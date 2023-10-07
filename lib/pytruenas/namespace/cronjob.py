@@ -3,7 +3,7 @@ from typing import (
     TYPE_CHECKING as _TYPING,
     TypedDict as _Dict,
 )
-from .._base import MapExtended as _NSMap
+from ..base import MapExtended as _NSMap
 
 
 class CronjobEntry(_Dict):

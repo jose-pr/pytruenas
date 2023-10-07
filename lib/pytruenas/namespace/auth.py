@@ -4,7 +4,7 @@ from typing import (
     TypedDict as _Dict,
 )
 from .. import _utils
-from .._base import TrueNASClient, Namespace
+from ..base import TrueNASClient, Namespace
 
 if _TYPING:
 

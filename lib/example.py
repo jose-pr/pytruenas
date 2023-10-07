@@ -2,7 +2,11 @@
 from pytruenas import TrueNASClient, Creds, AuthMethod, Config, UpdateReturn
 from pytruenas.namespace import *
 
-client = TrueNASClient()
+import os
+
+tn_host = os.environ['TN_HOST']
+tn_apikey = os.environ['TN_APIKEY']
+client = TrueNASClient(tn_host, tn_apikey)
 sysgeneral = SystemGeneral(client)
 config = sysgeneral.config()
 port = config['ui_port']

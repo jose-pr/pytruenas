@@ -1,19 +1,14 @@
 from typing import (
-    Iterator,
-    Self,
-    TypedDict as _Dict,
     TypeVar as _TypeVar,
     NamedTuple as _NT,
     Sequence as _Sequence,
     Mapping as _Map,
-    MutableMapping as _MutMap,
     Generic as _Generic,
     overload as _overload,
 )
 import typing as _ty
 from enum import Enum as _Enum
 import re as _re
-import base64 as _b64
 
 from . import _utils, _conn
 
@@ -79,7 +74,7 @@ class Config(Namespace, _Generic[D]):
         /,
         _return: _ty.Literal[UpdateReturn.NewValue] = UpdateReturn.NewValue,
         _force: bool = False,
-        **__named: _ty.Unpack[D],
+        **__named: D,
     ) -> "D":
         ...
 
@@ -90,7 +85,7 @@ class Config(Namespace, _Generic[D]):
         /,
         _return: _ty.Literal[UpdateReturn.Diff] = UpdateReturn.Diff,
         _force: bool = False,
-        **__named: _ty.Unpack[D],
+        **__named: D,
     ) -> "_DStr":
         ...
 
@@ -101,7 +96,7 @@ class Config(Namespace, _Generic[D]):
         /,
         _return: _ty.Literal[UpdateReturn.Both] = UpdateReturn.Both,
         _force: bool = False,
-        **__named: _ty.Unpack[D],
+        **__named: D,
     ) -> "tuple[_DStr,D]":
         ...
 
@@ -111,7 +106,7 @@ class Config(Namespace, _Generic[D]):
         /,
         _return: UpdateReturn = UpdateReturn.NewValue,
         _force: bool = False,
-        **__named: _ty.Unpack[D],
+        **__named: D,
     ) -> "tuple[_DStr,D]|D|_DStr":
         partial = _utils.merge(__partial, __named)
         config = self.config(normalize=True)
@@ -148,7 +143,7 @@ class Map(Namespace, _Generic[D]):
     def __getitem__(self, __key: str) -> D:
         return self.get_instance(__key)
 
-    def __iter__(self) -> Iterator[str]:
+    def __iter__(self) -> _ty.Iterator[str]:
         return self._as_dict().__iter__()
 
     def __len__(self) -> int:
@@ -162,7 +157,7 @@ class Map(Namespace, _Generic[D]):
         /,
         _return: _ty.Literal[UpdateReturn.NewValue] = UpdateReturn.NewValue,
         _force: bool = False,
-        **__named: _ty.Unpack[D],
+        **__named: D,
     ) -> "D":
         ...
 
@@ -174,7 +169,7 @@ class Map(Namespace, _Generic[D]):
         /,
         _return: _ty.Literal[UpdateReturn.Diff] = UpdateReturn.Diff,
         _force: bool = False,
-        **__named: _ty.Unpack[D],
+        **__named: D,
     ) -> "_DStr":
         ...
 
@@ -186,7 +181,7 @@ class Map(Namespace, _Generic[D]):
         /,
         _return: _ty.Literal[UpdateReturn.Both] = UpdateReturn.Both,
         _force: bool = False,
-        **__named: _ty.Unpack[D],
+        **__named: D,
     ) -> "tuple[_DStr,D]":
         ...
 
@@ -197,7 +192,7 @@ class Map(Namespace, _Generic[D]):
         /,
         _return: UpdateReturn = UpdateReturn.NewValue,
         _force: bool = False,
-        **__named: _ty.Unpack[D],
+        **__named: D,
     ) -> "tuple[_DStr,D]|D|_DStr":
         partial = _utils.merge(__partial, __named)
         if isinstance(id, _Map):
