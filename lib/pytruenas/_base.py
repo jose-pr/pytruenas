@@ -1,4 +1,5 @@
 from typing import (
+    Iterator,
     Self,
     TypedDict as _Dict,
     TypeVar as _TypeVar,
@@ -62,55 +63,58 @@ class UpdateReturn(_Enum):
 
 
 class Config(Namespace, _Generic[D]):
-    def config(self, normalized: bool = True) -> D:
+    def config(self, normalize: bool = True) -> D:
         config = self("config")
-        if normalized:
-            config = self._normalize(config)
-        return config
-
-    def _normalize(self, config) -> D:
+        if normalize:
+            f = getattr(D, "_nomalize", None)
+            if f:
+                config = f(config)
         return config
 
     @_overload
     def update(
         self,
-        __partial:_DStr=None,
+        __partial: _DStr = None,
         /,
         _return: _ty.Literal[UpdateReturn.NewValue] = UpdateReturn.NewValue,
-        **__named:_ty.Unpack[D],
+        _force: bool = False,
+        **__named: _ty.Unpack[D],
     ) -> "D":
         ...
 
     @_overload
     def update(
         self,
-        __partial:_DStr=None,
+        __partial: _DStr = None,
         /,
         _return: _ty.Literal[UpdateReturn.Diff] = UpdateReturn.Diff,
-        **__named:_ty.Unpack[D],
+        _force: bool = False,
+        **__named: _ty.Unpack[D],
     ) -> "_DStr":
         ...
 
     @_overload
     def update(
         self,
-        __partial:_DStr=None,
+        __partial: _DStr = None,
         /,
         _return: _ty.Literal[UpdateReturn.Both] = UpdateReturn.Both,
-        **__named:_ty.Unpack[D],
+        _force: bool = False,
+        **__named: _ty.Unpack[D],
     ) -> "tuple[_DStr,D]":
         ...
 
     def update(
         self,
-        __partial:_DStr=None,
+        __partial: _DStr = None,
         /,
         _return: UpdateReturn = UpdateReturn.NewValue,
-        **__named:_ty.Unpack[D],
+        _force: bool = False,
+        **__named: _ty.Unpack[D],
     ) -> "tuple[_DStr,D]|D|_DStr":
         partial = _utils.merge(__partial, __named)
-        config = self.config()
-        diff = _utils.diff(config, partial)
+        config = self.config(normalize=True)
+        diff = config if _force else _utils.diff(config, partial)
         if diff:
             config = self("update", diff)
         if _return == UpdateReturn.Diff:
@@ -119,6 +123,100 @@ class Config(Namespace, _Generic[D]):
             return diff, config
         else:
             return config
+
+
+class Map(Namespace, _Generic[D]):
+    _idattr = "id"
+
+    def query(self) -> list[D]:
+        return self("query")
+
+    def _as_dict(self, __key=None) -> "_DStr[D]":
+        key = __key or self._idattr
+        return {item[key]: item for item in self.query()}
+
+    def _parseid(self, id: str | D):
+        if isinstance(id, _Map):
+            id = id[self._idattr]
+        return id
+
+    def get_instance(self, id: str | D):
+        id = self._parseid(id)
+        return self("get_instance", id)
+
+    def __getitem__(self, __key: str) -> D:
+        return self.get_instance(__key)
+
+    def __iter__(self) -> Iterator[str]:
+        return self._as_dict().__iter__()
+
+    def __len__(self) -> int:
+        return self("query", [], {"count": True})
+
+    @_overload
+    def update(
+        self,
+        id: str | D,
+        __partial: _DStr = None,
+        /,
+        _return: _ty.Literal[UpdateReturn.NewValue] = UpdateReturn.NewValue,
+        _force: bool = False,
+        **__named: _ty.Unpack[D],
+    ) -> "D":
+        ...
+
+    @_overload
+    def update(
+        self,
+        id: str | D,
+        __partial: _DStr = None,
+        /,
+        _return: _ty.Literal[UpdateReturn.Diff] = UpdateReturn.Diff,
+        _force: bool = False,
+        **__named: _ty.Unpack[D],
+    ) -> "_DStr":
+        ...
+
+    @_overload
+    def update(
+        self,
+        id: str | D,
+        __partial: _DStr = None,
+        /,
+        _return: _ty.Literal[UpdateReturn.Both] = UpdateReturn.Both,
+        _force: bool = False,
+        **__named: _ty.Unpack[D],
+    ) -> "tuple[_DStr,D]":
+        ...
+
+    def update(
+        self,
+        id: str | D,
+        __partial: _DStr = None,
+        /,
+        _return: UpdateReturn = UpdateReturn.NewValue,
+        _force: bool = False,
+        **__named: _ty.Unpack[D],
+    ) -> "tuple[_DStr,D]|D|_DStr":
+        partial = _utils.merge(__partial, __named)
+        if isinstance(id, _Map):
+            config = id
+        else:
+            config = self.get_instance(id)
+        id = self._parseid(id)
+        diff = config if _force else _utils.diff(config, partial)
+        if diff:
+            config = self("update", id, diff)
+        if _return == UpdateReturn.Diff:
+            return diff
+        elif _return == UpdateReturn.Both:
+            return diff, config
+        else:
+            return config
+
+
+class MapExtended(Map[D], _Map[str, D], _Generic[D]):
+    ...
 
 
 class AuthMethod(_Enum):
