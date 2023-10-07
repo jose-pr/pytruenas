@@ -10,7 +10,7 @@ import typing as _ty
 from enum import Enum as _Enum
 import re as _re
 
-from . import _utils, _conn
+from . import _utils, _conn, _core
 
 from typing import TYPE_CHECKING as _TYPING
 
@@ -49,7 +49,7 @@ K = _TypeVar("K", bound=str)
 V = _TypeVar("V", bound=str)
 T = _TypeVar("T")
 D = _TypeVar("D", bound=_ty.TypedDict)
-_DStr = dict[str]
+_DStr = dict[str, T]
 
 
 class UpdateReturn(_Enum):
@@ -298,7 +298,6 @@ class Creds(_NT):
             return client.call(method, *self.args)
         return None
 
-
 class TrueNASClient:
     def __init__(
         self,
@@ -339,3 +338,15 @@ class TrueNASClient:
         if cls is None:
             cls = Namespace
         return cls(self, name)
+    
+    def _services(self) -> _DStr[_core.Service]:
+        core = Namespace(self, 'core')
+        services:dict[str,_core.Service] = core.get_services()
+        for name, service in services.items():
+            service['_methods_'] = core.get_methods(name)
+        return services
+    
+    def _events(self) -> _DStr[_core.Event]:
+        core = Namespace(self, 'core')
+        services:dict[str,_core.Service] = core.get_services()
+        return services
