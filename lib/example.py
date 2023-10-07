@@ -16,4 +16,8 @@ if sysgeneral.update(_return=UpdateReturn.Diff, ui_port=port):
 auth = Auth(client)
 whoami = auth.me()
 sessions = auth.sessions()
+
+token = auth.generate_token()
+
+print(token)
 pass

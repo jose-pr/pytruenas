@@ -13,6 +13,7 @@ from typing import (
 import typing as _ty
 from enum import Enum as _Enum
 import re as _re
+import base64 as _b64
 
 from . import _utils, _conn
 
@@ -235,6 +236,13 @@ class Creds(_NT):
     method: AuthMethod
     args: "_Sequence[str]"
 
+    #
+    # Parse a key either from:
+    #   (username,password)
+    #   (username,password,otp_token)
+    #   api_key|token
+    #   Mapping with values set by their name
+    #
     @classmethod
     def parse(cls, creds: "tuple[str,str]|tuple[str,str,str]|str|dict"):
         if creds:
@@ -246,17 +254,30 @@ class Creds(_NT):
                 usr = creds.get("username")
                 pwd = creds.get("password")
                 otp = creds.get("otp_token")
+                token = creds.get('token')
                 if key:
                     ty = AuthMethod.ApiKey
                     args = [key]
                 elif usr and pwd is not None:
                     ty = AuthMethod.BasicAuth
                     args = [usr, pwd, otp]
+                elif token:
+                    ty = AuthMethod.Token
+                    args[token]
                 else:
                     raise ValueError("Credentials not supported", creds)
             elif isinstance(creds, (str, bytes)):
-                key = creds
-                ty = AuthMethod.ApiKey
+                key = _utils.str_(creds)
+                #
+                # From what i can see an apikey format is <id>-<64 alpha/numeric chars>
+                #
+                ty = AuthMethod.Token
+                try:
+                    i, k = key.split('-', maxsplit=1) 
+                    if i.isnumeric() and k.isalnum() and len(k) == 64:
+                        ty = AuthMethod.ApiKey
+                except:
+                    pass
                 args = [key]
             elif isinstance(creds, _Sequence):
                 ty = AuthMethod.BasicAuth
@@ -268,8 +289,10 @@ class Creds(_NT):
                     )
                 usr, pwd, otp, *_ = (*creds, None, None)
                 args = [usr, pwd, otp]
-            if args[-1] == None:
+            if args and args[-1] is None:
                 args.pop()
+            if not args and ty is not AuthMethod.Local:
+                raise ValueError("Only Local authentication doesnt require credentials")
             return Creds(ty, [_utils.str_(arg) for arg in args])
         else:
             return Creds(AuthMethod.Local, [])
