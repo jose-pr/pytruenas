@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/python3
 from pytruenas import TrueNASClient, Creds, AuthMethod, Config, UpdateReturn
 from pytruenas.auth import Auth, Session
 from pytruenas.system import SystemGeneral
