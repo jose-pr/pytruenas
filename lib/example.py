@@ -1,6 +1,6 @@
 #!/bin/python3
 from pytruenas import TrueNASClient, Creds, AuthMethod, Config, UpdateReturn
-from pytruenas.namespace import *
+from pytruenas.namespace.tns23 import *
 
 import os
 
