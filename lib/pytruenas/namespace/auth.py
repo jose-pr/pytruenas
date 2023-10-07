@@ -1,13 +1,10 @@
 from enum import Enum as _Enum
 from typing import (
-    NamedTuple as _NT,
-    Sequence as _Sequence,
-    Mapping as _Map,
     TYPE_CHECKING as _TYPING,
     TypedDict as _Dict,
 )
-from . import _utils
-from ._base import TrueNASClient, Namespace
+from .. import _utils
+from .._base import TrueNASClient, Namespace
 
 if _TYPING:
 
