@@ -14,7 +14,7 @@ class UpdateReturn(_Enum):
     Both = 2
 
 
-class Config(Namespace, _ty.Generic[D]):
+class Config(_ty.Generic[D]):
     def config(self, normalize: bool = True) -> D:
         config = self("config")
         if normalize:
@@ -77,7 +77,7 @@ class Config(Namespace, _ty.Generic[D]):
             return config
 
 
-class Map(Namespace, _ty.Generic[D]):
+class Map(_ty.Generic[D]):
     _idattr = "id"
 
     def query(self) -> list[D]:
