@@ -1,7 +1,8 @@
 from mako.template import Template as _MakoTemplate
 from pathlib import Path as _P
 import typing as _ty
-from . import NamespaceCodegen as _NSCodegen, NamespaceInfo
+from .._utils import MISSING
+from . import NamespaceCodegen as _NSCodegen, NamespaceSignature
 
 _DEFAULT_TEMPLATE = _P(__file__).parent.parent / "namespace" / "_template.py.mako"
 
@@ -11,9 +12,9 @@ class NamespaceCodegen(_NSCodegen):
         filename=str(_DEFAULT_TEMPLATE).removesuffix(".py.mako") + ".pyi.mako"
     )
 
-    def generate(self, ns: NamespaceInfo, exportas: str, modname: str) -> str:
+    def generate(self, ns: NamespaceSignature) -> str:
         return [
-            t.render(ns=ns, exportas=exportas, modname=modname)
+            t.render(ns=ns, MISSING=MISSING)
             for t in (
                 self.template
                 if isinstance(self.template, _ty.Sequence)

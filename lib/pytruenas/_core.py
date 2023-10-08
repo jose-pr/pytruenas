@@ -28,7 +28,7 @@ class ServiceConfig(TypedDict):
 class NamespaceInfo(TypedDict):
     config: ServiceConfig
     type: str
-    methods: "Method"
+    methods: "dict[str, Method]"
 
 
 class Parameter(TypedDict):
@@ -72,8 +72,8 @@ class Method(TypedDict):
     downloadable: bool
     uploadable: bool
     check_pipes: list
-    accepts: Parameter
-    returns: Parameter | None
+    accepts: list[Parameter]
+    returns: list[Parameter]
 
     def _normalize(self):
         # type: ignore
