@@ -1,10 +1,10 @@
 
 from pytruenas import Namespace, TrueNASClient
-import typing as _ty
+import typing
 class Reporting(Namespace):
-    _namespace:_ty.Literal['reporting']
+    _namespace:typing.Literal['reporting']
     def __init__(self, client:TrueNASClient) -> None: ...
-    @_ty.overload
+    @typing.overload
     def clear(self, 
     /) -> None: 
         """
@@ -16,9 +16,9 @@ class Reporting(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def config(self, 
-    /) -> 'dict[str]': 
+    /) -> 'ReportingEntry': 
         """
         
 
@@ -26,15 +26,15 @@ class Reporting(Namespace):
         ----------
         Returns
         -------
-        dict[str]:
+        ReportingEntry:
             reporting_entry
         """
         ...
-    @_ty.overload
+    @typing.overload
     def get_data(self, 
-        graphs:'list'=[],
-        reporting_query:'dict[str]'={},
-    /) -> 'list': 
+        graphs:'list[Graph]'=[],
+        reporting_query:'ReportingQuery'={},
+    /) -> 'list[GraphReportingData]': 
         """
         Get reporting data for given graphs.
         
@@ -53,15 +53,15 @@ class Reporting(Namespace):
             reporting_query
         Returns
         -------
-        list:
+        list[GraphReportingData]:
             reporting_data
         """
         ...
-    @_ty.overload
+    @typing.overload
     def graphs(self, 
-        query_filters:'list'=[],
-        query_options:'dict[str]'={},
-    /) -> 'int|dict[str]|list': 
+        query_filters:'list[list]'=[],
+        query_options:'QueryOptions'={},
+    /) -> 'int|Graph_|list[Graph_]': 
         """
         
 
@@ -75,17 +75,17 @@ class Reporting(Namespace):
         -------
         int:
             
-        dict[str]:
+        Graph_:
             
-        list:
+        list[Graph_]:
             
         """
         ...
-    @_ty.overload
+    @typing.overload
     def netdata_get_data(self, 
-        graphs:'list'=[],
-        reporting_query_netdata:'dict[str]'={},
-    /) -> 'list': 
+        graphs:'list[Graph__]'=[],
+        reporting_query_netdata:'ReportingQueryNetdata'={},
+    /) -> 'list[NetdataGraphReportingData]': 
         """
         Get reporting data for given graphs.
         
@@ -104,15 +104,15 @@ class Reporting(Namespace):
             reporting_query_netdata
         Returns
         -------
-        list:
+        list[NetdataGraphReportingData]:
             reporting_data
         """
         ...
-    @_ty.overload
+    @typing.overload
     def netdata_graph(self, 
         name:'str',
-        reporting_query_netdata:'dict[str]'={},
-    /) -> 'dict[str]': 
+        reporting_query_netdata:'ReportingQueryNetdata_'={},
+    /) -> 'NetdataGraphReportingData': 
         """
         Get reporting data for `name` graph.
 
@@ -124,15 +124,15 @@ class Reporting(Namespace):
             reporting_query_netdata
         Returns
         -------
-        dict[str]:
+        NetdataGraphReportingData:
             netdata_graph_reporting_data
         """
         ...
-    @_ty.overload
+    @typing.overload
     def netdata_graphs(self, 
-        query_filters:'list'=[],
-        query_options:'dict[str]'={},
-    /) -> 'int|dict[str]|list': 
+        query_filters:'list[list]'=[],
+        query_options:'QueryOptions'={},
+    /) -> 'int|Graph___|list[Graph___]': 
         """
         Get reporting netdata graphs.
 
@@ -146,16 +146,16 @@ class Reporting(Namespace):
         -------
         int:
             
-        dict[str]:
+        Graph___:
             
-        list:
+        list[Graph___]:
             
         """
         ...
-    @_ty.overload
+    @typing.overload
     def update(self, 
-        reporting_update:'dict[str]'={},
-    /) -> 'dict[str]': 
+        reporting_update:'ReportingUpdate'={},
+    /) -> 'ReportingUpdateReturns': 
         """
         Configure Reporting Database settings.
         
@@ -173,7 +173,103 @@ class Reporting(Namespace):
             reporting_update
         Returns
         -------
-        dict[str]:
+        ReportingUpdateReturns:
             reporting_update_returns
         """
+        ...
+
+class ReportingEntry(typing.TypedDict):
+        graphite:'str'
+        graphite_separateinstances:'bool'
+        graph_age:'int'
+        graph_points:'int'
+        id:'int'
+        ...
+class Graph(typing.TypedDict):
+        name:'str'
+        identifier:'typing.Optional[str]'
+        ...
+class ReportingQuery(typing.TypedDict):
+        unit:'str'
+        page:'int'
+        start:'str'
+        end:'str'
+        aggregate:'bool'
+        ...
+class GraphReportingData(typing.TypedDict):
+        name:'str'
+        identifier:'typing.Optional[str]'
+        data:'list'
+        aggregations:'Aggregations'
+        ...
+class Aggregations(typing.TypedDict):
+        min:'list'
+        max:'list'
+        mean:'list'
+        ...
+class QueryOptions(typing.TypedDict):
+        relationships:'bool'
+        extend:'typing.Optional[str]'
+        extend_context:'typing.Optional[str]'
+        prefix:'typing.Optional[str]'
+        extra:'dict[str]'
+        order_by:'list'
+        select:'list'
+        count:'bool'
+        get:'bool'
+        offset:'int'
+        limit:'int'
+        force_sql_filters:'bool'
+        ...
+class Graph_(typing.TypedDict):
+        name:'str'
+        title:'str'
+        vertical_label:'str'
+        identifiers:'typing.Optional[list[str]]'
+        stacked:'bool'
+        stacked_show_total:'bool'
+        ...
+class Graph__(typing.TypedDict):
+        name:'str'
+        identifier:'typing.Optional[str]'
+        ...
+class ReportingQueryNetdata(typing.TypedDict):
+        unit:'str'
+        page:'int'
+        aggregate:'bool'
+        start:'int'
+        end:'int'
+        ...
+class NetdataGraphReportingData(typing.TypedDict):
+        name:'str'
+        identifier:'typing.Optional[str]'
+        data:'list'
+        aggregations:'Aggregations'
+        ...
+class ReportingQueryNetdata_(typing.TypedDict):
+        unit:'str'
+        page:'int'
+        aggregate:'bool'
+        start:'int'
+        end:'int'
+        ...
+class Graph___(typing.TypedDict):
+        name:'str'
+        title:'str'
+        vertical_label:'str'
+        identifiers:'typing.Optional[list[str]]'
+        ...
+class ReportingUpdate(typing.TypedDict):
+        graphite:'str'
+        graphite_separateinstances:'bool'
+        graph_age:'int'
+        graph_points:'int'
+        confirm_rrd_destroy:'bool'
+        ...
+class ReportingUpdateReturns(typing.TypedDict):
+        graphite:'str'
+        graphite_separateinstances:'bool'
+        graph_age:'int'
+        graph_points:'int'
+        id:'int'
         ...

@@ -1,12 +1,12 @@
 
 from pytruenas import Namespace, TrueNASClient
-import typing as _ty
+import typing
 class SystemAdvanced(Namespace):
-    _namespace:_ty.Literal['system.advanced']
+    _namespace:typing.Literal['system.advanced']
     def __init__(self, client:TrueNASClient) -> None: ...
-    @_ty.overload
+    @typing.overload
     def config(self, 
-    /) -> 'dict[str]': 
+    /) -> 'SystemAdvancedEntry': 
         """
         
 
@@ -14,11 +14,11 @@ class SystemAdvanced(Namespace):
         ----------
         Returns
         -------
-        dict[str]:
+        SystemAdvancedEntry:
             system_advanced_entry
         """
         ...
-    @_ty.overload
+    @typing.overload
     def sed_global_password(self, 
     /) -> 'str': 
         """
@@ -32,7 +32,7 @@ class SystemAdvanced(Namespace):
             sed_global_password
         """
         ...
-    @_ty.overload
+    @typing.overload
     def serial_port_choices(self, 
     /) -> 'dict[str]': 
         """
@@ -46,7 +46,7 @@ class SystemAdvanced(Namespace):
             serial_port_choices
         """
         ...
-    @_ty.overload
+    @typing.overload
     def syslog_certificate_authority_choices(self, 
     /) -> 'dict[str]': 
         """
@@ -60,7 +60,7 @@ class SystemAdvanced(Namespace):
             Syslog Certificate Authority Choices
         """
         ...
-    @_ty.overload
+    @typing.overload
     def syslog_certificate_choices(self, 
     /) -> 'dict[str]': 
         """
@@ -74,10 +74,10 @@ class SystemAdvanced(Namespace):
             Syslog Certificate Choices
         """
         ...
-    @_ty.overload
+    @typing.overload
     def update(self, 
-        system_advanced_update:'dict[str]'={},
-    /) -> 'dict[str]': 
+        system_advanced_update:'SystemAdvancedUpdate'={},
+    /) -> 'SystemAdvancedUpdateReturns': 
         """
         Update System Advanced Service Configuration.
         
@@ -100,13 +100,13 @@ class SystemAdvanced(Namespace):
             system_advanced_update
         Returns
         -------
-        dict[str]:
+        SystemAdvancedUpdateReturns:
             system_advanced_update_returns
         """
         ...
-    @_ty.overload
+    @typing.overload
     def update_gpu_pci_ids(self, 
-        isolated_gpu_pci_ids:'list',
+        isolated_gpu_pci_ids:'list[str]',
     /) -> None: 
         """
         `isolated_gpu_pci_ids` is a list of PCI ids which are isolated from host system.
@@ -118,4 +118,94 @@ class SystemAdvanced(Namespace):
         Returns
         -------
         """
+        ...
+
+class SystemAdvancedEntry(typing.TypedDict):
+        advancedmode:'bool'
+        autotune:'bool'
+        kdump_enabled:'bool'
+        boot_scrub:'int'
+        consolemenu:'bool'
+        consolemsg:'bool'
+        debugkernel:'bool'
+        fqdn_syslog:'bool'
+        motd:'str'
+        powerdaemon:'bool'
+        serialconsole:'bool'
+        serialport:'str'
+        anonstats_token:'str'
+        serialspeed:'str'
+        swapondrive:'int'
+        overprovision:'typing.Optional[int]'
+        traceback:'bool'
+        uploadcrash:'bool'
+        anonstats:'bool'
+        sed_user:'str'
+        sysloglevel:'str'
+        syslogserver:'str'
+        syslog_transport:'str'
+        syslog_tls_certificate:'typing.Optional[int]'
+        syslog_tls_certificate_authority:'typing.Optional[int]'
+        isolated_gpu_pci_ids:'list[str]'
+        kernel_extra_options:'str'
+        id:'int'
+        ...
+class SystemAdvancedUpdate(typing.TypedDict):
+        advancedmode:'bool'
+        autotune:'bool'
+        kdump_enabled:'bool'
+        boot_scrub:'int'
+        consolemenu:'bool'
+        consolemsg:'bool'
+        debugkernel:'bool'
+        fqdn_syslog:'bool'
+        motd:'str'
+        powerdaemon:'bool'
+        serialconsole:'bool'
+        serialport:'str'
+        serialspeed:'str'
+        swapondrive:'int'
+        overprovision:'typing.Optional[int]'
+        traceback:'bool'
+        uploadcrash:'bool'
+        anonstats:'bool'
+        sed_user:'str'
+        sysloglevel:'str'
+        syslogserver:'str'
+        syslog_transport:'str'
+        syslog_tls_certificate:'typing.Optional[int]'
+        syslog_tls_certificate_authority:'typing.Optional[int]'
+        isolated_gpu_pci_ids:'list[str]'
+        kernel_extra_options:'str'
+        sed_passwd:'str'
+        ...
+class SystemAdvancedUpdateReturns(typing.TypedDict):
+        advancedmode:'bool'
+        autotune:'bool'
+        kdump_enabled:'bool'
+        boot_scrub:'int'
+        consolemenu:'bool'
+        consolemsg:'bool'
+        debugkernel:'bool'
+        fqdn_syslog:'bool'
+        motd:'str'
+        powerdaemon:'bool'
+        serialconsole:'bool'
+        serialport:'str'
+        anonstats_token:'str'
+        serialspeed:'str'
+        swapondrive:'int'
+        overprovision:'typing.Optional[int]'
+        traceback:'bool'
+        uploadcrash:'bool'
+        anonstats:'bool'
+        sed_user:'str'
+        sysloglevel:'str'
+        syslogserver:'str'
+        syslog_transport:'str'
+        syslog_tls_certificate:'typing.Optional[int]'
+        syslog_tls_certificate_authority:'typing.Optional[int]'
+        isolated_gpu_pci_ids:'list[str]'
+        kernel_extra_options:'str'
+        id:'int'
         ...

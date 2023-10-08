@@ -1,12 +1,12 @@
 
 from pytruenas import Namespace, TrueNASClient
-import typing as _ty
+import typing
 class Ups(Namespace):
-    _namespace:_ty.Literal['ups']
+    _namespace:typing.Literal['ups']
     def __init__(self, client:TrueNASClient) -> None: ...
-    @_ty.overload
+    @typing.overload
     def config(self, 
-    /) -> 'dict[str]': 
+    /) -> 'UpsEntry': 
         """
         
 
@@ -14,11 +14,11 @@ class Ups(Namespace):
         ----------
         Returns
         -------
-        dict[str]:
+        UpsEntry:
             ups_entry
         """
         ...
-    @_ty.overload
+    @typing.overload
     def driver_choices(self, 
     /) -> 'dict[str]': 
         """
@@ -37,9 +37,9 @@ class Ups(Namespace):
             ```
         """
         ...
-    @_ty.overload
+    @typing.overload
     def port_choices(self, 
-    /) -> 'list': 
+    /) -> 'list[str]': 
         """
         
 
@@ -47,14 +47,14 @@ class Ups(Namespace):
         ----------
         Returns
         -------
-        list:
+        list[str]:
             port_choices
         """
         ...
-    @_ty.overload
+    @typing.overload
     def update(self, 
-        ups_update:'dict[str]'={},
-    /) -> 'dict[str]': 
+        ups_update:'UpsUpdate'={},
+    /) -> 'UpsUpdateReturns': 
         """
         Update UPS Service Configuration.
         
@@ -74,7 +74,75 @@ class Ups(Namespace):
             ups_update
         Returns
         -------
-        dict[str]:
+        UpsUpdateReturns:
             ups_update_returns
         """
+        ...
+
+class UpsEntry(typing.TypedDict):
+        powerdown:'bool'
+        rmonitor:'bool'
+        id:'int'
+        nocommwarntime:'typing.Optional[int]'
+        remoteport:'int'
+        shutdowntimer:'int'
+        hostsync:'int'
+        description:'str'
+        driver:'str'
+        extrausers:'str'
+        identifier:'str'
+        mode:'str'
+        monpwd:'str'
+        monuser:'str'
+        options:'str'
+        optionsupsd:'str'
+        port:'str'
+        remotehost:'str'
+        shutdown:'str'
+        shutdowncmd:'typing.Optional[str]'
+        complete_identifier:'str'
+        ...
+class UpsUpdate(typing.TypedDict):
+        powerdown:'bool'
+        rmonitor:'bool'
+        nocommwarntime:'typing.Optional[int]'
+        remoteport:'int'
+        shutdowntimer:'int'
+        hostsync:'int'
+        description:'str'
+        driver:'str'
+        extrausers:'str'
+        identifier:'str'
+        mode:'str'
+        monpwd:'str'
+        monuser:'str'
+        options:'str'
+        optionsupsd:'str'
+        port:'str'
+        remotehost:'str'
+        shutdown:'str'
+        shutdowncmd:'typing.Optional[str]'
+        ...
+class UpsUpdateReturns(typing.TypedDict):
+        powerdown:'bool'
+        rmonitor:'bool'
+        id:'int'
+        nocommwarntime:'typing.Optional[int]'
+        remoteport:'int'
+        shutdowntimer:'int'
+        hostsync:'int'
+        description:'str'
+        driver:'str'
+        extrausers:'str'
+        identifier:'str'
+        mode:'str'
+        monpwd:'str'
+        monuser:'str'
+        options:'str'
+        optionsupsd:'str'
+        port:'str'
+        remotehost:'str'
+        shutdown:'str'
+        shutdowncmd:'typing.Optional[str]'
+        complete_identifier:'str'
         ...

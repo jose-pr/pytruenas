@@ -1,10 +1,10 @@
 
 from pytruenas import Namespace, TrueNASClient
-import typing as _ty
+import typing
 class Interface(Namespace):
-    _namespace:_ty.Literal['interface']
+    _namespace:typing.Literal['interface']
     def __init__(self, client:TrueNASClient) -> None: ...
-    @_ty.overload
+    @typing.overload
     def bridge_members_choices(self, 
         id:'str|None'=None,
     /) -> 'dict[str]': 
@@ -24,7 +24,7 @@ class Interface(Namespace):
             bridge_members_choices
         """
         ...
-    @_ty.overload
+    @typing.overload
     def cancel_rollback(self, 
     /) -> None: 
         """
@@ -38,7 +38,7 @@ class Interface(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def checkin(self, 
     /) -> None: 
         """
@@ -53,7 +53,7 @@ class Interface(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def checkin_waiting(self, 
     /) -> 'int|None': 
         """
@@ -71,9 +71,9 @@ class Interface(Namespace):
             remaining_seconds
         """
         ...
-    @_ty.overload
+    @typing.overload
     def choices(self, 
-        options:'dict[str]'={},
+        options:'Options'={},
     /) -> 'dict[str]': 
         """
         Choices of available network interfaces.
@@ -94,9 +94,9 @@ class Interface(Namespace):
             available_interfaces
         """
         ...
-    @_ty.overload
+    @typing.overload
     def commit(self, 
-        options:'dict[str]'={},
+        options:'Options_'={},
     /) -> None: 
         """
         Commit/apply pending interfaces changes.
@@ -114,10 +114,10 @@ class Interface(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def create(self, 
-        interface_create:'dict[str]'={},
-    /) -> 'dict[str]': 
+        interface_create:'InterfaceCreate'={},
+    /) -> 'InterfaceCreateReturns': 
         """
         Create virtual interfaces (Link Aggregation, VLAN)
         
@@ -135,11 +135,11 @@ class Interface(Namespace):
             interface_create
         Returns
         -------
-        dict[str]:
+        InterfaceCreateReturns:
             interface_create_returns
         """
         ...
-    @_ty.overload
+    @typing.overload
     def default_route_will_be_removed(self, 
     /) -> 'bool': 
         """
@@ -157,7 +157,7 @@ class Interface(Namespace):
             default_route_will_be_removed
         """
         ...
-    @_ty.overload
+    @typing.overload
     def delete(self, 
         id:'str',
     /) -> 'str': 
@@ -174,10 +174,10 @@ class Interface(Namespace):
             interface_id
         """
         ...
-    @_ty.overload
+    @typing.overload
     def get_instance(self, 
         id:'str|int|bool|dict[str]|list',
-        query_options_get_instance:'dict[str]'={},
+        query_options_get_instance:'QueryOptionsGetInstance'={},
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -194,7 +194,7 @@ class Interface(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def has_pending_changes(self, 
     /) -> 'bool': 
         """
@@ -208,10 +208,10 @@ class Interface(Namespace):
             has_pending_changes
         """
         ...
-    @_ty.overload
+    @typing.overload
     def ip_in_use(self, 
-        ips:'dict[str]'={},
-    /) -> 'list': 
+        ips:'Ips'={},
+    /) -> 'list[InUseIp]': 
         """
         Get all IPv4 / Ipv6 from all valid interfaces, excluding tap and epair.
         
@@ -243,13 +243,13 @@ class Interface(Namespace):
             ips
         Returns
         -------
-        list:
+        list[InUseIp]:
             in_use_ips
         """
         ...
-    @_ty.overload
+    @typing.overload
     def lacpdu_rate_choices(self, 
-    /) -> 'dict[str]': 
+    /) -> 'LacpduRateChoices': 
         """
         Available lacpdu rate policies for the LACP lagg type interfaces.
 
@@ -257,11 +257,11 @@ class Interface(Namespace):
         ----------
         Returns
         -------
-        dict[str]:
+        LacpduRateChoices:
             lacpdu_rate_choices
         """
         ...
-    @_ty.overload
+    @typing.overload
     def lag_ports_choices(self, 
         id:'str|None'=None,
     /) -> 'dict[str]': 
@@ -281,11 +281,11 @@ class Interface(Namespace):
             lag_ports_choices
         """
         ...
-    @_ty.overload
+    @typing.overload
     def query(self, 
-        query_filters:'list'=[],
-        query_options:'dict[str]'={},
-    /) -> 'list|dict[str]|int|dict[str]': 
+        query_filters:'list[list]'=[],
+        query_options:'QueryOptions'={},
+    /) -> 'list[InterfaceEntry]|InterfaceEntry|int|InterfaceEntry': 
         """
         Query Interfaces with `query-filters` and `query-options`
 
@@ -297,17 +297,17 @@ class Interface(Namespace):
             query-options
         Returns
         -------
-        list:
+        list[InterfaceEntry]:
             
-        dict[str]:
+        InterfaceEntry:
             
         int:
             
-        dict[str]:
+        InterfaceEntry:
             
         """
         ...
-    @_ty.overload
+    @typing.overload
     def rollback(self, 
     /) -> None: 
         """
@@ -319,7 +319,7 @@ class Interface(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def save_default_route(self, 
         gw:'str',
     /) -> None: 
@@ -381,9 +381,9 @@ class Interface(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def services_restarted_on_sync(self, 
-    /) -> 'list': 
+    /) -> 'list[ServiceRestart]': 
         """
         Returns which services will be set to listen on 0.0.0.0 (and, thus, restarted) on sync.
         
@@ -398,15 +398,15 @@ class Interface(Namespace):
         ----------
         Returns
         -------
-        list:
+        list[ServiceRestart]:
             services_to_be_restarted
         """
         ...
-    @_ty.overload
+    @typing.overload
     def update(self, 
         id:'str',
-        interface_update:'dict[str]'={},
-    /) -> 'dict[str]': 
+        interface_update:'InterfaceUpdate'={},
+    /) -> 'InterfaceUpdateReturns': 
         """
         Update Interface of `id`.
 
@@ -418,11 +418,11 @@ class Interface(Namespace):
             interface_update
         Returns
         -------
-        dict[str]:
+        InterfaceUpdateReturns:
             interface_update_returns
         """
         ...
-    @_ty.overload
+    @typing.overload
     def vlan_parent_interface_choices(self, 
     /) -> 'dict[str]': 
         """
@@ -436,7 +436,7 @@ class Interface(Namespace):
             vlan_parent_interface_choices
         """
         ...
-    @_ty.overload
+    @typing.overload
     def websocket_interface(self, 
     /) -> 'str|None': 
         """
@@ -452,7 +452,7 @@ class Interface(Namespace):
             websocket_interface
         """
         ...
-    @_ty.overload
+    @typing.overload
     def websocket_local_ip(self, 
     /) -> 'str|None': 
         """
@@ -468,9 +468,9 @@ class Interface(Namespace):
             websocket_local_ip
         """
         ...
-    @_ty.overload
+    @typing.overload
     def xmit_hash_policy_choices(self, 
-    /) -> 'dict[str]': 
+    /) -> 'XmitHashPolicyChoices': 
         """
         Available transmit hash policies for the LACP or LOADBALANCE
         lagg type interfaces.
@@ -479,7 +479,232 @@ class Interface(Namespace):
         ----------
         Returns
         -------
-        dict[str]:
+        XmitHashPolicyChoices:
             xmit_hash_policy_choices
         """
+        ...
+
+class Options(typing.TypedDict):
+        bridge_members:'bool'
+        lag_ports:'bool'
+        vlan_parent:'bool'
+        exclude:'list'
+        exclude_types:'list[str]'
+        include:'list'
+        ...
+class Options_(typing.TypedDict):
+        rollback:'bool'
+        checkin_timeout:'int'
+        ...
+class InterfaceCreate(typing.TypedDict):
+        name:'str'
+        description:'str'
+        type:'str'
+        ipv4_dhcp:'bool'
+        ipv6_auto:'bool'
+        aliases:'list[InterfaceAlias]'
+        failover_critical:'bool'
+        failover_group:'typing.Optional[int]'
+        failover_vhid:'typing.Optional[int]'
+        failover_aliases:'list[InterfaceFailoverAlias]'
+        failover_virtual_aliases:'list[InterfaceVirtualAlias]'
+        bridge_members:'list'
+        stp:'bool'
+        lag_protocol:'str'
+        xmit_hash_policy:'typing.Optional[str]'
+        lacpdu_rate:'typing.Optional[str]'
+        lag_ports:'list[str]'
+        vlan_parent_interface:'str'
+        vlan_tag:'int'
+        vlan_pcp:'typing.Optional[int]'
+        mtu:'typing.Optional[int]'
+        ...
+class InterfaceAlias(typing.TypedDict):
+        type:'str'
+        address:'str'
+        netmask:'int'
+        ...
+class InterfaceFailoverAlias(typing.TypedDict):
+        type:'str'
+        address:'str'
+        ...
+class InterfaceVirtualAlias(typing.TypedDict):
+        type:'str'
+        address:'str'
+        ...
+class InterfaceCreateReturns(typing.TypedDict):
+        id:'str'
+        name:'str'
+        fake:'bool'
+        type:'str'
+        state:'State'
+        aliases:'list[Alias]'
+        ipv4_dhcp:'bool'
+        ipv6_auto:'bool'
+        description:'str'
+        mtu:'typing.Optional[int]'
+        vlan_parent_interface:'typing.Optional[str]'
+        vlan_tag:'typing.Optional[int]'
+        vlan_pcp:'typing.Optional[int]'
+        lag_protocol:'str'
+        lag_ports:'list[str]'
+        bridge_members:'list[str]'
+        ...
+class State(typing.TypedDict):
+        name:'str'
+        orig_name:'str'
+        description:'str'
+        mtu:'int'
+        cloned:'bool'
+        flags:'list[str]'
+        nd6_flags:'list'
+        capabilities:'list'
+        link_state:'str'
+        media_type:'str'
+        media_subtype:'str'
+        active_media_type:'str'
+        active_media_subtype:'str'
+        supported_media:'list'
+        media_options:'typing.Optional[list]'
+        link_address:'str'
+        rx_queues:'int'
+        tx_queues:'int'
+        aliases:'list[Alias]'
+        vrrp_config:'typing.Optional[list]'
+        protocol:'typing.Optional[str]'
+        ports:'list[LagPorts]'
+        xmit_hash_policy:'typing.Optional[str]'
+        lacpdu_rate:'typing.Optional[str]'
+        parent:'typing.Optional[str]'
+        tag:'typing.Optional[int]'
+        pcp:'typing.Optional[int]'
+        ...
+class Alias(typing.TypedDict):
+        type:'str'
+        address:'str'
+        netmask:'str'
+        broadcast:'str'
+        ...
+class LagPorts(typing.TypedDict):
+        name:'str'
+        flags:'list[str]'
+        ...
+class Alias_(typing.TypedDict):
+        type:'str'
+        address:'str'
+        netmask:'str'
+        ...
+class QueryOptionsGetInstance(typing.TypedDict):
+        relationships:'bool'
+        extend:'typing.Optional[str]'
+        extend_context:'typing.Optional[str]'
+        prefix:'typing.Optional[str]'
+        extra:'dict[str]'
+        order_by:'list'
+        select:'list'
+        count:'bool'
+        get:'bool'
+        offset:'int'
+        limit:'int'
+        force_sql_filters:'bool'
+        ...
+class Ips(typing.TypedDict):
+        ipv4:'bool'
+        ipv6:'bool'
+        ipv6_link_local:'bool'
+        loopback:'bool'
+        any:'bool'
+        static:'bool'
+        ...
+class InUseIp(typing.TypedDict):
+        type:'str'
+        address:'str'
+        netmask:'int'
+        broadcast:'str'
+        ...
+class LacpduRateChoices(typing.TypedDict):
+        SLOW:'str'
+        FAST:'str'
+        ...
+class QueryOptions(typing.TypedDict):
+        relationships:'bool'
+        extend:'typing.Optional[str]'
+        extend_context:'typing.Optional[str]'
+        prefix:'typing.Optional[str]'
+        extra:'dict[str]'
+        order_by:'list'
+        select:'list'
+        count:'bool'
+        get:'bool'
+        offset:'int'
+        limit:'int'
+        force_sql_filters:'bool'
+        ...
+class InterfaceEntry(typing.TypedDict):
+        id:'str'
+        name:'str'
+        fake:'bool'
+        type:'str'
+        state:'State'
+        aliases:'list[Alias]'
+        ipv4_dhcp:'bool'
+        ipv6_auto:'bool'
+        description:'str'
+        mtu:'typing.Optional[int]'
+        vlan_parent_interface:'typing.Optional[str]'
+        vlan_tag:'typing.Optional[int]'
+        vlan_pcp:'typing.Optional[int]'
+        lag_protocol:'str'
+        lag_ports:'list[str]'
+        bridge_members:'list[str]'
+        ...
+class ServiceRestart(typing.TypedDict):
+        type:'str'
+        service:'str'
+        ips:'list[str]'
+        ...
+class InterfaceUpdate(typing.TypedDict):
+        name:'str'
+        description:'str'
+        ipv4_dhcp:'bool'
+        ipv6_auto:'bool'
+        aliases:'list[InterfaceAlias]'
+        failover_critical:'bool'
+        failover_group:'typing.Optional[int]'
+        failover_vhid:'typing.Optional[int]'
+        failover_aliases:'list[InterfaceFailoverAlias]'
+        failover_virtual_aliases:'list[InterfaceVirtualAlias]'
+        bridge_members:'list'
+        stp:'bool'
+        lag_protocol:'str'
+        xmit_hash_policy:'typing.Optional[str]'
+        lacpdu_rate:'typing.Optional[str]'
+        lag_ports:'list[str]'
+        vlan_parent_interface:'str'
+        vlan_tag:'int'
+        vlan_pcp:'typing.Optional[int]'
+        mtu:'typing.Optional[int]'
+        ...
+class InterfaceUpdateReturns(typing.TypedDict):
+        id:'str'
+        name:'str'
+        fake:'bool'
+        type:'str'
+        state:'State'
+        aliases:'list[Alias]'
+        ipv4_dhcp:'bool'
+        ipv6_auto:'bool'
+        description:'str'
+        mtu:'typing.Optional[int]'
+        vlan_parent_interface:'typing.Optional[str]'
+        vlan_tag:'typing.Optional[int]'
+        vlan_pcp:'typing.Optional[int]'
+        lag_protocol:'str'
+        lag_ports:'list[str]'
+        bridge_members:'list[str]'
+        ...
+class XmitHashPolicyChoices(typing.TypedDict):
+        LAYER2:'str'
+        LAYER2+3:'str'
+        LAYER3+4:'str'
         ...

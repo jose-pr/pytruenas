@@ -1,12 +1,12 @@
 
 from pytruenas import Namespace, TrueNASClient
-import typing as _ty
+import typing
 class CloudsyncCredentials(Namespace):
-    _namespace:_ty.Literal['cloudsync.credentials']
+    _namespace:typing.Literal['cloudsync.credentials']
     def __init__(self, client:TrueNASClient) -> None: ...
-    @_ty.overload
+    @typing.overload
     def create(self, 
-        cloud_sync_credentials_create:'dict[str]'={},
+        cloud_sync_credentials_create:'CloudSyncCredentialsCreate'={},
     /) -> 'dict[str]': 
         """
         Create Cloud Sync Credentials.
@@ -23,7 +23,7 @@ class CloudsyncCredentials(Namespace):
             cloudsync_credentials_create_returns
         """
         ...
-    @_ty.overload
+    @typing.overload
     def delete(self, 
         id:'int',
     /) -> 'bool': 
@@ -40,10 +40,10 @@ class CloudsyncCredentials(Namespace):
             Will return `true` if `id` is deleted successfully
         """
         ...
-    @_ty.overload
+    @typing.overload
     def get_instance(self, 
         id:'str|int|bool|dict[str]|list',
-        query_options_get_instance:'dict[str]'={},
+        query_options_get_instance:'QueryOptionsGetInstance'={},
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -60,11 +60,11 @@ class CloudsyncCredentials(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def query(self, 
-        query_filters:'list'=[],
-        query_options:'dict[str]'={},
-    /) -> 'list|dict[str]|int|dict[str]': 
+        query_filters:'list[list]'=[],
+        query_options:'QueryOptions'={},
+    /) -> 'list[dict[str]]|dict[str]|int|dict[str]': 
         """
         
 
@@ -76,7 +76,7 @@ class CloudsyncCredentials(Namespace):
             query-options
         Returns
         -------
-        list:
+        list[dict[str]]:
             
         dict[str]:
             
@@ -86,10 +86,10 @@ class CloudsyncCredentials(Namespace):
             
         """
         ...
-    @_ty.overload
+    @typing.overload
     def update(self, 
         id:'int',
-        cloud_sync_credentials_update:'dict[str]'={},
+        cloud_sync_credentials_update:'CloudSyncCredentialsUpdate'={},
     /) -> 'dict[str]': 
         """
         Update Cloud Sync Credentials of `id`.
@@ -107,9 +107,9 @@ class CloudsyncCredentials(Namespace):
             cloudsync_credentials_update_returns
         """
         ...
-    @_ty.overload
+    @typing.overload
     def verify(self, 
-        cloud_sync_credentials_verify:'dict[str]'={},
+        cloud_sync_credentials_verify:'CloudSyncCredentialsVerify'={},
     /) -> None: 
         """
         Verify if `attributes` provided for `provider` are authorized by the `provider`.
@@ -121,4 +121,47 @@ class CloudsyncCredentials(Namespace):
         Returns
         -------
         """
+        ...
+
+class CloudSyncCredentialsCreate(typing.TypedDict):
+        name:'str'
+        provider:'str'
+        attributes:'dict[str]'
+        ...
+class QueryOptionsGetInstance(typing.TypedDict):
+        relationships:'bool'
+        extend:'typing.Optional[str]'
+        extend_context:'typing.Optional[str]'
+        prefix:'typing.Optional[str]'
+        extra:'dict[str]'
+        order_by:'list'
+        select:'list'
+        count:'bool'
+        get:'bool'
+        offset:'int'
+        limit:'int'
+        force_sql_filters:'bool'
+        ...
+class QueryOptions(typing.TypedDict):
+        relationships:'bool'
+        extend:'typing.Optional[str]'
+        extend_context:'typing.Optional[str]'
+        prefix:'typing.Optional[str]'
+        extra:'dict[str]'
+        order_by:'list'
+        select:'list'
+        count:'bool'
+        get:'bool'
+        offset:'int'
+        limit:'int'
+        force_sql_filters:'bool'
+        ...
+class CloudSyncCredentialsUpdate(typing.TypedDict):
+        name:'str'
+        provider:'str'
+        attributes:'dict[str]'
+        ...
+class CloudSyncCredentialsVerify(typing.TypedDict):
+        provider:'str'
+        attributes:'dict[str]'
         ...

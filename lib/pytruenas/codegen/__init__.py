@@ -8,12 +8,56 @@ from ..base import TrueNASClient
 from .. import _utils, _core
 
 
-class OpenApiType(_ty.NamedTuple):
-    raw: _core.Parameter|str
+class Object(_ty.NamedTuple):
+    properties: _ty.OrderedDict[str, "OpenApiType"]
 
-    def python(self) -> str:
-        ty = self.raw["type"] if isinstance(self.raw, dict) else self.raw
+
+class OpenApiType(_ty.NamedTuple):
+    raw: _core.Parameter | str
+
+    def python(self, mem: dict = None) -> type | Object:
+        if mem is None:
+            mem = {}
+        ty = self._python(mem)
+        if "<" in str(ty):
+            ty = ty.__name__
+        return str(ty).replace("'",'')
+
+    def _python(self, mem: dict = None) -> str:
+        raw: _core.Parameter = (
+            self.raw if isinstance(self.raw, dict) else {"type": self.raw}
+        )
+        _found = False
+        types = []
+        for k in ["type", "anyOf"]:
+            if k in raw:
+                _type = raw[k]
+                if not isinstance(_type, list):
+                    _type = [_type]
+                for t in _type:
+                    if isinstance(t, str):
+                        t = {**raw, "type": t}
+                    types.append(t)
+
+        if len(types) > 1:
+            return _ty.Union[tuple([OpenApiType(t)._python(mem) for t in types])]  # type: ignore
+        elif not types:
+            return None
+        ty=types[0]['type']
+        if isinstance(ty, OpenApiType):
+            return ty._python(mem)
+        union = []
+        for item in raw.get("items", []):
+            union.append(OpenApiType(item)._python(mem))
+        if len(union) > 1:
+            union = _ty.Union[tuple(union)]  # type: ignore
+        elif union:
+            union = union[0]
+        if "format" in raw:
+            pass
         match ty:
+            case 'float':
+                ty = float
             case "null":
                 ty = None
             case "boolean":
@@ -23,15 +67,36 @@ class OpenApiType(_ty.NamedTuple):
             case "string":
                 ty = str
             case "array":
-                ty = list
+                if union:
+                    ty = list[union]
+                else:
+                    ty = list
             case "object":
-                ty = dict[str]
+                obj = Object(_ty.OrderedDict())
+                for name, prop in raw.get("properties", {}).items():
+                    obj.properties[name] = OpenApiType(prop)
+                if obj.properties:
+                    name: str = mem.get("basename", "") + _re.sub(r'[-\s_]+','_',raw.get(
+                        "title", "Object"
+                    )).strip("_")
+
+                    name = name[0].upper() + _re.sub(
+                        "_[a-z]", lambda m: m.group(0)[1:].upper(), name[1:]
+                    ).replace('_', '')
+
+                    usednames = mem.setdefault("types", {})
+                    while name in usednames and usednames[name] != obj:
+                        name += "_"
+                    usednames[name] = obj
+                    for prop in obj.properties.values():
+                        prop._python(mem)
+                    ty = name
+                else:
+                    ty = dict[str]
+                pass
             case _:
                 raise ValueError(ty)
-        if "<" in str(ty):
-            ty = ty.__name__
-        return str(ty)
-
+        return ty
 
 class Paramater(_ty.NamedTuple):
     type: list[OpenApiType]
@@ -43,15 +108,19 @@ class Paramater(_ty.NamedTuple):
     def from_param(cls, param: "_core.Parameter"):
         param = param or {}
         type = []
-        desc = param.get("description", param.get('title', ''))
+        desc = param.get("description", param.get("title", ""))
         required = param.get("required", True)
         _found = False
-        for k in ['type', 'anyOf']:
+        for k in ["type", "anyOf"]:
             if k in param:
                 _type = param[k]
                 if not isinstance(_type, list):
                     _type = [_type]
-                type = [OpenApiType(t) for t in _type]
+                type = []
+                for t in _type:
+                    if isinstance(t, str):
+                        t = {**param, "type": t}
+                    type.append(OpenApiType(t))
                 _found = True
         if not _found:
             pass

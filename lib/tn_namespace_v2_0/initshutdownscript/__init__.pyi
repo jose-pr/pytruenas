@@ -1,13 +1,13 @@
 
 from pytruenas import Namespace, TrueNASClient
-import typing as _ty
+import typing
 class Initshutdownscript(Namespace):
-    _namespace:_ty.Literal['initshutdownscript']
+    _namespace:typing.Literal['initshutdownscript']
     def __init__(self, client:TrueNASClient) -> None: ...
-    @_ty.overload
+    @typing.overload
     def create(self, 
-        init_shutdown_script_create:'dict[str]'={},
-    /) -> 'dict[str]': 
+        init_shutdown_script_create:'InitShutdownScriptCreate'={},
+    /) -> 'InitshutdownscriptCreateReturns': 
         """
         Create an initshutdown script task.
         
@@ -31,11 +31,11 @@ class Initshutdownscript(Namespace):
             init_shutdown_script_create
         Returns
         -------
-        dict[str]:
+        InitshutdownscriptCreateReturns:
             initshutdownscript_create_returns
         """
         ...
-    @_ty.overload
+    @typing.overload
     def delete(self, 
         id:'int',
     /) -> 'bool': 
@@ -52,10 +52,10 @@ class Initshutdownscript(Namespace):
             Will return `true` if `id` is deleted successfully
         """
         ...
-    @_ty.overload
+    @typing.overload
     def get_instance(self, 
         id:'str|int|bool|dict[str]|list',
-        query_options_get_instance:'dict[str]'={},
+        query_options_get_instance:'QueryOptionsGetInstance'={},
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -72,11 +72,11 @@ class Initshutdownscript(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def query(self, 
-        query_filters:'list'=[],
-        query_options:'dict[str]'={},
-    /) -> 'list|dict[str]|int|dict[str]': 
+        query_filters:'list[list]'=[],
+        query_options:'QueryOptions'={},
+    /) -> 'list[InitShutdownScriptEntry]|InitShutdownScriptEntry|int|InitShutdownScriptEntry': 
         """
         
 
@@ -88,21 +88,21 @@ class Initshutdownscript(Namespace):
             query-options
         Returns
         -------
-        list:
+        list[InitShutdownScriptEntry]:
             
-        dict[str]:
+        InitShutdownScriptEntry:
             
         int:
             
-        dict[str]:
+        InitShutdownScriptEntry:
             
         """
         ...
-    @_ty.overload
+    @typing.overload
     def update(self, 
         id:'int',
-        initshutdownscript_update:'dict[str]'={},
-    /) -> 'dict[str]': 
+        initshutdownscript_update:'InitshutdownscriptUpdate'={},
+    /) -> 'InitshutdownscriptUpdateReturns': 
         """
         Update initshutdown script task of `id`.
 
@@ -115,7 +115,89 @@ class Initshutdownscript(Namespace):
             initshutdownscript_update
         Returns
         -------
-        dict[str]:
+        InitshutdownscriptUpdateReturns:
             initshutdownscript_update_returns
         """
+        ...
+
+class InitShutdownScriptCreate(typing.TypedDict):
+        type:'str'
+        command:'typing.Optional[str]'
+        script_text:'typing.Optional[str]'
+        script:'typing.Optional[str]'
+        when:'str'
+        enabled:'bool'
+        timeout:'int'
+        comment:'str'
+        ...
+class InitshutdownscriptCreateReturns(typing.TypedDict):
+        type:'str'
+        command:'typing.Optional[str]'
+        script_text:'typing.Optional[str]'
+        script:'typing.Optional[str]'
+        when:'str'
+        enabled:'bool'
+        timeout:'int'
+        comment:'str'
+        id:'int'
+        ...
+class QueryOptionsGetInstance(typing.TypedDict):
+        relationships:'bool'
+        extend:'typing.Optional[str]'
+        extend_context:'typing.Optional[str]'
+        prefix:'typing.Optional[str]'
+        extra:'dict[str]'
+        order_by:'list'
+        select:'list'
+        count:'bool'
+        get:'bool'
+        offset:'int'
+        limit:'int'
+        force_sql_filters:'bool'
+        ...
+class QueryOptions(typing.TypedDict):
+        relationships:'bool'
+        extend:'typing.Optional[str]'
+        extend_context:'typing.Optional[str]'
+        prefix:'typing.Optional[str]'
+        extra:'dict[str]'
+        order_by:'list'
+        select:'list'
+        count:'bool'
+        get:'bool'
+        offset:'int'
+        limit:'int'
+        force_sql_filters:'bool'
+        ...
+class InitShutdownScriptEntry(typing.TypedDict):
+        type:'str'
+        command:'typing.Optional[str]'
+        script_text:'typing.Optional[str]'
+        script:'typing.Optional[str]'
+        when:'str'
+        enabled:'bool'
+        timeout:'int'
+        comment:'str'
+        id:'int'
+        ...
+class InitshutdownscriptUpdate(typing.TypedDict):
+        type:'str'
+        command:'typing.Optional[str]'
+        script_text:'typing.Optional[str]'
+        script:'typing.Optional[str]'
+        when:'str'
+        enabled:'bool'
+        timeout:'int'
+        comment:'str'
+        ...
+class InitshutdownscriptUpdateReturns(typing.TypedDict):
+        type:'str'
+        command:'typing.Optional[str]'
+        script_text:'typing.Optional[str]'
+        script:'typing.Optional[str]'
+        when:'str'
+        enabled:'bool'
+        timeout:'int'
+        comment:'str'
+        id:'int'
         ...

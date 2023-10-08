@@ -1,12 +1,12 @@
 
 from pytruenas import Namespace, TrueNASClient
-import typing as _ty
+import typing
 class Container(Namespace):
-    _namespace:_ty.Literal['container']
+    _namespace:typing.Literal['container']
     def __init__(self, client:TrueNASClient) -> None: ...
-    @_ty.overload
+    @typing.overload
     def config(self, 
-    /) -> 'dict[str]': 
+    /) -> 'ContainerEntry': 
         """
         
 
@@ -14,14 +14,14 @@ class Container(Namespace):
         ----------
         Returns
         -------
-        dict[str]:
+        ContainerEntry:
             container_entry
         """
         ...
-    @_ty.overload
+    @typing.overload
     def prune(self, 
-        prune_options:'dict[str]'={},
-    /) -> 'dict[str]': 
+        prune_options:'PruneOptions'={},
+    /) -> 'PrunedResources': 
         """
         Prune unused images/containers. This will by default remove any dangling images.
         
@@ -34,7 +34,7 @@ class Container(Namespace):
             prune_options
         Returns
         -------
-        dict[str]:
+        PrunedResources:
             Example(s):
             ```
             {
@@ -55,10 +55,10 @@ class Container(Namespace):
             ```
         """
         ...
-    @_ty.overload
+    @typing.overload
     def update(self, 
-        container_update:'dict[str]'={},
-    /) -> 'dict[str]': 
+        container_update:'ContainerUpdate'={},
+    /) -> 'ContainerUpdateReturns': 
         """
         When `enable_image_updates` is set, system will check if existing container images need to be updated. System
         will basically check if we have an updated image hash available for the same tag available and if we do,
@@ -73,7 +73,25 @@ class Container(Namespace):
             container_update
         Returns
         -------
-        dict[str]:
+        ContainerUpdateReturns:
             container_update_returns
         """
+        ...
+
+class ContainerEntry(typing.TypedDict):
+        enable_image_updates:'bool'
+        id:'int'
+        ...
+class PruneOptions(typing.TypedDict):
+        remove_unused_images:'bool'
+        ...
+class PrunedResources(typing.TypedDict):
+        images:'dict[str]'
+        ...
+class ContainerUpdate(typing.TypedDict):
+        enable_image_updates:'bool'
+        ...
+class ContainerUpdateReturns(typing.TypedDict):
+        enable_image_updates:'bool'
+        id:'int'
         ...

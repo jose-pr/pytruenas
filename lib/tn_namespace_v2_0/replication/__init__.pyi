@@ -1,13 +1,13 @@
 
 from pytruenas import Namespace, TrueNASClient
-import typing as _ty
+import typing
 class Replication(Namespace):
-    _namespace:_ty.Literal['replication']
+    _namespace:typing.Literal['replication']
     def __init__(self, client:TrueNASClient) -> None: ...
-    @_ty.overload
+    @typing.overload
     def count_eligible_manual_snapshots(self, 
-        count_eligible_manual_snapshots:'dict[str]'={},
-    /) -> 'dict[str]': 
+        count_eligible_manual_snapshots:'CountEligibleManualSnapshots'={},
+    /) -> 'CountEligibleManualSnapshots_': 
         """
         Count how many existing snapshots of `dataset` match `naming_schema`.
 
@@ -17,13 +17,13 @@ class Replication(Namespace):
             count_eligible_manual_snapshots
         Returns
         -------
-        dict[str]:
+        CountEligibleManualSnapshots_:
             count_eligible_manual_snapshots
         """
         ...
-    @_ty.overload
+    @typing.overload
     def create(self, 
-        replication_create:'dict[str]'={},
+        replication_create:'ReplicationCreate'={},
     /) -> 'dict[str]': 
         """
         Create a Replication Task
@@ -86,7 +86,7 @@ class Replication(Namespace):
             replication_create_returns
         """
         ...
-    @_ty.overload
+    @typing.overload
     def create_dataset(self, 
         dataset:'str',
         transport:'str',
@@ -109,7 +109,7 @@ class Replication(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def delete(self, 
         id:'int',
     /) -> 'bool': 
@@ -126,10 +126,10 @@ class Replication(Namespace):
             Will return `true` if `id` is deleted successfully
         """
         ...
-    @_ty.overload
+    @typing.overload
     def get_instance(self, 
         id:'str|int|bool|dict[str]|list',
-        query_options_get_instance:'dict[str]'={},
+        query_options_get_instance:'QueryOptionsGetInstance'={},
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -146,11 +146,11 @@ class Replication(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def list_datasets(self, 
         transport:'str',
         ssh_credentials:'int|None'=None,
-    /) -> 'list': 
+    /) -> 'list[str]': 
         """
         List datasets on remote side
         
@@ -164,13 +164,13 @@ class Replication(Namespace):
             ssh_credentials
         Returns
         -------
-        list:
+        list[str]:
             datasets
         """
         ...
-    @_ty.overload
+    @typing.overload
     def list_naming_schemas(self, 
-    /) -> 'list': 
+    /) -> 'list[str]': 
         """
         List all naming schemas used in periodic snapshot and replication tasks.
 
@@ -178,15 +178,15 @@ class Replication(Namespace):
         ----------
         Returns
         -------
-        list:
+        list[str]:
             naming_schemas
         """
         ...
-    @_ty.overload
+    @typing.overload
     def query(self, 
-        query_filters:'list'=[],
-        query_options:'dict[str]'={},
-    /) -> 'list|dict[str]|int|dict[str]': 
+        query_filters:'list[list]'=[],
+        query_options:'QueryOptions'={},
+    /) -> 'list[dict[str]]|dict[str]|int|dict[str]': 
         """
         
 
@@ -198,7 +198,7 @@ class Replication(Namespace):
             query-options
         Returns
         -------
-        list:
+        list[dict[str]]:
             
         dict[str]:
             
@@ -208,10 +208,10 @@ class Replication(Namespace):
             
         """
         ...
-    @_ty.overload
+    @typing.overload
     def restore(self, 
         id:'int',
-        replication_restore:'dict[str]'={},
+        replication_restore:'ReplicationRestore'={},
     /) -> None: 
         """
         Create the opposite of replication task `id` (PULL if it was PUSH and vice versa).
@@ -226,7 +226,7 @@ class Replication(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def run(self, 
         id:'int',
     /) -> None: 
@@ -241,9 +241,9 @@ class Replication(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def run_onetime(self, 
-        replication_run_onetime:'dict[str]'={},
+        replication_run_onetime:'ReplicationRunOnetime'={},
     /) -> None: 
         """
         Run replication task without creating it.
@@ -258,10 +258,10 @@ class Replication(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def target_unmatched_snapshots(self, 
         direction:'str',
-        source_datasets:'list',
+        source_datasets:'list[str]',
         target_dataset:'str',
         transport:'str',
         ssh_credentials:'int|None'=None,
@@ -298,10 +298,10 @@ class Replication(Namespace):
             ```
         """
         ...
-    @_ty.overload
+    @typing.overload
     def update(self, 
         id:'int',
-        replication_update:'dict[str]'={},
+        replication_update:'ReplicationUpdate'={},
     /) -> 'dict[str]': 
         """
         Update a Replication Task with specific `id`
@@ -319,4 +319,219 @@ class Replication(Namespace):
         dict[str]:
             replication_update_returns
         """
+        ...
+
+class CountEligibleManualSnapshots(typing.TypedDict):
+        datasets:'list[str]'
+        naming_schema:'list[str]'
+        name_regex:'typing.Optional[str]'
+        transport:'str'
+        ssh_credentials:'typing.Optional[int]'
+        ...
+class CountEligibleManualSnapshots_(typing.TypedDict):
+        total:'int'
+        eligible:'int'
+        ...
+class ReplicationCreate(typing.TypedDict):
+        name:'str'
+        direction:'str'
+        transport:'str'
+        ssh_credentials:'typing.Optional[int]'
+        netcat_active_side:'typing.Optional[str]'
+        netcat_active_side_listen_address:'typing.Optional[str]'
+        netcat_active_side_port_min:'typing.Optional[int]'
+        netcat_active_side_port_max:'typing.Optional[int]'
+        netcat_passive_side_connect_address:'typing.Optional[str]'
+        sudo:'bool'
+        source_datasets:'list[str]'
+        target_dataset:'str'
+        recursive:'bool'
+        exclude:'list[str]'
+        properties:'bool'
+        properties_exclude:'list[str]'
+        properties_override:'dict[str]'
+        replicate:'bool'
+        encryption:'bool'
+        encryption_inherit:'typing.Optional[bool]'
+        encryption_key:'typing.Optional[str]'
+        encryption_key_format:'typing.Optional[str]'
+        encryption_key_location:'typing.Optional[str]'
+        periodic_snapshot_tasks:'list[int]'
+        naming_schema:'list[str]'
+        also_include_naming_schema:'list[str]'
+        name_regex:'typing.Optional[str]'
+        auto:'bool'
+        schedule:'Schedule'
+        restrict_schedule:'RestrictSchedule'
+        only_matching_schedule:'bool'
+        allow_from_scratch:'bool'
+        readonly:'str'
+        hold_pending_snapshots:'bool'
+        retention_policy:'str'
+        lifetime_value:'typing.Optional[int]'
+        lifetime_unit:'typing.Optional[str]'
+        lifetimes:'list[Lifetime]'
+        compression:'typing.Optional[str]'
+        speed_limit:'typing.Optional[int]'
+        large_block:'bool'
+        embed:'bool'
+        compressed:'bool'
+        retries:'int'
+        logging_level:'typing.Optional[str]'
+        enabled:'bool'
+        ...
+class Schedule(typing.TypedDict):
+        minute:'str'
+        hour:'str'
+        dom:'str'
+        month:'str'
+        dow:'str'
+        begin:'str'
+        end:'str'
+        ...
+class RestrictSchedule(typing.TypedDict):
+        minute:'str'
+        hour:'str'
+        dom:'str'
+        month:'str'
+        dow:'str'
+        begin:'str'
+        end:'str'
+        ...
+class Lifetime(typing.TypedDict):
+        schedule:'Schedule'
+        lifetime_value:'int'
+        lifetime_unit:'str'
+        ...
+class Schedule_(typing.TypedDict):
+        minute:'str'
+        hour:'str'
+        dom:'str'
+        month:'str'
+        dow:'str'
+        ...
+class QueryOptionsGetInstance(typing.TypedDict):
+        relationships:'bool'
+        extend:'typing.Optional[str]'
+        extend_context:'typing.Optional[str]'
+        prefix:'typing.Optional[str]'
+        extra:'dict[str]'
+        order_by:'list'
+        select:'list'
+        count:'bool'
+        get:'bool'
+        offset:'int'
+        limit:'int'
+        force_sql_filters:'bool'
+        ...
+class QueryOptions(typing.TypedDict):
+        relationships:'bool'
+        extend:'typing.Optional[str]'
+        extend_context:'typing.Optional[str]'
+        prefix:'typing.Optional[str]'
+        extra:'dict[str]'
+        order_by:'list'
+        select:'list'
+        count:'bool'
+        get:'bool'
+        offset:'int'
+        limit:'int'
+        force_sql_filters:'bool'
+        ...
+class ReplicationRestore(typing.TypedDict):
+        name:'str'
+        target_dataset:'str'
+        ...
+class ReplicationRunOnetime(typing.TypedDict):
+        direction:'str'
+        transport:'str'
+        ssh_credentials:'typing.Optional[int]'
+        netcat_active_side:'typing.Optional[str]'
+        netcat_active_side_listen_address:'typing.Optional[str]'
+        netcat_active_side_port_min:'typing.Optional[int]'
+        netcat_active_side_port_max:'typing.Optional[int]'
+        netcat_passive_side_connect_address:'typing.Optional[str]'
+        sudo:'bool'
+        source_datasets:'list[str]'
+        target_dataset:'str'
+        recursive:'bool'
+        exclude:'list[str]'
+        properties:'bool'
+        properties_exclude:'list[str]'
+        properties_override:'dict[str]'
+        replicate:'bool'
+        encryption:'bool'
+        encryption_inherit:'typing.Optional[bool]'
+        encryption_key:'typing.Optional[str]'
+        encryption_key_format:'typing.Optional[str]'
+        encryption_key_location:'typing.Optional[str]'
+        periodic_snapshot_tasks:'list[int]'
+        naming_schema:'list[str]'
+        also_include_naming_schema:'list[str]'
+        name_regex:'typing.Optional[str]'
+        restrict_schedule:'RestrictSchedule'
+        allow_from_scratch:'bool'
+        readonly:'str'
+        hold_pending_snapshots:'bool'
+        retention_policy:'str'
+        lifetime_value:'typing.Optional[int]'
+        lifetime_unit:'typing.Optional[str]'
+        lifetimes:'list[Lifetime]'
+        compression:'typing.Optional[str]'
+        speed_limit:'typing.Optional[int]'
+        large_block:'bool'
+        embed:'bool'
+        compressed:'bool'
+        retries:'int'
+        logging_level:'typing.Optional[str]'
+        exclude_mountpoint_property:'bool'
+        only_from_scratch:'bool'
+        ...
+class ReplicationUpdate(typing.TypedDict):
+        name:'str'
+        direction:'str'
+        transport:'str'
+        ssh_credentials:'typing.Optional[int]'
+        netcat_active_side:'typing.Optional[str]'
+        netcat_active_side_listen_address:'typing.Optional[str]'
+        netcat_active_side_port_min:'typing.Optional[int]'
+        netcat_active_side_port_max:'typing.Optional[int]'
+        netcat_passive_side_connect_address:'typing.Optional[str]'
+        sudo:'bool'
+        source_datasets:'list[str]'
+        target_dataset:'str'
+        recursive:'bool'
+        exclude:'list[str]'
+        properties:'bool'
+        properties_exclude:'list[str]'
+        properties_override:'dict[str]'
+        replicate:'bool'
+        encryption:'bool'
+        encryption_inherit:'typing.Optional[bool]'
+        encryption_key:'typing.Optional[str]'
+        encryption_key_format:'typing.Optional[str]'
+        encryption_key_location:'typing.Optional[str]'
+        periodic_snapshot_tasks:'list[int]'
+        naming_schema:'list[str]'
+        also_include_naming_schema:'list[str]'
+        name_regex:'typing.Optional[str]'
+        auto:'bool'
+        schedule:'Schedule'
+        restrict_schedule:'RestrictSchedule'
+        only_matching_schedule:'bool'
+        allow_from_scratch:'bool'
+        readonly:'str'
+        hold_pending_snapshots:'bool'
+        retention_policy:'str'
+        lifetime_value:'typing.Optional[int]'
+        lifetime_unit:'typing.Optional[str]'
+        lifetimes:'list[Lifetime]'
+        compression:'typing.Optional[str]'
+        speed_limit:'typing.Optional[int]'
+        large_block:'bool'
+        embed:'bool'
+        compressed:'bool'
+        retries:'int'
+        logging_level:'typing.Optional[str]'
+        enabled:'bool'
         ...

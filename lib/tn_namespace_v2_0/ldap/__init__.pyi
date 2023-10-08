@@ -1,10 +1,10 @@
 
 from pytruenas import Namespace, TrueNASClient
-import typing as _ty
+import typing
 class Ldap(Namespace):
-    _namespace:_ty.Literal['ldap']
+    _namespace:typing.Literal['ldap']
     def __init__(self, client:TrueNASClient) -> None: ...
-    @_ty.overload
+    @typing.overload
     def config(self, 
     /) -> 'dict[str]': 
         """
@@ -18,7 +18,7 @@ class Ldap(Namespace):
             ldap_entry
         """
         ...
-    @_ty.overload
+    @typing.overload
     def get_state(self, 
     /) -> 'str': 
         """
@@ -33,9 +33,9 @@ class Ldap(Namespace):
             directoryservice_state
         """
         ...
-    @_ty.overload
+    @typing.overload
     def schema_choices(self, 
-    /) -> 'list': 
+    /) -> 'list[str]': 
         """
         Returns list of available LDAP schema choices.
 
@@ -43,13 +43,13 @@ class Ldap(Namespace):
         ----------
         Returns
         -------
-        list:
+        list[str]:
             schema_choices
         """
         ...
-    @_ty.overload
+    @typing.overload
     def ssl_choices(self, 
-    /) -> 'list': 
+    /) -> 'list[str]': 
         """
         Returns list of SSL choices.
 
@@ -57,13 +57,13 @@ class Ldap(Namespace):
         ----------
         Returns
         -------
-        list:
+        list[str]:
             ssl_choices
         """
         ...
-    @_ty.overload
+    @typing.overload
     def update(self, 
-        ldap_update:'dict[str]'={},
+        ldap_update:'LdapUpdate'={},
     /) -> 'dict[str]': 
         """
         `hostname` list of ip addresses or hostnames of LDAP servers with
@@ -126,4 +126,24 @@ class Ldap(Namespace):
         dict[str]:
             ldap_update_returns
         """
+        ...
+
+class LdapUpdate(typing.TypedDict):
+        hostname:'list'
+        basedn:'str'
+        binddn:'str'
+        bindpw:'str'
+        anonbind:'bool'
+        ssl:'str'
+        certificate:'typing.Optional[int]'
+        validate_certificates:'bool'
+        disable_freenas_cache:'bool'
+        timeout:'int'
+        dns_timeout:'int'
+        kerberos_realm:'typing.Optional[int]'
+        kerberos_principal:'str'
+        has_samba_schema:'bool'
+        auxiliary_parameters:'str'
+        schema:'str'
+        enable:'bool'
         ...

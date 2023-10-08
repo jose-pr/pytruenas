@@ -1,12 +1,12 @@
 
 from pytruenas import Namespace, TrueNASClient
-import typing as _ty
+import typing
 class Support(Namespace):
-    _namespace:_ty.Literal['support']
+    _namespace:typing.Literal['support']
     def __init__(self, client:TrueNASClient) -> None: ...
-    @_ty.overload
+    @typing.overload
     def attach_ticket(self, 
-        attach_ticket:'dict[str]'={},
+        attach_ticket:'AttachTicket'={},
     /) -> None: 
         """
         Method to attach a file to a existing ticket.
@@ -19,7 +19,7 @@ class Support(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def attach_ticket_max_size(self, 
     /) -> 'int': 
         """
@@ -33,9 +33,9 @@ class Support(Namespace):
             attach_ticket_max_size
         """
         ...
-    @_ty.overload
+    @typing.overload
     def config(self, 
-    /) -> 'dict[str]': 
+    /) -> 'SupportEntry': 
         """
         
 
@@ -43,11 +43,11 @@ class Support(Namespace):
         ----------
         Returns
         -------
-        dict[str]:
+        SupportEntry:
             support_entry
         """
         ...
-    @_ty.overload
+    @typing.overload
     def fetch_categories(self, 
         token:'str'="",
     /) -> 'dict[str]': 
@@ -71,9 +71,9 @@ class Support(Namespace):
             ```
         """
         ...
-    @_ty.overload
+    @typing.overload
     def fields(self, 
-    /) -> 'list': 
+    /) -> 'list[list[str]]': 
         """
         Returns list of pairs of field names and field titles for Proactive Support.
 
@@ -81,11 +81,11 @@ class Support(Namespace):
         ----------
         Returns
         -------
-        list:
+        list[list[str]]:
             support_fields
         """
         ...
-    @_ty.overload
+    @typing.overload
     def is_available(self, 
     /) -> 'bool': 
         """
@@ -99,7 +99,7 @@ class Support(Namespace):
             proactive_support_is_available
         """
         ...
-    @_ty.overload
+    @typing.overload
     def is_available_and_enabled(self, 
     /) -> 'bool': 
         """
@@ -113,10 +113,10 @@ class Support(Namespace):
             proactive_support_is_available_and_enabled
         """
         ...
-    @_ty.overload
+    @typing.overload
     def new_ticket(self, 
-        new_ticket:'dict[str]'={},
-    /) -> 'dict[str]': 
+        new_ticket:'NewTicket'={},
+    /) -> 'NewTicketResponse': 
         """
         Creates a new ticket for support.
         This is done using the support proxy API.
@@ -131,14 +131,14 @@ class Support(Namespace):
             new_ticket
         Returns
         -------
-        dict[str]:
+        NewTicketResponse:
             new_ticket_response
         """
         ...
-    @_ty.overload
+    @typing.overload
     def update(self, 
-        support_update:'dict[str]'={},
-    /) -> 'dict[str]': 
+        support_update:'SupportUpdate'={},
+    /) -> 'SupportUpdateReturns': 
         """
         Update Proactive Support settings.
 
@@ -148,7 +148,67 @@ class Support(Namespace):
             support_update
         Returns
         -------
-        dict[str]:
+        SupportUpdateReturns:
             support_update_returns
         """
+        ...
+
+class AttachTicket(typing.TypedDict):
+        ticket:'int'
+        filename:'str'
+        token:'str'
+        ...
+class SupportEntry(typing.TypedDict):
+        enabled:'typing.Optional[bool]'
+        name:'str'
+        title:'str'
+        email:'str'
+        phone:'str'
+        secondary_name:'str'
+        secondary_title:'str'
+        secondary_email:'str'
+        secondary_phone:'str'
+        id:'int'
+        ...
+class NewTicket(typing.TypedDict):
+        title:'str'
+        body:'str'
+        category:'str'
+        attach_debug:'bool'
+        token:'str'
+        type:'str'
+        criticality:'str'
+        environment:'str'
+        phone:'str'
+        name:'str'
+        email:'str'
+        cc:'list[str]'
+        ...
+class NewTicketResponse(typing.TypedDict):
+        ticket:'typing.Optional[int]'
+        url:'typing.Optional[str]'
+        has_debug:'bool'
+        ...
+class SupportUpdate(typing.TypedDict):
+        enabled:'typing.Optional[bool]'
+        name:'str'
+        title:'str'
+        email:'str'
+        phone:'str'
+        secondary_name:'str'
+        secondary_title:'str'
+        secondary_email:'str'
+        secondary_phone:'str'
+        ...
+class SupportUpdateReturns(typing.TypedDict):
+        enabled:'typing.Optional[bool]'
+        name:'str'
+        title:'str'
+        email:'str'
+        phone:'str'
+        secondary_name:'str'
+        secondary_title:'str'
+        secondary_email:'str'
+        secondary_phone:'str'
+        id:'int'
         ...

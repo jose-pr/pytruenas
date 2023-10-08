@@ -1,10 +1,10 @@
 
 from pytruenas import Namespace, TrueNASClient
-import typing as _ty
+import typing
 class ReplicationConfig(Namespace):
-    _namespace:_ty.Literal['replication.config']
+    _namespace:typing.Literal['replication.config']
     def __init__(self, client:TrueNASClient) -> None: ...
-    @_ty.overload
+    @typing.overload
     def config(self, 
     /) -> 'dict[str]': 
         """
@@ -18,9 +18,9 @@ class ReplicationConfig(Namespace):
             replication_config_entry
         """
         ...
-    @_ty.overload
+    @typing.overload
     def update(self, 
-        replication_config_update:'dict[str]'={},
+        replication_config_update:'ReplicationConfigUpdate'={},
     /) -> 'dict[str]': 
         """
         `max_parallel_replication_tasks` represents a maximum number of parallel replication tasks running.
@@ -34,4 +34,8 @@ class ReplicationConfig(Namespace):
         dict[str]:
             replication_config_update_returns
         """
+        ...
+
+class ReplicationConfigUpdate(typing.TypedDict):
+        max_parallel_replication_tasks:'typing.Optional[int]'
         ...

@@ -1,13 +1,13 @@
 
 from pytruenas import Namespace, TrueNASClient
-import typing as _ty
+import typing
 class KerberosRealm(Namespace):
-    _namespace:_ty.Literal['kerberos.realm']
+    _namespace:typing.Literal['kerberos.realm']
     def __init__(self, client:TrueNASClient) -> None: ...
-    @_ty.overload
+    @typing.overload
     def create(self, 
-        kerberos_realm_create:'dict[str]'={},
-    /) -> 'dict[str]': 
+        kerberos_realm_create:'KerberosRealmCreate'={},
+    /) -> 'KerberosRealmCreateReturns': 
         """
         Create a new kerberos realm. This will be automatically populated during the
         domain join process in an Active Directory environment. Kerberos realm names
@@ -26,11 +26,11 @@ class KerberosRealm(Namespace):
             kerberos_realm_create
         Returns
         -------
-        dict[str]:
+        KerberosRealmCreateReturns:
             kerberos_realm_create_returns
         """
         ...
-    @_ty.overload
+    @typing.overload
     def delete(self, 
         id:'int',
     /) -> 'bool': 
@@ -47,10 +47,10 @@ class KerberosRealm(Namespace):
             Will return `true` if `id` is deleted successfully
         """
         ...
-    @_ty.overload
+    @typing.overload
     def get_instance(self, 
         id:'str|int|bool|dict[str]|list',
-        query_options_get_instance:'dict[str]'={},
+        query_options_get_instance:'QueryOptionsGetInstance'={},
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -67,11 +67,11 @@ class KerberosRealm(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def query(self, 
-        query_filters:'list'=[],
-        query_options:'dict[str]'={},
-    /) -> 'list|dict[str]|int|dict[str]': 
+        query_filters:'list[list]'=[],
+        query_options:'QueryOptions'={},
+    /) -> 'list[KerberosRealmEntry]|KerberosRealmEntry|int|KerberosRealmEntry': 
         """
         
 
@@ -83,21 +83,21 @@ class KerberosRealm(Namespace):
             query-options
         Returns
         -------
-        list:
+        list[KerberosRealmEntry]:
             
-        dict[str]:
+        KerberosRealmEntry:
             
         int:
             
-        dict[str]:
+        KerberosRealmEntry:
             
         """
         ...
-    @_ty.overload
+    @typing.overload
     def update(self, 
         id:'int',
-        kerberos_realm_update:'dict[str]'={},
-    /) -> 'dict[str]': 
+        kerberos_realm_update:'KerberosRealmUpdate'={},
+    /) -> 'KerberosRealmUpdateReturns': 
         """
         Update a kerberos realm by id. This will be automatically populated during the
         domain join process in an Active Directory environment. Kerberos realm names
@@ -111,7 +111,69 @@ class KerberosRealm(Namespace):
             kerberos_realm_update
         Returns
         -------
-        dict[str]:
+        KerberosRealmUpdateReturns:
             kerberos_realm_update_returns
         """
+        ...
+
+class KerberosRealmCreate(typing.TypedDict):
+        realm:'str'
+        kdc:'list'
+        admin_server:'list'
+        kpasswd_server:'list'
+        ...
+class KerberosRealmCreateReturns(typing.TypedDict):
+        realm:'str'
+        kdc:'list'
+        admin_server:'list'
+        kpasswd_server:'list'
+        id:'int'
+        ...
+class QueryOptionsGetInstance(typing.TypedDict):
+        relationships:'bool'
+        extend:'typing.Optional[str]'
+        extend_context:'typing.Optional[str]'
+        prefix:'typing.Optional[str]'
+        extra:'dict[str]'
+        order_by:'list'
+        select:'list'
+        count:'bool'
+        get:'bool'
+        offset:'int'
+        limit:'int'
+        force_sql_filters:'bool'
+        ...
+class QueryOptions(typing.TypedDict):
+        relationships:'bool'
+        extend:'typing.Optional[str]'
+        extend_context:'typing.Optional[str]'
+        prefix:'typing.Optional[str]'
+        extra:'dict[str]'
+        order_by:'list'
+        select:'list'
+        count:'bool'
+        get:'bool'
+        offset:'int'
+        limit:'int'
+        force_sql_filters:'bool'
+        ...
+class KerberosRealmEntry(typing.TypedDict):
+        realm:'str'
+        kdc:'list'
+        admin_server:'list'
+        kpasswd_server:'list'
+        id:'int'
+        ...
+class KerberosRealmUpdate(typing.TypedDict):
+        realm:'str'
+        kdc:'list'
+        admin_server:'list'
+        kpasswd_server:'list'
+        ...
+class KerberosRealmUpdateReturns(typing.TypedDict):
+        realm:'str'
+        kdc:'list'
+        admin_server:'list'
+        kpasswd_server:'list'
+        id:'int'
         ...

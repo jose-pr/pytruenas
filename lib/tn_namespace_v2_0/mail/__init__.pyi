@@ -1,12 +1,12 @@
 
 from pytruenas import Namespace, TrueNASClient
-import typing as _ty
+import typing
 class Mail(Namespace):
-    _namespace:_ty.Literal['mail']
+    _namespace:typing.Literal['mail']
     def __init__(self, client:TrueNASClient) -> None: ...
-    @_ty.overload
+    @typing.overload
     def config(self, 
-    /) -> 'dict[str]': 
+    /) -> 'MailEntry': 
         """
         
 
@@ -14,14 +14,14 @@ class Mail(Namespace):
         ----------
         Returns
         -------
-        dict[str]:
+        MailEntry:
             mail_entry
         """
         ...
-    @_ty.overload
+    @typing.overload
     def send(self, 
-        mail_message:'dict[str]'={},
-        mail_update:'dict[str]'={},
+        mail_message:'MailMessage'={},
+        mail_update:'MailUpdate'={},
     /) -> 'bool': 
         """
         Sends mail using configured mail settings.
@@ -68,10 +68,10 @@ class Mail(Namespace):
             successfully_sent
         """
         ...
-    @_ty.overload
+    @typing.overload
     def update(self, 
-        mail_update:'dict[str]'={},
-    /) -> 'dict[str]': 
+        mail_update:'MailUpdate_'={},
+    /) -> 'MailUpdateReturns': 
         """
         Update Mail Service Configuration.
         
@@ -90,7 +90,77 @@ class Mail(Namespace):
             mail_update
         Returns
         -------
-        dict[str]:
+        MailUpdateReturns:
             mail_update_returns
         """
+        ...
+
+class MailEntry(typing.TypedDict):
+        fromemail:'str'
+        fromname:'str'
+        outgoingserver:'str'
+        port:'int'
+        security:'str'
+        smtp:'bool'
+        user:'typing.Optional[str]'
+        pass:'typing.Optional[str]'
+        oauth:'Oauth'
+        id:'int'
+        ...
+class Oauth(typing.TypedDict):
+        client_id:'str'
+        client_secret:'str'
+        refresh_token:'str'
+        ...
+class MailMessage(typing.TypedDict):
+        subject:'str'
+        text:'str'
+        html:'typing.Optional[str]'
+        to:'list[str]'
+        cc:'list[str]'
+        interval:'typing.Optional[int]'
+        channel:'typing.Optional[str]'
+        timeout:'int'
+        attachments:'bool'
+        queue:'bool'
+        extra_headers:'dict[str]'
+        ...
+class MailUpdate(typing.TypedDict):
+        fromemail:'str'
+        fromname:'str'
+        outgoingserver:'str'
+        port:'int'
+        security:'str'
+        smtp:'bool'
+        user:'typing.Optional[str]'
+        pass:'typing.Optional[str]'
+        oauth:'Oauth'
+        ...
+class Oauth_(typing.TypedDict):
+        client_id:'str'
+        client_secret:'str'
+        refresh_token:'str'
+        ...
+class MailUpdate_(typing.TypedDict):
+        fromemail:'str'
+        fromname:'str'
+        outgoingserver:'str'
+        port:'int'
+        security:'str'
+        smtp:'bool'
+        user:'typing.Optional[str]'
+        pass:'typing.Optional[str]'
+        oauth:'Oauth'
+        ...
+class MailUpdateReturns(typing.TypedDict):
+        fromemail:'str'
+        fromname:'str'
+        outgoingserver:'str'
+        port:'int'
+        security:'str'
+        smtp:'bool'
+        user:'typing.Optional[str]'
+        pass:'typing.Optional[str]'
+        oauth:'Oauth'
+        id:'int'
         ...

@@ -1,14 +1,14 @@
 
 from pytruenas import Namespace, TrueNASClient
-import typing as _ty
+import typing
 class IpmiSensors(Namespace):
-    _namespace:_ty.Literal['ipmi.sensors']
+    _namespace:typing.Literal['ipmi.sensors']
     def __init__(self, client:TrueNASClient) -> None: ...
-    @_ty.overload
+    @typing.overload
     def query(self, 
-        query_filters:'list'=[],
-        query_options:'dict[str]'={},
-    /) -> 'int|list|list': 
+        query_filters:'list[list]'=[],
+        query_options:'QueryOptions'={},
+    /) -> 'int|list[dict[str]]|list[list[dict[str]]]': 
         """
         
 
@@ -22,9 +22,24 @@ class IpmiSensors(Namespace):
         -------
         int:
             
-        list:
+        list[dict[str]]:
             
-        list:
+        list[list[dict[str]]]:
             
         """
+        ...
+
+class QueryOptions(typing.TypedDict):
+        relationships:'bool'
+        extend:'typing.Optional[str]'
+        extend_context:'typing.Optional[str]'
+        prefix:'typing.Optional[str]'
+        extra:'dict[str]'
+        order_by:'list'
+        select:'list'
+        count:'bool'
+        get:'bool'
+        offset:'int'
+        limit:'int'
+        force_sql_filters:'bool'
         ...

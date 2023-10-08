@@ -1,10 +1,10 @@
 
 from pytruenas import Namespace, TrueNASClient
-import typing as _ty
+import typing
 class IpmiMc(Namespace):
-    _namespace:_ty.Literal['ipmi.mc']
+    _namespace:typing.Literal['ipmi.mc']
     def __init__(self, client:TrueNASClient) -> None: ...
-    @_ty.overload
+    @typing.overload
     def info(self, 
     /) -> 'dict[str]': 
         """
@@ -37,3 +37,4 @@ class IpmiMc(Namespace):
             mc_info
         """
         ...
+

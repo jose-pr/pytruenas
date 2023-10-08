@@ -1,10 +1,10 @@
 
 from pytruenas import Namespace, TrueNASClient
-import typing as _ty
+import typing
 class Directoryservices(Namespace):
-    _namespace:_ty.Literal['directoryservices']
+    _namespace:typing.Literal['directoryservices']
     def __init__(self, client:TrueNASClient) -> None: ...
-    @_ty.overload
+    @typing.overload
     def cache_refresh(self, 
     /) -> None: 
         """
@@ -26,9 +26,9 @@ class Directoryservices(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def get_state(self, 
-    /) -> 'dict[str]': 
+    /) -> 'DirectoryServicesStates': 
         """
         `DISABLED` Directory Service is disabled.
         
@@ -45,7 +45,12 @@ class Directoryservices(Namespace):
         ----------
         Returns
         -------
-        dict[str]:
+        DirectoryServicesStates:
             directory_services_states
         """
+        ...
+
+class DirectoryServicesStates(typing.TypedDict):
+        activedirectory:'str'
+        ldap:'str'
         ...

@@ -1,10 +1,10 @@
 
 from pytruenas import Namespace, TrueNASClient
-import typing as _ty
+import typing
 class CtdbGeneral(Namespace):
-    _namespace:_ty.Literal['ctdb.general']
+    _namespace:typing.Literal['ctdb.general']
     def __init__(self, client:TrueNASClient) -> None: ...
-    @_ty.overload
+    @typing.overload
     def healthy(self, 
     /) -> 'bool': 
         """
@@ -18,10 +18,10 @@ class CtdbGeneral(Namespace):
             status
         """
         ...
-    @_ty.overload
+    @typing.overload
     def ips(self, 
-        ctdb_ips:'dict[str]'={},
-    /) -> 'list': 
+        ctdb_ips:'CtdbIps'={},
+    /) -> 'list[CtdbPublicIp]': 
         """
         Return a list of public ip addresses in the ctdb cluster.
         
@@ -34,13 +34,13 @@ class CtdbGeneral(Namespace):
             ctdb_ips
         Returns
         -------
-        list:
+        list[CtdbPublicIp]:
             ctdb_public_ips
         """
         ...
-    @_ty.overload
+    @typing.overload
     def listnodes(self, 
-    /) -> 'list': 
+    /) -> 'list[CtdbNode]': 
         """
         Return a list of nodes in the ctdb cluster.
 
@@ -48,11 +48,11 @@ class CtdbGeneral(Namespace):
         ----------
         Returns
         -------
-        list:
+        list[CtdbNode]:
             nodelist
         """
         ...
-    @_ty.overload
+    @typing.overload
     def pnn(self, 
     /) -> 'int': 
         """
@@ -67,7 +67,7 @@ class CtdbGeneral(Namespace):
             pnn
         """
         ...
-    @_ty.overload
+    @typing.overload
     def recovery_master(self, 
     /) -> 'int': 
         """
@@ -81,10 +81,10 @@ class CtdbGeneral(Namespace):
             recmaster
         """
         ...
-    @_ty.overload
+    @typing.overload
     def status(self, 
-        ctdb_status:'dict[str]'={},
-    /) -> 'dict[str]': 
+        ctdb_status:'CtdbStatus'={},
+    /) -> 'CtdbStatus_': 
         """
         List the status of the ctdb cluster.
         
@@ -124,7 +124,65 @@ class CtdbGeneral(Namespace):
             ctdb_status
         Returns
         -------
-        dict[str]:
+        CtdbStatus_:
             ctdb_status
         """
+        ...
+
+class CtdbIps(typing.TypedDict):
+        all_nodes:'bool'
+        ...
+class CtdbPublicIp(typing.TypedDict):
+        public_ip:'str'
+        pnn:'int'
+        interfaces:'list[CtdbInterfaceInfo]'
+        ...
+class CtdbInterfaceInfo(typing.TypedDict):
+        name:'str'
+        active:'bool'
+        available:'bool'
+        ...
+class CtdbNode(typing.TypedDict):
+        pnn:'int'
+        address:'str'
+        address_type:'str'
+        enabled:'bool'
+        this_node:'bool'
+        ...
+class CtdbStatus(typing.TypedDict):
+        all_nodes:'bool'
+        ...
+class CtdbStatus_(typing.TypedDict):
+        nodemap:'Nodemap'
+        vnnmap:'Vnnmap'
+        recovery_mode_raw:'int'
+        recovery_mode_str:'str'
+        recovery_master:'int'
+        all_healthy:'bool'
+        ...
+class Nodemap(typing.TypedDict):
+        node_count:'int'
+        deleted_node_count:'int'
+        nodes:'list[CtdbNodemapEntry]'
+        ...
+class CtdbNodemapEntry(typing.TypedDict):
+        pnn:'int'
+        address:'Address'
+        flags:'list[str]'
+        flags_raw:'int'
+        partially_online:'bool'
+        this_node:'bool'
+        ...
+class Address(typing.TypedDict):
+        type:'str'
+        address:'str'
+        ...
+class Vnnmap(typing.TypedDict):
+        size:'int'
+        generation:'int'
+        entries:'list[Object]'
+        ...
+class Object(typing.TypedDict):
+        hash:'int'
+        lmaster:'int'
         ...

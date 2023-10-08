@@ -1,14 +1,14 @@
 
 from pytruenas import Namespace, TrueNASClient
-import typing as _ty
+import typing
 class Dns(Namespace):
-    _namespace:_ty.Literal['dns']
+    _namespace:typing.Literal['dns']
     def __init__(self, client:TrueNASClient) -> None: ...
-    @_ty.overload
+    @typing.overload
     def query(self, 
-        query_filters:'list'=[],
-        query_options:'dict[str]'={},
-    /) -> 'int|dict[str]|list': 
+        query_filters:'list[list]'=[],
+        query_options:'QueryOptions'={},
+    /) -> 'int|Nameserver|list[Nameserver]': 
         """
         Query Name Servers with `query-filters` and `query-options`.
 
@@ -22,9 +22,27 @@ class Dns(Namespace):
         -------
         int:
             
-        dict[str]:
+        Nameserver:
             
-        list:
+        list[Nameserver]:
             
         """
+        ...
+
+class QueryOptions(typing.TypedDict):
+        relationships:'bool'
+        extend:'typing.Optional[str]'
+        extend_context:'typing.Optional[str]'
+        prefix:'typing.Optional[str]'
+        extra:'dict[str]'
+        order_by:'list'
+        select:'list'
+        count:'bool'
+        get:'bool'
+        offset:'int'
+        limit:'int'
+        force_sql_filters:'bool'
+        ...
+class Nameserver(typing.TypedDict):
+        nameserver:'str'
         ...

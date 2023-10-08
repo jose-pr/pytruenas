@@ -1,12 +1,12 @@
 
 from pytruenas import Namespace, TrueNASClient
-import typing as _ty
+import typing
 class Vmware(Namespace):
-    _namespace:_ty.Literal['vmware']
+    _namespace:typing.Literal['vmware']
     def __init__(self, client:TrueNASClient) -> None: ...
-    @_ty.overload
+    @typing.overload
     def create(self, 
-        vmware_create:'dict[str]'={},
+        vmware_create:'VmwareCreate'={},
     /) -> 'dict[str]': 
         """
         Create VMWare snapshot.
@@ -28,7 +28,7 @@ class Vmware(Namespace):
             vmware_create_returns
         """
         ...
-    @_ty.overload
+    @typing.overload
     def dataset_has_vms(self, 
         dataset:'str',
         recursive:'bool',
@@ -46,7 +46,7 @@ class Vmware(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def delete(self, 
         id:'int',
     /) -> 'bool': 
@@ -63,9 +63,9 @@ class Vmware(Namespace):
             Will return `true` if `id` is deleted successfully
         """
         ...
-    @_ty.overload
+    @typing.overload
     def get_datastores(self, 
-        vmware_creds:'dict[str]'={},
+        vmware_creds:'VmwareCreds'={},
     /) -> None: 
         """
         Get datastores from VMWare.
@@ -78,10 +78,10 @@ class Vmware(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def get_instance(self, 
         id:'str|int|bool|dict[str]|list',
-        query_options_get_instance:'dict[str]'={},
+        query_options_get_instance:'QueryOptionsGetInstance'={},
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -98,7 +98,7 @@ class Vmware(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def get_virtual_machines(self, 
         pk:'int',
     /) -> None: 
@@ -113,9 +113,9 @@ class Vmware(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def match_datastores_with_datasets(self, 
-        vmware_creds:'dict[str]'={},
+        vmware_creds:'VmwareCreds'={},
     /) -> None: 
         """
         Requests datastores from vCenter server and tries to match them with local filesystems.
@@ -130,11 +130,11 @@ class Vmware(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def query(self, 
-        query_filters:'list'=[],
-        query_options:'dict[str]'={},
-    /) -> 'list|dict[str]|int|dict[str]': 
+        query_filters:'list[list]'=[],
+        query_options:'QueryOptions'={},
+    /) -> 'list[dict[str]]|dict[str]|int|dict[str]': 
         """
         
 
@@ -146,7 +146,7 @@ class Vmware(Namespace):
             query-options
         Returns
         -------
-        list:
+        list[dict[str]]:
             
         dict[str]:
             
@@ -156,10 +156,10 @@ class Vmware(Namespace):
             
         """
         ...
-    @_ty.overload
+    @typing.overload
     def update(self, 
         id:'int',
-        vmware_update:'dict[str]'={},
+        vmware_update:'VmwareUpdate'={},
     /) -> 'dict[str]': 
         """
         Update VMWare snapshot of `id`.
@@ -176,4 +176,52 @@ class Vmware(Namespace):
         dict[str]:
             vmware_update_returns
         """
+        ...
+
+class VmwareCreate(typing.TypedDict):
+        datastore:'str'
+        filesystem:'str'
+        hostname:'str'
+        password:'str'
+        username:'str'
+        ...
+class VmwareCreds(typing.TypedDict):
+        hostname:'str'
+        username:'str'
+        password:'str'
+        ...
+class QueryOptionsGetInstance(typing.TypedDict):
+        relationships:'bool'
+        extend:'typing.Optional[str]'
+        extend_context:'typing.Optional[str]'
+        prefix:'typing.Optional[str]'
+        extra:'dict[str]'
+        order_by:'list'
+        select:'list'
+        count:'bool'
+        get:'bool'
+        offset:'int'
+        limit:'int'
+        force_sql_filters:'bool'
+        ...
+class QueryOptions(typing.TypedDict):
+        relationships:'bool'
+        extend:'typing.Optional[str]'
+        extend_context:'typing.Optional[str]'
+        prefix:'typing.Optional[str]'
+        extra:'dict[str]'
+        order_by:'list'
+        select:'list'
+        count:'bool'
+        get:'bool'
+        offset:'int'
+        limit:'int'
+        force_sql_filters:'bool'
+        ...
+class VmwareUpdate(typing.TypedDict):
+        datastore:'str'
+        filesystem:'str'
+        hostname:'str'
+        password:'str'
+        username:'str'
         ...

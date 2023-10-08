@@ -1,10 +1,10 @@
 
 from pytruenas import Namespace, TrueNASClient
-import typing as _ty
+import typing
 class Route(Namespace):
-    _namespace:_ty.Literal['route']
+    _namespace:typing.Literal['route']
     def __init__(self, client:TrueNASClient) -> None: ...
-    @_ty.overload
+    @typing.overload
     def ipv4gw_reachable(self, 
         ipv4_gateway:'str',
     /) -> 'bool': 
@@ -24,11 +24,11 @@ class Route(Namespace):
             ipv4gw_reachable
         """
         ...
-    @_ty.overload
+    @typing.overload
     def system_routes(self, 
-        query_filters:'list'=[],
-        query_options:'dict[str]'={},
-    /) -> 'int|dict[str]|list': 
+        query_filters:'list[list]'=[],
+        query_options:'QueryOptions'={},
+    /) -> 'int|SystemRoute|list[SystemRoute]': 
         """
         Get current/applied network routes.
 
@@ -42,9 +42,34 @@ class Route(Namespace):
         -------
         int:
             
-        dict[str]:
+        SystemRoute:
             
-        list:
+        list[SystemRoute]:
             
         """
+        ...
+
+class QueryOptions(typing.TypedDict):
+        relationships:'bool'
+        extend:'typing.Optional[str]'
+        extend_context:'typing.Optional[str]'
+        prefix:'typing.Optional[str]'
+        extra:'dict[str]'
+        order_by:'list'
+        select:'list'
+        count:'bool'
+        get:'bool'
+        offset:'int'
+        limit:'int'
+        force_sql_filters:'bool'
+        ...
+class SystemRoute(typing.TypedDict):
+        network:'str'
+        netmask:'str'
+        gateway:'typing.Optional[str]'
+        interface:'str'
+        flags:'list'
+        table_id:'int'
+        scope:'int'
+        preferred_source:'typing.Optional[str]'
         ...

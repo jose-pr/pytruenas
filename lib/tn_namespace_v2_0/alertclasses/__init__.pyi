@@ -1,12 +1,12 @@
 
 from pytruenas import Namespace, TrueNASClient
-import typing as _ty
+import typing
 class Alertclasses(Namespace):
-    _namespace:_ty.Literal['alertclasses']
+    _namespace:typing.Literal['alertclasses']
     def __init__(self, client:TrueNASClient) -> None: ...
-    @_ty.overload
+    @typing.overload
     def config(self, 
-    /) -> 'dict[str]': 
+    /) -> 'AlertclassesEntry': 
         """
         
 
@@ -14,14 +14,14 @@ class Alertclasses(Namespace):
         ----------
         Returns
         -------
-        dict[str]:
+        AlertclassesEntry:
             alertclasses_entry
         """
         ...
-    @_ty.overload
+    @typing.overload
     def update(self, 
-        alertclasses_update:'dict[str]'={},
-    /) -> 'dict[str]': 
+        alertclasses_update:'AlertclassesUpdate'={},
+    /) -> 'AlertclassesUpdateReturns': 
         """
         Update default Alert settings.
 
@@ -31,7 +31,19 @@ class Alertclasses(Namespace):
             alertclasses_update
         Returns
         -------
-        dict[str]:
+        AlertclassesUpdateReturns:
             alertclasses_update_returns
         """
+        ...
+
+class AlertclassesEntry(typing.TypedDict):
+        id:'int'
+        classes:'dict[str]'
+        ...
+class AlertclassesUpdate(typing.TypedDict):
+        classes:'dict[str]'
+        ...
+class AlertclassesUpdateReturns(typing.TypedDict):
+        id:'int'
+        classes:'dict[str]'
         ...

@@ -1,10 +1,10 @@
 
 from pytruenas import Namespace, TrueNASClient
-import typing as _ty
+import typing
 class Activedirectory(Namespace):
-    _namespace:_ty.Literal['activedirectory']
+    _namespace:typing.Literal['activedirectory']
     def __init__(self, client:TrueNASClient) -> None: ...
-    @_ty.overload
+    @typing.overload
     def config(self, 
     /) -> 'dict[str]': 
         """
@@ -18,10 +18,10 @@ class Activedirectory(Namespace):
             activedirectory_entry
         """
         ...
-    @_ty.overload
+    @typing.overload
     def domain_info(self, 
         domain:'str'="",
-    /) -> 'dict[str]': 
+    /) -> 'DomainInfo': 
         """
         Returns the following information about the currently joined domain:
         
@@ -47,11 +47,11 @@ class Activedirectory(Namespace):
             domain
         Returns
         -------
-        dict[str]:
+        DomainInfo:
             domain_info
         """
         ...
-    @_ty.overload
+    @typing.overload
     def get_state(self, 
     /) -> 'str': 
         """
@@ -66,9 +66,9 @@ class Activedirectory(Namespace):
             directoryservice_state
         """
         ...
-    @_ty.overload
+    @typing.overload
     def leave(self, 
-        kerberos_username_password:'dict[str]'={},
+        kerberos_username_password:'KerberosUsernamePassword'={},
     /) -> None: 
         """
         Leave Active Directory domain. This will remove computer
@@ -86,7 +86,7 @@ class Activedirectory(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def nss_info_choices(self, 
     /) -> 'str': 
         """
@@ -100,7 +100,7 @@ class Activedirectory(Namespace):
             nss_info_ad
         """
         ...
-    @_ty.overload
+    @typing.overload
     def started(self, 
     /) -> None: 
         """
@@ -115,9 +115,9 @@ class Activedirectory(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def update(self, 
-        activedirectory_update:'dict[str]'={},
+        activedirectory_update:'ActivedirectoryUpdate'={},
     /) -> 'dict[str]': 
         """
         Update active directory configuration.
@@ -214,4 +214,42 @@ class Activedirectory(Namespace):
         dict[str]:
             activedirectory_update_returns
         """
+        ...
+
+class DomainInfo(typing.TypedDict):
+        LDAP server:'str'
+        LDAP server name:'str'
+        Realm:'str'
+        Bind Path:'str'
+        LDAP port:'int'
+        Server time:'int'
+        KDC server:'str'
+        Server time offset:'int'
+        Last machine account password change:'int'
+        ...
+class KerberosUsernamePassword(typing.TypedDict):
+        username:'str'
+        password:'str'
+        ...
+class ActivedirectoryUpdate(typing.TypedDict):
+        domainname:'str'
+        bindname:'str'
+        bindpw:'str'
+        verbose_logging:'bool'
+        use_default_domain:'bool'
+        allow_trusted_doms:'bool'
+        allow_dns_updates:'bool'
+        disable_freenas_cache:'bool'
+        restrict_pam:'bool'
+        site:'typing.Optional[str]'
+        kerberos_realm:'typing.Optional[int]'
+        kerberos_principal:'typing.Optional[str]'
+        timeout:'int'
+        dns_timeout:'int'
+        nss_info:'typing.Optional[str]'
+        createcomputer:'str'
+        netbiosname:'str'
+        netbiosname_b:'str'
+        netbiosalias:'list'
+        enable:'bool'
         ...

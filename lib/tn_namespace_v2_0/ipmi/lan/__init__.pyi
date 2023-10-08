@@ -1,12 +1,12 @@
 
 from pytruenas import Namespace, TrueNASClient
-import typing as _ty
+import typing
 class IpmiLan(Namespace):
-    _namespace:_ty.Literal['ipmi.lan']
+    _namespace:typing.Literal['ipmi.lan']
     def __init__(self, client:TrueNASClient) -> None: ...
-    @_ty.overload
+    @typing.overload
     def channels(self, 
-    /) -> 'list': 
+    /) -> 'list[int]': 
         """
         Return a list of available IPMI channels.
 
@@ -14,14 +14,14 @@ class IpmiLan(Namespace):
         ----------
         Returns
         -------
-        list:
+        list[int]:
             lan_channels
         """
         ...
-    @_ty.overload
+    @typing.overload
     def get_instance(self, 
         id:'str|int|bool|dict[str]|list',
-        query_options_get_instance:'dict[str]'={},
+        query_options_get_instance:'QueryOptionsGetInstance'={},
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -38,11 +38,11 @@ class IpmiLan(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def query(self, 
-        query_filters:'list'=[],
-        query_options:'dict[str]'={},
-    /) -> 'list|dict[str]|int|dict[str]': 
+        query_filters:'list[list]'=[],
+        query_options:'QueryOptions'={},
+    /) -> 'list[dict[str]]|dict[str]|int|dict[str]': 
         """
         Query available IPMI Channels with `query-filters` and `query-options`.
 
@@ -54,7 +54,7 @@ class IpmiLan(Namespace):
             query-options
         Returns
         -------
-        list:
+        list[dict[str]]:
             
         dict[str]:
             
@@ -64,10 +64,10 @@ class IpmiLan(Namespace):
             
         """
         ...
-    @_ty.overload
+    @typing.overload
     def update(self, 
         channel:'int',
-        ipmi_update:'dict[str]'={},
+        ipmi_update:'IpmiUpdate'={},
     /) -> 'dict[str]': 
         """
         Update IPMI configuration on channel number `id`.
@@ -90,4 +90,41 @@ class IpmiLan(Namespace):
         dict[str]:
             ipmi_lan_update_returns
         """
+        ...
+
+class QueryOptionsGetInstance(typing.TypedDict):
+        relationships:'bool'
+        extend:'typing.Optional[str]'
+        extend_context:'typing.Optional[str]'
+        prefix:'typing.Optional[str]'
+        extra:'dict[str]'
+        order_by:'list'
+        select:'list'
+        count:'bool'
+        get:'bool'
+        offset:'int'
+        limit:'int'
+        force_sql_filters:'bool'
+        ...
+class QueryOptions(typing.TypedDict):
+        relationships:'bool'
+        extend:'typing.Optional[str]'
+        extend_context:'typing.Optional[str]'
+        prefix:'typing.Optional[str]'
+        extra:'dict[str]'
+        order_by:'list'
+        select:'list'
+        count:'bool'
+        get:'bool'
+        offset:'int'
+        limit:'int'
+        force_sql_filters:'bool'
+        ...
+class IpmiUpdate(typing.TypedDict):
+        ipaddress:'str'
+        netmask:'str'
+        gateway:'str'
+        password:'str'
+        dhcp:'bool'
+        vlan:'typing.Optional[int]'
         ...

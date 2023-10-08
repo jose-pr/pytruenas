@@ -1,10 +1,10 @@
 
 from pytruenas import Namespace, TrueNASClient
-import typing as _ty
+import typing
 class IpmiSel(Namespace):
-    _namespace:_ty.Literal['ipmi.sel']
+    _namespace:typing.Literal['ipmi.sel']
     def __init__(self, client:TrueNASClient) -> None: ...
-    @_ty.overload
+    @typing.overload
     def clear(self, 
     /) -> None: 
         """
@@ -16,11 +16,11 @@ class IpmiSel(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def elist(self, 
-        query_filters:'list'=[],
-        query_options:'dict[str]'={},
-    /) -> 'int|dict[str]|list': 
+        query_filters:'list[list]'=[],
+        query_options:'QueryOptions'={},
+    /) -> 'int|dict[str]|list[dict[str]]': 
         """
         Query IPMI System Event Log (SEL) extended list
 
@@ -36,11 +36,11 @@ class IpmiSel(Namespace):
             
         dict[str]:
             
-        list:
+        list[dict[str]]:
             
         """
         ...
-    @_ty.overload
+    @typing.overload
     def info(self, 
     /) -> 'dict[str]': 
         """
@@ -53,4 +53,19 @@ class IpmiSel(Namespace):
         dict[str]:
             ipmi_sel_info
         """
+        ...
+
+class QueryOptions(typing.TypedDict):
+        relationships:'bool'
+        extend:'typing.Optional[str]'
+        extend_context:'typing.Optional[str]'
+        prefix:'typing.Optional[str]'
+        extra:'dict[str]'
+        order_by:'list'
+        select:'list'
+        count:'bool'
+        get:'bool'
+        offset:'int'
+        limit:'int'
+        force_sql_filters:'bool'
         ...

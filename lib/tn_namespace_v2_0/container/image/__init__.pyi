@@ -1,10 +1,10 @@
 
 from pytruenas import Namespace, TrueNASClient
-import typing as _ty
+import typing
 class ContainerImage(Namespace):
-    _namespace:_ty.Literal['container.image']
+    _namespace:typing.Literal['container.image']
     def __init__(self, client:TrueNASClient) -> None: ...
-    @_ty.overload
+    @typing.overload
     def delete(self, 
         id:'str',
     /) -> None: 
@@ -19,9 +19,9 @@ class ContainerImage(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def get_chart_releases_consuming_image(self, 
-        image_tags:'list'=[],
+        image_tags:'list[str]'=[],
     /) -> 'list': 
         """
         Retrieve chart releases consuming `image_tag` image.
@@ -36,10 +36,10 @@ class ContainerImage(Namespace):
             get_chart_releases_consuming_image
         """
         ...
-    @_ty.overload
+    @typing.overload
     def get_instance(self, 
         id:'str|int|bool|dict[str]|list',
-        query_options_get_instance:'dict[str]'={},
+        query_options_get_instance:'QueryOptionsGetInstance'={},
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -56,9 +56,9 @@ class ContainerImage(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def pull(self, 
-        image_pull:'dict[str]'={},
+        image_pull:'ImagePull'={},
     /) -> None: 
         """
         `from_image` is the name of the image to pull. Format for the name is "registry/repo/image" where
@@ -77,11 +77,11 @@ class ContainerImage(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def query(self, 
-        query_filters:'list'=[],
-        query_options:'dict[str]'={},
-    /) -> 'list|dict[str]|int|dict[str]': 
+        query_filters:'list[list]'=[],
+        query_options:'QueryOptions'={},
+    /) -> 'list[ContainerImageEntry]|ContainerImageEntry|int|ContainerImageEntry': 
         """
         Retrieve container images present in the system.
         
@@ -96,13 +96,68 @@ class ContainerImage(Namespace):
             query-options
         Returns
         -------
-        list:
+        list[ContainerImageEntry]:
             
-        dict[str]:
+        ContainerImageEntry:
             
         int:
             
-        dict[str]:
+        ContainerImageEntry:
             
         """
+        ...
+
+class QueryOptionsGetInstance(typing.TypedDict):
+        relationships:'bool'
+        extend:'typing.Optional[str]'
+        extend_context:'typing.Optional[str]'
+        prefix:'typing.Optional[str]'
+        extra:'dict[str]'
+        order_by:'list'
+        select:'list'
+        count:'bool'
+        get:'bool'
+        offset:'int'
+        limit:'int'
+        force_sql_filters:'bool'
+        ...
+class ImagePull(typing.TypedDict):
+        authentication:'Authentication'
+        from_image:'str'
+        tag:'typing.Optional[str]'
+        ...
+class Authentication(typing.TypedDict):
+        username:'str'
+        password:'str'
+        ...
+class QueryOptions(typing.TypedDict):
+        relationships:'bool'
+        extend:'typing.Optional[str]'
+        extend_context:'typing.Optional[str]'
+        prefix:'typing.Optional[str]'
+        extra:'dict[str]'
+        order_by:'list'
+        select:'list'
+        count:'bool'
+        get:'bool'
+        offset:'int'
+        limit:'int'
+        force_sql_filters:'bool'
+        ...
+class ContainerImageEntry(typing.TypedDict):
+        id:'str'
+        repo_tags:'list[str]'
+        repo_digests:'list[str]'
+        size:'int'
+        dangling:'bool'
+        update_available:'bool'
+        system_image:'bool'
+        parsed_repo_tags:'list[ParsedRepoTag]'
+        complete_tags:'list[str]'
+        ...
+class ParsedRepoTag(typing.TypedDict):
+        image:'str'
+        tag:'str'
+        registry:'str'
+        complete_tag:'str'
         ...

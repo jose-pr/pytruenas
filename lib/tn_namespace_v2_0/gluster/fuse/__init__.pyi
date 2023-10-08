@@ -1,12 +1,12 @@
 
 from pytruenas import Namespace, TrueNASClient
-import typing as _ty
+import typing
 class GlusterFuse(Namespace):
-    _namespace:_ty.Literal['gluster.fuse']
+    _namespace:typing.Literal['gluster.fuse']
     def __init__(self, client:TrueNASClient) -> None: ...
-    @_ty.overload
+    @typing.overload
     def is_mounted(self, 
-        glusterfuse_mounted:'dict[str]'={},
+        glusterfuse_mounted:'GlusterfuseMounted'={},
     /) -> 'bool': 
         """
         Check if gluster volume is FUSE mounted locally.
@@ -23,9 +23,9 @@ class GlusterFuse(Namespace):
             is_mounted
         """
         ...
-    @_ty.overload
+    @typing.overload
     def mount(self, 
-        gluserfuse_mount:'dict[str]'={},
+        gluserfuse_mount:'GluserfuseMount'={},
     /) -> 'bool': 
         """
         Mount a gluster volume using the gluster FUSE client.
@@ -49,9 +49,9 @@ class GlusterFuse(Namespace):
             mount
         """
         ...
-    @_ty.overload
+    @typing.overload
     def umount(self, 
-        glusterfuse_umount:'dict[str]'={},
+        glusterfuse_umount:'GlusterfuseUmount'={},
     /) -> 'bool': 
         """
         Unmount a locally FUSE mounted gluster volume.
@@ -74,4 +74,18 @@ class GlusterFuse(Namespace):
         bool:
             umount
         """
+        ...
+
+class GlusterfuseMounted(typing.TypedDict):
+        name:'str'
+        ...
+class GluserfuseMount(typing.TypedDict):
+        name:'str'
+        all:'bool'
+        raise:'bool'
+        ...
+class GlusterfuseUmount(typing.TypedDict):
+        name:'str'
+        all:'bool'
+        raise:'bool'
         ...

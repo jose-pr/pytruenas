@@ -1,12 +1,12 @@
 
 from pytruenas import Namespace, TrueNASClient
-import typing as _ty
+import typing
 class GlusterEventsd(Namespace):
-    _namespace:_ty.Literal['gluster.eventsd']
+    _namespace:typing.Literal['gluster.eventsd']
     def __init__(self, client:TrueNASClient) -> None: ...
-    @_ty.overload
+    @typing.overload
     def create(self, 
-        webhook_create:'dict[str]'={},
+        webhook_create:'WebhookCreate'={},
     /) -> None: 
         """
         Add `url` webhook that will be called
@@ -29,9 +29,9 @@ class GlusterEventsd(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def delete(self, 
-        webhook_delete:'dict[str]'={},
+        webhook_delete:'WebhookDelete'={},
     /) -> None: 
         """
         Delete `url` webhook
@@ -46,7 +46,7 @@ class GlusterEventsd(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def sync(self, 
     /) -> None: 
         """
@@ -59,7 +59,7 @@ class GlusterEventsd(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def webhooks(self, 
     /) -> None: 
         """
@@ -70,4 +70,13 @@ class GlusterEventsd(Namespace):
         Returns
         -------
         """
+        ...
+
+class WebhookCreate(typing.TypedDict):
+        url:'str'
+        bearer_token:'str'
+        secret:'str'
+        ...
+class WebhookDelete(typing.TypedDict):
+        url:'str'
         ...

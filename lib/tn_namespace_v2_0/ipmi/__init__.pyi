@@ -1,10 +1,10 @@
 
 from pytruenas import Namespace, TrueNASClient
-import typing as _ty
+import typing
 class Ipmi(Namespace):
-    _namespace:_ty.Literal['ipmi']
+    _namespace:typing.Literal['ipmi']
     def __init__(self, client:TrueNASClient) -> None: ...
-    @_ty.overload
+    @typing.overload
     def is_loaded(self, 
     /) -> 'bool': 
         """
@@ -18,3 +18,4 @@ class Ipmi(Namespace):
             ipmi_loaded
         """
         ...
+

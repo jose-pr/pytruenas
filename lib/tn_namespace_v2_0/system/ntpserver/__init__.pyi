@@ -1,13 +1,13 @@
 
 from pytruenas import Namespace, TrueNASClient
-import typing as _ty
+import typing
 class SystemNtpserver(Namespace):
-    _namespace:_ty.Literal['system.ntpserver']
+    _namespace:typing.Literal['system.ntpserver']
     def __init__(self, client:TrueNASClient) -> None: ...
-    @_ty.overload
+    @typing.overload
     def create(self, 
-        ntp_create:'dict[str]'={},
-    /) -> 'dict[str]': 
+        ntp_create:'NtpCreate'={},
+    /) -> 'SystemNtpserverCreateReturns': 
         """
         Add an NTP Server.
         
@@ -34,11 +34,11 @@ class SystemNtpserver(Namespace):
             ntp_create
         Returns
         -------
-        dict[str]:
+        SystemNtpserverCreateReturns:
             system_ntpserver_create_returns
         """
         ...
-    @_ty.overload
+    @typing.overload
     def delete(self, 
         id:'int',
     /) -> 'bool': 
@@ -55,10 +55,10 @@ class SystemNtpserver(Namespace):
             Will return `true` if `id` is deleted successfully
         """
         ...
-    @_ty.overload
+    @typing.overload
     def get_instance(self, 
         id:'str|int|bool|dict[str]|list',
-        query_options_get_instance:'dict[str]'={},
+        query_options_get_instance:'QueryOptionsGetInstance'={},
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -75,11 +75,11 @@ class SystemNtpserver(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def query(self, 
-        query_filters:'list'=[],
-        query_options:'dict[str]'={},
-    /) -> 'list|dict[str]|int|dict[str]': 
+        query_filters:'list[list]'=[],
+        query_options:'QueryOptions'={},
+    /) -> 'list[NtpEntry]|NtpEntry|int|NtpEntry': 
         """
         
 
@@ -91,21 +91,21 @@ class SystemNtpserver(Namespace):
             query-options
         Returns
         -------
-        list:
+        list[NtpEntry]:
             
-        dict[str]:
+        NtpEntry:
             
         int:
             
-        dict[str]:
+        NtpEntry:
             
         """
         ...
-    @_ty.overload
+    @typing.overload
     def update(self, 
         id:'int',
-        ntp_update:'dict[str]'={},
-    /) -> 'dict[str]': 
+        ntp_update:'NtpUpdate'={},
+    /) -> 'SystemNtpserverUpdateReturns': 
         """
         Update NTP server of `id`.
 
@@ -118,7 +118,81 @@ class SystemNtpserver(Namespace):
             ntp_update
         Returns
         -------
-        dict[str]:
+        SystemNtpserverUpdateReturns:
             system_ntpserver_update_returns
         """
+        ...
+
+class NtpCreate(typing.TypedDict):
+        address:'str'
+        burst:'bool'
+        iburst:'bool'
+        prefer:'bool'
+        minpoll:'int'
+        maxpoll:'int'
+        force:'bool'
+        ...
+class SystemNtpserverCreateReturns(typing.TypedDict):
+        address:'str'
+        burst:'bool'
+        iburst:'bool'
+        prefer:'bool'
+        minpoll:'int'
+        maxpoll:'int'
+        id:'int'
+        ...
+class QueryOptionsGetInstance(typing.TypedDict):
+        relationships:'bool'
+        extend:'typing.Optional[str]'
+        extend_context:'typing.Optional[str]'
+        prefix:'typing.Optional[str]'
+        extra:'dict[str]'
+        order_by:'list'
+        select:'list'
+        count:'bool'
+        get:'bool'
+        offset:'int'
+        limit:'int'
+        force_sql_filters:'bool'
+        ...
+class QueryOptions(typing.TypedDict):
+        relationships:'bool'
+        extend:'typing.Optional[str]'
+        extend_context:'typing.Optional[str]'
+        prefix:'typing.Optional[str]'
+        extra:'dict[str]'
+        order_by:'list'
+        select:'list'
+        count:'bool'
+        get:'bool'
+        offset:'int'
+        limit:'int'
+        force_sql_filters:'bool'
+        ...
+class NtpEntry(typing.TypedDict):
+        address:'str'
+        burst:'bool'
+        iburst:'bool'
+        prefer:'bool'
+        minpoll:'int'
+        maxpoll:'int'
+        id:'int'
+        ...
+class NtpUpdate(typing.TypedDict):
+        address:'str'
+        burst:'bool'
+        iburst:'bool'
+        prefer:'bool'
+        minpoll:'int'
+        maxpoll:'int'
+        force:'bool'
+        ...
+class SystemNtpserverUpdateReturns(typing.TypedDict):
+        address:'str'
+        burst:'bool'
+        iburst:'bool'
+        prefer:'bool'
+        minpoll:'int'
+        maxpoll:'int'
+        id:'int'
         ...

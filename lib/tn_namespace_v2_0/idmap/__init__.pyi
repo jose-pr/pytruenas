@@ -1,10 +1,10 @@
 
 from pytruenas import Namespace, TrueNASClient
-import typing as _ty
+import typing
 class Idmap(Namespace):
-    _namespace:_ty.Literal['idmap']
+    _namespace:typing.Literal['idmap']
     def __init__(self, client:TrueNASClient) -> None: ...
-    @_ty.overload
+    @typing.overload
     def backend_choices(self, 
     /) -> None: 
         """
@@ -16,7 +16,7 @@ class Idmap(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def backend_options(self, 
     /) -> None: 
         """
@@ -29,7 +29,7 @@ class Idmap(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def clear_idmap_cache(self, 
     /) -> None: 
         """
@@ -42,10 +42,10 @@ class Idmap(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def create(self, 
-        idmap_domain_create:'dict[str]'={},
-    /) -> 'dict[str]': 
+        idmap_domain_create:'IdmapDomainCreate'={},
+    /) -> 'IdmapCreateReturns': 
         """
         Create a new IDMAP domain. These domains must be unique. This table
         will be automatically populated after joining an Active Directory domain
@@ -141,11 +141,11 @@ class Idmap(Namespace):
             idmap_domain_create
         Returns
         -------
-        dict[str]:
+        IdmapCreateReturns:
             idmap_create_returns
         """
         ...
-    @_ty.overload
+    @typing.overload
     def delete(self, 
         id:'int',
     /) -> 'bool': 
@@ -164,10 +164,10 @@ class Idmap(Namespace):
             Will return `true` if `id` is deleted successfully
         """
         ...
-    @_ty.overload
+    @typing.overload
     def get_instance(self, 
         id:'str|int|bool|dict[str]|list',
-        query_options_get_instance:'dict[str]'={},
+        query_options_get_instance:'QueryOptionsGetInstance'={},
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -184,7 +184,7 @@ class Idmap(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def options_choices(self, 
         idmap_backend:'str',
     /) -> None: 
@@ -199,11 +199,11 @@ class Idmap(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def query(self, 
-        query_filters:'list'=[],
-        query_options:'dict[str]'={},
-    /) -> 'list|dict[str]|int|dict[str]': 
+        query_filters:'list[list]'=[],
+        query_options:'QueryOptions'={},
+    /) -> 'list[IdmapDomainEntry]|IdmapDomainEntry|int|IdmapDomainEntry': 
         """
         
 
@@ -215,21 +215,21 @@ class Idmap(Namespace):
             query-options
         Returns
         -------
-        list:
+        list[IdmapDomainEntry]:
             
-        dict[str]:
+        IdmapDomainEntry:
             
         int:
             
-        dict[str]:
+        IdmapDomainEntry:
             
         """
         ...
-    @_ty.overload
+    @typing.overload
     def update(self, 
         id:'int',
-        idmap_update:'dict[str]'={},
-    /) -> 'dict[str]': 
+        idmap_update:'IdmapUpdate'={},
+    /) -> 'IdmapUpdateReturns': 
         """
         Update a domain by id.
 
@@ -241,7 +241,123 @@ class Idmap(Namespace):
             idmap_update
         Returns
         -------
-        dict[str]:
+        IdmapUpdateReturns:
             idmap_update_returns
         """
+        ...
+
+class IdmapDomainCreate(typing.TypedDict):
+        name:'str'
+        dns_domain_name:'str'
+        range_low:'int'
+        range_high:'int'
+        idmap_backend:'str'
+        certificate:'typing.Optional[int]'
+        options:'typing.Union[ForwardRef(IdmapAdOptions), ForwardRef(IdmapAutoridOptions), ForwardRef(IdmapLdapOptions), ForwardRef(IdmapNssOptions), ForwardRef(IdmapRfc2307Options), ForwardRef(IdmapRidOptions), dict[str]]'
+        ...
+class IdmapAdOptions(typing.TypedDict):
+        schema_mode:'str'
+        unix_primary_group:'bool'
+        unix_nss_info:'bool'
+        ...
+class IdmapAutoridOptions(typing.TypedDict):
+        rangesize:'int'
+        readonly:'bool'
+        ignore_builtin:'bool'
+        ...
+class IdmapLdapOptions(typing.TypedDict):
+        ldap_base_dn:'str'
+        ldap_user_dn:'str'
+        ldap_user_dn_password:'str'
+        ldap_url:'str'
+        readonly:'bool'
+        ssl:'str'
+        validate_certificates:'bool'
+        ...
+class IdmapNssOptions(typing.TypedDict):
+        linked_service:'str'
+        ...
+class IdmapRfc2307Options(typing.TypedDict):
+        ldap_server:'str'
+        ldap_realm:'bool'
+        bind_path_user:'str'
+        bind_path_group:'str'
+        user_cn:'bool'
+        cn_realm:'str'
+        ldap_domain:'str'
+        ldap_url:'str'
+        ldap_user_dn:'str'
+        ldap_user_dn_password:'str'
+        ssl:'str'
+        validate_certificates:'bool'
+        ...
+class IdmapRidOptions(typing.TypedDict):
+        sssd_compat:'bool'
+        ...
+class IdmapCreateReturns(typing.TypedDict):
+        name:'str'
+        dns_domain_name:'str'
+        range_low:'int'
+        range_high:'int'
+        idmap_backend:'str'
+        certificate:'typing.Optional[int]'
+        options:'typing.Union[ForwardRef(IdmapAdOptions), ForwardRef(IdmapAutoridOptions), ForwardRef(IdmapLdapOptions), ForwardRef(IdmapNssOptions), ForwardRef(IdmapRfc2307Options), ForwardRef(IdmapRidOptions), dict[str]]'
+        id:'int'
+        ...
+class QueryOptionsGetInstance(typing.TypedDict):
+        relationships:'bool'
+        extend:'typing.Optional[str]'
+        extend_context:'typing.Optional[str]'
+        prefix:'typing.Optional[str]'
+        extra:'dict[str]'
+        order_by:'list'
+        select:'list'
+        count:'bool'
+        get:'bool'
+        offset:'int'
+        limit:'int'
+        force_sql_filters:'bool'
+        ...
+class QueryOptions(typing.TypedDict):
+        relationships:'bool'
+        extend:'typing.Optional[str]'
+        extend_context:'typing.Optional[str]'
+        prefix:'typing.Optional[str]'
+        extra:'dict[str]'
+        order_by:'list'
+        select:'list'
+        count:'bool'
+        get:'bool'
+        offset:'int'
+        limit:'int'
+        force_sql_filters:'bool'
+        ...
+class IdmapDomainEntry(typing.TypedDict):
+        name:'str'
+        dns_domain_name:'str'
+        range_low:'int'
+        range_high:'int'
+        idmap_backend:'str'
+        certificate:'typing.Optional[int]'
+        options:'typing.Union[ForwardRef(IdmapAdOptions), ForwardRef(IdmapAutoridOptions), ForwardRef(IdmapLdapOptions), ForwardRef(IdmapNssOptions), ForwardRef(IdmapRfc2307Options), ForwardRef(IdmapRidOptions), dict[str]]'
+        id:'int'
+        ...
+class IdmapUpdate(typing.TypedDict):
+        name:'str'
+        dns_domain_name:'str'
+        range_low:'int'
+        range_high:'int'
+        idmap_backend:'str'
+        certificate:'typing.Optional[int]'
+        options:'typing.Union[ForwardRef(IdmapAdOptions), ForwardRef(IdmapAutoridOptions), ForwardRef(IdmapLdapOptions), ForwardRef(IdmapNssOptions), ForwardRef(IdmapRfc2307Options), ForwardRef(IdmapRidOptions), dict[str]]'
+        ...
+class IdmapUpdateReturns(typing.TypedDict):
+        name:'str'
+        dns_domain_name:'str'
+        range_low:'int'
+        range_high:'int'
+        idmap_backend:'str'
+        certificate:'typing.Optional[int]'
+        options:'typing.Union[ForwardRef(IdmapAdOptions), ForwardRef(IdmapAutoridOptions), ForwardRef(IdmapLdapOptions), ForwardRef(IdmapNssOptions), ForwardRef(IdmapRfc2307Options), ForwardRef(IdmapRidOptions), dict[str]]'
+        id:'int'
         ...

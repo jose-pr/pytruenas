@@ -1,12 +1,12 @@
 
 from pytruenas import Namespace, TrueNASClient
-import typing as _ty
+import typing
 class GlusterLocalevents(Namespace):
-    _namespace:_ty.Literal['gluster.localevents']
+    _namespace:typing.Literal['gluster.localevents']
     def __init__(self, client:TrueNASClient) -> None: ...
-    @_ty.overload
+    @typing.overload
     def add_jwt_secret(self, 
-        add_secret:'dict[str]'={},
+        add_secret:'AddSecret'={},
     /) -> None: 
         """
         Add a `secret` key used to encode/decode
@@ -37,7 +37,7 @@ class GlusterLocalevents(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def get_set_jwt_secret(self, 
     /) -> 'str': 
         """
@@ -60,4 +60,9 @@ class GlusterLocalevents(Namespace):
         str:
             get_set_jwt_secret
         """
+        ...
+
+class AddSecret(typing.TypedDict):
+        secret:'str'
+        force:'bool'
         ...

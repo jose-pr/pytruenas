@@ -1,12 +1,12 @@
 
 from pytruenas import Namespace, TrueNASClient
-import typing as _ty
+import typing
 class IscsiTarget(Namespace):
-    _namespace:_ty.Literal['iscsi.target']
+    _namespace:typing.Literal['iscsi.target']
     def __init__(self, client:TrueNASClient) -> None: ...
-    @_ty.overload
+    @typing.overload
     def create(self, 
-        iscsi_target_create:'dict[str]'={},
+        iscsi_target_create:'IscsiTargetCreate'={},
     /) -> 'dict[str]': 
         """
         Create an iSCSI Target.
@@ -28,7 +28,7 @@ class IscsiTarget(Namespace):
             iscsi_target_create_returns
         """
         ...
-    @_ty.overload
+    @typing.overload
     def delete(self, 
         id:'int',
         force:'bool'=False,
@@ -50,10 +50,10 @@ class IscsiTarget(Namespace):
             Will return `true` if `id` is deleted successfully
         """
         ...
-    @_ty.overload
+    @typing.overload
     def get_instance(self, 
         id:'str|int|bool|dict[str]|list',
-        query_options_get_instance:'dict[str]'={},
+        query_options_get_instance:'QueryOptionsGetInstance'={},
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -70,11 +70,11 @@ class IscsiTarget(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def query(self, 
-        query_filters:'list'=[],
-        query_options:'dict[str]'={},
-    /) -> 'list|dict[str]|int|dict[str]': 
+        query_filters:'list[list]'=[],
+        query_options:'QueryOptions'={},
+    /) -> 'list[dict[str]]|dict[str]|int|dict[str]': 
         """
         
 
@@ -86,7 +86,7 @@ class IscsiTarget(Namespace):
             query-options
         Returns
         -------
-        list:
+        list[dict[str]]:
             
         dict[str]:
             
@@ -96,10 +96,10 @@ class IscsiTarget(Namespace):
             
         """
         ...
-    @_ty.overload
+    @typing.overload
     def update(self, 
         id:'int',
-        iscsi_target_update:'dict[str]'={},
+        iscsi_target_update:'IscsiTargetUpdate'={},
     /) -> 'dict[str]': 
         """
         Update iSCSI Target of `id`.
@@ -117,7 +117,7 @@ class IscsiTarget(Namespace):
             iscsi_target_update_returns
         """
         ...
-    @_ty.overload
+    @typing.overload
     def validate_name(self, 
         name:'str',
         existing_id:'int|None'=None,
@@ -138,4 +138,53 @@ class IscsiTarget(Namespace):
         Returns
         -------
         """
+        ...
+
+class IscsiTargetCreate(typing.TypedDict):
+        name:'str'
+        alias:'typing.Optional[str]'
+        mode:'str'
+        groups:'list[Group]'
+        auth_networks:'list[str]'
+        ...
+class Group(typing.TypedDict):
+        portal:'int'
+        initiator:'typing.Optional[int]'
+        authmethod:'str'
+        auth:'typing.Optional[int]'
+        ...
+class QueryOptionsGetInstance(typing.TypedDict):
+        relationships:'bool'
+        extend:'typing.Optional[str]'
+        extend_context:'typing.Optional[str]'
+        prefix:'typing.Optional[str]'
+        extra:'dict[str]'
+        order_by:'list'
+        select:'list'
+        count:'bool'
+        get:'bool'
+        offset:'int'
+        limit:'int'
+        force_sql_filters:'bool'
+        ...
+class QueryOptions(typing.TypedDict):
+        relationships:'bool'
+        extend:'typing.Optional[str]'
+        extend_context:'typing.Optional[str]'
+        prefix:'typing.Optional[str]'
+        extra:'dict[str]'
+        order_by:'list'
+        select:'list'
+        count:'bool'
+        get:'bool'
+        offset:'int'
+        limit:'int'
+        force_sql_filters:'bool'
+        ...
+class IscsiTargetUpdate(typing.TypedDict):
+        name:'str'
+        alias:'typing.Optional[str]'
+        mode:'str'
+        groups:'list[Group]'
+        auth_networks:'list[str]'
         ...

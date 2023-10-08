@@ -1,12 +1,12 @@
 
 from pytruenas import Namespace, TrueNASClient
-import typing as _ty
+import typing
 class User(Namespace):
-    _namespace:_ty.Literal['user']
+    _namespace:typing.Literal['user']
     def __init__(self, client:TrueNASClient) -> None: ...
-    @_ty.overload
+    @typing.overload
     def create(self, 
-        user_create:'dict[str]'={},
+        user_create:'UserCreate'={},
     /) -> 'int': 
         """
         Create a new user.
@@ -32,10 +32,10 @@ class User(Namespace):
             primary_key
         """
         ...
-    @_ty.overload
+    @typing.overload
     def delete(self, 
         id:'int',
-        options:'dict[str]'={},
+        options:'Options'={},
     /) -> 'int': 
         """
         Delete user `id`.
@@ -55,10 +55,10 @@ class User(Namespace):
             primary_key
         """
         ...
-    @_ty.overload
+    @typing.overload
     def get_instance(self, 
         id:'str|int|bool|dict[str]|list',
-        query_options_get_instance:'dict[str]'={},
+        query_options_get_instance:'QueryOptionsGetInstance'={},
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -75,7 +75,7 @@ class User(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def get_next_uid(self, 
     /) -> 'int': 
         """
@@ -89,10 +89,10 @@ class User(Namespace):
             next_available_uid
         """
         ...
-    @_ty.overload
+    @typing.overload
     def get_user_obj(self, 
-        get_user_obj:'dict[str]'={},
-    /) -> 'dict[str]': 
+        get_user_obj:'GetUserObj'={},
+    /) -> 'UserInformation': 
         """
         Returns dictionary containing information from struct passwd for the user specified by either
         the username or uid. Bypasses user cache.
@@ -116,11 +116,11 @@ class User(Namespace):
             get_user_obj
         Returns
         -------
-        dict[str]:
+        UserInformation:
             user_information
         """
         ...
-    @_ty.overload
+    @typing.overload
     def has_local_administrator_set_up(self, 
     /) -> 'bool': 
         """
@@ -137,7 +137,7 @@ class User(Namespace):
             has_local_administrator_set_up
         """
         ...
-    @_ty.overload
+    @typing.overload
     def has_root_password(self, 
     /) -> 'bool': 
         """
@@ -151,7 +151,7 @@ class User(Namespace):
             has_root_password
         """
         ...
-    @_ty.overload
+    @typing.overload
     def provisioning_uri(self, 
         username:'str',
     /) -> 'str': 
@@ -169,11 +169,11 @@ class User(Namespace):
             Provisioning URI
         """
         ...
-    @_ty.overload
+    @typing.overload
     def query(self, 
-        query_filters:'list'=[],
-        query_options:'dict[str]'={},
-    /) -> 'list|dict[str]|int|dict[str]': 
+        query_filters:'list[list]'=[],
+        query_options:'QueryOptions'={},
+    /) -> 'list[UserEntry]|UserEntry|int|UserEntry': 
         """
         Query users with `query-filters` and `query-options`. As a performance optimization, only local users
         will be queried by default.
@@ -196,20 +196,20 @@ class User(Namespace):
             query-options
         Returns
         -------
-        list:
+        list[UserEntry]:
             
-        dict[str]:
+        UserEntry:
             
         int:
             
-        dict[str]:
+        UserEntry:
             
         """
         ...
-    @_ty.overload
+    @typing.overload
     def renew_2fa_secret(self, 
         username:'str',
-    /) -> 'dict[str]': 
+    /) -> 'UserEntry': 
         """
         Renew `username` user's two-factor authentication secret.
 
@@ -219,11 +219,11 @@ class User(Namespace):
             username
         Returns
         -------
-        dict[str]:
+        UserEntry:
             user_entry
         """
         ...
-    @_ty.overload
+    @typing.overload
     def set_root_password(self, 
         password:'str',
         options:'dict[str]'={},
@@ -241,11 +241,11 @@ class User(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def setup_local_administrator(self, 
         username:'str',
         password:'str',
-        options:'dict[str]'={},
+        options:'Options_'={},
     /) -> None: 
         """
         Set up local administrator (this method does not require authentication if local administrator is not already
@@ -263,10 +263,10 @@ class User(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def shell_choices(self, 
-        group_ids:'list'=[],
-    /) -> 'dict[str]': 
+        group_ids:'list[int]'=[],
+    /) -> 'ShellInfo': 
         """
         Return the available shell choices to be used in `user.create` and `user.update`.
         
@@ -278,7 +278,7 @@ class User(Namespace):
             group_ids
         Returns
         -------
-        dict[str]:
+        ShellInfo:
             Example(s):
             ```
             {
@@ -293,7 +293,7 @@ class User(Namespace):
             ```
         """
         ...
-    @_ty.overload
+    @typing.overload
     def unset_2fa_secret(self, 
         username:'str',
     /) -> None: 
@@ -308,10 +308,10 @@ class User(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def update(self, 
         id:'int',
-        user_update:'dict[str]'={},
+        user_update:'UserUpdate'={},
     /) -> 'int': 
         """
         Update attributes of an existing user.
@@ -328,7 +328,7 @@ class User(Namespace):
             primary_key
         """
         ...
-    @_ty.overload
+    @typing.overload
     def verify_twofactor_token(self, 
         username:'str',
         token:'str|None',
@@ -347,4 +347,128 @@ class User(Namespace):
         bool:
             token_verified
         """
+        ...
+
+class UserCreate(typing.TypedDict):
+        uid:'int'
+        username:'str'
+        group:'int'
+        group_create:'bool'
+        home:'str'
+        home_mode:'str'
+        home_create:'bool'
+        shell:'str'
+        full_name:'str'
+        email:'typing.Optional[str]'
+        password:'str'
+        password_disabled:'bool'
+        ssh_password_enabled:'bool'
+        locked:'bool'
+        smb:'bool'
+        sudo_commands:'list[str]'
+        sudo_commands_nopasswd:'list[str]'
+        sshpubkey:'typing.Optional[str]'
+        groups:'list[int]'
+        ...
+class Options(typing.TypedDict):
+        delete_group:'bool'
+        ...
+class QueryOptionsGetInstance(typing.TypedDict):
+        relationships:'bool'
+        extend:'typing.Optional[str]'
+        extend_context:'typing.Optional[str]'
+        prefix:'typing.Optional[str]'
+        extra:'dict[str]'
+        order_by:'list'
+        select:'list'
+        count:'bool'
+        get:'bool'
+        offset:'int'
+        limit:'int'
+        force_sql_filters:'bool'
+        ...
+class GetUserObj(typing.TypedDict):
+        username:'str'
+        uid:'int'
+        get_groups:'bool'
+        sid_info:'bool'
+        ...
+class UserInformation(typing.TypedDict):
+        pw_name:'str'
+        pw_gecos:'str'
+        pw_dir:'str'
+        pw_shell:'str'
+        pw_uid:'int'
+        pw_gid:'int'
+        grouplist:'list'
+        sid_info:'dict[str]'
+        ...
+class QueryOptions(typing.TypedDict):
+        relationships:'bool'
+        extend:'typing.Optional[str]'
+        extend_context:'typing.Optional[str]'
+        prefix:'typing.Optional[str]'
+        extra:'dict[str]'
+        order_by:'list'
+        select:'list'
+        count:'bool'
+        get:'bool'
+        offset:'int'
+        limit:'int'
+        force_sql_filters:'bool'
+        ...
+class UserEntry(typing.TypedDict):
+        uid:'int'
+        username:'str'
+        home:'str'
+        shell:'str'
+        full_name:'str'
+        email:'typing.Optional[str]'
+        password_disabled:'bool'
+        ssh_password_enabled:'bool'
+        locked:'bool'
+        smb:'bool'
+        sudo_commands:'list[str]'
+        sudo_commands_nopasswd:'list[str]'
+        sshpubkey:'typing.Optional[str]'
+        groups:'list[int]'
+        group:'dict[str]'
+        id:'int'
+        builtin:'bool'
+        id_type_both:'bool'
+        local:'bool'
+        twofactor_auth_configured:'bool'
+        unixhash:'str'
+        smbhash:'str'
+        nt_name:'typing.Optional[str]'
+        sid:'typing.Optional[str]'
+        ...
+class Options_(typing.TypedDict):
+        ec2:'Ec2'
+        ...
+class Ec2(typing.TypedDict):
+        instance_id:'str'
+        ...
+class ShellInfo(typing.TypedDict):
+        shell_path:'str'
+        ...
+class UserUpdate(typing.TypedDict):
+        uid:'int'
+        username:'str'
+        group:'int'
+        home:'str'
+        home_mode:'str'
+        home_create:'bool'
+        shell:'str'
+        full_name:'str'
+        email:'typing.Optional[str]'
+        password:'str'
+        password_disabled:'bool'
+        ssh_password_enabled:'bool'
+        locked:'bool'
+        smb:'bool'
+        sudo_commands:'list[str]'
+        sudo_commands_nopasswd:'list[str]'
+        sshpubkey:'typing.Optional[str]'
+        groups:'list[int]'
         ...

@@ -1,10 +1,10 @@
 
 from pytruenas import Namespace, TrueNASClient
-import typing as _ty
+import typing
 class Kerberos(Namespace):
-    _namespace:_ty.Literal['kerberos']
+    _namespace:typing.Literal['kerberos']
     def __init__(self, client:TrueNASClient) -> None: ...
-    @_ty.overload
+    @typing.overload
     def config(self, 
     /) -> 'dict[str]': 
         """
@@ -18,9 +18,9 @@ class Kerberos(Namespace):
             kerberos_entry
         """
         ...
-    @_ty.overload
+    @typing.overload
     def update(self, 
-        kerberos_settings_update:'dict[str]'={},
+        kerberos_settings_update:'KerberosSettingsUpdate'={},
     /) -> 'dict[str]': 
         """
         `appdefaults_aux` add parameters to "appdefaults" section of the krb5.conf file.
@@ -36,4 +36,9 @@ class Kerberos(Namespace):
         dict[str]:
             kerberos_update_returns
         """
+        ...
+
+class KerberosSettingsUpdate(typing.TypedDict):
+        appdefaults_aux:'str'
+        libdefaults_aux:'str'
         ...

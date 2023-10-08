@@ -1,12 +1,12 @@
 
 from pytruenas import Namespace, TrueNASClient
-import typing as _ty
+import typing
 class PoolSnapshottask(Namespace):
-    _namespace:_ty.Literal['pool.snapshottask']
+    _namespace:typing.Literal['pool.snapshottask']
     def __init__(self, client:TrueNASClient) -> None: ...
-    @_ty.overload
+    @typing.overload
     def create(self, 
-        periodic_snapshot_create:'dict[str]'={},
+        periodic_snapshot_create:'PeriodicSnapshotCreate'={},
     /) -> 'dict[str]': 
         """
         Create a Periodic Snapshot Task
@@ -31,10 +31,10 @@ class PoolSnapshottask(Namespace):
             pool_snapshottask_create_returns
         """
         ...
-    @_ty.overload
+    @typing.overload
     def delete(self, 
         id:'int',
-        options:'dict[str]'={},
+        options:'Options'={},
     /) -> 'bool': 
         """
         Delete a Periodic Snapshot Task with specific `id`
@@ -51,7 +51,7 @@ class PoolSnapshottask(Namespace):
             Will return `true` if `id` is deleted successfully
         """
         ...
-    @_ty.overload
+    @typing.overload
     def delete_will_change_retention_for(self, 
         id:'int',
     /) -> 'dict[str]': 
@@ -68,9 +68,9 @@ class PoolSnapshottask(Namespace):
             snapshots
         """
         ...
-    @_ty.overload
+    @typing.overload
     def foreseen_count(self, 
-        periodic_snapshot_foreseen_count:'dict[str]'={},
+        periodic_snapshot_foreseen_count:'PeriodicSnapshotForeseenCount'={},
     /) -> 'int': 
         """
         Returns a number of snapshots (per-dataset) being retained if a periodic snapshot task with specific parameters
@@ -86,10 +86,10 @@ class PoolSnapshottask(Namespace):
             foreseen_count
         """
         ...
-    @_ty.overload
+    @typing.overload
     def get_instance(self, 
         id:'str|int|bool|dict[str]|list',
-        query_options_get_instance:'dict[str]'={},
+        query_options_get_instance:'QueryOptionsGetInstance'={},
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -106,7 +106,7 @@ class PoolSnapshottask(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def max_count(self, 
     /) -> 'int': 
         """
@@ -120,7 +120,7 @@ class PoolSnapshottask(Namespace):
             max_count
         """
         ...
-    @_ty.overload
+    @typing.overload
     def max_total_count(self, 
     /) -> 'int': 
         """
@@ -134,11 +134,11 @@ class PoolSnapshottask(Namespace):
             max_total_count
         """
         ...
-    @_ty.overload
+    @typing.overload
     def query(self, 
-        query_filters:'list'=[],
-        query_options:'dict[str]'={},
-    /) -> 'list|dict[str]|int|dict[str]': 
+        query_filters:'list[list]'=[],
+        query_options:'QueryOptions'={},
+    /) -> 'list[dict[str]]|dict[str]|int|dict[str]': 
         """
         
 
@@ -150,7 +150,7 @@ class PoolSnapshottask(Namespace):
             query-options
         Returns
         -------
-        list:
+        list[dict[str]]:
             
         dict[str]:
             
@@ -160,7 +160,7 @@ class PoolSnapshottask(Namespace):
             
         """
         ...
-    @_ty.overload
+    @typing.overload
     def run(self, 
         id:'int',
     /) -> None: 
@@ -175,10 +175,10 @@ class PoolSnapshottask(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def update(self, 
         id:'int',
-        periodic_snapshot_update:'dict[str]'={},
+        periodic_snapshot_update:'PeriodicSnapshotUpdate'={},
     /) -> 'dict[str]': 
         """
         Update a Periodic Snapshot Task with specific `id`
@@ -197,10 +197,10 @@ class PoolSnapshottask(Namespace):
             pool_snapshottask_update_returns
         """
         ...
-    @_ty.overload
+    @typing.overload
     def update_will_change_retention_for(self, 
         id:'int',
-        periodic_snapshot_update_will_change_retention:'dict[str]'={},
+        periodic_snapshot_update_will_change_retention:'PeriodicSnapshotUpdateWillChangeRetention'={},
     /) -> 'dict[str]': 
         """
         Returns a list of snapshots which will change the retention if periodic snapshot task `id` is updated
@@ -217,4 +217,84 @@ class PoolSnapshottask(Namespace):
         dict[str]:
             snapshots
         """
+        ...
+
+class PeriodicSnapshotCreate(typing.TypedDict):
+        dataset:'str'
+        recursive:'bool'
+        exclude:'list[str]'
+        lifetime_value:'int'
+        lifetime_unit:'str'
+        naming_schema:'str'
+        schedule:'Schedule'
+        allow_empty:'bool'
+        enabled:'bool'
+        ...
+class Schedule(typing.TypedDict):
+        minute:'str'
+        hour:'str'
+        dom:'str'
+        month:'str'
+        dow:'str'
+        begin:'str'
+        end:'str'
+        ...
+class Options(typing.TypedDict):
+        fixate_removal_date:'bool'
+        ...
+class PeriodicSnapshotForeseenCount(typing.TypedDict):
+        lifetime_value:'int'
+        lifetime_unit:'str'
+        schedule:'Schedule'
+        ...
+class QueryOptionsGetInstance(typing.TypedDict):
+        relationships:'bool'
+        extend:'typing.Optional[str]'
+        extend_context:'typing.Optional[str]'
+        prefix:'typing.Optional[str]'
+        extra:'dict[str]'
+        order_by:'list'
+        select:'list'
+        count:'bool'
+        get:'bool'
+        offset:'int'
+        limit:'int'
+        force_sql_filters:'bool'
+        ...
+class QueryOptions(typing.TypedDict):
+        relationships:'bool'
+        extend:'typing.Optional[str]'
+        extend_context:'typing.Optional[str]'
+        prefix:'typing.Optional[str]'
+        extra:'dict[str]'
+        order_by:'list'
+        select:'list'
+        count:'bool'
+        get:'bool'
+        offset:'int'
+        limit:'int'
+        force_sql_filters:'bool'
+        ...
+class PeriodicSnapshotUpdate(typing.TypedDict):
+        dataset:'str'
+        recursive:'bool'
+        exclude:'list[str]'
+        lifetime_value:'int'
+        lifetime_unit:'str'
+        naming_schema:'str'
+        schedule:'Schedule'
+        allow_empty:'bool'
+        enabled:'bool'
+        fixate_removal_date:'bool'
+        ...
+class PeriodicSnapshotUpdateWillChangeRetention(typing.TypedDict):
+        dataset:'str'
+        recursive:'bool'
+        exclude:'list[str]'
+        lifetime_value:'int'
+        lifetime_unit:'str'
+        naming_schema:'str'
+        schedule:'Schedule'
+        allow_empty:'bool'
+        enabled:'bool'
         ...

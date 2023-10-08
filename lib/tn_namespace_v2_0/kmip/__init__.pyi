@@ -1,10 +1,10 @@
 
 from pytruenas import Namespace, TrueNASClient
-import typing as _ty
+import typing
 class Kmip(Namespace):
-    _namespace:_ty.Literal['kmip']
+    _namespace:typing.Literal['kmip']
     def __init__(self, client:TrueNASClient) -> None: ...
-    @_ty.overload
+    @typing.overload
     def clear_sync_pending_keys(self, 
     /) -> None: 
         """
@@ -19,9 +19,9 @@ class Kmip(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def config(self, 
-    /) -> 'dict[str]': 
+    /) -> 'KmipEntry': 
         """
         
 
@@ -29,11 +29,11 @@ class Kmip(Namespace):
         ----------
         Returns
         -------
-        dict[str]:
+        KmipEntry:
             kmip_entry
         """
         ...
-    @_ty.overload
+    @typing.overload
     def kmip_sync_pending(self, 
     /) -> 'bool': 
         """
@@ -48,9 +48,9 @@ class Kmip(Namespace):
             pending_kmip_sync
         """
         ...
-    @_ty.overload
+    @typing.overload
     def ssl_version_choices(self, 
-    /) -> 'dict[str]': 
+    /) -> 'SslVersionChoices': 
         """
         Retrieve valid SSL version choices to be used when configuring kmip service.
 
@@ -58,11 +58,11 @@ class Kmip(Namespace):
         ----------
         Returns
         -------
-        dict[str]:
+        SslVersionChoices:
             ssl_version_choices
         """
         ...
-    @_ty.overload
+    @typing.overload
     def sync_keys(self, 
     /) -> None: 
         """
@@ -74,10 +74,10 @@ class Kmip(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def update(self, 
-        kmip_update:'dict[str]'={},
-    /) -> 'dict[str]': 
+        kmip_update:'KmipUpdate'={},
+    /) -> 'KmipUpdateReturns': 
         """
         Update KMIP Server Configuration.
         
@@ -111,7 +111,48 @@ class Kmip(Namespace):
             kmip_update
         Returns
         -------
-        dict[str]:
+        KmipUpdateReturns:
             kmip_update_returns
         """
+        ...
+
+class KmipEntry(typing.TypedDict):
+        id:'int'
+        enabled:'bool'
+        manage_sed_disks:'bool'
+        manage_zfs_keys:'bool'
+        certificate:'typing.Optional[int]'
+        certificate_authority:'typing.Optional[int]'
+        port:'int'
+        server:'typing.Optional[str]'
+        ssl_version:'str'
+        ...
+class SslVersionChoices(typing.TypedDict):
+        PROTOCOL_TLSv1:'str'
+        PROTOCOL_TLSv1_1:'str'
+        PROTOCOL_TLSv1_2:'str'
+        ...
+class KmipUpdate(typing.TypedDict):
+        enabled:'bool'
+        manage_sed_disks:'bool'
+        manage_zfs_keys:'bool'
+        certificate:'typing.Optional[int]'
+        certificate_authority:'typing.Optional[int]'
+        port:'int'
+        server:'typing.Optional[str]'
+        ssl_version:'str'
+        force_clear:'bool'
+        change_server:'bool'
+        validate:'bool'
+        ...
+class KmipUpdateReturns(typing.TypedDict):
+        id:'int'
+        enabled:'bool'
+        manage_sed_disks:'bool'
+        manage_zfs_keys:'bool'
+        certificate:'typing.Optional[int]'
+        certificate_authority:'typing.Optional[int]'
+        port:'int'
+        server:'typing.Optional[str]'
+        ssl_version:'str'
         ...

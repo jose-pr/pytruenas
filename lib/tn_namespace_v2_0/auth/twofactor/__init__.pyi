@@ -1,12 +1,12 @@
 
 from pytruenas import Namespace, TrueNASClient
-import typing as _ty
+import typing
 class AuthTwofactor(Namespace):
-    _namespace:_ty.Literal['auth.twofactor']
+    _namespace:typing.Literal['auth.twofactor']
     def __init__(self, client:TrueNASClient) -> None: ...
-    @_ty.overload
+    @typing.overload
     def config(self, 
-    /) -> 'dict[str]': 
+    /) -> 'AuthTwofactorEntry': 
         """
         
 
@@ -14,14 +14,14 @@ class AuthTwofactor(Namespace):
         ----------
         Returns
         -------
-        dict[str]:
+        AuthTwofactorEntry:
             auth_twofactor_entry
         """
         ...
-    @_ty.overload
+    @typing.overload
     def update(self, 
-        auth_twofactor_update:'dict[str]'={},
-    /) -> 'dict[str]': 
+        auth_twofactor_update:'AuthTwofactorUpdate'={},
+    /) -> 'AuthTwofactorUpdateReturns': 
         """
         `otp_digits` represents number of allowed digits in the OTP.
         
@@ -35,7 +35,34 @@ class AuthTwofactor(Namespace):
             auth_twofactor_update
         Returns
         -------
-        dict[str]:
+        AuthTwofactorUpdateReturns:
             auth_twofactor_update_returns
         """
+        ...
+
+class AuthTwofactorEntry(typing.TypedDict):
+        enabled:'bool'
+        otp_digits:'int'
+        window:'int'
+        interval:'int'
+        services:'Services'
+        id:'int'
+        ...
+class Services(typing.TypedDict):
+        ssh:'bool'
+        ...
+class AuthTwofactorUpdate(typing.TypedDict):
+        enabled:'bool'
+        otp_digits:'int'
+        window:'int'
+        interval:'int'
+        services:'Services'
+        ...
+class AuthTwofactorUpdateReturns(typing.TypedDict):
+        enabled:'bool'
+        otp_digits:'int'
+        window:'int'
+        interval:'int'
+        services:'Services'
+        id:'int'
         ...

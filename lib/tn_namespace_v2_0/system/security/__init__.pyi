@@ -1,12 +1,12 @@
 
 from pytruenas import Namespace, TrueNASClient
-import typing as _ty
+import typing
 class SystemSecurity(Namespace):
-    _namespace:_ty.Literal['system.security']
+    _namespace:typing.Literal['system.security']
     def __init__(self, client:TrueNASClient) -> None: ...
-    @_ty.overload
+    @typing.overload
     def config(self, 
-    /) -> 'dict[str]': 
+    /) -> 'SystemSecurityEntry': 
         """
         
 
@@ -14,14 +14,14 @@ class SystemSecurity(Namespace):
         ----------
         Returns
         -------
-        dict[str]:
+        SystemSecurityEntry:
             system_security_entry
         """
         ...
-    @_ty.overload
+    @typing.overload
     def update(self, 
-        system_security_update:'dict[str]'={},
-    /) -> 'dict[str]': 
+        system_security_update:'SystemSecurityUpdate'={},
+    /) -> 'SystemSecurityUpdateReturns': 
         """
         Update System Security Service Configuration.
         
@@ -33,7 +33,19 @@ class SystemSecurity(Namespace):
             system_security_update
         Returns
         -------
-        dict[str]:
+        SystemSecurityUpdateReturns:
             system_security_update_returns
         """
+        ...
+
+class SystemSecurityEntry(typing.TypedDict):
+        enable_fips:'bool'
+        id:'int'
+        ...
+class SystemSecurityUpdate(typing.TypedDict):
+        enable_fips:'bool'
+        ...
+class SystemSecurityUpdateReturns(typing.TypedDict):
+        enable_fips:'bool'
+        id:'int'
         ...

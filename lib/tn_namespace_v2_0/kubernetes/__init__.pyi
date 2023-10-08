@@ -1,10 +1,10 @@
 
 from pytruenas import Namespace, TrueNASClient
-import typing as _ty
+import typing
 class Kubernetes(Namespace):
-    _namespace:_ty.Literal['kubernetes']
+    _namespace:typing.Literal['kubernetes']
     def __init__(self, client:TrueNASClient) -> None: ...
-    @_ty.overload
+    @typing.overload
     def backup_chart_releases(self, 
         backup_name:'str|None'=None,
     /) -> 'str': 
@@ -24,7 +24,7 @@ class Kubernetes(Namespace):
             backup_name
         """
         ...
-    @_ty.overload
+    @typing.overload
     def bindip_choices(self, 
     /) -> 'dict[str]': 
         """
@@ -38,9 +38,9 @@ class Kubernetes(Namespace):
             kubernetes_bind_ip_choices
         """
         ...
-    @_ty.overload
+    @typing.overload
     def config(self, 
-    /) -> 'dict[str]': 
+    /) -> 'KubernetesEntry': 
         """
         
 
@@ -48,11 +48,11 @@ class Kubernetes(Namespace):
         ----------
         Returns
         -------
-        dict[str]:
+        KubernetesEntry:
             kubernetes_entry
         """
         ...
-    @_ty.overload
+    @typing.overload
     def delete_backup(self, 
         backup_name:'str',
     /) -> None: 
@@ -67,9 +67,9 @@ class Kubernetes(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def events(self, 
-    /) -> 'list': 
+    /) -> 'list[Event]': 
         """
         Returns events for kubernetes node.
 
@@ -77,11 +77,11 @@ class Kubernetes(Namespace):
         ----------
         Returns
         -------
-        list:
+        list[Event]:
             kubernetes_node_events
         """
         ...
-    @_ty.overload
+    @typing.overload
     def list_backups(self, 
     /) -> 'dict[str]': 
         """
@@ -95,7 +95,7 @@ class Kubernetes(Namespace):
             backups
         """
         ...
-    @_ty.overload
+    @typing.overload
     def node_ip(self, 
     /) -> 'str|None': 
         """
@@ -111,10 +111,10 @@ class Kubernetes(Namespace):
             kubernetes_node_ip
         """
         ...
-    @_ty.overload
+    @typing.overload
     def restore_backup(self, 
         backup_name:'str',
-        options:'dict[str]'={},
+        options:'Options'={},
     /) -> None: 
         """
         Restore `backup_name` chart releases backup.
@@ -132,7 +132,7 @@ class Kubernetes(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def route_interface_choices(self, 
     /) -> 'dict[str]': 
         """
@@ -146,9 +146,9 @@ class Kubernetes(Namespace):
             route_interface_choices
         """
         ...
-    @_ty.overload
+    @typing.overload
     def status(self, 
-    /) -> 'dict[str]': 
+    /) -> 'Status': 
         """
         Returns the status of the Kubernetes service.
 
@@ -156,14 +156,14 @@ class Kubernetes(Namespace):
         ----------
         Returns
         -------
-        dict[str]:
+        Status:
             status
         """
         ...
-    @_ty.overload
+    @typing.overload
     def update(self, 
-        kubernetes_update:'dict[str]'={},
-    /) -> 'dict[str]': 
+        kubernetes_update:'KubernetesUpdate'={},
+    /) -> 'KubernetesUpdateReturns': 
         """
         `pool` must be a valid ZFS pool configured in the system. Kubernetes service will initialise the pool by
         creating datasets under `pool_name/ix-applications`.
@@ -216,7 +216,77 @@ class Kubernetes(Namespace):
             kubernetes_update
         Returns
         -------
-        dict[str]:
+        KubernetesUpdateReturns:
             kubernetes_update_returns
         """
+        ...
+
+class KubernetesEntry(typing.TypedDict):
+        servicelb:'bool'
+        configure_gpus:'bool'
+        metrics_server:'bool'
+        passthrough_mode:'bool'
+        pool:'typing.Optional[str]'
+        cluster_cidr:'str'
+        service_cidr:'str'
+        cluster_dns_ip:'str'
+        node_ip:'str'
+        route_v4_interface:'typing.Optional[str]'
+        route_v4_gateway:'typing.Optional[str]'
+        route_v6_interface:'typing.Optional[str]'
+        route_v6_gateway:'typing.Optional[str]'
+        dataset:'typing.Optional[str]'
+        id:'int'
+        ...
+class Event(typing.TypedDict):
+        metadata:'Metadata'
+        message:'str'
+        ...
+class Metadata(typing.TypedDict):
+        name:'str'
+        ...
+class Options(typing.TypedDict):
+        wait_for_csi:'bool'
+        ...
+class Status(typing.TypedDict):
+        status:'str'
+        description:'str'
+        ...
+class KubernetesUpdate(typing.TypedDict):
+        servicelb:'bool'
+        configure_gpus:'bool'
+        metrics_server:'bool'
+        passthrough_mode:'bool'
+        pool:'typing.Optional[str]'
+        cluster_cidr:'str'
+        service_cidr:'str'
+        cluster_dns_ip:'str'
+        node_ip:'str'
+        route_v4_interface:'typing.Optional[str]'
+        route_v4_gateway:'typing.Optional[str]'
+        route_v6_interface:'typing.Optional[str]'
+        route_v6_gateway:'typing.Optional[str]'
+        migrate_applications:'bool'
+        force:'bool'
+        migration_options:'MigrationOptions'
+        ...
+class MigrationOptions(typing.TypedDict):
+        passphrase:'str'
+        ...
+class KubernetesUpdateReturns(typing.TypedDict):
+        servicelb:'bool'
+        configure_gpus:'bool'
+        metrics_server:'bool'
+        passthrough_mode:'bool'
+        pool:'typing.Optional[str]'
+        cluster_cidr:'str'
+        service_cidr:'str'
+        cluster_dns_ip:'str'
+        node_ip:'str'
+        route_v4_interface:'typing.Optional[str]'
+        route_v4_gateway:'typing.Optional[str]'
+        route_v6_interface:'typing.Optional[str]'
+        route_v6_gateway:'typing.Optional[str]'
+        dataset:'typing.Optional[str]'
+        id:'int'
         ...

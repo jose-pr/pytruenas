@@ -1,12 +1,12 @@
 
 from pytruenas import Namespace, TrueNASClient
-import typing as _ty
+import typing
 class CtdbPrivateIps(Namespace):
-    _namespace:_ty.Literal['ctdb.private.ips']
+    _namespace:typing.Literal['ctdb.private.ips']
     def __init__(self, client:TrueNASClient) -> None: ...
-    @_ty.overload
+    @typing.overload
     def create(self, 
-        private_create:'dict[str]'={},
+        private_create:'PrivateCreate'={},
     /) -> 'dict[str]': 
         """
         Add a ctdb private address to the cluster
@@ -27,10 +27,10 @@ class CtdbPrivateIps(Namespace):
             ctdb_private_ips_create_returns
         """
         ...
-    @_ty.overload
+    @typing.overload
     def get_instance(self, 
         id:'str|int|bool|dict[str]|list',
-        query_options_get_instance:'dict[str]'={},
+        query_options_get_instance:'QueryOptionsGetInstance'={},
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -47,11 +47,11 @@ class CtdbPrivateIps(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def query(self, 
-        query_filters:'list'=[],
-        query_options:'dict[str]'={},
-    /) -> 'list|dict[str]|int|dict[str]': 
+        query_filters:'list[list]'=[],
+        query_options:'QueryOptions'={},
+    /) -> 'list[dict[str]]|dict[str]|int|dict[str]': 
         """
         This returns contents of the CTDB nodes file (private IP addresses)
         Explanation of keys are as follows:
@@ -77,7 +77,7 @@ class CtdbPrivateIps(Namespace):
             query-options
         Returns
         -------
-        list:
+        list[dict[str]]:
             
         dict[str]:
             
@@ -87,10 +87,10 @@ class CtdbPrivateIps(Namespace):
             
         """
         ...
-    @_ty.overload
+    @typing.overload
     def update(self, 
         id:'int',
-        private_update:'dict[str]'={},
+        private_update:'PrivateUpdate'={},
     /) -> 'dict[str]': 
         """
         Update Private IP address from the ctdb cluster with pnn value of `id`.
@@ -116,4 +116,41 @@ class CtdbPrivateIps(Namespace):
         dict[str]:
             ctdb_private_ips_update_returns
         """
+        ...
+
+class PrivateCreate(typing.TypedDict):
+        ip:'str'
+        node_uuid:'str'
+        ...
+class QueryOptionsGetInstance(typing.TypedDict):
+        relationships:'bool'
+        extend:'typing.Optional[str]'
+        extend_context:'typing.Optional[str]'
+        prefix:'typing.Optional[str]'
+        extra:'dict[str]'
+        order_by:'list'
+        select:'list'
+        count:'bool'
+        get:'bool'
+        offset:'int'
+        limit:'int'
+        force_sql_filters:'bool'
+        ...
+class QueryOptions(typing.TypedDict):
+        relationships:'bool'
+        extend:'typing.Optional[str]'
+        extend_context:'typing.Optional[str]'
+        prefix:'typing.Optional[str]'
+        extra:'dict[str]'
+        order_by:'list'
+        select:'list'
+        count:'bool'
+        get:'bool'
+        offset:'int'
+        limit:'int'
+        force_sql_filters:'bool'
+        ...
+class PrivateUpdate(typing.TypedDict):
+        enable:'bool'
+        node_uuid:'str'
         ...

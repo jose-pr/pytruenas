@@ -1,12 +1,12 @@
 
 from pytruenas import Namespace, TrueNASClient
-import typing as _ty
+import typing
 class Snmp(Namespace):
-    _namespace:_ty.Literal['snmp']
+    _namespace:typing.Literal['snmp']
     def __init__(self, client:TrueNASClient) -> None: ...
-    @_ty.overload
+    @typing.overload
     def config(self, 
-    /) -> 'dict[str]': 
+    /) -> 'SnmpEntry': 
         """
         
 
@@ -14,14 +14,14 @@ class Snmp(Namespace):
         ----------
         Returns
         -------
-        dict[str]:
+        SnmpEntry:
             snmp_entry
         """
         ...
-    @_ty.overload
+    @typing.overload
     def update(self, 
-        snmp_update:'dict[str]'={},
-    /) -> 'dict[str]': 
+        snmp_update:'SnmpUpdate'={},
+    /) -> 'SnmpUpdateReturns': 
         """
         Update SNMP Service Configuration.
         
@@ -36,7 +36,55 @@ class Snmp(Namespace):
             snmp_update
         Returns
         -------
-        dict[str]:
+        SnmpUpdateReturns:
             snmp_update_returns
         """
+        ...
+
+class SnmpEntry(typing.TypedDict):
+        location:'str'
+        contact:'str'
+        traps:'bool'
+        v3:'bool'
+        community:'str'
+        v3_username:'str'
+        v3_authtype:'str'
+        v3_password:'str'
+        v3_privproto:'typing.Optional[str]'
+        v3_privpassphrase:'typing.Optional[str]'
+        loglevel:'int'
+        options:'str'
+        zilstat:'bool'
+        id:'int'
+        ...
+class SnmpUpdate(typing.TypedDict):
+        location:'str'
+        contact:'str'
+        traps:'bool'
+        v3:'bool'
+        community:'str'
+        v3_username:'str'
+        v3_authtype:'str'
+        v3_password:'str'
+        v3_privproto:'typing.Optional[str]'
+        v3_privpassphrase:'typing.Optional[str]'
+        loglevel:'int'
+        options:'str'
+        zilstat:'bool'
+        ...
+class SnmpUpdateReturns(typing.TypedDict):
+        location:'str'
+        contact:'str'
+        traps:'bool'
+        v3:'bool'
+        community:'str'
+        v3_username:'str'
+        v3_authtype:'str'
+        v3_password:'str'
+        v3_privproto:'typing.Optional[str]'
+        v3_privpassphrase:'typing.Optional[str]'
+        loglevel:'int'
+        options:'str'
+        zilstat:'bool'
+        id:'int'
         ...

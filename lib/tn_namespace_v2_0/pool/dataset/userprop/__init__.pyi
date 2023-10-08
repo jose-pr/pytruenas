@@ -1,13 +1,13 @@
 
 from pytruenas import Namespace, TrueNASClient
-import typing as _ty
+import typing
 class PoolDatasetUserprop(Namespace):
-    _namespace:_ty.Literal['pool.dataset.userprop']
+    _namespace:typing.Literal['pool.dataset.userprop']
     def __init__(self, client:TrueNASClient) -> None: ...
-    @_ty.overload
+    @typing.overload
     def create(self, 
-        dataset_user_prop_create:'dict[str]'={},
-    /) -> 'dict[str]': 
+        dataset_user_prop_create:'DatasetUserPropCreate'={},
+    /) -> 'PoolDatasetUserpropCreateReturns': 
         """
         Create a user property for a given `id` dataset.
 
@@ -17,14 +17,14 @@ class PoolDatasetUserprop(Namespace):
             dataset_user_prop_create
         Returns
         -------
-        dict[str]:
+        PoolDatasetUserpropCreateReturns:
             pool_dataset_userprop_create_returns
         """
         ...
-    @_ty.overload
+    @typing.overload
     def delete(self, 
         id:'str',
-        dataset_user_prop_delete:'dict[str]'={},
+        dataset_user_prop_delete:'DatasetUserPropDelete'={},
     /) -> 'bool': 
         """
         Delete user property `dataset_user_prop_delete.name` for `id` dataset.
@@ -41,10 +41,10 @@ class PoolDatasetUserprop(Namespace):
             Will return `true` if `id` is deleted successfully
         """
         ...
-    @_ty.overload
+    @typing.overload
     def get_instance(self, 
         id:'str|int|bool|dict[str]|list',
-        query_options_get_instance:'dict[str]'={},
+        query_options_get_instance:'QueryOptionsGetInstance'={},
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -61,11 +61,11 @@ class PoolDatasetUserprop(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def query(self, 
-        query_filters:'list'=[],
-        query_options:'dict[str]'={},
-    /) -> 'list|dict[str]|int|dict[str]': 
+        query_filters:'list[list]'=[],
+        query_options:'QueryOptions'={},
+    /) -> 'list[PoolDatasetUserpropEntry]|PoolDatasetUserpropEntry|int|PoolDatasetUserpropEntry': 
         """
         Query all user properties for ZFS datasets.
 
@@ -77,21 +77,21 @@ class PoolDatasetUserprop(Namespace):
             query-options
         Returns
         -------
-        list:
+        list[PoolDatasetUserpropEntry]:
             
-        dict[str]:
+        PoolDatasetUserpropEntry:
             
         int:
             
-        dict[str]:
+        PoolDatasetUserpropEntry:
             
         """
         ...
-    @_ty.overload
+    @typing.overload
     def update(self, 
         id:'str',
-        dataset_user_prop_update:'dict[str]'={},
-    /) -> 'dict[str]': 
+        dataset_user_prop_update:'DatasetUserPropUpdate'={},
+    /) -> 'PoolDatasetUserpropUpdateReturns': 
         """
         Update `dataset_user_prop_update.name` user property for `id` dataset.
 
@@ -103,7 +103,63 @@ class PoolDatasetUserprop(Namespace):
             dataset_user_prop_update
         Returns
         -------
-        dict[str]:
+        PoolDatasetUserpropUpdateReturns:
             pool_dataset_userprop_update_returns
         """
+        ...
+
+class DatasetUserPropCreate(typing.TypedDict):
+        id:'str'
+        property:'Property'
+        ...
+class Property(typing.TypedDict):
+        name:'str'
+        value:'str'
+        ...
+class PoolDatasetUserpropCreateReturns(typing.TypedDict):
+        id:'str'
+        properties:'dict[str]'
+        ...
+class DatasetUserPropDelete(typing.TypedDict):
+        name:'str'
+        ...
+class QueryOptionsGetInstance(typing.TypedDict):
+        relationships:'bool'
+        extend:'typing.Optional[str]'
+        extend_context:'typing.Optional[str]'
+        prefix:'typing.Optional[str]'
+        extra:'dict[str]'
+        order_by:'list'
+        select:'list'
+        count:'bool'
+        get:'bool'
+        offset:'int'
+        limit:'int'
+        force_sql_filters:'bool'
+        ...
+class QueryOptions(typing.TypedDict):
+        relationships:'bool'
+        extend:'typing.Optional[str]'
+        extend_context:'typing.Optional[str]'
+        prefix:'typing.Optional[str]'
+        extra:'dict[str]'
+        order_by:'list'
+        select:'list'
+        count:'bool'
+        get:'bool'
+        offset:'int'
+        limit:'int'
+        force_sql_filters:'bool'
+        ...
+class PoolDatasetUserpropEntry(typing.TypedDict):
+        id:'str'
+        properties:'dict[str]'
+        ...
+class DatasetUserPropUpdate(typing.TypedDict):
+        name:'str'
+        value:'str'
+        ...
+class PoolDatasetUserpropUpdateReturns(typing.TypedDict):
+        id:'str'
+        properties:'dict[str]'
         ...

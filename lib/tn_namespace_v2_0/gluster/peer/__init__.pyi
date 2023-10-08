@@ -1,13 +1,13 @@
 
 from pytruenas import Namespace, TrueNASClient
-import typing as _ty
+import typing
 class GlusterPeer(Namespace):
-    _namespace:_ty.Literal['gluster.peer']
+    _namespace:typing.Literal['gluster.peer']
     def __init__(self, client:TrueNASClient) -> None: ...
-    @_ty.overload
+    @typing.overload
     def create(self, 
-        peer_create:'dict[str]'={},
-    /) -> 'dict[str]': 
+        peer_create:'PeerCreate'={},
+    /) -> 'GlusterPeerCreateReturns': 
         """
         Add peer to the Trusted Storage Pool.
         
@@ -25,11 +25,11 @@ class GlusterPeer(Namespace):
             peer_create
         Returns
         -------
-        dict[str]:
+        GlusterPeerCreateReturns:
             gluster_peer_create_returns
         """
         ...
-    @_ty.overload
+    @typing.overload
     def delete(self, 
         id:'str',
     /) -> None: 
@@ -50,10 +50,10 @@ class GlusterPeer(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def get_instance(self, 
         id:'str|int|bool|dict[str]|list',
-        query_options_get_instance:'dict[str]'={},
+        query_options_get_instance:'QueryOptionsGetInstance'={},
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -70,9 +70,9 @@ class GlusterPeer(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def ips_available(self, 
-    /) -> 'list': 
+    /) -> 'list[str]': 
         """
         Return list of VIP(v4/v6) addresses available on the system
 
@@ -80,15 +80,15 @@ class GlusterPeer(Namespace):
         ----------
         Returns
         -------
-        list:
+        list[str]:
             ips
         """
         ...
-    @_ty.overload
+    @typing.overload
     def query(self, 
-        query_filters:'list'=[],
-        query_options:'dict[str]'={},
-    /) -> 'list|dict[str]|int|dict[str]': 
+        query_filters:'list[list]'=[],
+        query_options:'QueryOptions'={},
+    /) -> 'list[GlusterPeerEntry]|GlusterPeerEntry|int|GlusterPeerEntry': 
         """
         
 
@@ -100,20 +100,20 @@ class GlusterPeer(Namespace):
             query-options
         Returns
         -------
-        list:
+        list[GlusterPeerEntry]:
             
-        dict[str]:
+        GlusterPeerEntry:
             
         int:
             
-        dict[str]:
+        GlusterPeerEntry:
             
         """
         ...
-    @_ty.overload
+    @typing.overload
     def status(self, 
-        peer_status:'dict[str]'={},
-    /) -> 'list': 
+        peer_status:'PeerStatus'={},
+    /) -> 'list[GlusterPeerEntry]': 
         """
         List the status of peers in the Trusted Storage Pool.
         
@@ -125,7 +125,59 @@ class GlusterPeer(Namespace):
             peer_status
         Returns
         -------
-        list:
+        list[GlusterPeerEntry]:
             peers
         """
+        ...
+
+class PeerCreate(typing.TypedDict):
+        hostname:'str'
+        private_address:'str'
+        ...
+class GlusterPeerCreateReturns(typing.TypedDict):
+        id:'str'
+        uuid:'str'
+        hostname:'str'
+        connected:'str'
+        state:'str'
+        status:'str'
+        ...
+class QueryOptionsGetInstance(typing.TypedDict):
+        relationships:'bool'
+        extend:'typing.Optional[str]'
+        extend_context:'typing.Optional[str]'
+        prefix:'typing.Optional[str]'
+        extra:'dict[str]'
+        order_by:'list'
+        select:'list'
+        count:'bool'
+        get:'bool'
+        offset:'int'
+        limit:'int'
+        force_sql_filters:'bool'
+        ...
+class QueryOptions(typing.TypedDict):
+        relationships:'bool'
+        extend:'typing.Optional[str]'
+        extend_context:'typing.Optional[str]'
+        prefix:'typing.Optional[str]'
+        extra:'dict[str]'
+        order_by:'list'
+        select:'list'
+        count:'bool'
+        get:'bool'
+        offset:'int'
+        limit:'int'
+        force_sql_filters:'bool'
+        ...
+class GlusterPeerEntry(typing.TypedDict):
+        id:'str'
+        uuid:'str'
+        hostname:'str'
+        connected:'str'
+        state:'str'
+        status:'str'
+        ...
+class PeerStatus(typing.TypedDict):
+        localhost:'bool'
         ...

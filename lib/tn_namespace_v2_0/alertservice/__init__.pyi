@@ -1,13 +1,13 @@
 
 from pytruenas import Namespace, TrueNASClient
-import typing as _ty
+import typing
 class Alertservice(Namespace):
-    _namespace:_ty.Literal['alertservice']
+    _namespace:typing.Literal['alertservice']
     def __init__(self, client:TrueNASClient) -> None: ...
-    @_ty.overload
+    @typing.overload
     def create(self, 
-        alert_service_create:'dict[str]'={},
-    /) -> 'dict[str]': 
+        alert_service_create:'AlertServiceCreate'={},
+    /) -> 'AlertserviceCreateReturns': 
         """
         Create an Alert Service of specified `type`.
         
@@ -19,11 +19,11 @@ class Alertservice(Namespace):
             alert_service_create
         Returns
         -------
-        dict[str]:
+        AlertserviceCreateReturns:
             alertservice_create_returns
         """
         ...
-    @_ty.overload
+    @typing.overload
     def delete(self, 
         id:'int',
     /) -> 'bool': 
@@ -40,10 +40,10 @@ class Alertservice(Namespace):
             Will return `true` if `id` is deleted successfully
         """
         ...
-    @_ty.overload
+    @typing.overload
     def get_instance(self, 
         id:'str|int|bool|dict[str]|list',
-        query_options_get_instance:'dict[str]'={},
+        query_options_get_instance:'QueryOptionsGetInstance'={},
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -60,9 +60,9 @@ class Alertservice(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def list_types(self, 
-    /) -> 'list': 
+    /) -> 'list[AlertServiceType]': 
         """
         List all types of supported Alert services which can be configured with the system.
 
@@ -70,15 +70,15 @@ class Alertservice(Namespace):
         ----------
         Returns
         -------
-        list:
+        list[AlertServiceType]:
             alert_service_types
         """
         ...
-    @_ty.overload
+    @typing.overload
     def query(self, 
-        query_filters:'list'=[],
-        query_options:'dict[str]'={},
-    /) -> 'list|dict[str]|int|dict[str]': 
+        query_filters:'list[list]'=[],
+        query_options:'QueryOptions'={},
+    /) -> 'list[AlertserviceEntry]|AlertserviceEntry|int|AlertserviceEntry': 
         """
         
 
@@ -90,19 +90,19 @@ class Alertservice(Namespace):
             query-options
         Returns
         -------
-        list:
+        list[AlertserviceEntry]:
             
-        dict[str]:
+        AlertserviceEntry:
             
         int:
             
-        dict[str]:
+        AlertserviceEntry:
             
         """
         ...
-    @_ty.overload
+    @typing.overload
     def test(self, 
-        alert_service_create:'dict[str]'={},
+        alert_service_create:'AlertServiceCreate_'={},
     /) -> 'bool': 
         """
         Send a test alert using `type` of Alert Service.
@@ -117,11 +117,11 @@ class Alertservice(Namespace):
             Is `true` if test is successful
         """
         ...
-    @_ty.overload
+    @typing.overload
     def update(self, 
         id:'int',
-        alert_service_update:'dict[str]'={},
-    /) -> 'dict[str]': 
+        alert_service_update:'AlertServiceUpdate'={},
+    /) -> 'AlertserviceUpdateReturns': 
         """
         Update Alert Service of `id`.
 
@@ -133,7 +133,88 @@ class Alertservice(Namespace):
             alert_service_update
         Returns
         -------
-        dict[str]:
+        AlertserviceUpdateReturns:
             alertservice_update_returns
         """
+        ...
+
+class AlertServiceCreate(typing.TypedDict):
+        name:'str'
+        type:'str'
+        attributes:'dict[str]'
+        level:'str'
+        enabled:'bool'
+        ...
+class AlertserviceCreateReturns(typing.TypedDict):
+        name:'str'
+        type:'str'
+        attributes:'dict[str]'
+        level:'str'
+        enabled:'bool'
+        id:'int'
+        type__title:'str'
+        ...
+class QueryOptionsGetInstance(typing.TypedDict):
+        relationships:'bool'
+        extend:'typing.Optional[str]'
+        extend_context:'typing.Optional[str]'
+        prefix:'typing.Optional[str]'
+        extra:'dict[str]'
+        order_by:'list'
+        select:'list'
+        count:'bool'
+        get:'bool'
+        offset:'int'
+        limit:'int'
+        force_sql_filters:'bool'
+        ...
+class AlertServiceType(typing.TypedDict):
+        name:'str'
+        title:'str'
+        ...
+class QueryOptions(typing.TypedDict):
+        relationships:'bool'
+        extend:'typing.Optional[str]'
+        extend_context:'typing.Optional[str]'
+        prefix:'typing.Optional[str]'
+        extra:'dict[str]'
+        order_by:'list'
+        select:'list'
+        count:'bool'
+        get:'bool'
+        offset:'int'
+        limit:'int'
+        force_sql_filters:'bool'
+        ...
+class AlertserviceEntry(typing.TypedDict):
+        name:'str'
+        type:'str'
+        attributes:'dict[str]'
+        level:'str'
+        enabled:'bool'
+        id:'int'
+        type__title:'str'
+        ...
+class AlertServiceCreate_(typing.TypedDict):
+        name:'str'
+        type:'str'
+        attributes:'dict[str]'
+        level:'str'
+        enabled:'bool'
+        ...
+class AlertServiceUpdate(typing.TypedDict):
+        name:'str'
+        type:'str'
+        attributes:'dict[str]'
+        level:'str'
+        enabled:'bool'
+        ...
+class AlertserviceUpdateReturns(typing.TypedDict):
+        name:'str'
+        type:'str'
+        attributes:'dict[str]'
+        level:'str'
+        enabled:'bool'
+        id:'int'
+        type__title:'str'
         ...

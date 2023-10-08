@@ -1,10 +1,10 @@
 
 from pytruenas import Namespace, TrueNASClient
-import typing as _ty
+import typing
 class Alert(Namespace):
-    _namespace:_ty.Literal['alert']
+    _namespace:typing.Literal['alert']
     def __init__(self, client:TrueNASClient) -> None: ...
-    @_ty.overload
+    @typing.overload
     def dismiss(self, 
         uuid:'str',
     /) -> None: 
@@ -19,9 +19,9 @@ class Alert(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def list(self, 
-    /) -> 'list': 
+    /) -> 'list[Alert]': 
         """
         List all types of alerts including active/dismissed currently in the system.
 
@@ -29,13 +29,13 @@ class Alert(Namespace):
         ----------
         Returns
         -------
-        list:
+        list[Alert]:
             alerts
         """
         ...
-    @_ty.overload
+    @typing.overload
     def list_categories(self, 
-    /) -> 'list': 
+    /) -> 'list[Category]': 
         """
         List all types of alerts which the system can issue.
 
@@ -43,13 +43,13 @@ class Alert(Namespace):
         ----------
         Returns
         -------
-        list:
+        list[Category]:
             categories
         """
         ...
-    @_ty.overload
+    @typing.overload
     def list_policies(self, 
-    /) -> 'list': 
+    /) -> 'list[str]': 
         """
         List all alert policies which indicate the frequency of the alerts.
 
@@ -57,11 +57,11 @@ class Alert(Namespace):
         ----------
         Returns
         -------
-        list:
+        list[str]:
             alert_policies
         """
         ...
-    @_ty.overload
+    @typing.overload
     def restore(self, 
         uuid:'str',
     /) -> None: 
@@ -75,4 +75,33 @@ class Alert(Namespace):
         Returns
         -------
         """
+        ...
+
+class Alert(typing.TypedDict):
+        uuid:'str'
+        source:'str'
+        klass:'str'
+        args:'typing.Union[str, int, bool, dict[str], list]'
+        node:'str'
+        key:'str'
+        datetime:'str'
+        last_occurrence:'str'
+        dismissed:'bool'
+        mail:'typing.Union[str, int, bool, dict[str], list]'
+        text:'str'
+        id:'str'
+        level:'str'
+        formatted:'typing.Optional[str]'
+        one_shot:'bool'
+        ...
+class Category(typing.TypedDict):
+        id:'str'
+        title:'str'
+        classes:'list[CategoryClass]'
+        ...
+class CategoryClass(typing.TypedDict):
+        id:'str'
+        title:'str'
+        level:'str'
+        proactive_support:'bool'
         ...

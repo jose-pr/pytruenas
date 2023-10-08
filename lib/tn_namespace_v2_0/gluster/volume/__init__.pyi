@@ -1,13 +1,13 @@
 
 from pytruenas import Namespace, TrueNASClient
-import typing as _ty
+import typing
 class GlusterVolume(Namespace):
-    _namespace:_ty.Literal['gluster.volume']
+    _namespace:typing.Literal['gluster.volume']
     def __init__(self, client:TrueNASClient) -> None: ...
-    @_ty.overload
+    @typing.overload
     def create(self, 
-        glustervolume_create:'dict[str]'={},
-    /) -> 'dict[str]': 
+        glustervolume_create:'GlustervolumeCreate'={},
+    /) -> 'GlusterVolumeCreateReturns': 
         """
         Create a gluster volume.
         
@@ -32,11 +32,11 @@ class GlusterVolume(Namespace):
             glustervolume_create
         Returns
         -------
-        dict[str]:
+        GlusterVolumeCreateReturns:
             gluster_volume_create_returns
         """
         ...
-    @_ty.overload
+    @typing.overload
     def delete(self, 
         id:'str',
     /) -> None: 
@@ -58,10 +58,10 @@ class GlusterVolume(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def get_instance(self, 
         id:'str|int|bool|dict[str]|list',
-        query_options_get_instance:'dict[str]'={},
+        query_options_get_instance:'QueryOptionsGetInstance'={},
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -78,10 +78,10 @@ class GlusterVolume(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def info(self, 
-        volume_info:'dict[str]'={},
-    /) -> 'list': 
+        volume_info:'VolumeInfo'={},
+    /) -> 'list[Volume]': 
         """
         Return information about gluster volume(s).
         
@@ -93,13 +93,13 @@ class GlusterVolume(Namespace):
             volume_info
         Returns
         -------
-        list:
+        list[Volume]:
             volumes
         """
         ...
-    @_ty.overload
+    @typing.overload
     def list(self, 
-    /) -> 'list': 
+    /) -> 'list[str]': 
         """
         Return list of gluster volumes.
 
@@ -107,13 +107,13 @@ class GlusterVolume(Namespace):
         ----------
         Returns
         -------
-        list:
+        list[str]:
             volumes
         """
         ...
-    @_ty.overload
+    @typing.overload
     def optreset(self, 
-        volume_optreset:'dict[str]'={},
+        volume_optreset:'VolumeOptreset'={},
     /) -> None: 
         """
         Reset volumes options.
@@ -132,9 +132,9 @@ class GlusterVolume(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def optset(self, 
-        volume_optset:'dict[str]'={},
+        volume_optset:'VolumeOptset'={},
     /) -> None: 
         """
         Set gluster volume options.
@@ -155,11 +155,11 @@ class GlusterVolume(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def query(self, 
-        query_filters:'list'=[],
-        query_options:'dict[str]'={},
-    /) -> 'list|dict[str]|int|dict[str]': 
+        query_filters:'list[list]'=[],
+        query_options:'QueryOptions'={},
+    /) -> 'list[GlusterVolumeEntry]|GlusterVolumeEntry|int|GlusterVolumeEntry': 
         """
         
 
@@ -171,19 +171,19 @@ class GlusterVolume(Namespace):
             query-options
         Returns
         -------
-        list:
+        list[GlusterVolumeEntry]:
             
-        dict[str]:
+        GlusterVolumeEntry:
             
         int:
             
-        dict[str]:
+        GlusterVolumeEntry:
             
         """
         ...
-    @_ty.overload
+    @typing.overload
     def quota(self, 
-        volume_quota:'dict[str]'={},
+        volume_quota:'VolumeQuota'={},
     /) -> None: 
         """
         Enable/Disable the quota for a given gluster volume.
@@ -202,9 +202,9 @@ class GlusterVolume(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def restart(self, 
-        volume_restart:'dict[str]'={},
+        volume_restart:'VolumeRestart'={},
     /) -> None: 
         """
         Restart a gluster volume.
@@ -220,9 +220,9 @@ class GlusterVolume(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def start(self, 
-        volume_start:'dict[str]'={},
+        volume_start:'VolumeStart'={},
     /) -> None: 
         """
         Start a gluster volume.
@@ -241,10 +241,10 @@ class GlusterVolume(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def status(self, 
-        volume_status:'dict[str]'={},
-    /) -> 'list': 
+        volume_status:'VolumeStatus'={},
+    /) -> 'list[GlusterVolumeEntry]': 
         """
         Return detailed information about gluster volume.
         
@@ -257,13 +257,13 @@ class GlusterVolume(Namespace):
             volume_status
         Returns
         -------
-        list:
+        list[GlusterVolumeEntry]:
             volumes
         """
         ...
-    @_ty.overload
+    @typing.overload
     def stop(self, 
-        volume_stop:'dict[str]'={},
+        volume_stop:'VolumeStop'={},
     /) -> None: 
         """
         Stop a gluster volume.
@@ -281,4 +281,135 @@ class GlusterVolume(Namespace):
         Returns
         -------
         """
+        ...
+
+class GlustervolumeCreate(typing.TypedDict):
+        name:'str'
+        bricks:'list[Brick]'
+        replica:'int'
+        arbiter:'int'
+        disperse:'int'
+        disperse_data:'int'
+        redundancy:'int'
+        force:'bool'
+        ...
+class Brick(typing.TypedDict):
+        peer_name:'str'
+        peer_path:'str'
+        ...
+class GlusterVolumeCreateReturns(typing.TypedDict):
+        name:'str'
+        uuid:'str'
+        type:'str'
+        online:'bool'
+        ports:'Ports'
+        pid:'str'
+        size_total:'int'
+        size_free:'int'
+        size_used:'int'
+        inodes_total:'int'
+        inodes_free:'int'
+        inodes_used:'int'
+        device:'str'
+        block_size:'str'
+        mnt_options:'str'
+        fs_name:'str'
+        ...
+class Ports(typing.TypedDict):
+        tcp:'str'
+        rdma:'str'
+        ...
+class QueryOptionsGetInstance(typing.TypedDict):
+        relationships:'bool'
+        extend:'typing.Optional[str]'
+        extend_context:'typing.Optional[str]'
+        prefix:'typing.Optional[str]'
+        extra:'dict[str]'
+        order_by:'list'
+        select:'list'
+        count:'bool'
+        get:'bool'
+        offset:'int'
+        limit:'int'
+        force_sql_filters:'bool'
+        ...
+class VolumeInfo(typing.TypedDict):
+        name:'str'
+        ...
+class Volume(typing.TypedDict):
+        name:'str'
+        uuid:'str'
+        type:'str'
+        status:'str'
+        num_bricks:'int'
+        distribute:'int'
+        stripe:'int'
+        replica:'int'
+        disperse:'int'
+        disperse_redundancy:'int'
+        transport:'int'
+        snapshot_count:'int'
+        bricks:'list'
+        options:'list'
+        ...
+class VolumeOptreset(typing.TypedDict):
+        name:'str'
+        opt:'str'
+        force:'bool'
+        ...
+class VolumeOptset(typing.TypedDict):
+        name:'str'
+        opts:'dict[str]'
+        ...
+class QueryOptions(typing.TypedDict):
+        relationships:'bool'
+        extend:'typing.Optional[str]'
+        extend_context:'typing.Optional[str]'
+        prefix:'typing.Optional[str]'
+        extra:'dict[str]'
+        order_by:'list'
+        select:'list'
+        count:'bool'
+        get:'bool'
+        offset:'int'
+        limit:'int'
+        force_sql_filters:'bool'
+        ...
+class GlusterVolumeEntry(typing.TypedDict):
+        name:'str'
+        uuid:'str'
+        type:'str'
+        online:'bool'
+        ports:'Ports'
+        pid:'str'
+        size_total:'int'
+        size_free:'int'
+        size_used:'int'
+        inodes_total:'int'
+        inodes_free:'int'
+        inodes_used:'int'
+        device:'str'
+        block_size:'str'
+        mnt_options:'str'
+        fs_name:'str'
+        ...
+class VolumeQuota(typing.TypedDict):
+        name:'str'
+        enable:'bool'
+        ...
+class VolumeRestart(typing.TypedDict):
+        name:'str'
+        force:'bool'
+        ...
+class VolumeStart(typing.TypedDict):
+        name:'str'
+        force:'bool'
+        ...
+class VolumeStatus(typing.TypedDict):
+        name:'str'
+        verbose:'bool'
+        ...
+class VolumeStop(typing.TypedDict):
+        name:'str'
+        force:'bool'
         ...

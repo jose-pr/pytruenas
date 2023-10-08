@@ -1,10 +1,10 @@
 
 from pytruenas import Namespace, TrueNASClient
-import typing as _ty
+import typing
 class Failover(Namespace):
-    _namespace:_ty.Literal['failover']
+    _namespace:typing.Literal['failover']
     def __init__(self, client:TrueNASClient) -> None: ...
-    @_ty.overload
+    @typing.overload
     def become_passive(self, 
     /) -> None: 
         """
@@ -29,11 +29,11 @@ class Failover(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def call_remote(self, 
         method:'str',
         args:'list'=[],
-        options:'dict[str]'={},
+        options:'Options'={},
     /) -> 'str|int|bool|dict[str]|list': 
         """
         Call a method on the other node.
@@ -80,9 +80,9 @@ class Failover(Namespace):
             call_remote
         """
         ...
-    @_ty.overload
+    @typing.overload
     def config(self, 
-    /) -> 'dict[str]': 
+    /) -> 'FailoverEntry': 
         """
         
 
@@ -90,14 +90,14 @@ class Failover(Namespace):
         ----------
         Returns
         -------
-        dict[str]:
+        FailoverEntry:
             failover_entry
         """
         ...
-    @_ty.overload
+    @typing.overload
     def control(self, 
         action:'str',
-        options:'dict[str]'={},
+        options:'Options_'={},
     /) -> None: 
         """
         
@@ -112,7 +112,7 @@ class Failover(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def force_master(self, 
     /) -> 'bool': 
         """
@@ -126,9 +126,9 @@ class Failover(Namespace):
             force_master
         """
         ...
-    @_ty.overload
+    @typing.overload
     def get_ips(self, 
-    /) -> 'list': 
+    /) -> 'list[str]': 
         """
         Get a list of IPs for which the webUI can be accessed.
 
@@ -136,11 +136,11 @@ class Failover(Namespace):
         ----------
         Returns
         -------
-        list:
+        list[str]:
             ips
         """
         ...
-    @_ty.overload
+    @typing.overload
     def hardware(self, 
     /) -> 'str': 
         """
@@ -160,7 +160,7 @@ class Failover(Namespace):
             hardware
         """
         ...
-    @_ty.overload
+    @typing.overload
     def in_progress(self, 
     /) -> 'bool': 
         """
@@ -174,7 +174,7 @@ class Failover(Namespace):
             in_progress
         """
         ...
-    @_ty.overload
+    @typing.overload
     def licensed(self, 
     /) -> 'bool': 
         """
@@ -188,7 +188,7 @@ class Failover(Namespace):
             licensed
         """
         ...
-    @_ty.overload
+    @typing.overload
     def node(self, 
     /) -> 'str': 
         """
@@ -206,7 +206,7 @@ class Failover(Namespace):
             node
         """
         ...
-    @_ty.overload
+    @typing.overload
     def status(self, 
     /) -> 'str': 
         """
@@ -228,7 +228,7 @@ class Failover(Namespace):
             status
         """
         ...
-    @_ty.overload
+    @typing.overload
     def sync_from_peer(self, 
     /) -> None: 
         """
@@ -240,9 +240,9 @@ class Failover(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def sync_to_peer(self, 
-        options:'dict[str]'={},
+        options:'Options__'={},
     /) -> None: 
         """
         Sync database and files to the other controller.
@@ -257,9 +257,9 @@ class Failover(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def unlock(self, 
-        options:'dict[str]'={},
+        options:'Options___'={},
     /) -> 'bool': 
         """
         Unlock datasets in HA, syncing passphrase between controllers and forcing this controller
@@ -275,10 +275,10 @@ class Failover(Namespace):
             unlock
         """
         ...
-    @_ty.overload
+    @typing.overload
     def update(self, 
-        failover_update:'dict[str]'={},
-    /) -> 'dict[str]': 
+        failover_update:'FailoverUpdate'={},
+    /) -> 'FailoverUpdateReturns': 
         """
         Update failover state.
         
@@ -300,13 +300,13 @@ class Failover(Namespace):
             failover_update
         Returns
         -------
-        dict[str]:
+        FailoverUpdateReturns:
             failover_update_returns
         """
         ...
-    @_ty.overload
+    @typing.overload
     def upgrade(self, 
-        failover_upgrade:'dict[str]'={},
+        failover_upgrade:'FailoverUpgrade'={},
     /) -> 'bool': 
         """
         Upgrades both controllers.
@@ -333,7 +333,7 @@ class Failover(Namespace):
             upgrade
         """
         ...
-    @_ty.overload
+    @typing.overload
     def upgrade_finish(self, 
     /) -> 'bool': 
         """
@@ -350,7 +350,7 @@ class Failover(Namespace):
             upgrade_finish
         """
         ...
-    @_ty.overload
+    @typing.overload
     def upgrade_pending(self, 
     /) -> 'bool': 
         """
@@ -366,4 +366,53 @@ class Failover(Namespace):
         bool:
             upgrade_pending
         """
+        ...
+
+class Options(typing.TypedDict):
+        timeout:'int'
+        job:'bool'
+        job_return:'typing.Optional[bool]'
+        callback:'typing.Union[str, int, bool, dict[str], list]'
+        connect_timeout:'float'
+        raise_connect_error:'bool'
+        ...
+class FailoverEntry(typing.TypedDict):
+        id:'int'
+        disabled:'bool'
+        timeout:'int'
+        master:'bool'
+        ...
+class Options_(typing.TypedDict):
+        active:'bool'
+        ...
+class Options__(typing.TypedDict):
+        reboot:'bool'
+        ...
+class Options___(typing.TypedDict):
+        pools:'list[PoolKeys]'
+        datasets:'list[DatasetKeys]'
+        ...
+class PoolKeys(typing.TypedDict):
+        name:'str'
+        passphrase:'str'
+        ...
+class DatasetKeys(typing.TypedDict):
+        name:'str'
+        passphrase:'str'
+        ...
+class FailoverUpdate(typing.TypedDict):
+        disabled:'bool'
+        timeout:'int'
+        master:'typing.Optional[bool]'
+        ...
+class FailoverUpdateReturns(typing.TypedDict):
+        id:'int'
+        disabled:'bool'
+        timeout:'int'
+        master:'bool'
+        ...
+class FailoverUpgrade(typing.TypedDict):
+        train:'str'
+        resume:'bool'
+        resume_manual:'bool'
         ...

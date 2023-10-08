@@ -1,10 +1,10 @@
 
 from pytruenas import Namespace, TrueNASClient
-import typing as _ty
+import typing
 class VmDevice(Namespace):
-    _namespace:_ty.Literal['vm.device']
+    _namespace:typing.Literal['vm.device']
     def __init__(self, client:TrueNASClient) -> None: ...
-    @_ty.overload
+    @typing.overload
     def bind_choices(self, 
     /) -> 'dict[str]': 
         """
@@ -18,10 +18,10 @@ class VmDevice(Namespace):
             bind_choices
         """
         ...
-    @_ty.overload
+    @typing.overload
     def create(self, 
-        vmdevice_create:'dict[str]'={},
-    /) -> 'dict[str]': 
+        vmdevice_create:'VmdeviceCreate'={},
+    /) -> 'VmDeviceCreateReturns': 
         """
         Create a new device for the VM of id `vm`.
         
@@ -37,14 +37,14 @@ class VmDevice(Namespace):
             vmdevice_create
         Returns
         -------
-        dict[str]:
+        VmDeviceCreateReturns:
             vm_device_create_returns
         """
         ...
-    @_ty.overload
+    @typing.overload
     def delete(self, 
         id:'int',
-        vm_device_delete:'dict[str]'={},
+        vm_device_delete:'VmDeviceDelete'={},
     /) -> 'bool': 
         """
         Delete a VM device of `id`.
@@ -61,7 +61,7 @@ class VmDevice(Namespace):
             Will return `true` if `id` is deleted successfully
         """
         ...
-    @_ty.overload
+    @typing.overload
     def disk_choices(self, 
     /) -> 'dict[str]': 
         """
@@ -80,10 +80,10 @@ class VmDevice(Namespace):
             ```
         """
         ...
-    @_ty.overload
+    @typing.overload
     def get_instance(self, 
         id:'str|int|bool|dict[str]|list',
-        query_options_get_instance:'dict[str]'={},
+        query_options_get_instance:'QueryOptionsGetInstance'={},
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -100,7 +100,7 @@ class VmDevice(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def iommu_enabled(self, 
     /) -> 'bool': 
         """
@@ -114,9 +114,9 @@ class VmDevice(Namespace):
             iommu_enabled
         """
         ...
-    @_ty.overload
+    @typing.overload
     def iotype_choices(self, 
-    /) -> 'dict[str]': 
+    /) -> 'IotypeChoices': 
         """
         IO-type choices for storage devices.
 
@@ -124,11 +124,11 @@ class VmDevice(Namespace):
         ----------
         Returns
         -------
-        dict[str]:
+        IotypeChoices:
             iotype_choices
         """
         ...
-    @_ty.overload
+    @typing.overload
     def nic_attach_choices(self, 
     /) -> 'dict[str]': 
         """
@@ -142,10 +142,10 @@ class VmDevice(Namespace):
             nic_attach_choices
         """
         ...
-    @_ty.overload
+    @typing.overload
     def passthrough_device(self, 
         device:'str',
-    /) -> 'dict[str]': 
+    /) -> 'PassthroughDevice': 
         """
         Retrieve details about `device` PCI device
 
@@ -155,13 +155,13 @@ class VmDevice(Namespace):
             device
         Returns
         -------
-        dict[str]:
+        PassthroughDevice:
             passthrough_device
         """
         ...
-    @_ty.overload
+    @typing.overload
     def passthrough_device_choices(self, 
-    /) -> 'list': 
+    /) -> 'list[PassthroughDevice]': 
         """
         Available choices for PCI passthru devices
 
@@ -169,13 +169,13 @@ class VmDevice(Namespace):
         ----------
         Returns
         -------
-        list:
+        list[PassthroughDevice]:
             passthrough_device_choices
         """
         ...
-    @_ty.overload
+    @typing.overload
     def pptdev_choices(self, 
-    /) -> 'list': 
+    /) -> 'list[PassthroughDevice]': 
         """
         Available choices for PCI passthru device
 
@@ -183,15 +183,15 @@ class VmDevice(Namespace):
         ----------
         Returns
         -------
-        list:
+        list[PassthroughDevice]:
             passthrough_device_choices
         """
         ...
-    @_ty.overload
+    @typing.overload
     def query(self, 
-        query_filters:'list'=[],
-        query_options:'dict[str]'={},
-    /) -> 'list|dict[str]|int|dict[str]': 
+        query_filters:'list[list]'=[],
+        query_options:'QueryOptions'={},
+    /) -> 'list[VmDeviceEntry]|VmDeviceEntry|int|VmDeviceEntry': 
         """
         
 
@@ -203,21 +203,21 @@ class VmDevice(Namespace):
             query-options
         Returns
         -------
-        list:
+        list[VmDeviceEntry]:
             
-        dict[str]:
+        VmDeviceEntry:
             
         int:
             
-        dict[str]:
+        VmDeviceEntry:
             
         """
         ...
-    @_ty.overload
+    @typing.overload
     def update(self, 
         id:'int',
-        vm_device_update:'dict[str]'={},
-    /) -> 'dict[str]': 
+        vm_device_update:'VmDeviceUpdate'={},
+    /) -> 'VmDeviceUpdateReturns': 
         """
         Update a VM device of `id`.
         
@@ -231,13 +231,13 @@ class VmDevice(Namespace):
             vm_device_update
         Returns
         -------
-        dict[str]:
+        VmDeviceUpdateReturns:
             vm_device_update_returns
         """
         ...
-    @_ty.overload
+    @typing.overload
     def usb_controller_choices(self, 
-    /) -> 'dict[str]': 
+    /) -> 'UsbControllerChoices': 
         """
         Retrieve USB controller type choices
 
@@ -245,13 +245,13 @@ class VmDevice(Namespace):
         ----------
         Returns
         -------
-        dict[str]:
+        UsbControllerChoices:
             usb_controller_choices
         """
         ...
-    @_ty.overload
+    @typing.overload
     def usb_passthrough_choices(self, 
-    /) -> 'list': 
+    /) -> 'list[UsbPassthroughDevice]': 
         """
         Available choices for USB passthrough devices.
 
@@ -259,14 +259,14 @@ class VmDevice(Namespace):
         ----------
         Returns
         -------
-        list:
+        list[UsbPassthroughDevice]:
             usb_passthrough_choices
         """
         ...
-    @_ty.overload
+    @typing.overload
     def usb_passthrough_device(self, 
         device:'str',
-    /) -> 'dict[str]': 
+    /) -> 'UsbPassthroughDevice': 
         """
         Retrieve details about `device` USB device.
 
@@ -276,7 +276,132 @@ class VmDevice(Namespace):
             device
         Returns
         -------
-        dict[str]:
+        UsbPassthroughDevice:
             usb_passthrough_device
         """
+        ...
+
+class VmdeviceCreate(typing.TypedDict):
+        dtype:'str'
+        vm:'int'
+        attributes:'dict[str]'
+        order:'typing.Optional[int]'
+        ...
+class VmDeviceCreateReturns(typing.TypedDict):
+        dtype:'str'
+        vm:'int'
+        attributes:'dict[str]'
+        order:'typing.Optional[int]'
+        id:'int'
+        ...
+class VmDeviceDelete(typing.TypedDict):
+        zvol:'bool'
+        raw_file:'bool'
+        force:'bool'
+        ...
+class QueryOptionsGetInstance(typing.TypedDict):
+        relationships:'bool'
+        extend:'typing.Optional[str]'
+        extend_context:'typing.Optional[str]'
+        prefix:'typing.Optional[str]'
+        extra:'dict[str]'
+        order_by:'list'
+        select:'list'
+        count:'bool'
+        get:'bool'
+        offset:'int'
+        limit:'int'
+        force_sql_filters:'bool'
+        ...
+class IotypeChoices(typing.TypedDict):
+        NATIVE:'str'
+        THREADS:'str'
+        IO_URING:'str'
+        ...
+class PassthroughDevice(typing.TypedDict):
+        capability:'Capability'
+        controller_type:'typing.Optional[str]'
+        iommu_group:'IommuGroup'
+        available:'bool'
+        drivers:'list[str]'
+        error:'typing.Optional[str]'
+        device_path:'typing.Optional[str]'
+        reset_mechanism_defined:'bool'
+        description:'str'
+        ...
+class Capability(typing.TypedDict):
+        class:'typing.Optional[str]'
+        domain:'typing.Optional[str]'
+        bus:'typing.Optional[str]'
+        slot:'typing.Optional[str]'
+        function:'typing.Optional[str]'
+        product:'typing.Optional[str]'
+        vendor:'typing.Optional[str]'
+        ...
+class IommuGroup(typing.TypedDict):
+        number:'int'
+        addresses:'list[Address]'
+        ...
+class Address(typing.TypedDict):
+        domain:'str'
+        bus:'str'
+        slot:'str'
+        function:'str'
+        ...
+class QueryOptions(typing.TypedDict):
+        relationships:'bool'
+        extend:'typing.Optional[str]'
+        extend_context:'typing.Optional[str]'
+        prefix:'typing.Optional[str]'
+        extra:'dict[str]'
+        order_by:'list'
+        select:'list'
+        count:'bool'
+        get:'bool'
+        offset:'int'
+        limit:'int'
+        force_sql_filters:'bool'
+        ...
+class VmDeviceEntry(typing.TypedDict):
+        dtype:'str'
+        vm:'int'
+        attributes:'dict[str]'
+        order:'typing.Optional[int]'
+        id:'int'
+        ...
+class VmDeviceUpdate(typing.TypedDict):
+        dtype:'str'
+        vm:'int'
+        attributes:'dict[str]'
+        order:'typing.Optional[int]'
+        ...
+class VmDeviceUpdateReturns(typing.TypedDict):
+        dtype:'str'
+        vm:'int'
+        attributes:'dict[str]'
+        order:'typing.Optional[int]'
+        id:'int'
+        ...
+class UsbControllerChoices(typing.TypedDict):
+        piix3-uhci:'str'
+        piix4-uhci:'str'
+        ehci:'str'
+        ich9-ehci1:'str'
+        vt82c686b-uhci:'str'
+        pci-ohci:'str'
+        nec-xhci:'str'
+        qemu-xhci:'str'
+        ...
+class UsbPassthroughDevice(typing.TypedDict):
+        capability:'Capability'
+        available:'bool'
+        error:'typing.Optional[str]'
+        ...
+class Capability_(typing.TypedDict):
+        product:'typing.Optional[str]'
+        product_id:'typing.Optional[str]'
+        vendor:'typing.Optional[str]'
+        vendor_id:'typing.Optional[str]'
+        bus:'typing.Optional[str]'
+        device:'typing.Optional[str]'
         ...

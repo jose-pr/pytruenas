@@ -1,12 +1,12 @@
 
 from pytruenas import Namespace, TrueNASClient
-import typing as _ty
+import typing
 class IscsiTargetextent(Namespace):
-    _namespace:_ty.Literal['iscsi.targetextent']
+    _namespace:typing.Literal['iscsi.targetextent']
     def __init__(self, client:TrueNASClient) -> None: ...
-    @_ty.overload
+    @typing.overload
     def create(self, 
-        iscsi_targetextent_create:'dict[str]'={},
+        iscsi_targetextent_create:'IscsiTargetextentCreate'={},
     /) -> 'dict[str]': 
         """
         Create an Associated Target.
@@ -23,7 +23,7 @@ class IscsiTargetextent(Namespace):
             iscsi_targetextent_create_returns
         """
         ...
-    @_ty.overload
+    @typing.overload
     def delete(self, 
         id:'int',
         force:'bool'=False,
@@ -43,10 +43,10 @@ class IscsiTargetextent(Namespace):
             Will return `true` if `id` is deleted successfully
         """
         ...
-    @_ty.overload
+    @typing.overload
     def get_instance(self, 
         id:'str|int|bool|dict[str]|list',
-        query_options_get_instance:'dict[str]'={},
+        query_options_get_instance:'QueryOptionsGetInstance'={},
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -63,11 +63,11 @@ class IscsiTargetextent(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def query(self, 
-        query_filters:'list'=[],
-        query_options:'dict[str]'={},
-    /) -> 'list|dict[str]|int|dict[str]': 
+        query_filters:'list[list]'=[],
+        query_options:'QueryOptions'={},
+    /) -> 'list[dict[str]]|dict[str]|int|dict[str]': 
         """
         
 
@@ -79,7 +79,7 @@ class IscsiTargetextent(Namespace):
             query-options
         Returns
         -------
-        list:
+        list[dict[str]]:
             
         dict[str]:
             
@@ -89,10 +89,10 @@ class IscsiTargetextent(Namespace):
             
         """
         ...
-    @_ty.overload
+    @typing.overload
     def update(self, 
         id:'int',
-        iscsi_targetextent_update:'dict[str]'={},
+        iscsi_targetextent_update:'IscsiTargetextentUpdate'={},
     /) -> 'dict[str]': 
         """
         Update Associated Target of `id`.
@@ -109,4 +109,43 @@ class IscsiTargetextent(Namespace):
         dict[str]:
             iscsi_targetextent_update_returns
         """
+        ...
+
+class IscsiTargetextentCreate(typing.TypedDict):
+        target:'int'
+        lunid:'typing.Optional[int]'
+        extent:'int'
+        ...
+class QueryOptionsGetInstance(typing.TypedDict):
+        relationships:'bool'
+        extend:'typing.Optional[str]'
+        extend_context:'typing.Optional[str]'
+        prefix:'typing.Optional[str]'
+        extra:'dict[str]'
+        order_by:'list'
+        select:'list'
+        count:'bool'
+        get:'bool'
+        offset:'int'
+        limit:'int'
+        force_sql_filters:'bool'
+        ...
+class QueryOptions(typing.TypedDict):
+        relationships:'bool'
+        extend:'typing.Optional[str]'
+        extend_context:'typing.Optional[str]'
+        prefix:'typing.Optional[str]'
+        extra:'dict[str]'
+        order_by:'list'
+        select:'list'
+        count:'bool'
+        get:'bool'
+        offset:'int'
+        limit:'int'
+        force_sql_filters:'bool'
+        ...
+class IscsiTargetextentUpdate(typing.TypedDict):
+        target:'int'
+        lunid:'int'
+        extent:'int'
         ...

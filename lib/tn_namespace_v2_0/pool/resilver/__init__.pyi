@@ -1,12 +1,12 @@
 
 from pytruenas import Namespace, TrueNASClient
-import typing as _ty
+import typing
 class PoolResilver(Namespace):
-    _namespace:_ty.Literal['pool.resilver']
+    _namespace:typing.Literal['pool.resilver']
     def __init__(self, client:TrueNASClient) -> None: ...
-    @_ty.overload
+    @typing.overload
     def config(self, 
-    /) -> 'dict[str]': 
+    /) -> 'PoolResilverEntry': 
         """
         
 
@@ -14,14 +14,14 @@ class PoolResilver(Namespace):
         ----------
         Returns
         -------
-        dict[str]:
+        PoolResilverEntry:
             pool_resilver_entry
         """
         ...
-    @_ty.overload
+    @typing.overload
     def update(self, 
-        pool_resilver_update:'dict[str]'={},
-    /) -> 'dict[str]': 
+        pool_resilver_update:'PoolResilverUpdate'={},
+    /) -> 'PoolResilverUpdateReturns': 
         """
         Configure Pool Resilver Priority.
         
@@ -37,7 +37,28 @@ class PoolResilver(Namespace):
             pool_resilver_update
         Returns
         -------
-        dict[str]:
+        PoolResilverUpdateReturns:
             pool_resilver_update_returns
         """
+        ...
+
+class PoolResilverEntry(typing.TypedDict):
+        id:'int'
+        begin:'str'
+        end:'str'
+        enabled:'bool'
+        weekday:'list[int]'
+        ...
+class PoolResilverUpdate(typing.TypedDict):
+        begin:'str'
+        end:'str'
+        enabled:'bool'
+        weekday:'list[int]'
+        ...
+class PoolResilverUpdateReturns(typing.TypedDict):
+        id:'int'
+        begin:'str'
+        end:'str'
+        enabled:'bool'
+        weekday:'list[int]'
         ...

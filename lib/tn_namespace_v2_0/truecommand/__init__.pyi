@@ -1,12 +1,12 @@
 
 from pytruenas import Namespace, TrueNASClient
-import typing as _ty
+import typing
 class Truecommand(Namespace):
-    _namespace:_ty.Literal['truecommand']
+    _namespace:typing.Literal['truecommand']
     def __init__(self, client:TrueNASClient) -> None: ...
-    @_ty.overload
+    @typing.overload
     def config(self, 
-    /) -> 'dict[str]': 
+    /) -> 'TruecommandEntry': 
         """
         
 
@@ -14,13 +14,13 @@ class Truecommand(Namespace):
         ----------
         Returns
         -------
-        dict[str]:
+        TruecommandEntry:
             truecommand_entry
         """
         ...
-    @_ty.overload
+    @typing.overload
     def connected(self, 
-    /) -> 'dict[str]': 
+    /) -> 'TruecommandConnected': 
         """
         Returns information which shows if system has an authenticated api key
         and has initiated a VPN connection with TrueCommand.
@@ -29,14 +29,14 @@ class Truecommand(Namespace):
         ----------
         Returns
         -------
-        dict[str]:
+        TruecommandConnected:
             truecommand_connected
         """
         ...
-    @_ty.overload
+    @typing.overload
     def update(self, 
-        truecommand_update:'dict[str]'={},
-    /) -> 'dict[str]': 
+        truecommand_update:'TruecommandUpdate'={},
+    /) -> 'TruecommandUpdateReturns': 
         """
         Update Truecommand service settings.
         
@@ -48,7 +48,37 @@ class Truecommand(Namespace):
             truecommand_update
         Returns
         -------
-        dict[str]:
+        TruecommandUpdateReturns:
             truecommand_update_returns
         """
+        ...
+
+class TruecommandEntry(typing.TypedDict):
+        id:'int'
+        api_key:'typing.Optional[str]'
+        status:'str'
+        status_reason:'str'
+        remote_url:'typing.Optional[str]'
+        remote_ip_address:'typing.Optional[str]'
+        enabled:'bool'
+        ...
+class TruecommandConnected(typing.TypedDict):
+        connected:'bool'
+        truecommand_ip:'typing.Optional[str]'
+        truecommand_url:'typing.Optional[str]'
+        status:'str'
+        status_reason:'str'
+        ...
+class TruecommandUpdate(typing.TypedDict):
+        enabled:'bool'
+        api_key:'typing.Optional[str]'
+        ...
+class TruecommandUpdateReturns(typing.TypedDict):
+        id:'int'
+        api_key:'typing.Optional[str]'
+        status:'str'
+        status_reason:'str'
+        remote_url:'typing.Optional[str]'
+        remote_ip_address:'typing.Optional[str]'
+        enabled:'bool'
         ...

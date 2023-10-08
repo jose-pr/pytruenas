@@ -1,10 +1,10 @@
 
 from pytruenas import Namespace, TrueNASClient
-import typing as _ty
+import typing
 class Filesystem(Namespace):
-    _namespace:_ty.Literal['filesystem']
+    _namespace:typing.Literal['filesystem']
     def __init__(self, client:TrueNASClient) -> None: ...
-    @_ty.overload
+    @typing.overload
     def acl_is_trivial(self, 
         path:'str',
     /) -> 'bool': 
@@ -27,11 +27,11 @@ class Filesystem(Namespace):
             paths_acl_is_trivial
         """
         ...
-    @_ty.overload
+    @typing.overload
     def can_access_as_user(self, 
         username:'str',
         path:'str',
-        permissions:'dict[str]'={},
+        permissions:'Permissions'={},
     /) -> 'bool': 
         """
         Check if `username` is able to access `path` with specific `permissions`. At least one of `read/write/execute`
@@ -52,9 +52,9 @@ class Filesystem(Namespace):
             can_access_as_user
         """
         ...
-    @_ty.overload
+    @typing.overload
     def chown(self, 
-        filesystem_ownership:'dict[str]'={},
+        filesystem_ownership:'FilesystemOwnership'={},
     /) -> None: 
         """
         Change owner or group of file at `path`.
@@ -77,10 +77,10 @@ class Filesystem(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def default_acl_choices(self, 
         path:'str'="",
-    /) -> 'list': 
+    /) -> 'list[str]': 
         """
         `DEPRECATED`
         Returns list of names of ACL templates. Wrapper around
@@ -92,11 +92,11 @@ class Filesystem(Namespace):
             path
         Returns
         -------
-        list:
+        list[str]:
             acl_choices
         """
         ...
-    @_ty.overload
+    @typing.overload
     def get(self, 
         path:'str',
     /) -> None: 
@@ -111,11 +111,11 @@ class Filesystem(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def get_default_acl(self, 
         acl_type:'str'="POSIX_OPEN",
         share_type:'str'="NONE",
-    /) -> 'list|list': 
+    /) -> 'list[Nfs4Ace]|list[Posix1eAce]': 
         """
         `DEPRECATED`
         Returns a default ACL depending on the usage specified by `acl_type`.
@@ -131,16 +131,16 @@ class Filesystem(Namespace):
             share_type
         Returns
         -------
-        list:
+        list[Nfs4Ace]:
             
-        list:
+        list[Posix1eAce]:
             
         """
         ...
-    @_ty.overload
+    @typing.overload
     def get_dosmode(self, 
         path:'str',
-    /) -> 'dict[str]': 
+    /) -> 'Dosmode': 
         """
         
 
@@ -150,16 +150,16 @@ class Filesystem(Namespace):
             path
         Returns
         -------
-        dict[str]:
+        Dosmode:
             dosmode
         """
         ...
-    @_ty.overload
+    @typing.overload
     def getacl(self, 
         path:'str',
         simplified:'bool'=True,
         resolve_ids:'bool'=False,
-    /) -> 'dict[str]': 
+    /) -> 'TruenasAcl': 
         """
         Return ACL of a given path. This may return a POSIX1e ACL or a NFSv4 ACL. The acl type is indicated
         by the `acltype` key.
@@ -212,11 +212,11 @@ class Filesystem(Namespace):
             only be used if resolving ids to names is required.
         Returns
         -------
-        dict[str]:
+        TruenasAcl:
             truenas_acl
         """
         ...
-    @_ty.overload
+    @typing.overload
     def is_immutable(self, 
         path:'str',
     /) -> 'bool': 
@@ -233,12 +233,12 @@ class Filesystem(Namespace):
             is_immutable
         """
         ...
-    @_ty.overload
+    @typing.overload
     def listdir(self, 
         path:'str',
-        query_filters:'list'=[],
-        query_options:'dict[str]'={},
-    /) -> 'int|dict[str]|list': 
+        query_filters:'list[list]'=[],
+        query_options:'QueryOptions'={},
+    /) -> 'int|PathEntry|list[PathEntry]': 
         """
         Get the contents of a directory.
         
@@ -272,16 +272,16 @@ class Filesystem(Namespace):
         -------
         int:
             
-        dict[str]:
+        PathEntry:
             
-        list:
+        list[PathEntry]:
             
         """
         ...
-    @_ty.overload
+    @typing.overload
     def mkdir(self, 
         path:'str',
-    /) -> 'dict[str]': 
+    /) -> 'PathEntry': 
         """
         Create a directory at the specified path.
 
@@ -291,14 +291,14 @@ class Filesystem(Namespace):
             path
         Returns
         -------
-        dict[str]:
+        PathEntry:
             path_entry
         """
         ...
-    @_ty.overload
+    @typing.overload
     def put(self, 
         path:'str',
-        options:'dict[str]'={},
+        options:'Options_'={},
     /) -> 'bool': 
         """
         Job to put contents to `path`.
@@ -315,9 +315,9 @@ class Filesystem(Namespace):
             successful_put
         """
         ...
-    @_ty.overload
+    @typing.overload
     def set_dosmode(self, 
-        set_dosmode:'dict[str]'={},
+        set_dosmode:'SetDosmode'={},
     /) -> None: 
         """
         
@@ -330,7 +330,7 @@ class Filesystem(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def set_immutable(self, 
         set_flag:'bool',
         path:'str',
@@ -350,9 +350,9 @@ class Filesystem(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def setacl(self, 
-        filesystem_acl:'dict[str]'={},
+        filesystem_acl:'FilesystemAcl'={},
     /) -> None: 
         """
         Set ACL of a given path. Takes the following parameters:
@@ -396,9 +396,9 @@ class Filesystem(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def setperm(self, 
-        filesystem_permission:'dict[str]'={},
+        filesystem_permission:'FilesystemPermission'={},
     /) -> None: 
         """
         Set unix permissions on given `path`.
@@ -437,10 +437,10 @@ class Filesystem(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def stat(self, 
         path:'str',
-    /) -> 'dict[str]': 
+    /) -> 'PathStats': 
         """
         Return the filesystem stat(2) for a given `path`.
         
@@ -455,14 +455,14 @@ class Filesystem(Namespace):
             Return the filesystem stat(2) for a given `path`.
         Returns
         -------
-        dict[str]:
+        PathStats:
             path_stats
         """
         ...
-    @_ty.overload
+    @typing.overload
     def statfs(self, 
         path:'str',
-    /) -> 'dict[str]': 
+    /) -> 'PathStatfs': 
         """
         Return stats from the filesystem of a given path.
         
@@ -480,7 +480,189 @@ class Filesystem(Namespace):
             path
         Returns
         -------
-        dict[str]:
+        PathStatfs:
             path_statfs
         """
+        ...
+
+class Permissions(typing.TypedDict):
+        read:'typing.Optional[bool]'
+        write:'typing.Optional[bool]'
+        execute:'typing.Optional[bool]'
+        ...
+class FilesystemOwnership(typing.TypedDict):
+        path:'str'
+        uid:'typing.Optional[int]'
+        gid:'typing.Optional[int]'
+        options:'Options'
+        ...
+class Options(typing.TypedDict):
+        recursive:'bool'
+        traverse:'bool'
+        ...
+class Nfs4Ace(typing.TypedDict):
+        tag:'str'
+        id:'typing.Optional[int]'
+        type:'str'
+        perms:'Perms'
+        flags:'Flags'
+        ...
+class Perms(typing.TypedDict):
+        READ_DATA:'bool'
+        WRITE_DATA:'bool'
+        APPEND_DATA:'bool'
+        READ_NAMED_ATTRS:'bool'
+        WRITE_NAMED_ATTRS:'bool'
+        EXECUTE:'bool'
+        DELETE_CHILD:'bool'
+        READ_ATTRIBUTES:'bool'
+        WRITE_ATTRIBUTES:'bool'
+        DELETE:'bool'
+        READ_ACL:'bool'
+        WRITE_ACL:'bool'
+        WRITE_OWNER:'bool'
+        SYNCHRONIZE:'bool'
+        BASIC:'str'
+        ...
+class Flags(typing.TypedDict):
+        FILE_INHERIT:'bool'
+        DIRECTORY_INHERIT:'bool'
+        NO_PROPAGATE_INHERIT:'bool'
+        INHERIT_ONLY:'bool'
+        INHERITED:'bool'
+        BASIC:'str'
+        ...
+class Posix1eAce(typing.TypedDict):
+        default:'bool'
+        tag:'str'
+        id:'int'
+        perms:'Perms'
+        ...
+class Perms_(typing.TypedDict):
+        READ:'bool'
+        WRITE:'bool'
+        EXECUTE:'bool'
+        ...
+class Dosmode(typing.TypedDict):
+        readonly:'bool'
+        hidden:'bool'
+        system:'bool'
+        archive:'bool'
+        reparse:'bool'
+        offline:'bool'
+        sparse:'bool'
+        ...
+class TruenasAcl(typing.TypedDict):
+        path:'str'
+        trivial:'bool'
+        acltype:'typing.Optional[str]'
+        acl:'typing.Union[list[Nfs4Ace], list[Posix1eAce]]'
+        ...
+class QueryOptions(typing.TypedDict):
+        relationships:'bool'
+        extend:'typing.Optional[str]'
+        extend_context:'typing.Optional[str]'
+        prefix:'typing.Optional[str]'
+        extra:'dict[str]'
+        order_by:'list'
+        select:'list'
+        count:'bool'
+        get:'bool'
+        offset:'int'
+        limit:'int'
+        force_sql_filters:'bool'
+        ...
+class PathEntry(typing.TypedDict):
+        name:'str'
+        path:'str'
+        realpath:'str'
+        type:'str'
+        size:'typing.Optional[int]'
+        mode:'typing.Optional[int]'
+        acl:'typing.Optional[bool]'
+        uid:'typing.Optional[int]'
+        gid:'typing.Optional[int]'
+        is_mountpoint:'bool'
+        is_ctldir:'bool'
+        ...
+class Options_(typing.TypedDict):
+        append:'bool'
+        mode:'int'
+        ...
+class SetDosmode(typing.TypedDict):
+        path:'str'
+        dosmode:'Dosmode'
+        ...
+class FilesystemAcl(typing.TypedDict):
+        path:'str'
+        uid:'typing.Optional[int]'
+        gid:'typing.Optional[int]'
+        dacl:'typing.Union[list[Nfs4Ace], list[Posix1eAce]]'
+        nfs41_flags:'Nfs41Flags'
+        acltype:'typing.Optional[str]'
+        options:'Options'
+        ...
+class Nfs41Flags(typing.TypedDict):
+        autoinherit:'bool'
+        protected:'bool'
+        ...
+class Options__(typing.TypedDict):
+        stripacl:'bool'
+        recursive:'bool'
+        traverse:'bool'
+        canonicalize:'bool'
+        ...
+class FilesystemPermission(typing.TypedDict):
+        path:'str'
+        mode:'typing.Optional[str]'
+        uid:'typing.Optional[int]'
+        gid:'typing.Optional[int]'
+        options:'Options'
+        ...
+class Options___(typing.TypedDict):
+        stripacl:'bool'
+        recursive:'bool'
+        traverse:'bool'
+        ...
+class PathStats(typing.TypedDict):
+        realpath:'str'
+        size:'int'
+        mode:'int'
+        uid:'int'
+        gid:'int'
+        atime:'float'
+        mtime:'float'
+        ctime:'float'
+        btime:'float'
+        dev:'int'
+        inode:'int'
+        nlink:'int'
+        is_mountpoint:'bool'
+        is_ctldir:'bool'
+        user:'typing.Optional[str]'
+        group:'typing.Optional[str]'
+        acl:'bool'
+        ...
+class PathStatfs(typing.TypedDict):
+        flags:'list'
+        fsid:'list'
+        fstype:'str'
+        source:'str'
+        dest:'str'
+        blocksize:'int'
+        total_blocks:'int'
+        free_blocks:'int'
+        avail_blocks:'int'
+        total_blocks_str:'str'
+        free_blocks_str:'str'
+        avail_blocks_str:'str'
+        files:'int'
+        free_files:'int'
+        name_max:'int'
+        total_bytes:'int'
+        free_bytes:'int'
+        avail_bytes:'int'
+        total_bytes_str:'str'
+        free_bytes_str:'str'
+        avail_bytes_str:'str'
         ...

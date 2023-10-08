@@ -1,13 +1,13 @@
 
 from pytruenas import Namespace, TrueNASClient
-import typing as _ty
+import typing
 class ClusterManagement(Namespace):
-    _namespace:_ty.Literal['cluster.management']
+    _namespace:typing.Literal['cluster.management']
     def __init__(self, client:TrueNASClient) -> None: ...
-    @_ty.overload
+    @typing.overload
     def add_nodes(self, 
-        add_cluster_nodes:'dict[str]'={},
-    /) -> 'dict[str]': 
+        add_cluster_nodes:'AddClusterNodes'={},
+    /) -> 'ClusterInformation': 
         """
         WARNING: clustering APIs are not intended for 3rd-party consumption and may result
         in a misconfigured SCALE cluster, production outage, or data loss.
@@ -34,14 +34,14 @@ class ClusterManagement(Namespace):
             add_cluster_nodes
         Returns
         -------
-        dict[str]:
+        ClusterInformation:
             cluster_information
         """
         ...
-    @_ty.overload
+    @typing.overload
     def cluster_create(self, 
-        cluster_configuration:'dict[str]'={},
-    /) -> 'dict[str]': 
+        cluster_configuration:'ClusterConfiguration'={},
+    /) -> 'ClusterInformation_': 
         """
         WARNING: clustering APIs are not intended for 3rd-party consumption and may result
         in a misconfigured SCALE cluster, production outage, or data loss.
@@ -90,14 +90,14 @@ class ClusterManagement(Namespace):
             cluster_configuration
         Returns
         -------
-        dict[str]:
+        ClusterInformation_:
             cluster_information
         """
         ...
-    @_ty.overload
+    @typing.overload
     def summary(self, 
-        summary_options:'dict[str]'={},
-    /) -> 'dict[str]': 
+        summary_options:'SummaryOptions'={},
+    /) -> 'Summary': 
         """
         WARNING: clustering APIs are not intended for 3rd-party consumption and may result
         in a misconfigured SCALE cluster, production outage, or data loss.
@@ -140,7 +140,167 @@ class ClusterManagement(Namespace):
             summary_options
         Returns
         -------
-        dict[str]:
+        Summary:
             summary
         """
+        ...
+
+class AddClusterNodes(typing.TypedDict):
+        new_cluster_nodes:'list[ClusterPeer]'
+        options:'Options'
+        ...
+class ClusterPeer(typing.TypedDict):
+        remote_credential:'typing.Union[ForwardRef(PlainCred), ForwardRef(AuthenticationToken), ForwardRef(ApiKey)]'
+        hostname:'str'
+        private_address:'str'
+        brick_path:'str'
+        ...
+class PlainCred(typing.TypedDict):
+        username:'str'
+        password:'str'
+        ...
+class AuthenticationToken(typing.TypedDict):
+        auth_token:'str'
+        ...
+class ApiKey(typing.TypedDict):
+        api_key:'str'
+        ...
+class Options(typing.TypedDict):
+        skip_brick_add:'bool'
+        rebalance_volume:'bool'
+        ...
+class ClusterInformation(typing.TypedDict):
+        gluster_volume:'list[GlusterVolumeEntry]'
+        gluster_peers:'list[GlusterPeerEntry]'
+        ctdb_configuration:'CtdbConfiguration'
+        ...
+class GlusterVolumeEntry(typing.TypedDict):
+        name:'str'
+        uuid:'str'
+        type:'str'
+        online:'bool'
+        ports:'Ports'
+        pid:'str'
+        size_total:'int'
+        size_free:'int'
+        size_used:'int'
+        inodes_total:'int'
+        inodes_free:'int'
+        inodes_used:'int'
+        device:'str'
+        block_size:'str'
+        mnt_options:'str'
+        fs_name:'str'
+        ...
+class Ports(typing.TypedDict):
+        tcp:'str'
+        rdma:'str'
+        ...
+class GlusterPeerEntry(typing.TypedDict):
+        id:'str'
+        uuid:'str'
+        hostname:'str'
+        connected:'str'
+        state:'str'
+        status:'str'
+        ...
+class CtdbConfiguration(typing.TypedDict):
+        root_dir_config:'RootDirConfig'
+        private_ips:'list[CtdbPrivateIp]'
+        ...
+class RootDirConfig(typing.TypedDict):
+        volume_name:'str'
+        volume_mountpoint:'str'
+        volume_type:'str'
+        path:'str'
+        mountpoint:'str'
+        uuid:'str'
+        ...
+class CtdbPrivateIp(typing.TypedDict):
+        id:'int'
+        pnn:'int'
+        address:'str'
+        enabled:'bool'
+        this_node:'bool'
+        node_uuid:'str'
+        ...
+class ClusterConfiguration(typing.TypedDict):
+        volume_configuration:'VolumeConfiguration'
+        local_node_configuration:'LocalNodeConfiguration'
+        peers:'list[ClusterPeer]'
+        ...
+class VolumeConfiguration(typing.TypedDict):
+        name:'str'
+        brick_layout:'typing.Union[ForwardRef(ReplicatedBrickLayout), ForwardRef(DispersedBrickLayout), ForwardRef(DistributedBrickLayout)]'
+        ...
+class ReplicatedBrickLayout(typing.TypedDict):
+        replica_distribute:'int'
+        ...
+class DispersedBrickLayout(typing.TypedDict):
+        disperse_data:'int'
+        disperse_redundancy:'int'
+        disperse_distribute:'int'
+        ...
+class DistributedBrickLayout(typing.TypedDict):
+        distribute_bricks:'int'
+        ...
+class LocalNodeConfiguration(typing.TypedDict):
+        hostname:'str'
+        private_address:'str'
+        brick_path:'str'
+        ...
+class ClusterInformation_(typing.TypedDict):
+        gluster_volume:'list[GlusterVolumeEntry]'
+        gluster_peers:'list[GlusterPeerEntry]'
+        ctdb_configuration:'CtdbConfiguration'
+        ...
+class SummaryOptions(typing.TypedDict):
+        include_volumes:'bool'
+        ...
+class Summary(typing.TypedDict):
+        healthy:'bool'
+        version:'Version'
+        ctdb_root_dir_config:'RootDirConfig'
+        leader:'Leader'
+        cluster_nodes:'list[ClusterNode]'
+        cluster_volumes:'list'
+        ...
+class Version(typing.TypedDict):
+        major:'int'
+        minor:'int'
+        ...
+class Leader(typing.TypedDict):
+        pnn:'int'
+        this_node:'bool'
+        enabled:'bool'
+        uuid:'str'
+        status:'Status'
+        private_address:'str'
+        virtual_addresses:'VirtualAddresses'
+        ...
+class Status(typing.TypedDict):
+        node:'Node'
+        peering:'Peering'
+        ...
+class Node(typing.TypedDict):
+        flags:'list'
+        partially_online:'bool'
+        ...
+class Peering(typing.TypedDict):
+        connected:'str'
+        state:'str'
+        status:'str'
+        ...
+class VirtualAddresses(typing.TypedDict):
+        configured:'list'
+        active:'list'
+        ...
+class ClusterNode(typing.TypedDict):
+        pnn:'int'
+        this_node:'bool'
+        enabled:'bool'
+        uuid:'str'
+        status:'Status'
+        private_address:'str'
+        virtual_addresses:'VirtualAddresses'
         ...

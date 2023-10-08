@@ -1,12 +1,12 @@
 
 from pytruenas import Namespace, TrueNASClient
-import typing as _ty
+import typing
 class Update(Namespace):
-    _namespace:_ty.Literal['update']
+    _namespace:typing.Literal['update']
     def __init__(self, client:TrueNASClient) -> None: ...
-    @_ty.overload
+    @typing.overload
     def check_available(self, 
-        update_check_available:'dict[str]'={},
+        update_check_available:'UpdateCheckAvailable'={},
     /) -> None: 
         """
         Checks if there is an update available from update server.
@@ -25,7 +25,7 @@ class Update(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def download(self, 
     /) -> None: 
         """
@@ -37,9 +37,9 @@ class Update(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def file(self, 
-        updatefile:'dict[str]'={},
+        updatefile:'Updatefile'={},
     /) -> None: 
         """
         Updates the system using the uploaded .tar file.
@@ -58,7 +58,7 @@ class Update(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def get_auto_download(self, 
     /) -> None: 
         """
@@ -70,7 +70,7 @@ class Update(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def get_pending(self, 
         path:'str|None'=None,
     /) -> None: 
@@ -91,7 +91,7 @@ class Update(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def get_trains(self, 
     /) -> None: 
         """
@@ -104,10 +104,10 @@ class Update(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def manual(self, 
         path:'str',
-        options:'dict[str]'={},
+        options:'Options'={},
     /) -> None: 
         """
         Update the system using a manual update file.
@@ -130,7 +130,7 @@ class Update(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def set_auto_download(self, 
         autocheck:'bool',
     /) -> None: 
@@ -145,7 +145,7 @@ class Update(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def set_train(self, 
         train:'str',
     /) -> None: 
@@ -160,9 +160,9 @@ class Update(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def update(self, 
-        update:'dict[str]'={},
+        update:'Update'={},
     /) -> None: 
         """
         Downloads (if not already in cache) and apply an update.
@@ -178,4 +178,23 @@ class Update(Namespace):
         Returns
         -------
         """
+        ...
+
+class UpdateCheckAvailable(typing.TypedDict):
+        train:'str'
+        ...
+class Updatefile(typing.TypedDict):
+        resume:'bool'
+        destination:'typing.Optional[str]'
+        ...
+class Options(typing.TypedDict):
+        dataset_name:'typing.Optional[str]'
+        resume:'bool'
+        cleanup:'bool'
+        ...
+class Update(typing.TypedDict):
+        dataset_name:'typing.Optional[str]'
+        resume:'bool'
+        train:'typing.Optional[str]'
+        reboot:'bool'
         ...

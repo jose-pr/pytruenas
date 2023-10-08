@@ -1,12 +1,12 @@
 
 from pytruenas import Namespace, TrueNASClient
-import typing as _ty
+import typing
 class FailoverDisabled(Namespace):
-    _namespace:_ty.Literal['failover.disabled']
+    _namespace:typing.Literal['failover.disabled']
     def __init__(self, client:TrueNASClient) -> None: ...
-    @_ty.overload
+    @typing.overload
     def reasons(self, 
-    /) -> 'list': 
+    /) -> 'list[str]': 
         """
         Returns a list of reasons why failover is not enabled/functional.
         
@@ -30,7 +30,8 @@ class FailoverDisabled(Namespace):
         ----------
         Returns
         -------
-        list:
+        list[str]:
             reasons
         """
         ...
+
