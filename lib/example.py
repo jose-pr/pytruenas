@@ -3,7 +3,7 @@ from pytruenas import TrueNASClient, Creds, AuthMethod
 from pytruenas.exts import UpdateReturn
 from pytruenas.namespace.tns23 import *
 
-from tn_namespaces import AcmeDnsAuthenticator
+from _namespaces import AcmeDnsAuthenticator
 
 import os
 
