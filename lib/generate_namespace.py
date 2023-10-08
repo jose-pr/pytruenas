@@ -11,7 +11,7 @@ import shutil
 #client = TrueNASClient(tn_host, tn_apikey)
 client = TrueNASClient()
 
-namespaces_path = Path('./lib/_namespaces').resolve()
+namespaces_path = Path('./lib/tn_namespace_v2_0').resolve()
 shutil.rmtree(namespaces_path, ignore_errors=True)
 
 

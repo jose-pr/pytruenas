@@ -1,31 +1,60 @@
 #!/bin/python3
 from pytruenas import TrueNASClient, Creds, AuthMethod
 from pytruenas.exts import UpdateReturn
-from pytruenas.namespace.tns23 import *
-
-from _namespaces import AcmeDnsAuthenticator
 
 import os
+from typing import TypedDict
+
+from pytruenas.exts import MapExtended as _NSMap
+from tn_namespace_v2_0 import Cronjob as _Cronjob, Auth
+from tn_namespace_v2_0_exts import SystemGeneral
+
+class CronjobEntry(TypedDict):
+    id:int
+    ...
+#
+# Extend automatic generated namespace with some methods for Map/list 
+#
+class Cronjob(_NSMap[CronjobEntry], _Cronjob):
+    ...
+
 
 tn_host = os.environ['TN_HOST']
 tn_apikey = os.environ['TN_APIKEY']
-client = TrueNASClient(tn_host, tn_apikey)
-test= AcmeDnsAuthenticator(client)
+client = TrueNASClient(tn_host, tn_apikey, sslverify=False)
 sysgeneral = SystemGeneral(client)
 config = sysgeneral.config()
 port = config['ui_port']
 timezones = sysgeneral.timezone_choices()
 cronjobs = Cronjob(client)
-count = cronjobs.get(1)
+count = len(cronjobs)
+_cronjobs = cronjobs.query()
+_first = _cronjobs[0] if cronjobs else None
+firstid = _first['id'] if cronjobs else None
+assert cronjobs.get(firstid, None) == _first 
+#
+# By default returns the new config
+#
+config = sysgeneral.update({"ui_port": 80})
+#
+# Get the changes and the full config
+#
 diff, config = sysgeneral.update({"ui_port": 81},  _return=UpdateReturn.Both, ui_port=80, ui_httpsport=443)
 print(f"Changes: {diff}")
+#
+# Only do an action if config changed
+#
 if sysgeneral.update(_return=UpdateReturn.Diff, ui_port=port):
     print("Settings changed back")
 auth = Auth(client)
-whoami = auth.me()
+try:
+    whoami = auth.me()
+except:
+    # Will fail when using api keys
+    ...
 sessions = auth.sessions()
 
-token = auth.generate_token()
+token = auth.generate_token(10)
 
 print(token)
 pass
