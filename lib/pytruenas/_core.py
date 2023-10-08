@@ -30,7 +30,6 @@ class NamespaceInfo(TypedDict):
     type: str
     methods: "dict[str, Method]"
 
-
 class Parameter(TypedDict):
     name: str
     title: str

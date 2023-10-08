@@ -154,4 +154,4 @@ class Codegen:
                 ns_path.write_text(code)
                 if typings:
                     ns_path.with_suffix(".pyi").write_text(typings)
-                index.write(f"from .{ns.module} import {ns.modpath}\n")
+                index.write(f"from .{ns.module} import {ns.classname}\n")
