@@ -9,12 +9,21 @@ class ${exportas}(Namespace):
     def ${name}(self, 
     % for param in method['accepts']:
         ${param['name']}\
+        %if 'type' in param:
+:${'|'.join([str(t) for t in param['type']])}\
+        %endif
         %if not param.get('required', True):
 =${param.get('default',None)}\
         %endif
 ,
     % endfor
-    /): 
+    /)\
+%if not method['returns']:
+ -> None\
+%else:
+ -> ${'|'.join([str(t) for t in method['_returns']])}\
+%endif
+: 
         """${method['description'] or ''}
         """
         ...
