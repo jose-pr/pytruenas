@@ -1,10 +1,10 @@
 
 from pytruenas import Namespace, TrueNASClient
-import typing as _ty
+import typing
 class System(Namespace):
-    _namespace:_ty.Literal['system']
+    _namespace:typing.Literal['system']
     def __init__(self, client:TrueNASClient) -> None: ...
-    @_ty.overload
+    @typing.overload
     def boot_id(self, 
     /) -> 'str': 
         """
@@ -20,7 +20,7 @@ class System(Namespace):
             system_boot_identifier
         """
         ...
-    @_ty.overload
+    @typing.overload
     def build_time(self, 
     /) -> 'str': 
         """
@@ -34,7 +34,7 @@ class System(Namespace):
             system_build_time
         """
         ...
-    @_ty.overload
+    @typing.overload
     def debug(self, 
     /) -> None: 
         """
@@ -46,7 +46,7 @@ class System(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def environment(self, 
     /) -> 'str': 
         """
@@ -62,7 +62,7 @@ class System(Namespace):
             product_running_environment
         """
         ...
-    @_ty.overload
+    @typing.overload
     def feature_enabled(self, 
         feature:'str',
     /) -> 'bool': 
@@ -79,7 +79,7 @@ class System(Namespace):
             feature_enabled
         """
         ...
-    @_ty.overload
+    @typing.overload
     def host_id(self, 
     /) -> 'str': 
         """
@@ -97,9 +97,9 @@ class System(Namespace):
             system_host_identifier
         """
         ...
-    @_ty.overload
+    @typing.overload
     def info(self, 
-    /) -> 'dict[str]': 
+    /) -> 'SystemInfo': 
         """
         Returns basic system information.
 
@@ -107,11 +107,11 @@ class System(Namespace):
         ----------
         Returns
         -------
-        dict[str]:
+        SystemInfo:
             system_info
         """
         ...
-    @_ty.overload
+    @typing.overload
     def is_freenas(self, 
     /) -> 'bool': 
         """
@@ -127,7 +127,7 @@ class System(Namespace):
             system_is_truenas_core
         """
         ...
-    @_ty.overload
+    @typing.overload
     def is_stable(self, 
     /) -> 'str': 
         """
@@ -141,7 +141,7 @@ class System(Namespace):
             is_stable
         """
         ...
-    @_ty.overload
+    @typing.overload
     def license_update(self, 
         license:'str',
     /) -> None: 
@@ -156,7 +156,7 @@ class System(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def product_name(self, 
     /) -> 'str': 
         """
@@ -170,7 +170,7 @@ class System(Namespace):
             product_name
         """
         ...
-    @_ty.overload
+    @typing.overload
     def product_type(self, 
     /) -> 'str': 
         """
@@ -187,7 +187,7 @@ class System(Namespace):
             product_type
         """
         ...
-    @_ty.overload
+    @typing.overload
     def ready(self, 
     /) -> 'bool': 
         """
@@ -201,9 +201,9 @@ class System(Namespace):
             system_ready
         """
         ...
-    @_ty.overload
+    @typing.overload
     def reboot(self, 
-        system_reboot:'dict[str]'={},
+        system_reboot:'SystemReboot'={},
     /) -> None: 
         """
         Reboots the operating system.
@@ -218,7 +218,7 @@ class System(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def release_notes_url(self, 
         version_str:'str'=None,
     /) -> 'str|None': 
@@ -242,9 +242,9 @@ class System(Namespace):
             truenas_release_notes_url
         """
         ...
-    @_ty.overload
+    @typing.overload
     def shutdown(self, 
-        system_shutdown:'dict[str]'={},
+        system_shutdown:'SystemShutdown'={},
     /) -> None: 
         """
         Shuts down the operating system.
@@ -259,7 +259,7 @@ class System(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def state(self, 
     /) -> 'str': 
         """
@@ -276,7 +276,7 @@ class System(Namespace):
             system_state
         """
         ...
-    @_ty.overload
+    @typing.overload
     def version(self, 
     /) -> 'str': 
         """
@@ -290,7 +290,7 @@ class System(Namespace):
             truenas_version
         """
         ...
-    @_ty.overload
+    @typing.overload
     def version_short(self, 
     /) -> 'str': 
         """
@@ -303,4 +303,33 @@ class System(Namespace):
         str:
             truenas_version_shortname
         """
+        ...
+
+class SystemInfo(typing.TypedDict):
+        version:'str'
+        buildtime:'str'
+        hostname:'str'
+        physmem:'int'
+        model:'str'
+        cores:'int'
+        physical_cores:'int'
+        loadavg:'list'
+        uptime:'str'
+        uptime_seconds:'float'
+        system_serial:'typing.Optional[str]'
+        system_product:'typing.Optional[str]'
+        system_product_version:'typing.Optional[str]'
+        license:'dict[str]'
+        boottime:'str'
+        datetime:'str'
+        birthday:'typing.Optional[str]'
+        timezone:'str'
+        system_manufacturer:'typing.Optional[str]'
+        ecc_memory:'bool'
+        ...
+class SystemReboot(typing.TypedDict):
+        delay:'int'
+        ...
+class SystemShutdown(typing.TypedDict):
+        delay:'int'
         ...

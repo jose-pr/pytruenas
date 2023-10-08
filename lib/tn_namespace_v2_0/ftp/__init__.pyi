@@ -1,12 +1,12 @@
 
 from pytruenas import Namespace, TrueNASClient
-import typing as _ty
+import typing
 class Ftp(Namespace):
-    _namespace:_ty.Literal['ftp']
+    _namespace:typing.Literal['ftp']
     def __init__(self, client:TrueNASClient) -> None: ...
-    @_ty.overload
+    @typing.overload
     def config(self, 
-    /) -> 'dict[str]': 
+    /) -> 'FtpEntry': 
         """
         
 
@@ -14,14 +14,14 @@ class Ftp(Namespace):
         ----------
         Returns
         -------
-        dict[str]:
+        FtpEntry:
             ftp_entry
         """
         ...
-    @_ty.overload
+    @typing.overload
     def update(self, 
-        ftp_update:'dict[str]'={},
-    /) -> 'dict[str]': 
+        ftp_update:'FtpUpdate'={},
+    /) -> 'FtpUpdateReturns': 
         """
         Update ftp service configuration.
         
@@ -93,7 +93,136 @@ class Ftp(Namespace):
             ftp_update
         Returns
         -------
-        dict[str]:
+        FtpUpdateReturns:
             ftp_update_returns
         """
+        ...
+
+class FtpEntry(typing.TypedDict):
+        port:'int'
+        clients:'int'
+        ipconnections:'int'
+        loginattempt:'int'
+        timeout:'int'
+        timeout_notransfer:'int'
+        rootlogin:'bool'
+        onlyanonymous:'bool'
+        anonpath:'typing.Optional[str]'
+        onlylocal:'bool'
+        banner:'str'
+        filemask:'str'
+        dirmask:'str'
+        fxp:'bool'
+        resume:'bool'
+        defaultroot:'bool'
+        ident:'bool'
+        reversedns:'bool'
+        masqaddress:'str'
+        passiveportsmin:'int'
+        passiveportsmax:'int'
+        localuserbw:'int'
+        localuserdlbw:'int'
+        anonuserbw:'int'
+        anonuserdlbw:'int'
+        tls:'bool'
+        tls_policy:'str'
+        tls_opt_allow_client_renegotiations:'bool'
+        tls_opt_allow_dot_login:'bool'
+        tls_opt_allow_per_user:'bool'
+        tls_opt_common_name_required:'bool'
+        tls_opt_enable_diags:'bool'
+        tls_opt_export_cert_data:'bool'
+        tls_opt_no_empty_fragments:'bool'
+        tls_opt_no_session_reuse_required:'bool'
+        tls_opt_stdenvvars:'bool'
+        tls_opt_dns_name_required:'bool'
+        tls_opt_ip_address_required:'bool'
+        ssltls_certificate:'typing.Optional[int]'
+        options:'str'
+        id:'int'
+        ...
+class FtpUpdate(typing.TypedDict):
+        port:'int'
+        clients:'int'
+        ipconnections:'int'
+        loginattempt:'int'
+        timeout:'int'
+        timeout_notransfer:'int'
+        rootlogin:'bool'
+        onlyanonymous:'bool'
+        anonpath:'typing.Optional[str]'
+        onlylocal:'bool'
+        banner:'str'
+        filemask:'str'
+        dirmask:'str'
+        fxp:'bool'
+        resume:'bool'
+        defaultroot:'bool'
+        ident:'bool'
+        reversedns:'bool'
+        masqaddress:'str'
+        passiveportsmin:'int'
+        passiveportsmax:'int'
+        localuserbw:'int'
+        localuserdlbw:'int'
+        anonuserbw:'int'
+        anonuserdlbw:'int'
+        tls:'bool'
+        tls_policy:'str'
+        tls_opt_allow_client_renegotiations:'bool'
+        tls_opt_allow_dot_login:'bool'
+        tls_opt_allow_per_user:'bool'
+        tls_opt_common_name_required:'bool'
+        tls_opt_enable_diags:'bool'
+        tls_opt_export_cert_data:'bool'
+        tls_opt_no_empty_fragments:'bool'
+        tls_opt_no_session_reuse_required:'bool'
+        tls_opt_stdenvvars:'bool'
+        tls_opt_dns_name_required:'bool'
+        tls_opt_ip_address_required:'bool'
+        ssltls_certificate:'typing.Optional[int]'
+        options:'str'
+        ...
+class FtpUpdateReturns(typing.TypedDict):
+        port:'int'
+        clients:'int'
+        ipconnections:'int'
+        loginattempt:'int'
+        timeout:'int'
+        timeout_notransfer:'int'
+        rootlogin:'bool'
+        onlyanonymous:'bool'
+        anonpath:'typing.Optional[str]'
+        onlylocal:'bool'
+        banner:'str'
+        filemask:'str'
+        dirmask:'str'
+        fxp:'bool'
+        resume:'bool'
+        defaultroot:'bool'
+        ident:'bool'
+        reversedns:'bool'
+        masqaddress:'str'
+        passiveportsmin:'int'
+        passiveportsmax:'int'
+        localuserbw:'int'
+        localuserdlbw:'int'
+        anonuserbw:'int'
+        anonuserdlbw:'int'
+        tls:'bool'
+        tls_policy:'str'
+        tls_opt_allow_client_renegotiations:'bool'
+        tls_opt_allow_dot_login:'bool'
+        tls_opt_allow_per_user:'bool'
+        tls_opt_common_name_required:'bool'
+        tls_opt_enable_diags:'bool'
+        tls_opt_export_cert_data:'bool'
+        tls_opt_no_empty_fragments:'bool'
+        tls_opt_no_session_reuse_required:'bool'
+        tls_opt_stdenvvars:'bool'
+        tls_opt_dns_name_required:'bool'
+        tls_opt_ip_address_required:'bool'
+        ssltls_certificate:'typing.Optional[int]'
+        options:'str'
+        id:'int'
         ...

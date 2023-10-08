@@ -1,12 +1,12 @@
 
 from pytruenas import Namespace, TrueNASClient
-import typing as _ty
+import typing
 class AcmeDnsAuthenticator(Namespace):
-    _namespace:_ty.Literal['acme.dns.authenticator']
+    _namespace:typing.Literal['acme.dns.authenticator']
     def __init__(self, client:TrueNASClient) -> None: ...
-    @_ty.overload
+    @typing.overload
     def authenticator_schemas(self, 
-    /) -> 'list': 
+    /) -> 'list[AuthenticatorSchema]': 
         """
         Get the schemas for all DNS providers we support for ACME DNS Challenge and the respective attributes
         required for connecting to them while validating a DNS Challenge
@@ -15,14 +15,14 @@ class AcmeDnsAuthenticator(Namespace):
         ----------
         Returns
         -------
-        list:
+        list[AuthenticatorSchema]:
             Authenticator Schemas
         """
         ...
-    @_ty.overload
+    @typing.overload
     def create(self, 
-        acme_dns_authenticator_create:'dict[str]'={},
-    /) -> 'dict[str]': 
+        acme_dns_authenticator_create:'AcmeDnsAuthenticatorCreate'={},
+    /) -> 'AcmeDnsAuthenticatorCreateReturns': 
         """
         Create a DNS Authenticator
         
@@ -35,11 +35,11 @@ class AcmeDnsAuthenticator(Namespace):
             acme_dns_authenticator_create
         Returns
         -------
-        dict[str]:
+        AcmeDnsAuthenticatorCreateReturns:
             acme_dns_authenticator_create_returns
         """
         ...
-    @_ty.overload
+    @typing.overload
     def delete(self, 
         id:'int',
     /) -> 'bool': 
@@ -56,10 +56,10 @@ class AcmeDnsAuthenticator(Namespace):
             Will return `true` if `id` is deleted successfully
         """
         ...
-    @_ty.overload
+    @typing.overload
     def get_instance(self, 
         id:'str|int|bool|dict[str]|list',
-        query_options_get_instance:'dict[str]'={},
+        query_options_get_instance:'QueryOptionsGetInstance'={},
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -76,11 +76,11 @@ class AcmeDnsAuthenticator(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def query(self, 
-        query_filters:'list'=[],
-        query_options:'dict[str]'={},
-    /) -> 'list|dict[str]|int|dict[str]': 
+        query_filters:'list[list]'=[],
+        query_options:'QueryOptions'={},
+    /) -> 'list[AcmeDnsAuthenticatorEntry]|AcmeDnsAuthenticatorEntry|int|AcmeDnsAuthenticatorEntry': 
         """
         
 
@@ -92,21 +92,21 @@ class AcmeDnsAuthenticator(Namespace):
             query-options
         Returns
         -------
-        list:
+        list[AcmeDnsAuthenticatorEntry]:
             
-        dict[str]:
+        AcmeDnsAuthenticatorEntry:
             
         int:
             
-        dict[str]:
+        AcmeDnsAuthenticatorEntry:
             
         """
         ...
-    @_ty.overload
+    @typing.overload
     def update(self, 
         id:'int',
-        dns_authenticator_update:'dict[str]'={},
-    /) -> 'dict[str]': 
+        dns_authenticator_update:'DnsAuthenticatorUpdate'={},
+    /) -> 'AcmeDnsAuthenticatorUpdateReturns': 
         """
         Update DNS Authenticator of `id`
 
@@ -118,7 +118,72 @@ class AcmeDnsAuthenticator(Namespace):
             dns_authenticator_update
         Returns
         -------
-        dict[str]:
+        AcmeDnsAuthenticatorUpdateReturns:
             acme_dns_authenticator_update_returns
         """
+        ...
+
+class AuthenticatorSchema(typing.TypedDict):
+        key:'str'
+        schema:'list[AttributeSchema]'
+        ...
+class AttributeSchema(typing.TypedDict):
+        _name_:'str'
+        title:'str'
+        _required_:'bool'
+        ...
+class AcmeDnsAuthenticatorCreate(typing.TypedDict):
+        authenticator:'str'
+        attributes:'dict[str]'
+        name:'str'
+        ...
+class AcmeDnsAuthenticatorCreateReturns(typing.TypedDict):
+        id:'int'
+        authenticator:'str'
+        attributes:'dict[str]'
+        name:'str'
+        ...
+class QueryOptionsGetInstance(typing.TypedDict):
+        relationships:'bool'
+        extend:'typing.Optional[str]'
+        extend_context:'typing.Optional[str]'
+        prefix:'typing.Optional[str]'
+        extra:'dict[str]'
+        order_by:'list'
+        select:'list'
+        count:'bool'
+        get:'bool'
+        offset:'int'
+        limit:'int'
+        force_sql_filters:'bool'
+        ...
+class QueryOptions(typing.TypedDict):
+        relationships:'bool'
+        extend:'typing.Optional[str]'
+        extend_context:'typing.Optional[str]'
+        prefix:'typing.Optional[str]'
+        extra:'dict[str]'
+        order_by:'list'
+        select:'list'
+        count:'bool'
+        get:'bool'
+        offset:'int'
+        limit:'int'
+        force_sql_filters:'bool'
+        ...
+class AcmeDnsAuthenticatorEntry(typing.TypedDict):
+        id:'int'
+        authenticator:'str'
+        attributes:'dict[str]'
+        name:'str'
+        ...
+class DnsAuthenticatorUpdate(typing.TypedDict):
+        attributes:'dict[str]'
+        name:'str'
+        ...
+class AcmeDnsAuthenticatorUpdateReturns(typing.TypedDict):
+        id:'int'
+        authenticator:'str'
+        attributes:'dict[str]'
+        name:'str'
         ...

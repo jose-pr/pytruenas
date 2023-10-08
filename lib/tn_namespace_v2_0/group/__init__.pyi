@@ -1,12 +1,12 @@
 
 from pytruenas import Namespace, TrueNASClient
-import typing as _ty
+import typing
 class Group(Namespace):
-    _namespace:_ty.Literal['group']
+    _namespace:typing.Literal['group']
     def __init__(self, client:TrueNASClient) -> None: ...
-    @_ty.overload
+    @typing.overload
     def create(self, 
-        group_create:'dict[str]'={},
+        group_create:'GroupCreate'={},
     /) -> 'int': 
         """
         Create a new group.
@@ -29,10 +29,10 @@ class Group(Namespace):
             primary_key
         """
         ...
-    @_ty.overload
+    @typing.overload
     def delete(self, 
         id:'int',
-        options:'dict[str]'={},
+        options:'Options'={},
     /) -> 'int': 
         """
         Delete group `id`.
@@ -51,10 +51,10 @@ class Group(Namespace):
             primary_key
         """
         ...
-    @_ty.overload
+    @typing.overload
     def get_group_obj(self, 
-        get_group_obj:'dict[str]'={},
-    /) -> 'dict[str]': 
+        get_group_obj:'GetGroupObj'={},
+    /) -> 'GroupInfo': 
         """
         Returns dictionary containing information from struct grp for the group specified by either
         the groupname or gid. Bypasses group cache.
@@ -65,14 +65,14 @@ class Group(Namespace):
             get_group_obj
         Returns
         -------
-        dict[str]:
+        GroupInfo:
             group_info
         """
         ...
-    @_ty.overload
+    @typing.overload
     def get_instance(self, 
         id:'str|int|bool|dict[str]|list',
-        query_options_get_instance:'dict[str]'={},
+        query_options_get_instance:'QueryOptionsGetInstance'={},
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -89,7 +89,7 @@ class Group(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def get_next_gid(self, 
     /) -> 'int': 
         """
@@ -103,10 +103,10 @@ class Group(Namespace):
             next_available_gid
         """
         ...
-    @_ty.overload
+    @typing.overload
     def has_password_enabled_user(self, 
-        gids:'list'=[],
-        exclude_user_ids:'list'=[],
+        gids:'list[int]'=[],
+        exclude_user_ids:'list[int]'=[],
     /) -> None: 
         """
         Checks whether at least one local user with a password is a member of any of the `group_ids`.
@@ -121,11 +121,11 @@ class Group(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def query(self, 
-        query_filters:'list'=[],
-        query_options:'dict[str]'={},
-    /) -> 'list|dict[str]|int|dict[str]': 
+        query_filters:'list[list]'=[],
+        query_options:'QueryOptions'={},
+    /) -> 'list[GroupEntry]|GroupEntry|int|GroupEntry': 
         """
         Query groups with `query-filters` and `query-options`. As a performance optimization, only local groups
         will be queried by default.
@@ -147,20 +147,20 @@ class Group(Namespace):
             query-options
         Returns
         -------
-        list:
+        list[GroupEntry]:
             
-        dict[str]:
+        GroupEntry:
             
         int:
             
-        dict[str]:
+        GroupEntry:
             
         """
         ...
-    @_ty.overload
+    @typing.overload
     def update(self, 
         id:'int',
-        group_update:'dict[str]'={},
+        group_update:'GroupUpdate'={},
     /) -> 'int': 
         """
         Update attributes of an existing group.
@@ -176,4 +176,78 @@ class Group(Namespace):
         int:
             primary_key
         """
+        ...
+
+class GroupCreate(typing.TypedDict):
+        gid:'int'
+        name:'str'
+        smb:'bool'
+        sudo_commands:'list[str]'
+        sudo_commands_nopasswd:'list[str]'
+        allow_duplicate_gid:'bool'
+        users:'list[int]'
+        ...
+class Options(typing.TypedDict):
+        delete_users:'bool'
+        ...
+class GetGroupObj(typing.TypedDict):
+        groupname:'str'
+        gid:'int'
+        ...
+class GroupInfo(typing.TypedDict):
+        gr_name:'str'
+        gr_gid:'int'
+        gr_mem:'list'
+        ...
+class QueryOptionsGetInstance(typing.TypedDict):
+        relationships:'bool'
+        extend:'typing.Optional[str]'
+        extend_context:'typing.Optional[str]'
+        prefix:'typing.Optional[str]'
+        extra:'dict[str]'
+        order_by:'list'
+        select:'list'
+        count:'bool'
+        get:'bool'
+        offset:'int'
+        limit:'int'
+        force_sql_filters:'bool'
+        ...
+class QueryOptions(typing.TypedDict):
+        relationships:'bool'
+        extend:'typing.Optional[str]'
+        extend_context:'typing.Optional[str]'
+        prefix:'typing.Optional[str]'
+        extra:'dict[str]'
+        order_by:'list'
+        select:'list'
+        count:'bool'
+        get:'bool'
+        offset:'int'
+        limit:'int'
+        force_sql_filters:'bool'
+        ...
+class GroupEntry(typing.TypedDict):
+        gid:'int'
+        name:'str'
+        smb:'bool'
+        sudo_commands:'list[str]'
+        sudo_commands_nopasswd:'list[str]'
+        users:'list[int]'
+        id:'int'
+        group:'str'
+        builtin:'bool'
+        id_type_both:'bool'
+        local:'bool'
+        nt_name:'typing.Optional[str]'
+        sid:'typing.Optional[str]'
+        ...
+class GroupUpdate(typing.TypedDict):
+        gid:'int'
+        name:'str'
+        smb:'bool'
+        sudo_commands:'list[str]'
+        sudo_commands_nopasswd:'list[str]'
+        allow_duplicate_gid:'bool'
+        users:'list[int]'
         ...

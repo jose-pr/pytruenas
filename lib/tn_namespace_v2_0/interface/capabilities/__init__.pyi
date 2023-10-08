@@ -1,13 +1,13 @@
 
 from pytruenas import Namespace, TrueNASClient
-import typing as _ty
+import typing
 class InterfaceCapabilities(Namespace):
-    _namespace:_ty.Literal['interface.capabilities']
+    _namespace:typing.Literal['interface.capabilities']
     def __init__(self, client:TrueNASClient) -> None: ...
-    @_ty.overload
+    @typing.overload
     def get(self, 
         name:'str',
-    /) -> 'dict[str]': 
+    /) -> 'Capabilties': 
         """
         Return enabled, disabled and supported capabilities (also known as features)
         on a given interface.
@@ -20,14 +20,14 @@ class InterfaceCapabilities(Namespace):
             name
         Returns
         -------
-        dict[str]:
+        Capabilties:
             capabilties
         """
         ...
-    @_ty.overload
+    @typing.overload
     def set(self, 
-        capabilities_set:'dict[str]'={},
-    /) -> 'list': 
+        capabilities_set:'CapabilitiesSet'={},
+    /) -> 'list[str]': 
         """
         Enable or Disable capabilties (also known as features) on a given interface.
         
@@ -42,7 +42,18 @@ class InterfaceCapabilities(Namespace):
             capabilities_set
         Returns
         -------
-        list:
+        list[str]:
             capabilities
         """
+        ...
+
+class Capabilties(typing.TypedDict):
+        enabled:'list[str]'
+        disabled:'list[str]'
+        supported:'list[str]'
+        ...
+class CapabilitiesSet(typing.TypedDict):
+        name:'str'
+        capabilties:'list'
+        action:'str'
         ...

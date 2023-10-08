@@ -1,12 +1,12 @@
 
 from pytruenas import Namespace, TrueNASClient
-import typing as _ty
+import typing
 class NetworkConfiguration(Namespace):
-    _namespace:_ty.Literal['network.configuration']
+    _namespace:typing.Literal['network.configuration']
     def __init__(self, client:TrueNASClient) -> None: ...
-    @_ty.overload
+    @typing.overload
     def activity_choices(self, 
-    /) -> 'list': 
+    /) -> 'list[list[str]]': 
         """
         Returns allowed/forbidden network activity choices.
 
@@ -14,13 +14,13 @@ class NetworkConfiguration(Namespace):
         ----------
         Returns
         -------
-        list:
+        list[list[str]]:
             activity_choices
         """
         ...
-    @_ty.overload
+    @typing.overload
     def config(self, 
-    /) -> 'dict[str]': 
+    /) -> 'NetworkConfigurationEntry': 
         """
         
 
@@ -28,14 +28,14 @@ class NetworkConfiguration(Namespace):
         ----------
         Returns
         -------
-        dict[str]:
+        NetworkConfigurationEntry:
             network_configuration_entry
         """
         ...
-    @_ty.overload
+    @typing.overload
     def update(self, 
-        global_configuration_update:'dict[str]'={},
-    /) -> 'dict[str]': 
+        global_configuration_update:'GlobalConfigurationUpdate'={},
+    /) -> 'NetworkConfigurationUpdateReturns': 
         """
         Update Network Configuration Service configuration.
         
@@ -61,7 +61,78 @@ class NetworkConfiguration(Namespace):
             global_configuration_update
         Returns
         -------
-        dict[str]:
+        NetworkConfigurationUpdateReturns:
             network_configuration_update_returns
         """
+        ...
+
+class NetworkConfigurationEntry(typing.TypedDict):
+        id:'int'
+        hostname:'str'
+        domain:'str'
+        ipv4gateway:'str'
+        ipv6gateway:'str'
+        nameserver1:'str'
+        nameserver2:'str'
+        nameserver3:'str'
+        httpproxy:'str'
+        hosts:'list[str]'
+        domains:'list[str]'
+        service_announcement:'ServiceAnnouncement'
+        activity:'Activity'
+        hostname_local:'str'
+        hostname_b:'typing.Optional[str]'
+        hostname_virtual:'typing.Optional[str]'
+        state:'State'
+        ...
+class ServiceAnnouncement(typing.TypedDict):
+        netbios:'bool'
+        mdns:'bool'
+        wsd:'bool'
+        ...
+class Activity(typing.TypedDict):
+        type:'str'
+        activities:'list[str]'
+        ...
+class State(typing.TypedDict):
+        ipv4gateway:'str'
+        ipv6gateway:'str'
+        nameserver1:'str'
+        nameserver2:'str'
+        nameserver3:'str'
+        ...
+class GlobalConfigurationUpdate(typing.TypedDict):
+        hostname:'str'
+        domain:'str'
+        ipv4gateway:'str'
+        ipv6gateway:'str'
+        nameserver1:'str'
+        nameserver2:'str'
+        nameserver3:'str'
+        httpproxy:'str'
+        hosts:'list[str]'
+        domains:'list[str]'
+        service_announcement:'ServiceAnnouncement'
+        activity:'Activity'
+        hostname_b:'typing.Optional[str]'
+        hostname_virtual:'typing.Optional[str]'
+        ...
+class NetworkConfigurationUpdateReturns(typing.TypedDict):
+        id:'int'
+        hostname:'str'
+        domain:'str'
+        ipv4gateway:'str'
+        ipv6gateway:'str'
+        nameserver1:'str'
+        nameserver2:'str'
+        nameserver3:'str'
+        httpproxy:'str'
+        hosts:'list[str]'
+        domains:'list[str]'
+        service_announcement:'ServiceAnnouncement'
+        activity:'Activity'
+        hostname_local:'str'
+        hostname_b:'typing.Optional[str]'
+        hostname_virtual:'typing.Optional[str]'
+        state:'State'
         ...

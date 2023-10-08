@@ -1,10 +1,10 @@
 
 from pytruenas import Namespace, TrueNASClient
-import typing as _ty
+import typing
 class Ssh(Namespace):
-    _namespace:_ty.Literal['ssh']
+    _namespace:typing.Literal['ssh']
     def __init__(self, client:TrueNASClient) -> None: ...
-    @_ty.overload
+    @typing.overload
     def bindiface_choices(self, 
     /) -> 'dict[str]': 
         """
@@ -18,9 +18,9 @@ class Ssh(Namespace):
             ssh_bind_interfaces_choices
         """
         ...
-    @_ty.overload
+    @typing.overload
     def config(self, 
-    /) -> 'dict[str]': 
+    /) -> 'SshEntry': 
         """
         
 
@@ -28,14 +28,14 @@ class Ssh(Namespace):
         ----------
         Returns
         -------
-        dict[str]:
+        SshEntry:
             ssh_entry
         """
         ...
-    @_ty.overload
+    @typing.overload
     def update(self, 
-        ssh_update:'dict[str]'={},
-    /) -> 'dict[str]': 
+        ssh_update:'SshUpdate'={},
+    /) -> 'SshUpdateReturns': 
         """
         Update settings of SSH daemon service.
         
@@ -47,7 +47,79 @@ class Ssh(Namespace):
             ssh_update
         Returns
         -------
-        dict[str]:
+        SshUpdateReturns:
             ssh_update_returns
         """
+        ...
+
+class SshEntry(typing.TypedDict):
+        bindiface:'list[str]'
+        tcpport:'int'
+        password_login_groups:'list[str]'
+        passwordauth:'bool'
+        kerberosauth:'bool'
+        tcpfwd:'bool'
+        compression:'bool'
+        sftp_log_level:'str'
+        sftp_log_facility:'str'
+        weak_ciphers:'list[str]'
+        options:'str'
+        privatekey:'str'
+        host_dsa_key:'typing.Optional[str]'
+        host_dsa_key_pub:'typing.Optional[str]'
+        host_dsa_key_cert_pub:'typing.Optional[str]'
+        host_ecdsa_key:'typing.Optional[str]'
+        host_ecdsa_key_pub:'typing.Optional[str]'
+        host_ecdsa_key_cert_pub:'typing.Optional[str]'
+        host_ed25519_key:'typing.Optional[str]'
+        host_ed25519_key_pub:'typing.Optional[str]'
+        host_ed25519_key_cert_pub:'typing.Optional[str]'
+        host_key:'typing.Optional[str]'
+        host_key_pub:'typing.Optional[str]'
+        host_rsa_key:'typing.Optional[str]'
+        host_rsa_key_pub:'typing.Optional[str]'
+        host_rsa_key_cert_pub:'typing.Optional[str]'
+        id:'int'
+        ...
+class SshUpdate(typing.TypedDict):
+        bindiface:'list[str]'
+        tcpport:'int'
+        password_login_groups:'list[str]'
+        passwordauth:'bool'
+        kerberosauth:'bool'
+        tcpfwd:'bool'
+        compression:'bool'
+        sftp_log_level:'str'
+        sftp_log_facility:'str'
+        weak_ciphers:'list[str]'
+        options:'str'
+        ...
+class SshUpdateReturns(typing.TypedDict):
+        bindiface:'list[str]'
+        tcpport:'int'
+        password_login_groups:'list[str]'
+        passwordauth:'bool'
+        kerberosauth:'bool'
+        tcpfwd:'bool'
+        compression:'bool'
+        sftp_log_level:'str'
+        sftp_log_facility:'str'
+        weak_ciphers:'list[str]'
+        options:'str'
+        privatekey:'str'
+        host_dsa_key:'typing.Optional[str]'
+        host_dsa_key_pub:'typing.Optional[str]'
+        host_dsa_key_cert_pub:'typing.Optional[str]'
+        host_ecdsa_key:'typing.Optional[str]'
+        host_ecdsa_key_pub:'typing.Optional[str]'
+        host_ecdsa_key_cert_pub:'typing.Optional[str]'
+        host_ed25519_key:'typing.Optional[str]'
+        host_ed25519_key_pub:'typing.Optional[str]'
+        host_ed25519_key_cert_pub:'typing.Optional[str]'
+        host_key:'typing.Optional[str]'
+        host_key_pub:'typing.Optional[str]'
+        host_rsa_key:'typing.Optional[str]'
+        host_rsa_key_pub:'typing.Optional[str]'
+        host_rsa_key_cert_pub:'typing.Optional[str]'
+        id:'int'
         ...

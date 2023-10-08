@@ -1,13 +1,13 @@
 
 from pytruenas import Namespace, TrueNASClient
-import typing as _ty
+import typing
 class Boot(Namespace):
-    _namespace:_ty.Literal['boot']
+    _namespace:typing.Literal['boot']
     def __init__(self, client:TrueNASClient) -> None: ...
-    @_ty.overload
+    @typing.overload
     def attach(self, 
         dev:'str',
-        options:'dict[str]'={},
+        options:'Options'={},
     /) -> None: 
         """
         Attach a disk to the boot pool, turning a stripe into a mirror.
@@ -25,7 +25,7 @@ class Boot(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def detach(self, 
         dev:'str',
     /) -> None: 
@@ -40,9 +40,9 @@ class Boot(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def get_disks(self, 
-    /) -> 'list': 
+    /) -> 'list[str]': 
         """
         Returns disks of the boot pool.
 
@@ -50,11 +50,11 @@ class Boot(Namespace):
         ----------
         Returns
         -------
-        list:
+        list[str]:
             disks
         """
         ...
-    @_ty.overload
+    @typing.overload
     def get_scrub_interval(self, 
     /) -> 'int': 
         """
@@ -68,9 +68,9 @@ class Boot(Namespace):
             interval
         """
         ...
-    @_ty.overload
+    @typing.overload
     def get_state(self, 
-    /) -> 'dict[str]': 
+    /) -> 'GetState': 
         """
         Returns the current state of the boot pool, including all vdevs, properties and datasets.
 
@@ -78,11 +78,11 @@ class Boot(Namespace):
         ----------
         Returns
         -------
-        dict[str]:
+        GetState:
             get_state
         """
         ...
-    @_ty.overload
+    @typing.overload
     def replace(self, 
         label:'str',
         dev:'str',
@@ -100,7 +100,7 @@ class Boot(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def scrub(self, 
     /) -> None: 
         """
@@ -112,7 +112,7 @@ class Boot(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def set_scrub_interval(self, 
         interval:'int',
     /) -> 'int': 
@@ -128,4 +128,38 @@ class Boot(Namespace):
         int:
             interval
         """
+        ...
+
+class Options(typing.TypedDict):
+        expand:'bool'
+        ...
+class GetState(typing.TypedDict):
+        name:'str'
+        status:'str'
+        path:'str'
+        scan:'dict[str]'
+        is_upgraded:'bool'
+        healthy:'bool'
+        warning:'bool'
+        status_code:'typing.Optional[str]'
+        status_detail:'typing.Optional[str]'
+        size:'typing.Optional[int]'
+        allocated:'typing.Optional[int]'
+        free:'typing.Optional[int]'
+        freeing:'typing.Optional[int]'
+        fragmentation:'typing.Optional[str]'
+        size_str:'typing.Optional[str]'
+        allocated_str:'typing.Optional[str]'
+        free_str:'typing.Optional[str]'
+        freeing_str:'typing.Optional[str]'
+        autotrim:'dict[str]'
+        topology:'Topology'
+        ...
+class Topology(typing.TypedDict):
+        data:'list'
+        log:'list'
+        cache:'list'
+        spare:'list'
+        special:'list'
+        dedup:'list'
         ...

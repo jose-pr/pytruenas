@@ -1,10 +1,10 @@
 
 from pytruenas import Namespace, TrueNASClient
-import typing as _ty
+import typing
 class Core(Namespace):
-    _namespace:_ty.Literal['core']
+    _namespace:typing.Literal['core']
     def __init__(self, client:TrueNASClient) -> None: ...
-    @_ty.overload
+    @typing.overload
     def bulk(self, 
         method:'str',
         params:'list'=[],
@@ -44,9 +44,9 @@ class Core(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def debug(self, 
-        options:'dict[str]'={},
+        options:'Options'={},
     /) -> None: 
         """
         Setup middlewared for remote debugging.
@@ -67,7 +67,7 @@ class Core(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def debug_mode_enabled(self, 
     /) -> 'bool': 
         """
@@ -81,7 +81,7 @@ class Core(Namespace):
             debug_mode_enabled
         """
         ...
-    @_ty.overload
+    @typing.overload
     def download(self, 
         method:'str',
         args:'list'=[],
@@ -113,7 +113,7 @@ class Core(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def get_events(self, 
     /) -> None: 
         """
@@ -125,11 +125,11 @@ class Core(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def get_jobs(self, 
-        query_filters:'list'=[],
-        query_options:'dict[str]'={},
-    /) -> 'int|dict[str]|list': 
+        query_filters:'list[list]'=[],
+        query_options:'QueryOptions'={},
+    /) -> 'int|Job|list[Job]': 
         """
         Get the long running jobs.
 
@@ -143,13 +143,13 @@ class Core(Namespace):
         -------
         int:
             
-        dict[str]:
+        Job:
             
-        list:
+        list[Job]:
             
         """
         ...
-    @_ty.overload
+    @typing.overload
     def job_abort(self, 
         id:'int',
     /) -> None: 
@@ -164,10 +164,10 @@ class Core(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def job_update(self, 
         id:'int',
-        job_update:'dict[str]'={},
+        job_update:'JobUpdate'={},
     /) -> None: 
         """
         
@@ -182,7 +182,7 @@ class Core(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def job_wait(self, 
         id:'int',
     /) -> None: 
@@ -197,7 +197,7 @@ class Core(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def ping(self, 
     /) -> None: 
         """
@@ -211,9 +211,9 @@ class Core(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def ping_remote(self, 
-        options:'dict[str]'={},
+        options:'Options_'={},
     /) -> None: 
         """
         Method that will send an ICMP echo request to "hostname"
@@ -227,7 +227,7 @@ class Core(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def resize_shell(self, 
         id:'str',
         cols:'int',
@@ -248,11 +248,11 @@ class Core(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def sessions(self, 
-        query_filters:'list'=[],
-        query_options:'dict[str]'={},
-    /) -> 'int|dict[str]|list': 
+        query_filters:'list[list]'=[],
+        query_options:'QueryOptions'={},
+    /) -> 'int|Session|list[Session]': 
         """
         Get currently open websocket sessions.
 
@@ -266,13 +266,13 @@ class Core(Namespace):
         -------
         int:
             
-        dict[str]:
+        Session:
             
-        list:
+        list[Session]:
             
         """
         ...
-    @_ty.overload
+    @typing.overload
     def set_debug_mode(self, 
         debug_mode:'bool',
     /) -> None: 
@@ -286,4 +286,67 @@ class Core(Namespace):
         Returns
         -------
         """
+        ...
+
+class Options(typing.TypedDict):
+        bind_address:'str'
+        bind_port:'int'
+        threaded:'bool'
+        ...
+class QueryOptions(typing.TypedDict):
+        relationships:'bool'
+        extend:'typing.Optional[str]'
+        extend_context:'typing.Optional[str]'
+        prefix:'typing.Optional[str]'
+        extra:'dict[str]'
+        order_by:'list'
+        select:'list'
+        count:'bool'
+        get:'bool'
+        offset:'int'
+        limit:'int'
+        force_sql_filters:'bool'
+        ...
+class Job(typing.TypedDict):
+        id:'int'
+        method:'str'
+        arguments:'list'
+        transient:'bool'
+        description:'typing.Optional[str]'
+        abortable:'bool'
+        logs_path:'typing.Optional[str]'
+        logs_excerpt:'typing.Optional[str]'
+        progress:'Progress'
+        result:'typing.Union[str, int, bool, dict[str], list]'
+        error:'typing.Optional[str]'
+        exception:'typing.Optional[str]'
+        exc_info:'ExcInfo'
+        state:'str'
+        time_started:'typing.Optional[str]'
+        time_finished:'typing.Optional[str]'
+        ...
+class Progress(typing.TypedDict):
+        percent:'typing.Optional[int]'
+        description:'typing.Optional[str]'
+        extra:'typing.Union[str, int, bool, dict[str], list]'
+        ...
+class ExcInfo(typing.TypedDict):
+        repr:'typing.Optional[str]'
+        type:'typing.Optional[str]'
+        extra:'typing.Union[str, int, bool, dict[str], list]'
+        ...
+class JobUpdate(typing.TypedDict):
+        progress:'dict[str]'
+        ...
+class Options_(typing.TypedDict):
+        type:'str'
+        hostname:'str'
+        timeout:'int'
+        ...
+class Session(typing.TypedDict):
+        id:'str'
+        socket_family:'str'
+        address:'str'
+        authenticated:'bool'
+        call_count:'int'
         ...

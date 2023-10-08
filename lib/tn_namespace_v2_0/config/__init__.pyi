@@ -1,12 +1,12 @@
 
 from pytruenas import Namespace, TrueNASClient
-import typing as _ty
+import typing
 class Config(Namespace):
-    _namespace:_ty.Literal['config']
+    _namespace:typing.Literal['config']
     def __init__(self, client:TrueNASClient) -> None: ...
-    @_ty.overload
+    @typing.overload
     def reset(self, 
-        options:'dict[str]'={},
+        options:'Options'={},
     /) -> None: 
         """
         Reset database to configuration defaults.
@@ -22,9 +22,9 @@ class Config(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def save(self, 
-        configsave:'dict[str]'={},
+        configsave:'Configsave'={},
     /) -> None: 
         """
         Create a tar file of security-sensitive information. These options select which information
@@ -45,7 +45,7 @@ class Config(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def upload(self, 
     /) -> None: 
         """
@@ -56,4 +56,14 @@ class Config(Namespace):
         Returns
         -------
         """
+        ...
+
+class Options(typing.TypedDict):
+        reboot:'bool'
+        ...
+class Configsave(typing.TypedDict):
+        secretseed:'bool'
+        pool_keys:'bool'
+        root_authorized_keys:'bool'
+        gluster_config:'bool'
         ...

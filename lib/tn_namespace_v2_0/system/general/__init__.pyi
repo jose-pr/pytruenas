@@ -1,10 +1,10 @@
 
 from pytruenas import Namespace, TrueNASClient
-import typing as _ty
+import typing
 class SystemGeneral(Namespace):
-    _namespace:_ty.Literal['system.general']
+    _namespace:typing.Literal['system.general']
     def __init__(self, client:TrueNASClient) -> None: ...
-    @_ty.overload
+    @typing.overload
     def checkin(self, 
     /) -> None: 
         """
@@ -19,7 +19,7 @@ class SystemGeneral(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def checkin_waiting(self, 
     /) -> 'int|None': 
         """
@@ -36,9 +36,9 @@ class SystemGeneral(Namespace):
             remaining_seconds
         """
         ...
-    @_ty.overload
+    @typing.overload
     def config(self, 
-    /) -> 'dict[str]': 
+    /) -> 'SystemGeneralEntry': 
         """
         
 
@@ -46,11 +46,11 @@ class SystemGeneral(Namespace):
         ----------
         Returns
         -------
-        dict[str]:
+        SystemGeneralEntry:
             system_general_entry
         """
         ...
-    @_ty.overload
+    @typing.overload
     def country_choices(self, 
     /) -> 'dict[str]': 
         """
@@ -64,7 +64,7 @@ class SystemGeneral(Namespace):
             country_choices
         """
         ...
-    @_ty.overload
+    @typing.overload
     def kbdmap_choices(self, 
     /) -> 'dict[str]': 
         """
@@ -78,7 +78,7 @@ class SystemGeneral(Namespace):
             kbdmap_choices
         """
         ...
-    @_ty.overload
+    @typing.overload
     def language_choices(self, 
     /) -> 'dict[str]': 
         """
@@ -92,7 +92,7 @@ class SystemGeneral(Namespace):
             System Language Choices
         """
         ...
-    @_ty.overload
+    @typing.overload
     def local_url(self, 
     /) -> 'str': 
         """
@@ -106,7 +106,7 @@ class SystemGeneral(Namespace):
             local_url
         """
         ...
-    @_ty.overload
+    @typing.overload
     def timezone_choices(self, 
     /) -> 'dict[str]': 
         """
@@ -120,7 +120,7 @@ class SystemGeneral(Namespace):
             System Timezone Choices
         """
         ...
-    @_ty.overload
+    @typing.overload
     def ui_address_choices(self, 
     /) -> 'dict[str]': 
         """
@@ -134,7 +134,7 @@ class SystemGeneral(Namespace):
             Available UI IPv4 Address Choices
         """
         ...
-    @_ty.overload
+    @typing.overload
     def ui_certificate_choices(self, 
     /) -> 'dict[str]': 
         """
@@ -148,9 +148,9 @@ class SystemGeneral(Namespace):
             UI Certificate Choices
         """
         ...
-    @_ty.overload
+    @typing.overload
     def ui_httpsprotocols_choices(self, 
-    /) -> 'dict[str]': 
+    /) -> 'UIHTTPSProtocolChoices': 
         """
         Returns available HTTPS protocols.
 
@@ -158,11 +158,11 @@ class SystemGeneral(Namespace):
         ----------
         Returns
         -------
-        dict[str]:
+        UIHTTPSProtocolChoices:
             UI HTTPS Protocol Choices
         """
         ...
-    @_ty.overload
+    @typing.overload
     def ui_restart(self, 
         delay:'int'=3,
     /) -> None: 
@@ -179,7 +179,7 @@ class SystemGeneral(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def ui_v6address_choices(self, 
     /) -> 'dict[str]': 
         """
@@ -193,10 +193,10 @@ class SystemGeneral(Namespace):
             Available UI IPv6 Address Choices
         """
         ...
-    @_ty.overload
+    @typing.overload
     def update(self, 
-        general_settings:'dict[str]'={},
-    /) -> 'dict[str]': 
+        general_settings:'GeneralSettings'={},
+    /) -> 'SystemGeneralUpdateReturns': 
         """
         Update System General Service Configuration.
         
@@ -230,7 +230,131 @@ class SystemGeneral(Namespace):
             general_settings
         Returns
         -------
-        dict[str]:
+        SystemGeneralUpdateReturns:
             system_general_update_returns
         """
+        ...
+
+class SystemGeneralEntry(typing.TypedDict):
+        ui_certificate:'UiCertificate'
+        ui_httpsport:'int'
+        ui_httpsredirect:'bool'
+        ui_httpsprotocols:'list[str]'
+        ui_port:'int'
+        ui_address:'list[str]'
+        ui_v6address:'list[str]'
+        ui_allowlist:'list[str]'
+        ui_consolemsg:'bool'
+        ui_x_frame_options:'str'
+        kbdmap:'str'
+        language:'str'
+        timezone:'str'
+        usage_collection:'typing.Optional[bool]'
+        birthday:'str'
+        wizardshown:'bool'
+        usage_collection_is_set:'bool'
+        ds_auth:'bool'
+        id:'int'
+        ...
+class UiCertificate(typing.TypedDict):
+        id:'int'
+        type:'int'
+        name:'str'
+        certificate:'typing.Optional[str]'
+        privatekey:'typing.Optional[str]'
+        CSR:'typing.Optional[str]'
+        acme_uri:'typing.Optional[str]'
+        domains_authenticators:'dict[str]'
+        renew_days:'int'
+        revoked_date:'typing.Optional[str]'
+        signedby:'dict[str]'
+        root_path:'str'
+        acme:'dict[str]'
+        certificate_path:'typing.Optional[str]'
+        privatekey_path:'typing.Optional[str]'
+        csr_path:'typing.Optional[str]'
+        cert_type:'str'
+        revoked:'bool'
+        expired:'typing.Optional[bool]'
+        issuer:'typing.Union[str, NoneType, dict[str]]'
+        chain_list:'list[str]'
+        country:'typing.Optional[str]'
+        state:'typing.Optional[str]'
+        city:'typing.Optional[str]'
+        organization:'typing.Optional[str]'
+        organizational_unit:'typing.Optional[str]'
+        san:'typing.Optional[list[str]]'
+        email:'typing.Optional[str]'
+        DN:'typing.Optional[str]'
+        subject_name_hash:'typing.Optional[str]'
+        digest_algorithm:'typing.Optional[str]'
+        from:'typing.Optional[str]'
+        common:'typing.Optional[str]'
+        until:'typing.Optional[str]'
+        fingerprint:'typing.Optional[str]'
+        key_type:'typing.Optional[str]'
+        internal:'typing.Optional[str]'
+        lifetime:'typing.Optional[int]'
+        serial:'typing.Optional[int]'
+        key_length:'typing.Optional[int]'
+        chain:'typing.Optional[bool]'
+        CA_type_existing:'bool'
+        CA_type_internal:'bool'
+        CA_type_intermediate:'bool'
+        cert_type_existing:'bool'
+        cert_type_internal:'bool'
+        cert_type_CSR:'bool'
+        parsed:'bool'
+        can_be_revoked:'bool'
+        extensions:'dict[str]'
+        revoked_certs:'list'
+        crl_path:'str'
+        signed_certificates:'int'
+        ...
+class UIHTTPSProtocolChoices(typing.TypedDict):
+        TLSv1:'str'
+        TLSv1.1:'str'
+        TLSv1.2:'str'
+        TLSv1.3:'str'
+        ...
+class GeneralSettings(typing.TypedDict):
+        ui_httpsport:'int'
+        ui_httpsredirect:'bool'
+        ui_httpsprotocols:'list[str]'
+        ui_port:'int'
+        ui_address:'list[str]'
+        ui_v6address:'list[str]'
+        ui_allowlist:'list[str]'
+        ui_consolemsg:'bool'
+        ui_x_frame_options:'str'
+        kbdmap:'str'
+        language:'str'
+        timezone:'str'
+        usage_collection:'typing.Optional[bool]'
+        birthday:'str'
+        ds_auth:'bool'
+        ui_certificate:'typing.Optional[int]'
+        rollback_timeout:'typing.Optional[int]'
+        ui_restart_delay:'typing.Optional[int]'
+        ...
+class SystemGeneralUpdateReturns(typing.TypedDict):
+        ui_certificate:'UiCertificate'
+        ui_httpsport:'int'
+        ui_httpsredirect:'bool'
+        ui_httpsprotocols:'list[str]'
+        ui_port:'int'
+        ui_address:'list[str]'
+        ui_v6address:'list[str]'
+        ui_allowlist:'list[str]'
+        ui_consolemsg:'bool'
+        ui_x_frame_options:'str'
+        kbdmap:'str'
+        language:'str'
+        timezone:'str'
+        usage_collection:'typing.Optional[bool]'
+        birthday:'str'
+        wizardshown:'bool'
+        usage_collection_is_set:'bool'
+        ds_auth:'bool'
+        id:'int'
         ...

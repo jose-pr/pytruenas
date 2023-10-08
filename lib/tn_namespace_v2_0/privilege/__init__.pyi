@@ -1,13 +1,13 @@
 
 from pytruenas import Namespace, TrueNASClient
-import typing as _ty
+import typing
 class Privilege(Namespace):
-    _namespace:_ty.Literal['privilege']
+    _namespace:typing.Literal['privilege']
     def __init__(self, client:TrueNASClient) -> None: ...
-    @_ty.overload
+    @typing.overload
     def create(self, 
-        privilege_create:'dict[str]'={},
-    /) -> 'dict[str]': 
+        privilege_create:'PrivilegeCreate'={},
+    /) -> 'PrivilegeCreateReturns': 
         """
         Creates a privilege.
         
@@ -27,11 +27,11 @@ class Privilege(Namespace):
             privilege_create
         Returns
         -------
-        dict[str]:
+        PrivilegeCreateReturns:
             privilege_create_returns
         """
         ...
-    @_ty.overload
+    @typing.overload
     def delete(self, 
         id:'int',
     /) -> 'bool': 
@@ -48,10 +48,10 @@ class Privilege(Namespace):
             Will return `true` if `id` is deleted successfully
         """
         ...
-    @_ty.overload
+    @typing.overload
     def get_instance(self, 
         id:'str|int|bool|dict[str]|list',
-        query_options_get_instance:'dict[str]'={},
+        query_options_get_instance:'QueryOptionsGetInstance'={},
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -68,11 +68,11 @@ class Privilege(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def query(self, 
-        query_filters:'list'=[],
-        query_options:'dict[str]'={},
-    /) -> 'list|dict[str]|int|dict[str]': 
+        query_filters:'list[list]'=[],
+        query_options:'QueryOptions'={},
+    /) -> 'list[PrivilegeEntry]|PrivilegeEntry|int|PrivilegeEntry': 
         """
         
 
@@ -84,21 +84,21 @@ class Privilege(Namespace):
             query-options
         Returns
         -------
-        list:
+        list[PrivilegeEntry]:
             
-        dict[str]:
+        PrivilegeEntry:
             
         int:
             
-        dict[str]:
+        PrivilegeEntry:
             
         """
         ...
-    @_ty.overload
+    @typing.overload
     def update(self, 
         id:'int',
-        privilege_update:'dict[str]'={},
-    /) -> 'dict[str]': 
+        privilege_update:'PrivilegeUpdate'={},
+    /) -> 'PrivilegeUpdateReturns': 
         """
         Update the privilege `id`.
 
@@ -111,7 +111,88 @@ class Privilege(Namespace):
             privilege_update
         Returns
         -------
-        dict[str]:
+        PrivilegeUpdateReturns:
             privilege_update_returns
         """
+        ...
+
+class PrivilegeCreate(typing.TypedDict):
+        id:'int'
+        name:'str'
+        local_groups:'list[int]'
+        ds_groups:'list[typing.Union[int, str]]'
+        allowlist:'list[AllowlistItem]'
+        roles:'list[str]'
+        web_shell:'bool'
+        ...
+class AllowlistItem(typing.TypedDict):
+        method:'str'
+        resource:'str'
+        ...
+class PrivilegeCreateReturns(typing.TypedDict):
+        id:'int'
+        builtin_name:'typing.Optional[str]'
+        name:'str'
+        local_groups:'list[int]'
+        ds_groups:'list[typing.Union[int, str]]'
+        allowlist:'list[AllowlistItem]'
+        roles:'list[str]'
+        web_shell:'bool'
+        ...
+class QueryOptionsGetInstance(typing.TypedDict):
+        relationships:'bool'
+        extend:'typing.Optional[str]'
+        extend_context:'typing.Optional[str]'
+        prefix:'typing.Optional[str]'
+        extra:'dict[str]'
+        order_by:'list'
+        select:'list'
+        count:'bool'
+        get:'bool'
+        offset:'int'
+        limit:'int'
+        force_sql_filters:'bool'
+        ...
+class QueryOptions(typing.TypedDict):
+        relationships:'bool'
+        extend:'typing.Optional[str]'
+        extend_context:'typing.Optional[str]'
+        prefix:'typing.Optional[str]'
+        extra:'dict[str]'
+        order_by:'list'
+        select:'list'
+        count:'bool'
+        get:'bool'
+        offset:'int'
+        limit:'int'
+        force_sql_filters:'bool'
+        ...
+class PrivilegeEntry(typing.TypedDict):
+        id:'int'
+        builtin_name:'typing.Optional[str]'
+        name:'str'
+        local_groups:'list[int]'
+        ds_groups:'list[typing.Union[int, str]]'
+        allowlist:'list[AllowlistItem]'
+        roles:'list[str]'
+        web_shell:'bool'
+        ...
+class PrivilegeUpdate(typing.TypedDict):
+        id:'int'
+        name:'str'
+        local_groups:'list[int]'
+        ds_groups:'list[typing.Union[int, str]]'
+        allowlist:'list[AllowlistItem]'
+        roles:'list[str]'
+        web_shell:'bool'
+        ...
+class PrivilegeUpdateReturns(typing.TypedDict):
+        id:'int'
+        builtin_name:'typing.Optional[str]'
+        name:'str'
+        local_groups:'list[int]'
+        ds_groups:'list[typing.Union[int, str]]'
+        allowlist:'list[AllowlistItem]'
+        roles:'list[str]'
+        web_shell:'bool'
         ...

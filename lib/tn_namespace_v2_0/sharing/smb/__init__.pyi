@@ -1,12 +1,12 @@
 
 from pytruenas import Namespace, TrueNASClient
-import typing as _ty
+import typing
 class SharingSmb(Namespace):
-    _namespace:_ty.Literal['sharing.smb']
+    _namespace:typing.Literal['sharing.smb']
     def __init__(self, client:TrueNASClient) -> None: ...
-    @_ty.overload
+    @typing.overload
     def create(self, 
-        sharingsmb_create:'dict[str]'={},
+        sharingsmb_create:'SharingsmbCreate'={},
     /) -> 'dict[str]': 
         """
         Create a SMB Share.
@@ -49,7 +49,7 @@ class SharingSmb(Namespace):
             sharing_smb_create_returns
         """
         ...
-    @_ty.overload
+    @typing.overload
     def delete(self, 
         id:'int',
     /) -> 'bool': 
@@ -67,10 +67,10 @@ class SharingSmb(Namespace):
             Will return `true` if `id` is deleted successfully
         """
         ...
-    @_ty.overload
+    @typing.overload
     def get_instance(self, 
         id:'str|int|bool|dict[str]|list',
-        query_options_get_instance:'dict[str]'={},
+        query_options_get_instance:'QueryOptionsGetInstance'={},
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -87,10 +87,10 @@ class SharingSmb(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def getacl(self, 
-        smb_getacl:'dict[str]'={},
-    /) -> 'dict[str]': 
+        smb_getacl:'SmbGetacl'={},
+    /) -> 'SmbShareAcl': 
         """
         
 
@@ -100,11 +100,11 @@ class SharingSmb(Namespace):
             smb_getacl
         Returns
         -------
-        dict[str]:
+        SmbShareAcl:
             smb_share_acl
         """
         ...
-    @_ty.overload
+    @typing.overload
     def presets(self, 
     /) -> None: 
         """
@@ -117,11 +117,11 @@ class SharingSmb(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def query(self, 
-        query_filters:'list'=[],
-        query_options:'dict[str]'={},
-    /) -> 'list|dict[str]|int|dict[str]': 
+        query_filters:'list[list]'=[],
+        query_options:'QueryOptions'={},
+    /) -> 'list[dict[str]]|dict[str]|int|dict[str]': 
         """
         Query shares with filters. In clustered environments, local datastore query
         is bypassed in favor of clustered registry.
@@ -134,7 +134,7 @@ class SharingSmb(Namespace):
             query-options
         Returns
         -------
-        list:
+        list[dict[str]]:
             
         dict[str]:
             
@@ -144,10 +144,10 @@ class SharingSmb(Namespace):
             
         """
         ...
-    @_ty.overload
+    @typing.overload
     def setacl(self, 
-        smb_share_acl:'dict[str]'={},
-    /) -> 'dict[str]': 
+        smb_share_acl:'SmbShareAcl_'={},
+    /) -> 'SmbShareAcl_': 
         """
         Set an ACL on `share_name`. This only impacts access through the SMB protocol.
         Either ae_who_sid, ae_who_id must, ae_who_str be specified for each ACL entry in the
@@ -175,14 +175,14 @@ class SharingSmb(Namespace):
             smb_share_acl
         Returns
         -------
-        dict[str]:
+        SmbShareAcl_:
             smb_share_acl
         """
         ...
-    @_ty.overload
+    @typing.overload
     def update(self, 
         id:'int',
-        sharingsmb_update:'dict[str]'={},
+        sharingsmb_update:'SharingsmbUpdate'={},
     /) -> 'dict[str]': 
         """
         Update SMB Share of `id`.
@@ -199,4 +199,108 @@ class SharingSmb(Namespace):
         dict[str]:
             sharing_smb_update_returns
         """
+        ...
+
+class SharingsmbCreate(typing.TypedDict):
+        purpose:'str'
+        path:'str'
+        path_suffix:'str'
+        home:'bool'
+        name:'str'
+        comment:'str'
+        ro:'bool'
+        browsable:'bool'
+        timemachine:'bool'
+        timemachine_quota:'int'
+        recyclebin:'bool'
+        guestok:'bool'
+        abe:'bool'
+        hostsallow:'list'
+        hostsdeny:'list'
+        aapl_name_mangling:'bool'
+        acl:'bool'
+        durablehandle:'bool'
+        shadowcopy:'bool'
+        streams:'bool'
+        fsrvp:'bool'
+        auxsmbconf:'str'
+        enabled:'bool'
+        cluster_volname:'str'
+        afp:'bool'
+        ...
+class QueryOptionsGetInstance(typing.TypedDict):
+        relationships:'bool'
+        extend:'typing.Optional[str]'
+        extend_context:'typing.Optional[str]'
+        prefix:'typing.Optional[str]'
+        extra:'dict[str]'
+        order_by:'list'
+        select:'list'
+        count:'bool'
+        get:'bool'
+        offset:'int'
+        limit:'int'
+        force_sql_filters:'bool'
+        ...
+class SmbGetacl(typing.TypedDict):
+        share_name:'str'
+        ...
+class SmbShareAcl(typing.TypedDict):
+        share_name:'str'
+        share_acl:'list[Aclentry]'
+        ...
+class Aclentry(typing.TypedDict):
+        ae_who_sid:'str'
+        ae_who_id:'AeWhoId'
+        ae_perm:'str'
+        ae_type:'str'
+        ...
+class AeWhoId(typing.TypedDict):
+        id_type:'str'
+        id:'int'
+        ...
+class QueryOptions(typing.TypedDict):
+        relationships:'bool'
+        extend:'typing.Optional[str]'
+        extend_context:'typing.Optional[str]'
+        prefix:'typing.Optional[str]'
+        extra:'dict[str]'
+        order_by:'list'
+        select:'list'
+        count:'bool'
+        get:'bool'
+        offset:'int'
+        limit:'int'
+        force_sql_filters:'bool'
+        ...
+class SmbShareAcl_(typing.TypedDict):
+        share_name:'str'
+        share_acl:'list[Aclentry]'
+        ...
+class SharingsmbUpdate(typing.TypedDict):
+        purpose:'str'
+        path:'str'
+        path_suffix:'str'
+        home:'bool'
+        name:'str'
+        comment:'str'
+        ro:'bool'
+        browsable:'bool'
+        timemachine:'bool'
+        timemachine_quota:'int'
+        recyclebin:'bool'
+        guestok:'bool'
+        abe:'bool'
+        hostsallow:'list'
+        hostsdeny:'list'
+        aapl_name_mangling:'bool'
+        acl:'bool'
+        durablehandle:'bool'
+        shadowcopy:'bool'
+        streams:'bool'
+        fsrvp:'bool'
+        auxsmbconf:'str'
+        enabled:'bool'
+        cluster_volname:'str'
+        afp:'bool'
         ...

@@ -1,13 +1,13 @@
 
 from pytruenas import Namespace, TrueNASClient
-import typing as _ty
+import typing
 class PoolDataset(Namespace):
-    _namespace:_ty.Literal['pool.dataset']
+    _namespace:typing.Literal['pool.dataset']
     def __init__(self, client:TrueNASClient) -> None: ...
-    @_ty.overload
+    @typing.overload
     def attachments(self, 
         id:'str',
-    /) -> 'list': 
+    /) -> 'list[Attachment]': 
         """
         Return a list of services dependent of this dataset.
         
@@ -29,14 +29,14 @@ class PoolDataset(Namespace):
             id
         Returns
         -------
-        list:
+        list[Attachment]:
             attachments
         """
         ...
-    @_ty.overload
+    @typing.overload
     def change_key(self, 
         id:'str',
-        change_key_options:'dict[str]'={},
+        change_key_options:'ChangeKeyOptions'={},
     /) -> None: 
         """
         Change encryption properties for `id` encrypted dataset.
@@ -56,9 +56,9 @@ class PoolDataset(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def checksum_choices(self, 
-    /) -> 'dict[str]': 
+    /) -> 'ChecksumChoices': 
         """
         Retrieve checksums supported for ZFS dataset.
 
@@ -66,13 +66,13 @@ class PoolDataset(Namespace):
         ----------
         Returns
         -------
-        dict[str]:
+        ChecksumChoices:
             checksum_choices
         """
         ...
-    @_ty.overload
+    @typing.overload
     def compression_choices(self, 
-    /) -> 'dict[str]': 
+    /) -> 'CompressionChoices': 
         """
         Retrieve compression algorithm supported by ZFS.
 
@@ -80,14 +80,14 @@ class PoolDataset(Namespace):
         ----------
         Returns
         -------
-        dict[str]:
+        CompressionChoices:
             compression_choices
         """
         ...
-    @_ty.overload
+    @typing.overload
     def create(self, 
-        pool_dataset_create:'dict[str]'={},
-    /) -> 'dict[str]': 
+        pool_dataset_create:'PoolDatasetCreate'={},
+    /) -> 'PoolDatasetCreateReturns': 
         """
         Creates a dataset/zvol.
         
@@ -116,14 +116,14 @@ class PoolDataset(Namespace):
             pool_dataset_create
         Returns
         -------
-        dict[str]:
+        PoolDatasetCreateReturns:
             pool_dataset_create_returns
         """
         ...
-    @_ty.overload
+    @typing.overload
     def delete(self, 
         id:'str',
-        dataset_delete:'dict[str]'={},
+        dataset_delete:'DatasetDelete'={},
     /) -> 'bool': 
         """
         Delete dataset/zvol `id`.
@@ -148,11 +148,11 @@ class PoolDataset(Namespace):
             Will return `true` if `id` is deleted successfully
         """
         ...
-    @_ty.overload
+    @typing.overload
     def destroy_snapshots(self, 
         name:'str',
-        snapshots:'dict[str]'={},
-    /) -> 'list': 
+        snapshots:'Snapshots'={},
+    /) -> 'list[str]': 
         """
         Destroy specified snapshots of a given dataset.
 
@@ -164,11 +164,11 @@ class PoolDataset(Namespace):
             snapshots
         Returns
         -------
-        list:
+        list[str]:
             deleted_snapshots
         """
         ...
-    @_ty.overload
+    @typing.overload
     def details(self, 
     /) -> 'list': 
         """
@@ -467,9 +467,9 @@ class PoolDataset(Namespace):
             ```
         """
         ...
-    @_ty.overload
+    @typing.overload
     def encryption_algorithm_choices(self, 
-    /) -> 'dict[str]': 
+    /) -> 'EncryptionAlgorithmChoices': 
         """
         Retrieve encryption algorithms supported for ZFS dataset encryption.
 
@@ -477,15 +477,15 @@ class PoolDataset(Namespace):
         ----------
         Returns
         -------
-        dict[str]:
+        EncryptionAlgorithmChoices:
             encryption_algorithm_choices
         """
         ...
-    @_ty.overload
+    @typing.overload
     def encryption_summary(self, 
         id:'str',
-        encryption_root_summary_options:'dict[str]'={},
-    /) -> 'list': 
+        encryption_root_summary_options:'EncryptionRootSummaryOptions'={},
+    /) -> 'list[DatasetEncryptionSummary]': 
         """
         Retrieve summary of all encrypted roots under `id`.
         
@@ -562,11 +562,11 @@ class PoolDataset(Namespace):
             encryption_root_summary_options
         Returns
         -------
-        list:
+        list[DatasetEncryptionSummary]:
             encryption_summary
         """
         ...
-    @_ty.overload
+    @typing.overload
     def export_key(self, 
         id:'str',
         download:'bool'=False,
@@ -593,7 +593,7 @@ class PoolDataset(Namespace):
             key
         """
         ...
-    @_ty.overload
+    @typing.overload
     def export_keys(self, 
         id:'str',
     /) -> None: 
@@ -612,7 +612,7 @@ class PoolDataset(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def export_keys_for_replication(self, 
         id:'int',
     /) -> None: 
@@ -631,10 +631,10 @@ class PoolDataset(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def get_instance(self, 
         id:'str|int|bool|dict[str]|list',
-        query_options_get_instance:'dict[str]'={},
+        query_options_get_instance:'QueryOptionsGetInstance'={},
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -651,12 +651,12 @@ class PoolDataset(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def get_quota(self, 
         ds:'str',
         quota_type:'str',
-        query_filters:'list'=[],
-        query_options:'dict[str]'={},
+        query_filters:'list[list]'=[],
+        query_options:'QueryOptions'={},
     /) -> None: 
         """
         Return a list of the specified `quota_type` of quotas on the ZFS dataset `ds`.
@@ -702,7 +702,7 @@ class PoolDataset(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def inherit_parent_encryption_properties(self, 
         id:'str',
     /) -> None: 
@@ -718,10 +718,10 @@ class PoolDataset(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def lock(self, 
         id:'str',
-        lock_options:'dict[str]'={},
+        lock_options:'LockOptions'={},
     /) -> 'bool': 
         """
         Locks `id` dataset. It will unmount the dataset and its children before locking.
@@ -742,7 +742,7 @@ class PoolDataset(Namespace):
             locked
         """
         ...
-    @_ty.overload
+    @typing.overload
     def mountpoint(self, 
         dataset:'str',
         raise:'bool'=True,
@@ -765,11 +765,11 @@ class PoolDataset(Namespace):
             mountpoint
         """
         ...
-    @_ty.overload
+    @typing.overload
     def permission(self, 
         id:'str',
-        pool_dataset_permission:'dict[str]'={},
-    /) -> 'dict[str]': 
+        pool_dataset_permission:'PoolDatasetPermission'={},
+    /) -> 'PoolDatasetPermission': 
         """
         Set permissions for a dataset `id`. Permissions may be specified as
         either a posix `mode` or an `acl`. This method is a wrapper around
@@ -809,14 +809,14 @@ class PoolDataset(Namespace):
             pool_dataset_permission
         Returns
         -------
-        dict[str]:
+        PoolDatasetPermission:
             pool_dataset_permission
         """
         ...
-    @_ty.overload
+    @typing.overload
     def processes(self, 
         id:'str',
-    /) -> 'list': 
+    /) -> 'list[Process]': 
         """
         Return a list of processes using this dataset.
         
@@ -841,11 +841,11 @@ class PoolDataset(Namespace):
             id
         Returns
         -------
-        list:
+        list[Process]:
             processes
         """
         ...
-    @_ty.overload
+    @typing.overload
     def promote(self, 
         id:'str',
     /) -> None: 
@@ -860,11 +860,11 @@ class PoolDataset(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def query(self, 
-        query_filters:'list'=[],
-        query_options:'dict[str]'={},
-    /) -> 'list|dict[str]|int|dict[str]': 
+        query_filters:'list[list]'=[],
+        query_options:'QueryOptions'={},
+    /) -> 'list[PoolDatasetEntry]|PoolDatasetEntry|int|PoolDatasetEntry': 
         """
         Query Pool Datasets with `query-filters` and `query-options`.
         
@@ -902,17 +902,17 @@ class PoolDataset(Namespace):
             query-options
         Returns
         -------
-        list:
+        list[PoolDatasetEntry]:
             
-        dict[str]:
+        PoolDatasetEntry:
             
         int:
             
-        dict[str]:
+        PoolDatasetEntry:
             
         """
         ...
-    @_ty.overload
+    @typing.overload
     def recommended_zvol_blocksize(self, 
         pool:'str',
     /) -> 'str': 
@@ -929,10 +929,10 @@ class PoolDataset(Namespace):
             recommended_zvol_blocksize
         """
         ...
-    @_ty.overload
+    @typing.overload
     def recordsize_choices(self, 
         pool_name:'str|None'=None,
-    /) -> 'list': 
+    /) -> 'list[str]': 
         """
         Retrieve recordsize choices for datasets.
 
@@ -942,14 +942,14 @@ class PoolDataset(Namespace):
             pool_name
         Returns
         -------
-        list:
+        list[str]:
             recordsize_choices
         """
         ...
-    @_ty.overload
+    @typing.overload
     def set_quota(self, 
         ds:'str',
-        quotas:'list'=[{"quota_type": "USER", "id": "0", "quota_value": 0}],
+        quotas:'list[QuotaEntry]'=[{"quota_type": "USER", "id": "0", "quota_value": 0}],
     /) -> None: 
         """
         There are three over-arching types of quotas for ZFS datasets.
@@ -993,7 +993,7 @@ class PoolDataset(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def snapshot_count(self, 
         dataset:'str',
     /) -> 'int': 
@@ -1010,11 +1010,11 @@ class PoolDataset(Namespace):
             snapshot_count
         """
         ...
-    @_ty.overload
+    @typing.overload
     def unlock(self, 
         id:'str',
-        unlock_options:'dict[str]'={},
-    /) -> 'dict[str]': 
+        unlock_options:'UnlockOptions'={},
+    /) -> 'Unlock': 
         """
         Unlock dataset `id` (and its children if `unlock_options.recursive` is `true`).
         
@@ -1056,11 +1056,11 @@ class PoolDataset(Namespace):
             unlock_options
         Returns
         -------
-        dict[str]:
+        Unlock:
             unlock
         """
         ...
-    @_ty.overload
+    @typing.overload
     def unlock_services_restart_choices(self, 
         dataset:'str',
     /) -> 'dict[str]': 
@@ -1077,11 +1077,11 @@ class PoolDataset(Namespace):
             services_to_restart
         """
         ...
-    @_ty.overload
+    @typing.overload
     def update(self, 
         id:'str',
-        pool_dataset_update:'dict[str]'={},
-    /) -> 'dict[str]': 
+        pool_dataset_update:'PoolDatasetUpdate'={},
+    /) -> 'PoolDatasetUpdateReturns': 
         """
         Updates a dataset/zvol `id`.
 
@@ -1093,7 +1093,774 @@ class PoolDataset(Namespace):
             pool_dataset_update
         Returns
         -------
-        dict[str]:
+        PoolDatasetUpdateReturns:
             pool_dataset_update_returns
         """
+        ...
+
+class Attachment(typing.TypedDict):
+        type:'str'
+        service:'typing.Optional[str]'
+        attachments:'list[str]'
+        ...
+class ChangeKeyOptions(typing.TypedDict):
+        generate_key:'bool'
+        key_file:'bool'
+        pbkdf2iters:'int'
+        passphrase:'typing.Optional[str]'
+        key:'typing.Optional[str]'
+        ...
+class ChecksumChoices(typing.TypedDict):
+        ON:'str'
+        FLETCHER2:'str'
+        FLETCHER4:'str'
+        SHA256:'str'
+        SHA512:'str'
+        SKEIN:'str'
+        EDONR:'str'
+        ...
+class CompressionChoices(typing.TypedDict):
+        OFF:'str'
+        LZ4:'str'
+        GZIP:'str'
+        GZIP-1:'str'
+        GZIP-9:'str'
+        ZSTD:'str'
+        ZSTD-FAST:'str'
+        ZLE:'str'
+        LZJB:'str'
+        ZSTD-1:'str'
+        ZSTD-2:'str'
+        ZSTD-3:'str'
+        ZSTD-4:'str'
+        ZSTD-5:'str'
+        ZSTD-6:'str'
+        ZSTD-7:'str'
+        ZSTD-8:'str'
+        ZSTD-9:'str'
+        ZSTD-10:'str'
+        ZSTD-11:'str'
+        ZSTD-12:'str'
+        ZSTD-13:'str'
+        ZSTD-14:'str'
+        ZSTD-15:'str'
+        ZSTD-16:'str'
+        ZSTD-17:'str'
+        ZSTD-18:'str'
+        ZSTD-19:'str'
+        ZSTD-FAST-1:'str'
+        ZSTD-FAST-2:'str'
+        ZSTD-FAST-3:'str'
+        ZSTD-FAST-4:'str'
+        ZSTD-FAST-5:'str'
+        ZSTD-FAST-6:'str'
+        ZSTD-FAST-7:'str'
+        ZSTD-FAST-8:'str'
+        ZSTD-FAST-9:'str'
+        ZSTD-FAST-10:'str'
+        ZSTD-FAST-20:'str'
+        ZSTD-FAST-30:'str'
+        ZSTD-FAST-40:'str'
+        ZSTD-FAST-50:'str'
+        ZSTD-FAST-60:'str'
+        ZSTD-FAST-70:'str'
+        ZSTD-FAST-80:'str'
+        ZSTD-FAST-90:'str'
+        ZSTD-FAST-100:'str'
+        ZSTD-FAST-500:'str'
+        ZSTD-FAST-1000:'str'
+        ...
+class PoolDatasetCreate(typing.TypedDict):
+        name:'str'
+        type:'str'
+        volsize:'int'
+        volblocksize:'str'
+        sparse:'bool'
+        force_size:'bool'
+        comments:'str'
+        sync:'str'
+        snapdev:'str'
+        compression:'str'
+        atime:'str'
+        exec:'str'
+        managedby:'str'
+        quota:'typing.Optional[int]'
+        quota_warning:'typing.Union[int, str]'
+        quota_critical:'typing.Union[int, str]'
+        refquota:'typing.Optional[int]'
+        refquota_warning:'typing.Union[int, str]'
+        refquota_critical:'typing.Union[int, str]'
+        reservation:'int'
+        refreservation:'int'
+        special_small_block_size:'typing.Union[int, str]'
+        copies:'typing.Union[int, str]'
+        snapdir:'str'
+        deduplication:'str'
+        checksum:'str'
+        readonly:'str'
+        recordsize:'str'
+        casesensitivity:'str'
+        aclmode:'str'
+        acltype:'str'
+        share_type:'str'
+        xattr:'str'
+        encryption_options:'EncryptionOptions'
+        encryption:'bool'
+        inherit_encryption:'bool'
+        user_properties:'list[UserProperty]'
+        create_ancestors:'bool'
+        ...
+class EncryptionOptions(typing.TypedDict):
+        generate_key:'bool'
+        pbkdf2iters:'int'
+        algorithm:'str'
+        passphrase:'typing.Optional[str]'
+        key:'typing.Optional[str]'
+        ...
+class UserProperty(typing.TypedDict):
+        key:'str'
+        value:'str'
+        ...
+class PoolDatasetCreateReturns(typing.TypedDict):
+        id:'str'
+        type:'str'
+        name:'str'
+        pool:'str'
+        encrypted:'bool'
+        encryption_root:'typing.Optional[str]'
+        key_loaded:'typing.Optional[bool]'
+        children:'list'
+        user_properties:'dict[str]'
+        locked:'bool'
+        comments:'Comments'
+        quota_warning:'QuotaWarning'
+        quota_critical:'QuotaCritical'
+        refquota_warning:'RefquotaWarning'
+        refquota_critical:'RefquotaCritical'
+        managedby:'Managedby'
+        deduplication:'Deduplication'
+        aclmode:'Aclmode'
+        acltype:'Acltype'
+        xattr:'Xattr'
+        atime:'Atime'
+        casesensitivity:'Casesensitivity'
+        checksum:'Checksum'
+        exec:'Exec'
+        sync:'Sync'
+        compression:'Compression'
+        compressratio:'Compressratio'
+        origin:'Origin'
+        quota:'Quota'
+        refquota:'Refquota'
+        reservation:'Reservation'
+        refreservation:'Refreservation'
+        copies:'Copies'
+        snapdir:'Snapdir'
+        readonly:'Readonly'
+        recordsize:'Recordsize'
+        sparse:'Sparse'
+        volsize:'Volsize'
+        volblocksize:'Volblocksize'
+        key_format:'KeyFormat'
+        encryption_algorithm:'EncryptionAlgorithm'
+        used:'Used'
+        usedbychildren:'Usedbychildren'
+        usedbydataset:'Usedbydataset'
+        usedbyrefreservation:'Usedbyrefreservation'
+        usedbysnapshots:'Usedbysnapshots'
+        available:'Available'
+        special_small_block_size:'SpecialSmallBlockSize'
+        pbkdf2iters:'Pbkdf2iters'
+        creation:'Creation'
+        snapdev:'Snapdev'
+        mountpoint:'typing.Optional[str]'
+        ...
+class Comments(typing.TypedDict):
+        parsed:'typing.Union[str, int, bool, dict[str], list]'
+        rawvalue:'typing.Optional[str]'
+        value:'typing.Optional[str]'
+        source:'typing.Optional[str]'
+        source_info:'typing.Union[str, int, bool, dict[str], list]'
+        ...
+class QuotaWarning(typing.TypedDict):
+        parsed:'typing.Union[str, int, bool, dict[str], list]'
+        rawvalue:'typing.Optional[str]'
+        value:'typing.Optional[str]'
+        source:'typing.Optional[str]'
+        source_info:'typing.Union[str, int, bool, dict[str], list]'
+        ...
+class QuotaCritical(typing.TypedDict):
+        parsed:'typing.Union[str, int, bool, dict[str], list]'
+        rawvalue:'typing.Optional[str]'
+        value:'typing.Optional[str]'
+        source:'typing.Optional[str]'
+        source_info:'typing.Union[str, int, bool, dict[str], list]'
+        ...
+class RefquotaWarning(typing.TypedDict):
+        parsed:'typing.Union[str, int, bool, dict[str], list]'
+        rawvalue:'typing.Optional[str]'
+        value:'typing.Optional[str]'
+        source:'typing.Optional[str]'
+        source_info:'typing.Union[str, int, bool, dict[str], list]'
+        ...
+class RefquotaCritical(typing.TypedDict):
+        parsed:'typing.Union[str, int, bool, dict[str], list]'
+        rawvalue:'typing.Optional[str]'
+        value:'typing.Optional[str]'
+        source:'typing.Optional[str]'
+        source_info:'typing.Union[str, int, bool, dict[str], list]'
+        ...
+class Managedby(typing.TypedDict):
+        parsed:'typing.Union[str, int, bool, dict[str], list]'
+        rawvalue:'typing.Optional[str]'
+        value:'typing.Optional[str]'
+        source:'typing.Optional[str]'
+        source_info:'typing.Union[str, int, bool, dict[str], list]'
+        ...
+class Deduplication(typing.TypedDict):
+        parsed:'typing.Union[str, int, bool, dict[str], list]'
+        rawvalue:'typing.Optional[str]'
+        value:'typing.Optional[str]'
+        source:'typing.Optional[str]'
+        source_info:'typing.Union[str, int, bool, dict[str], list]'
+        ...
+class Aclmode(typing.TypedDict):
+        parsed:'typing.Union[str, int, bool, dict[str], list]'
+        rawvalue:'typing.Optional[str]'
+        value:'typing.Optional[str]'
+        source:'typing.Optional[str]'
+        source_info:'typing.Union[str, int, bool, dict[str], list]'
+        ...
+class Acltype(typing.TypedDict):
+        parsed:'typing.Union[str, int, bool, dict[str], list]'
+        rawvalue:'typing.Optional[str]'
+        value:'typing.Optional[str]'
+        source:'typing.Optional[str]'
+        source_info:'typing.Union[str, int, bool, dict[str], list]'
+        ...
+class Xattr(typing.TypedDict):
+        parsed:'typing.Union[str, int, bool, dict[str], list]'
+        rawvalue:'typing.Optional[str]'
+        value:'typing.Optional[str]'
+        source:'typing.Optional[str]'
+        source_info:'typing.Union[str, int, bool, dict[str], list]'
+        ...
+class Atime(typing.TypedDict):
+        parsed:'typing.Union[str, int, bool, dict[str], list]'
+        rawvalue:'typing.Optional[str]'
+        value:'typing.Optional[str]'
+        source:'typing.Optional[str]'
+        source_info:'typing.Union[str, int, bool, dict[str], list]'
+        ...
+class Casesensitivity(typing.TypedDict):
+        parsed:'typing.Union[str, int, bool, dict[str], list]'
+        rawvalue:'typing.Optional[str]'
+        value:'typing.Optional[str]'
+        source:'typing.Optional[str]'
+        source_info:'typing.Union[str, int, bool, dict[str], list]'
+        ...
+class Checksum(typing.TypedDict):
+        parsed:'typing.Union[str, int, bool, dict[str], list]'
+        rawvalue:'typing.Optional[str]'
+        value:'typing.Optional[str]'
+        source:'typing.Optional[str]'
+        source_info:'typing.Union[str, int, bool, dict[str], list]'
+        ...
+class Exec(typing.TypedDict):
+        parsed:'typing.Union[str, int, bool, dict[str], list]'
+        rawvalue:'typing.Optional[str]'
+        value:'typing.Optional[str]'
+        source:'typing.Optional[str]'
+        source_info:'typing.Union[str, int, bool, dict[str], list]'
+        ...
+class Sync(typing.TypedDict):
+        parsed:'typing.Union[str, int, bool, dict[str], list]'
+        rawvalue:'typing.Optional[str]'
+        value:'typing.Optional[str]'
+        source:'typing.Optional[str]'
+        source_info:'typing.Union[str, int, bool, dict[str], list]'
+        ...
+class Compression(typing.TypedDict):
+        parsed:'typing.Union[str, int, bool, dict[str], list]'
+        rawvalue:'typing.Optional[str]'
+        value:'typing.Optional[str]'
+        source:'typing.Optional[str]'
+        source_info:'typing.Union[str, int, bool, dict[str], list]'
+        ...
+class Compressratio(typing.TypedDict):
+        parsed:'typing.Union[str, int, bool, dict[str], list]'
+        rawvalue:'typing.Optional[str]'
+        value:'typing.Optional[str]'
+        source:'typing.Optional[str]'
+        source_info:'typing.Union[str, int, bool, dict[str], list]'
+        ...
+class Origin(typing.TypedDict):
+        parsed:'typing.Union[str, int, bool, dict[str], list]'
+        rawvalue:'typing.Optional[str]'
+        value:'typing.Optional[str]'
+        source:'typing.Optional[str]'
+        source_info:'typing.Union[str, int, bool, dict[str], list]'
+        ...
+class Quota(typing.TypedDict):
+        parsed:'typing.Union[str, int, bool, dict[str], list]'
+        rawvalue:'typing.Optional[str]'
+        value:'typing.Optional[str]'
+        source:'typing.Optional[str]'
+        source_info:'typing.Union[str, int, bool, dict[str], list]'
+        ...
+class Refquota(typing.TypedDict):
+        parsed:'typing.Union[str, int, bool, dict[str], list]'
+        rawvalue:'typing.Optional[str]'
+        value:'typing.Optional[str]'
+        source:'typing.Optional[str]'
+        source_info:'typing.Union[str, int, bool, dict[str], list]'
+        ...
+class Reservation(typing.TypedDict):
+        parsed:'typing.Union[str, int, bool, dict[str], list]'
+        rawvalue:'typing.Optional[str]'
+        value:'typing.Optional[str]'
+        source:'typing.Optional[str]'
+        source_info:'typing.Union[str, int, bool, dict[str], list]'
+        ...
+class Refreservation(typing.TypedDict):
+        parsed:'typing.Union[str, int, bool, dict[str], list]'
+        rawvalue:'typing.Optional[str]'
+        value:'typing.Optional[str]'
+        source:'typing.Optional[str]'
+        source_info:'typing.Union[str, int, bool, dict[str], list]'
+        ...
+class Copies(typing.TypedDict):
+        parsed:'typing.Union[str, int, bool, dict[str], list]'
+        rawvalue:'typing.Optional[str]'
+        value:'typing.Optional[str]'
+        source:'typing.Optional[str]'
+        source_info:'typing.Union[str, int, bool, dict[str], list]'
+        ...
+class Snapdir(typing.TypedDict):
+        parsed:'typing.Union[str, int, bool, dict[str], list]'
+        rawvalue:'typing.Optional[str]'
+        value:'typing.Optional[str]'
+        source:'typing.Optional[str]'
+        source_info:'typing.Union[str, int, bool, dict[str], list]'
+        ...
+class Readonly(typing.TypedDict):
+        parsed:'typing.Union[str, int, bool, dict[str], list]'
+        rawvalue:'typing.Optional[str]'
+        value:'typing.Optional[str]'
+        source:'typing.Optional[str]'
+        source_info:'typing.Union[str, int, bool, dict[str], list]'
+        ...
+class Recordsize(typing.TypedDict):
+        parsed:'typing.Union[str, int, bool, dict[str], list]'
+        rawvalue:'typing.Optional[str]'
+        value:'typing.Optional[str]'
+        source:'typing.Optional[str]'
+        source_info:'typing.Union[str, int, bool, dict[str], list]'
+        ...
+class Sparse(typing.TypedDict):
+        parsed:'typing.Union[str, int, bool, dict[str], list]'
+        rawvalue:'typing.Optional[str]'
+        value:'typing.Optional[str]'
+        source:'typing.Optional[str]'
+        source_info:'typing.Union[str, int, bool, dict[str], list]'
+        ...
+class Volsize(typing.TypedDict):
+        parsed:'typing.Union[str, int, bool, dict[str], list]'
+        rawvalue:'typing.Optional[str]'
+        value:'typing.Optional[str]'
+        source:'typing.Optional[str]'
+        source_info:'typing.Union[str, int, bool, dict[str], list]'
+        ...
+class Volblocksize(typing.TypedDict):
+        parsed:'typing.Union[str, int, bool, dict[str], list]'
+        rawvalue:'typing.Optional[str]'
+        value:'typing.Optional[str]'
+        source:'typing.Optional[str]'
+        source_info:'typing.Union[str, int, bool, dict[str], list]'
+        ...
+class KeyFormat(typing.TypedDict):
+        parsed:'typing.Union[str, int, bool, dict[str], list]'
+        rawvalue:'typing.Optional[str]'
+        value:'typing.Optional[str]'
+        source:'typing.Optional[str]'
+        source_info:'typing.Union[str, int, bool, dict[str], list]'
+        ...
+class EncryptionAlgorithm(typing.TypedDict):
+        parsed:'typing.Union[str, int, bool, dict[str], list]'
+        rawvalue:'typing.Optional[str]'
+        value:'typing.Optional[str]'
+        source:'typing.Optional[str]'
+        source_info:'typing.Union[str, int, bool, dict[str], list]'
+        ...
+class Used(typing.TypedDict):
+        parsed:'typing.Union[str, int, bool, dict[str], list]'
+        rawvalue:'typing.Optional[str]'
+        value:'typing.Optional[str]'
+        source:'typing.Optional[str]'
+        source_info:'typing.Union[str, int, bool, dict[str], list]'
+        ...
+class Usedbychildren(typing.TypedDict):
+        parsed:'typing.Union[str, int, bool, dict[str], list]'
+        rawvalue:'typing.Optional[str]'
+        value:'typing.Optional[str]'
+        source:'typing.Optional[str]'
+        source_info:'typing.Union[str, int, bool, dict[str], list]'
+        ...
+class Usedbydataset(typing.TypedDict):
+        parsed:'typing.Union[str, int, bool, dict[str], list]'
+        rawvalue:'typing.Optional[str]'
+        value:'typing.Optional[str]'
+        source:'typing.Optional[str]'
+        source_info:'typing.Union[str, int, bool, dict[str], list]'
+        ...
+class Usedbyrefreservation(typing.TypedDict):
+        parsed:'typing.Union[str, int, bool, dict[str], list]'
+        rawvalue:'typing.Optional[str]'
+        value:'typing.Optional[str]'
+        source:'typing.Optional[str]'
+        source_info:'typing.Union[str, int, bool, dict[str], list]'
+        ...
+class Usedbysnapshots(typing.TypedDict):
+        parsed:'typing.Union[str, int, bool, dict[str], list]'
+        rawvalue:'typing.Optional[str]'
+        value:'typing.Optional[str]'
+        source:'typing.Optional[str]'
+        source_info:'typing.Union[str, int, bool, dict[str], list]'
+        ...
+class Available(typing.TypedDict):
+        parsed:'typing.Union[str, int, bool, dict[str], list]'
+        rawvalue:'typing.Optional[str]'
+        value:'typing.Optional[str]'
+        source:'typing.Optional[str]'
+        source_info:'typing.Union[str, int, bool, dict[str], list]'
+        ...
+class SpecialSmallBlockSize(typing.TypedDict):
+        parsed:'typing.Union[str, int, bool, dict[str], list]'
+        rawvalue:'typing.Optional[str]'
+        value:'typing.Optional[str]'
+        source:'typing.Optional[str]'
+        source_info:'typing.Union[str, int, bool, dict[str], list]'
+        ...
+class Pbkdf2iters(typing.TypedDict):
+        parsed:'typing.Union[str, int, bool, dict[str], list]'
+        rawvalue:'typing.Optional[str]'
+        value:'typing.Optional[str]'
+        source:'typing.Optional[str]'
+        source_info:'typing.Union[str, int, bool, dict[str], list]'
+        ...
+class Creation(typing.TypedDict):
+        parsed:'typing.Union[str, int, bool, dict[str], list]'
+        rawvalue:'typing.Optional[str]'
+        value:'typing.Optional[str]'
+        source:'typing.Optional[str]'
+        source_info:'typing.Union[str, int, bool, dict[str], list]'
+        ...
+class Snapdev(typing.TypedDict):
+        parsed:'typing.Union[str, int, bool, dict[str], list]'
+        rawvalue:'typing.Optional[str]'
+        value:'typing.Optional[str]'
+        source:'typing.Optional[str]'
+        source_info:'typing.Union[str, int, bool, dict[str], list]'
+        ...
+class DatasetDelete(typing.TypedDict):
+        recursive:'bool'
+        force:'bool'
+        ...
+class Snapshots(typing.TypedDict):
+        all:'bool'
+        recursive:'bool'
+        snapshots:'list[typing.Union[ForwardRef(SnapshotSpec), str]]'
+        ...
+class SnapshotSpec(typing.TypedDict):
+        start:'str'
+        end:'str'
+        ...
+class EncryptionAlgorithmChoices(typing.TypedDict):
+        AES-128-CCM:'str'
+        AES-192-CCM:'str'
+        AES-256-CCM:'str'
+        AES-128-GCM:'str'
+        AES-192-GCM:'str'
+        AES-256-GCM:'str'
+        ...
+class EncryptionRootSummaryOptions(typing.TypedDict):
+        key_file:'bool'
+        force:'bool'
+        datasets:'list[Dataset]'
+        ...
+class Dataset(typing.TypedDict):
+        force:'bool'
+        name:'str'
+        key:'str'
+        passphrase:'str'
+        ...
+class DatasetEncryptionSummary(typing.TypedDict):
+        name:'str'
+        key_format:'str'
+        key_present_in_database:'bool'
+        valid_key:'bool'
+        locked:'bool'
+        unlock_error:'typing.Optional[str]'
+        unlock_successful:'bool'
+        ...
+class QueryOptionsGetInstance(typing.TypedDict):
+        relationships:'bool'
+        extend:'typing.Optional[str]'
+        extend_context:'typing.Optional[str]'
+        prefix:'typing.Optional[str]'
+        extra:'dict[str]'
+        order_by:'list'
+        select:'list'
+        count:'bool'
+        get:'bool'
+        offset:'int'
+        limit:'int'
+        force_sql_filters:'bool'
+        ...
+class QueryOptions(typing.TypedDict):
+        relationships:'bool'
+        extend:'typing.Optional[str]'
+        extend_context:'typing.Optional[str]'
+        prefix:'typing.Optional[str]'
+        extra:'dict[str]'
+        order_by:'list'
+        select:'list'
+        count:'bool'
+        get:'bool'
+        offset:'int'
+        limit:'int'
+        force_sql_filters:'bool'
+        ...
+class LockOptions(typing.TypedDict):
+        force_umount:'bool'
+        ...
+class PoolDatasetPermission(typing.TypedDict):
+        user:'str'
+        group:'str'
+        mode:'typing.Optional[str]'
+        acl:'typing.Union[list[Nfs4Ace], list[Posix1eAce]]'
+        options:'Options'
+        ...
+class Nfs4Ace(typing.TypedDict):
+        tag:'str'
+        id:'typing.Optional[int]'
+        type:'str'
+        perms:'Perms'
+        flags:'Flags'
+        ...
+class Perms(typing.TypedDict):
+        READ_DATA:'bool'
+        WRITE_DATA:'bool'
+        APPEND_DATA:'bool'
+        READ_NAMED_ATTRS:'bool'
+        WRITE_NAMED_ATTRS:'bool'
+        EXECUTE:'bool'
+        DELETE_CHILD:'bool'
+        READ_ATTRIBUTES:'bool'
+        WRITE_ATTRIBUTES:'bool'
+        DELETE:'bool'
+        READ_ACL:'bool'
+        WRITE_ACL:'bool'
+        WRITE_OWNER:'bool'
+        SYNCHRONIZE:'bool'
+        BASIC:'str'
+        ...
+class Flags(typing.TypedDict):
+        FILE_INHERIT:'bool'
+        DIRECTORY_INHERIT:'bool'
+        NO_PROPAGATE_INHERIT:'bool'
+        INHERIT_ONLY:'bool'
+        INHERITED:'bool'
+        BASIC:'str'
+        ...
+class Posix1eAce(typing.TypedDict):
+        default:'bool'
+        tag:'str'
+        id:'int'
+        perms:'Perms'
+        ...
+class Perms_(typing.TypedDict):
+        READ:'bool'
+        WRITE:'bool'
+        EXECUTE:'bool'
+        ...
+class Options(typing.TypedDict):
+        set_default_acl:'bool'
+        stripacl:'bool'
+        recursive:'bool'
+        traverse:'bool'
+        ...
+class Process(typing.TypedDict):
+        pid:'int'
+        name:'str'
+        service:'str'
+        cmdline:'str'
+        ...
+class PoolDatasetEntry(typing.TypedDict):
+        id:'str'
+        type:'str'
+        name:'str'
+        pool:'str'
+        encrypted:'bool'
+        encryption_root:'typing.Optional[str]'
+        key_loaded:'typing.Optional[bool]'
+        children:'list'
+        user_properties:'dict[str]'
+        locked:'bool'
+        comments:'Comments'
+        quota_warning:'QuotaWarning'
+        quota_critical:'QuotaCritical'
+        refquota_warning:'RefquotaWarning'
+        refquota_critical:'RefquotaCritical'
+        managedby:'Managedby'
+        deduplication:'Deduplication'
+        aclmode:'Aclmode'
+        acltype:'Acltype'
+        xattr:'Xattr'
+        atime:'Atime'
+        casesensitivity:'Casesensitivity'
+        checksum:'Checksum'
+        exec:'Exec'
+        sync:'Sync'
+        compression:'Compression'
+        compressratio:'Compressratio'
+        origin:'Origin'
+        quota:'Quota'
+        refquota:'Refquota'
+        reservation:'Reservation'
+        refreservation:'Refreservation'
+        copies:'Copies'
+        snapdir:'Snapdir'
+        readonly:'Readonly'
+        recordsize:'Recordsize'
+        sparse:'Sparse'
+        volsize:'Volsize'
+        volblocksize:'Volblocksize'
+        key_format:'KeyFormat'
+        encryption_algorithm:'EncryptionAlgorithm'
+        used:'Used'
+        usedbychildren:'Usedbychildren'
+        usedbydataset:'Usedbydataset'
+        usedbyrefreservation:'Usedbyrefreservation'
+        usedbysnapshots:'Usedbysnapshots'
+        available:'Available'
+        special_small_block_size:'SpecialSmallBlockSize'
+        pbkdf2iters:'Pbkdf2iters'
+        creation:'Creation'
+        snapdev:'Snapdev'
+        mountpoint:'typing.Optional[str]'
+        ...
+class QuotaEntry(typing.TypedDict):
+        quota_type:'str'
+        id:'str'
+        quota_value:'typing.Optional[int]'
+        ...
+class UnlockOptions(typing.TypedDict):
+        force:'bool'
+        key_file:'bool'
+        recursive:'bool'
+        toggle_attachments:'bool'
+        datasets:'list[Dataset]'
+        ...
+class Dataset_(typing.TypedDict):
+        force:'bool'
+        name:'str'
+        key:'str'
+        passphrase:'str'
+        recursive:'bool'
+        ...
+class Unlock(typing.TypedDict):
+        unlocked:'list[str]'
+        failed:'dict[str]'
+        ...
+class PoolDatasetUpdate(typing.TypedDict):
+        volsize:'int'
+        force_size:'bool'
+        comments:'str'
+        sync:'str'
+        snapdev:'str'
+        compression:'str'
+        atime:'str'
+        exec:'str'
+        managedby:'str'
+        quota:'typing.Optional[int]'
+        quota_warning:'typing.Union[int, str]'
+        quota_critical:'typing.Union[int, str]'
+        refquota:'typing.Optional[int]'
+        refquota_warning:'typing.Union[int, str]'
+        refquota_critical:'typing.Union[int, str]'
+        reservation:'int'
+        refreservation:'int'
+        special_small_block_size:'typing.Union[int, str]'
+        copies:'typing.Union[int, str]'
+        snapdir:'str'
+        deduplication:'str'
+        checksum:'str'
+        readonly:'str'
+        recordsize:'str'
+        aclmode:'str'
+        acltype:'str'
+        xattr:'str'
+        user_properties:'list[UserProperty]'
+        create_ancestors:'bool'
+        user_properties_update:'list[UserProperty]'
+        ...
+class UserProperty_(typing.TypedDict):
+        key:'str'
+        value:'str'
+        remove:'bool'
+        ...
+class PoolDatasetUpdateReturns(typing.TypedDict):
+        id:'str'
+        type:'str'
+        name:'str'
+        pool:'str'
+        encrypted:'bool'
+        encryption_root:'typing.Optional[str]'
+        key_loaded:'typing.Optional[bool]'
+        children:'list'
+        user_properties:'dict[str]'
+        locked:'bool'
+        comments:'Comments'
+        quota_warning:'QuotaWarning'
+        quota_critical:'QuotaCritical'
+        refquota_warning:'RefquotaWarning'
+        refquota_critical:'RefquotaCritical'
+        managedby:'Managedby'
+        deduplication:'Deduplication'
+        aclmode:'Aclmode'
+        acltype:'Acltype'
+        xattr:'Xattr'
+        atime:'Atime'
+        casesensitivity:'Casesensitivity'
+        checksum:'Checksum'
+        exec:'Exec'
+        sync:'Sync'
+        compression:'Compression'
+        compressratio:'Compressratio'
+        origin:'Origin'
+        quota:'Quota'
+        refquota:'Refquota'
+        reservation:'Reservation'
+        refreservation:'Refreservation'
+        copies:'Copies'
+        snapdir:'Snapdir'
+        readonly:'Readonly'
+        recordsize:'Recordsize'
+        sparse:'Sparse'
+        volsize:'Volsize'
+        volblocksize:'Volblocksize'
+        key_format:'KeyFormat'
+        encryption_algorithm:'EncryptionAlgorithm'
+        used:'Used'
+        usedbychildren:'Usedbychildren'
+        usedbydataset:'Usedbydataset'
+        usedbyrefreservation:'Usedbyrefreservation'
+        usedbysnapshots:'Usedbysnapshots'
+        available:'Available'
+        special_small_block_size:'SpecialSmallBlockSize'
+        pbkdf2iters:'Pbkdf2iters'
+        creation:'Creation'
+        snapdev:'Snapdev'
+        mountpoint:'typing.Optional[str]'
         ...

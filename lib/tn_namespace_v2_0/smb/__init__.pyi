@@ -1,10 +1,10 @@
 
 from pytruenas import Namespace, TrueNASClient
-import typing as _ty
+import typing
 class Smb(Namespace):
-    _namespace:_ty.Literal['smb']
+    _namespace:typing.Literal['smb']
     def __init__(self, client:TrueNASClient) -> None: ...
-    @_ty.overload
+    @typing.overload
     def bindip_choices(self, 
     /) -> None: 
         """
@@ -17,7 +17,7 @@ class Smb(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def client_count(self, 
     /) -> None: 
         """
@@ -29,7 +29,7 @@ class Smb(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def config(self, 
     /) -> 'dict[str]': 
         """
@@ -43,7 +43,7 @@ class Smb(Namespace):
             smb_entry
         """
         ...
-    @_ty.overload
+    @typing.overload
     def domain_choices(self, 
     /) -> None: 
         """
@@ -56,9 +56,9 @@ class Smb(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def get_remote_acl(self, 
-        get_remote_acl:'dict[str]'={},
+        get_remote_acl:'GetRemoteAcl'={},
     /) -> None: 
         """
         Retrieves an ACL from a remote SMB server.
@@ -88,12 +88,12 @@ class Smb(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def status(self, 
         info_level:'str'="ALL",
-        query_filters:'list'=[],
-        query_options:'dict[str]'={},
-        status_options:'dict[str]'={},
+        query_filters:'list[list]'=[],
+        query_options:'QueryOptions'={},
+        status_options:'StatusOptions'={},
     /) -> None: 
         """
         Returns SMB server status (sessions, open files, locks, notifications).
@@ -124,7 +124,7 @@ class Smb(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def unixcharset_choices(self, 
     /) -> None: 
         """
@@ -136,9 +136,9 @@ class Smb(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def update(self, 
-        smb_update:'dict[str]'={},
+        smb_update:'SmbUpdate'={},
     /) -> 'dict[str]': 
         """
         Update SMB Service Configuration.
@@ -181,4 +181,58 @@ class Smb(Namespace):
         dict[str]:
             smb_update_returns
         """
+        ...
+
+class GetRemoteAcl(typing.TypedDict):
+        server:'str'
+        share:'str'
+        path:'str'
+        username:'str'
+        password:'str'
+        options:'Options'
+        ...
+class Options(typing.TypedDict):
+        use_kerberos:'bool'
+        output_format:'str'
+        ...
+class QueryOptions(typing.TypedDict):
+        relationships:'bool'
+        extend:'typing.Optional[str]'
+        extend_context:'typing.Optional[str]'
+        prefix:'typing.Optional[str]'
+        extra:'dict[str]'
+        order_by:'list'
+        select:'list'
+        count:'bool'
+        get:'bool'
+        offset:'int'
+        limit:'int'
+        force_sql_filters:'bool'
+        ...
+class StatusOptions(typing.TypedDict):
+        verbose:'bool'
+        fast:'bool'
+        restrict_user:'str'
+        restrict_session:'str'
+        ...
+class SmbUpdate(typing.TypedDict):
+        netbiosname:'str'
+        netbiosname_b:'str'
+        netbiosalias:'list[str]'
+        workgroup:'str'
+        description:'str'
+        enable_smb1:'bool'
+        unixcharset:'str'
+        loglevel:'str'
+        syslog:'bool'
+        aapl_extensions:'bool'
+        localmaster:'bool'
+        guest:'str'
+        admin_group:'typing.Optional[str]'
+        filemask:'str'
+        dirmask:'str'
+        ntlmv1_auth:'bool'
+        multichannel:'bool'
+        bindip:'list[str]'
+        smb_options:'str'
         ...

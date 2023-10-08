@@ -1,13 +1,13 @@
 
 from pytruenas import Namespace, TrueNASClient
-import typing as _ty
+import typing
 class Tunable(Namespace):
-    _namespace:_ty.Literal['tunable']
+    _namespace:typing.Literal['tunable']
     def __init__(self, client:TrueNASClient) -> None: ...
-    @_ty.overload
+    @typing.overload
     def create(self, 
-        tunable_create:'dict[str]'={},
-    /) -> 'dict[str]': 
+        tunable_create:'TunableCreate'={},
+    /) -> 'TunableCreateReturns': 
         """
         Create a tunable.
         
@@ -29,11 +29,11 @@ class Tunable(Namespace):
             tunable_create
         Returns
         -------
-        dict[str]:
+        TunableCreateReturns:
             tunable_create_returns
         """
         ...
-    @_ty.overload
+    @typing.overload
     def delete(self, 
         id:'int',
     /) -> 'bool': 
@@ -50,10 +50,10 @@ class Tunable(Namespace):
             Will return `true` if `id` is deleted successfully
         """
         ...
-    @_ty.overload
+    @typing.overload
     def get_instance(self, 
         id:'str|int|bool|dict[str]|list',
-        query_options_get_instance:'dict[str]'={},
+        query_options_get_instance:'QueryOptionsGetInstance'={},
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -70,11 +70,11 @@ class Tunable(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def query(self, 
-        query_filters:'list'=[],
-        query_options:'dict[str]'={},
-    /) -> 'list|dict[str]|int|dict[str]': 
+        query_filters:'list[list]'=[],
+        query_options:'QueryOptions'={},
+    /) -> 'list[TunableEntry]|TunableEntry|int|TunableEntry': 
         """
         
 
@@ -86,19 +86,19 @@ class Tunable(Namespace):
             query-options
         Returns
         -------
-        list:
+        list[TunableEntry]:
             
-        dict[str]:
+        TunableEntry:
             
         int:
             
-        dict[str]:
+        TunableEntry:
             
         """
         ...
-    @_ty.overload
+    @typing.overload
     def tunable_type_choices(self, 
-    /) -> 'dict[str]': 
+    /) -> 'TunableTypeChoices': 
         """
         Retrieve the supported tunable types that can be changed.
 
@@ -106,15 +106,15 @@ class Tunable(Namespace):
         ----------
         Returns
         -------
-        dict[str]:
+        TunableTypeChoices:
             tunable_type_choices
         """
         ...
-    @_ty.overload
+    @typing.overload
     def update(self, 
         id:'int',
-        tunable_update:'dict[str]'={},
-    /) -> 'dict[str]': 
+        tunable_update:'TunableUpdate'={},
+    /) -> 'TunableUpdateReturns': 
         """
         Update Tunable of `id`.
 
@@ -127,7 +127,82 @@ class Tunable(Namespace):
             tunable_update
         Returns
         -------
-        dict[str]:
+        TunableUpdateReturns:
             tunable_update_returns
         """
+        ...
+
+class TunableCreate(typing.TypedDict):
+        type:'str'
+        var:'str'
+        value:'str'
+        comment:'str'
+        enabled:'bool'
+        update_initramfs:'bool'
+        ...
+class TunableCreateReturns(typing.TypedDict):
+        type:'str'
+        var:'str'
+        value:'str'
+        comment:'str'
+        enabled:'bool'
+        update_initramfs:'bool'
+        id:'int'
+        ...
+class QueryOptionsGetInstance(typing.TypedDict):
+        relationships:'bool'
+        extend:'typing.Optional[str]'
+        extend_context:'typing.Optional[str]'
+        prefix:'typing.Optional[str]'
+        extra:'dict[str]'
+        order_by:'list'
+        select:'list'
+        count:'bool'
+        get:'bool'
+        offset:'int'
+        limit:'int'
+        force_sql_filters:'bool'
+        ...
+class QueryOptions(typing.TypedDict):
+        relationships:'bool'
+        extend:'typing.Optional[str]'
+        extend_context:'typing.Optional[str]'
+        prefix:'typing.Optional[str]'
+        extra:'dict[str]'
+        order_by:'list'
+        select:'list'
+        count:'bool'
+        get:'bool'
+        offset:'int'
+        limit:'int'
+        force_sql_filters:'bool'
+        ...
+class TunableEntry(typing.TypedDict):
+        type:'str'
+        var:'str'
+        value:'str'
+        comment:'str'
+        enabled:'bool'
+        update_initramfs:'bool'
+        id:'int'
+        ...
+class TunableTypeChoices(typing.TypedDict):
+        SYSCTL:'str'
+        UDEV:'str'
+        ZFS:'str'
+        ...
+class TunableUpdate(typing.TypedDict):
+        value:'str'
+        comment:'str'
+        enabled:'bool'
+        update_initramfs:'bool'
+        ...
+class TunableUpdateReturns(typing.TypedDict):
+        type:'str'
+        var:'str'
+        value:'str'
+        comment:'str'
+        enabled:'bool'
+        update_initramfs:'bool'
+        id:'int'
         ...

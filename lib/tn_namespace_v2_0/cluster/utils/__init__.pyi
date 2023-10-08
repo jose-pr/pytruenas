@@ -1,10 +1,10 @@
 
 from pytruenas import Namespace, TrueNASClient
-import typing as _ty
+import typing
 class ClusterUtils(Namespace):
-    _namespace:_ty.Literal['cluster.utils']
+    _namespace:typing.Literal['cluster.utils']
     def __init__(self, client:TrueNASClient) -> None: ...
-    @_ty.overload
+    @typing.overload
     def is_clustered(self, 
     /) -> 'bool': 
         """
@@ -20,3 +20,4 @@ class ClusterUtils(Namespace):
             is_clustered
         """
         ...
+

@@ -1,18 +1,22 @@
 <%
+        types ={}
+        mem = {
+                'types': types
+        }
 %>
 from pytruenas import Namespace, TrueNASClient
-import typing as _ty
+import typing
 class ${ns.classname}(Namespace):
-    _namespace:_ty.Literal['${ns.dotname}']
+    _namespace:typing.Literal['${ns.dotname}']
     def __init__(self, client:TrueNASClient) -> None: ...
 % for name, signatures in ns.methods.items():
 % for method in signatures:
-    @_ty.overload
+    @typing.overload
     def ${name}(self, 
     % for pname, param in method.arguments.items():
         ${pname}\
         %if param.type:
-:'${'|'.join([t.python() for t in param.type])}'\
+:'${'|'.join([t.python(mem) for t in param.type])}'\
         %endif
         %if not param.required and param.default != MISSING:
 =${param.default}\
@@ -25,7 +29,7 @@ class ${ns.classname}(Namespace):
 %else:
  -> '\
 %for p in method.returns:
-${'|'.join([t.python() for t in p.type])}\
+${'|'.join([t.python(mem) for t in p.type])}\
  %endfor
 '\
 %endif
@@ -43,7 +47,7 @@ ${'|'.join([t.python() for t in p.type])}\
         -------
 % for param in method.returns:
 % for t in param.type:
-        ${t.python()}:
+        ${t.python(mem)}:
             ${(param.description or '').strip().replace('\n', '\n            ')}
 %endfor
 %endfor
@@ -51,3 +55,11 @@ ${'|'.join([t.python() for t in p.type])}\
         ...
 % endfor
 % endfor
+
+%for name, obj in types.items():
+class ${name}(typing.TypedDict):
+%for pname, ty in obj.properties.items():
+        ${pname}:'${ty.python({})}'
+%endfor
+        ...
+%endfor

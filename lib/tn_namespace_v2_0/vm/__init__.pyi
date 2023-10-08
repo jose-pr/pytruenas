@@ -1,12 +1,12 @@
 
 from pytruenas import Namespace, TrueNASClient
-import typing as _ty
+import typing
 class Vm(Namespace):
-    _namespace:_ty.Literal['vm']
+    _namespace:typing.Literal['vm']
     def __init__(self, client:TrueNASClient) -> None: ...
-    @_ty.overload
+    @typing.overload
     def bootloader_options(self, 
-    /) -> 'dict[str]': 
+    /) -> 'BootloaderOptions': 
         """
         Supported motherboard firmware options.
 
@@ -14,11 +14,11 @@ class Vm(Namespace):
         ----------
         Returns
         -------
-        dict[str]:
+        BootloaderOptions:
             bootloader_options
         """
         ...
-    @_ty.overload
+    @typing.overload
     def bootloader_ovmf_choices(self, 
     /) -> 'dict[str]': 
         """
@@ -32,7 +32,7 @@ class Vm(Namespace):
             bootloader_ovmf_choices
         """
         ...
-    @_ty.overload
+    @typing.overload
     def clone(self, 
         id:'int',
         name:'str'=None,
@@ -55,7 +55,7 @@ class Vm(Namespace):
             clone
         """
         ...
-    @_ty.overload
+    @typing.overload
     def cpu_model_choices(self, 
     /) -> 'dict[str]': 
         """
@@ -75,10 +75,10 @@ class Vm(Namespace):
             ```
         """
         ...
-    @_ty.overload
+    @typing.overload
     def create(self, 
-        vm_create:'dict[str]'={},
-    /) -> 'dict[str]': 
+        vm_create:'VmCreate'={},
+    /) -> 'VmCreateReturns': 
         """
         Create a Virtual Machine (VM).
         
@@ -119,14 +119,14 @@ class Vm(Namespace):
             vm_create
         Returns
         -------
-        dict[str]:
+        VmCreateReturns:
             vm_create_returns
         """
         ...
-    @_ty.overload
+    @typing.overload
     def delete(self, 
         id:'int',
-        vm_delete:'dict[str]'={},
+        vm_delete:'VmDelete'={},
     /) -> 'bool': 
         """
         Delete a VM.
@@ -143,9 +143,9 @@ class Vm(Namespace):
             Will return `true` if `id` is deleted successfully
         """
         ...
-    @_ty.overload
+    @typing.overload
     def flags(self, 
-    /) -> 'dict[str]': 
+    /) -> 'CpuFlags': 
         """
         Returns a dictionary with CPU flags for the hypervisor.
 
@@ -153,11 +153,11 @@ class Vm(Namespace):
         ----------
         Returns
         -------
-        dict[str]:
+        CpuFlags:
             cpu_flags
         """
         ...
-    @_ty.overload
+    @typing.overload
     def get_available_memory(self, 
         overcommit:'bool'=False,
     /) -> 'int': 
@@ -195,7 +195,7 @@ class Vm(Namespace):
             available_memory
         """
         ...
-    @_ty.overload
+    @typing.overload
     def get_console(self, 
         id:'int',
     /) -> 'str': 
@@ -212,10 +212,10 @@ class Vm(Namespace):
             console_device
         """
         ...
-    @_ty.overload
+    @typing.overload
     def get_display_devices(self, 
         id:'int',
-    /) -> 'list': 
+    /) -> 'list[VmDeviceEntry]': 
         """
         Get the display devices from a given guest. If a display device has password configured,
         `attributes.password_configured` will be set to `true`.
@@ -226,16 +226,16 @@ class Vm(Namespace):
             id
         Returns
         -------
-        list:
+        list[VmDeviceEntry]:
             get_display_devices
         """
         ...
-    @_ty.overload
+    @typing.overload
     def get_display_web_uri(self, 
         id:'int',
         host:'str'="",
-        options:'dict[str]'={},
-    /) -> 'dict[str]': 
+        options:'Options'={},
+    /) -> 'DisplayDevicesUri': 
         """
         Retrieve Display URI for a given VM or appropriate error if there is no display device available
         or if it is not configured to use web interface
@@ -250,14 +250,14 @@ class Vm(Namespace):
             options
         Returns
         -------
-        dict[str]:
+        DisplayDevicesUri:
             display_devices_uri
         """
         ...
-    @_ty.overload
+    @typing.overload
     def get_instance(self, 
         id:'str|int|bool|dict[str]|list',
-        query_options_get_instance:'dict[str]'={},
+        query_options_get_instance:'QueryOptionsGetInstance'={},
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -274,7 +274,7 @@ class Vm(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def get_memory_usage(self, 
         vm_id:'int',
     /) -> 'int': 
@@ -291,10 +291,10 @@ class Vm(Namespace):
             Memory usage of a VM in bytes
         """
         ...
-    @_ty.overload
+    @typing.overload
     def get_vm_memory_info(self, 
         vm_id:'int',
-    /) -> 'dict[str]': 
+    /) -> 'GetVmMemoryInfo': 
         """
         Returns memory information for `vm_id` VM if it is going to be started.
         
@@ -306,13 +306,13 @@ class Vm(Namespace):
             Returns memory information for `vm_id` VM if it is going to be started.
         Returns
         -------
-        dict[str]:
+        GetVmMemoryInfo:
             get_vm_memory_info
         """
         ...
-    @_ty.overload
+    @typing.overload
     def get_vmemory_in_use(self, 
-    /) -> 'dict[str]': 
+    /) -> 'VmemoryInUse': 
         """
         The total amount of virtual memory in MB used by guests
         
@@ -325,11 +325,11 @@ class Vm(Namespace):
         ----------
         Returns
         -------
-        dict[str]:
+        VmemoryInUse:
             vmemory_in_use
         """
         ...
-    @_ty.overload
+    @typing.overload
     def guest_architecture_and_machine_choices(self, 
     /) -> 'dict[str]': 
         """
@@ -359,7 +359,7 @@ class Vm(Namespace):
             ```
         """
         ...
-    @_ty.overload
+    @typing.overload
     def log_file_path(self, 
         id:'int',
     /) -> 'str|None': 
@@ -380,7 +380,7 @@ class Vm(Namespace):
             log_file_path
         """
         ...
-    @_ty.overload
+    @typing.overload
     def maximum_supported_vcpus(self, 
     /) -> 'int': 
         """
@@ -394,9 +394,9 @@ class Vm(Namespace):
             maximum_supported_vcpus
         """
         ...
-    @_ty.overload
+    @typing.overload
     def port_wizard(self, 
-    /) -> 'dict[str]': 
+    /) -> 'AvailableDisplayPort': 
         """
         It returns the next available Display Server Port and Web Port.
         
@@ -406,11 +406,11 @@ class Vm(Namespace):
         ----------
         Returns
         -------
-        dict[str]:
+        AvailableDisplayPort:
             available_display_port
         """
         ...
-    @_ty.overload
+    @typing.overload
     def poweroff(self, 
         id:'int',
     /) -> None: 
@@ -425,7 +425,7 @@ class Vm(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def profiles(self, 
     /) -> 'dict[str]': 
         """
@@ -439,11 +439,11 @@ class Vm(Namespace):
             profiles
         """
         ...
-    @_ty.overload
+    @typing.overload
     def query(self, 
-        query_filters:'list'=[],
-        query_options:'dict[str]'={},
-    /) -> 'list|dict[str]|int|dict[str]': 
+        query_filters:'list[list]'=[],
+        query_options:'QueryOptions'={},
+    /) -> 'list[VmEntry]|VmEntry|int|VmEntry': 
         """
         
 
@@ -455,17 +455,17 @@ class Vm(Namespace):
             query-options
         Returns
         -------
-        list:
+        list[VmEntry]:
             
-        dict[str]:
+        VmEntry:
             
         int:
             
-        dict[str]:
+        VmEntry:
             
         """
         ...
-    @_ty.overload
+    @typing.overload
     def random_mac(self, 
     /) -> 'str': 
         """
@@ -482,9 +482,9 @@ class Vm(Namespace):
             mac
         """
         ...
-    @_ty.overload
+    @typing.overload
     def resolution_choices(self, 
-    /) -> 'dict[str]': 
+    /) -> 'ResolutionChoices': 
         """
         Retrieve supported resolution choices for VM Display devices.
 
@@ -492,11 +492,11 @@ class Vm(Namespace):
         ----------
         Returns
         -------
-        dict[str]:
+        ResolutionChoices:
             resolution_choices
         """
         ...
-    @_ty.overload
+    @typing.overload
     def restart(self, 
         id:'int',
     /) -> None: 
@@ -511,7 +511,7 @@ class Vm(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def resume(self, 
         id:'int',
     /) -> None: 
@@ -526,10 +526,10 @@ class Vm(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def start(self, 
         id:'int',
-        options:'dict[str]'={},
+        options:'Options_'={},
     /) -> None: 
         """
         Start a VM.
@@ -552,10 +552,10 @@ class Vm(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def status(self, 
         id:'int',
-    /) -> 'dict[str]': 
+    /) -> 'VmStatus': 
         """
         Get the status of `id` VM.
         
@@ -569,14 +569,14 @@ class Vm(Namespace):
             Get the status of `id` VM.
         Returns
         -------
-        dict[str]:
+        VmStatus:
             vm_status
         """
         ...
-    @_ty.overload
+    @typing.overload
     def stop(self, 
         id:'int',
-        options:'dict[str]'={},
+        options:'Options__'={},
     /) -> None: 
         """
         Stops a VM.
@@ -598,7 +598,7 @@ class Vm(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def supports_virtualization(self, 
     /) -> 'bool': 
         """
@@ -612,7 +612,7 @@ class Vm(Namespace):
             supports_virtualization
         """
         ...
-    @_ty.overload
+    @typing.overload
     def suspend(self, 
         id:'int',
     /) -> None: 
@@ -627,11 +627,11 @@ class Vm(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def update(self, 
         id:'int',
-        vm_update:'dict[str]'={},
-    /) -> 'dict[str]': 
+        vm_update:'VmUpdate'={},
+    /) -> 'VmUpdateReturns': 
         """
         Update all information of a specific VM.
         
@@ -658,13 +658,13 @@ class Vm(Namespace):
             vm_update
         Returns
         -------
-        dict[str]:
+        VmUpdateReturns:
             vm_update_returns
         """
         ...
-    @_ty.overload
+    @typing.overload
     def virtualization_details(self, 
-    /) -> 'dict[str]': 
+    /) -> 'VirtualizationDetails': 
         """
         Retrieve details if virtualization is supported on the system and in case why it's not supported if it isn't.
 
@@ -672,7 +672,267 @@ class Vm(Namespace):
         ----------
         Returns
         -------
-        dict[str]:
+        VirtualizationDetails:
             virtualization_details
         """
+        ...
+
+class BootloaderOptions(typing.TypedDict):
+        UEFI:'str'
+        UEFI_CSM:'str'
+        ...
+class VmCreate(typing.TypedDict):
+        command_line_args:'str'
+        cpu_mode:'str'
+        cpu_model:'typing.Optional[str]'
+        name:'str'
+        description:'str'
+        vcpus:'int'
+        cores:'int'
+        threads:'int'
+        cpuset:'typing.Optional[str]'
+        nodeset:'typing.Optional[str]'
+        pin_vcpus:'bool'
+        suspend_on_snapshot:'bool'
+        trusted_platform_module:'bool'
+        memory:'int'
+        min_memory:'typing.Optional[int]'
+        hyperv_enlightenments:'bool'
+        bootloader:'str'
+        bootloader_ovmf:'str'
+        autostart:'bool'
+        hide_from_msr:'bool'
+        ensure_display_device:'bool'
+        time:'str'
+        shutdown_timeout:'int'
+        arch_type:'typing.Optional[str]'
+        machine_type:'typing.Optional[str]'
+        uuid:'typing.Optional[str]'
+        ...
+class VmCreateReturns(typing.TypedDict):
+        command_line_args:'str'
+        cpu_mode:'str'
+        cpu_model:'typing.Optional[str]'
+        name:'str'
+        description:'str'
+        vcpus:'int'
+        cores:'int'
+        threads:'int'
+        cpuset:'typing.Optional[str]'
+        nodeset:'typing.Optional[str]'
+        pin_vcpus:'bool'
+        suspend_on_snapshot:'bool'
+        trusted_platform_module:'bool'
+        memory:'int'
+        min_memory:'typing.Optional[int]'
+        hyperv_enlightenments:'bool'
+        bootloader:'str'
+        bootloader_ovmf:'str'
+        autostart:'bool'
+        hide_from_msr:'bool'
+        ensure_display_device:'bool'
+        time:'str'
+        shutdown_timeout:'int'
+        arch_type:'typing.Optional[str]'
+        machine_type:'typing.Optional[str]'
+        uuid:'typing.Optional[str]'
+        devices:'list'
+        status:'Status'
+        id:'int'
+        ...
+class Status(typing.TypedDict):
+        state:'str'
+        pid:'typing.Optional[int]'
+        domain_state:'str'
+        ...
+class VmDelete(typing.TypedDict):
+        zvols:'bool'
+        force:'bool'
+        ...
+class CpuFlags(typing.TypedDict):
+        intel_vmx:'bool'
+        unrestricted_guest:'bool'
+        amd_rvi:'bool'
+        amd_asids:'bool'
+        ...
+class VmDeviceEntry(typing.TypedDict):
+        dtype:'str'
+        vm:'int'
+        attributes:'dict[str]'
+        order:'typing.Optional[int]'
+        id:'int'
+        ...
+class Options(typing.TypedDict):
+        protocol:'str'
+        ...
+class DisplayDevicesUri(typing.TypedDict):
+        error:'typing.Optional[str]'
+        uri:'typing.Optional[str]'
+        ...
+class QueryOptionsGetInstance(typing.TypedDict):
+        relationships:'bool'
+        extend:'typing.Optional[str]'
+        extend_context:'typing.Optional[str]'
+        prefix:'typing.Optional[str]'
+        extra:'dict[str]'
+        order_by:'list'
+        select:'list'
+        count:'bool'
+        get:'bool'
+        offset:'int'
+        limit:'int'
+        force_sql_filters:'bool'
+        ...
+class GetVmMemoryInfo(typing.TypedDict):
+        minimum_memory_requested:'int'
+        total_memory_requested:'int'
+        overcommit_required:'bool'
+        memory_req_fulfilled_after_overcommit:'bool'
+        arc_to_shrink:'typing.Optional[int]'
+        current_arc_max:'int'
+        arc_min:'int'
+        arc_max_after_shrink:'int'
+        actual_vm_requested_memory:'int'
+        ...
+class VmemoryInUse(typing.TypedDict):
+        RNP:'int'
+        PRD:'int'
+        RPRD:'int'
+        ...
+class AvailableDisplayPort(typing.TypedDict):
+        port:'int'
+        web:'int'
+        ...
+class QueryOptions(typing.TypedDict):
+        relationships:'bool'
+        extend:'typing.Optional[str]'
+        extend_context:'typing.Optional[str]'
+        prefix:'typing.Optional[str]'
+        extra:'dict[str]'
+        order_by:'list'
+        select:'list'
+        count:'bool'
+        get:'bool'
+        offset:'int'
+        limit:'int'
+        force_sql_filters:'bool'
+        ...
+class VmEntry(typing.TypedDict):
+        command_line_args:'str'
+        cpu_mode:'str'
+        cpu_model:'typing.Optional[str]'
+        name:'str'
+        description:'str'
+        vcpus:'int'
+        cores:'int'
+        threads:'int'
+        cpuset:'typing.Optional[str]'
+        nodeset:'typing.Optional[str]'
+        pin_vcpus:'bool'
+        suspend_on_snapshot:'bool'
+        trusted_platform_module:'bool'
+        memory:'int'
+        min_memory:'typing.Optional[int]'
+        hyperv_enlightenments:'bool'
+        bootloader:'str'
+        bootloader_ovmf:'str'
+        autostart:'bool'
+        hide_from_msr:'bool'
+        ensure_display_device:'bool'
+        time:'str'
+        shutdown_timeout:'int'
+        arch_type:'typing.Optional[str]'
+        machine_type:'typing.Optional[str]'
+        uuid:'typing.Optional[str]'
+        devices:'list'
+        status:'Status'
+        id:'int'
+        ...
+class ResolutionChoices(typing.TypedDict):
+        1920x1200:'str'
+        1920x1080:'str'
+        1600x1200:'str'
+        1600x900:'str'
+        1400x1050:'str'
+        1280x1024:'str'
+        1280x720:'str'
+        1024x768:'str'
+        800x600:'str'
+        640x480:'str'
+        ...
+class Options_(typing.TypedDict):
+        overcommit:'bool'
+        ...
+class VmStatus(typing.TypedDict):
+        state:'str'
+        pid:'typing.Optional[int]'
+        domain_state:'str'
+        ...
+class Options__(typing.TypedDict):
+        force:'bool'
+        force_after_timeout:'bool'
+        ...
+class VmUpdate(typing.TypedDict):
+        command_line_args:'str'
+        cpu_mode:'str'
+        cpu_model:'typing.Optional[str]'
+        name:'str'
+        description:'str'
+        vcpus:'int'
+        cores:'int'
+        threads:'int'
+        cpuset:'typing.Optional[str]'
+        nodeset:'typing.Optional[str]'
+        pin_vcpus:'bool'
+        suspend_on_snapshot:'bool'
+        trusted_platform_module:'bool'
+        memory:'int'
+        min_memory:'typing.Optional[int]'
+        hyperv_enlightenments:'bool'
+        bootloader:'str'
+        bootloader_ovmf:'str'
+        autostart:'bool'
+        hide_from_msr:'bool'
+        ensure_display_device:'bool'
+        time:'str'
+        shutdown_timeout:'int'
+        arch_type:'typing.Optional[str]'
+        machine_type:'typing.Optional[str]'
+        uuid:'typing.Optional[str]'
+        id:'int'
+        ...
+class VmUpdateReturns(typing.TypedDict):
+        command_line_args:'str'
+        cpu_mode:'str'
+        cpu_model:'typing.Optional[str]'
+        name:'str'
+        description:'str'
+        vcpus:'int'
+        cores:'int'
+        threads:'int'
+        cpuset:'typing.Optional[str]'
+        nodeset:'typing.Optional[str]'
+        pin_vcpus:'bool'
+        suspend_on_snapshot:'bool'
+        trusted_platform_module:'bool'
+        memory:'int'
+        min_memory:'typing.Optional[int]'
+        hyperv_enlightenments:'bool'
+        bootloader:'str'
+        bootloader_ovmf:'str'
+        autostart:'bool'
+        hide_from_msr:'bool'
+        ensure_display_device:'bool'
+        time:'str'
+        shutdown_timeout:'int'
+        arch_type:'typing.Optional[str]'
+        machine_type:'typing.Optional[str]'
+        uuid:'typing.Optional[str]'
+        devices:'list'
+        status:'Status'
+        id:'int'
+        ...
+class VirtualizationDetails(typing.TypedDict):
+        supported:'bool'
+        error:'typing.Optional[str]'
         ...

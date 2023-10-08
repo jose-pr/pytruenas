@@ -1,13 +1,13 @@
 
 from pytruenas import Namespace, TrueNASClient
-import typing as _ty
+import typing
 class Certificateauthority(Namespace):
-    _namespace:_ty.Literal['certificateauthority']
+    _namespace:typing.Literal['certificateauthority']
     def __init__(self, client:TrueNASClient) -> None: ...
-    @_ty.overload
+    @typing.overload
     def ca_sign_csr(self, 
-        ca_sign_csr:'dict[str]'={},
-    /) -> 'dict[str]': 
+        ca_sign_csr:'CaSignCsr'={},
+    /) -> 'CertificateEntry': 
         """
         Sign CSR by Certificate Authority of `ca_id`
         
@@ -22,14 +22,14 @@ class Certificateauthority(Namespace):
             ca_sign_csr
         Returns
         -------
-        dict[str]:
+        CertificateEntry:
             certificate_entry
         """
         ...
-    @_ty.overload
+    @typing.overload
     def create(self, 
-        ca_create:'dict[str]'={},
-    /) -> 'dict[str]': 
+        ca_create:'CaCreate'={},
+    /) -> 'CertificateauthorityCreateReturns': 
         """
         Create a new Certificate Authority
         
@@ -57,11 +57,11 @@ class Certificateauthority(Namespace):
             ca_create
         Returns
         -------
-        dict[str]:
+        CertificateauthorityCreateReturns:
             certificateauthority_create_returns
         """
         ...
-    @_ty.overload
+    @typing.overload
     def delete(self, 
         id:'int',
     /) -> 'bool': 
@@ -78,10 +78,10 @@ class Certificateauthority(Namespace):
             Will return `true` if `id` is deleted successfully
         """
         ...
-    @_ty.overload
+    @typing.overload
     def get_instance(self, 
         id:'str|int|bool|dict[str]|list',
-        query_options_get_instance:'dict[str]'={},
+        query_options_get_instance:'QueryOptionsGetInstance'={},
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -98,9 +98,9 @@ class Certificateauthority(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def profiles(self, 
-    /) -> 'dict[str]': 
+    /) -> 'CertificateAuthorityProfiles': 
         """
         Returns a dictionary of predefined options for specific use cases i.e OpenVPN certificate authority
         configurations which can be used for creating certificate authorities.
@@ -109,15 +109,15 @@ class Certificateauthority(Namespace):
         ----------
         Returns
         -------
-        dict[str]:
+        CertificateAuthorityProfiles:
             certificate_authority_profiles
         """
         ...
-    @_ty.overload
+    @typing.overload
     def query(self, 
-        query_filters:'list'=[],
-        query_options:'dict[str]'={},
-    /) -> 'list|dict[str]|int|dict[str]': 
+        query_filters:'list[list]'=[],
+        query_options:'QueryOptions'={},
+    /) -> 'list[CertificateEntry_]|CertificateEntry_|int|CertificateEntry_': 
         """
         
 
@@ -129,21 +129,21 @@ class Certificateauthority(Namespace):
             query-options
         Returns
         -------
-        list:
+        list[CertificateEntry_]:
             
-        dict[str]:
+        CertificateEntry_:
             
         int:
             
-        dict[str]:
+        CertificateEntry_:
             
         """
         ...
-    @_ty.overload
+    @typing.overload
     def update(self, 
         id:'int',
-        ca_update:'dict[str]'={},
-    /) -> 'dict[str]': 
+        ca_update:'CaUpdate'={},
+    /) -> 'CertificateauthorityUpdateReturns': 
         """
         Update Certificate Authority of `id`
         
@@ -160,7 +160,371 @@ class Certificateauthority(Namespace):
             ca_update
         Returns
         -------
-        dict[str]:
+        CertificateauthorityUpdateReturns:
             certificateauthority_update_returns
         """
+        ...
+
+class CaSignCsr(typing.TypedDict):
+        ca_id:'int'
+        csr_cert_id:'int'
+        name:'str'
+        cert_extensions:'CertExtensions'
+        ...
+class CertExtensions(typing.TypedDict):
+        BasicConstraints:'BasicConstraints'
+        AuthorityKeyIdentifier:'AuthorityKeyIdentifier'
+        ExtendedKeyUsage:'ExtendedKeyUsage'
+        KeyUsage:'KeyUsage'
+        ...
+class BasicConstraints(typing.TypedDict):
+        ca:'bool'
+        enabled:'bool'
+        path_length:'typing.Optional[int]'
+        extension_critical:'bool'
+        ...
+class AuthorityKeyIdentifier(typing.TypedDict):
+        authority_cert_issuer:'bool'
+        enabled:'bool'
+        extension_critical:'bool'
+        ...
+class ExtendedKeyUsage(typing.TypedDict):
+        usages:'list[str]'
+        enabled:'bool'
+        extension_critical:'bool'
+        ...
+class KeyUsage(typing.TypedDict):
+        enabled:'bool'
+        digital_signature:'bool'
+        content_commitment:'bool'
+        key_encipherment:'bool'
+        data_encipherment:'bool'
+        key_agreement:'bool'
+        key_cert_sign:'bool'
+        crl_sign:'bool'
+        encipher_only:'bool'
+        decipher_only:'bool'
+        extension_critical:'bool'
+        ...
+class CertificateEntry(typing.TypedDict):
+        id:'int'
+        type:'int'
+        name:'str'
+        certificate:'typing.Optional[str]'
+        privatekey:'typing.Optional[str]'
+        CSR:'typing.Optional[str]'
+        acme_uri:'typing.Optional[str]'
+        domains_authenticators:'dict[str]'
+        renew_days:'int'
+        revoked_date:'typing.Optional[str]'
+        signedby:'dict[str]'
+        root_path:'str'
+        acme:'dict[str]'
+        certificate_path:'typing.Optional[str]'
+        privatekey_path:'typing.Optional[str]'
+        csr_path:'typing.Optional[str]'
+        cert_type:'str'
+        revoked:'bool'
+        expired:'typing.Optional[bool]'
+        issuer:'typing.Union[str, NoneType, dict[str]]'
+        chain_list:'list[str]'
+        country:'typing.Optional[str]'
+        state:'typing.Optional[str]'
+        city:'typing.Optional[str]'
+        organization:'typing.Optional[str]'
+        organizational_unit:'typing.Optional[str]'
+        san:'typing.Optional[list[str]]'
+        email:'typing.Optional[str]'
+        DN:'typing.Optional[str]'
+        subject_name_hash:'typing.Optional[str]'
+        digest_algorithm:'typing.Optional[str]'
+        from:'typing.Optional[str]'
+        common:'typing.Optional[str]'
+        until:'typing.Optional[str]'
+        fingerprint:'typing.Optional[str]'
+        key_type:'typing.Optional[str]'
+        internal:'typing.Optional[str]'
+        lifetime:'typing.Optional[int]'
+        serial:'typing.Optional[int]'
+        key_length:'typing.Optional[int]'
+        chain:'typing.Optional[bool]'
+        CA_type_existing:'bool'
+        CA_type_internal:'bool'
+        CA_type_intermediate:'bool'
+        cert_type_existing:'bool'
+        cert_type_internal:'bool'
+        cert_type_CSR:'bool'
+        parsed:'bool'
+        can_be_revoked:'bool'
+        extensions:'dict[str]'
+        revoked_certs:'list'
+        crl_path:'str'
+        signed_certificates:'int'
+        ...
+class CaCreate(typing.TypedDict):
+        tos:'bool'
+        csr_id:'int'
+        signedby:'int'
+        key_length:'int'
+        renew_days:'int'
+        type:'int'
+        lifetime:'int'
+        serial:'int'
+        acme_directory_uri:'str'
+        certificate:'str'
+        city:'str'
+        common:'typing.Optional[str]'
+        country:'str'
+        CSR:'str'
+        ec_curve:'str'
+        email:'str'
+        key_type:'str'
+        name:'str'
+        organization:'str'
+        organizational_unit:'str'
+        passphrase:'str'
+        privatekey:'str'
+        state:'str'
+        create_type:'str'
+        digest_algorithm:'str'
+        san:'list[str]'
+        cert_extensions:'CertExtensions'
+        add_to_trusted_store:'bool'
+        ...
+class CertExtensions_(typing.TypedDict):
+        BasicConstraints:'BasicConstraints'
+        AuthorityKeyIdentifier:'AuthorityKeyIdentifier'
+        ExtendedKeyUsage:'ExtendedKeyUsage'
+        KeyUsage:'KeyUsage'
+        ...
+class BasicConstraints_(typing.TypedDict):
+        ca:'bool'
+        enabled:'bool'
+        path_length:'typing.Optional[int]'
+        extension_critical:'bool'
+        ...
+class ExtendedKeyUsage_(typing.TypedDict):
+        usages:'list[str]'
+        enabled:'bool'
+        extension_critical:'bool'
+        ...
+class KeyUsage_(typing.TypedDict):
+        enabled:'bool'
+        digital_signature:'bool'
+        content_commitment:'bool'
+        key_encipherment:'bool'
+        data_encipherment:'bool'
+        key_agreement:'bool'
+        key_cert_sign:'bool'
+        crl_sign:'bool'
+        encipher_only:'bool'
+        decipher_only:'bool'
+        extension_critical:'bool'
+        ...
+class CertificateauthorityCreateReturns(typing.TypedDict):
+        id:'int'
+        type:'int'
+        name:'str'
+        certificate:'typing.Optional[str]'
+        privatekey:'typing.Optional[str]'
+        CSR:'typing.Optional[str]'
+        acme_uri:'typing.Optional[str]'
+        domains_authenticators:'dict[str]'
+        renew_days:'int'
+        revoked_date:'typing.Optional[str]'
+        signedby:'dict[str]'
+        root_path:'str'
+        acme:'dict[str]'
+        certificate_path:'typing.Optional[str]'
+        privatekey_path:'typing.Optional[str]'
+        csr_path:'typing.Optional[str]'
+        cert_type:'str'
+        revoked:'bool'
+        expired:'typing.Optional[bool]'
+        issuer:'typing.Union[str, NoneType, dict[str]]'
+        chain_list:'list[str]'
+        country:'typing.Optional[str]'
+        state:'typing.Optional[str]'
+        city:'typing.Optional[str]'
+        organization:'typing.Optional[str]'
+        organizational_unit:'typing.Optional[str]'
+        san:'typing.Optional[list[str]]'
+        email:'typing.Optional[str]'
+        DN:'typing.Optional[str]'
+        subject_name_hash:'typing.Optional[str]'
+        digest_algorithm:'typing.Optional[str]'
+        from:'typing.Optional[str]'
+        common:'typing.Optional[str]'
+        until:'typing.Optional[str]'
+        fingerprint:'typing.Optional[str]'
+        key_type:'typing.Optional[str]'
+        internal:'typing.Optional[str]'
+        lifetime:'typing.Optional[int]'
+        serial:'typing.Optional[int]'
+        key_length:'typing.Optional[int]'
+        chain:'typing.Optional[bool]'
+        CA_type_existing:'bool'
+        CA_type_internal:'bool'
+        CA_type_intermediate:'bool'
+        cert_type_existing:'bool'
+        cert_type_internal:'bool'
+        cert_type_CSR:'bool'
+        parsed:'bool'
+        can_be_revoked:'bool'
+        extensions:'dict[str]'
+        revoked_certs:'list'
+        crl_path:'str'
+        signed_certificates:'int'
+        add_to_trusted_store:'bool'
+        ...
+class QueryOptionsGetInstance(typing.TypedDict):
+        relationships:'bool'
+        extend:'typing.Optional[str]'
+        extend_context:'typing.Optional[str]'
+        prefix:'typing.Optional[str]'
+        extra:'dict[str]'
+        order_by:'list'
+        select:'list'
+        count:'bool'
+        get:'bool'
+        offset:'int'
+        limit:'int'
+        force_sql_filters:'bool'
+        ...
+class CertificateAuthorityProfiles(typing.TypedDict):
+        CA:'dict[str]'
+        ...
+class QueryOptions(typing.TypedDict):
+        relationships:'bool'
+        extend:'typing.Optional[str]'
+        extend_context:'typing.Optional[str]'
+        prefix:'typing.Optional[str]'
+        extra:'dict[str]'
+        order_by:'list'
+        select:'list'
+        count:'bool'
+        get:'bool'
+        offset:'int'
+        limit:'int'
+        force_sql_filters:'bool'
+        ...
+class CertificateEntry_(typing.TypedDict):
+        id:'int'
+        type:'int'
+        name:'str'
+        certificate:'typing.Optional[str]'
+        privatekey:'typing.Optional[str]'
+        CSR:'typing.Optional[str]'
+        acme_uri:'typing.Optional[str]'
+        domains_authenticators:'dict[str]'
+        renew_days:'int'
+        revoked_date:'typing.Optional[str]'
+        signedby:'dict[str]'
+        root_path:'str'
+        acme:'dict[str]'
+        certificate_path:'typing.Optional[str]'
+        privatekey_path:'typing.Optional[str]'
+        csr_path:'typing.Optional[str]'
+        cert_type:'str'
+        revoked:'bool'
+        expired:'typing.Optional[bool]'
+        issuer:'typing.Union[str, NoneType, dict[str]]'
+        chain_list:'list[str]'
+        country:'typing.Optional[str]'
+        state:'typing.Optional[str]'
+        city:'typing.Optional[str]'
+        organization:'typing.Optional[str]'
+        organizational_unit:'typing.Optional[str]'
+        san:'typing.Optional[list[str]]'
+        email:'typing.Optional[str]'
+        DN:'typing.Optional[str]'
+        subject_name_hash:'typing.Optional[str]'
+        digest_algorithm:'typing.Optional[str]'
+        from:'typing.Optional[str]'
+        common:'typing.Optional[str]'
+        until:'typing.Optional[str]'
+        fingerprint:'typing.Optional[str]'
+        key_type:'typing.Optional[str]'
+        internal:'typing.Optional[str]'
+        lifetime:'typing.Optional[int]'
+        serial:'typing.Optional[int]'
+        key_length:'typing.Optional[int]'
+        chain:'typing.Optional[bool]'
+        CA_type_existing:'bool'
+        CA_type_internal:'bool'
+        CA_type_intermediate:'bool'
+        cert_type_existing:'bool'
+        cert_type_internal:'bool'
+        cert_type_CSR:'bool'
+        parsed:'bool'
+        can_be_revoked:'bool'
+        extensions:'dict[str]'
+        revoked_certs:'list'
+        crl_path:'str'
+        signed_certificates:'int'
+        add_to_trusted_store:'bool'
+        ...
+class CaUpdate(typing.TypedDict):
+        revoked:'bool'
+        add_to_trusted_store:'bool'
+        ca_id:'int'
+        csr_cert_id:'int'
+        create_type:'str'
+        name:'str'
+        ...
+class CertificateauthorityUpdateReturns(typing.TypedDict):
+        id:'int'
+        type:'int'
+        name:'str'
+        certificate:'typing.Optional[str]'
+        privatekey:'typing.Optional[str]'
+        CSR:'typing.Optional[str]'
+        acme_uri:'typing.Optional[str]'
+        domains_authenticators:'dict[str]'
+        renew_days:'int'
+        revoked_date:'typing.Optional[str]'
+        signedby:'dict[str]'
+        root_path:'str'
+        acme:'dict[str]'
+        certificate_path:'typing.Optional[str]'
+        privatekey_path:'typing.Optional[str]'
+        csr_path:'typing.Optional[str]'
+        cert_type:'str'
+        revoked:'bool'
+        expired:'typing.Optional[bool]'
+        issuer:'typing.Union[str, NoneType, dict[str]]'
+        chain_list:'list[str]'
+        country:'typing.Optional[str]'
+        state:'typing.Optional[str]'
+        city:'typing.Optional[str]'
+        organization:'typing.Optional[str]'
+        organizational_unit:'typing.Optional[str]'
+        san:'typing.Optional[list[str]]'
+        email:'typing.Optional[str]'
+        DN:'typing.Optional[str]'
+        subject_name_hash:'typing.Optional[str]'
+        digest_algorithm:'typing.Optional[str]'
+        from:'typing.Optional[str]'
+        common:'typing.Optional[str]'
+        until:'typing.Optional[str]'
+        fingerprint:'typing.Optional[str]'
+        key_type:'typing.Optional[str]'
+        internal:'typing.Optional[str]'
+        lifetime:'typing.Optional[int]'
+        serial:'typing.Optional[int]'
+        key_length:'typing.Optional[int]'
+        chain:'typing.Optional[bool]'
+        CA_type_existing:'bool'
+        CA_type_internal:'bool'
+        CA_type_intermediate:'bool'
+        cert_type_existing:'bool'
+        cert_type_internal:'bool'
+        cert_type_CSR:'bool'
+        parsed:'bool'
+        can_be_revoked:'bool'
+        extensions:'dict[str]'
+        revoked_certs:'list'
+        crl_path:'str'
+        signed_certificates:'int'
+        add_to_trusted_store:'bool'
         ...

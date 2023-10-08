@@ -1,12 +1,12 @@
 
 from pytruenas import Namespace, TrueNASClient
-import typing as _ty
+import typing
 class Smart(Namespace):
-    _namespace:_ty.Literal['smart']
+    _namespace:typing.Literal['smart']
     def __init__(self, client:TrueNASClient) -> None: ...
-    @_ty.overload
+    @typing.overload
     def config(self, 
-    /) -> 'dict[str]': 
+    /) -> 'SmartEntry': 
         """
         
 
@@ -14,14 +14,14 @@ class Smart(Namespace):
         ----------
         Returns
         -------
-        dict[str]:
+        SmartEntry:
             smart_entry
         """
         ...
-    @_ty.overload
+    @typing.overload
     def update(self, 
-        smart_update:'dict[str]'={},
-    /) -> 'dict[str]': 
+        smart_update:'SmartUpdate'={},
+    /) -> 'SmartUpdateReturns': 
         """
         Update SMART Service Configuration.
         
@@ -38,7 +38,31 @@ class Smart(Namespace):
             smart_update
         Returns
         -------
-        dict[str]:
+        SmartUpdateReturns:
             smart_update_returns
         """
+        ...
+
+class SmartEntry(typing.TypedDict):
+        interval:'int'
+        id:'int'
+        powermode:'str'
+        difference:'int'
+        informational:'int'
+        critical:'int'
+        ...
+class SmartUpdate(typing.TypedDict):
+        interval:'int'
+        powermode:'str'
+        difference:'int'
+        informational:'int'
+        critical:'int'
+        ...
+class SmartUpdateReturns(typing.TypedDict):
+        interval:'int'
+        id:'int'
+        powermode:'str'
+        difference:'int'
+        informational:'int'
+        critical:'int'
         ...

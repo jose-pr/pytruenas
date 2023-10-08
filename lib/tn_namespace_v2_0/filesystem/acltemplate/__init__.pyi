@@ -1,13 +1,13 @@
 
 from pytruenas import Namespace, TrueNASClient
-import typing as _ty
+import typing
 class FilesystemAcltemplate(Namespace):
-    _namespace:_ty.Literal['filesystem.acltemplate']
+    _namespace:typing.Literal['filesystem.acltemplate']
     def __init__(self, client:TrueNASClient) -> None: ...
-    @_ty.overload
+    @typing.overload
     def by_path(self, 
-        acltemplate_by_path:'dict[str]'={},
-    /) -> 'list': 
+        acltemplate_by_path:'AcltemplateByPath'={},
+    /) -> 'list[AcltemplateEntry]': 
         """
         Retrieve list of available ACL templates for a given `path`.
         
@@ -26,14 +26,14 @@ class FilesystemAcltemplate(Namespace):
             acltemplate_by_path
         Returns
         -------
-        list:
+        list[AcltemplateEntry]:
             templates
         """
         ...
-    @_ty.overload
+    @typing.overload
     def create(self, 
-        acltemplate_create:'dict[str]'={},
-    /) -> 'dict[str]': 
+        acltemplate_create:'AcltemplateCreate'={},
+    /) -> 'FilesystemAcltemplateCreateReturns': 
         """
         Create a new filesystem ACL template.
 
@@ -43,11 +43,11 @@ class FilesystemAcltemplate(Namespace):
             acltemplate_create
         Returns
         -------
-        dict[str]:
+        FilesystemAcltemplateCreateReturns:
             filesystem_acltemplate_create_returns
         """
         ...
-    @_ty.overload
+    @typing.overload
     def delete(self, 
         id:'int',
     /) -> 'bool': 
@@ -64,10 +64,10 @@ class FilesystemAcltemplate(Namespace):
             Will return `true` if `id` is deleted successfully
         """
         ...
-    @_ty.overload
+    @typing.overload
     def get_instance(self, 
         id:'str|int|bool|dict[str]|list',
-        query_options_get_instance:'dict[str]'={},
+        query_options_get_instance:'QueryOptionsGetInstance'={},
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -84,11 +84,11 @@ class FilesystemAcltemplate(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def query(self, 
-        query_filters:'list'=[],
-        query_options:'dict[str]'={},
-    /) -> 'list|dict[str]|int|dict[str]': 
+        query_filters:'list[list]'=[],
+        query_options:'QueryOptions'={},
+    /) -> 'list[AcltemplateEntry]|AcltemplateEntry|int|AcltemplateEntry': 
         """
         
 
@@ -100,21 +100,21 @@ class FilesystemAcltemplate(Namespace):
             query-options
         Returns
         -------
-        list:
+        list[AcltemplateEntry]:
             
-        dict[str]:
+        AcltemplateEntry:
             
         int:
             
-        dict[str]:
+        AcltemplateEntry:
             
         """
         ...
-    @_ty.overload
+    @typing.overload
     def update(self, 
         id:'int',
-        acltemplate_update:'dict[str]'={},
-    /) -> 'dict[str]': 
+        acltemplate_update:'AcltemplateUpdate'={},
+    /) -> 'FilesystemAcltemplateUpdateReturns': 
         """
         update filesystem ACL template with `id`.
 
@@ -126,7 +126,126 @@ class FilesystemAcltemplate(Namespace):
             acltemplate_update
         Returns
         -------
-        dict[str]:
+        FilesystemAcltemplateUpdateReturns:
             filesystem_acltemplate_update_returns
         """
+        ...
+
+class AcltemplateByPath(typing.TypedDict):
+        path:'str'
+        query-filters:'list[list]'
+        query-options:'QueryOptions'
+        format-options:'FormatOptions'
+        ...
+class QueryOptions(typing.TypedDict):
+        relationships:'bool'
+        extend:'typing.Optional[str]'
+        extend_context:'typing.Optional[str]'
+        prefix:'typing.Optional[str]'
+        extra:'dict[str]'
+        order_by:'list'
+        select:'list'
+        count:'bool'
+        get:'bool'
+        offset:'int'
+        limit:'int'
+        force_sql_filters:'bool'
+        ...
+class FormatOptions(typing.TypedDict):
+        canonicalize:'bool'
+        ensure_builtins:'bool'
+        resolve_names:'bool'
+        ...
+class AcltemplateEntry(typing.TypedDict):
+        name:'str'
+        acltype:'str'
+        comment:'str'
+        acl:'typing.Union[list[Nfs4Ace], list[Posix1eAce]]'
+        id:'int'
+        builtin:'bool'
+        ...
+class Nfs4Ace(typing.TypedDict):
+        tag:'str'
+        id:'typing.Optional[int]'
+        type:'str'
+        perms:'Perms'
+        flags:'Flags'
+        ...
+class Perms(typing.TypedDict):
+        READ_DATA:'bool'
+        WRITE_DATA:'bool'
+        APPEND_DATA:'bool'
+        READ_NAMED_ATTRS:'bool'
+        WRITE_NAMED_ATTRS:'bool'
+        EXECUTE:'bool'
+        DELETE_CHILD:'bool'
+        READ_ATTRIBUTES:'bool'
+        WRITE_ATTRIBUTES:'bool'
+        DELETE:'bool'
+        READ_ACL:'bool'
+        WRITE_ACL:'bool'
+        WRITE_OWNER:'bool'
+        SYNCHRONIZE:'bool'
+        BASIC:'str'
+        ...
+class Flags(typing.TypedDict):
+        FILE_INHERIT:'bool'
+        DIRECTORY_INHERIT:'bool'
+        NO_PROPAGATE_INHERIT:'bool'
+        INHERIT_ONLY:'bool'
+        INHERITED:'bool'
+        BASIC:'str'
+        ...
+class Posix1eAce(typing.TypedDict):
+        default:'bool'
+        tag:'str'
+        id:'int'
+        perms:'Perms'
+        ...
+class Perms_(typing.TypedDict):
+        READ:'bool'
+        WRITE:'bool'
+        EXECUTE:'bool'
+        ...
+class AcltemplateCreate(typing.TypedDict):
+        name:'str'
+        acltype:'str'
+        comment:'str'
+        acl:'typing.Union[list[Nfs4Ace], list[Posix1eAce]]'
+        ...
+class FilesystemAcltemplateCreateReturns(typing.TypedDict):
+        name:'str'
+        acltype:'str'
+        comment:'str'
+        acl:'typing.Union[list[Nfs4Ace], list[Posix1eAce]]'
+        id:'int'
+        builtin:'bool'
+        ...
+class QueryOptionsGetInstance(typing.TypedDict):
+        relationships:'bool'
+        extend:'typing.Optional[str]'
+        extend_context:'typing.Optional[str]'
+        prefix:'typing.Optional[str]'
+        extra:'dict[str]'
+        order_by:'list'
+        select:'list'
+        count:'bool'
+        get:'bool'
+        offset:'int'
+        limit:'int'
+        force_sql_filters:'bool'
+        ...
+class AcltemplateUpdate(typing.TypedDict):
+        name:'str'
+        acltype:'str'
+        comment:'str'
+        acl:'typing.Union[list[Nfs4Ace], list[Posix1eAce]]'
+        ...
+class FilesystemAcltemplateUpdateReturns(typing.TypedDict):
+        name:'str'
+        acltype:'str'
+        comment:'str'
+        acl:'typing.Union[list[Nfs4Ace], list[Posix1eAce]]'
+        id:'int'
+        builtin:'bool'
         ...

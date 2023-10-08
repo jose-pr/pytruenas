@@ -1,12 +1,12 @@
 
 from pytruenas import Namespace, TrueNASClient
-import typing as _ty
+import typing
 class CtdbPublicIps(Namespace):
-    _namespace:_ty.Literal['ctdb.public.ips']
+    _namespace:typing.Literal['ctdb.public.ips']
     def __init__(self, client:TrueNASClient) -> None: ...
-    @_ty.overload
+    @typing.overload
     def create(self, 
-        public_create:'dict[str]'={},
+        public_create:'PublicCreate'={},
     /) -> 'dict[str]': 
         """
         Add a ctdb public address to the cluster
@@ -29,7 +29,7 @@ class CtdbPublicIps(Namespace):
             ctdb_public_ips_create_returns
         """
         ...
-    @_ty.overload
+    @typing.overload
     def delete(self, 
         public_ip:'str',
         pnn:'int'=None,
@@ -58,10 +58,10 @@ class CtdbPublicIps(Namespace):
             Will return `true` if `id` is deleted successfully
         """
         ...
-    @_ty.overload
+    @typing.overload
     def get_instance(self, 
         id:'str|int|bool|dict[str]|list',
-        query_options_get_instance:'dict[str]'={},
+        query_options_get_instance:'QueryOptionsGetInstance'={},
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -78,10 +78,10 @@ class CtdbPublicIps(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def interface_choices(self, 
-        exclude_ifaces:'list'=[],
-    /) -> 'list': 
+        exclude_ifaces:'list[str]'=[],
+    /) -> 'list[str]': 
         """
         Retrieve list of available interface choices that can be used for assigning a ctdbd public ip.
 
@@ -91,15 +91,15 @@ class CtdbPublicIps(Namespace):
             exclude_ifaces
         Returns
         -------
-        list:
+        list[str]:
             interface_choices
         """
         ...
-    @_ty.overload
+    @typing.overload
     def query(self, 
-        query_filters:'list'=[],
-        query_options:'dict[str]'={},
-    /) -> 'list|dict[str]|int|dict[str]': 
+        query_filters:'list[list]'=[],
+        query_options:'QueryOptions'={},
+    /) -> 'list[dict[str]]|dict[str]|int|dict[str]': 
         """
         Retrieve information about configured public IP addresses for the
         ctdb cluster. This call raise a CallError with errno set to ENXIO
@@ -118,7 +118,7 @@ class CtdbPublicIps(Namespace):
             query-options
         Returns
         -------
-        list:
+        list[dict[str]]:
             
         dict[str]:
             
@@ -127,4 +127,39 @@ class CtdbPublicIps(Namespace):
         dict[str]:
             
         """
+        ...
+
+class PublicCreate(typing.TypedDict):
+        pnn:'int'
+        ip:'str'
+        netmask:'int'
+        interface:'str'
+        ...
+class QueryOptionsGetInstance(typing.TypedDict):
+        relationships:'bool'
+        extend:'typing.Optional[str]'
+        extend_context:'typing.Optional[str]'
+        prefix:'typing.Optional[str]'
+        extra:'dict[str]'
+        order_by:'list'
+        select:'list'
+        count:'bool'
+        get:'bool'
+        offset:'int'
+        limit:'int'
+        force_sql_filters:'bool'
+        ...
+class QueryOptions(typing.TypedDict):
+        relationships:'bool'
+        extend:'typing.Optional[str]'
+        extend_context:'typing.Optional[str]'
+        prefix:'typing.Optional[str]'
+        extra:'dict[str]'
+        order_by:'list'
+        select:'list'
+        count:'bool'
+        get:'bool'
+        offset:'int'
+        limit:'int'
+        force_sql_filters:'bool'
         ...

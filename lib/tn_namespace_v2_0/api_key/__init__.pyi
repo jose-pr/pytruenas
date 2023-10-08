@@ -1,12 +1,12 @@
 
 from pytruenas import Namespace, TrueNASClient
-import typing as _ty
+import typing
 class Api_key(Namespace):
-    _namespace:_ty.Literal['api_key']
+    _namespace:typing.Literal['api_key']
     def __init__(self, client:TrueNASClient) -> None: ...
-    @_ty.overload
+    @typing.overload
     def create(self, 
-        api_key_create:'dict[str]'={},
+        api_key_create:'ApiKeyCreate'={},
     /) -> 'dict[str]': 
         """
         Creates API Key.
@@ -23,7 +23,7 @@ class Api_key(Namespace):
             api_key_create_returns
         """
         ...
-    @_ty.overload
+    @typing.overload
     def delete(self, 
         id:'int',
     /) -> 'bool': 
@@ -40,10 +40,10 @@ class Api_key(Namespace):
             Will return `true` if `id` is deleted successfully
         """
         ...
-    @_ty.overload
+    @typing.overload
     def get_instance(self, 
         id:'str|int|bool|dict[str]|list',
-        query_options_get_instance:'dict[str]'={},
+        query_options_get_instance:'QueryOptionsGetInstance'={},
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -60,11 +60,11 @@ class Api_key(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def query(self, 
-        query_filters:'list'=[],
-        query_options:'dict[str]'={},
-    /) -> 'list|dict[str]|int|dict[str]': 
+        query_filters:'list[list]'=[],
+        query_options:'QueryOptions'={},
+    /) -> 'list[dict[str]]|dict[str]|int|dict[str]': 
         """
         
 
@@ -76,7 +76,7 @@ class Api_key(Namespace):
             query-options
         Returns
         -------
-        list:
+        list[dict[str]]:
             
         dict[str]:
             
@@ -86,10 +86,10 @@ class Api_key(Namespace):
             
         """
         ...
-    @_ty.overload
+    @typing.overload
     def update(self, 
         id:'int',
-        api_key_update:'dict[str]'={},
+        api_key_update:'ApiKeyUpdate'={},
     /) -> 'dict[str]': 
         """
         Update API Key `id`.
@@ -107,4 +107,46 @@ class Api_key(Namespace):
         dict[str]:
             api_key_update_returns
         """
+        ...
+
+class ApiKeyCreate(typing.TypedDict):
+        name:'str'
+        allowlist:'list[AllowlistItem]'
+        ...
+class AllowlistItem(typing.TypedDict):
+        method:'str'
+        resource:'str'
+        ...
+class QueryOptionsGetInstance(typing.TypedDict):
+        relationships:'bool'
+        extend:'typing.Optional[str]'
+        extend_context:'typing.Optional[str]'
+        prefix:'typing.Optional[str]'
+        extra:'dict[str]'
+        order_by:'list'
+        select:'list'
+        count:'bool'
+        get:'bool'
+        offset:'int'
+        limit:'int'
+        force_sql_filters:'bool'
+        ...
+class QueryOptions(typing.TypedDict):
+        relationships:'bool'
+        extend:'typing.Optional[str]'
+        extend_context:'typing.Optional[str]'
+        prefix:'typing.Optional[str]'
+        extra:'dict[str]'
+        order_by:'list'
+        select:'list'
+        count:'bool'
+        get:'bool'
+        offset:'int'
+        limit:'int'
+        force_sql_filters:'bool'
+        ...
+class ApiKeyUpdate(typing.TypedDict):
+        name:'str'
+        allowlist:'list[AllowlistItem]'
+        reset:'bool'
         ...

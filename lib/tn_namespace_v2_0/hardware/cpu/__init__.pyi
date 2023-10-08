@@ -1,10 +1,10 @@
 
 from pytruenas import Namespace, TrueNASClient
-import typing as _ty
+import typing
 class HardwareCpu(Namespace):
-    _namespace:_ty.Literal['hardware.cpu']
+    _namespace:typing.Literal['hardware.cpu']
     def __init__(self, client:TrueNASClient) -> None: ...
-    @_ty.overload
+    @typing.overload
     def available_governors(self, 
     /) -> 'dict[str]': 
         """
@@ -18,7 +18,7 @@ class HardwareCpu(Namespace):
             governor
         """
         ...
-    @_ty.overload
+    @typing.overload
     def current_governor(self, 
     /) -> 'str': 
         """
@@ -32,7 +32,7 @@ class HardwareCpu(Namespace):
             governor
         """
         ...
-    @_ty.overload
+    @typing.overload
     def set_governor(self, 
         governor:'str',
     /) -> None: 
@@ -47,3 +47,4 @@ class HardwareCpu(Namespace):
         -------
         """
         ...
+

@@ -1,13 +1,13 @@
 
 from pytruenas import Namespace, TrueNASClient
-import typing as _ty
+import typing
 class Cronjob(Namespace):
-    _namespace:_ty.Literal['cronjob']
+    _namespace:typing.Literal['cronjob']
     def __init__(self, client:TrueNASClient) -> None: ...
-    @_ty.overload
+    @typing.overload
     def create(self, 
-        cron_job_create:'dict[str]'={},
-    /) -> 'dict[str]': 
+        cron_job_create:'CronJobCreate'={},
+    /) -> 'CronjobCreateReturns': 
         """
         Create a new cron job.
         
@@ -20,11 +20,11 @@ class Cronjob(Namespace):
             cron_job_create
         Returns
         -------
-        dict[str]:
+        CronjobCreateReturns:
             cronjob_create_returns
         """
         ...
-    @_ty.overload
+    @typing.overload
     def delete(self, 
         id:'int',
     /) -> 'bool': 
@@ -41,10 +41,10 @@ class Cronjob(Namespace):
             Will return `true` if `id` is deleted successfully
         """
         ...
-    @_ty.overload
+    @typing.overload
     def get_instance(self, 
         id:'str|int|bool|dict[str]|list',
-        query_options_get_instance:'dict[str]'={},
+        query_options_get_instance:'QueryOptionsGetInstance'={},
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -61,11 +61,11 @@ class Cronjob(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def query(self, 
-        query_filters:'list'=[],
-        query_options:'dict[str]'={},
-    /) -> 'list|dict[str]|int|dict[str]': 
+        query_filters:'list[list]'=[],
+        query_options:'QueryOptions'={},
+    /) -> 'list[CronJobEntry]|CronJobEntry|int|CronJobEntry': 
         """
         
 
@@ -77,17 +77,17 @@ class Cronjob(Namespace):
             query-options
         Returns
         -------
-        list:
+        list[CronJobEntry]:
             
-        dict[str]:
+        CronJobEntry:
             
         int:
             
-        dict[str]:
+        CronJobEntry:
             
         """
         ...
-    @_ty.overload
+    @typing.overload
     def run(self, 
         id:'int',
         skip_disabled:'bool'=False,
@@ -105,11 +105,11 @@ class Cronjob(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def update(self, 
         id:'int',
-        cronjob_update:'dict[str]'={},
-    /) -> 'dict[str]': 
+        cronjob_update:'CronjobUpdate'={},
+    /) -> 'CronjobUpdateReturns': 
         """
         Update cronjob of `id`.
 
@@ -122,7 +122,91 @@ class Cronjob(Namespace):
             cronjob_update
         Returns
         -------
-        dict[str]:
+        CronjobUpdateReturns:
             cronjob_update_returns
         """
+        ...
+
+class CronJobCreate(typing.TypedDict):
+        enabled:'bool'
+        stderr:'bool'
+        stdout:'bool'
+        schedule:'Schedule'
+        command:'str'
+        description:'str'
+        user:'str'
+        ...
+class Schedule(typing.TypedDict):
+        minute:'str'
+        hour:'str'
+        dom:'str'
+        month:'str'
+        dow:'str'
+        ...
+class CronjobCreateReturns(typing.TypedDict):
+        enabled:'bool'
+        stderr:'bool'
+        stdout:'bool'
+        schedule:'Schedule'
+        command:'str'
+        description:'str'
+        user:'str'
+        id:'int'
+        ...
+class QueryOptionsGetInstance(typing.TypedDict):
+        relationships:'bool'
+        extend:'typing.Optional[str]'
+        extend_context:'typing.Optional[str]'
+        prefix:'typing.Optional[str]'
+        extra:'dict[str]'
+        order_by:'list'
+        select:'list'
+        count:'bool'
+        get:'bool'
+        offset:'int'
+        limit:'int'
+        force_sql_filters:'bool'
+        ...
+class QueryOptions(typing.TypedDict):
+        relationships:'bool'
+        extend:'typing.Optional[str]'
+        extend_context:'typing.Optional[str]'
+        prefix:'typing.Optional[str]'
+        extra:'dict[str]'
+        order_by:'list'
+        select:'list'
+        count:'bool'
+        get:'bool'
+        offset:'int'
+        limit:'int'
+        force_sql_filters:'bool'
+        ...
+class CronJobEntry(typing.TypedDict):
+        enabled:'bool'
+        stderr:'bool'
+        stdout:'bool'
+        schedule:'Schedule'
+        command:'str'
+        description:'str'
+        user:'str'
+        id:'int'
+        ...
+class CronjobUpdate(typing.TypedDict):
+        enabled:'bool'
+        stderr:'bool'
+        stdout:'bool'
+        schedule:'Schedule'
+        command:'str'
+        description:'str'
+        user:'str'
+        ...
+class CronjobUpdateReturns(typing.TypedDict):
+        enabled:'bool'
+        stderr:'bool'
+        stdout:'bool'
+        schedule:'Schedule'
+        command:'str'
+        description:'str'
+        user:'str'
+        id:'int'
         ...

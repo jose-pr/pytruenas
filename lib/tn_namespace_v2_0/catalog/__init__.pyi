@@ -1,13 +1,13 @@
 
 from pytruenas import Namespace, TrueNASClient
-import typing as _ty
+import typing
 class Catalog(Namespace):
-    _namespace:_ty.Literal['catalog']
+    _namespace:typing.Literal['catalog']
     def __init__(self, client:TrueNASClient) -> None: ...
-    @_ty.overload
+    @typing.overload
     def create(self, 
-        catalog_create:'dict[str]'={},
-    /) -> 'dict[str]': 
+        catalog_create:'CatalogCreate'={},
+    /) -> 'CatalogCreateReturns': 
         """
         `catalog_create.preferred_trains` specifies trains which will be displayed in the UI directly for a user.
 
@@ -17,11 +17,11 @@ class Catalog(Namespace):
             catalog_create
         Returns
         -------
-        dict[str]:
+        CatalogCreateReturns:
             catalog_create_returns
         """
         ...
-    @_ty.overload
+    @typing.overload
     def delete(self, 
         label:'str',
     /) -> 'bool': 
@@ -38,10 +38,10 @@ class Catalog(Namespace):
             Will return `true` if `id` is deleted successfully
         """
         ...
-    @_ty.overload
+    @typing.overload
     def get_instance(self, 
         id:'str|int|bool|dict[str]|list',
-        query_options_get_instance:'dict[str]'={},
+        query_options_get_instance:'QueryOptionsGetInstance'={},
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -58,11 +58,11 @@ class Catalog(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def get_item_details(self, 
         item_name:'str',
-        item_version_details:'dict[str]'={},
-    /) -> 'dict[str]': 
+        item_version_details:'ItemVersionDetails'={},
+    /) -> 'ItemDetails': 
         """
         Retrieve information of `item_name` `item_version_details.catalog` catalog item.
 
@@ -74,14 +74,14 @@ class Catalog(Namespace):
             item_version_details
         Returns
         -------
-        dict[str]:
+        ItemDetails:
             item_details
         """
         ...
-    @_ty.overload
+    @typing.overload
     def items(self, 
         label:'str',
-        options:'dict[str]'={},
+        options:'Options'={},
     /) -> 'dict[str]': 
         """
         Retrieve item details for `label` catalog.
@@ -146,11 +146,11 @@ class Catalog(Namespace):
             ```
         """
         ...
-    @_ty.overload
+    @typing.overload
     def query(self, 
-        query_filters:'list'=[],
-        query_options:'dict[str]'={},
-    /) -> 'list|dict[str]|int|dict[str]': 
+        query_filters:'list[list]'=[],
+        query_options:'QueryOptions'={},
+    /) -> 'list[CatalogEntry]|CatalogEntry|int|CatalogEntry': 
         """
         
 
@@ -162,17 +162,17 @@ class Catalog(Namespace):
             query-options
         Returns
         -------
-        list:
+        list[CatalogEntry]:
             
-        dict[str]:
+        CatalogEntry:
             
         int:
             
-        dict[str]:
+        CatalogEntry:
             
         """
         ...
-    @_ty.overload
+    @typing.overload
     def sync(self, 
         label:'str',
     /) -> None: 
@@ -187,7 +187,7 @@ class Catalog(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def sync_all(self, 
     /) -> None: 
         """
@@ -199,11 +199,11 @@ class Catalog(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def update(self, 
         id:'str',
-        catalog_update:'dict[str]'={},
-    /) -> 'dict[str]': 
+        catalog_update:'CatalogUpdate'={},
+    /) -> 'CatalogUpdateReturns': 
         """
         
 
@@ -215,11 +215,11 @@ class Catalog(Namespace):
             catalog_update
         Returns
         -------
-        dict[str]:
+        CatalogUpdateReturns:
             catalog_update_returns
         """
         ...
-    @_ty.overload
+    @typing.overload
     def validate(self, 
         label:'str',
     /) -> None: 
@@ -236,4 +236,124 @@ class Catalog(Namespace):
         Returns
         -------
         """
+        ...
+
+class CatalogCreate(typing.TypedDict):
+        label:'str'
+        repository:'str'
+        branch:'str'
+        preferred_trains:'list'
+        force:'bool'
+        ...
+class CatalogCreateReturns(typing.TypedDict):
+        label:'str'
+        repository:'str'
+        branch:'str'
+        location:'str'
+        id:'str'
+        preferred_trains:'list'
+        trains:'dict[str]'
+        healthy:'bool'
+        error:'bool'
+        builtin:'bool'
+        cached:'bool'
+        caching_progress:'CachingProgress'
+        caching_job:'dict[str]'
+        ...
+class CachingProgress(typing.TypedDict):
+        description:'typing.Optional[str]'
+        extra:'typing.Union[str, int, bool, dict[str], list]'
+        percent:'typing.Optional[float]'
+        ...
+class QueryOptionsGetInstance(typing.TypedDict):
+        relationships:'bool'
+        extend:'typing.Optional[str]'
+        extend_context:'typing.Optional[str]'
+        prefix:'typing.Optional[str]'
+        extra:'dict[str]'
+        order_by:'list'
+        select:'list'
+        count:'bool'
+        get:'bool'
+        offset:'int'
+        limit:'int'
+        force_sql_filters:'bool'
+        ...
+class ItemVersionDetails(typing.TypedDict):
+        cache:'bool'
+        catalog:'str'
+        train:'str'
+        ...
+class ItemDetails(typing.TypedDict):
+        name:'str'
+        categories:'list[str]'
+        maintainers:'list'
+        tags:'list'
+        screenshots:'list[str]'
+        sources:'list[str]'
+        app_readme:'typing.Optional[str]'
+        location:'str'
+        healthy:'bool'
+        recommended:'bool'
+        healthy_error:'typing.Optional[str]'
+        versions:'dict[str]'
+        latest_version:'typing.Optional[str]'
+        latest_app_version:'typing.Optional[str]'
+        latest_human_version:'typing.Optional[str]'
+        last_update:'typing.Optional[str]'
+        icon_url:'typing.Optional[str]'
+        home:'str'
+        ...
+class Options(typing.TypedDict):
+        cache:'bool'
+        cache_only:'bool'
+        retrieve_all_trains:'bool'
+        trains:'list[str]'
+        ...
+class QueryOptions(typing.TypedDict):
+        relationships:'bool'
+        extend:'typing.Optional[str]'
+        extend_context:'typing.Optional[str]'
+        prefix:'typing.Optional[str]'
+        extra:'dict[str]'
+        order_by:'list'
+        select:'list'
+        count:'bool'
+        get:'bool'
+        offset:'int'
+        limit:'int'
+        force_sql_filters:'bool'
+        ...
+class CatalogEntry(typing.TypedDict):
+        label:'str'
+        repository:'str'
+        branch:'str'
+        location:'str'
+        id:'str'
+        preferred_trains:'list'
+        trains:'dict[str]'
+        healthy:'bool'
+        error:'bool'
+        builtin:'bool'
+        cached:'bool'
+        caching_progress:'CachingProgress'
+        caching_job:'dict[str]'
+        ...
+class CatalogUpdate(typing.TypedDict):
+        preferred_trains:'list'
+        ...
+class CatalogUpdateReturns(typing.TypedDict):
+        label:'str'
+        repository:'str'
+        branch:'str'
+        location:'str'
+        id:'str'
+        preferred_trains:'list'
+        trains:'dict[str]'
+        healthy:'bool'
+        error:'bool'
+        builtin:'bool'
+        cached:'bool'
+        caching_progress:'CachingProgress'
+        caching_job:'dict[str]'
         ...

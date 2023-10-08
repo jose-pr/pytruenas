@@ -1,10 +1,10 @@
 
 from pytruenas import Namespace, TrueNASClient
-import typing as _ty
+import typing
 class IscsiGlobal_(Namespace):
-    _namespace:_ty.Literal['iscsi.global']
+    _namespace:typing.Literal['iscsi.global']
     def __init__(self, client:TrueNASClient) -> None: ...
-    @_ty.overload
+    @typing.overload
     def alua_enabled(self, 
     /) -> None: 
         """
@@ -16,7 +16,7 @@ class IscsiGlobal_(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def client_count(self, 
     /) -> None: 
         """
@@ -28,7 +28,7 @@ class IscsiGlobal_(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def config(self, 
     /) -> 'dict[str]': 
         """
@@ -42,11 +42,11 @@ class IscsiGlobal_(Namespace):
             iscsi_global_entry
         """
         ...
-    @_ty.overload
+    @typing.overload
     def sessions(self, 
-        query_filters:'list'=[],
-        query_options:'dict[str]'={},
-    /) -> 'int|dict[str]|list': 
+        query_filters:'list[list]'=[],
+        query_options:'QueryOptions'={},
+    /) -> 'int|Session|list[Session]': 
         """
         Get a list of currently running iSCSI sessions. This includes initiator and target names
         and the unique connection IDs.
@@ -61,15 +61,15 @@ class IscsiGlobal_(Namespace):
         -------
         int:
             
-        dict[str]:
+        Session:
             
-        list:
+        list[Session]:
             
         """
         ...
-    @_ty.overload
+    @typing.overload
     def update(self, 
-        iscsiglobal_update:'dict[str]'={},
+        iscsiglobal_update:'IscsiglobalUpdate'={},
     /) -> 'dict[str]': 
         """
         `alua` is a no-op for FreeNAS.
@@ -83,4 +83,42 @@ class IscsiGlobal_(Namespace):
         dict[str]:
             iscsi_global_update_returns
         """
+        ...
+
+class QueryOptions(typing.TypedDict):
+        relationships:'bool'
+        extend:'typing.Optional[str]'
+        extend_context:'typing.Optional[str]'
+        prefix:'typing.Optional[str]'
+        extra:'dict[str]'
+        order_by:'list'
+        select:'list'
+        count:'bool'
+        get:'bool'
+        offset:'int'
+        limit:'int'
+        force_sql_filters:'bool'
+        ...
+class Session(typing.TypedDict):
+        initiator:'str'
+        initiator_addr:'str'
+        initiator_alias:'typing.Optional[str]'
+        target:'str'
+        target_alias:'str'
+        header_digest:'typing.Optional[str]'
+        data_digest:'typing.Optional[str]'
+        max_data_segment_length:'typing.Optional[int]'
+        max_receive_data_segment_length:'typing.Optional[int]'
+        max_burst_length:'typing.Optional[int]'
+        first_burst_length:'typing.Optional[int]'
+        immediate_data:'bool'
+        iser:'bool'
+        offload:'bool'
+        ...
+class IscsiglobalUpdate(typing.TypedDict):
+        basename:'str'
+        isns_servers:'list[str]'
+        listen_port:'int'
+        pool_avail_threshold:'typing.Optional[int]'
+        alua:'bool'
         ...

@@ -34,8 +34,10 @@ class Parameter(TypedDict):
     name: str
     title: str
     required: bool
-    type: "str|list[str]"
+    type: "str|list[str|Parameter]"
     description: str
+    items: 'list[Parameter]'
+    properties: 'dict[str,Parameter]'
 
     def _normalize(self) -> "Parameter":
         # type: ignore

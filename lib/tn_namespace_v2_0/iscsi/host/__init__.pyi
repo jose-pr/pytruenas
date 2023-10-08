@@ -1,12 +1,12 @@
 
 from pytruenas import Namespace, TrueNASClient
-import typing as _ty
+import typing
 class IscsiHost(Namespace):
-    _namespace:_ty.Literal['iscsi.host']
+    _namespace:typing.Literal['iscsi.host']
     def __init__(self, client:TrueNASClient) -> None: ...
-    @_ty.overload
+    @typing.overload
     def create(self, 
-        iscsi_host_create:'dict[str]'={},
+        iscsi_host_create:'IscsiHostCreate'={},
     /) -> 'dict[str]': 
         """
         Creates iSCSI host.
@@ -25,7 +25,7 @@ class IscsiHost(Namespace):
             iscsi_host_create_returns
         """
         ...
-    @_ty.overload
+    @typing.overload
     def delete(self, 
         id:'int',
     /) -> 'bool': 
@@ -42,7 +42,7 @@ class IscsiHost(Namespace):
             Will return `true` if `id` is deleted successfully
         """
         ...
-    @_ty.overload
+    @typing.overload
     def get_initiators(self, 
         id:'int',
     /) -> None: 
@@ -57,10 +57,10 @@ class IscsiHost(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def get_instance(self, 
         id:'str|int|bool|dict[str]|list',
-        query_options_get_instance:'dict[str]'={},
+        query_options_get_instance:'QueryOptionsGetInstance'={},
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -77,7 +77,7 @@ class IscsiHost(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def get_targets(self, 
         id:'int',
     /) -> None: 
@@ -92,11 +92,11 @@ class IscsiHost(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def query(self, 
-        query_filters:'list'=[],
-        query_options:'dict[str]'={},
-    /) -> 'list|dict[str]|int|dict[str]': 
+        query_filters:'list[list]'=[],
+        query_options:'QueryOptions'={},
+    /) -> 'list[dict[str]]|dict[str]|int|dict[str]': 
         """
         
 
@@ -108,7 +108,7 @@ class IscsiHost(Namespace):
             query-options
         Returns
         -------
-        list:
+        list[dict[str]]:
             
         dict[str]:
             
@@ -118,10 +118,10 @@ class IscsiHost(Namespace):
             
         """
         ...
-    @_ty.overload
+    @typing.overload
     def set_initiators(self, 
         id:'int',
-        ids:'list'=[],
+        ids:'list[int]'=[],
         force:'bool'=False,
     /) -> None: 
         """
@@ -140,10 +140,10 @@ class IscsiHost(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def set_targets(self, 
         id:'int',
-        ids:'list'=[],
+        ids:'list[int]'=[],
     /) -> None: 
         """
         Associates targets `ids` with host `id`.
@@ -158,10 +158,10 @@ class IscsiHost(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def update(self, 
         id:'int',
-        iscsi_host_update:'dict[str]'={},
+        iscsi_host_update:'IscsiHostUpdate'={},
     /) -> 'dict[str]': 
         """
         Update iSCSI host `id`.
@@ -178,4 +178,45 @@ class IscsiHost(Namespace):
         dict[str]:
             iscsi_host_update_returns
         """
+        ...
+
+class IscsiHostCreate(typing.TypedDict):
+        ip:'str'
+        description:'str'
+        iqns:'list[str]'
+        added_automatically:'bool'
+        ...
+class QueryOptionsGetInstance(typing.TypedDict):
+        relationships:'bool'
+        extend:'typing.Optional[str]'
+        extend_context:'typing.Optional[str]'
+        prefix:'typing.Optional[str]'
+        extra:'dict[str]'
+        order_by:'list'
+        select:'list'
+        count:'bool'
+        get:'bool'
+        offset:'int'
+        limit:'int'
+        force_sql_filters:'bool'
+        ...
+class QueryOptions(typing.TypedDict):
+        relationships:'bool'
+        extend:'typing.Optional[str]'
+        extend_context:'typing.Optional[str]'
+        prefix:'typing.Optional[str]'
+        extra:'dict[str]'
+        order_by:'list'
+        select:'list'
+        count:'bool'
+        get:'bool'
+        offset:'int'
+        limit:'int'
+        force_sql_filters:'bool'
+        ...
+class IscsiHostUpdate(typing.TypedDict):
+        ip:'str'
+        description:'str'
+        iqns:'list[str]'
+        added_automatically:'bool'
         ...

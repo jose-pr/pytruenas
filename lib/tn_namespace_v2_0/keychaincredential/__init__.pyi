@@ -1,13 +1,13 @@
 
 from pytruenas import Namespace, TrueNASClient
-import typing as _ty
+import typing
 class Keychaincredential(Namespace):
-    _namespace:_ty.Literal['keychaincredential']
+    _namespace:typing.Literal['keychaincredential']
     def __init__(self, client:TrueNASClient) -> None: ...
-    @_ty.overload
+    @typing.overload
     def create(self, 
-        keychain_credential_create:'dict[str]'={},
-    /) -> 'dict[str]': 
+        keychain_credential_create:'KeychainCredentialCreate'={},
+    /) -> 'KeychaincredentialCreateReturns': 
         """
         Create a Keychain Credential
         
@@ -35,14 +35,14 @@ class Keychaincredential(Namespace):
             keychain_credential_create
         Returns
         -------
-        dict[str]:
+        KeychaincredentialCreateReturns:
             keychaincredential_create_returns
         """
         ...
-    @_ty.overload
+    @typing.overload
     def delete(self, 
         id:'int',
-        options:'dict[str]'={},
+        options:'Options'={},
     /) -> None: 
         """
         Delete Keychain Credential with specific `id`
@@ -57,9 +57,9 @@ class Keychaincredential(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def generate_ssh_key_pair(self, 
-    /) -> 'dict[str]': 
+    /) -> 'SshKeyPair': 
         """
         Generate a public/private key pair
         
@@ -69,14 +69,14 @@ class Keychaincredential(Namespace):
         ----------
         Returns
         -------
-        dict[str]:
+        SshKeyPair:
             ssh_key_pair
         """
         ...
-    @_ty.overload
+    @typing.overload
     def get_instance(self, 
         id:'str|int|bool|dict[str]|list',
-        query_options_get_instance:'dict[str]'={},
+        query_options_get_instance:'QueryOptionsGetInstance'={},
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -93,11 +93,11 @@ class Keychaincredential(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def query(self, 
-        query_filters:'list'=[],
-        query_options:'dict[str]'={},
-    /) -> 'list|dict[str]|int|dict[str]': 
+        query_filters:'list[list]'=[],
+        query_options:'QueryOptions'={},
+    /) -> 'list[KeychainCredentialEntry]|KeychainCredentialEntry|int|KeychainCredentialEntry': 
         """
         
 
@@ -109,19 +109,19 @@ class Keychaincredential(Namespace):
             query-options
         Returns
         -------
-        list:
+        list[KeychainCredentialEntry]:
             
-        dict[str]:
+        KeychainCredentialEntry:
             
         int:
             
-        dict[str]:
+        KeychainCredentialEntry:
             
         """
         ...
-    @_ty.overload
+    @typing.overload
     def remote_ssh_host_key_scan(self, 
-        keychain_remote_ssh_host_key_scan:'dict[str]'={},
+        keychain_remote_ssh_host_key_scan:'KeychainRemoteSshHostKeyScan'={},
     /) -> 'str': 
         """
         Discover a remote host key
@@ -138,10 +138,10 @@ class Keychaincredential(Namespace):
             remove_ssh_host_key
         """
         ...
-    @_ty.overload
+    @typing.overload
     def remote_ssh_semiautomatic_setup(self, 
-        keychain_remote_ssh_semiautomatic_setup:'dict[str]'={},
-    /) -> 'dict[str]': 
+        keychain_remote_ssh_semiautomatic_setup:'KeychainRemoteSshSemiautomaticSetup'={},
+    /) -> 'KeychainCredentialEntry_': 
         """
         Perform semi-automatic SSH connection setup with other FreeNAS machine
         
@@ -156,14 +156,14 @@ class Keychaincredential(Namespace):
             keychain_remote_ssh_semiautomatic_setup
         Returns
         -------
-        dict[str]:
+        KeychainCredentialEntry_:
             keychain_credential_entry
         """
         ...
-    @_ty.overload
+    @typing.overload
     def setup_ssh_connection(self, 
-        setup_ssh_connection:'dict[str]'={},
-    /) -> 'dict[str]': 
+        setup_ssh_connection:'SetupSshConnection'={},
+    /) -> 'KeychainCredentialEntry': 
         """
         Creates a SSH Connection performing the following steps:
         
@@ -179,15 +179,15 @@ class Keychaincredential(Namespace):
             setup_ssh_connection
         Returns
         -------
-        dict[str]:
+        KeychainCredentialEntry:
             keychain_credential_entry
         """
         ...
-    @_ty.overload
+    @typing.overload
     def update(self, 
         id:'int',
-        keychain_credential_update:'dict[str]'={},
-    /) -> 'dict[str]': 
+        keychain_credential_update:'KeychainCredentialUpdate'={},
+    /) -> 'KeychaincredentialUpdateReturns': 
         """
         Update a Keychain Credential with specific `id`
         
@@ -205,14 +205,14 @@ class Keychaincredential(Namespace):
             keychain_credential_update
         Returns
         -------
-        dict[str]:
+        KeychaincredentialUpdateReturns:
             keychaincredential_update_returns
         """
         ...
-    @_ty.overload
+    @typing.overload
     def used_by(self, 
         id:'int',
-    /) -> 'list': 
+    /) -> 'list[CredentialResult]': 
         """
         Returns list of objects that use this credential.
 
@@ -222,7 +222,119 @@ class Keychaincredential(Namespace):
             id
         Returns
         -------
-        list:
+        list[CredentialResult]:
             credential_results
         """
+        ...
+
+class KeychainCredentialCreate(typing.TypedDict):
+        name:'str'
+        type:'str'
+        attributes:'dict[str]'
+        ...
+class KeychaincredentialCreateReturns(typing.TypedDict):
+        name:'str'
+        type:'str'
+        attributes:'dict[str]'
+        id:'int'
+        ...
+class Options(typing.TypedDict):
+        cascade:'bool'
+        ...
+class SshKeyPair(typing.TypedDict):
+        private_key:'str'
+        public_key:'str'
+        ...
+class QueryOptionsGetInstance(typing.TypedDict):
+        relationships:'bool'
+        extend:'typing.Optional[str]'
+        extend_context:'typing.Optional[str]'
+        prefix:'typing.Optional[str]'
+        extra:'dict[str]'
+        order_by:'list'
+        select:'list'
+        count:'bool'
+        get:'bool'
+        offset:'int'
+        limit:'int'
+        force_sql_filters:'bool'
+        ...
+class QueryOptions(typing.TypedDict):
+        relationships:'bool'
+        extend:'typing.Optional[str]'
+        extend_context:'typing.Optional[str]'
+        prefix:'typing.Optional[str]'
+        extra:'dict[str]'
+        order_by:'list'
+        select:'list'
+        count:'bool'
+        get:'bool'
+        offset:'int'
+        limit:'int'
+        force_sql_filters:'bool'
+        ...
+class KeychainCredentialEntry(typing.TypedDict):
+        name:'str'
+        type:'str'
+        attributes:'dict[str]'
+        id:'int'
+        ...
+class KeychainRemoteSshHostKeyScan(typing.TypedDict):
+        host:'str'
+        port:'str'
+        connect_timeout:'int'
+        ...
+class KeychainRemoteSshSemiautomaticSetup(typing.TypedDict):
+        name:'str'
+        url:'str'
+        token:'str'
+        admin_username:'str'
+        password:'str'
+        otp_token:'str'
+        username:'str'
+        private_key:'int'
+        connect_timeout:'int'
+        sudo:'bool'
+        ...
+class KeychainCredentialEntry_(typing.TypedDict):
+        name:'str'
+        type:'str'
+        attributes:'dict[str]'
+        id:'int'
+        ...
+class SetupSshConnection(typing.TypedDict):
+        private_key:'PrivateKey'
+        connection_name:'str'
+        setup_type:'str'
+        semi_automatic_setup:'SemiAutomaticSetup'
+        manual_setup:'dict[str]'
+        ...
+class PrivateKey(typing.TypedDict):
+        generate_key:'bool'
+        existing_key_id:'int'
+        name:'str'
+        ...
+class SemiAutomaticSetup(typing.TypedDict):
+        url:'str'
+        token:'str'
+        admin_username:'str'
+        password:'str'
+        otp_token:'str'
+        username:'str'
+        connect_timeout:'int'
+        sudo:'bool'
+        ...
+class KeychainCredentialUpdate(typing.TypedDict):
+        name:'str'
+        attributes:'dict[str]'
+        ...
+class KeychaincredentialUpdateReturns(typing.TypedDict):
+        name:'str'
+        type:'str'
+        attributes:'dict[str]'
+        id:'int'
+        ...
+class CredentialResult(typing.TypedDict):
+        title:'str'
+        unbind_method:'str'
         ...

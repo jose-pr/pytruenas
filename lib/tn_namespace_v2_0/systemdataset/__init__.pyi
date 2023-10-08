@@ -1,12 +1,12 @@
 
 from pytruenas import Namespace, TrueNASClient
-import typing as _ty
+import typing
 class Systemdataset(Namespace):
-    _namespace:_ty.Literal['systemdataset']
+    _namespace:typing.Literal['systemdataset']
     def __init__(self, client:TrueNASClient) -> None: ...
-    @_ty.overload
+    @typing.overload
     def config(self, 
-    /) -> 'dict[str]': 
+    /) -> 'SystemdatasetEntry': 
         """
         
 
@@ -14,11 +14,11 @@ class Systemdataset(Namespace):
         ----------
         Returns
         -------
-        dict[str]:
+        SystemdatasetEntry:
             systemdataset_entry
         """
         ...
-    @_ty.overload
+    @typing.overload
     def pool_choices(self, 
         include_current_pool:'bool'=True,
     /) -> 'dict[str]': 
@@ -35,10 +35,10 @@ class Systemdataset(Namespace):
             systemdataset_pool_choices
         """
         ...
-    @_ty.overload
+    @typing.overload
     def update(self, 
-        sysdataset_update:'dict[str]'={},
-    /) -> 'dict[str]': 
+        sysdataset_update:'SysdatasetUpdate'={},
+    /) -> 'SystemdatasetUpdateReturns': 
         """
         Update System Dataset Service Configuration.
         
@@ -53,7 +53,35 @@ class Systemdataset(Namespace):
             sysdataset_update
         Returns
         -------
-        dict[str]:
+        SystemdatasetUpdateReturns:
             systemdataset_update_returns
         """
+        ...
+
+class SystemdatasetEntry(typing.TypedDict):
+        id:'int'
+        pool:'str'
+        pool_set:'bool'
+        uuid:'str'
+        uuid_b:'typing.Optional[str]'
+        basename:'str'
+        uuid_a:'str'
+        syslog:'bool'
+        path:'typing.Optional[str]'
+        ...
+class SysdatasetUpdate(typing.TypedDict):
+        pool:'typing.Optional[str]'
+        pool_exclude:'typing.Optional[str]'
+        syslog:'bool'
+        ...
+class SystemdatasetUpdateReturns(typing.TypedDict):
+        id:'int'
+        pool:'str'
+        pool_set:'bool'
+        uuid:'str'
+        uuid_b:'typing.Optional[str]'
+        basename:'str'
+        uuid_a:'str'
+        syslog:'bool'
+        path:'typing.Optional[str]'
         ...

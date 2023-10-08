@@ -1,10 +1,10 @@
 
 from pytruenas import Namespace, TrueNASClient
-import typing as _ty
+import typing
 class Certificate(Namespace):
-    _namespace:_ty.Literal['certificate']
+    _namespace:typing.Literal['certificate']
     def __init__(self, client:TrueNASClient) -> None: ...
-    @_ty.overload
+    @typing.overload
     def acme_server_choices(self, 
     /) -> 'dict[str]': 
         """
@@ -19,9 +19,9 @@ class Certificate(Namespace):
             acme_server_choices
         """
         ...
-    @_ty.overload
+    @typing.overload
     def certificate_signing_requests_profiles(self, 
-    /) -> 'dict[str]': 
+    /) -> 'CertificateSigningRequestsProfiles': 
         """
         Returns a dictionary of predefined options for specific use cases i.e openvpn client/server
         configurations which can be used for creating certificate signing requests.
@@ -30,7 +30,7 @@ class Certificate(Namespace):
         ----------
         Returns
         -------
-        dict[str]:
+        CertificateSigningRequestsProfiles:
             Example(s):
             ```
             {
@@ -92,7 +92,7 @@ class Certificate(Namespace):
             ```
         """
         ...
-    @_ty.overload
+    @typing.overload
     def country_choices(self, 
     /) -> 'dict[str]': 
         """
@@ -106,10 +106,10 @@ class Certificate(Namespace):
             country_choices
         """
         ...
-    @_ty.overload
+    @typing.overload
     def create(self, 
-        certificate_create:'dict[str]'={},
-    /) -> 'dict[str]': 
+        certificate_create:'CertificateCreate'={},
+    /) -> 'CertificateCreateReturns': 
         """
         Create a new Certificate
         
@@ -141,11 +141,11 @@ class Certificate(Namespace):
             certificate_create
         Returns
         -------
-        dict[str]:
+        CertificateCreateReturns:
             certificate_create_returns
         """
         ...
-    @_ty.overload
+    @typing.overload
     def delete(self, 
         id:'int',
         force:'bool'=False,
@@ -173,9 +173,9 @@ class Certificate(Namespace):
             Will return `true` if `id` is deleted successfully
         """
         ...
-    @_ty.overload
+    @typing.overload
     def ec_curve_choices(self, 
-    /) -> 'dict[str]': 
+    /) -> 'EcCurveChoices': 
         """
         Dictionary of supported EC curves.
 
@@ -183,13 +183,13 @@ class Certificate(Namespace):
         ----------
         Returns
         -------
-        dict[str]:
+        EcCurveChoices:
             ec_curve_choices
         """
         ...
-    @_ty.overload
+    @typing.overload
     def extended_key_usage_choices(self, 
-    /) -> 'dict[str]': 
+    /) -> 'ExtendedKeyUsageChoices': 
         """
         Dictionary of choices for `ExtendedKeyUsage` extension which can be passed over to `usages` attribute.
 
@@ -197,14 +197,14 @@ class Certificate(Namespace):
         ----------
         Returns
         -------
-        dict[str]:
+        ExtendedKeyUsageChoices:
             extended_key_usage_choices
         """
         ...
-    @_ty.overload
+    @typing.overload
     def get_instance(self, 
         id:'str|int|bool|dict[str]|list',
-        query_options_get_instance:'dict[str]'={},
+        query_options_get_instance:'QueryOptionsGetInstance'={},
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -221,9 +221,9 @@ class Certificate(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def key_type_choices(self, 
-    /) -> 'dict[str]': 
+    /) -> 'PrivateKeyTypeChoices': 
         """
         Dictionary of supported key types for certificates.
 
@@ -231,13 +231,13 @@ class Certificate(Namespace):
         ----------
         Returns
         -------
-        dict[str]:
+        PrivateKeyTypeChoices:
             private_key_type_choices
         """
         ...
-    @_ty.overload
+    @typing.overload
     def profiles(self, 
-    /) -> 'dict[str]': 
+    /) -> 'CertificateProfiles': 
         """
         Returns a dictionary of predefined options for specific use cases i.e openvpn client/server
         configurations which can be used for creating certificates.
@@ -246,15 +246,15 @@ class Certificate(Namespace):
         ----------
         Returns
         -------
-        dict[str]:
+        CertificateProfiles:
             certificate_profiles
         """
         ...
-    @_ty.overload
+    @typing.overload
     def query(self, 
-        query_filters:'list'=[],
-        query_options:'dict[str]'={},
-    /) -> 'list|dict[str]|int|dict[str]': 
+        query_filters:'list[list]'=[],
+        query_options:'QueryOptions'={},
+    /) -> 'list[CertificateEntry]|CertificateEntry|int|CertificateEntry': 
         """
         
 
@@ -266,21 +266,21 @@ class Certificate(Namespace):
             query-options
         Returns
         -------
-        list:
+        list[CertificateEntry]:
             
-        dict[str]:
+        CertificateEntry:
             
         int:
             
-        dict[str]:
+        CertificateEntry:
             
         """
         ...
-    @_ty.overload
+    @typing.overload
     def update(self, 
         id:'int',
-        certificate_update:'dict[str]'={},
-    /) -> 'dict[str]': 
+        certificate_update:'CertificateUpdate'={},
+    /) -> 'CertificateUpdateReturns': 
         """
         Update certificate of `id`
         
@@ -299,7 +299,302 @@ class Certificate(Namespace):
             certificate_update
         Returns
         -------
-        dict[str]:
+        CertificateUpdateReturns:
             certificate_update_returns
         """
+        ...
+
+class CertificateSigningRequestsProfiles(typing.TypedDict):
+        HTTPS RSA Certificate:'dict[str]'
+        HTTPS ECC Certificate:'dict[str]'
+        ...
+class CertificateCreate(typing.TypedDict):
+        tos:'bool'
+        dns_mapping:'dict[str]'
+        csr_id:'int'
+        signedby:'int'
+        key_length:'int'
+        renew_days:'int'
+        type:'int'
+        lifetime:'int'
+        serial:'int'
+        acme_directory_uri:'str'
+        certificate:'str'
+        city:'str'
+        common:'typing.Optional[str]'
+        country:'str'
+        CSR:'str'
+        ec_curve:'str'
+        email:'str'
+        key_type:'str'
+        name:'str'
+        organization:'str'
+        organizational_unit:'str'
+        passphrase:'str'
+        privatekey:'str'
+        state:'str'
+        create_type:'str'
+        digest_algorithm:'str'
+        san:'list[str]'
+        cert_extensions:'CertExtensions'
+        ...
+class CertExtensions(typing.TypedDict):
+        BasicConstraints:'BasicConstraints'
+        AuthorityKeyIdentifier:'AuthorityKeyIdentifier'
+        ExtendedKeyUsage:'ExtendedKeyUsage'
+        KeyUsage:'KeyUsage'
+        ...
+class BasicConstraints(typing.TypedDict):
+        ca:'bool'
+        enabled:'bool'
+        path_length:'typing.Optional[int]'
+        extension_critical:'bool'
+        ...
+class AuthorityKeyIdentifier(typing.TypedDict):
+        authority_cert_issuer:'bool'
+        enabled:'bool'
+        extension_critical:'bool'
+        ...
+class ExtendedKeyUsage(typing.TypedDict):
+        usages:'list[str]'
+        enabled:'bool'
+        extension_critical:'bool'
+        ...
+class KeyUsage(typing.TypedDict):
+        enabled:'bool'
+        digital_signature:'bool'
+        content_commitment:'bool'
+        key_encipherment:'bool'
+        data_encipherment:'bool'
+        key_agreement:'bool'
+        key_cert_sign:'bool'
+        crl_sign:'bool'
+        encipher_only:'bool'
+        decipher_only:'bool'
+        extension_critical:'bool'
+        ...
+class CertificateCreateReturns(typing.TypedDict):
+        id:'int'
+        type:'int'
+        name:'str'
+        certificate:'typing.Optional[str]'
+        privatekey:'typing.Optional[str]'
+        CSR:'typing.Optional[str]'
+        acme_uri:'typing.Optional[str]'
+        domains_authenticators:'dict[str]'
+        renew_days:'int'
+        revoked_date:'typing.Optional[str]'
+        signedby:'dict[str]'
+        root_path:'str'
+        acme:'dict[str]'
+        certificate_path:'typing.Optional[str]'
+        privatekey_path:'typing.Optional[str]'
+        csr_path:'typing.Optional[str]'
+        cert_type:'str'
+        revoked:'bool'
+        expired:'typing.Optional[bool]'
+        issuer:'typing.Union[str, NoneType, dict[str]]'
+        chain_list:'list[str]'
+        country:'typing.Optional[str]'
+        state:'typing.Optional[str]'
+        city:'typing.Optional[str]'
+        organization:'typing.Optional[str]'
+        organizational_unit:'typing.Optional[str]'
+        san:'typing.Optional[list[str]]'
+        email:'typing.Optional[str]'
+        DN:'typing.Optional[str]'
+        subject_name_hash:'typing.Optional[str]'
+        digest_algorithm:'typing.Optional[str]'
+        from:'typing.Optional[str]'
+        common:'typing.Optional[str]'
+        until:'typing.Optional[str]'
+        fingerprint:'typing.Optional[str]'
+        key_type:'typing.Optional[str]'
+        internal:'typing.Optional[str]'
+        lifetime:'typing.Optional[int]'
+        serial:'typing.Optional[int]'
+        key_length:'typing.Optional[int]'
+        chain:'typing.Optional[bool]'
+        CA_type_existing:'bool'
+        CA_type_internal:'bool'
+        CA_type_intermediate:'bool'
+        cert_type_existing:'bool'
+        cert_type_internal:'bool'
+        cert_type_CSR:'bool'
+        parsed:'bool'
+        can_be_revoked:'bool'
+        extensions:'dict[str]'
+        revoked_certs:'list'
+        crl_path:'str'
+        signed_certificates:'int'
+        ...
+class EcCurveChoices(typing.TypedDict):
+        SECP256R1:'str'
+        SECP384R1:'str'
+        SECP521R1:'str'
+        ed25519:'str'
+        ...
+class ExtendedKeyUsageChoices(typing.TypedDict):
+        ANY_EXTENDED_KEY_USAGE:'str'
+        CERTIFICATE_TRANSPARENCY:'str'
+        CLIENT_AUTH:'str'
+        CODE_SIGNING:'str'
+        EMAIL_PROTECTION:'str'
+        IPSEC_IKE:'str'
+        KERBEROS_PKINIT_KDC:'str'
+        OCSP_SIGNING:'str'
+        SERVER_AUTH:'str'
+        SMARTCARD_LOGON:'str'
+        TIME_STAMPING:'str'
+        ...
+class QueryOptionsGetInstance(typing.TypedDict):
+        relationships:'bool'
+        extend:'typing.Optional[str]'
+        extend_context:'typing.Optional[str]'
+        prefix:'typing.Optional[str]'
+        extra:'dict[str]'
+        order_by:'list'
+        select:'list'
+        count:'bool'
+        get:'bool'
+        offset:'int'
+        limit:'int'
+        force_sql_filters:'bool'
+        ...
+class PrivateKeyTypeChoices(typing.TypedDict):
+        RSA:'str'
+        EC:'str'
+        ...
+class CertificateProfiles(typing.TypedDict):
+        HTTPS RSA Certificate:'dict[str]'
+        HTTPS ECC Certificate:'dict[str]'
+        ...
+class QueryOptions(typing.TypedDict):
+        relationships:'bool'
+        extend:'typing.Optional[str]'
+        extend_context:'typing.Optional[str]'
+        prefix:'typing.Optional[str]'
+        extra:'dict[str]'
+        order_by:'list'
+        select:'list'
+        count:'bool'
+        get:'bool'
+        offset:'int'
+        limit:'int'
+        force_sql_filters:'bool'
+        ...
+class CertificateEntry(typing.TypedDict):
+        id:'int'
+        type:'int'
+        name:'str'
+        certificate:'typing.Optional[str]'
+        privatekey:'typing.Optional[str]'
+        CSR:'typing.Optional[str]'
+        acme_uri:'typing.Optional[str]'
+        domains_authenticators:'dict[str]'
+        renew_days:'int'
+        revoked_date:'typing.Optional[str]'
+        signedby:'dict[str]'
+        root_path:'str'
+        acme:'dict[str]'
+        certificate_path:'typing.Optional[str]'
+        privatekey_path:'typing.Optional[str]'
+        csr_path:'typing.Optional[str]'
+        cert_type:'str'
+        revoked:'bool'
+        expired:'typing.Optional[bool]'
+        issuer:'typing.Union[str, NoneType, dict[str]]'
+        chain_list:'list[str]'
+        country:'typing.Optional[str]'
+        state:'typing.Optional[str]'
+        city:'typing.Optional[str]'
+        organization:'typing.Optional[str]'
+        organizational_unit:'typing.Optional[str]'
+        san:'typing.Optional[list[str]]'
+        email:'typing.Optional[str]'
+        DN:'typing.Optional[str]'
+        subject_name_hash:'typing.Optional[str]'
+        digest_algorithm:'typing.Optional[str]'
+        from:'typing.Optional[str]'
+        common:'typing.Optional[str]'
+        until:'typing.Optional[str]'
+        fingerprint:'typing.Optional[str]'
+        key_type:'typing.Optional[str]'
+        internal:'typing.Optional[str]'
+        lifetime:'typing.Optional[int]'
+        serial:'typing.Optional[int]'
+        key_length:'typing.Optional[int]'
+        chain:'typing.Optional[bool]'
+        CA_type_existing:'bool'
+        CA_type_internal:'bool'
+        CA_type_intermediate:'bool'
+        cert_type_existing:'bool'
+        cert_type_internal:'bool'
+        cert_type_CSR:'bool'
+        parsed:'bool'
+        can_be_revoked:'bool'
+        extensions:'dict[str]'
+        revoked_certs:'list'
+        crl_path:'str'
+        signed_certificates:'int'
+        ...
+class CertificateUpdate(typing.TypedDict):
+        revoked:'bool'
+        renew_days:'int'
+        name:'str'
+        ...
+class CertificateUpdateReturns(typing.TypedDict):
+        id:'int'
+        type:'int'
+        name:'str'
+        certificate:'typing.Optional[str]'
+        privatekey:'typing.Optional[str]'
+        CSR:'typing.Optional[str]'
+        acme_uri:'typing.Optional[str]'
+        domains_authenticators:'dict[str]'
+        renew_days:'int'
+        revoked_date:'typing.Optional[str]'
+        signedby:'dict[str]'
+        root_path:'str'
+        acme:'dict[str]'
+        certificate_path:'typing.Optional[str]'
+        privatekey_path:'typing.Optional[str]'
+        csr_path:'typing.Optional[str]'
+        cert_type:'str'
+        revoked:'bool'
+        expired:'typing.Optional[bool]'
+        issuer:'typing.Union[str, NoneType, dict[str]]'
+        chain_list:'list[str]'
+        country:'typing.Optional[str]'
+        state:'typing.Optional[str]'
+        city:'typing.Optional[str]'
+        organization:'typing.Optional[str]'
+        organizational_unit:'typing.Optional[str]'
+        san:'typing.Optional[list[str]]'
+        email:'typing.Optional[str]'
+        DN:'typing.Optional[str]'
+        subject_name_hash:'typing.Optional[str]'
+        digest_algorithm:'typing.Optional[str]'
+        from:'typing.Optional[str]'
+        common:'typing.Optional[str]'
+        until:'typing.Optional[str]'
+        fingerprint:'typing.Optional[str]'
+        key_type:'typing.Optional[str]'
+        internal:'typing.Optional[str]'
+        lifetime:'typing.Optional[int]'
+        serial:'typing.Optional[int]'
+        key_length:'typing.Optional[int]'
+        chain:'typing.Optional[bool]'
+        CA_type_existing:'bool'
+        CA_type_internal:'bool'
+        CA_type_intermediate:'bool'
+        cert_type_existing:'bool'
+        cert_type_internal:'bool'
+        cert_type_CSR:'bool'
+        parsed:'bool'
+        can_be_revoked:'bool'
+        extensions:'dict[str]'
+        revoked_certs:'list'
+        crl_path:'str'
+        signed_certificates:'int'
         ...

@@ -1,13 +1,13 @@
 
 from pytruenas import Namespace, TrueNASClient
-import typing as _ty
+import typing
 class Disk(Namespace):
-    _namespace:_ty.Literal['disk']
+    _namespace:typing.Literal['disk']
     def __init__(self, client:TrueNASClient) -> None: ...
-    @_ty.overload
+    @typing.overload
     def get_instance(self, 
         id:'str|int|bool|dict[str]|list',
-        query_options_get_instance:'dict[str]'={},
+        query_options_get_instance:'QueryOptionsGetInstance'={},
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -24,7 +24,7 @@ class Disk(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def get_unused(self, 
         join_partitions:'bool'=False,
     /) -> None: 
@@ -43,11 +43,11 @@ class Disk(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def query(self, 
-        query_filters:'list'=[],
-        query_options:'dict[str]'={},
-    /) -> 'list|dict[str]|int|dict[str]': 
+        query_filters:'list[list]'=[],
+        query_options:'QueryOptions'={},
+    /) -> 'list[DiskEntry]|DiskEntry|int|DiskEntry': 
         """
         Query disks.
         
@@ -67,19 +67,19 @@ class Disk(Namespace):
             query-options
         Returns
         -------
-        list:
+        list[DiskEntry]:
             
-        dict[str]:
+        DiskEntry:
             
         int:
             
-        dict[str]:
+        DiskEntry:
             
         """
         ...
-    @_ty.overload
+    @typing.overload
     def resize(self, 
-        disks:'list',
+        disks:'list[Object]',
         sync:'bool'=True,
         raise_error:'bool'=False,
     /) -> None: 
@@ -114,9 +114,9 @@ class Disk(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def retaste(self, 
-        disks:'list'=None,
+        disks:'list[str]'=None,
     /) -> None: 
         """
         
@@ -129,10 +129,10 @@ class Disk(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def smart_attributes(self, 
         name:'str',
-    /) -> 'list': 
+    /) -> 'list[SmartAttribute]': 
         """
         Returns S.M.A.R.T. attributes values for specified disk name.
 
@@ -142,14 +142,14 @@ class Disk(Namespace):
             name
         Returns
         -------
-        list:
+        list[SmartAttribute]:
             smart_attributes
         """
         ...
-    @_ty.overload
+    @typing.overload
     def temperature(self, 
         name:'str',
-        options:'dict[str]'={},
+        options:'Options'={},
     /) -> 'int|None': 
         """
         Returns temperature for device `name` using specified S.M.A.R.T. `powermode`. If `cache` is not null
@@ -169,9 +169,9 @@ class Disk(Namespace):
             temperature
         """
         ...
-    @_ty.overload
+    @typing.overload
     def temperature_agg(self, 
-        names:'list'=[],
+        names:'list[str]'=[],
         days:'int'=7,
     /) -> 'dict[str]': 
         """
@@ -189,10 +189,10 @@ class Disk(Namespace):
             temperatures
         """
         ...
-    @_ty.overload
+    @typing.overload
     def temperature_alerts(self, 
-        names:'list'=[],
-    /) -> 'dict[str]': 
+        names:'list[str]'=[],
+    /) -> 'Alert': 
         """
         Returns existing temperature alerts for specified disk `names.`
 
@@ -202,14 +202,14 @@ class Disk(Namespace):
             names
         Returns
         -------
-        dict[str]:
+        Alert:
             alert
         """
         ...
-    @_ty.overload
+    @typing.overload
     def temperatures(self, 
-        names:'list'=[],
-        options:'dict[str]'={},
+        names:'list[str]'=[],
+        options:'Options_'={},
     /) -> 'dict[str]': 
         """
         Returns temperatures for a list of devices (runs in parallel).
@@ -228,11 +228,11 @@ class Disk(Namespace):
             disks_temperatures
         """
         ...
-    @_ty.overload
+    @typing.overload
     def update(self, 
         id:'str',
-        disk_update:'dict[str]'={},
-    /) -> 'dict[str]': 
+        disk_update:'DiskUpdate'={},
+    /) -> 'DiskUpdateReturns': 
         """
         Update disk of `id`.
         
@@ -257,16 +257,16 @@ class Disk(Namespace):
             disk_update
         Returns
         -------
-        dict[str]:
+        DiskUpdateReturns:
             disk_update_returns
         """
         ...
-    @_ty.overload
+    @typing.overload
     def wipe(self, 
         dev:'str',
         mode:'str',
         synccache:'bool'=True,
-        swap_removal_options:'dict[str]'={},
+        swap_removal_options:'SwapRemovalOptions'={},
     /) -> None: 
         """
         Performs a wipe of a disk `dev`.
@@ -288,4 +288,171 @@ class Disk(Namespace):
         Returns
         -------
         """
+        ...
+
+class QueryOptionsGetInstance(typing.TypedDict):
+        relationships:'bool'
+        extend:'typing.Optional[str]'
+        extend_context:'typing.Optional[str]'
+        prefix:'typing.Optional[str]'
+        extra:'dict[str]'
+        order_by:'list'
+        select:'list'
+        count:'bool'
+        get:'bool'
+        offset:'int'
+        limit:'int'
+        force_sql_filters:'bool'
+        ...
+class QueryOptions(typing.TypedDict):
+        relationships:'bool'
+        extend:'typing.Optional[str]'
+        extend_context:'typing.Optional[str]'
+        prefix:'typing.Optional[str]'
+        extra:'dict[str]'
+        order_by:'list'
+        select:'list'
+        count:'bool'
+        get:'bool'
+        offset:'int'
+        limit:'int'
+        force_sql_filters:'bool'
+        ...
+class DiskEntry(typing.TypedDict):
+        identifier:'str'
+        name:'str'
+        subsystem:'str'
+        number:'int'
+        serial:'str'
+        lunid:'typing.Optional[str]'
+        size:'int'
+        description:'str'
+        transfermode:'str'
+        hddstandby:'str'
+        togglesmart:'bool'
+        advpowermgmt:'str'
+        smartoptions:'str'
+        expiretime:'typing.Optional[str]'
+        critical:'typing.Optional[int]'
+        difference:'typing.Optional[int]'
+        informational:'typing.Optional[int]'
+        model:'typing.Optional[str]'
+        rotationrate:'typing.Optional[int]'
+        type:'typing.Optional[str]'
+        zfs_guid:'typing.Optional[str]'
+        bus:'str'
+        devname:'str'
+        enclosure:'Enclosure'
+        pool:'typing.Optional[str]'
+        passwd:'str'
+        kmip_uid:'typing.Optional[str]'
+        supports_smart:'typing.Optional[bool]'
+        ...
+class Enclosure(typing.TypedDict):
+        number:'int'
+        slot:'int'
+        ...
+class Object(typing.TypedDict):
+        name:'str'
+        size:'int'
+        ...
+class SmartAttribute(typing.TypedDict):
+        id:'int'
+        value:'int'
+        worst:'int'
+        thresh:'int'
+        name:'str'
+        when_failed:'str'
+        flags:'Flags'
+        raw:'Raw'
+        ...
+class Flags(typing.TypedDict):
+        value:'int'
+        string:'str'
+        prefailure:'bool'
+        updated_online:'bool'
+        performance:'bool'
+        error_rate:'bool'
+        event_count:'bool'
+        auto_keep:'bool'
+        ...
+class Raw(typing.TypedDict):
+        value:'int'
+        string:'str'
+        ...
+class Options(typing.TypedDict):
+        cache:'typing.Optional[int]'
+        powermode:'str'
+        ...
+class Alert(typing.TypedDict):
+        uuid:'str'
+        source:'str'
+        klass:'str'
+        args:'typing.Union[str, int, bool, dict[str], list]'
+        node:'str'
+        key:'str'
+        datetime:'str'
+        last_occurrence:'str'
+        dismissed:'bool'
+        mail:'typing.Union[str, int, bool, dict[str], list]'
+        text:'str'
+        id:'str'
+        level:'str'
+        formatted:'typing.Optional[str]'
+        one_shot:'bool'
+        ...
+class Options_(typing.TypedDict):
+        cache:'typing.Optional[int]'
+        only_cached:'bool'
+        powermode:'str'
+        ...
+class DiskUpdate(typing.TypedDict):
+        number:'int'
+        lunid:'typing.Optional[str]'
+        description:'str'
+        hddstandby:'str'
+        togglesmart:'bool'
+        advpowermgmt:'str'
+        smartoptions:'str'
+        critical:'typing.Optional[int]'
+        difference:'typing.Optional[int]'
+        informational:'typing.Optional[int]'
+        bus:'str'
+        enclosure:'Enclosure'
+        pool:'typing.Optional[str]'
+        passwd:'str'
+        supports_smart:'typing.Optional[bool]'
+        ...
+class DiskUpdateReturns(typing.TypedDict):
+        identifier:'str'
+        name:'str'
+        subsystem:'str'
+        number:'int'
+        serial:'str'
+        lunid:'typing.Optional[str]'
+        size:'int'
+        description:'str'
+        transfermode:'str'
+        hddstandby:'str'
+        togglesmart:'bool'
+        advpowermgmt:'str'
+        smartoptions:'str'
+        expiretime:'typing.Optional[str]'
+        critical:'typing.Optional[int]'
+        difference:'typing.Optional[int]'
+        informational:'typing.Optional[int]'
+        model:'typing.Optional[str]'
+        rotationrate:'typing.Optional[int]'
+        type:'typing.Optional[str]'
+        zfs_guid:'typing.Optional[str]'
+        bus:'str'
+        devname:'str'
+        enclosure:'Enclosure'
+        pool:'typing.Optional[str]'
+        passwd:'str'
+        kmip_uid:'typing.Optional[str]'
+        supports_smart:'typing.Optional[bool]'
+        ...
+class SwapRemovalOptions(typing.TypedDict):
+        configure_swap:'bool'
         ...

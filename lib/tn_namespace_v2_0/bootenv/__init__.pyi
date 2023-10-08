@@ -1,10 +1,10 @@
 
 from pytruenas import Namespace, TrueNASClient
-import typing as _ty
+import typing
 class Bootenv(Namespace):
-    _namespace:_ty.Literal['bootenv']
+    _namespace:typing.Literal['bootenv']
     def __init__(self, client:TrueNASClient) -> None: ...
-    @_ty.overload
+    @typing.overload
     def activate(self, 
         id:'str',
     /) -> 'bool': 
@@ -21,9 +21,9 @@ class Bootenv(Namespace):
             successfully_activated
         """
         ...
-    @_ty.overload
+    @typing.overload
     def create(self, 
-        bootenv_create:'dict[str]'={},
+        bootenv_create:'BootenvCreate'={},
     /) -> 'str': 
         """
         Create a new boot environment using `name`.
@@ -43,7 +43,7 @@ class Bootenv(Namespace):
             bootenv_name
         """
         ...
-    @_ty.overload
+    @typing.overload
     def delete(self, 
         id:'str',
     /) -> 'bool': 
@@ -60,10 +60,10 @@ class Bootenv(Namespace):
             Will return `true` if `id` is deleted successfully
         """
         ...
-    @_ty.overload
+    @typing.overload
     def get_instance(self, 
         id:'str|int|bool|dict[str]|list',
-        query_options_get_instance:'dict[str]'={},
+        query_options_get_instance:'QueryOptionsGetInstance'={},
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -80,11 +80,11 @@ class Bootenv(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def query(self, 
-        query_filters:'list'=[],
-        query_options:'dict[str]'={},
-    /) -> 'list|dict[str]|int|dict[str]': 
+        query_filters:'list[list]'=[],
+        query_options:'QueryOptions'={},
+    /) -> 'list[BootenvEntry]|BootenvEntry|int|BootenvEntry': 
         """
         Query all Boot Environments with `query-filters` and `query-options`.
 
@@ -96,20 +96,20 @@ class Bootenv(Namespace):
             query-options
         Returns
         -------
-        list:
+        list[BootenvEntry]:
             
-        dict[str]:
+        BootenvEntry:
             
         int:
             
-        dict[str]:
+        BootenvEntry:
             
         """
         ...
-    @_ty.overload
+    @typing.overload
     def set_attribute(self, 
         id:'str',
-        attributes:'dict[str]'={},
+        attributes:'Attributes'={},
     /) -> 'bool': 
         """
         Sets attributes boot environment `id`.
@@ -128,10 +128,10 @@ class Bootenv(Namespace):
             successfully_set_attribute
         """
         ...
-    @_ty.overload
+    @typing.overload
     def update(self, 
         id:'str',
-        bootenv_update:'dict[str]'={},
+        bootenv_update:'BootenvUpdate'={},
     /) -> 'str': 
         """
         Update `id` boot environment name with a new provided valid `name`.
@@ -148,4 +148,56 @@ class Bootenv(Namespace):
         str:
             bootenv_name
         """
+        ...
+
+class BootenvCreate(typing.TypedDict):
+        name:'str'
+        source:'str'
+        ...
+class QueryOptionsGetInstance(typing.TypedDict):
+        relationships:'bool'
+        extend:'typing.Optional[str]'
+        extend_context:'typing.Optional[str]'
+        prefix:'typing.Optional[str]'
+        extra:'dict[str]'
+        order_by:'list'
+        select:'list'
+        count:'bool'
+        get:'bool'
+        offset:'int'
+        limit:'int'
+        force_sql_filters:'bool'
+        ...
+class QueryOptions(typing.TypedDict):
+        relationships:'bool'
+        extend:'typing.Optional[str]'
+        extend_context:'typing.Optional[str]'
+        prefix:'typing.Optional[str]'
+        extra:'dict[str]'
+        order_by:'list'
+        select:'list'
+        count:'bool'
+        get:'bool'
+        offset:'int'
+        limit:'int'
+        force_sql_filters:'bool'
+        ...
+class BootenvEntry(typing.TypedDict):
+        id:'str'
+        realname:'str'
+        name:'str'
+        active:'str'
+        activated:'bool'
+        can_activate:'bool'
+        mountpoint:'str'
+        space:'str'
+        created:'str'
+        keep:'bool'
+        rawspace:'int'
+        ...
+class Attributes(typing.TypedDict):
+        keep:'bool'
+        ...
+class BootenvUpdate(typing.TypedDict):
+        name:'str'
         ...

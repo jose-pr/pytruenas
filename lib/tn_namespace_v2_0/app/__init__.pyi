@@ -1,14 +1,14 @@
 
 from pytruenas import Namespace, TrueNASClient
-import typing as _ty
+import typing
 class App(Namespace):
-    _namespace:_ty.Literal['app']
+    _namespace:typing.Literal['app']
     def __init__(self, client:TrueNASClient) -> None: ...
-    @_ty.overload
+    @typing.overload
     def available(self, 
-        query_filters:'list'=[],
-        query_options:'dict[str]'={},
-    /) -> 'int|dict[str]|list': 
+        query_filters:'list[list]'=[],
+        query_options:'QueryOptions'={},
+    /) -> 'int|AvailableApps|list[AvailableApps]': 
         """
         Retrieve all available applications from all configured catalogs.
 
@@ -22,15 +22,15 @@ class App(Namespace):
         -------
         int:
             
-        dict[str]:
+        AvailableApps:
             
-        list:
+        list[AvailableApps]:
             
         """
         ...
-    @_ty.overload
+    @typing.overload
     def categories(self, 
-    /) -> 'list': 
+    /) -> 'list[str]': 
         """
         Retrieve list of valid categories which have associated applications.
 
@@ -38,15 +38,15 @@ class App(Namespace):
         ----------
         Returns
         -------
-        list:
+        list[str]:
             categories
         """
         ...
-    @_ty.overload
+    @typing.overload
     def latest(self, 
-        query_filters:'list'=[],
-        query_options:'dict[str]'={},
-    /) -> 'int|dict[str]|list': 
+        query_filters:'list[list]'=[],
+        query_options:'QueryOptions'={},
+    /) -> 'int|AvailableApps|list[AvailableApps]': 
         """
         Retrieve latest updated apps.
 
@@ -60,18 +60,18 @@ class App(Namespace):
         -------
         int:
             
-        dict[str]:
+        AvailableApps:
             
-        list:
+        list[AvailableApps]:
             
         """
         ...
-    @_ty.overload
+    @typing.overload
     def similar(self, 
         app_name:'str',
         catalog:'str',
         train:'str',
-    /) -> 'list': 
+    /) -> 'list[AvailableApps]': 
         """
         Retrieve applications which are similar to `app_name`.
 
@@ -85,7 +85,44 @@ class App(Namespace):
             train
         Returns
         -------
-        list:
+        list[AvailableApps]:
             similar
         """
+        ...
+
+class QueryOptions(typing.TypedDict):
+        relationships:'bool'
+        extend:'typing.Optional[str]'
+        extend_context:'typing.Optional[str]'
+        prefix:'typing.Optional[str]'
+        extra:'dict[str]'
+        order_by:'list'
+        select:'list'
+        count:'bool'
+        get:'bool'
+        offset:'int'
+        limit:'int'
+        force_sql_filters:'bool'
+        ...
+class AvailableApps(typing.TypedDict):
+        healthy:'bool'
+        installed:'bool'
+        categories:'list'
+        maintainers:'list'
+        tags:'list'
+        screenshots:'list[str]'
+        sources:'list[str]'
+        name:'str'
+        title:'str'
+        description:'str'
+        app_readme:'str'
+        location:'str'
+        healthy_error:'typing.Optional[str]'
+        home:'str'
+        last_update:'str'
+        latest_version:'str'
+        latest_app_version:'str'
+        icon_url:'str'
+        train:'str'
+        catalog:'str'
         ...

@@ -1,13 +1,13 @@
 
 from pytruenas import Namespace, TrueNASClient
-import typing as _ty
+import typing
 class Rsynctask(Namespace):
-    _namespace:_ty.Literal['rsynctask']
+    _namespace:typing.Literal['rsynctask']
     def __init__(self, client:TrueNASClient) -> None: ...
-    @_ty.overload
+    @typing.overload
     def create(self, 
-        rsync_task_create:'dict[str]'={},
-    /) -> 'dict[str]': 
+        rsync_task_create:'RsyncTaskCreate'={},
+    /) -> 'RsynctaskCreateReturns': 
         """
         Create a Rsync Task.
         
@@ -47,11 +47,11 @@ class Rsynctask(Namespace):
             rsync_task_create
         Returns
         -------
-        dict[str]:
+        RsynctaskCreateReturns:
             rsynctask_create_returns
         """
         ...
-    @_ty.overload
+    @typing.overload
     def delete(self, 
         id:'int',
     /) -> 'bool': 
@@ -68,10 +68,10 @@ class Rsynctask(Namespace):
             Will return `true` if `id` is deleted successfully
         """
         ...
-    @_ty.overload
+    @typing.overload
     def get_instance(self, 
         id:'str|int|bool|dict[str]|list',
-        query_options_get_instance:'dict[str]'={},
+        query_options_get_instance:'QueryOptionsGetInstance'={},
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -88,11 +88,11 @@ class Rsynctask(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def query(self, 
-        query_filters:'list'=[],
-        query_options:'dict[str]'={},
-    /) -> 'list|dict[str]|int|dict[str]': 
+        query_filters:'list[list]'=[],
+        query_options:'QueryOptions'={},
+    /) -> 'list[RsyncTaskEntry]|RsyncTaskEntry|int|RsyncTaskEntry': 
         """
         
 
@@ -104,17 +104,17 @@ class Rsynctask(Namespace):
             query-options
         Returns
         -------
-        list:
+        list[RsyncTaskEntry]:
             
-        dict[str]:
+        RsyncTaskEntry:
             
         int:
             
-        dict[str]:
+        RsyncTaskEntry:
             
         """
         ...
-    @_ty.overload
+    @typing.overload
     def run(self, 
         id:'int',
     /) -> None: 
@@ -131,11 +131,11 @@ class Rsynctask(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def update(self, 
         id:'int',
-        rsync_task_update:'dict[str]'={},
-    /) -> 'dict[str]': 
+        rsync_task_update:'RsyncTaskUpdate'={},
+    /) -> 'RsynctaskUpdateReturns': 
         """
         Update Rsync Task of `id`.
 
@@ -148,7 +148,176 @@ class Rsynctask(Namespace):
             rsync_task_update
         Returns
         -------
-        dict[str]:
+        RsynctaskUpdateReturns:
             rsynctask_update_returns
         """
+        ...
+
+class RsyncTaskCreate(typing.TypedDict):
+        path:'str'
+        user:'str'
+        mode:'str'
+        remotehost:'typing.Optional[str]'
+        remoteport:'typing.Optional[int]'
+        remotemodule:'typing.Optional[str]'
+        ssh_credentials:'typing.Optional[int]'
+        remotepath:'str'
+        validate_rpath:'bool'
+        ssh_keyscan:'bool'
+        direction:'str'
+        desc:'str'
+        schedule:'Schedule'
+        recursive:'bool'
+        times:'bool'
+        compress:'bool'
+        archive:'bool'
+        delete:'bool'
+        quiet:'bool'
+        preserveperm:'bool'
+        preserveattr:'bool'
+        delayupdates:'bool'
+        extra:'list[str]'
+        enabled:'bool'
+        ...
+class Schedule(typing.TypedDict):
+        minute:'str'
+        hour:'str'
+        dom:'str'
+        month:'str'
+        dow:'str'
+        ...
+class RsynctaskCreateReturns(typing.TypedDict):
+        path:'str'
+        user:'str'
+        mode:'str'
+        remotehost:'typing.Optional[str]'
+        remoteport:'typing.Optional[int]'
+        remotemodule:'typing.Optional[str]'
+        remotepath:'str'
+        direction:'str'
+        desc:'str'
+        schedule:'Schedule'
+        recursive:'bool'
+        times:'bool'
+        compress:'bool'
+        archive:'bool'
+        delete:'bool'
+        quiet:'bool'
+        preserveperm:'bool'
+        preserveattr:'bool'
+        delayupdates:'bool'
+        extra:'list[str]'
+        enabled:'bool'
+        id:'int'
+        ssh_credentials:'dict[str]'
+        locked:'bool'
+        job:'dict[str]'
+        ...
+class QueryOptionsGetInstance(typing.TypedDict):
+        relationships:'bool'
+        extend:'typing.Optional[str]'
+        extend_context:'typing.Optional[str]'
+        prefix:'typing.Optional[str]'
+        extra:'dict[str]'
+        order_by:'list'
+        select:'list'
+        count:'bool'
+        get:'bool'
+        offset:'int'
+        limit:'int'
+        force_sql_filters:'bool'
+        ...
+class QueryOptions(typing.TypedDict):
+        relationships:'bool'
+        extend:'typing.Optional[str]'
+        extend_context:'typing.Optional[str]'
+        prefix:'typing.Optional[str]'
+        extra:'dict[str]'
+        order_by:'list'
+        select:'list'
+        count:'bool'
+        get:'bool'
+        offset:'int'
+        limit:'int'
+        force_sql_filters:'bool'
+        ...
+class RsyncTaskEntry(typing.TypedDict):
+        path:'str'
+        user:'str'
+        mode:'str'
+        remotehost:'typing.Optional[str]'
+        remoteport:'typing.Optional[int]'
+        remotemodule:'typing.Optional[str]'
+        remotepath:'str'
+        direction:'str'
+        desc:'str'
+        schedule:'Schedule'
+        recursive:'bool'
+        times:'bool'
+        compress:'bool'
+        archive:'bool'
+        delete:'bool'
+        quiet:'bool'
+        preserveperm:'bool'
+        preserveattr:'bool'
+        delayupdates:'bool'
+        extra:'list[str]'
+        enabled:'bool'
+        id:'int'
+        ssh_credentials:'dict[str]'
+        locked:'bool'
+        job:'dict[str]'
+        ...
+class RsyncTaskUpdate(typing.TypedDict):
+        path:'str'
+        user:'str'
+        mode:'str'
+        remotehost:'typing.Optional[str]'
+        remoteport:'typing.Optional[int]'
+        remotemodule:'typing.Optional[str]'
+        ssh_credentials:'typing.Optional[int]'
+        remotepath:'str'
+        validate_rpath:'bool'
+        ssh_keyscan:'bool'
+        direction:'str'
+        desc:'str'
+        schedule:'Schedule'
+        recursive:'bool'
+        times:'bool'
+        compress:'bool'
+        archive:'bool'
+        delete:'bool'
+        quiet:'bool'
+        preserveperm:'bool'
+        preserveattr:'bool'
+        delayupdates:'bool'
+        extra:'list[str]'
+        enabled:'bool'
+        ...
+class RsynctaskUpdateReturns(typing.TypedDict):
+        path:'str'
+        user:'str'
+        mode:'str'
+        remotehost:'typing.Optional[str]'
+        remoteport:'typing.Optional[int]'
+        remotemodule:'typing.Optional[str]'
+        remotepath:'str'
+        direction:'str'
+        desc:'str'
+        schedule:'Schedule'
+        recursive:'bool'
+        times:'bool'
+        compress:'bool'
+        archive:'bool'
+        delete:'bool'
+        quiet:'bool'
+        preserveperm:'bool'
+        preserveattr:'bool'
+        delayupdates:'bool'
+        extra:'list[str]'
+        enabled:'bool'
+        id:'int'
+        ssh_credentials:'dict[str]'
+        locked:'bool'
+        job:'dict[str]'
         ...

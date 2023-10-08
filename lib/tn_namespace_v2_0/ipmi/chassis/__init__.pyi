@@ -1,10 +1,10 @@
 
 from pytruenas import Namespace, TrueNASClient
-import typing as _ty
+import typing
 class IpmiChassis(Namespace):
-    _namespace:_ty.Literal['ipmi.chassis']
+    _namespace:typing.Literal['ipmi.chassis']
     def __init__(self, client:TrueNASClient) -> None: ...
-    @_ty.overload
+    @typing.overload
     def identify(self, 
         verb:'str'="ON",
     /) -> None: 
@@ -21,7 +21,7 @@ class IpmiChassis(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def info(self, 
     /) -> 'dict[str]': 
         """
@@ -49,3 +49,4 @@ class IpmiChassis(Namespace):
             chassis_info
         """
         ...
+

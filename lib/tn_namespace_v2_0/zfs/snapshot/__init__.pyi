@@ -1,12 +1,12 @@
 
 from pytruenas import Namespace, TrueNASClient
-import typing as _ty
+import typing
 class ZfsSnapshot(Namespace):
-    _namespace:_ty.Literal['zfs.snapshot']
+    _namespace:typing.Literal['zfs.snapshot']
     def __init__(self, client:TrueNASClient) -> None: ...
-    @_ty.overload
+    @typing.overload
     def clone(self, 
-        snapshot_clone:'dict[str]'={},
+        snapshot_clone:'SnapshotClone'={},
     /) -> None: 
         """
         Clone a given snapshot to a new dataset.
@@ -22,9 +22,9 @@ class ZfsSnapshot(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def create(self, 
-        snapshot_create:'dict[str]'={},
+        snapshot_create:'SnapshotCreate'={},
     /) -> 'dict[str]': 
         """
         Take a snapshot from a given dataset.
@@ -39,10 +39,10 @@ class ZfsSnapshot(Namespace):
             zfs_snapshot_create_returns
         """
         ...
-    @_ty.overload
+    @typing.overload
     def delete(self, 
         id:'str',
-        options:'dict[str]'={},
+        options:'Options'={},
     /) -> 'bool': 
         """
         Delete snapshot of name `id`.
@@ -61,10 +61,10 @@ class ZfsSnapshot(Namespace):
             Will return `true` if `id` is deleted successfully
         """
         ...
-    @_ty.overload
+    @typing.overload
     def get_instance(self, 
         id:'str|int|bool|dict[str]|list',
-        query_options_get_instance:'dict[str]'={},
+        query_options_get_instance:'QueryOptionsGetInstance'={},
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -81,10 +81,10 @@ class ZfsSnapshot(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def hold(self, 
         id:'str',
-        options:'dict[str]'={},
+        options:'Options_'={},
     /) -> None: 
         """
         Holds snapshot `id`.
@@ -103,11 +103,11 @@ class ZfsSnapshot(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def query(self, 
-        query_filters:'list'=[],
-        query_options:'dict[str]'={},
-    /) -> 'list|dict[str]|int|dict[str]': 
+        query_filters:'list[list]'=[],
+        query_options:'QueryOptions'={},
+    /) -> 'list[dict[str]]|dict[str]|int|dict[str]': 
         """
         Query all ZFS Snapshots with `query-filters` and `query-options`.
         
@@ -125,7 +125,7 @@ class ZfsSnapshot(Namespace):
             query-options
         Returns
         -------
-        list:
+        list[dict[str]]:
             
         dict[str]:
             
@@ -135,10 +135,10 @@ class ZfsSnapshot(Namespace):
             
         """
         ...
-    @_ty.overload
+    @typing.overload
     def release(self, 
         id:'str',
-        options:'dict[str]'={},
+        options:'Options_'={},
     /) -> None: 
         """
         Release held snapshot `id`.
@@ -158,9 +158,9 @@ class ZfsSnapshot(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def remove(self, 
-        snapshot_remove:'dict[str]'={},
+        snapshot_remove:'SnapshotRemove'={},
     /) -> None: 
         """
         Remove a snapshot from a given dataset.
@@ -176,10 +176,10 @@ class ZfsSnapshot(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def rollback(self, 
         id:'str',
-        options:'dict[str]'={},
+        options:'Options__'={},
     /) -> None: 
         """
         Rollback to a given snapshot `id`.
@@ -204,10 +204,10 @@ class ZfsSnapshot(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def update(self, 
         id:'str',
-        snapshot_update:'dict[str]'={},
+        snapshot_update:'SnapshotUpdate'={},
     /) -> 'dict[str]': 
         """
         
@@ -223,4 +223,74 @@ class ZfsSnapshot(Namespace):
         dict[str]:
             zfs_snapshot_update_returns
         """
+        ...
+
+class SnapshotClone(typing.TypedDict):
+        snapshot:'str'
+        dataset_dst:'str'
+        dataset_properties:'dict[str]'
+        ...
+class SnapshotCreate(typing.TypedDict):
+        dataset:'str'
+        name:'str'
+        naming_schema:'str'
+        recursive:'bool'
+        exclude:'list[str]'
+        suspend_vms:'bool'
+        vmware_sync:'bool'
+        properties:'dict[str]'
+        ...
+class Options(typing.TypedDict):
+        defer:'bool'
+        recursive:'bool'
+        ...
+class QueryOptionsGetInstance(typing.TypedDict):
+        relationships:'bool'
+        extend:'typing.Optional[str]'
+        extend_context:'typing.Optional[str]'
+        prefix:'typing.Optional[str]'
+        extra:'dict[str]'
+        order_by:'list'
+        select:'list'
+        count:'bool'
+        get:'bool'
+        offset:'int'
+        limit:'int'
+        force_sql_filters:'bool'
+        ...
+class Options_(typing.TypedDict):
+        recursive:'bool'
+        ...
+class QueryOptions(typing.TypedDict):
+        relationships:'bool'
+        extend:'typing.Optional[str]'
+        extend_context:'typing.Optional[str]'
+        prefix:'typing.Optional[str]'
+        extra:'dict[str]'
+        order_by:'list'
+        select:'list'
+        count:'bool'
+        get:'bool'
+        offset:'int'
+        limit:'int'
+        force_sql_filters:'bool'
+        ...
+class SnapshotRemove(typing.TypedDict):
+        dataset:'str'
+        name:'str'
+        defer_delete:'bool'
+        ...
+class Options__(typing.TypedDict):
+        recursive:'bool'
+        recursive_clones:'bool'
+        force:'bool'
+        recursive_rollback:'bool'
+        ...
+class SnapshotUpdate(typing.TypedDict):
+        user_properties_update:'list[UserProperty]'
+        ...
+class UserProperty(typing.TypedDict):
+        key:'str'
+        value:'str'
+        remove:'bool'
         ...

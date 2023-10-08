@@ -1,12 +1,12 @@
 
 from pytruenas import Namespace, TrueNASClient
-import typing as _ty
+import typing
 class IscsiExtent(Namespace):
-    _namespace:_ty.Literal['iscsi.extent']
+    _namespace:typing.Literal['iscsi.extent']
     def __init__(self, client:TrueNASClient) -> None: ...
-    @_ty.overload
+    @typing.overload
     def create(self, 
-        iscsi_extent_create:'dict[str]'={},
+        iscsi_extent_create:'IscsiExtentCreate'={},
     /) -> 'dict[str]': 
         """
         Create an iSCSI Extent.
@@ -33,7 +33,7 @@ class IscsiExtent(Namespace):
             iscsi_extent_create_returns
         """
         ...
-    @_ty.overload
+    @typing.overload
     def delete(self, 
         id:'int',
         remove:'bool'=False,
@@ -58,7 +58,7 @@ class IscsiExtent(Namespace):
             Will return `true` if `id` is deleted successfully
         """
         ...
-    @_ty.overload
+    @typing.overload
     def disk_choices(self, 
     /) -> None: 
         """
@@ -71,10 +71,10 @@ class IscsiExtent(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def get_instance(self, 
         id:'str|int|bool|dict[str]|list',
-        query_options_get_instance:'dict[str]'={},
+        query_options_get_instance:'QueryOptionsGetInstance'={},
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -91,11 +91,11 @@ class IscsiExtent(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def query(self, 
-        query_filters:'list'=[],
-        query_options:'dict[str]'={},
-    /) -> 'list|dict[str]|int|dict[str]': 
+        query_filters:'list[list]'=[],
+        query_options:'QueryOptions'={},
+    /) -> 'list[dict[str]]|dict[str]|int|dict[str]': 
         """
         
 
@@ -107,7 +107,7 @@ class IscsiExtent(Namespace):
             query-options
         Returns
         -------
-        list:
+        list[dict[str]]:
             
         dict[str]:
             
@@ -117,10 +117,10 @@ class IscsiExtent(Namespace):
             
         """
         ...
-    @_ty.overload
+    @typing.overload
     def update(self, 
         id:'int',
-        iscsi_extent_update:'dict[str]'={},
+        iscsi_extent_update:'IscsiExtentUpdate'={},
     /) -> 'dict[str]': 
         """
         Update iSCSI Extent of `id`.
@@ -137,4 +137,67 @@ class IscsiExtent(Namespace):
         dict[str]:
             iscsi_extent_update_returns
         """
+        ...
+
+class IscsiExtentCreate(typing.TypedDict):
+        name:'str'
+        type:'str'
+        disk:'typing.Optional[str]'
+        serial:'typing.Optional[str]'
+        path:'typing.Optional[str]'
+        filesize:'int'
+        blocksize:'int'
+        pblocksize:'bool'
+        avail_threshold:'typing.Optional[int]'
+        comment:'str'
+        insecure_tpc:'bool'
+        xen:'bool'
+        rpm:'str'
+        ro:'bool'
+        enabled:'bool'
+        ...
+class QueryOptionsGetInstance(typing.TypedDict):
+        relationships:'bool'
+        extend:'typing.Optional[str]'
+        extend_context:'typing.Optional[str]'
+        prefix:'typing.Optional[str]'
+        extra:'dict[str]'
+        order_by:'list'
+        select:'list'
+        count:'bool'
+        get:'bool'
+        offset:'int'
+        limit:'int'
+        force_sql_filters:'bool'
+        ...
+class QueryOptions(typing.TypedDict):
+        relationships:'bool'
+        extend:'typing.Optional[str]'
+        extend_context:'typing.Optional[str]'
+        prefix:'typing.Optional[str]'
+        extra:'dict[str]'
+        order_by:'list'
+        select:'list'
+        count:'bool'
+        get:'bool'
+        offset:'int'
+        limit:'int'
+        force_sql_filters:'bool'
+        ...
+class IscsiExtentUpdate(typing.TypedDict):
+        name:'str'
+        type:'str'
+        disk:'typing.Optional[str]'
+        serial:'typing.Optional[str]'
+        path:'typing.Optional[str]'
+        filesize:'int'
+        blocksize:'int'
+        pblocksize:'bool'
+        avail_threshold:'typing.Optional[int]'
+        comment:'str'
+        insecure_tpc:'bool'
+        xen:'bool'
+        rpm:'str'
+        ro:'bool'
+        enabled:'bool'
         ...

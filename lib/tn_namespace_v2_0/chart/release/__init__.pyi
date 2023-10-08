@@ -1,12 +1,12 @@
 
 from pytruenas import Namespace, TrueNASClient
-import typing as _ty
+import typing
 class ChartRelease(Namespace):
-    _namespace:_ty.Literal['chart.release']
+    _namespace:typing.Literal['chart.release']
     def __init__(self, client:TrueNASClient) -> None: ...
-    @_ty.overload
+    @typing.overload
     def certificate_authority_choices(self, 
-    /) -> 'list': 
+    /) -> 'list[CertificateEntry]': 
         """
         Returns certificate authorities which can be used by applications.
 
@@ -14,13 +14,13 @@ class ChartRelease(Namespace):
         ----------
         Returns
         -------
-        list:
+        list[CertificateEntry]:
             certificate_authority_choices
         """
         ...
-    @_ty.overload
+    @typing.overload
     def certificate_choices(self, 
-    /) -> 'list': 
+    /) -> 'list[CertificateEntry_]': 
         """
         Returns certificates which can be used by applications.
 
@@ -28,14 +28,14 @@ class ChartRelease(Namespace):
         ----------
         Returns
         -------
-        list:
+        list[CertificateEntry_]:
             certificate_choices
         """
         ...
-    @_ty.overload
+    @typing.overload
     def create(self, 
-        chart_release_create:'dict[str]'={},
-    /) -> 'dict[str]': 
+        chart_release_create:'ChartReleaseCreate'={},
+    /) -> 'ChartReleaseCreateReturns': 
         """
         Create a chart release for a catalog item.
         
@@ -56,14 +56,14 @@ class ChartRelease(Namespace):
             chart_release_create
         Returns
         -------
-        dict[str]:
+        ChartReleaseCreateReturns:
             chart_release_create_returns
         """
         ...
-    @_ty.overload
+    @typing.overload
     def delete(self, 
         release_name:'str',
-        options:'dict[str]'={},
+        options:'Options'={},
     /) -> 'bool': 
         """
         Delete existing chart release.
@@ -83,10 +83,10 @@ class ChartRelease(Namespace):
             Will return `true` if `id` is deleted successfully
         """
         ...
-    @_ty.overload
+    @typing.overload
     def events(self, 
         release_name:'str',
-    /) -> 'list': 
+    /) -> 'list[Event]': 
         """
         Returns kubernetes events for `release_name` Chart Release.
 
@@ -96,11 +96,11 @@ class ChartRelease(Namespace):
             release_name
         Returns
         -------
-        list:
+        list[Event]:
             events
         """
         ...
-    @_ty.overload
+    @typing.overload
     def get_chart_releases_using_chart_release_images(self, 
         chart_release_name:'str',
     /) -> 'dict[str]': 
@@ -124,10 +124,10 @@ class ChartRelease(Namespace):
             ```
         """
         ...
-    @_ty.overload
+    @typing.overload
     def get_instance(self, 
         id:'str|int|bool|dict[str]|list',
-        query_options_get_instance:'dict[str]'={},
+        query_options_get_instance:'QueryOptionsGetInstance'={},
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -144,7 +144,7 @@ class ChartRelease(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def nic_choices(self, 
     /) -> 'dict[str]': 
         """
@@ -158,7 +158,7 @@ class ChartRelease(Namespace):
             nic_choices
         """
         ...
-    @_ty.overload
+    @typing.overload
     def pod_console_choices(self, 
         release_name:'str',
     /) -> 'dict[str]': 
@@ -185,10 +185,10 @@ class ChartRelease(Namespace):
             ```
         """
         ...
-    @_ty.overload
+    @typing.overload
     def pod_logs(self, 
         release_name:'str',
-        options:'dict[str]'={},
+        options:'Options_'={},
     /) -> None: 
         """
         Export logs of `options.container_name` container in `options.pod_name` pod in `release_name` chart release.
@@ -212,7 +212,7 @@ class ChartRelease(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def pod_logs_choices(self, 
         release_name:'str',
     /) -> 'dict[str]': 
@@ -236,10 +236,10 @@ class ChartRelease(Namespace):
             ```
         """
         ...
-    @_ty.overload
+    @typing.overload
     def pod_status(self, 
         release_name:'str',
-    /) -> 'dict[str]': 
+    /) -> 'PodStatus_': 
         """
         Retrieve available/desired pods status for a chart release and it's current state.
 
@@ -249,14 +249,14 @@ class ChartRelease(Namespace):
             release_name
         Returns
         -------
-        dict[str]:
+        PodStatus_:
             pod_status
         """
         ...
-    @_ty.overload
+    @typing.overload
     def pull_container_images(self, 
         release_name:'str',
-        pull_container_images_options:'dict[str]'={},
+        pull_container_images_options:'PullContainerImagesOptions'={},
     /) -> 'dict[str]': 
         """
         Update container images being used by `release_name` chart release.
@@ -283,11 +283,11 @@ class ChartRelease(Namespace):
             ```
         """
         ...
-    @_ty.overload
+    @typing.overload
     def query(self, 
-        query_filters:'list'=[],
-        query_options:'dict[str]'={},
-    /) -> 'list|dict[str]|int|dict[str]': 
+        query_filters:'list[list]'=[],
+        query_options:'QueryOptions'={},
+    /) -> 'list[ChartReleaseEntry]|ChartReleaseEntry|int|ChartReleaseEntry': 
         """
         Query available chart releases.
         
@@ -311,20 +311,20 @@ class ChartRelease(Namespace):
             query-options
         Returns
         -------
-        list:
+        list[ChartReleaseEntry]:
             
-        dict[str]:
+        ChartReleaseEntry:
             
         int:
             
-        dict[str]:
+        ChartReleaseEntry:
             
         """
         ...
-    @_ty.overload
+    @typing.overload
     def redeploy(self, 
         release_name:'str',
-    /) -> 'dict[str]': 
+    /) -> 'ChartReleaseEntry': 
         """
         Redeploy will initiate a new rollout of the Helm chart according to upgrade strategy defined by the chart
         release workloads. A good example for redeploying is updating kubernetes pods with an updated container image.
@@ -335,11 +335,11 @@ class ChartRelease(Namespace):
             release_name
         Returns
         -------
-        dict[str]:
+        ChartReleaseEntry:
             chart_release_entry
         """
         ...
-    @_ty.overload
+    @typing.overload
     def remove_ix_volume(self, 
         release_name:'str',
         volume_name:'str',
@@ -357,11 +357,11 @@ class ChartRelease(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def rollback(self, 
         release_name:'str',
-        rollback_options:'dict[str]'={},
-    /) -> 'dict[str]': 
+        rollback_options:'RollbackOptions'={},
+    /) -> 'ChartReleaseEntry': 
         """
         Rollback a chart release to a previous chart version.
         
@@ -388,15 +388,15 @@ class ChartRelease(Namespace):
             rollback_options
         Returns
         -------
-        dict[str]:
+        ChartReleaseEntry:
             chart_release_entry
         """
         ...
-    @_ty.overload
+    @typing.overload
     def scale(self, 
         release_name:'str',
-        scale_options:'dict[str]'={},
-    /) -> 'dict[str]': 
+        scale_options:'ScaleOptions'={},
+    /) -> 'ScaleChartRelease': 
         """
         Scale a `release_name` chart release to `scale_options.replica_count` specified.
         
@@ -410,14 +410,14 @@ class ChartRelease(Namespace):
             scale_options
         Returns
         -------
-        dict[str]:
+        ScaleChartRelease:
             scale_chart_release
         """
         ...
-    @_ty.overload
+    @typing.overload
     def scale_workloads(self, 
         release_name:'str',
-        workloads:'list'=[],
+        workloads:'list[ScaleWorkload]'=[],
     /) -> None: 
         """
         Scale workloads in a chart release to specified `replica_count`.
@@ -432,9 +432,9 @@ class ChartRelease(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def scaleable_resources(self, 
-    /) -> 'dict[str]': 
+    /) -> 'ScaleableResources': 
         """
         Returns choices for types of workloads which can be scaled up/down.
 
@@ -442,15 +442,15 @@ class ChartRelease(Namespace):
         ----------
         Returns
         -------
-        dict[str]:
+        ScaleableResources:
             scaleable_resources
         """
         ...
-    @_ty.overload
+    @typing.overload
     def update(self, 
         chart_release:'str',
-        chart_release_update:'dict[str]'={},
-    /) -> 'dict[str]': 
+        chart_release_update:'ChartReleaseUpdate'={},
+    /) -> 'ChartReleaseUpdateReturns': 
         """
         Update an existing chart release.
         
@@ -465,15 +465,15 @@ class ChartRelease(Namespace):
             chart_release_update
         Returns
         -------
-        dict[str]:
+        ChartReleaseUpdateReturns:
             chart_release_update_returns
         """
         ...
-    @_ty.overload
+    @typing.overload
     def upgrade(self, 
         release_name:'str',
-        upgrade_options:'dict[str]'={},
-    /) -> 'dict[str]': 
+        upgrade_options:'UpgradeOptions'={},
+    /) -> 'ChartReleaseEntry': 
         """
         Upgrade `release_name` chart release.
         
@@ -498,15 +498,15 @@ class ChartRelease(Namespace):
             upgrade_options
         Returns
         -------
-        dict[str]:
+        ChartReleaseEntry:
             chart_release_entry
         """
         ...
-    @_ty.overload
+    @typing.overload
     def upgrade_summary(self, 
         release_name:'str',
-        options:'dict[str]'={},
-    /) -> 'dict[str]': 
+        options:'Options__'={},
+    /) -> 'UpgradeSummary': 
         """
         Retrieve upgrade summary for `release_name` which will include which container images will be updated
         and changelog for `options.item_version` chart version specified if applicable. If only container images
@@ -524,13 +524,13 @@ class ChartRelease(Namespace):
             options
         Returns
         -------
-        dict[str]:
+        UpgradeSummary:
             upgrade_summary
         """
         ...
-    @_ty.overload
+    @typing.overload
     def used_ports(self, 
-    /) -> 'list': 
+    /) -> 'list[int]': 
         """
         Returns ports in use by applications.
 
@@ -538,7 +538,344 @@ class ChartRelease(Namespace):
         ----------
         Returns
         -------
-        list:
+        list[int]:
             used_ports
         """
+        ...
+
+class CertificateEntry(typing.TypedDict):
+        id:'int'
+        type:'int'
+        name:'str'
+        certificate:'typing.Optional[str]'
+        privatekey:'typing.Optional[str]'
+        CSR:'typing.Optional[str]'
+        acme_uri:'typing.Optional[str]'
+        domains_authenticators:'dict[str]'
+        renew_days:'int'
+        revoked_date:'typing.Optional[str]'
+        signedby:'dict[str]'
+        root_path:'str'
+        acme:'dict[str]'
+        certificate_path:'typing.Optional[str]'
+        privatekey_path:'typing.Optional[str]'
+        csr_path:'typing.Optional[str]'
+        cert_type:'str'
+        revoked:'bool'
+        expired:'typing.Optional[bool]'
+        issuer:'typing.Union[str, NoneType, dict[str]]'
+        chain_list:'list[str]'
+        country:'typing.Optional[str]'
+        state:'typing.Optional[str]'
+        city:'typing.Optional[str]'
+        organization:'typing.Optional[str]'
+        organizational_unit:'typing.Optional[str]'
+        san:'typing.Optional[list[str]]'
+        email:'typing.Optional[str]'
+        DN:'typing.Optional[str]'
+        subject_name_hash:'typing.Optional[str]'
+        digest_algorithm:'typing.Optional[str]'
+        from:'typing.Optional[str]'
+        common:'typing.Optional[str]'
+        until:'typing.Optional[str]'
+        fingerprint:'typing.Optional[str]'
+        key_type:'typing.Optional[str]'
+        internal:'typing.Optional[str]'
+        lifetime:'typing.Optional[int]'
+        serial:'typing.Optional[int]'
+        key_length:'typing.Optional[int]'
+        chain:'typing.Optional[bool]'
+        CA_type_existing:'bool'
+        CA_type_internal:'bool'
+        CA_type_intermediate:'bool'
+        cert_type_existing:'bool'
+        cert_type_internal:'bool'
+        cert_type_CSR:'bool'
+        parsed:'bool'
+        can_be_revoked:'bool'
+        extensions:'dict[str]'
+        revoked_certs:'list'
+        crl_path:'str'
+        signed_certificates:'int'
+        add_to_trusted_store:'bool'
+        ...
+class CertificateEntry_(typing.TypedDict):
+        id:'int'
+        type:'int'
+        name:'str'
+        certificate:'typing.Optional[str]'
+        privatekey:'typing.Optional[str]'
+        CSR:'typing.Optional[str]'
+        acme_uri:'typing.Optional[str]'
+        domains_authenticators:'dict[str]'
+        renew_days:'int'
+        revoked_date:'typing.Optional[str]'
+        signedby:'dict[str]'
+        root_path:'str'
+        acme:'dict[str]'
+        certificate_path:'typing.Optional[str]'
+        privatekey_path:'typing.Optional[str]'
+        csr_path:'typing.Optional[str]'
+        cert_type:'str'
+        revoked:'bool'
+        expired:'typing.Optional[bool]'
+        issuer:'typing.Union[str, NoneType, dict[str]]'
+        chain_list:'list[str]'
+        country:'typing.Optional[str]'
+        state:'typing.Optional[str]'
+        city:'typing.Optional[str]'
+        organization:'typing.Optional[str]'
+        organizational_unit:'typing.Optional[str]'
+        san:'typing.Optional[list[str]]'
+        email:'typing.Optional[str]'
+        DN:'typing.Optional[str]'
+        subject_name_hash:'typing.Optional[str]'
+        digest_algorithm:'typing.Optional[str]'
+        from:'typing.Optional[str]'
+        common:'typing.Optional[str]'
+        until:'typing.Optional[str]'
+        fingerprint:'typing.Optional[str]'
+        key_type:'typing.Optional[str]'
+        internal:'typing.Optional[str]'
+        lifetime:'typing.Optional[int]'
+        serial:'typing.Optional[int]'
+        key_length:'typing.Optional[int]'
+        chain:'typing.Optional[bool]'
+        CA_type_existing:'bool'
+        CA_type_internal:'bool'
+        CA_type_intermediate:'bool'
+        cert_type_existing:'bool'
+        cert_type_internal:'bool'
+        cert_type_CSR:'bool'
+        parsed:'bool'
+        can_be_revoked:'bool'
+        extensions:'dict[str]'
+        revoked_certs:'list'
+        crl_path:'str'
+        signed_certificates:'int'
+        ...
+class ChartReleaseCreate(typing.TypedDict):
+        values:'dict[str]'
+        catalog:'str'
+        item:'str'
+        release_name:'str'
+        train:'str'
+        version:'str'
+        ...
+class ChartReleaseCreateReturns(typing.TypedDict):
+        name:'str'
+        info:'dict[str]'
+        config:'dict[str]'
+        hooks:'list'
+        version:'int'
+        namespace:'str'
+        chart_metadata:'ChartMetadata'
+        id:'str'
+        catalog:'str'
+        catalog_train:'str'
+        path:'str'
+        dataset:'str'
+        status:'str'
+        used_ports:'list[Port]'
+        pod_status:'PodStatus'
+        update_available:'bool'
+        human_version:'str'
+        human_latest_version:'str'
+        container_images_update_available:'bool'
+        portals:'dict[str]'
+        chart_schema:'dict[str]'
+        history:'dict[str]'
+        resources:'Resources'
+        ...
+class ChartMetadata(typing.TypedDict):
+        name:'str'
+        version:'str'
+        latest_chart_version:'str'
+        ...
+class Port(typing.TypedDict):
+        port:'int'
+        protocol:'str'
+        ...
+class PodStatus(typing.TypedDict):
+        available:'int'
+        desired:'int'
+        ...
+class Resources(typing.TypedDict):
+        storage_class:'dict[str]'
+        persistent_volumes:'list'
+        host_path_volumes:'list'
+        locked_host_paths:'list'
+        container_images:'dict[str]'
+        truenas_certificates:'list[int]'
+        truenas_certificate_authorities:'list[int]'
+        cronjobs:'list'
+        deployments:'list'
+        jobs:'list'
+        persistent_volume_claims:'list'
+        pods:'list'
+        statefulsets:'list'
+        ...
+class Options(typing.TypedDict):
+        delete_unused_images:'bool'
+        ...
+class Event(typing.TypedDict):
+        involvedObject:'InvolvedObject'
+        metadata:'Metadata'
+        ...
+class InvolvedObject(typing.TypedDict):
+        kind:'str'
+        name:'str'
+        namespace:'str'
+        ...
+class Metadata(typing.TypedDict):
+        namespace:'str'
+        uid:'str'
+        name:'str'
+        ...
+class QueryOptionsGetInstance(typing.TypedDict):
+        relationships:'bool'
+        extend:'typing.Optional[str]'
+        extend_context:'typing.Optional[str]'
+        prefix:'typing.Optional[str]'
+        extra:'dict[str]'
+        order_by:'list'
+        select:'list'
+        count:'bool'
+        get:'bool'
+        offset:'int'
+        limit:'int'
+        force_sql_filters:'bool'
+        ...
+class Options_(typing.TypedDict):
+        limit_bytes:'typing.Optional[int]'
+        tail_lines:'typing.Optional[int]'
+        pod_name:'str'
+        container_name:'str'
+        ...
+class PodStatus_(typing.TypedDict):
+        available:'int'
+        desired:'int'
+        status:'str'
+        ...
+class PullContainerImagesOptions(typing.TypedDict):
+        redeploy:'bool'
+        ...
+class QueryOptions(typing.TypedDict):
+        relationships:'bool'
+        extend:'typing.Optional[str]'
+        extend_context:'typing.Optional[str]'
+        prefix:'typing.Optional[str]'
+        extra:'dict[str]'
+        order_by:'list'
+        select:'list'
+        count:'bool'
+        get:'bool'
+        offset:'int'
+        limit:'int'
+        force_sql_filters:'bool'
+        ...
+class ChartReleaseEntry(typing.TypedDict):
+        name:'str'
+        info:'dict[str]'
+        config:'dict[str]'
+        hooks:'list'
+        version:'int'
+        namespace:'str'
+        chart_metadata:'ChartMetadata'
+        id:'str'
+        catalog:'str'
+        catalog_train:'str'
+        path:'str'
+        dataset:'str'
+        status:'str'
+        used_ports:'list[Port]'
+        pod_status:'PodStatus'
+        update_available:'bool'
+        human_version:'str'
+        human_latest_version:'str'
+        container_images_update_available:'bool'
+        portals:'dict[str]'
+        chart_schema:'dict[str]'
+        history:'dict[str]'
+        resources:'Resources'
+        ...
+class RollbackOptions(typing.TypedDict):
+        force_rollback:'bool'
+        recreate_resources:'bool'
+        rollback_snapshot:'bool'
+        item_version:'str'
+        ...
+class ScaleOptions(typing.TypedDict):
+        replica_count:'int'
+        ...
+class ScaleChartRelease(typing.TypedDict):
+        before_scale:'BeforeScale'
+        after_scale:'AfterScale'
+        ...
+class BeforeScale(typing.TypedDict):
+        deployments:'dict[str]'
+        statefulsets:'dict[str]'
+        ...
+class AfterScale(typing.TypedDict):
+        deployments:'dict[str]'
+        statefulsets:'dict[str]'
+        ...
+class ScaleWorkload(typing.TypedDict):
+        replica_count:'int'
+        type:'str'
+        name:'str'
+        ...
+class ScaleableResources(typing.TypedDict):
+        DEPLOYMENT:'str'
+        STATEFULSET:'str'
+        ...
+class ChartReleaseUpdate(typing.TypedDict):
+        values:'dict[str]'
+        ...
+class ChartReleaseUpdateReturns(typing.TypedDict):
+        name:'str'
+        info:'dict[str]'
+        config:'dict[str]'
+        hooks:'list'
+        version:'int'
+        namespace:'str'
+        chart_metadata:'ChartMetadata'
+        id:'str'
+        catalog:'str'
+        catalog_train:'str'
+        path:'str'
+        dataset:'str'
+        status:'str'
+        used_ports:'list[Port]'
+        pod_status:'PodStatus'
+        update_available:'bool'
+        human_version:'str'
+        human_latest_version:'str'
+        container_images_update_available:'bool'
+        portals:'dict[str]'
+        chart_schema:'dict[str]'
+        history:'dict[str]'
+        resources:'Resources'
+        ...
+class UpgradeOptions(typing.TypedDict):
+        values:'dict[str]'
+        item_version:'str'
+        ...
+class Options__(typing.TypedDict):
+        item_version:'str'
+        ...
+class UpgradeSummary(typing.TypedDict):
+        image_update_available:'bool'
+        item_update_available:'bool'
+        container_images_to_update:'dict[str]'
+        latest_version:'str'
+        latest_human_version:'str'
+        upgrade_version:'str'
+        upgrade_human_version:'str'
+        changelog:'typing.Optional[str]'
+        available_versions_for_upgrade:'list[VersionInfo]'
+        ...
+class VersionInfo(typing.TypedDict):
+        version:'str'
+        human_version:'str'
         ...

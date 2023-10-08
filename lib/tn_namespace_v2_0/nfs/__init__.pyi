@@ -1,12 +1,12 @@
 
 from pytruenas import Namespace, TrueNASClient
-import typing as _ty
+import typing
 class Nfs(Namespace):
-    _namespace:_ty.Literal['nfs']
+    _namespace:typing.Literal['nfs']
     def __init__(self, client:TrueNASClient) -> None: ...
-    @_ty.overload
+    @typing.overload
     def add_principal(self, 
-        kerberos_username_password:'dict[str]'={},
+        kerberos_username_password:'KerberosUsernamePassword'={},
     /) -> 'bool': 
         """
         Use user-provided admin credentials to kinit, add NFS SPN
@@ -25,7 +25,7 @@ class Nfs(Namespace):
             principal_add_status
         """
         ...
-    @_ty.overload
+    @typing.overload
     def bindip_choices(self, 
     /) -> 'dict[str]': 
         """
@@ -39,7 +39,7 @@ class Nfs(Namespace):
             bindip_choices
         """
         ...
-    @_ty.overload
+    @typing.overload
     def client_count(self, 
     /) -> 'int': 
         """
@@ -55,9 +55,9 @@ class Nfs(Namespace):
             number_of_clients
         """
         ...
-    @_ty.overload
+    @typing.overload
     def config(self, 
-    /) -> 'dict[str]': 
+    /) -> 'NfsEntry': 
         """
         
 
@@ -65,14 +65,14 @@ class Nfs(Namespace):
         ----------
         Returns
         -------
-        dict[str]:
+        NfsEntry:
             nfs_entry
         """
         ...
-    @_ty.overload
+    @typing.overload
     def get_nfs3_clients(self, 
-        query_filters:'list'=[],
-        query_options:'dict[str]'={},
+        query_filters:'list[list]'=[],
+        query_options:'QueryOptions'={},
     /) -> None: 
         """
         Read contents of rmtab. This information may not
@@ -89,10 +89,10 @@ class Nfs(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def get_nfs4_clients(self, 
-        query_filters:'list'=[],
-        query_options:'dict[str]'={},
+        query_filters:'list[list]'=[],
+        query_options:'QueryOptions'={},
     /) -> None: 
         """
         Read information about NFSv4 clients from
@@ -108,10 +108,10 @@ class Nfs(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def update(self, 
-        nfs_update:'dict[str]'={},
-    /) -> 'dict[str]': 
+        nfs_update:'NfsUpdate'={},
+    /) -> 'NfsUpdateReturns': 
         """
         Update NFS Service Configuration.
         
@@ -142,7 +142,78 @@ class Nfs(Namespace):
             nfs_update
         Returns
         -------
-        dict[str]:
+        NfsUpdateReturns:
             nfs_update_returns
         """
+        ...
+
+class KerberosUsernamePassword(typing.TypedDict):
+        username:'str'
+        password:'str'
+        ...
+class NfsEntry(typing.TypedDict):
+        id:'int'
+        servers:'int'
+        udp:'bool'
+        allow_nonroot:'bool'
+        protocols:'list[str]'
+        v4_v3owner:'bool'
+        v4_krb:'bool'
+        v4_domain:'str'
+        bindip:'list[str]'
+        mountd_port:'typing.Optional[int]'
+        rpcstatd_port:'typing.Optional[int]'
+        rpclockd_port:'typing.Optional[int]'
+        mountd_log:'bool'
+        statd_lockd_log:'bool'
+        v4_krb_enabled:'bool'
+        userd_manage_gids:'bool'
+        ...
+class QueryOptions(typing.TypedDict):
+        relationships:'bool'
+        extend:'typing.Optional[str]'
+        extend_context:'typing.Optional[str]'
+        prefix:'typing.Optional[str]'
+        extra:'dict[str]'
+        order_by:'list'
+        select:'list'
+        count:'bool'
+        get:'bool'
+        offset:'int'
+        limit:'int'
+        force_sql_filters:'bool'
+        ...
+class NfsUpdate(typing.TypedDict):
+        servers:'int'
+        udp:'bool'
+        allow_nonroot:'bool'
+        protocols:'list[str]'
+        v4_v3owner:'bool'
+        v4_krb:'bool'
+        v4_domain:'str'
+        bindip:'list[str]'
+        mountd_port:'typing.Optional[int]'
+        rpcstatd_port:'typing.Optional[int]'
+        rpclockd_port:'typing.Optional[int]'
+        mountd_log:'bool'
+        statd_lockd_log:'bool'
+        userd_manage_gids:'bool'
+        ...
+class NfsUpdateReturns(typing.TypedDict):
+        id:'int'
+        servers:'int'
+        udp:'bool'
+        allow_nonroot:'bool'
+        protocols:'list[str]'
+        v4_v3owner:'bool'
+        v4_krb:'bool'
+        v4_domain:'str'
+        bindip:'list[str]'
+        mountd_port:'typing.Optional[int]'
+        rpcstatd_port:'typing.Optional[int]'
+        rpclockd_port:'typing.Optional[int]'
+        mountd_log:'bool'
+        statd_lockd_log:'bool'
+        v4_krb_enabled:'bool'
+        userd_manage_gids:'bool'
         ...

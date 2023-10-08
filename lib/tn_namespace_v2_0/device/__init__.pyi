@@ -1,13 +1,13 @@
 
 from pytruenas import Namespace, TrueNASClient
-import typing as _ty
+import typing
 class Device(Namespace):
-    _namespace:_ty.Literal['device']
+    _namespace:typing.Literal['device']
     def __init__(self, client:TrueNASClient) -> None: ...
-    @_ty.overload
+    @typing.overload
     def get_info(self, 
         type:'str',
-    /) -> 'list|list|dict[str]': 
+    /) -> 'list[SerialInfo]|list[GpuInfo]|dict[str]': 
         """
         Get info for SERIAL/DISK/GPU device types.
 
@@ -17,15 +17,15 @@ class Device(Namespace):
             type
         Returns
         -------
-        list:
+        list[SerialInfo]:
             
-        list:
+        list[GpuInfo]:
             
         dict[str]:
             
         """
         ...
-    @_ty.overload
+    @typing.overload
     def gpu_pci_ids_choices(self, 
     /) -> 'dict[str]': 
         """
@@ -45,4 +45,32 @@ class Device(Namespace):
             }
             ```
         """
+        ...
+
+class SerialInfo(typing.TypedDict):
+        name:'str'
+        location:'str'
+        drivername:'str'
+        start:'str'
+        size:'int'
+        description:'str'
+        ...
+class GpuInfo(typing.TypedDict):
+        addr:'Addr'
+        description:'str'
+        devices:'list[GpuDevice]'
+        vendor:'typing.Optional[str]'
+        available_to_host:'bool'
+        uses_system_critical_devices:'bool'
+        ...
+class Addr(typing.TypedDict):
+        pci_slot:'str'
+        domain:'str'
+        bus:'str'
+        slot:'str'
+        ...
+class GpuDevice(typing.TypedDict):
+        pci_id:'str'
+        pci_slot:'str'
+        vm_pci_slot:'str'
         ...

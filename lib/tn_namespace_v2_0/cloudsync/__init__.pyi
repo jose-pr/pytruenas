@@ -1,10 +1,10 @@
 
 from pytruenas import Namespace, TrueNASClient
-import typing as _ty
+import typing
 class Cloudsync(Namespace):
-    _namespace:_ty.Literal['cloudsync']
+    _namespace:typing.Literal['cloudsync']
     def __init__(self, client:TrueNASClient) -> None: ...
-    @_ty.overload
+    @typing.overload
     def abort(self, 
         id:'int',
     /) -> None: 
@@ -19,9 +19,9 @@ class Cloudsync(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def create(self, 
-        cloud_sync_create:'dict[str]'={},
+        cloud_sync_create:'CloudSyncCreate'={},
     /) -> 'dict[str]': 
         """
         Creates a new cloud_sync entry.
@@ -36,7 +36,7 @@ class Cloudsync(Namespace):
             cloudsync_create_returns
         """
         ...
-    @_ty.overload
+    @typing.overload
     def create_bucket(self, 
         credentials_id:'int',
         name:'str',
@@ -54,7 +54,7 @@ class Cloudsync(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def delete(self, 
         id:'int',
     /) -> 'bool': 
@@ -71,10 +71,10 @@ class Cloudsync(Namespace):
             Will return `true` if `id` is deleted successfully
         """
         ...
-    @_ty.overload
+    @typing.overload
     def get_instance(self, 
         id:'str|int|bool|dict[str]|list',
-        query_options_get_instance:'dict[str]'={},
+        query_options_get_instance:'QueryOptionsGetInstance'={},
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -91,7 +91,7 @@ class Cloudsync(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def list_buckets(self, 
         credentials_id:'int',
     /) -> None: 
@@ -106,9 +106,9 @@ class Cloudsync(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def list_directory(self, 
-        cloud_sync_ls:'dict[str]'={},
+        cloud_sync_ls:'CloudSyncLs'={},
     /) -> None: 
         """
         List contents of a remote bucket / directory.
@@ -135,7 +135,7 @@ class Cloudsync(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def providers(self, 
     /) -> None: 
         """
@@ -184,11 +184,11 @@ class Cloudsync(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def query(self, 
-        query_filters:'list'=[],
-        query_options:'dict[str]'={},
-    /) -> 'list|dict[str]|int|dict[str]': 
+        query_filters:'list[list]'=[],
+        query_options:'QueryOptions'={},
+    /) -> 'list[dict[str]]|dict[str]|int|dict[str]': 
         """
         
 
@@ -200,7 +200,7 @@ class Cloudsync(Namespace):
             query-options
         Returns
         -------
-        list:
+        list[dict[str]]:
             
         dict[str]:
             
@@ -210,10 +210,10 @@ class Cloudsync(Namespace):
             
         """
         ...
-    @_ty.overload
+    @typing.overload
     def restore(self, 
         id:'int',
-        cloud_sync_restore:'dict[str]'={},
+        cloud_sync_restore:'CloudSyncRestore'={},
     /) -> None: 
         """
         Create the opposite of cloud sync task `id` (PULL if it was PUSH and vice versa).
@@ -228,10 +228,10 @@ class Cloudsync(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def sync(self, 
         id:'int',
-        cloud_sync_sync_options:'dict[str]'={},
+        cloud_sync_sync_options:'CloudSyncSyncOptions'={},
     /) -> None: 
         """
         Run the cloud_sync job `id`, syncing the local data to remote.
@@ -246,10 +246,10 @@ class Cloudsync(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def sync_onetime(self, 
-        cloud_sync_sync_onetime:'dict[str]'={},
-        cloud_sync_sync_onetime_options:'dict[str]'={},
+        cloud_sync_sync_onetime:'CloudSyncSyncOnetime'={},
+        cloud_sync_sync_onetime_options:'CloudSyncSyncOnetimeOptions'={},
     /) -> None: 
         """
         Run cloud sync task without creating it.
@@ -264,10 +264,10 @@ class Cloudsync(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def update(self, 
         id:'int',
-        cloud_sync_update:'dict[str]'={},
+        cloud_sync_update:'CloudSyncUpdate'={},
     /) -> 'dict[str]': 
         """
         Updates the cloud_sync entry `id` with `data`.
@@ -284,4 +284,136 @@ class Cloudsync(Namespace):
         dict[str]:
             cloudsync_update_returns
         """
+        ...
+
+class CloudSyncCreate(typing.TypedDict):
+        description:'str'
+        path:'str'
+        credentials:'int'
+        attributes:'dict[str]'
+        schedule:'Schedule'
+        pre_script:'str'
+        post_script:'str'
+        snapshot:'bool'
+        bwlimit:'list[CloudSyncBwlimit]'
+        include:'list[str]'
+        exclude:'list[str]'
+        transfers:'typing.Optional[int]'
+        args:'str'
+        enabled:'bool'
+        direction:'str'
+        transfer_mode:'str'
+        encryption:'bool'
+        filename_encryption:'bool'
+        encryption_password:'str'
+        encryption_salt:'str'
+        create_empty_src_dirs:'bool'
+        follow_symlinks:'bool'
+        ...
+class Schedule(typing.TypedDict):
+        minute:'str'
+        hour:'str'
+        dom:'str'
+        month:'str'
+        dow:'str'
+        ...
+class CloudSyncBwlimit(typing.TypedDict):
+        time:'str'
+        bandwidth:'typing.Optional[int]'
+        ...
+class QueryOptionsGetInstance(typing.TypedDict):
+        relationships:'bool'
+        extend:'typing.Optional[str]'
+        extend_context:'typing.Optional[str]'
+        prefix:'typing.Optional[str]'
+        extra:'dict[str]'
+        order_by:'list'
+        select:'list'
+        count:'bool'
+        get:'bool'
+        offset:'int'
+        limit:'int'
+        force_sql_filters:'bool'
+        ...
+class CloudSyncLs(typing.TypedDict):
+        credentials:'int'
+        encryption:'bool'
+        filename_encryption:'bool'
+        encryption_password:'str'
+        encryption_salt:'str'
+        attributes:'dict[str]'
+        args:'str'
+        ...
+class QueryOptions(typing.TypedDict):
+        relationships:'bool'
+        extend:'typing.Optional[str]'
+        extend_context:'typing.Optional[str]'
+        prefix:'typing.Optional[str]'
+        extra:'dict[str]'
+        order_by:'list'
+        select:'list'
+        count:'bool'
+        get:'bool'
+        offset:'int'
+        limit:'int'
+        force_sql_filters:'bool'
+        ...
+class CloudSyncRestore(typing.TypedDict):
+        description:'str'
+        transfer_mode:'str'
+        path:'str'
+        ...
+class CloudSyncSyncOptions(typing.TypedDict):
+        dry_run:'bool'
+        ...
+class CloudSyncSyncOnetime(typing.TypedDict):
+        description:'str'
+        path:'str'
+        credentials:'int'
+        attributes:'dict[str]'
+        schedule:'Schedule'
+        pre_script:'str'
+        post_script:'str'
+        snapshot:'bool'
+        bwlimit:'list[CloudSyncBwlimit]'
+        include:'list[str]'
+        exclude:'list[str]'
+        transfers:'typing.Optional[int]'
+        args:'str'
+        enabled:'bool'
+        direction:'str'
+        transfer_mode:'str'
+        encryption:'bool'
+        filename_encryption:'bool'
+        encryption_password:'str'
+        encryption_salt:'str'
+        create_empty_src_dirs:'bool'
+        follow_symlinks:'bool'
+        ...
+class CloudSyncSyncOnetimeOptions(typing.TypedDict):
+        dry_run:'bool'
+        ...
+class CloudSyncUpdate(typing.TypedDict):
+        description:'str'
+        path:'str'
+        credentials:'int'
+        attributes:'dict[str]'
+        schedule:'Schedule'
+        pre_script:'str'
+        post_script:'str'
+        snapshot:'bool'
+        bwlimit:'list[CloudSyncBwlimit]'
+        include:'list[str]'
+        exclude:'list[str]'
+        transfers:'typing.Optional[int]'
+        args:'str'
+        enabled:'bool'
+        direction:'str'
+        transfer_mode:'str'
+        encryption:'bool'
+        filename_encryption:'bool'
+        encryption_password:'str'
+        encryption_salt:'str'
+        create_empty_src_dirs:'bool'
+        follow_symlinks:'bool'
         ...

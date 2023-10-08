@@ -1,12 +1,12 @@
 
 from pytruenas import Namespace, TrueNASClient
-import typing as _ty
+import typing
 class IscsiInitiator(Namespace):
-    _namespace:_ty.Literal['iscsi.initiator']
+    _namespace:typing.Literal['iscsi.initiator']
     def __init__(self, client:TrueNASClient) -> None: ...
-    @_ty.overload
+    @typing.overload
     def create(self, 
-        iscsi_initiator_create:'dict[str]'={},
+        iscsi_initiator_create:'IscsiInitiatorCreate'={},
     /) -> 'dict[str]': 
         """
         Create an iSCSI Initiator.
@@ -24,7 +24,7 @@ class IscsiInitiator(Namespace):
             iscsi_initiator_create_returns
         """
         ...
-    @_ty.overload
+    @typing.overload
     def delete(self, 
         id:'int',
     /) -> 'bool': 
@@ -41,10 +41,10 @@ class IscsiInitiator(Namespace):
             Will return `true` if `id` is deleted successfully
         """
         ...
-    @_ty.overload
+    @typing.overload
     def get_instance(self, 
         id:'str|int|bool|dict[str]|list',
-        query_options_get_instance:'dict[str]'={},
+        query_options_get_instance:'QueryOptionsGetInstance'={},
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -61,11 +61,11 @@ class IscsiInitiator(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def query(self, 
-        query_filters:'list'=[],
-        query_options:'dict[str]'={},
-    /) -> 'list|dict[str]|int|dict[str]': 
+        query_filters:'list[list]'=[],
+        query_options:'QueryOptions'={},
+    /) -> 'list[dict[str]]|dict[str]|int|dict[str]': 
         """
         
 
@@ -77,7 +77,7 @@ class IscsiInitiator(Namespace):
             query-options
         Returns
         -------
-        list:
+        list[dict[str]]:
             
         dict[str]:
             
@@ -87,10 +87,10 @@ class IscsiInitiator(Namespace):
             
         """
         ...
-    @_ty.overload
+    @typing.overload
     def update(self, 
         id:'int',
-        iscsi_initiator_update:'dict[str]'={},
+        iscsi_initiator_update:'IscsiInitiatorUpdate'={},
     /) -> 'dict[str]': 
         """
         Update iSCSI initiator of `id`.
@@ -107,4 +107,41 @@ class IscsiInitiator(Namespace):
         dict[str]:
             iscsi_initiator_update_returns
         """
+        ...
+
+class IscsiInitiatorCreate(typing.TypedDict):
+        initiators:'list'
+        comment:'str'
+        ...
+class QueryOptionsGetInstance(typing.TypedDict):
+        relationships:'bool'
+        extend:'typing.Optional[str]'
+        extend_context:'typing.Optional[str]'
+        prefix:'typing.Optional[str]'
+        extra:'dict[str]'
+        order_by:'list'
+        select:'list'
+        count:'bool'
+        get:'bool'
+        offset:'int'
+        limit:'int'
+        force_sql_filters:'bool'
+        ...
+class QueryOptions(typing.TypedDict):
+        relationships:'bool'
+        extend:'typing.Optional[str]'
+        extend_context:'typing.Optional[str]'
+        prefix:'typing.Optional[str]'
+        extra:'dict[str]'
+        order_by:'list'
+        select:'list'
+        count:'bool'
+        get:'bool'
+        offset:'int'
+        limit:'int'
+        force_sql_filters:'bool'
+        ...
+class IscsiInitiatorUpdate(typing.TypedDict):
+        initiators:'list'
+        comment:'str'
         ...

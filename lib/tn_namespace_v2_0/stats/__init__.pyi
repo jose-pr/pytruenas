@@ -1,14 +1,14 @@
 
 from pytruenas import Namespace, TrueNASClient
-import typing as _ty
+import typing
 class Stats(Namespace):
-    _namespace:_ty.Literal['stats']
+    _namespace:typing.Literal['stats']
     def __init__(self, client:TrueNASClient) -> None: ...
-    @_ty.overload
+    @typing.overload
     def get_data(self, 
-        stats_list:'list'=[],
-        stats_filter:'dict[str]'={},
-    /) -> 'dict[str]': 
+        stats_list:'list[StatsData]'=[],
+        stats_filter:'StatsFilter'={},
+    /) -> 'StatsData_': 
         """
         Get data points from rrd files.
 
@@ -20,15 +20,15 @@ class Stats(Namespace):
             stats-filter
         Returns
         -------
-        dict[str]:
+        StatsData_:
             stats_data
         """
         ...
-    @_ty.overload
+    @typing.overload
     def get_dataset_info(self, 
         source:'str',
         type:'str',
-    /) -> 'dict[str]': 
+    /) -> 'DatasetInfo': 
         """
         Returns info about a given dataset from some source.
 
@@ -40,11 +40,11 @@ class Stats(Namespace):
             type
         Returns
         -------
-        dict[str]:
+        DatasetInfo:
             dataset_info
         """
         ...
-    @_ty.overload
+    @typing.overload
     def get_sources(self, 
     /) -> 'dict[str]': 
         """
@@ -57,4 +57,28 @@ class Stats(Namespace):
         dict[str]:
             stats_sources
         """
+        ...
+
+class StatsData(typing.TypedDict):
+        source:'str'
+        type:'str'
+        dataset:'str'
+        cf:'str'
+        ...
+class StatsFilter(typing.TypedDict):
+        step:'int'
+        start:'str'
+        end:'str'
+        ...
+class StatsData_(typing.TypedDict):
+        about:'str'
+        meta:'dict[str]'
+        data:'list'
+        ...
+class DatasetInfo(typing.TypedDict):
+        source:'str'
+        type:'str'
+        datasets:'dict[str]'
+        step:'int'
+        last_update:'int'
         ...

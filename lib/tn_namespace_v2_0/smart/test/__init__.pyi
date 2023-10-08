@@ -1,13 +1,13 @@
 
 from pytruenas import Namespace, TrueNASClient
-import typing as _ty
+import typing
 class SmartTest(Namespace):
-    _namespace:_ty.Literal['smart.test']
+    _namespace:typing.Literal['smart.test']
     def __init__(self, client:TrueNASClient) -> None: ...
-    @_ty.overload
+    @typing.overload
     def create(self, 
-        smart_task_create:'dict[str]'={},
-    /) -> 'dict[str]': 
+        smart_task_create:'SmartTaskCreate'={},
+    /) -> 'SmartTestCreateReturns': 
         """
         Create a SMART Test Task.
         
@@ -23,11 +23,11 @@ class SmartTest(Namespace):
             smart_task_create
         Returns
         -------
-        dict[str]:
+        SmartTestCreateReturns:
             smart_test_create_returns
         """
         ...
-    @_ty.overload
+    @typing.overload
     def delete(self, 
         id:'int',
     /) -> 'bool': 
@@ -44,7 +44,7 @@ class SmartTest(Namespace):
             Will return `true` if `id` is deleted successfully
         """
         ...
-    @_ty.overload
+    @typing.overload
     def disk_choices(self, 
         full_disk:'bool'=False,
     /) -> None: 
@@ -61,10 +61,10 @@ class SmartTest(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def get_instance(self, 
         id:'str|int|bool|dict[str]|list',
-        query_options_get_instance:'dict[str]'={},
+        query_options_get_instance:'QueryOptionsGetInstance'={},
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -81,10 +81,10 @@ class SmartTest(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def manual_test(self, 
-        disks:'list'=[],
-    /) -> 'list': 
+        disks:'list[DiskRun]'=[],
+    /) -> 'list[SmartManualTestDiskResponse]': 
         """
         Run manual SMART tests for `disks`.
         
@@ -96,15 +96,15 @@ class SmartTest(Namespace):
             Run manual SMART tests for `disks`.
         Returns
         -------
-        list:
+        list[SmartManualTestDiskResponse]:
             smart_manual_test
         """
         ...
-    @_ty.overload
+    @typing.overload
     def query(self, 
-        query_filters:'list'=[],
-        query_options:'dict[str]'={},
-    /) -> 'list|dict[str]|int|dict[str]': 
+        query_filters:'list[list]'=[],
+        query_options:'QueryOptions'={},
+    /) -> 'list[SmartTaskEntry]|SmartTaskEntry|int|SmartTaskEntry': 
         """
         
 
@@ -116,17 +116,17 @@ class SmartTest(Namespace):
             query-options
         Returns
         -------
-        list:
+        list[SmartTaskEntry]:
             
-        dict[str]:
+        SmartTaskEntry:
             
         int:
             
-        dict[str]:
+        SmartTaskEntry:
             
         """
         ...
-    @_ty.overload
+    @typing.overload
     def query_for_disk(self, 
         disk:'str',
     /) -> None: 
@@ -141,11 +141,11 @@ class SmartTest(Namespace):
         -------
         """
         ...
-    @_ty.overload
+    @typing.overload
     def results(self, 
-        query_filters:'list'=[],
-        query_options:'dict[str]'={},
-    /) -> 'int|dict[str]|list': 
+        query_filters:'list[list]'=[],
+        query_options:'QueryOptions'={},
+    /) -> 'int|DiskSmartTestResult|list[DiskSmartTestResult]': 
         """
         Get disk(s) S.M.A.R.T. test(s) results.
         
@@ -161,17 +161,17 @@ class SmartTest(Namespace):
         -------
         int:
             
-        dict[str]:
+        DiskSmartTestResult:
             
-        list:
+        list[DiskSmartTestResult]:
             
         """
         ...
-    @_ty.overload
+    @typing.overload
     def update(self, 
         id:'int',
-        smart_test_update:'dict[str]'={},
-    /) -> 'dict[str]': 
+        smart_test_update:'SmartTestUpdate'={},
+    /) -> 'SmartTestUpdateReturns': 
         """
         Update SMART Test Task of `id`.
 
@@ -184,7 +184,109 @@ class SmartTest(Namespace):
             smart_test_update
         Returns
         -------
-        dict[str]:
+        SmartTestUpdateReturns:
             smart_test_update_returns
         """
+        ...
+
+class SmartTaskCreate(typing.TypedDict):
+        schedule:'Schedule'
+        desc:'str'
+        all_disks:'bool'
+        disks:'list[str]'
+        type:'str'
+        ...
+class Schedule(typing.TypedDict):
+        hour:'str'
+        dom:'str'
+        month:'str'
+        dow:'str'
+        ...
+class SmartTestCreateReturns(typing.TypedDict):
+        schedule:'Schedule'
+        desc:'str'
+        all_disks:'bool'
+        disks:'list[str]'
+        type:'str'
+        id:'int'
+        ...
+class QueryOptionsGetInstance(typing.TypedDict):
+        relationships:'bool'
+        extend:'typing.Optional[str]'
+        extend_context:'typing.Optional[str]'
+        prefix:'typing.Optional[str]'
+        extra:'dict[str]'
+        order_by:'list'
+        select:'list'
+        count:'bool'
+        get:'bool'
+        offset:'int'
+        limit:'int'
+        force_sql_filters:'bool'
+        ...
+class DiskRun(typing.TypedDict):
+        identifier:'str'
+        mode:'str'
+        type:'str'
+        ...
+class SmartManualTestDiskResponse(typing.TypedDict):
+        disk:'str'
+        identifier:'str'
+        error:'typing.Optional[str]'
+        expected_result_time:'str'
+        job:'int'
+        ...
+class QueryOptions(typing.TypedDict):
+        relationships:'bool'
+        extend:'typing.Optional[str]'
+        extend_context:'typing.Optional[str]'
+        prefix:'typing.Optional[str]'
+        extra:'dict[str]'
+        order_by:'list'
+        select:'list'
+        count:'bool'
+        get:'bool'
+        offset:'int'
+        limit:'int'
+        force_sql_filters:'bool'
+        ...
+class SmartTaskEntry(typing.TypedDict):
+        schedule:'Schedule'
+        desc:'str'
+        all_disks:'bool'
+        disks:'list[str]'
+        type:'str'
+        id:'int'
+        ...
+class DiskSmartTestResult(typing.TypedDict):
+        disk:'str'
+        tests:'list[TestResult]'
+        current_test:'CurrentTest'
+        ...
+class TestResult(typing.TypedDict):
+        num:'int'
+        description:'str'
+        status:'str'
+        status_verbose:'str'
+        remaining:'float'
+        lifetime:'int'
+        lba_of_first_error:'typing.Optional[str]'
+        ...
+class CurrentTest(typing.TypedDict):
+        progress:'int'
+        ...
+class SmartTestUpdate(typing.TypedDict):
+        schedule:'Schedule'
+        desc:'str'
+        all_disks:'bool'
+        disks:'list[str]'
+        type:'str'
+        ...
+class SmartTestUpdateReturns(typing.TypedDict):
+        schedule:'Schedule'
+        desc:'str'
+        all_disks:'bool'
+        disks:'list[str]'
+        type:'str'
+        id:'int'
         ...
