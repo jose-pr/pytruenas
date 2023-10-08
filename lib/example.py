@@ -1,12 +1,16 @@
 #!/bin/python3
-from pytruenas import TrueNASClient, Creds, AuthMethod, Config, UpdateReturn
+from pytruenas import TrueNASClient, Creds, AuthMethod
+from pytruenas.exts import UpdateReturn
 from pytruenas.namespace.tns23 import *
+
+from tn_namespaces import AcmeDnsAuthenticator
 
 import os
 
 tn_host = os.environ['TN_HOST']
 tn_apikey = os.environ['TN_APIKEY']
 client = TrueNASClient(tn_host, tn_apikey)
+test= AcmeDnsAuthenticator(client)
 sysgeneral = SystemGeneral(client)
 config = sysgeneral.config()
 port = config['ui_port']

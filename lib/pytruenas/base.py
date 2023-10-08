@@ -1,18 +1,8 @@
-from typing import (
-    TypeVar as _TypeVar,
-    NamedTuple as _NT,
-    Sequence as _Sequence,
-    Mapping as _Map,
-    Generic as _Generic,
-    overload as _overload,
-)
 import typing as _ty
 from enum import Enum as _Enum
 import re as _re
 
 from . import _utils, _conn, _core
-
-from typing import TYPE_CHECKING as _TYPING
 
 
 class Namespace:
@@ -44,175 +34,7 @@ class Namespace:
             super().__getattribute__(name)
 
 
-NS = _TypeVar("NS", bound=Namespace)
-K = _TypeVar("K", bound=str)
-V = _TypeVar("V", bound=str)
-T = _TypeVar("T")
-D = _TypeVar("D", bound=_ty.TypedDict)
-_DStr = dict[str, T]
-
-
-class UpdateReturn(_Enum):
-    NewValue = 0
-    Diff = 1
-    Both = 2
-
-
-class Config(Namespace, _Generic[D]):
-    def config(self, normalize: bool = True) -> D:
-        config = self("config")
-        if normalize:
-            f = getattr(D, "_nomalize", None)
-            if f:
-                config = f(config)
-        return config
-
-    @_overload
-    def update(
-        self,
-        __partial: _DStr = None,
-        /,
-        _return: _ty.Literal[UpdateReturn.NewValue] = UpdateReturn.NewValue,
-        _force: bool = False,
-        **__named: D,
-    ) -> "D":
-        ...
-
-    @_overload
-    def update(
-        self,
-        __partial: _DStr = None,
-        /,
-        _return: _ty.Literal[UpdateReturn.Diff] = UpdateReturn.Diff,
-        _force: bool = False,
-        **__named: D,
-    ) -> "_DStr":
-        ...
-
-    @_overload
-    def update(
-        self,
-        __partial: _DStr = None,
-        /,
-        _return: _ty.Literal[UpdateReturn.Both] = UpdateReturn.Both,
-        _force: bool = False,
-        **__named: D,
-    ) -> "tuple[_DStr,D]":
-        ...
-
-    def update(
-        self,
-        __partial: _DStr = None,
-        /,
-        _return: UpdateReturn = UpdateReturn.NewValue,
-        _force: bool = False,
-        **__named: D,
-    ) -> "tuple[_DStr,D]|D|_DStr":
-        partial = _utils.merge(__partial, __named)
-        config = self.config(normalize=True)
-        diff = config if _force else _utils.diff(config, partial)
-        if diff:
-            config = self("update", diff)
-        if _return == UpdateReturn.Diff:
-            return diff
-        elif _return == UpdateReturn.Both:
-            return diff, config
-        else:
-            return config
-
-
-class Map(Namespace, _Generic[D]):
-    _idattr = "id"
-
-    def query(self) -> list[D]:
-        return self("query")
-
-    def _as_dict(self, __key=None) -> "_DStr[D]":
-        key = __key or self._idattr
-        return {item[key]: item for item in self.query()}
-
-    def _parseid(self, id: str | D):
-        if isinstance(id, _Map):
-            id = id[self._idattr]
-        return id
-
-    def get_instance(self, id: str | D):
-        id = self._parseid(id)
-        return self("get_instance", id)
-
-    def __getitem__(self, __key: str) -> D:
-        return self.get_instance(__key)
-
-    def __iter__(self) -> _ty.Iterator[str]:
-        return self._as_dict().__iter__()
-
-    def __len__(self) -> int:
-        return self("query", [], {"count": True})
-
-    @_overload
-    def update(
-        self,
-        id: str | D,
-        __partial: _DStr = None,
-        /,
-        _return: _ty.Literal[UpdateReturn.NewValue] = UpdateReturn.NewValue,
-        _force: bool = False,
-        **__named: D,
-    ) -> "D":
-        ...
-
-    @_overload
-    def update(
-        self,
-        id: str | D,
-        __partial: _DStr = None,
-        /,
-        _return: _ty.Literal[UpdateReturn.Diff] = UpdateReturn.Diff,
-        _force: bool = False,
-        **__named: D,
-    ) -> "_DStr":
-        ...
-
-    @_overload
-    def update(
-        self,
-        id: str | D,
-        __partial: _DStr = None,
-        /,
-        _return: _ty.Literal[UpdateReturn.Both] = UpdateReturn.Both,
-        _force: bool = False,
-        **__named: D,
-    ) -> "tuple[_DStr,D]":
-        ...
-
-    def update(
-        self,
-        id: str | D,
-        __partial: _DStr = None,
-        /,
-        _return: UpdateReturn = UpdateReturn.NewValue,
-        _force: bool = False,
-        **__named: D,
-    ) -> "tuple[_DStr,D]|D|_DStr":
-        partial = _utils.merge(__partial, __named)
-        if isinstance(id, _Map):
-            config = id
-        else:
-            config = self.get_instance(id)
-        id = self._parseid(id)
-        diff = config if _force else _utils.diff(config, partial)
-        if diff:
-            config = self("update", id, diff)
-        if _return == UpdateReturn.Diff:
-            return diff
-        elif _return == UpdateReturn.Both:
-            return diff, config
-        else:
-            return config
-
-
-class MapExtended(Map[D], _Map[str, D], _Generic[D]):
-    ...
+NS = _ty.TypeVar("NS", bound=Namespace)
 
 
 class AuthMethod(_Enum):
@@ -227,9 +49,9 @@ class AuthMethod(_Enum):
             return f"auth.{self.value}"
 
 
-class Creds(_NT):
+class Creds(_ty.NamedTuple):
     method: AuthMethod
-    args: "_Sequence[str]"
+    args: "_ty.Sequence[str]"
 
     #
     # Parse a key either from:
@@ -244,12 +66,12 @@ class Creds(_NT):
             ty = None
             if isinstance(creds, Creds):
                 ty, args = creds
-            elif isinstance(creds, _Map):
+            elif isinstance(creds, _ty.Mapping):
                 key = creds.get("api_key")
                 usr = creds.get("username")
                 pwd = creds.get("password")
                 otp = creds.get("otp_token")
-                token = creds.get('token')
+                token = creds.get("token")
                 if key:
                     ty = AuthMethod.ApiKey
                     args = [key]
@@ -268,13 +90,13 @@ class Creds(_NT):
                 #
                 ty = AuthMethod.Token
                 try:
-                    i, k = key.split('-', maxsplit=1) 
+                    i, k = key.split("-", maxsplit=1)
                     if i.isnumeric() and k.isalnum() and len(k) == 64:
                         ty = AuthMethod.ApiKey
                 except:
                     pass
                 args = [key]
-            elif isinstance(creds, _Sequence):
+            elif isinstance(creds, _ty.Sequence):
                 ty = AuthMethod.BasicAuth
                 _len = len(creds)
                 if _len not in [2, 3]:
@@ -297,6 +119,7 @@ class Creds(_NT):
         if method:
             return client.call(method, *self.args)
         return None
+
 
 class TrueNASClient:
     def __init__(
@@ -330,7 +153,7 @@ class TrueNASClient:
     def call(self, method: str, *args, **kwds):
         return self.conn.call(method, *args, **kwds)
 
-    @_overload
+    @_ty.overload
     def namespace(self, name: str) -> Namespace:
         pass
 
@@ -338,15 +161,20 @@ class TrueNASClient:
         if cls is None:
             cls = Namespace
         return cls(self, name)
-    
-    def _services(self) -> _DStr[_core.Service]:
-        core = Namespace(self, 'core')
-        services:dict[str,_core.Service] = core.get_services()
+
+    def namespaces(self) -> list[_core.NamespaceInfo]:
+        core = Namespace(self, "core")
+        services: dict[str, _core.NamespaceInfo] = core.get_services()
         for name, service in services.items():
-            service['_methods_'] = core.get_methods(name)
-        return services
-    
-    def _events(self) -> _DStr[_core.Event]:
-        core = Namespace(self, 'core')
-        services:dict[str,_core.Service] = core.get_services()
+            service["methods"] = {
+                n.removeprefix(
+                    service["config"]["namespace"] + "."
+                ): _core.Method._normalize(m)
+                for n, m in core.get_methods(name).items()
+            }
+        return list(services.values())
+
+    def _events(self) -> _utils._Dict[_core.Event]:
+        core = Namespace(self, "core")
+        services: dict[str, _core.NamespaceInfo] = core.get_services()
         return services

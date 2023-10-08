@@ -1,4 +1,6 @@
 /.vscode
 /.pyenv
 /.env
+/_*
+/lib/_*
 __pycache__
