@@ -7,6 +7,7 @@ from .._core import NamespaceInfo, Method, Parameter
 from ..base import TrueNASClient
 from .. import _utils
 
+
 class NamespaceCodegen:
     def generate(
         self, namespace: NamespaceInfo, exportas: str, modname: str
@@ -14,11 +15,11 @@ class NamespaceCodegen:
         ...
 
 
-def _openapi_to_python_type(ty: str | list[str]):
+def _openapi_to_python_type(ty: str | list[str], args: list[str] = None):
     if isinstance(ty, list):
         return [_openapi_to_python_type(t) for t in ty]
     match ty:
-        case 'null':
+        case "null":
             ty = None
         case "boolean":
             ty = bool
@@ -32,6 +33,8 @@ def _openapi_to_python_type(ty: str | list[str]):
             ty = dict[str]
         case _:
             pass
+    if "<" in str(ty):
+        ty = ty.__name__
     return ty
 
 
@@ -48,14 +51,19 @@ class Codegen:
                 "name": "",
             }
         else:
-            param['name'] = param["name"].replace('-','_')
+            param["name"] = param["name"].replace("-", "_")
             if "type" in param:
-                param["type"] = _openapi_to_python_type(param["type"])
+                param["type"] = [
+                    _openapi_to_python_type(param["type"], param.get("items"))
+                ]
             else:
-                if 'anyOf' in param:
-                    param['type'] = [ _openapi_to_python_type(t['type']) for t in param['anyOf'] ]
+                if "anyOf" in param:
+                    param["type"] = [
+                        _openapi_to_python_type(t["type"], t.get("items"))
+                        for t in param["anyOf"]
+                    ]
                 pass
-            default = param.get('default', _utils.MISSING)
+            default = param.get("default", _utils.MISSING)
             if default is not _utils.MISSING:
                 match default:
                     case True:
@@ -66,8 +74,8 @@ class Codegen:
                         ...
                     case _:
                         default = json.dumps(default)
-                param['default'] = default
-            
+                param["default"] = default
+
         return param
 
     def generate(self, client: TrueNASClient, root: _P | str):
@@ -90,8 +98,14 @@ class Codegen:
                 ns_path.mkdir(exist_ok=True, parents=True)
                 srv_ini = ns_path / "__init__.py"
                 for m in ns["methods"].values():
-                    for s in ["accepts", "returns"]:
-                        m[s] = [self.resolve_parameter(p) for p in m[s]]
+                    m["accepts"] = [self.resolve_parameter(p) for p in m["accepts"]]
+                    returns = m["returns"]
+                    returns = [self.resolve_parameter(p) for p in returns]
+                    _r = []
+                    for r in returns:
+                        _r.extend(r["type"])
+                    m["_returns"] = _r
+
                 code = self.nscodegen.generate(ns, exportas, modname)
                 if isinstance(code, str):
                     code = [code]
