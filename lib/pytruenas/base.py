@@ -12,6 +12,12 @@ class Namespace:
         self._client = client
         self.__namespace = name
 
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}({self._client._target or 'localhost'}/{self._namespace})"
+
+    def __str__(self) -> str:
+        return self._namespace
+
     @property
     def _namespace(self):
         if not getattr(self, f"_{Namespace.__name__}__namespace", None):
@@ -176,5 +182,5 @@ class TrueNASClient:
 
     def _events(self) -> _utils._Dict[_core.Event]:
         core = Namespace(self, "core")
-        services: dict[str, _core.NamespaceInfo] = core.get_services()
+        services: dict[str, _core.Event] = core.get_events()
         return services
