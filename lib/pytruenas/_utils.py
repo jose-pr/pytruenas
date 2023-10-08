@@ -5,8 +5,14 @@ from typing import (
     NamedTuple as _NT,
     Sequence as _Sequence,
     Mapping as _Map,
-    Generic as _Generic
+    Generic as _Generic,
 )
+import typing as _ty
+
+T = _ty.TypeVar("T")
+
+_Dict = dict[str, T]
+
 
 def str_(txt: "bytes|str") -> str:
     if isinstance(txt, str):

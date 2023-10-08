@@ -3,7 +3,7 @@ from typing import (
     TYPE_CHECKING as _TYPING,
     TypedDict as _Dict,
 )
-from ...base import Config as _Config
+from ...exts import Config as _Config
 
 
 class Certificate(_Dict):
