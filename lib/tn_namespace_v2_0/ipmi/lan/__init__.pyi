@@ -1,7 +1,11 @@
 
-from pytruenas import Namespace, TrueNASClient
+from pytruenas import TrueNASClient
+from pytruenas.base import Namespace
+
 import typing
-class IpmiLan(Namespace):
+class IpmiLan(
+    Namespace
+    ):
     _namespace:typing.Literal['ipmi.lan']
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload

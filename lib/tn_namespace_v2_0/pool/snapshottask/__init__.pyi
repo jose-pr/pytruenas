@@ -1,7 +1,11 @@
 
-from pytruenas import Namespace, TrueNASClient
+from pytruenas import TrueNASClient
+from pytruenas.base import Namespace
+
 import typing
-class PoolSnapshottask(Namespace):
+class PoolSnapshottask(
+    Namespace
+    ):
     _namespace:typing.Literal['pool.snapshottask']
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload

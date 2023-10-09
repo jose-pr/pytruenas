@@ -1,8 +1,16 @@
 <%
 %>
-from pytruenas import Namespace
+from ${str(ns.baseclass.__module__)} import ${str(ns.baseclass.__name__)}
+% for mixin in ns.mixins:
+from ${str(mixin.__module__)} import ${str(mixin.__name__)}
+% endfor
+
 import typing
-class ${ns.classname}(Namespace):
+class ${ns.classname}(\
+% for mixin in ns.mixins:
+${str(mixin.__name__)}, \
+% endfor
+${str(ns.baseclass.__name__)}):
     def __init__(self, client) -> None:
         super().__init__(client, '${ns.dotname}')
 

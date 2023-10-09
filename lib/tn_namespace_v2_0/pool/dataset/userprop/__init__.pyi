@@ -1,7 +1,11 @@
 
-from pytruenas import Namespace, TrueNASClient
+from pytruenas import TrueNASClient
+from pytruenas.base import Namespace
+
 import typing
-class PoolDatasetUserprop(Namespace):
+class PoolDatasetUserprop(
+    Namespace
+    ):
     _namespace:typing.Literal['pool.dataset.userprop']
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload

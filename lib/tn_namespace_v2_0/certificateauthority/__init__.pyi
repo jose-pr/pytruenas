@@ -1,7 +1,11 @@
 
-from pytruenas import Namespace, TrueNASClient
+from pytruenas import TrueNASClient
+from pytruenas.base import Namespace
+
 import typing
-class Certificateauthority(Namespace):
+class Certificateauthority(
+    Namespace
+    ):
     _namespace:typing.Literal['certificateauthority']
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload

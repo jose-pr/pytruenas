@@ -1,7 +1,11 @@
 
-from pytruenas import Namespace, TrueNASClient
+from pytruenas import TrueNASClient
+from pytruenas.base import Namespace
+
 import typing
-class Bootenv(Namespace):
+class Bootenv(
+    Namespace
+    ):
     _namespace:typing.Literal['bootenv']
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload

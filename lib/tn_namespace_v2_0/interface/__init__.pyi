@@ -1,7 +1,11 @@
 
-from pytruenas import Namespace, TrueNASClient
+from pytruenas import TrueNASClient
+from pytruenas.base import Namespace
+
 import typing
-class Interface(Namespace):
+class Interface(
+    Namespace
+    ):
     _namespace:typing.Literal['interface']
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload

@@ -1,7 +1,11 @@
 
-from pytruenas import Namespace, TrueNASClient
+from pytruenas import TrueNASClient
+from pytruenas.base import Namespace
+
 import typing
-class Kmip(Namespace):
+class Kmip(
+    Namespace
+    ):
     _namespace:typing.Literal['kmip']
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload

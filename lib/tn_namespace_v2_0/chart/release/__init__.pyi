@@ -1,7 +1,11 @@
 
-from pytruenas import Namespace, TrueNASClient
+from pytruenas import TrueNASClient
+from pytruenas.base import Namespace
+
 import typing
-class ChartRelease(Namespace):
+class ChartRelease(
+    Namespace
+    ):
     _namespace:typing.Literal['chart.release']
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload

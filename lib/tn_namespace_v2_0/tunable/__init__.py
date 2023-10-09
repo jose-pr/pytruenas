@@ -1,5 +1,6 @@
 
-from pytruenas import Namespace
+from pytruenas.base import Namespace
+
 import typing
 class Tunable(Namespace):
     def __init__(self, client) -> None:

@@ -1,7 +1,11 @@
 
-from pytruenas import Namespace, TrueNASClient
+from pytruenas import TrueNASClient
+from pytruenas.base import Namespace
+
 import typing
-class Cronjob(Namespace):
+class Cronjob(
+    Namespace
+    ):
     _namespace:typing.Literal['cronjob']
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload

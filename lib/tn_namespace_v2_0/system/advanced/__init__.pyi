@@ -1,7 +1,11 @@
 
-from pytruenas import Namespace, TrueNASClient
+from pytruenas import TrueNASClient
+from pytruenas.base import Namespace
+
 import typing
-class SystemAdvanced(Namespace):
+class SystemAdvanced(
+    Namespace
+    ):
     _namespace:typing.Literal['system.advanced']
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload

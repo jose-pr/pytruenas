@@ -1,7 +1,11 @@
 
-from pytruenas import Namespace, TrueNASClient
+from pytruenas import TrueNASClient
+from pytruenas.base import Namespace
+
 import typing
-class AcmeDnsAuthenticator(Namespace):
+class AcmeDnsAuthenticator(
+    Namespace
+    ):
     _namespace:typing.Literal['acme.dns.authenticator']
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload

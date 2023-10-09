@@ -1,7 +1,11 @@
 
-from pytruenas import Namespace, TrueNASClient
+from pytruenas import TrueNASClient
+from pytruenas.base import Namespace
+
 import typing
-class Mail(Namespace):
+class Mail(
+    Namespace
+    ):
     _namespace:typing.Literal['mail']
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload

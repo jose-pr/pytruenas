@@ -1,7 +1,11 @@
 
-from pytruenas import Namespace, TrueNASClient
+from pytruenas import TrueNASClient
+from pytruenas.base import Namespace
+
 import typing
-class CloudsyncCredentials(Namespace):
+class CloudsyncCredentials(
+    Namespace
+    ):
     _namespace:typing.Literal['cloudsync.credentials']
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload

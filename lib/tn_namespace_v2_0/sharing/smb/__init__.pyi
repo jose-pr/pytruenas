@@ -1,7 +1,11 @@
 
-from pytruenas import Namespace, TrueNASClient
+from pytruenas import TrueNASClient
+from pytruenas.base import Namespace
+
 import typing
-class SharingSmb(Namespace):
+class SharingSmb(
+    Namespace
+    ):
     _namespace:typing.Literal['sharing.smb']
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload

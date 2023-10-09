@@ -1,7 +1,11 @@
 
-from pytruenas import Namespace, TrueNASClient
+from pytruenas import TrueNASClient
+from pytruenas.base import Namespace
+
 import typing
-class CtdbPrivateIps(Namespace):
+class CtdbPrivateIps(
+    Namespace
+    ):
     _namespace:typing.Literal['ctdb.private.ips']
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload

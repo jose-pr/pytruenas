@@ -1,9 +1,19 @@
 <%
 
 %>
-from pytruenas import Namespace, TrueNASClient
+from pytruenas import TrueNASClient
+from ${str(ns.baseclass.__module__)} import ${str(ns.baseclass.__name__)}
+% for mixin in ns.mixins:
+from ${str(mixin.__module__)} import ${str(mixin.__name__)}
+% endfor
+
 import typing
-class ${ns.classname}(Namespace):
+class ${ns.classname}(
+% for mixin in ns.mixins:
+    ${str(mixin.__name__)},
+% endfor
+    ${str(ns.baseclass.__name__)}
+    ):
     _namespace:typing.Literal['${ns.dotname}']
     def __init__(self, client:TrueNASClient) -> None: ...
 % for name, signatures in ns.methods.items():

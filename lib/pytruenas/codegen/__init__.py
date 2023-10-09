@@ -4,14 +4,14 @@ from pathlib import Path as _P
 import re as _re
 import keyword as _kw
 import typing as _ty
-from ..base import TrueNASClient
+from ..base import TrueNASClient, Namespace
 from .. import _utils, _core
 
 
 class Object(_ty.NamedTuple):
     properties: _ty.OrderedDict[str, "OpenApiType"]
 
-    def __eq__(self, other): 
+    def __eq__(self, other):
         if not isinstance(other, Object):
             # don't attempt to compare against unrelated types
             return NotImplemented
@@ -22,8 +22,8 @@ class Object(_ty.NamedTuple):
         for k, v in a.items():
             if k not in b:
                 return False
-            diff = _utils.diff(b[k]._raw,v._raw)
-            diff.pop('description', None)
+            diff = _utils.diff(b[k]._raw, v._raw)
+            diff.pop("description", None)
             if diff:
                 return False
         return True
@@ -82,7 +82,7 @@ class OpenApiType:
                 else:
                     return ty
 
-    def python(self) -> 'type | Object':
+    def python(self) -> "type | Object":
         ty = self._python()
         if "<" in str(ty):
             ty = ty.__name__
@@ -171,11 +171,15 @@ class NamespaceSignature:
     _raw: _core.NamespaceInfo
     methods: dict[str, list[MethodSignature]]
     objects: dict[str, Object]
+    baseclass: Namespace
+    mixins: list[type]
 
-    def __init__(self, raw: _core.NamespaceInfo) -> None:
+    def __init__(self, raw: _core.NamespaceInfo, baseclass=None, mixins=None) -> None:
         self._raw = raw
         self.methods = {}
         self.objects = dict()
+        self.mixins = mixins or []
+        self.baseclass = baseclass or Namespace
         for name, method in self._raw["methods"].items():
             signatures = []
             descr = method["description"]
@@ -230,7 +234,12 @@ class Codegen:
     def __init__(self, nscodegen: NamespaceCodegen) -> None:
         self.nscodegen = nscodegen
 
-    def generate(self, client: TrueNASClient, root: _P | str):
+    def generate(
+        self,
+        client: TrueNASClient,
+        root: _P | str,
+        nsclass: _ty.Callable[[NamespaceSignature], tuple[type, list[type]]] = None,
+    ):
         root = _P(root)
         root.mkdir(exist_ok=True)
 
@@ -239,7 +248,10 @@ class Codegen:
                 client.namespaces(), key=lambda ns: ns["config"]["namespace"]
             ):
                 ns = NamespaceSignature(ns)
-                mem = {}
+                if nsclass:
+                    base, mixins = nsclass(ns)
+                    ns.baseclass = base or Namespace
+                    ns.mixins = mixins or []
                 code = self.nscodegen.generate(ns)
                 if isinstance(code, str):
                     code = [code]

@@ -1,7 +1,11 @@
 
-from pytruenas import Namespace, TrueNASClient
+from pytruenas import TrueNASClient
+from pytruenas.base import Namespace
+
 import typing
-class SystemNtpserver(Namespace):
+class SystemNtpserver(
+    Namespace
+    ):
     _namespace:typing.Literal['system.ntpserver']
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload

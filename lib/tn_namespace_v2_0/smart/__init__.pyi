@@ -1,7 +1,11 @@
 
-from pytruenas import Namespace, TrueNASClient
+from pytruenas import TrueNASClient
+from pytruenas.base import Namespace
+
 import typing
-class Smart(Namespace):
+class Smart(
+    Namespace
+    ):
     _namespace:typing.Literal['smart']
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload

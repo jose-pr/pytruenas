@@ -1,7 +1,11 @@
 
-from pytruenas import Namespace, TrueNASClient
+from pytruenas import TrueNASClient
+from pytruenas.base import Namespace
+
 import typing
-class ReplicationConfig(Namespace):
+class ReplicationConfig(
+    Namespace
+    ):
     _namespace:typing.Literal['replication.config']
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload

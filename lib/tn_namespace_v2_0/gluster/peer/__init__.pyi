@@ -1,7 +1,11 @@
 
-from pytruenas import Namespace, TrueNASClient
+from pytruenas import TrueNASClient
+from pytruenas.base import Namespace
+
 import typing
-class GlusterPeer(Namespace):
+class GlusterPeer(
+    Namespace
+    ):
     _namespace:typing.Literal['gluster.peer']
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload

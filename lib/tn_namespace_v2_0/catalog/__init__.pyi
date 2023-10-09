@@ -1,7 +1,11 @@
 
-from pytruenas import Namespace, TrueNASClient
+from pytruenas import TrueNASClient
+from pytruenas.base import Namespace
+
 import typing
-class Catalog(Namespace):
+class Catalog(
+    Namespace
+    ):
     _namespace:typing.Literal['catalog']
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload

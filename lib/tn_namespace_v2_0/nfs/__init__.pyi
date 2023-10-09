@@ -1,7 +1,11 @@
 
-from pytruenas import Namespace, TrueNASClient
+from pytruenas import TrueNASClient
+from pytruenas.base import Namespace
+
 import typing
-class Nfs(Namespace):
+class Nfs(
+    Namespace
+    ):
     _namespace:typing.Literal['nfs']
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload

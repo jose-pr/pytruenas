@@ -1,7 +1,11 @@
 
-from pytruenas import Namespace, TrueNASClient
+from pytruenas import TrueNASClient
+from pytruenas.base import Namespace
+
 import typing
-class Ftp(Namespace):
+class Ftp(
+    Namespace
+    ):
     _namespace:typing.Literal['ftp']
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload
