@@ -59,11 +59,18 @@ class Creds(_ty.NamedTuple):
     method: AuthMethod
     args: "_ty.Sequence[str]"
 
+    @classmethod
+    def from_env(cls, env:_ty.Mapping = None):
+        if env is None:
+            import os
+            env = os.environ
+        return cls.parse(env.get('TN_CREDS'))
+
     #
     # Parse a key either from:
     #   (username,password)
     #   (username,password,otp_token)
-    #   api_key|token
+    #   api_key|token|username:password[\ntoken]
     #   Mapping with values set by their name
     #
     @classmethod
@@ -91,17 +98,28 @@ class Creds(_ty.NamedTuple):
                     raise ValueError("Credentials not supported", creds)
             elif isinstance(creds, (str, bytes)):
                 key = _utils.str_(creds)
-                #
-                # From what i can see an apikey format is <id>-<64 alpha/numeric chars>
-                #
-                ty = AuthMethod.Token
-                try:
-                    i, k = key.split("-", maxsplit=1)
-                    if i.isnumeric() and k.isalnum() and len(k) == 64:
-                        ty = AuthMethod.ApiKey
-                except:
-                    pass
-                args = [key]
+                if ":" in key:
+                    # : is not valid char in key or token assume is user/pass
+                    usr, pwd = key.split(":", maxsplit=1)
+                    if "\n" in pwd:
+                        # assume newline not a common/valid password char
+                        pwd, token = pwd.split("\n",maxsplit=1)
+                    else:
+                        token = None
+                    args =[usr,pwd,token]
+                    ty = AuthMethod.BasicAuth
+                else:
+                    #
+                    # From what i can see an apikey format is <id>-<64 alpha/numeric chars>
+                    #
+                    ty = AuthMethod.Token
+                    try:
+                        i, k = key.split("-", maxsplit=1)
+                        if i.isnumeric() and k.isalnum() and len(k) == 64:
+                            ty = AuthMethod.ApiKey
+                    except:
+                        pass
+                    args = [key]
             elif isinstance(creds, _ty.Sequence):
                 ty = AuthMethod.BasicAuth
                 _len = len(creds)

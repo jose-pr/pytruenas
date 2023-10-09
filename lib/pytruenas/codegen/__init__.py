@@ -238,7 +238,7 @@ class Codegen:
         self,
         client: TrueNASClient,
         root: _P | str,
-        nsclass: _ty.Callable[[NamespaceSignature], tuple[type, list[type]]] = None,
+        modns: _ty.Callable[[NamespaceSignature], None] = None,
     ):
         root = _P(root)
         root.mkdir(exist_ok=True)
@@ -248,10 +248,8 @@ class Codegen:
                 client.namespaces(), key=lambda ns: ns["config"]["namespace"]
             ):
                 ns = NamespaceSignature(ns)
-                if nsclass:
-                    base, mixins = nsclass(ns)
-                    ns.baseclass = base or Namespace
-                    ns.mixins = mixins or []
+                if modns:
+                    modns(ns)
                 code = self.nscodegen.generate(ns)
                 if isinstance(code, str):
                     code = [code]

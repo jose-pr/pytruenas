@@ -3,16 +3,11 @@ from pytruenas import TrueNASClient, Creds, AuthMethod
 from pytruenas.mixins import UpdateReturn
 
 import os
-from typing import TypedDict
 
 from pytruenas.mixins import TableExtMixin
 from tn_namespace_v2_0 import Cronjob as _Cronjob, Auth
 from tn_namespace_v2_0_exts import SystemGeneral
-
-
-class CronjobEntry(TypedDict):
-    id: int
-    ...
+from tn_namespace_v2_0_mixins import SystemAdvanced
 
 
 #
@@ -22,10 +17,12 @@ class Cronjob(TableExtMixin[_Cronjob.CronJobEntry], _Cronjob):
     ...
 
 
-tn_host = os.environ["TN_HOST"]
-tn_apikey = os.environ["TN_APIKEY"]
-client = TrueNASClient(tn_host, tn_apikey, sslverify=False)
+tn_host = os.environ.get("TN_HOST")
+tn_creds = Creds.from_env()
+client = TrueNASClient(tn_host, tn_creds, sslverify=False)
 sysgeneral = SystemGeneral(client)
+sysadv = SystemAdvanced(client)
+config = sysadv.config()
 config = sysgeneral.config()
 port = config["ui_port"]
 timezones = sysgeneral.timezone_choices()
