@@ -1,7 +1,11 @@
 
-from pytruenas import Namespace, TrueNASClient
+from pytruenas import TrueNASClient
+from pytruenas.base import Namespace
+
 import typing
-class Api_key(Namespace):
+class Api_key(
+    Namespace
+    ):
     _namespace:typing.Literal['api_key']
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload

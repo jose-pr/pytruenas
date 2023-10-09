@@ -1,7 +1,11 @@
 
-from pytruenas import Namespace, TrueNASClient
+from pytruenas import TrueNASClient
+from pytruenas.base import Namespace
+
 import typing
-class IscsiAuth(Namespace):
+class IscsiAuth(
+    Namespace
+    ):
     _namespace:typing.Literal['iscsi.auth']
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload

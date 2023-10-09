@@ -1,7 +1,11 @@
 
-from pytruenas import Namespace, TrueNASClient
+from pytruenas import TrueNASClient
+from pytruenas.base import Namespace
+
 import typing
-class PoolResilver(Namespace):
+class PoolResilver(
+    Namespace
+    ):
     _namespace:typing.Literal['pool.resilver']
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload

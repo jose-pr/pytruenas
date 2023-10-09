@@ -1,7 +1,11 @@
 
-from pytruenas import Namespace, TrueNASClient
+from pytruenas import TrueNASClient
+from pytruenas.base import Namespace
+
 import typing
-class Cloud_backup(Namespace):
+class Cloud_backup(
+    Namespace
+    ):
     _namespace:typing.Literal['cloud_backup']
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload

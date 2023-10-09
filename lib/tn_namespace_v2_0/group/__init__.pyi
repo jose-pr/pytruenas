@@ -1,7 +1,11 @@
 
-from pytruenas import Namespace, TrueNASClient
+from pytruenas import TrueNASClient
+from pytruenas.base import Namespace
+
 import typing
-class Group(Namespace):
+class Group(
+    Namespace
+    ):
     _namespace:typing.Literal['group']
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload

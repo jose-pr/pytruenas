@@ -1,7 +1,11 @@
 
-from pytruenas import Namespace, TrueNASClient
+from pytruenas import TrueNASClient
+from pytruenas.base import Namespace
+
 import typing
-class Activedirectory(Namespace):
+class Activedirectory(
+    Namespace
+    ):
     _namespace:typing.Literal['activedirectory']
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload

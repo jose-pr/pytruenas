@@ -1,7 +1,11 @@
 
-from pytruenas import Namespace, TrueNASClient
+from pytruenas import TrueNASClient
+from pytruenas.base import Namespace
+
 import typing
-class ClusterAccountsGroup(Namespace):
+class ClusterAccountsGroup(
+    Namespace
+    ):
     _namespace:typing.Literal['cluster.accounts.group']
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload

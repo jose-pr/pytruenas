@@ -1,7 +1,11 @@
 
-from pytruenas import Namespace, TrueNASClient
+from pytruenas import TrueNASClient
+from pytruenas.base import Namespace
+
 import typing
-class KerberosRealm(Namespace):
+class KerberosRealm(
+    Namespace
+    ):
     _namespace:typing.Literal['kerberos.realm']
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload

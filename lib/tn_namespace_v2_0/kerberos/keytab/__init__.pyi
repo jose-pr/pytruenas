@@ -1,7 +1,11 @@
 
-from pytruenas import Namespace, TrueNASClient
+from pytruenas import TrueNASClient
+from pytruenas.base import Namespace
+
 import typing
-class KerberosKeytab(Namespace):
+class KerberosKeytab(
+    Namespace
+    ):
     _namespace:typing.Literal['kerberos.keytab']
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload

@@ -1,7 +1,11 @@
 
-from pytruenas import Namespace, TrueNASClient
+from pytruenas import TrueNASClient
+from pytruenas.base import Namespace
+
 import typing
-class Service(Namespace):
+class Service(
+    Namespace
+    ):
     _namespace:typing.Literal['service']
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload

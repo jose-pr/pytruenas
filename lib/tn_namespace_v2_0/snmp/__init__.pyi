@@ -1,7 +1,11 @@
 
-from pytruenas import Namespace, TrueNASClient
+from pytruenas import TrueNASClient
+from pytruenas.base import Namespace
+
 import typing
-class Snmp(Namespace):
+class Snmp(
+    Namespace
+    ):
     _namespace:typing.Literal['snmp']
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload

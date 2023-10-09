@@ -1,7 +1,11 @@
 
-from pytruenas import Namespace, TrueNASClient
+from pytruenas import TrueNASClient
+from pytruenas.base import Namespace
+
 import typing
-class Rsynctask(Namespace):
+class Rsynctask(
+    Namespace
+    ):
     _namespace:typing.Literal['rsynctask']
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload

@@ -1,7 +1,11 @@
 
-from pytruenas import Namespace, TrueNASClient
+from pytruenas import TrueNASClient
+from pytruenas.base import Namespace
+
 import typing
-class Idmap(Namespace):
+class Idmap(
+    Namespace
+    ):
     _namespace:typing.Literal['idmap']
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload

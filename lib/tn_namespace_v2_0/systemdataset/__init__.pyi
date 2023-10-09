@@ -1,7 +1,11 @@
 
-from pytruenas import Namespace, TrueNASClient
+from pytruenas import TrueNASClient
+from pytruenas.base import Namespace
+
 import typing
-class Systemdataset(Namespace):
+class Systemdataset(
+    Namespace
+    ):
     _namespace:typing.Literal['systemdataset']
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload

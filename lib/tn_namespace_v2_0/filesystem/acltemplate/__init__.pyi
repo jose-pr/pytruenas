@@ -1,7 +1,11 @@
 
-from pytruenas import Namespace, TrueNASClient
+from pytruenas import TrueNASClient
+from pytruenas.base import Namespace
+
 import typing
-class FilesystemAcltemplate(Namespace):
+class FilesystemAcltemplate(
+    Namespace
+    ):
     _namespace:typing.Literal['filesystem.acltemplate']
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload
