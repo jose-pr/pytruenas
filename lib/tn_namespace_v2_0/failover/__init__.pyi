@@ -29,12 +29,60 @@ class Failover(Namespace):
         -------
         """
         ...
+    Options = typing.TypedDict('Options', {
+            'timeout':'int',
+            'job':'bool',
+            'job_return':'typing.Optional[bool]',
+            'callback':'typing.Union[str, int, bool, dict[str], list]',
+            'connect_timeout':'float',
+            'raise_connect_error':'bool',
+    })
+    FailoverEntry = typing.TypedDict('FailoverEntry', {
+            'id':'int',
+            'disabled':'bool',
+            'timeout':'int',
+            'master':'bool',
+    })
+    Options_ = typing.TypedDict('Options_', {
+            'active':'bool',
+    })
+    Options__ = typing.TypedDict('Options__', {
+            'reboot':'bool',
+    })
+    PoolKeys = typing.TypedDict('PoolKeys', {
+            'name':'str',
+            'passphrase':'str',
+    })
+    DatasetKeys = typing.TypedDict('DatasetKeys', {
+            'name':'str',
+            'passphrase':'str',
+    })
+    Options___ = typing.TypedDict('Options___', {
+            'pools':'list[PoolKeys]',
+            'datasets':'list[DatasetKeys]',
+    })
+    FailoverUpdate = typing.TypedDict('FailoverUpdate', {
+            'disabled':'bool',
+            'timeout':'int',
+            'master':'typing.Optional[bool]',
+    })
+    FailoverUpdateReturns = typing.TypedDict('FailoverUpdateReturns', {
+            'id':'int',
+            'disabled':'bool',
+            'timeout':'int',
+            'master':'bool',
+    })
+    FailoverUpgrade = typing.TypedDict('FailoverUpgrade', {
+            'train':'str',
+            'resume':'bool',
+            'resume_manual':'bool',
+    })
     @typing.overload
     def call_remote(self, 
         method:'str',
         args:'list'=[],
         options:'Options'={},
-    /) -> 'str|int|bool|dict[str]|list': 
+    /) -> 'typing.Union[str, int, bool, dict[str], list]': 
         """
         Call a method on the other node.
         
@@ -68,18 +116,58 @@ class Failover(Namespace):
             options
         Returns
         -------
-        str:
-            call_remote
-        int:
-            call_remote
-        bool:
-            call_remote
-        dict[str]:
-            call_remote
-        list:
+        typing.Union[str, int, bool, dict[str], list]:
             call_remote
         """
         ...
+    Options = typing.TypedDict('Options', {
+            'timeout':'int',
+            'job':'bool',
+            'job_return':'typing.Optional[bool]',
+            'callback':'typing.Union[str, int, bool, dict[str], list]',
+            'connect_timeout':'float',
+            'raise_connect_error':'bool',
+    })
+    FailoverEntry = typing.TypedDict('FailoverEntry', {
+            'id':'int',
+            'disabled':'bool',
+            'timeout':'int',
+            'master':'bool',
+    })
+    Options_ = typing.TypedDict('Options_', {
+            'active':'bool',
+    })
+    Options__ = typing.TypedDict('Options__', {
+            'reboot':'bool',
+    })
+    PoolKeys = typing.TypedDict('PoolKeys', {
+            'name':'str',
+            'passphrase':'str',
+    })
+    DatasetKeys = typing.TypedDict('DatasetKeys', {
+            'name':'str',
+            'passphrase':'str',
+    })
+    Options___ = typing.TypedDict('Options___', {
+            'pools':'list[PoolKeys]',
+            'datasets':'list[DatasetKeys]',
+    })
+    FailoverUpdate = typing.TypedDict('FailoverUpdate', {
+            'disabled':'bool',
+            'timeout':'int',
+            'master':'typing.Optional[bool]',
+    })
+    FailoverUpdateReturns = typing.TypedDict('FailoverUpdateReturns', {
+            'id':'int',
+            'disabled':'bool',
+            'timeout':'int',
+            'master':'bool',
+    })
+    FailoverUpgrade = typing.TypedDict('FailoverUpgrade', {
+            'train':'str',
+            'resume':'bool',
+            'resume_manual':'bool',
+    })
     @typing.overload
     def config(self, 
     /) -> 'FailoverEntry': 
@@ -94,6 +182,54 @@ class Failover(Namespace):
             failover_entry
         """
         ...
+    Options = typing.TypedDict('Options', {
+            'timeout':'int',
+            'job':'bool',
+            'job_return':'typing.Optional[bool]',
+            'callback':'typing.Union[str, int, bool, dict[str], list]',
+            'connect_timeout':'float',
+            'raise_connect_error':'bool',
+    })
+    FailoverEntry = typing.TypedDict('FailoverEntry', {
+            'id':'int',
+            'disabled':'bool',
+            'timeout':'int',
+            'master':'bool',
+    })
+    Options_ = typing.TypedDict('Options_', {
+            'active':'bool',
+    })
+    Options__ = typing.TypedDict('Options__', {
+            'reboot':'bool',
+    })
+    PoolKeys = typing.TypedDict('PoolKeys', {
+            'name':'str',
+            'passphrase':'str',
+    })
+    DatasetKeys = typing.TypedDict('DatasetKeys', {
+            'name':'str',
+            'passphrase':'str',
+    })
+    Options___ = typing.TypedDict('Options___', {
+            'pools':'list[PoolKeys]',
+            'datasets':'list[DatasetKeys]',
+    })
+    FailoverUpdate = typing.TypedDict('FailoverUpdate', {
+            'disabled':'bool',
+            'timeout':'int',
+            'master':'typing.Optional[bool]',
+    })
+    FailoverUpdateReturns = typing.TypedDict('FailoverUpdateReturns', {
+            'id':'int',
+            'disabled':'bool',
+            'timeout':'int',
+            'master':'bool',
+    })
+    FailoverUpgrade = typing.TypedDict('FailoverUpgrade', {
+            'train':'str',
+            'resume':'bool',
+            'resume_manual':'bool',
+    })
     @typing.overload
     def control(self, 
         action:'str',
@@ -112,6 +248,54 @@ class Failover(Namespace):
         -------
         """
         ...
+    Options = typing.TypedDict('Options', {
+            'timeout':'int',
+            'job':'bool',
+            'job_return':'typing.Optional[bool]',
+            'callback':'typing.Union[str, int, bool, dict[str], list]',
+            'connect_timeout':'float',
+            'raise_connect_error':'bool',
+    })
+    FailoverEntry = typing.TypedDict('FailoverEntry', {
+            'id':'int',
+            'disabled':'bool',
+            'timeout':'int',
+            'master':'bool',
+    })
+    Options_ = typing.TypedDict('Options_', {
+            'active':'bool',
+    })
+    Options__ = typing.TypedDict('Options__', {
+            'reboot':'bool',
+    })
+    PoolKeys = typing.TypedDict('PoolKeys', {
+            'name':'str',
+            'passphrase':'str',
+    })
+    DatasetKeys = typing.TypedDict('DatasetKeys', {
+            'name':'str',
+            'passphrase':'str',
+    })
+    Options___ = typing.TypedDict('Options___', {
+            'pools':'list[PoolKeys]',
+            'datasets':'list[DatasetKeys]',
+    })
+    FailoverUpdate = typing.TypedDict('FailoverUpdate', {
+            'disabled':'bool',
+            'timeout':'int',
+            'master':'typing.Optional[bool]',
+    })
+    FailoverUpdateReturns = typing.TypedDict('FailoverUpdateReturns', {
+            'id':'int',
+            'disabled':'bool',
+            'timeout':'int',
+            'master':'bool',
+    })
+    FailoverUpgrade = typing.TypedDict('FailoverUpgrade', {
+            'train':'str',
+            'resume':'bool',
+            'resume_manual':'bool',
+    })
     @typing.overload
     def force_master(self, 
     /) -> 'bool': 
@@ -126,6 +310,54 @@ class Failover(Namespace):
             force_master
         """
         ...
+    Options = typing.TypedDict('Options', {
+            'timeout':'int',
+            'job':'bool',
+            'job_return':'typing.Optional[bool]',
+            'callback':'typing.Union[str, int, bool, dict[str], list]',
+            'connect_timeout':'float',
+            'raise_connect_error':'bool',
+    })
+    FailoverEntry = typing.TypedDict('FailoverEntry', {
+            'id':'int',
+            'disabled':'bool',
+            'timeout':'int',
+            'master':'bool',
+    })
+    Options_ = typing.TypedDict('Options_', {
+            'active':'bool',
+    })
+    Options__ = typing.TypedDict('Options__', {
+            'reboot':'bool',
+    })
+    PoolKeys = typing.TypedDict('PoolKeys', {
+            'name':'str',
+            'passphrase':'str',
+    })
+    DatasetKeys = typing.TypedDict('DatasetKeys', {
+            'name':'str',
+            'passphrase':'str',
+    })
+    Options___ = typing.TypedDict('Options___', {
+            'pools':'list[PoolKeys]',
+            'datasets':'list[DatasetKeys]',
+    })
+    FailoverUpdate = typing.TypedDict('FailoverUpdate', {
+            'disabled':'bool',
+            'timeout':'int',
+            'master':'typing.Optional[bool]',
+    })
+    FailoverUpdateReturns = typing.TypedDict('FailoverUpdateReturns', {
+            'id':'int',
+            'disabled':'bool',
+            'timeout':'int',
+            'master':'bool',
+    })
+    FailoverUpgrade = typing.TypedDict('FailoverUpgrade', {
+            'train':'str',
+            'resume':'bool',
+            'resume_manual':'bool',
+    })
     @typing.overload
     def get_ips(self, 
     /) -> 'list[str]': 
@@ -140,6 +372,54 @@ class Failover(Namespace):
             ips
         """
         ...
+    Options = typing.TypedDict('Options', {
+            'timeout':'int',
+            'job':'bool',
+            'job_return':'typing.Optional[bool]',
+            'callback':'typing.Union[str, int, bool, dict[str], list]',
+            'connect_timeout':'float',
+            'raise_connect_error':'bool',
+    })
+    FailoverEntry = typing.TypedDict('FailoverEntry', {
+            'id':'int',
+            'disabled':'bool',
+            'timeout':'int',
+            'master':'bool',
+    })
+    Options_ = typing.TypedDict('Options_', {
+            'active':'bool',
+    })
+    Options__ = typing.TypedDict('Options__', {
+            'reboot':'bool',
+    })
+    PoolKeys = typing.TypedDict('PoolKeys', {
+            'name':'str',
+            'passphrase':'str',
+    })
+    DatasetKeys = typing.TypedDict('DatasetKeys', {
+            'name':'str',
+            'passphrase':'str',
+    })
+    Options___ = typing.TypedDict('Options___', {
+            'pools':'list[PoolKeys]',
+            'datasets':'list[DatasetKeys]',
+    })
+    FailoverUpdate = typing.TypedDict('FailoverUpdate', {
+            'disabled':'bool',
+            'timeout':'int',
+            'master':'typing.Optional[bool]',
+    })
+    FailoverUpdateReturns = typing.TypedDict('FailoverUpdateReturns', {
+            'id':'int',
+            'disabled':'bool',
+            'timeout':'int',
+            'master':'bool',
+    })
+    FailoverUpgrade = typing.TypedDict('FailoverUpgrade', {
+            'train':'str',
+            'resume':'bool',
+            'resume_manual':'bool',
+    })
     @typing.overload
     def hardware(self, 
     /) -> 'str': 
@@ -160,6 +440,54 @@ class Failover(Namespace):
             hardware
         """
         ...
+    Options = typing.TypedDict('Options', {
+            'timeout':'int',
+            'job':'bool',
+            'job_return':'typing.Optional[bool]',
+            'callback':'typing.Union[str, int, bool, dict[str], list]',
+            'connect_timeout':'float',
+            'raise_connect_error':'bool',
+    })
+    FailoverEntry = typing.TypedDict('FailoverEntry', {
+            'id':'int',
+            'disabled':'bool',
+            'timeout':'int',
+            'master':'bool',
+    })
+    Options_ = typing.TypedDict('Options_', {
+            'active':'bool',
+    })
+    Options__ = typing.TypedDict('Options__', {
+            'reboot':'bool',
+    })
+    PoolKeys = typing.TypedDict('PoolKeys', {
+            'name':'str',
+            'passphrase':'str',
+    })
+    DatasetKeys = typing.TypedDict('DatasetKeys', {
+            'name':'str',
+            'passphrase':'str',
+    })
+    Options___ = typing.TypedDict('Options___', {
+            'pools':'list[PoolKeys]',
+            'datasets':'list[DatasetKeys]',
+    })
+    FailoverUpdate = typing.TypedDict('FailoverUpdate', {
+            'disabled':'bool',
+            'timeout':'int',
+            'master':'typing.Optional[bool]',
+    })
+    FailoverUpdateReturns = typing.TypedDict('FailoverUpdateReturns', {
+            'id':'int',
+            'disabled':'bool',
+            'timeout':'int',
+            'master':'bool',
+    })
+    FailoverUpgrade = typing.TypedDict('FailoverUpgrade', {
+            'train':'str',
+            'resume':'bool',
+            'resume_manual':'bool',
+    })
     @typing.overload
     def in_progress(self, 
     /) -> 'bool': 
@@ -174,6 +502,54 @@ class Failover(Namespace):
             in_progress
         """
         ...
+    Options = typing.TypedDict('Options', {
+            'timeout':'int',
+            'job':'bool',
+            'job_return':'typing.Optional[bool]',
+            'callback':'typing.Union[str, int, bool, dict[str], list]',
+            'connect_timeout':'float',
+            'raise_connect_error':'bool',
+    })
+    FailoverEntry = typing.TypedDict('FailoverEntry', {
+            'id':'int',
+            'disabled':'bool',
+            'timeout':'int',
+            'master':'bool',
+    })
+    Options_ = typing.TypedDict('Options_', {
+            'active':'bool',
+    })
+    Options__ = typing.TypedDict('Options__', {
+            'reboot':'bool',
+    })
+    PoolKeys = typing.TypedDict('PoolKeys', {
+            'name':'str',
+            'passphrase':'str',
+    })
+    DatasetKeys = typing.TypedDict('DatasetKeys', {
+            'name':'str',
+            'passphrase':'str',
+    })
+    Options___ = typing.TypedDict('Options___', {
+            'pools':'list[PoolKeys]',
+            'datasets':'list[DatasetKeys]',
+    })
+    FailoverUpdate = typing.TypedDict('FailoverUpdate', {
+            'disabled':'bool',
+            'timeout':'int',
+            'master':'typing.Optional[bool]',
+    })
+    FailoverUpdateReturns = typing.TypedDict('FailoverUpdateReturns', {
+            'id':'int',
+            'disabled':'bool',
+            'timeout':'int',
+            'master':'bool',
+    })
+    FailoverUpgrade = typing.TypedDict('FailoverUpgrade', {
+            'train':'str',
+            'resume':'bool',
+            'resume_manual':'bool',
+    })
     @typing.overload
     def licensed(self, 
     /) -> 'bool': 
@@ -188,6 +564,54 @@ class Failover(Namespace):
             licensed
         """
         ...
+    Options = typing.TypedDict('Options', {
+            'timeout':'int',
+            'job':'bool',
+            'job_return':'typing.Optional[bool]',
+            'callback':'typing.Union[str, int, bool, dict[str], list]',
+            'connect_timeout':'float',
+            'raise_connect_error':'bool',
+    })
+    FailoverEntry = typing.TypedDict('FailoverEntry', {
+            'id':'int',
+            'disabled':'bool',
+            'timeout':'int',
+            'master':'bool',
+    })
+    Options_ = typing.TypedDict('Options_', {
+            'active':'bool',
+    })
+    Options__ = typing.TypedDict('Options__', {
+            'reboot':'bool',
+    })
+    PoolKeys = typing.TypedDict('PoolKeys', {
+            'name':'str',
+            'passphrase':'str',
+    })
+    DatasetKeys = typing.TypedDict('DatasetKeys', {
+            'name':'str',
+            'passphrase':'str',
+    })
+    Options___ = typing.TypedDict('Options___', {
+            'pools':'list[PoolKeys]',
+            'datasets':'list[DatasetKeys]',
+    })
+    FailoverUpdate = typing.TypedDict('FailoverUpdate', {
+            'disabled':'bool',
+            'timeout':'int',
+            'master':'typing.Optional[bool]',
+    })
+    FailoverUpdateReturns = typing.TypedDict('FailoverUpdateReturns', {
+            'id':'int',
+            'disabled':'bool',
+            'timeout':'int',
+            'master':'bool',
+    })
+    FailoverUpgrade = typing.TypedDict('FailoverUpgrade', {
+            'train':'str',
+            'resume':'bool',
+            'resume_manual':'bool',
+    })
     @typing.overload
     def node(self, 
     /) -> 'str': 
@@ -206,6 +630,54 @@ class Failover(Namespace):
             node
         """
         ...
+    Options = typing.TypedDict('Options', {
+            'timeout':'int',
+            'job':'bool',
+            'job_return':'typing.Optional[bool]',
+            'callback':'typing.Union[str, int, bool, dict[str], list]',
+            'connect_timeout':'float',
+            'raise_connect_error':'bool',
+    })
+    FailoverEntry = typing.TypedDict('FailoverEntry', {
+            'id':'int',
+            'disabled':'bool',
+            'timeout':'int',
+            'master':'bool',
+    })
+    Options_ = typing.TypedDict('Options_', {
+            'active':'bool',
+    })
+    Options__ = typing.TypedDict('Options__', {
+            'reboot':'bool',
+    })
+    PoolKeys = typing.TypedDict('PoolKeys', {
+            'name':'str',
+            'passphrase':'str',
+    })
+    DatasetKeys = typing.TypedDict('DatasetKeys', {
+            'name':'str',
+            'passphrase':'str',
+    })
+    Options___ = typing.TypedDict('Options___', {
+            'pools':'list[PoolKeys]',
+            'datasets':'list[DatasetKeys]',
+    })
+    FailoverUpdate = typing.TypedDict('FailoverUpdate', {
+            'disabled':'bool',
+            'timeout':'int',
+            'master':'typing.Optional[bool]',
+    })
+    FailoverUpdateReturns = typing.TypedDict('FailoverUpdateReturns', {
+            'id':'int',
+            'disabled':'bool',
+            'timeout':'int',
+            'master':'bool',
+    })
+    FailoverUpgrade = typing.TypedDict('FailoverUpgrade', {
+            'train':'str',
+            'resume':'bool',
+            'resume_manual':'bool',
+    })
     @typing.overload
     def status(self, 
     /) -> 'str': 
@@ -228,6 +700,54 @@ class Failover(Namespace):
             status
         """
         ...
+    Options = typing.TypedDict('Options', {
+            'timeout':'int',
+            'job':'bool',
+            'job_return':'typing.Optional[bool]',
+            'callback':'typing.Union[str, int, bool, dict[str], list]',
+            'connect_timeout':'float',
+            'raise_connect_error':'bool',
+    })
+    FailoverEntry = typing.TypedDict('FailoverEntry', {
+            'id':'int',
+            'disabled':'bool',
+            'timeout':'int',
+            'master':'bool',
+    })
+    Options_ = typing.TypedDict('Options_', {
+            'active':'bool',
+    })
+    Options__ = typing.TypedDict('Options__', {
+            'reboot':'bool',
+    })
+    PoolKeys = typing.TypedDict('PoolKeys', {
+            'name':'str',
+            'passphrase':'str',
+    })
+    DatasetKeys = typing.TypedDict('DatasetKeys', {
+            'name':'str',
+            'passphrase':'str',
+    })
+    Options___ = typing.TypedDict('Options___', {
+            'pools':'list[PoolKeys]',
+            'datasets':'list[DatasetKeys]',
+    })
+    FailoverUpdate = typing.TypedDict('FailoverUpdate', {
+            'disabled':'bool',
+            'timeout':'int',
+            'master':'typing.Optional[bool]',
+    })
+    FailoverUpdateReturns = typing.TypedDict('FailoverUpdateReturns', {
+            'id':'int',
+            'disabled':'bool',
+            'timeout':'int',
+            'master':'bool',
+    })
+    FailoverUpgrade = typing.TypedDict('FailoverUpgrade', {
+            'train':'str',
+            'resume':'bool',
+            'resume_manual':'bool',
+    })
     @typing.overload
     def sync_from_peer(self, 
     /) -> None: 
@@ -240,6 +760,54 @@ class Failover(Namespace):
         -------
         """
         ...
+    Options = typing.TypedDict('Options', {
+            'timeout':'int',
+            'job':'bool',
+            'job_return':'typing.Optional[bool]',
+            'callback':'typing.Union[str, int, bool, dict[str], list]',
+            'connect_timeout':'float',
+            'raise_connect_error':'bool',
+    })
+    FailoverEntry = typing.TypedDict('FailoverEntry', {
+            'id':'int',
+            'disabled':'bool',
+            'timeout':'int',
+            'master':'bool',
+    })
+    Options_ = typing.TypedDict('Options_', {
+            'active':'bool',
+    })
+    Options__ = typing.TypedDict('Options__', {
+            'reboot':'bool',
+    })
+    PoolKeys = typing.TypedDict('PoolKeys', {
+            'name':'str',
+            'passphrase':'str',
+    })
+    DatasetKeys = typing.TypedDict('DatasetKeys', {
+            'name':'str',
+            'passphrase':'str',
+    })
+    Options___ = typing.TypedDict('Options___', {
+            'pools':'list[PoolKeys]',
+            'datasets':'list[DatasetKeys]',
+    })
+    FailoverUpdate = typing.TypedDict('FailoverUpdate', {
+            'disabled':'bool',
+            'timeout':'int',
+            'master':'typing.Optional[bool]',
+    })
+    FailoverUpdateReturns = typing.TypedDict('FailoverUpdateReturns', {
+            'id':'int',
+            'disabled':'bool',
+            'timeout':'int',
+            'master':'bool',
+    })
+    FailoverUpgrade = typing.TypedDict('FailoverUpgrade', {
+            'train':'str',
+            'resume':'bool',
+            'resume_manual':'bool',
+    })
     @typing.overload
     def sync_to_peer(self, 
         options:'Options__'={},
@@ -257,6 +825,54 @@ class Failover(Namespace):
         -------
         """
         ...
+    Options = typing.TypedDict('Options', {
+            'timeout':'int',
+            'job':'bool',
+            'job_return':'typing.Optional[bool]',
+            'callback':'typing.Union[str, int, bool, dict[str], list]',
+            'connect_timeout':'float',
+            'raise_connect_error':'bool',
+    })
+    FailoverEntry = typing.TypedDict('FailoverEntry', {
+            'id':'int',
+            'disabled':'bool',
+            'timeout':'int',
+            'master':'bool',
+    })
+    Options_ = typing.TypedDict('Options_', {
+            'active':'bool',
+    })
+    Options__ = typing.TypedDict('Options__', {
+            'reboot':'bool',
+    })
+    PoolKeys = typing.TypedDict('PoolKeys', {
+            'name':'str',
+            'passphrase':'str',
+    })
+    DatasetKeys = typing.TypedDict('DatasetKeys', {
+            'name':'str',
+            'passphrase':'str',
+    })
+    Options___ = typing.TypedDict('Options___', {
+            'pools':'list[PoolKeys]',
+            'datasets':'list[DatasetKeys]',
+    })
+    FailoverUpdate = typing.TypedDict('FailoverUpdate', {
+            'disabled':'bool',
+            'timeout':'int',
+            'master':'typing.Optional[bool]',
+    })
+    FailoverUpdateReturns = typing.TypedDict('FailoverUpdateReturns', {
+            'id':'int',
+            'disabled':'bool',
+            'timeout':'int',
+            'master':'bool',
+    })
+    FailoverUpgrade = typing.TypedDict('FailoverUpgrade', {
+            'train':'str',
+            'resume':'bool',
+            'resume_manual':'bool',
+    })
     @typing.overload
     def unlock(self, 
         options:'Options___'={},
@@ -275,6 +891,54 @@ class Failover(Namespace):
             unlock
         """
         ...
+    Options = typing.TypedDict('Options', {
+            'timeout':'int',
+            'job':'bool',
+            'job_return':'typing.Optional[bool]',
+            'callback':'typing.Union[str, int, bool, dict[str], list]',
+            'connect_timeout':'float',
+            'raise_connect_error':'bool',
+    })
+    FailoverEntry = typing.TypedDict('FailoverEntry', {
+            'id':'int',
+            'disabled':'bool',
+            'timeout':'int',
+            'master':'bool',
+    })
+    Options_ = typing.TypedDict('Options_', {
+            'active':'bool',
+    })
+    Options__ = typing.TypedDict('Options__', {
+            'reboot':'bool',
+    })
+    PoolKeys = typing.TypedDict('PoolKeys', {
+            'name':'str',
+            'passphrase':'str',
+    })
+    DatasetKeys = typing.TypedDict('DatasetKeys', {
+            'name':'str',
+            'passphrase':'str',
+    })
+    Options___ = typing.TypedDict('Options___', {
+            'pools':'list[PoolKeys]',
+            'datasets':'list[DatasetKeys]',
+    })
+    FailoverUpdate = typing.TypedDict('FailoverUpdate', {
+            'disabled':'bool',
+            'timeout':'int',
+            'master':'typing.Optional[bool]',
+    })
+    FailoverUpdateReturns = typing.TypedDict('FailoverUpdateReturns', {
+            'id':'int',
+            'disabled':'bool',
+            'timeout':'int',
+            'master':'bool',
+    })
+    FailoverUpgrade = typing.TypedDict('FailoverUpgrade', {
+            'train':'str',
+            'resume':'bool',
+            'resume_manual':'bool',
+    })
     @typing.overload
     def update(self, 
         failover_update:'FailoverUpdate'={},
@@ -304,6 +968,54 @@ class Failover(Namespace):
             failover_update_returns
         """
         ...
+    Options = typing.TypedDict('Options', {
+            'timeout':'int',
+            'job':'bool',
+            'job_return':'typing.Optional[bool]',
+            'callback':'typing.Union[str, int, bool, dict[str], list]',
+            'connect_timeout':'float',
+            'raise_connect_error':'bool',
+    })
+    FailoverEntry = typing.TypedDict('FailoverEntry', {
+            'id':'int',
+            'disabled':'bool',
+            'timeout':'int',
+            'master':'bool',
+    })
+    Options_ = typing.TypedDict('Options_', {
+            'active':'bool',
+    })
+    Options__ = typing.TypedDict('Options__', {
+            'reboot':'bool',
+    })
+    PoolKeys = typing.TypedDict('PoolKeys', {
+            'name':'str',
+            'passphrase':'str',
+    })
+    DatasetKeys = typing.TypedDict('DatasetKeys', {
+            'name':'str',
+            'passphrase':'str',
+    })
+    Options___ = typing.TypedDict('Options___', {
+            'pools':'list[PoolKeys]',
+            'datasets':'list[DatasetKeys]',
+    })
+    FailoverUpdate = typing.TypedDict('FailoverUpdate', {
+            'disabled':'bool',
+            'timeout':'int',
+            'master':'typing.Optional[bool]',
+    })
+    FailoverUpdateReturns = typing.TypedDict('FailoverUpdateReturns', {
+            'id':'int',
+            'disabled':'bool',
+            'timeout':'int',
+            'master':'bool',
+    })
+    FailoverUpgrade = typing.TypedDict('FailoverUpgrade', {
+            'train':'str',
+            'resume':'bool',
+            'resume_manual':'bool',
+    })
     @typing.overload
     def upgrade(self, 
         failover_upgrade:'FailoverUpgrade'={},
@@ -333,6 +1045,54 @@ class Failover(Namespace):
             upgrade
         """
         ...
+    Options = typing.TypedDict('Options', {
+            'timeout':'int',
+            'job':'bool',
+            'job_return':'typing.Optional[bool]',
+            'callback':'typing.Union[str, int, bool, dict[str], list]',
+            'connect_timeout':'float',
+            'raise_connect_error':'bool',
+    })
+    FailoverEntry = typing.TypedDict('FailoverEntry', {
+            'id':'int',
+            'disabled':'bool',
+            'timeout':'int',
+            'master':'bool',
+    })
+    Options_ = typing.TypedDict('Options_', {
+            'active':'bool',
+    })
+    Options__ = typing.TypedDict('Options__', {
+            'reboot':'bool',
+    })
+    PoolKeys = typing.TypedDict('PoolKeys', {
+            'name':'str',
+            'passphrase':'str',
+    })
+    DatasetKeys = typing.TypedDict('DatasetKeys', {
+            'name':'str',
+            'passphrase':'str',
+    })
+    Options___ = typing.TypedDict('Options___', {
+            'pools':'list[PoolKeys]',
+            'datasets':'list[DatasetKeys]',
+    })
+    FailoverUpdate = typing.TypedDict('FailoverUpdate', {
+            'disabled':'bool',
+            'timeout':'int',
+            'master':'typing.Optional[bool]',
+    })
+    FailoverUpdateReturns = typing.TypedDict('FailoverUpdateReturns', {
+            'id':'int',
+            'disabled':'bool',
+            'timeout':'int',
+            'master':'bool',
+    })
+    FailoverUpgrade = typing.TypedDict('FailoverUpgrade', {
+            'train':'str',
+            'resume':'bool',
+            'resume_manual':'bool',
+    })
     @typing.overload
     def upgrade_finish(self, 
     /) -> 'bool': 
@@ -350,6 +1110,54 @@ class Failover(Namespace):
             upgrade_finish
         """
         ...
+    Options = typing.TypedDict('Options', {
+            'timeout':'int',
+            'job':'bool',
+            'job_return':'typing.Optional[bool]',
+            'callback':'typing.Union[str, int, bool, dict[str], list]',
+            'connect_timeout':'float',
+            'raise_connect_error':'bool',
+    })
+    FailoverEntry = typing.TypedDict('FailoverEntry', {
+            'id':'int',
+            'disabled':'bool',
+            'timeout':'int',
+            'master':'bool',
+    })
+    Options_ = typing.TypedDict('Options_', {
+            'active':'bool',
+    })
+    Options__ = typing.TypedDict('Options__', {
+            'reboot':'bool',
+    })
+    PoolKeys = typing.TypedDict('PoolKeys', {
+            'name':'str',
+            'passphrase':'str',
+    })
+    DatasetKeys = typing.TypedDict('DatasetKeys', {
+            'name':'str',
+            'passphrase':'str',
+    })
+    Options___ = typing.TypedDict('Options___', {
+            'pools':'list[PoolKeys]',
+            'datasets':'list[DatasetKeys]',
+    })
+    FailoverUpdate = typing.TypedDict('FailoverUpdate', {
+            'disabled':'bool',
+            'timeout':'int',
+            'master':'typing.Optional[bool]',
+    })
+    FailoverUpdateReturns = typing.TypedDict('FailoverUpdateReturns', {
+            'id':'int',
+            'disabled':'bool',
+            'timeout':'int',
+            'master':'bool',
+    })
+    FailoverUpgrade = typing.TypedDict('FailoverUpgrade', {
+            'train':'str',
+            'resume':'bool',
+            'resume_manual':'bool',
+    })
     @typing.overload
     def upgrade_pending(self, 
     /) -> 'bool': 
@@ -367,52 +1175,52 @@ class Failover(Namespace):
             upgrade_pending
         """
         ...
+    Options = typing.TypedDict('Options', {
+            'timeout':'int',
+            'job':'bool',
+            'job_return':'typing.Optional[bool]',
+            'callback':'typing.Union[str, int, bool, dict[str], list]',
+            'connect_timeout':'float',
+            'raise_connect_error':'bool',
+    })
+    FailoverEntry = typing.TypedDict('FailoverEntry', {
+            'id':'int',
+            'disabled':'bool',
+            'timeout':'int',
+            'master':'bool',
+    })
+    Options_ = typing.TypedDict('Options_', {
+            'active':'bool',
+    })
+    Options__ = typing.TypedDict('Options__', {
+            'reboot':'bool',
+    })
+    PoolKeys = typing.TypedDict('PoolKeys', {
+            'name':'str',
+            'passphrase':'str',
+    })
+    DatasetKeys = typing.TypedDict('DatasetKeys', {
+            'name':'str',
+            'passphrase':'str',
+    })
+    Options___ = typing.TypedDict('Options___', {
+            'pools':'list[PoolKeys]',
+            'datasets':'list[DatasetKeys]',
+    })
+    FailoverUpdate = typing.TypedDict('FailoverUpdate', {
+            'disabled':'bool',
+            'timeout':'int',
+            'master':'typing.Optional[bool]',
+    })
+    FailoverUpdateReturns = typing.TypedDict('FailoverUpdateReturns', {
+            'id':'int',
+            'disabled':'bool',
+            'timeout':'int',
+            'master':'bool',
+    })
+    FailoverUpgrade = typing.TypedDict('FailoverUpgrade', {
+            'train':'str',
+            'resume':'bool',
+            'resume_manual':'bool',
+    })
 
-class Options(typing.TypedDict):
-        timeout:'int'
-        job:'bool'
-        job_return:'typing.Optional[bool]'
-        callback:'typing.Union[str, int, bool, dict[str], list]'
-        connect_timeout:'float'
-        raise_connect_error:'bool'
-        ...
-class FailoverEntry(typing.TypedDict):
-        id:'int'
-        disabled:'bool'
-        timeout:'int'
-        master:'bool'
-        ...
-class Options_(typing.TypedDict):
-        active:'bool'
-        ...
-class Options__(typing.TypedDict):
-        reboot:'bool'
-        ...
-class Options___(typing.TypedDict):
-        pools:'list[PoolKeys]'
-        datasets:'list[DatasetKeys]'
-        ...
-class PoolKeys(typing.TypedDict):
-        name:'str'
-        passphrase:'str'
-        ...
-class DatasetKeys(typing.TypedDict):
-        name:'str'
-        passphrase:'str'
-        ...
-class FailoverUpdate(typing.TypedDict):
-        disabled:'bool'
-        timeout:'int'
-        master:'typing.Optional[bool]'
-        ...
-class FailoverUpdateReturns(typing.TypedDict):
-        id:'int'
-        disabled:'bool'
-        timeout:'int'
-        master:'bool'
-        ...
-class FailoverUpgrade(typing.TypedDict):
-        train:'str'
-        resume:'bool'
-        resume_manual:'bool'
-        ...

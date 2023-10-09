@@ -18,6 +18,17 @@ class Alertclasses(Namespace):
             alertclasses_entry
         """
         ...
+    AlertclassesEntry = typing.TypedDict('AlertclassesEntry', {
+            'id':'int',
+            'classes':'dict[str]',
+    })
+    AlertclassesUpdate = typing.TypedDict('AlertclassesUpdate', {
+            'classes':'dict[str]',
+    })
+    AlertclassesUpdateReturns = typing.TypedDict('AlertclassesUpdateReturns', {
+            'id':'int',
+            'classes':'dict[str]',
+    })
     @typing.overload
     def update(self, 
         alertclasses_update:'AlertclassesUpdate'={},
@@ -35,15 +46,15 @@ class Alertclasses(Namespace):
             alertclasses_update_returns
         """
         ...
+    AlertclassesEntry = typing.TypedDict('AlertclassesEntry', {
+            'id':'int',
+            'classes':'dict[str]',
+    })
+    AlertclassesUpdate = typing.TypedDict('AlertclassesUpdate', {
+            'classes':'dict[str]',
+    })
+    AlertclassesUpdateReturns = typing.TypedDict('AlertclassesUpdateReturns', {
+            'id':'int',
+            'classes':'dict[str]',
+    })
 
-class AlertclassesEntry(typing.TypedDict):
-        id:'int'
-        classes:'dict[str]'
-        ...
-class AlertclassesUpdate(typing.TypedDict):
-        classes:'dict[str]'
-        ...
-class AlertclassesUpdateReturns(typing.TypedDict):
-        id:'int'
-        classes:'dict[str]'
-        ...

@@ -1,8 +1,5 @@
 <%
-        types ={}
-        mem = {
-                'types': types
-        }
+
 %>
 from pytruenas import Namespace, TrueNASClient
 import typing
@@ -16,7 +13,7 @@ class ${ns.classname}(Namespace):
     % for pname, param in method.arguments.items():
         ${pname}\
         %if param.type:
-:'${'|'.join([t.python(mem) for t in param.type])}'\
+:'${'|'.join([t.python() for t in param.type])}'\
         %endif
         %if not param.required and param.default != MISSING:
 =${param.default}\
@@ -29,7 +26,7 @@ class ${ns.classname}(Namespace):
 %else:
  -> '\
 %for p in method.returns:
-${'|'.join([t.python(mem) for t in p.type])}\
+${'|'.join([t.python() for t in p.type])}\
  %endfor
 '\
 %endif
@@ -47,19 +44,19 @@ ${'|'.join([t.python(mem) for t in p.type])}\
         -------
 % for param in method.returns:
 % for t in param.type:
-        ${t.python(mem)}:
+        ${t.python()}:
             ${(param.description or '').strip().replace('\n', '\n            ')}
 %endfor
 %endfor
         """
         ...
 % endfor
+    %for name, obj in ns.objects.items():
+    ${name} = typing.TypedDict('${name}', {
+    %for pname, ty in obj.properties.items():
+            '${pname}':'${ty.python()}',
+    %endfor
+    })
+    %endfor
 % endfor
 
-%for name, obj in types.items():
-class ${name}(typing.TypedDict):
-%for pname, ty in obj.properties.items():
-        ${pname}:'${ty.python({})}'
-%endfor
-        ...
-%endfor

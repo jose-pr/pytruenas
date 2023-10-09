@@ -18,6 +18,53 @@ class Snmp(Namespace):
             snmp_entry
         """
         ...
+    SnmpEntry = typing.TypedDict('SnmpEntry', {
+            'location':'str',
+            'contact':'str',
+            'traps':'bool',
+            'v3':'bool',
+            'community':'str',
+            'v3_username':'str',
+            'v3_authtype':'str',
+            'v3_password':'str',
+            'v3_privproto':'typing.Optional[str]',
+            'v3_privpassphrase':'typing.Optional[str]',
+            'loglevel':'int',
+            'options':'str',
+            'zilstat':'bool',
+            'id':'int',
+    })
+    SnmpUpdate = typing.TypedDict('SnmpUpdate', {
+            'location':'str',
+            'contact':'str',
+            'traps':'bool',
+            'v3':'bool',
+            'community':'str',
+            'v3_username':'str',
+            'v3_authtype':'str',
+            'v3_password':'str',
+            'v3_privproto':'typing.Optional[str]',
+            'v3_privpassphrase':'typing.Optional[str]',
+            'loglevel':'int',
+            'options':'str',
+            'zilstat':'bool',
+    })
+    SnmpUpdateReturns = typing.TypedDict('SnmpUpdateReturns', {
+            'location':'str',
+            'contact':'str',
+            'traps':'bool',
+            'v3':'bool',
+            'community':'str',
+            'v3_username':'str',
+            'v3_authtype':'str',
+            'v3_password':'str',
+            'v3_privproto':'typing.Optional[str]',
+            'v3_privpassphrase':'typing.Optional[str]',
+            'loglevel':'int',
+            'options':'str',
+            'zilstat':'bool',
+            'id':'int',
+    })
     @typing.overload
     def update(self, 
         snmp_update:'SnmpUpdate'={},
@@ -40,51 +87,51 @@ class Snmp(Namespace):
             snmp_update_returns
         """
         ...
+    SnmpEntry = typing.TypedDict('SnmpEntry', {
+            'location':'str',
+            'contact':'str',
+            'traps':'bool',
+            'v3':'bool',
+            'community':'str',
+            'v3_username':'str',
+            'v3_authtype':'str',
+            'v3_password':'str',
+            'v3_privproto':'typing.Optional[str]',
+            'v3_privpassphrase':'typing.Optional[str]',
+            'loglevel':'int',
+            'options':'str',
+            'zilstat':'bool',
+            'id':'int',
+    })
+    SnmpUpdate = typing.TypedDict('SnmpUpdate', {
+            'location':'str',
+            'contact':'str',
+            'traps':'bool',
+            'v3':'bool',
+            'community':'str',
+            'v3_username':'str',
+            'v3_authtype':'str',
+            'v3_password':'str',
+            'v3_privproto':'typing.Optional[str]',
+            'v3_privpassphrase':'typing.Optional[str]',
+            'loglevel':'int',
+            'options':'str',
+            'zilstat':'bool',
+    })
+    SnmpUpdateReturns = typing.TypedDict('SnmpUpdateReturns', {
+            'location':'str',
+            'contact':'str',
+            'traps':'bool',
+            'v3':'bool',
+            'community':'str',
+            'v3_username':'str',
+            'v3_authtype':'str',
+            'v3_password':'str',
+            'v3_privproto':'typing.Optional[str]',
+            'v3_privpassphrase':'typing.Optional[str]',
+            'loglevel':'int',
+            'options':'str',
+            'zilstat':'bool',
+            'id':'int',
+    })
 
-class SnmpEntry(typing.TypedDict):
-        location:'str'
-        contact:'str'
-        traps:'bool'
-        v3:'bool'
-        community:'str'
-        v3_username:'str'
-        v3_authtype:'str'
-        v3_password:'str'
-        v3_privproto:'typing.Optional[str]'
-        v3_privpassphrase:'typing.Optional[str]'
-        loglevel:'int'
-        options:'str'
-        zilstat:'bool'
-        id:'int'
-        ...
-class SnmpUpdate(typing.TypedDict):
-        location:'str'
-        contact:'str'
-        traps:'bool'
-        v3:'bool'
-        community:'str'
-        v3_username:'str'
-        v3_authtype:'str'
-        v3_password:'str'
-        v3_privproto:'typing.Optional[str]'
-        v3_privpassphrase:'typing.Optional[str]'
-        loglevel:'int'
-        options:'str'
-        zilstat:'bool'
-        ...
-class SnmpUpdateReturns(typing.TypedDict):
-        location:'str'
-        contact:'str'
-        traps:'bool'
-        v3:'bool'
-        community:'str'
-        v3_username:'str'
-        v3_authtype:'str'
-        v3_password:'str'
-        v3_privproto:'typing.Optional[str]'
-        v3_privpassphrase:'typing.Optional[str]'
-        loglevel:'int'
-        options:'str'
-        zilstat:'bool'
-        id:'int'
-        ...

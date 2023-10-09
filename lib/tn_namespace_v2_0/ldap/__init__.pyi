@@ -18,6 +18,25 @@ class Ldap(Namespace):
             ldap_entry
         """
         ...
+    LdapUpdate = typing.TypedDict('LdapUpdate', {
+            'hostname':'list',
+            'basedn':'str',
+            'binddn':'str',
+            'bindpw':'str',
+            'anonbind':'bool',
+            'ssl':'str',
+            'certificate':'typing.Optional[int]',
+            'validate_certificates':'bool',
+            'disable_freenas_cache':'bool',
+            'timeout':'int',
+            'dns_timeout':'int',
+            'kerberos_realm':'typing.Optional[int]',
+            'kerberos_principal':'str',
+            'has_samba_schema':'bool',
+            'auxiliary_parameters':'str',
+            'schema':'str',
+            'enable':'bool',
+    })
     @typing.overload
     def get_state(self, 
     /) -> 'str': 
@@ -33,6 +52,25 @@ class Ldap(Namespace):
             directoryservice_state
         """
         ...
+    LdapUpdate = typing.TypedDict('LdapUpdate', {
+            'hostname':'list',
+            'basedn':'str',
+            'binddn':'str',
+            'bindpw':'str',
+            'anonbind':'bool',
+            'ssl':'str',
+            'certificate':'typing.Optional[int]',
+            'validate_certificates':'bool',
+            'disable_freenas_cache':'bool',
+            'timeout':'int',
+            'dns_timeout':'int',
+            'kerberos_realm':'typing.Optional[int]',
+            'kerberos_principal':'str',
+            'has_samba_schema':'bool',
+            'auxiliary_parameters':'str',
+            'schema':'str',
+            'enable':'bool',
+    })
     @typing.overload
     def schema_choices(self, 
     /) -> 'list[str]': 
@@ -47,6 +85,25 @@ class Ldap(Namespace):
             schema_choices
         """
         ...
+    LdapUpdate = typing.TypedDict('LdapUpdate', {
+            'hostname':'list',
+            'basedn':'str',
+            'binddn':'str',
+            'bindpw':'str',
+            'anonbind':'bool',
+            'ssl':'str',
+            'certificate':'typing.Optional[int]',
+            'validate_certificates':'bool',
+            'disable_freenas_cache':'bool',
+            'timeout':'int',
+            'dns_timeout':'int',
+            'kerberos_realm':'typing.Optional[int]',
+            'kerberos_principal':'str',
+            'has_samba_schema':'bool',
+            'auxiliary_parameters':'str',
+            'schema':'str',
+            'enable':'bool',
+    })
     @typing.overload
     def ssl_choices(self, 
     /) -> 'list[str]': 
@@ -61,6 +118,25 @@ class Ldap(Namespace):
             ssl_choices
         """
         ...
+    LdapUpdate = typing.TypedDict('LdapUpdate', {
+            'hostname':'list',
+            'basedn':'str',
+            'binddn':'str',
+            'bindpw':'str',
+            'anonbind':'bool',
+            'ssl':'str',
+            'certificate':'typing.Optional[int]',
+            'validate_certificates':'bool',
+            'disable_freenas_cache':'bool',
+            'timeout':'int',
+            'dns_timeout':'int',
+            'kerberos_realm':'typing.Optional[int]',
+            'kerberos_principal':'str',
+            'has_samba_schema':'bool',
+            'auxiliary_parameters':'str',
+            'schema':'str',
+            'enable':'bool',
+    })
     @typing.overload
     def update(self, 
         ldap_update:'LdapUpdate'={},
@@ -127,23 +203,23 @@ class Ldap(Namespace):
             ldap_update_returns
         """
         ...
+    LdapUpdate = typing.TypedDict('LdapUpdate', {
+            'hostname':'list',
+            'basedn':'str',
+            'binddn':'str',
+            'bindpw':'str',
+            'anonbind':'bool',
+            'ssl':'str',
+            'certificate':'typing.Optional[int]',
+            'validate_certificates':'bool',
+            'disable_freenas_cache':'bool',
+            'timeout':'int',
+            'dns_timeout':'int',
+            'kerberos_realm':'typing.Optional[int]',
+            'kerberos_principal':'str',
+            'has_samba_schema':'bool',
+            'auxiliary_parameters':'str',
+            'schema':'str',
+            'enable':'bool',
+    })
 
-class LdapUpdate(typing.TypedDict):
-        hostname:'list'
-        basedn:'str'
-        binddn:'str'
-        bindpw:'str'
-        anonbind:'bool'
-        ssl:'str'
-        certificate:'typing.Optional[int]'
-        validate_certificates:'bool'
-        disable_freenas_cache:'bool'
-        timeout:'int'
-        dns_timeout:'int'
-        kerberos_realm:'typing.Optional[int]'
-        kerberos_principal:'str'
-        has_samba_schema:'bool'
-        auxiliary_parameters:'str'
-        schema:'str'
-        enable:'bool'
-        ...

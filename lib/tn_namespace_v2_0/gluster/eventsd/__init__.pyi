@@ -29,6 +29,14 @@ class GlusterEventsd(Namespace):
         -------
         """
         ...
+    WebhookCreate = typing.TypedDict('WebhookCreate', {
+            'url':'str',
+            'bearer_token':'str',
+            'secret':'str',
+    })
+    WebhookDelete = typing.TypedDict('WebhookDelete', {
+            'url':'str',
+    })
     @typing.overload
     def delete(self, 
         webhook_delete:'WebhookDelete'={},
@@ -46,6 +54,14 @@ class GlusterEventsd(Namespace):
         -------
         """
         ...
+    WebhookCreate = typing.TypedDict('WebhookCreate', {
+            'url':'str',
+            'bearer_token':'str',
+            'secret':'str',
+    })
+    WebhookDelete = typing.TypedDict('WebhookDelete', {
+            'url':'str',
+    })
     @typing.overload
     def sync(self, 
     /) -> None: 
@@ -59,6 +75,14 @@ class GlusterEventsd(Namespace):
         -------
         """
         ...
+    WebhookCreate = typing.TypedDict('WebhookCreate', {
+            'url':'str',
+            'bearer_token':'str',
+            'secret':'str',
+    })
+    WebhookDelete = typing.TypedDict('WebhookDelete', {
+            'url':'str',
+    })
     @typing.overload
     def webhooks(self, 
     /) -> None: 
@@ -71,12 +95,12 @@ class GlusterEventsd(Namespace):
         -------
         """
         ...
+    WebhookCreate = typing.TypedDict('WebhookCreate', {
+            'url':'str',
+            'bearer_token':'str',
+            'secret':'str',
+    })
+    WebhookDelete = typing.TypedDict('WebhookDelete', {
+            'url':'str',
+    })
 
-class WebhookCreate(typing.TypedDict):
-        url:'str'
-        bearer_token:'str'
-        secret:'str'
-        ...
-class WebhookDelete(typing.TypedDict):
-        url:'str'
-        ...

@@ -28,6 +28,60 @@ class IscsiTarget(Namespace):
             iscsi_target_create_returns
         """
         ...
+    Group = typing.TypedDict('Group', {
+            'portal':'int',
+            'initiator':'typing.Optional[int]',
+            'authmethod':'str',
+            'auth':'typing.Optional[int]',
+    })
+    IscsiTargetCreate = typing.TypedDict('IscsiTargetCreate', {
+            'name':'str',
+            'alias':'typing.Optional[str]',
+            'mode':'str',
+            'groups':'list[Group]',
+            'auth_networks':'list[str]',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Group_ = typing.TypedDict('Group_', {
+            'portal':'int',
+            'initiator':'typing.Optional[int]',
+            'authmethod':'str',
+            'auth':'typing.Optional[int]',
+    })
+    IscsiTargetUpdate = typing.TypedDict('IscsiTargetUpdate', {
+            'name':'str',
+            'alias':'typing.Optional[str]',
+            'mode':'str',
+            'groups':'list[Group_]',
+            'auth_networks':'list[str]',
+    })
     @typing.overload
     def delete(self, 
         id:'int',
@@ -50,9 +104,63 @@ class IscsiTarget(Namespace):
             Will return `true` if `id` is deleted successfully
         """
         ...
+    Group = typing.TypedDict('Group', {
+            'portal':'int',
+            'initiator':'typing.Optional[int]',
+            'authmethod':'str',
+            'auth':'typing.Optional[int]',
+    })
+    IscsiTargetCreate = typing.TypedDict('IscsiTargetCreate', {
+            'name':'str',
+            'alias':'typing.Optional[str]',
+            'mode':'str',
+            'groups':'list[Group]',
+            'auth_networks':'list[str]',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Group_ = typing.TypedDict('Group_', {
+            'portal':'int',
+            'initiator':'typing.Optional[int]',
+            'authmethod':'str',
+            'auth':'typing.Optional[int]',
+    })
+    IscsiTargetUpdate = typing.TypedDict('IscsiTargetUpdate', {
+            'name':'str',
+            'alias':'typing.Optional[str]',
+            'mode':'str',
+            'groups':'list[Group_]',
+            'auth_networks':'list[str]',
+    })
     @typing.overload
     def get_instance(self, 
-        id:'str|int|bool|dict[str]|list',
+        id:'typing.Union[str, int, bool, dict[str], list]',
         query_options_get_instance:'QueryOptionsGetInstance'={},
     /) -> None: 
         """
@@ -70,11 +178,65 @@ class IscsiTarget(Namespace):
         -------
         """
         ...
+    Group = typing.TypedDict('Group', {
+            'portal':'int',
+            'initiator':'typing.Optional[int]',
+            'authmethod':'str',
+            'auth':'typing.Optional[int]',
+    })
+    IscsiTargetCreate = typing.TypedDict('IscsiTargetCreate', {
+            'name':'str',
+            'alias':'typing.Optional[str]',
+            'mode':'str',
+            'groups':'list[Group]',
+            'auth_networks':'list[str]',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Group_ = typing.TypedDict('Group_', {
+            'portal':'int',
+            'initiator':'typing.Optional[int]',
+            'authmethod':'str',
+            'auth':'typing.Optional[int]',
+    })
+    IscsiTargetUpdate = typing.TypedDict('IscsiTargetUpdate', {
+            'name':'str',
+            'alias':'typing.Optional[str]',
+            'mode':'str',
+            'groups':'list[Group_]',
+            'auth_networks':'list[str]',
+    })
     @typing.overload
     def query(self, 
         query_filters:'list[list]'=[],
         query_options:'QueryOptions'={},
-    /) -> 'list[dict[str]]|dict[str]|int|dict[str]': 
+    /) -> 'typing.Union[list[dict[str]], dict[str], int]': 
         """
         
 
@@ -86,16 +248,64 @@ class IscsiTarget(Namespace):
             query-options
         Returns
         -------
-        list[dict[str]]:
-            
-        dict[str]:
-            
-        int:
-            
-        dict[str]:
+        typing.Union[list[dict[str]], dict[str], int]:
             
         """
         ...
+    Group = typing.TypedDict('Group', {
+            'portal':'int',
+            'initiator':'typing.Optional[int]',
+            'authmethod':'str',
+            'auth':'typing.Optional[int]',
+    })
+    IscsiTargetCreate = typing.TypedDict('IscsiTargetCreate', {
+            'name':'str',
+            'alias':'typing.Optional[str]',
+            'mode':'str',
+            'groups':'list[Group]',
+            'auth_networks':'list[str]',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Group_ = typing.TypedDict('Group_', {
+            'portal':'int',
+            'initiator':'typing.Optional[int]',
+            'authmethod':'str',
+            'auth':'typing.Optional[int]',
+    })
+    IscsiTargetUpdate = typing.TypedDict('IscsiTargetUpdate', {
+            'name':'str',
+            'alias':'typing.Optional[str]',
+            'mode':'str',
+            'groups':'list[Group_]',
+            'auth_networks':'list[str]',
+    })
     @typing.overload
     def update(self, 
         id:'int',
@@ -117,10 +327,64 @@ class IscsiTarget(Namespace):
             iscsi_target_update_returns
         """
         ...
+    Group = typing.TypedDict('Group', {
+            'portal':'int',
+            'initiator':'typing.Optional[int]',
+            'authmethod':'str',
+            'auth':'typing.Optional[int]',
+    })
+    IscsiTargetCreate = typing.TypedDict('IscsiTargetCreate', {
+            'name':'str',
+            'alias':'typing.Optional[str]',
+            'mode':'str',
+            'groups':'list[Group]',
+            'auth_networks':'list[str]',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Group_ = typing.TypedDict('Group_', {
+            'portal':'int',
+            'initiator':'typing.Optional[int]',
+            'authmethod':'str',
+            'auth':'typing.Optional[int]',
+    })
+    IscsiTargetUpdate = typing.TypedDict('IscsiTargetUpdate', {
+            'name':'str',
+            'alias':'typing.Optional[str]',
+            'mode':'str',
+            'groups':'list[Group_]',
+            'auth_networks':'list[str]',
+    })
     @typing.overload
     def validate_name(self, 
         name:'str',
-        existing_id:'int|None'=None,
+        existing_id:'typing.Optional[int]'=None,
     /) -> None: 
         """
         Returns validation error for iSCSI target name
@@ -139,52 +403,58 @@ class IscsiTarget(Namespace):
         -------
         """
         ...
+    Group = typing.TypedDict('Group', {
+            'portal':'int',
+            'initiator':'typing.Optional[int]',
+            'authmethod':'str',
+            'auth':'typing.Optional[int]',
+    })
+    IscsiTargetCreate = typing.TypedDict('IscsiTargetCreate', {
+            'name':'str',
+            'alias':'typing.Optional[str]',
+            'mode':'str',
+            'groups':'list[Group]',
+            'auth_networks':'list[str]',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Group_ = typing.TypedDict('Group_', {
+            'portal':'int',
+            'initiator':'typing.Optional[int]',
+            'authmethod':'str',
+            'auth':'typing.Optional[int]',
+    })
+    IscsiTargetUpdate = typing.TypedDict('IscsiTargetUpdate', {
+            'name':'str',
+            'alias':'typing.Optional[str]',
+            'mode':'str',
+            'groups':'list[Group_]',
+            'auth_networks':'list[str]',
+    })
 
-class IscsiTargetCreate(typing.TypedDict):
-        name:'str'
-        alias:'typing.Optional[str]'
-        mode:'str'
-        groups:'list[Group]'
-        auth_networks:'list[str]'
-        ...
-class Group(typing.TypedDict):
-        portal:'int'
-        initiator:'typing.Optional[int]'
-        authmethod:'str'
-        auth:'typing.Optional[int]'
-        ...
-class QueryOptionsGetInstance(typing.TypedDict):
-        relationships:'bool'
-        extend:'typing.Optional[str]'
-        extend_context:'typing.Optional[str]'
-        prefix:'typing.Optional[str]'
-        extra:'dict[str]'
-        order_by:'list'
-        select:'list'
-        count:'bool'
-        get:'bool'
-        offset:'int'
-        limit:'int'
-        force_sql_filters:'bool'
-        ...
-class QueryOptions(typing.TypedDict):
-        relationships:'bool'
-        extend:'typing.Optional[str]'
-        extend_context:'typing.Optional[str]'
-        prefix:'typing.Optional[str]'
-        extra:'dict[str]'
-        order_by:'list'
-        select:'list'
-        count:'bool'
-        get:'bool'
-        offset:'int'
-        limit:'int'
-        force_sql_filters:'bool'
-        ...
-class IscsiTargetUpdate(typing.TypedDict):
-        name:'str'
-        alias:'typing.Optional[str]'
-        mode:'str'
-        groups:'list[Group]'
-        auth_networks:'list[str]'
-        ...

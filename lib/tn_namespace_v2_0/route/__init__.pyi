@@ -24,11 +24,45 @@ class Route(Namespace):
             ipv4gw_reachable
         """
         ...
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    SystemRoute = typing.TypedDict('SystemRoute', {
+            'network':'str',
+            'netmask':'str',
+            'gateway':'typing.Optional[str]',
+            'interface':'str',
+            'flags':'list',
+            'table_id':'int',
+            'scope':'int',
+            'preferred_source':'typing.Optional[str]',
+    })
+    SystemRoute_ = typing.TypedDict('SystemRoute_', {
+            'network':'str',
+            'netmask':'str',
+            'gateway':'typing.Optional[str]',
+            'interface':'str',
+            'flags':'list',
+            'table_id':'int',
+            'scope':'int',
+            'preferred_source':'typing.Optional[str]',
+    })
     @typing.overload
     def system_routes(self, 
         query_filters:'list[list]'=[],
         query_options:'QueryOptions'={},
-    /) -> 'int|SystemRoute|list[SystemRoute]': 
+    /) -> 'typing.Union[int, ForwardRef(SystemRoute), list[SystemRoute_]]': 
         """
         Get current/applied network routes.
 
@@ -40,36 +74,42 @@ class Route(Namespace):
             query-options
         Returns
         -------
-        int:
-            
-        SystemRoute:
-            
-        list[SystemRoute]:
+        typing.Union[int, ForwardRef(SystemRoute), list[SystemRoute_]]:
             
         """
         ...
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    SystemRoute = typing.TypedDict('SystemRoute', {
+            'network':'str',
+            'netmask':'str',
+            'gateway':'typing.Optional[str]',
+            'interface':'str',
+            'flags':'list',
+            'table_id':'int',
+            'scope':'int',
+            'preferred_source':'typing.Optional[str]',
+    })
+    SystemRoute_ = typing.TypedDict('SystemRoute_', {
+            'network':'str',
+            'netmask':'str',
+            'gateway':'typing.Optional[str]',
+            'interface':'str',
+            'flags':'list',
+            'table_id':'int',
+            'scope':'int',
+            'preferred_source':'typing.Optional[str]',
+    })
 
-class QueryOptions(typing.TypedDict):
-        relationships:'bool'
-        extend:'typing.Optional[str]'
-        extend_context:'typing.Optional[str]'
-        prefix:'typing.Optional[str]'
-        extra:'dict[str]'
-        order_by:'list'
-        select:'list'
-        count:'bool'
-        get:'bool'
-        offset:'int'
-        limit:'int'
-        force_sql_filters:'bool'
-        ...
-class SystemRoute(typing.TypedDict):
-        network:'str'
-        netmask:'str'
-        gateway:'typing.Optional[str]'
-        interface:'str'
-        flags:'list'
-        table_id:'int'
-        scope:'int'
-        preferred_source:'typing.Optional[str]'
-        ...

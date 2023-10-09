@@ -24,6 +24,29 @@ class Stats(Namespace):
             stats_data
         """
         ...
+    StatsData = typing.TypedDict('StatsData', {
+            'source':'str',
+            'type':'str',
+            'dataset':'str',
+            'cf':'str',
+    })
+    StatsFilter = typing.TypedDict('StatsFilter', {
+            'step':'int',
+            'start':'str',
+            'end':'str',
+    })
+    StatsData_ = typing.TypedDict('StatsData_', {
+            'about':'str',
+            'meta':'dict[str]',
+            'data':'list',
+    })
+    DatasetInfo = typing.TypedDict('DatasetInfo', {
+            'source':'str',
+            'type':'str',
+            'datasets':'dict[str]',
+            'step':'int',
+            'last_update':'int',
+    })
     @typing.overload
     def get_dataset_info(self, 
         source:'str',
@@ -44,6 +67,29 @@ class Stats(Namespace):
             dataset_info
         """
         ...
+    StatsData = typing.TypedDict('StatsData', {
+            'source':'str',
+            'type':'str',
+            'dataset':'str',
+            'cf':'str',
+    })
+    StatsFilter = typing.TypedDict('StatsFilter', {
+            'step':'int',
+            'start':'str',
+            'end':'str',
+    })
+    StatsData_ = typing.TypedDict('StatsData_', {
+            'about':'str',
+            'meta':'dict[str]',
+            'data':'list',
+    })
+    DatasetInfo = typing.TypedDict('DatasetInfo', {
+            'source':'str',
+            'type':'str',
+            'datasets':'dict[str]',
+            'step':'int',
+            'last_update':'int',
+    })
     @typing.overload
     def get_sources(self, 
     /) -> 'dict[str]': 
@@ -58,27 +104,27 @@ class Stats(Namespace):
             stats_sources
         """
         ...
+    StatsData = typing.TypedDict('StatsData', {
+            'source':'str',
+            'type':'str',
+            'dataset':'str',
+            'cf':'str',
+    })
+    StatsFilter = typing.TypedDict('StatsFilter', {
+            'step':'int',
+            'start':'str',
+            'end':'str',
+    })
+    StatsData_ = typing.TypedDict('StatsData_', {
+            'about':'str',
+            'meta':'dict[str]',
+            'data':'list',
+    })
+    DatasetInfo = typing.TypedDict('DatasetInfo', {
+            'source':'str',
+            'type':'str',
+            'datasets':'dict[str]',
+            'step':'int',
+            'last_update':'int',
+    })
 
-class StatsData(typing.TypedDict):
-        source:'str'
-        type:'str'
-        dataset:'str'
-        cf:'str'
-        ...
-class StatsFilter(typing.TypedDict):
-        step:'int'
-        start:'str'
-        end:'str'
-        ...
-class StatsData_(typing.TypedDict):
-        about:'str'
-        meta:'dict[str]'
-        data:'list'
-        ...
-class DatasetInfo(typing.TypedDict):
-        source:'str'
-        type:'str'
-        datasets:'dict[str]'
-        step:'int'
-        last_update:'int'
-        ...

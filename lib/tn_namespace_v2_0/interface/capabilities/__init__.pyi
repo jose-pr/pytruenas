@@ -24,6 +24,16 @@ class InterfaceCapabilities(Namespace):
             capabilties
         """
         ...
+    Capabilties = typing.TypedDict('Capabilties', {
+            'enabled':'list[str]',
+            'disabled':'list[str]',
+            'supported':'list[str]',
+    })
+    CapabilitiesSet = typing.TypedDict('CapabilitiesSet', {
+            'name':'str',
+            'capabilties':'list',
+            'action':'str',
+    })
     @typing.overload
     def set(self, 
         capabilities_set:'CapabilitiesSet'={},
@@ -46,14 +56,14 @@ class InterfaceCapabilities(Namespace):
             capabilities
         """
         ...
+    Capabilties = typing.TypedDict('Capabilties', {
+            'enabled':'list[str]',
+            'disabled':'list[str]',
+            'supported':'list[str]',
+    })
+    CapabilitiesSet = typing.TypedDict('CapabilitiesSet', {
+            'name':'str',
+            'capabilties':'list',
+            'action':'str',
+    })
 
-class Capabilties(typing.TypedDict):
-        enabled:'list[str]'
-        disabled:'list[str]'
-        supported:'list[str]'
-        ...
-class CapabilitiesSet(typing.TypedDict):
-        name:'str'
-        capabilties:'list'
-        action:'str'
-        ...

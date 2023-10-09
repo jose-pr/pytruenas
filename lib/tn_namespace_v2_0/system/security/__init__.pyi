@@ -18,6 +18,17 @@ class SystemSecurity(Namespace):
             system_security_entry
         """
         ...
+    SystemSecurityEntry = typing.TypedDict('SystemSecurityEntry', {
+            'enable_fips':'bool',
+            'id':'int',
+    })
+    SystemSecurityUpdate = typing.TypedDict('SystemSecurityUpdate', {
+            'enable_fips':'bool',
+    })
+    SystemSecurityUpdateReturns = typing.TypedDict('SystemSecurityUpdateReturns', {
+            'enable_fips':'bool',
+            'id':'int',
+    })
     @typing.overload
     def update(self, 
         system_security_update:'SystemSecurityUpdate'={},
@@ -37,15 +48,15 @@ class SystemSecurity(Namespace):
             system_security_update_returns
         """
         ...
+    SystemSecurityEntry = typing.TypedDict('SystemSecurityEntry', {
+            'enable_fips':'bool',
+            'id':'int',
+    })
+    SystemSecurityUpdate = typing.TypedDict('SystemSecurityUpdate', {
+            'enable_fips':'bool',
+    })
+    SystemSecurityUpdateReturns = typing.TypedDict('SystemSecurityUpdateReturns', {
+            'enable_fips':'bool',
+            'id':'int',
+    })
 
-class SystemSecurityEntry(typing.TypedDict):
-        enable_fips:'bool'
-        id:'int'
-        ...
-class SystemSecurityUpdate(typing.TypedDict):
-        enable_fips:'bool'
-        ...
-class SystemSecurityUpdateReturns(typing.TypedDict):
-        enable_fips:'bool'
-        id:'int'
-        ...

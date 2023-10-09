@@ -19,6 +19,82 @@ class AcmeDnsAuthenticator(Namespace):
             Authenticator Schemas
         """
         ...
+    AttributeSchema = typing.TypedDict('AttributeSchema', {
+            '_name_':'str',
+            'title':'str',
+            '_required_':'bool',
+    })
+    AuthenticatorSchema = typing.TypedDict('AuthenticatorSchema', {
+            'key':'str',
+            'schema':'list[AttributeSchema]',
+    })
+    AcmeDnsAuthenticatorCreate = typing.TypedDict('AcmeDnsAuthenticatorCreate', {
+            'authenticator':'str',
+            'attributes':'dict[str]',
+            'name':'str',
+    })
+    AcmeDnsAuthenticatorCreateReturns = typing.TypedDict('AcmeDnsAuthenticatorCreateReturns', {
+            'id':'int',
+            'authenticator':'str',
+            'attributes':'dict[str]',
+            'name':'str',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    AcmeDnsAuthenticatorEntry = typing.TypedDict('AcmeDnsAuthenticatorEntry', {
+            'id':'int',
+            'authenticator':'str',
+            'attributes':'dict[str]',
+            'name':'str',
+    })
+    AcmeDnsAuthenticatorEntry_ = typing.TypedDict('AcmeDnsAuthenticatorEntry_', {
+            'id':'int',
+            'authenticator':'str',
+            'attributes':'dict[str]',
+            'name':'str',
+    })
+    AcmeDnsAuthenticatorEntry__ = typing.TypedDict('AcmeDnsAuthenticatorEntry__', {
+            'id':'int',
+            'authenticator':'str',
+            'attributes':'dict[str]',
+            'name':'str',
+    })
+    DnsAuthenticatorUpdate = typing.TypedDict('DnsAuthenticatorUpdate', {
+            'attributes':'dict[str]',
+            'name':'str',
+    })
+    AcmeDnsAuthenticatorUpdateReturns = typing.TypedDict('AcmeDnsAuthenticatorUpdateReturns', {
+            'id':'int',
+            'authenticator':'str',
+            'attributes':'dict[str]',
+            'name':'str',
+    })
     @typing.overload
     def create(self, 
         acme_dns_authenticator_create:'AcmeDnsAuthenticatorCreate'={},
@@ -39,6 +115,82 @@ class AcmeDnsAuthenticator(Namespace):
             acme_dns_authenticator_create_returns
         """
         ...
+    AttributeSchema = typing.TypedDict('AttributeSchema', {
+            '_name_':'str',
+            'title':'str',
+            '_required_':'bool',
+    })
+    AuthenticatorSchema = typing.TypedDict('AuthenticatorSchema', {
+            'key':'str',
+            'schema':'list[AttributeSchema]',
+    })
+    AcmeDnsAuthenticatorCreate = typing.TypedDict('AcmeDnsAuthenticatorCreate', {
+            'authenticator':'str',
+            'attributes':'dict[str]',
+            'name':'str',
+    })
+    AcmeDnsAuthenticatorCreateReturns = typing.TypedDict('AcmeDnsAuthenticatorCreateReturns', {
+            'id':'int',
+            'authenticator':'str',
+            'attributes':'dict[str]',
+            'name':'str',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    AcmeDnsAuthenticatorEntry = typing.TypedDict('AcmeDnsAuthenticatorEntry', {
+            'id':'int',
+            'authenticator':'str',
+            'attributes':'dict[str]',
+            'name':'str',
+    })
+    AcmeDnsAuthenticatorEntry_ = typing.TypedDict('AcmeDnsAuthenticatorEntry_', {
+            'id':'int',
+            'authenticator':'str',
+            'attributes':'dict[str]',
+            'name':'str',
+    })
+    AcmeDnsAuthenticatorEntry__ = typing.TypedDict('AcmeDnsAuthenticatorEntry__', {
+            'id':'int',
+            'authenticator':'str',
+            'attributes':'dict[str]',
+            'name':'str',
+    })
+    DnsAuthenticatorUpdate = typing.TypedDict('DnsAuthenticatorUpdate', {
+            'attributes':'dict[str]',
+            'name':'str',
+    })
+    AcmeDnsAuthenticatorUpdateReturns = typing.TypedDict('AcmeDnsAuthenticatorUpdateReturns', {
+            'id':'int',
+            'authenticator':'str',
+            'attributes':'dict[str]',
+            'name':'str',
+    })
     @typing.overload
     def delete(self, 
         id:'int',
@@ -56,9 +208,85 @@ class AcmeDnsAuthenticator(Namespace):
             Will return `true` if `id` is deleted successfully
         """
         ...
+    AttributeSchema = typing.TypedDict('AttributeSchema', {
+            '_name_':'str',
+            'title':'str',
+            '_required_':'bool',
+    })
+    AuthenticatorSchema = typing.TypedDict('AuthenticatorSchema', {
+            'key':'str',
+            'schema':'list[AttributeSchema]',
+    })
+    AcmeDnsAuthenticatorCreate = typing.TypedDict('AcmeDnsAuthenticatorCreate', {
+            'authenticator':'str',
+            'attributes':'dict[str]',
+            'name':'str',
+    })
+    AcmeDnsAuthenticatorCreateReturns = typing.TypedDict('AcmeDnsAuthenticatorCreateReturns', {
+            'id':'int',
+            'authenticator':'str',
+            'attributes':'dict[str]',
+            'name':'str',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    AcmeDnsAuthenticatorEntry = typing.TypedDict('AcmeDnsAuthenticatorEntry', {
+            'id':'int',
+            'authenticator':'str',
+            'attributes':'dict[str]',
+            'name':'str',
+    })
+    AcmeDnsAuthenticatorEntry_ = typing.TypedDict('AcmeDnsAuthenticatorEntry_', {
+            'id':'int',
+            'authenticator':'str',
+            'attributes':'dict[str]',
+            'name':'str',
+    })
+    AcmeDnsAuthenticatorEntry__ = typing.TypedDict('AcmeDnsAuthenticatorEntry__', {
+            'id':'int',
+            'authenticator':'str',
+            'attributes':'dict[str]',
+            'name':'str',
+    })
+    DnsAuthenticatorUpdate = typing.TypedDict('DnsAuthenticatorUpdate', {
+            'attributes':'dict[str]',
+            'name':'str',
+    })
+    AcmeDnsAuthenticatorUpdateReturns = typing.TypedDict('AcmeDnsAuthenticatorUpdateReturns', {
+            'id':'int',
+            'authenticator':'str',
+            'attributes':'dict[str]',
+            'name':'str',
+    })
     @typing.overload
     def get_instance(self, 
-        id:'str|int|bool|dict[str]|list',
+        id:'typing.Union[str, int, bool, dict[str], list]',
         query_options_get_instance:'QueryOptionsGetInstance'={},
     /) -> None: 
         """
@@ -76,11 +304,87 @@ class AcmeDnsAuthenticator(Namespace):
         -------
         """
         ...
+    AttributeSchema = typing.TypedDict('AttributeSchema', {
+            '_name_':'str',
+            'title':'str',
+            '_required_':'bool',
+    })
+    AuthenticatorSchema = typing.TypedDict('AuthenticatorSchema', {
+            'key':'str',
+            'schema':'list[AttributeSchema]',
+    })
+    AcmeDnsAuthenticatorCreate = typing.TypedDict('AcmeDnsAuthenticatorCreate', {
+            'authenticator':'str',
+            'attributes':'dict[str]',
+            'name':'str',
+    })
+    AcmeDnsAuthenticatorCreateReturns = typing.TypedDict('AcmeDnsAuthenticatorCreateReturns', {
+            'id':'int',
+            'authenticator':'str',
+            'attributes':'dict[str]',
+            'name':'str',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    AcmeDnsAuthenticatorEntry = typing.TypedDict('AcmeDnsAuthenticatorEntry', {
+            'id':'int',
+            'authenticator':'str',
+            'attributes':'dict[str]',
+            'name':'str',
+    })
+    AcmeDnsAuthenticatorEntry_ = typing.TypedDict('AcmeDnsAuthenticatorEntry_', {
+            'id':'int',
+            'authenticator':'str',
+            'attributes':'dict[str]',
+            'name':'str',
+    })
+    AcmeDnsAuthenticatorEntry__ = typing.TypedDict('AcmeDnsAuthenticatorEntry__', {
+            'id':'int',
+            'authenticator':'str',
+            'attributes':'dict[str]',
+            'name':'str',
+    })
+    DnsAuthenticatorUpdate = typing.TypedDict('DnsAuthenticatorUpdate', {
+            'attributes':'dict[str]',
+            'name':'str',
+    })
+    AcmeDnsAuthenticatorUpdateReturns = typing.TypedDict('AcmeDnsAuthenticatorUpdateReturns', {
+            'id':'int',
+            'authenticator':'str',
+            'attributes':'dict[str]',
+            'name':'str',
+    })
     @typing.overload
     def query(self, 
         query_filters:'list[list]'=[],
         query_options:'QueryOptions'={},
-    /) -> 'list[AcmeDnsAuthenticatorEntry]|AcmeDnsAuthenticatorEntry|int|AcmeDnsAuthenticatorEntry': 
+    /) -> 'typing.Union[list[AcmeDnsAuthenticatorEntry], ForwardRef(AcmeDnsAuthenticatorEntry_), int, ForwardRef(AcmeDnsAuthenticatorEntry__)]': 
         """
         
 
@@ -92,16 +396,86 @@ class AcmeDnsAuthenticator(Namespace):
             query-options
         Returns
         -------
-        list[AcmeDnsAuthenticatorEntry]:
-            
-        AcmeDnsAuthenticatorEntry:
-            
-        int:
-            
-        AcmeDnsAuthenticatorEntry:
+        typing.Union[list[AcmeDnsAuthenticatorEntry], ForwardRef(AcmeDnsAuthenticatorEntry_), int, ForwardRef(AcmeDnsAuthenticatorEntry__)]:
             
         """
         ...
+    AttributeSchema = typing.TypedDict('AttributeSchema', {
+            '_name_':'str',
+            'title':'str',
+            '_required_':'bool',
+    })
+    AuthenticatorSchema = typing.TypedDict('AuthenticatorSchema', {
+            'key':'str',
+            'schema':'list[AttributeSchema]',
+    })
+    AcmeDnsAuthenticatorCreate = typing.TypedDict('AcmeDnsAuthenticatorCreate', {
+            'authenticator':'str',
+            'attributes':'dict[str]',
+            'name':'str',
+    })
+    AcmeDnsAuthenticatorCreateReturns = typing.TypedDict('AcmeDnsAuthenticatorCreateReturns', {
+            'id':'int',
+            'authenticator':'str',
+            'attributes':'dict[str]',
+            'name':'str',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    AcmeDnsAuthenticatorEntry = typing.TypedDict('AcmeDnsAuthenticatorEntry', {
+            'id':'int',
+            'authenticator':'str',
+            'attributes':'dict[str]',
+            'name':'str',
+    })
+    AcmeDnsAuthenticatorEntry_ = typing.TypedDict('AcmeDnsAuthenticatorEntry_', {
+            'id':'int',
+            'authenticator':'str',
+            'attributes':'dict[str]',
+            'name':'str',
+    })
+    AcmeDnsAuthenticatorEntry__ = typing.TypedDict('AcmeDnsAuthenticatorEntry__', {
+            'id':'int',
+            'authenticator':'str',
+            'attributes':'dict[str]',
+            'name':'str',
+    })
+    DnsAuthenticatorUpdate = typing.TypedDict('DnsAuthenticatorUpdate', {
+            'attributes':'dict[str]',
+            'name':'str',
+    })
+    AcmeDnsAuthenticatorUpdateReturns = typing.TypedDict('AcmeDnsAuthenticatorUpdateReturns', {
+            'id':'int',
+            'authenticator':'str',
+            'attributes':'dict[str]',
+            'name':'str',
+    })
     @typing.overload
     def update(self, 
         id:'int',
@@ -122,68 +496,80 @@ class AcmeDnsAuthenticator(Namespace):
             acme_dns_authenticator_update_returns
         """
         ...
+    AttributeSchema = typing.TypedDict('AttributeSchema', {
+            '_name_':'str',
+            'title':'str',
+            '_required_':'bool',
+    })
+    AuthenticatorSchema = typing.TypedDict('AuthenticatorSchema', {
+            'key':'str',
+            'schema':'list[AttributeSchema]',
+    })
+    AcmeDnsAuthenticatorCreate = typing.TypedDict('AcmeDnsAuthenticatorCreate', {
+            'authenticator':'str',
+            'attributes':'dict[str]',
+            'name':'str',
+    })
+    AcmeDnsAuthenticatorCreateReturns = typing.TypedDict('AcmeDnsAuthenticatorCreateReturns', {
+            'id':'int',
+            'authenticator':'str',
+            'attributes':'dict[str]',
+            'name':'str',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    AcmeDnsAuthenticatorEntry = typing.TypedDict('AcmeDnsAuthenticatorEntry', {
+            'id':'int',
+            'authenticator':'str',
+            'attributes':'dict[str]',
+            'name':'str',
+    })
+    AcmeDnsAuthenticatorEntry_ = typing.TypedDict('AcmeDnsAuthenticatorEntry_', {
+            'id':'int',
+            'authenticator':'str',
+            'attributes':'dict[str]',
+            'name':'str',
+    })
+    AcmeDnsAuthenticatorEntry__ = typing.TypedDict('AcmeDnsAuthenticatorEntry__', {
+            'id':'int',
+            'authenticator':'str',
+            'attributes':'dict[str]',
+            'name':'str',
+    })
+    DnsAuthenticatorUpdate = typing.TypedDict('DnsAuthenticatorUpdate', {
+            'attributes':'dict[str]',
+            'name':'str',
+    })
+    AcmeDnsAuthenticatorUpdateReturns = typing.TypedDict('AcmeDnsAuthenticatorUpdateReturns', {
+            'id':'int',
+            'authenticator':'str',
+            'attributes':'dict[str]',
+            'name':'str',
+    })
 
-class AuthenticatorSchema(typing.TypedDict):
-        key:'str'
-        schema:'list[AttributeSchema]'
-        ...
-class AttributeSchema(typing.TypedDict):
-        _name_:'str'
-        title:'str'
-        _required_:'bool'
-        ...
-class AcmeDnsAuthenticatorCreate(typing.TypedDict):
-        authenticator:'str'
-        attributes:'dict[str]'
-        name:'str'
-        ...
-class AcmeDnsAuthenticatorCreateReturns(typing.TypedDict):
-        id:'int'
-        authenticator:'str'
-        attributes:'dict[str]'
-        name:'str'
-        ...
-class QueryOptionsGetInstance(typing.TypedDict):
-        relationships:'bool'
-        extend:'typing.Optional[str]'
-        extend_context:'typing.Optional[str]'
-        prefix:'typing.Optional[str]'
-        extra:'dict[str]'
-        order_by:'list'
-        select:'list'
-        count:'bool'
-        get:'bool'
-        offset:'int'
-        limit:'int'
-        force_sql_filters:'bool'
-        ...
-class QueryOptions(typing.TypedDict):
-        relationships:'bool'
-        extend:'typing.Optional[str]'
-        extend_context:'typing.Optional[str]'
-        prefix:'typing.Optional[str]'
-        extra:'dict[str]'
-        order_by:'list'
-        select:'list'
-        count:'bool'
-        get:'bool'
-        offset:'int'
-        limit:'int'
-        force_sql_filters:'bool'
-        ...
-class AcmeDnsAuthenticatorEntry(typing.TypedDict):
-        id:'int'
-        authenticator:'str'
-        attributes:'dict[str]'
-        name:'str'
-        ...
-class DnsAuthenticatorUpdate(typing.TypedDict):
-        attributes:'dict[str]'
-        name:'str'
-        ...
-class AcmeDnsAuthenticatorUpdateReturns(typing.TypedDict):
-        id:'int'
-        authenticator:'str'
-        attributes:'dict[str]'
-        name:'str'
-        ...

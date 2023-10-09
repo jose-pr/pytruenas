@@ -30,6 +30,81 @@ class KerberosRealm(Namespace):
             kerberos_realm_create_returns
         """
         ...
+    KerberosRealmCreate = typing.TypedDict('KerberosRealmCreate', {
+            'realm':'str',
+            'kdc':'list',
+            'admin_server':'list',
+            'kpasswd_server':'list',
+    })
+    KerberosRealmCreateReturns = typing.TypedDict('KerberosRealmCreateReturns', {
+            'realm':'str',
+            'kdc':'list',
+            'admin_server':'list',
+            'kpasswd_server':'list',
+            'id':'int',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    KerberosRealmEntry = typing.TypedDict('KerberosRealmEntry', {
+            'realm':'str',
+            'kdc':'list',
+            'admin_server':'list',
+            'kpasswd_server':'list',
+            'id':'int',
+    })
+    KerberosRealmEntry_ = typing.TypedDict('KerberosRealmEntry_', {
+            'realm':'str',
+            'kdc':'list',
+            'admin_server':'list',
+            'kpasswd_server':'list',
+            'id':'int',
+    })
+    KerberosRealmEntry__ = typing.TypedDict('KerberosRealmEntry__', {
+            'realm':'str',
+            'kdc':'list',
+            'admin_server':'list',
+            'kpasswd_server':'list',
+            'id':'int',
+    })
+    KerberosRealmUpdate = typing.TypedDict('KerberosRealmUpdate', {
+            'realm':'str',
+            'kdc':'list',
+            'admin_server':'list',
+            'kpasswd_server':'list',
+    })
+    KerberosRealmUpdateReturns = typing.TypedDict('KerberosRealmUpdateReturns', {
+            'realm':'str',
+            'kdc':'list',
+            'admin_server':'list',
+            'kpasswd_server':'list',
+            'id':'int',
+    })
     @typing.overload
     def delete(self, 
         id:'int',
@@ -47,9 +122,84 @@ class KerberosRealm(Namespace):
             Will return `true` if `id` is deleted successfully
         """
         ...
+    KerberosRealmCreate = typing.TypedDict('KerberosRealmCreate', {
+            'realm':'str',
+            'kdc':'list',
+            'admin_server':'list',
+            'kpasswd_server':'list',
+    })
+    KerberosRealmCreateReturns = typing.TypedDict('KerberosRealmCreateReturns', {
+            'realm':'str',
+            'kdc':'list',
+            'admin_server':'list',
+            'kpasswd_server':'list',
+            'id':'int',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    KerberosRealmEntry = typing.TypedDict('KerberosRealmEntry', {
+            'realm':'str',
+            'kdc':'list',
+            'admin_server':'list',
+            'kpasswd_server':'list',
+            'id':'int',
+    })
+    KerberosRealmEntry_ = typing.TypedDict('KerberosRealmEntry_', {
+            'realm':'str',
+            'kdc':'list',
+            'admin_server':'list',
+            'kpasswd_server':'list',
+            'id':'int',
+    })
+    KerberosRealmEntry__ = typing.TypedDict('KerberosRealmEntry__', {
+            'realm':'str',
+            'kdc':'list',
+            'admin_server':'list',
+            'kpasswd_server':'list',
+            'id':'int',
+    })
+    KerberosRealmUpdate = typing.TypedDict('KerberosRealmUpdate', {
+            'realm':'str',
+            'kdc':'list',
+            'admin_server':'list',
+            'kpasswd_server':'list',
+    })
+    KerberosRealmUpdateReturns = typing.TypedDict('KerberosRealmUpdateReturns', {
+            'realm':'str',
+            'kdc':'list',
+            'admin_server':'list',
+            'kpasswd_server':'list',
+            'id':'int',
+    })
     @typing.overload
     def get_instance(self, 
-        id:'str|int|bool|dict[str]|list',
+        id:'typing.Union[str, int, bool, dict[str], list]',
         query_options_get_instance:'QueryOptionsGetInstance'={},
     /) -> None: 
         """
@@ -67,11 +217,86 @@ class KerberosRealm(Namespace):
         -------
         """
         ...
+    KerberosRealmCreate = typing.TypedDict('KerberosRealmCreate', {
+            'realm':'str',
+            'kdc':'list',
+            'admin_server':'list',
+            'kpasswd_server':'list',
+    })
+    KerberosRealmCreateReturns = typing.TypedDict('KerberosRealmCreateReturns', {
+            'realm':'str',
+            'kdc':'list',
+            'admin_server':'list',
+            'kpasswd_server':'list',
+            'id':'int',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    KerberosRealmEntry = typing.TypedDict('KerberosRealmEntry', {
+            'realm':'str',
+            'kdc':'list',
+            'admin_server':'list',
+            'kpasswd_server':'list',
+            'id':'int',
+    })
+    KerberosRealmEntry_ = typing.TypedDict('KerberosRealmEntry_', {
+            'realm':'str',
+            'kdc':'list',
+            'admin_server':'list',
+            'kpasswd_server':'list',
+            'id':'int',
+    })
+    KerberosRealmEntry__ = typing.TypedDict('KerberosRealmEntry__', {
+            'realm':'str',
+            'kdc':'list',
+            'admin_server':'list',
+            'kpasswd_server':'list',
+            'id':'int',
+    })
+    KerberosRealmUpdate = typing.TypedDict('KerberosRealmUpdate', {
+            'realm':'str',
+            'kdc':'list',
+            'admin_server':'list',
+            'kpasswd_server':'list',
+    })
+    KerberosRealmUpdateReturns = typing.TypedDict('KerberosRealmUpdateReturns', {
+            'realm':'str',
+            'kdc':'list',
+            'admin_server':'list',
+            'kpasswd_server':'list',
+            'id':'int',
+    })
     @typing.overload
     def query(self, 
         query_filters:'list[list]'=[],
         query_options:'QueryOptions'={},
-    /) -> 'list[KerberosRealmEntry]|KerberosRealmEntry|int|KerberosRealmEntry': 
+    /) -> 'typing.Union[list[KerberosRealmEntry], ForwardRef(KerberosRealmEntry_), int, ForwardRef(KerberosRealmEntry__)]': 
         """
         
 
@@ -83,16 +308,85 @@ class KerberosRealm(Namespace):
             query-options
         Returns
         -------
-        list[KerberosRealmEntry]:
-            
-        KerberosRealmEntry:
-            
-        int:
-            
-        KerberosRealmEntry:
+        typing.Union[list[KerberosRealmEntry], ForwardRef(KerberosRealmEntry_), int, ForwardRef(KerberosRealmEntry__)]:
             
         """
         ...
+    KerberosRealmCreate = typing.TypedDict('KerberosRealmCreate', {
+            'realm':'str',
+            'kdc':'list',
+            'admin_server':'list',
+            'kpasswd_server':'list',
+    })
+    KerberosRealmCreateReturns = typing.TypedDict('KerberosRealmCreateReturns', {
+            'realm':'str',
+            'kdc':'list',
+            'admin_server':'list',
+            'kpasswd_server':'list',
+            'id':'int',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    KerberosRealmEntry = typing.TypedDict('KerberosRealmEntry', {
+            'realm':'str',
+            'kdc':'list',
+            'admin_server':'list',
+            'kpasswd_server':'list',
+            'id':'int',
+    })
+    KerberosRealmEntry_ = typing.TypedDict('KerberosRealmEntry_', {
+            'realm':'str',
+            'kdc':'list',
+            'admin_server':'list',
+            'kpasswd_server':'list',
+            'id':'int',
+    })
+    KerberosRealmEntry__ = typing.TypedDict('KerberosRealmEntry__', {
+            'realm':'str',
+            'kdc':'list',
+            'admin_server':'list',
+            'kpasswd_server':'list',
+            'id':'int',
+    })
+    KerberosRealmUpdate = typing.TypedDict('KerberosRealmUpdate', {
+            'realm':'str',
+            'kdc':'list',
+            'admin_server':'list',
+            'kpasswd_server':'list',
+    })
+    KerberosRealmUpdateReturns = typing.TypedDict('KerberosRealmUpdateReturns', {
+            'realm':'str',
+            'kdc':'list',
+            'admin_server':'list',
+            'kpasswd_server':'list',
+            'id':'int',
+    })
     @typing.overload
     def update(self, 
         id:'int',
@@ -115,65 +409,79 @@ class KerberosRealm(Namespace):
             kerberos_realm_update_returns
         """
         ...
+    KerberosRealmCreate = typing.TypedDict('KerberosRealmCreate', {
+            'realm':'str',
+            'kdc':'list',
+            'admin_server':'list',
+            'kpasswd_server':'list',
+    })
+    KerberosRealmCreateReturns = typing.TypedDict('KerberosRealmCreateReturns', {
+            'realm':'str',
+            'kdc':'list',
+            'admin_server':'list',
+            'kpasswd_server':'list',
+            'id':'int',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    KerberosRealmEntry = typing.TypedDict('KerberosRealmEntry', {
+            'realm':'str',
+            'kdc':'list',
+            'admin_server':'list',
+            'kpasswd_server':'list',
+            'id':'int',
+    })
+    KerberosRealmEntry_ = typing.TypedDict('KerberosRealmEntry_', {
+            'realm':'str',
+            'kdc':'list',
+            'admin_server':'list',
+            'kpasswd_server':'list',
+            'id':'int',
+    })
+    KerberosRealmEntry__ = typing.TypedDict('KerberosRealmEntry__', {
+            'realm':'str',
+            'kdc':'list',
+            'admin_server':'list',
+            'kpasswd_server':'list',
+            'id':'int',
+    })
+    KerberosRealmUpdate = typing.TypedDict('KerberosRealmUpdate', {
+            'realm':'str',
+            'kdc':'list',
+            'admin_server':'list',
+            'kpasswd_server':'list',
+    })
+    KerberosRealmUpdateReturns = typing.TypedDict('KerberosRealmUpdateReturns', {
+            'realm':'str',
+            'kdc':'list',
+            'admin_server':'list',
+            'kpasswd_server':'list',
+            'id':'int',
+    })
 
-class KerberosRealmCreate(typing.TypedDict):
-        realm:'str'
-        kdc:'list'
-        admin_server:'list'
-        kpasswd_server:'list'
-        ...
-class KerberosRealmCreateReturns(typing.TypedDict):
-        realm:'str'
-        kdc:'list'
-        admin_server:'list'
-        kpasswd_server:'list'
-        id:'int'
-        ...
-class QueryOptionsGetInstance(typing.TypedDict):
-        relationships:'bool'
-        extend:'typing.Optional[str]'
-        extend_context:'typing.Optional[str]'
-        prefix:'typing.Optional[str]'
-        extra:'dict[str]'
-        order_by:'list'
-        select:'list'
-        count:'bool'
-        get:'bool'
-        offset:'int'
-        limit:'int'
-        force_sql_filters:'bool'
-        ...
-class QueryOptions(typing.TypedDict):
-        relationships:'bool'
-        extend:'typing.Optional[str]'
-        extend_context:'typing.Optional[str]'
-        prefix:'typing.Optional[str]'
-        extra:'dict[str]'
-        order_by:'list'
-        select:'list'
-        count:'bool'
-        get:'bool'
-        offset:'int'
-        limit:'int'
-        force_sql_filters:'bool'
-        ...
-class KerberosRealmEntry(typing.TypedDict):
-        realm:'str'
-        kdc:'list'
-        admin_server:'list'
-        kpasswd_server:'list'
-        id:'int'
-        ...
-class KerberosRealmUpdate(typing.TypedDict):
-        realm:'str'
-        kdc:'list'
-        admin_server:'list'
-        kpasswd_server:'list'
-        ...
-class KerberosRealmUpdateReturns(typing.TypedDict):
-        realm:'str'
-        kdc:'list'
-        admin_server:'list'
-        kpasswd_server:'list'
-        id:'int'
-        ...

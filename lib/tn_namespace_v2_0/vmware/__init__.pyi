@@ -28,6 +28,58 @@ class Vmware(Namespace):
             vmware_create_returns
         """
         ...
+    VmwareCreate = typing.TypedDict('VmwareCreate', {
+            'datastore':'str',
+            'filesystem':'str',
+            'hostname':'str',
+            'password':'str',
+            'username':'str',
+    })
+    VmwareCreds = typing.TypedDict('VmwareCreds', {
+            'hostname':'str',
+            'username':'str',
+            'password':'str',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    VmwareCreds_ = typing.TypedDict('VmwareCreds_', {
+            'hostname':'str',
+            'username':'str',
+            'password':'str',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    VmwareUpdate = typing.TypedDict('VmwareUpdate', {
+            'datastore':'str',
+            'filesystem':'str',
+            'hostname':'str',
+            'password':'str',
+            'username':'str',
+    })
     @typing.overload
     def dataset_has_vms(self, 
         dataset:'str',
@@ -46,6 +98,58 @@ class Vmware(Namespace):
         -------
         """
         ...
+    VmwareCreate = typing.TypedDict('VmwareCreate', {
+            'datastore':'str',
+            'filesystem':'str',
+            'hostname':'str',
+            'password':'str',
+            'username':'str',
+    })
+    VmwareCreds = typing.TypedDict('VmwareCreds', {
+            'hostname':'str',
+            'username':'str',
+            'password':'str',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    VmwareCreds_ = typing.TypedDict('VmwareCreds_', {
+            'hostname':'str',
+            'username':'str',
+            'password':'str',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    VmwareUpdate = typing.TypedDict('VmwareUpdate', {
+            'datastore':'str',
+            'filesystem':'str',
+            'hostname':'str',
+            'password':'str',
+            'username':'str',
+    })
     @typing.overload
     def delete(self, 
         id:'int',
@@ -63,6 +167,58 @@ class Vmware(Namespace):
             Will return `true` if `id` is deleted successfully
         """
         ...
+    VmwareCreate = typing.TypedDict('VmwareCreate', {
+            'datastore':'str',
+            'filesystem':'str',
+            'hostname':'str',
+            'password':'str',
+            'username':'str',
+    })
+    VmwareCreds = typing.TypedDict('VmwareCreds', {
+            'hostname':'str',
+            'username':'str',
+            'password':'str',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    VmwareCreds_ = typing.TypedDict('VmwareCreds_', {
+            'hostname':'str',
+            'username':'str',
+            'password':'str',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    VmwareUpdate = typing.TypedDict('VmwareUpdate', {
+            'datastore':'str',
+            'filesystem':'str',
+            'hostname':'str',
+            'password':'str',
+            'username':'str',
+    })
     @typing.overload
     def get_datastores(self, 
         vmware_creds:'VmwareCreds'={},
@@ -78,9 +234,61 @@ class Vmware(Namespace):
         -------
         """
         ...
+    VmwareCreate = typing.TypedDict('VmwareCreate', {
+            'datastore':'str',
+            'filesystem':'str',
+            'hostname':'str',
+            'password':'str',
+            'username':'str',
+    })
+    VmwareCreds = typing.TypedDict('VmwareCreds', {
+            'hostname':'str',
+            'username':'str',
+            'password':'str',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    VmwareCreds_ = typing.TypedDict('VmwareCreds_', {
+            'hostname':'str',
+            'username':'str',
+            'password':'str',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    VmwareUpdate = typing.TypedDict('VmwareUpdate', {
+            'datastore':'str',
+            'filesystem':'str',
+            'hostname':'str',
+            'password':'str',
+            'username':'str',
+    })
     @typing.overload
     def get_instance(self, 
-        id:'str|int|bool|dict[str]|list',
+        id:'typing.Union[str, int, bool, dict[str], list]',
         query_options_get_instance:'QueryOptionsGetInstance'={},
     /) -> None: 
         """
@@ -98,6 +306,58 @@ class Vmware(Namespace):
         -------
         """
         ...
+    VmwareCreate = typing.TypedDict('VmwareCreate', {
+            'datastore':'str',
+            'filesystem':'str',
+            'hostname':'str',
+            'password':'str',
+            'username':'str',
+    })
+    VmwareCreds = typing.TypedDict('VmwareCreds', {
+            'hostname':'str',
+            'username':'str',
+            'password':'str',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    VmwareCreds_ = typing.TypedDict('VmwareCreds_', {
+            'hostname':'str',
+            'username':'str',
+            'password':'str',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    VmwareUpdate = typing.TypedDict('VmwareUpdate', {
+            'datastore':'str',
+            'filesystem':'str',
+            'hostname':'str',
+            'password':'str',
+            'username':'str',
+    })
     @typing.overload
     def get_virtual_machines(self, 
         pk:'int',
@@ -113,9 +373,61 @@ class Vmware(Namespace):
         -------
         """
         ...
+    VmwareCreate = typing.TypedDict('VmwareCreate', {
+            'datastore':'str',
+            'filesystem':'str',
+            'hostname':'str',
+            'password':'str',
+            'username':'str',
+    })
+    VmwareCreds = typing.TypedDict('VmwareCreds', {
+            'hostname':'str',
+            'username':'str',
+            'password':'str',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    VmwareCreds_ = typing.TypedDict('VmwareCreds_', {
+            'hostname':'str',
+            'username':'str',
+            'password':'str',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    VmwareUpdate = typing.TypedDict('VmwareUpdate', {
+            'datastore':'str',
+            'filesystem':'str',
+            'hostname':'str',
+            'password':'str',
+            'username':'str',
+    })
     @typing.overload
     def match_datastores_with_datasets(self, 
-        vmware_creds:'VmwareCreds'={},
+        vmware_creds:'VmwareCreds_'={},
     /) -> None: 
         """
         Requests datastores from vCenter server and tries to match them with local filesystems.
@@ -130,11 +442,63 @@ class Vmware(Namespace):
         -------
         """
         ...
+    VmwareCreate = typing.TypedDict('VmwareCreate', {
+            'datastore':'str',
+            'filesystem':'str',
+            'hostname':'str',
+            'password':'str',
+            'username':'str',
+    })
+    VmwareCreds = typing.TypedDict('VmwareCreds', {
+            'hostname':'str',
+            'username':'str',
+            'password':'str',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    VmwareCreds_ = typing.TypedDict('VmwareCreds_', {
+            'hostname':'str',
+            'username':'str',
+            'password':'str',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    VmwareUpdate = typing.TypedDict('VmwareUpdate', {
+            'datastore':'str',
+            'filesystem':'str',
+            'hostname':'str',
+            'password':'str',
+            'username':'str',
+    })
     @typing.overload
     def query(self, 
         query_filters:'list[list]'=[],
         query_options:'QueryOptions'={},
-    /) -> 'list[dict[str]]|dict[str]|int|dict[str]': 
+    /) -> 'typing.Union[list[dict[str]], dict[str], int]': 
         """
         
 
@@ -146,16 +510,62 @@ class Vmware(Namespace):
             query-options
         Returns
         -------
-        list[dict[str]]:
-            
-        dict[str]:
-            
-        int:
-            
-        dict[str]:
+        typing.Union[list[dict[str]], dict[str], int]:
             
         """
         ...
+    VmwareCreate = typing.TypedDict('VmwareCreate', {
+            'datastore':'str',
+            'filesystem':'str',
+            'hostname':'str',
+            'password':'str',
+            'username':'str',
+    })
+    VmwareCreds = typing.TypedDict('VmwareCreds', {
+            'hostname':'str',
+            'username':'str',
+            'password':'str',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    VmwareCreds_ = typing.TypedDict('VmwareCreds_', {
+            'hostname':'str',
+            'username':'str',
+            'password':'str',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    VmwareUpdate = typing.TypedDict('VmwareUpdate', {
+            'datastore':'str',
+            'filesystem':'str',
+            'hostname':'str',
+            'password':'str',
+            'username':'str',
+    })
     @typing.overload
     def update(self, 
         id:'int',
@@ -177,51 +587,56 @@ class Vmware(Namespace):
             vmware_update_returns
         """
         ...
+    VmwareCreate = typing.TypedDict('VmwareCreate', {
+            'datastore':'str',
+            'filesystem':'str',
+            'hostname':'str',
+            'password':'str',
+            'username':'str',
+    })
+    VmwareCreds = typing.TypedDict('VmwareCreds', {
+            'hostname':'str',
+            'username':'str',
+            'password':'str',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    VmwareCreds_ = typing.TypedDict('VmwareCreds_', {
+            'hostname':'str',
+            'username':'str',
+            'password':'str',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    VmwareUpdate = typing.TypedDict('VmwareUpdate', {
+            'datastore':'str',
+            'filesystem':'str',
+            'hostname':'str',
+            'password':'str',
+            'username':'str',
+    })
 
-class VmwareCreate(typing.TypedDict):
-        datastore:'str'
-        filesystem:'str'
-        hostname:'str'
-        password:'str'
-        username:'str'
-        ...
-class VmwareCreds(typing.TypedDict):
-        hostname:'str'
-        username:'str'
-        password:'str'
-        ...
-class QueryOptionsGetInstance(typing.TypedDict):
-        relationships:'bool'
-        extend:'typing.Optional[str]'
-        extend_context:'typing.Optional[str]'
-        prefix:'typing.Optional[str]'
-        extra:'dict[str]'
-        order_by:'list'
-        select:'list'
-        count:'bool'
-        get:'bool'
-        offset:'int'
-        limit:'int'
-        force_sql_filters:'bool'
-        ...
-class QueryOptions(typing.TypedDict):
-        relationships:'bool'
-        extend:'typing.Optional[str]'
-        extend_context:'typing.Optional[str]'
-        prefix:'typing.Optional[str]'
-        extra:'dict[str]'
-        order_by:'list'
-        select:'list'
-        count:'bool'
-        get:'bool'
-        offset:'int'
-        limit:'int'
-        force_sql_filters:'bool'
-        ...
-class VmwareUpdate(typing.TypedDict):
-        datastore:'str'
-        filesystem:'str'
-        hostname:'str'
-        password:'str'
-        username:'str'
-        ...

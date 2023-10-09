@@ -29,6 +29,81 @@ class GlusterPeer(Namespace):
             gluster_peer_create_returns
         """
         ...
+    PeerCreate = typing.TypedDict('PeerCreate', {
+            'hostname':'str',
+            'private_address':'str',
+    })
+    GlusterPeerCreateReturns = typing.TypedDict('GlusterPeerCreateReturns', {
+            'id':'str',
+            'uuid':'str',
+            'hostname':'str',
+            'connected':'str',
+            'state':'str',
+            'status':'str',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    GlusterPeerEntry = typing.TypedDict('GlusterPeerEntry', {
+            'id':'str',
+            'uuid':'str',
+            'hostname':'str',
+            'connected':'str',
+            'state':'str',
+            'status':'str',
+    })
+    GlusterPeerEntry_ = typing.TypedDict('GlusterPeerEntry_', {
+            'id':'str',
+            'uuid':'str',
+            'hostname':'str',
+            'connected':'str',
+            'state':'str',
+            'status':'str',
+    })
+    GlusterPeerEntry__ = typing.TypedDict('GlusterPeerEntry__', {
+            'id':'str',
+            'uuid':'str',
+            'hostname':'str',
+            'connected':'str',
+            'state':'str',
+            'status':'str',
+    })
+    PeerStatus = typing.TypedDict('PeerStatus', {
+            'localhost':'bool',
+    })
+    GlusterPeerEntry___ = typing.TypedDict('GlusterPeerEntry___', {
+            'id':'str',
+            'uuid':'str',
+            'hostname':'str',
+            'connected':'str',
+            'state':'str',
+            'status':'str',
+    })
     @typing.overload
     def delete(self, 
         id:'str',
@@ -50,9 +125,84 @@ class GlusterPeer(Namespace):
         -------
         """
         ...
+    PeerCreate = typing.TypedDict('PeerCreate', {
+            'hostname':'str',
+            'private_address':'str',
+    })
+    GlusterPeerCreateReturns = typing.TypedDict('GlusterPeerCreateReturns', {
+            'id':'str',
+            'uuid':'str',
+            'hostname':'str',
+            'connected':'str',
+            'state':'str',
+            'status':'str',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    GlusterPeerEntry = typing.TypedDict('GlusterPeerEntry', {
+            'id':'str',
+            'uuid':'str',
+            'hostname':'str',
+            'connected':'str',
+            'state':'str',
+            'status':'str',
+    })
+    GlusterPeerEntry_ = typing.TypedDict('GlusterPeerEntry_', {
+            'id':'str',
+            'uuid':'str',
+            'hostname':'str',
+            'connected':'str',
+            'state':'str',
+            'status':'str',
+    })
+    GlusterPeerEntry__ = typing.TypedDict('GlusterPeerEntry__', {
+            'id':'str',
+            'uuid':'str',
+            'hostname':'str',
+            'connected':'str',
+            'state':'str',
+            'status':'str',
+    })
+    PeerStatus = typing.TypedDict('PeerStatus', {
+            'localhost':'bool',
+    })
+    GlusterPeerEntry___ = typing.TypedDict('GlusterPeerEntry___', {
+            'id':'str',
+            'uuid':'str',
+            'hostname':'str',
+            'connected':'str',
+            'state':'str',
+            'status':'str',
+    })
     @typing.overload
     def get_instance(self, 
-        id:'str|int|bool|dict[str]|list',
+        id:'typing.Union[str, int, bool, dict[str], list]',
         query_options_get_instance:'QueryOptionsGetInstance'={},
     /) -> None: 
         """
@@ -70,6 +220,81 @@ class GlusterPeer(Namespace):
         -------
         """
         ...
+    PeerCreate = typing.TypedDict('PeerCreate', {
+            'hostname':'str',
+            'private_address':'str',
+    })
+    GlusterPeerCreateReturns = typing.TypedDict('GlusterPeerCreateReturns', {
+            'id':'str',
+            'uuid':'str',
+            'hostname':'str',
+            'connected':'str',
+            'state':'str',
+            'status':'str',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    GlusterPeerEntry = typing.TypedDict('GlusterPeerEntry', {
+            'id':'str',
+            'uuid':'str',
+            'hostname':'str',
+            'connected':'str',
+            'state':'str',
+            'status':'str',
+    })
+    GlusterPeerEntry_ = typing.TypedDict('GlusterPeerEntry_', {
+            'id':'str',
+            'uuid':'str',
+            'hostname':'str',
+            'connected':'str',
+            'state':'str',
+            'status':'str',
+    })
+    GlusterPeerEntry__ = typing.TypedDict('GlusterPeerEntry__', {
+            'id':'str',
+            'uuid':'str',
+            'hostname':'str',
+            'connected':'str',
+            'state':'str',
+            'status':'str',
+    })
+    PeerStatus = typing.TypedDict('PeerStatus', {
+            'localhost':'bool',
+    })
+    GlusterPeerEntry___ = typing.TypedDict('GlusterPeerEntry___', {
+            'id':'str',
+            'uuid':'str',
+            'hostname':'str',
+            'connected':'str',
+            'state':'str',
+            'status':'str',
+    })
     @typing.overload
     def ips_available(self, 
     /) -> 'list[str]': 
@@ -84,11 +309,86 @@ class GlusterPeer(Namespace):
             ips
         """
         ...
+    PeerCreate = typing.TypedDict('PeerCreate', {
+            'hostname':'str',
+            'private_address':'str',
+    })
+    GlusterPeerCreateReturns = typing.TypedDict('GlusterPeerCreateReturns', {
+            'id':'str',
+            'uuid':'str',
+            'hostname':'str',
+            'connected':'str',
+            'state':'str',
+            'status':'str',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    GlusterPeerEntry = typing.TypedDict('GlusterPeerEntry', {
+            'id':'str',
+            'uuid':'str',
+            'hostname':'str',
+            'connected':'str',
+            'state':'str',
+            'status':'str',
+    })
+    GlusterPeerEntry_ = typing.TypedDict('GlusterPeerEntry_', {
+            'id':'str',
+            'uuid':'str',
+            'hostname':'str',
+            'connected':'str',
+            'state':'str',
+            'status':'str',
+    })
+    GlusterPeerEntry__ = typing.TypedDict('GlusterPeerEntry__', {
+            'id':'str',
+            'uuid':'str',
+            'hostname':'str',
+            'connected':'str',
+            'state':'str',
+            'status':'str',
+    })
+    PeerStatus = typing.TypedDict('PeerStatus', {
+            'localhost':'bool',
+    })
+    GlusterPeerEntry___ = typing.TypedDict('GlusterPeerEntry___', {
+            'id':'str',
+            'uuid':'str',
+            'hostname':'str',
+            'connected':'str',
+            'state':'str',
+            'status':'str',
+    })
     @typing.overload
     def query(self, 
         query_filters:'list[list]'=[],
         query_options:'QueryOptions'={},
-    /) -> 'list[GlusterPeerEntry]|GlusterPeerEntry|int|GlusterPeerEntry': 
+    /) -> 'typing.Union[list[GlusterPeerEntry], ForwardRef(GlusterPeerEntry_), int, ForwardRef(GlusterPeerEntry__)]': 
         """
         
 
@@ -100,20 +400,89 @@ class GlusterPeer(Namespace):
             query-options
         Returns
         -------
-        list[GlusterPeerEntry]:
-            
-        GlusterPeerEntry:
-            
-        int:
-            
-        GlusterPeerEntry:
+        typing.Union[list[GlusterPeerEntry], ForwardRef(GlusterPeerEntry_), int, ForwardRef(GlusterPeerEntry__)]:
             
         """
         ...
+    PeerCreate = typing.TypedDict('PeerCreate', {
+            'hostname':'str',
+            'private_address':'str',
+    })
+    GlusterPeerCreateReturns = typing.TypedDict('GlusterPeerCreateReturns', {
+            'id':'str',
+            'uuid':'str',
+            'hostname':'str',
+            'connected':'str',
+            'state':'str',
+            'status':'str',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    GlusterPeerEntry = typing.TypedDict('GlusterPeerEntry', {
+            'id':'str',
+            'uuid':'str',
+            'hostname':'str',
+            'connected':'str',
+            'state':'str',
+            'status':'str',
+    })
+    GlusterPeerEntry_ = typing.TypedDict('GlusterPeerEntry_', {
+            'id':'str',
+            'uuid':'str',
+            'hostname':'str',
+            'connected':'str',
+            'state':'str',
+            'status':'str',
+    })
+    GlusterPeerEntry__ = typing.TypedDict('GlusterPeerEntry__', {
+            'id':'str',
+            'uuid':'str',
+            'hostname':'str',
+            'connected':'str',
+            'state':'str',
+            'status':'str',
+    })
+    PeerStatus = typing.TypedDict('PeerStatus', {
+            'localhost':'bool',
+    })
+    GlusterPeerEntry___ = typing.TypedDict('GlusterPeerEntry___', {
+            'id':'str',
+            'uuid':'str',
+            'hostname':'str',
+            'connected':'str',
+            'state':'str',
+            'status':'str',
+    })
     @typing.overload
     def status(self, 
         peer_status:'PeerStatus'={},
-    /) -> 'list[GlusterPeerEntry]': 
+    /) -> 'list[GlusterPeerEntry___]': 
         """
         List the status of peers in the Trusted Storage Pool.
         
@@ -125,59 +494,83 @@ class GlusterPeer(Namespace):
             peer_status
         Returns
         -------
-        list[GlusterPeerEntry]:
+        list[GlusterPeerEntry___]:
             peers
         """
         ...
+    PeerCreate = typing.TypedDict('PeerCreate', {
+            'hostname':'str',
+            'private_address':'str',
+    })
+    GlusterPeerCreateReturns = typing.TypedDict('GlusterPeerCreateReturns', {
+            'id':'str',
+            'uuid':'str',
+            'hostname':'str',
+            'connected':'str',
+            'state':'str',
+            'status':'str',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    GlusterPeerEntry = typing.TypedDict('GlusterPeerEntry', {
+            'id':'str',
+            'uuid':'str',
+            'hostname':'str',
+            'connected':'str',
+            'state':'str',
+            'status':'str',
+    })
+    GlusterPeerEntry_ = typing.TypedDict('GlusterPeerEntry_', {
+            'id':'str',
+            'uuid':'str',
+            'hostname':'str',
+            'connected':'str',
+            'state':'str',
+            'status':'str',
+    })
+    GlusterPeerEntry__ = typing.TypedDict('GlusterPeerEntry__', {
+            'id':'str',
+            'uuid':'str',
+            'hostname':'str',
+            'connected':'str',
+            'state':'str',
+            'status':'str',
+    })
+    PeerStatus = typing.TypedDict('PeerStatus', {
+            'localhost':'bool',
+    })
+    GlusterPeerEntry___ = typing.TypedDict('GlusterPeerEntry___', {
+            'id':'str',
+            'uuid':'str',
+            'hostname':'str',
+            'connected':'str',
+            'state':'str',
+            'status':'str',
+    })
 
-class PeerCreate(typing.TypedDict):
-        hostname:'str'
-        private_address:'str'
-        ...
-class GlusterPeerCreateReturns(typing.TypedDict):
-        id:'str'
-        uuid:'str'
-        hostname:'str'
-        connected:'str'
-        state:'str'
-        status:'str'
-        ...
-class QueryOptionsGetInstance(typing.TypedDict):
-        relationships:'bool'
-        extend:'typing.Optional[str]'
-        extend_context:'typing.Optional[str]'
-        prefix:'typing.Optional[str]'
-        extra:'dict[str]'
-        order_by:'list'
-        select:'list'
-        count:'bool'
-        get:'bool'
-        offset:'int'
-        limit:'int'
-        force_sql_filters:'bool'
-        ...
-class QueryOptions(typing.TypedDict):
-        relationships:'bool'
-        extend:'typing.Optional[str]'
-        extend_context:'typing.Optional[str]'
-        prefix:'typing.Optional[str]'
-        extra:'dict[str]'
-        order_by:'list'
-        select:'list'
-        count:'bool'
-        get:'bool'
-        offset:'int'
-        limit:'int'
-        force_sql_filters:'bool'
-        ...
-class GlusterPeerEntry(typing.TypedDict):
-        id:'str'
-        uuid:'str'
-        hostname:'str'
-        connected:'str'
-        state:'str'
-        status:'str'
-        ...
-class PeerStatus(typing.TypedDict):
-        localhost:'bool'
-        ...

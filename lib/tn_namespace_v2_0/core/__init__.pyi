@@ -8,7 +8,7 @@ class Core(Namespace):
     def bulk(self, 
         method:'str',
         params:'list'=[],
-        description:'str|None'=None,
+        description:'typing.Optional[str]'=None,
     /) -> None: 
         """
         Will sequentially call `method` with arguments from the `params` list. For example, running
@@ -44,6 +44,117 @@ class Core(Namespace):
         -------
         """
         ...
+    Options = typing.TypedDict('Options', {
+            'bind_address':'str',
+            'bind_port':'int',
+            'threaded':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Progress = typing.TypedDict('Progress', {
+            'percent':'typing.Optional[int]',
+            'description':'typing.Optional[str]',
+            'extra':'typing.Union[str, int, bool, dict[str], list]',
+    })
+    ExcInfo = typing.TypedDict('ExcInfo', {
+            'repr':'typing.Optional[str]',
+            'type':'typing.Optional[str]',
+            'extra':'typing.Union[str, int, bool, dict[str], list]',
+    })
+    Job = typing.TypedDict('Job', {
+            'id':'int',
+            'method':'str',
+            'arguments':'list',
+            'transient':'bool',
+            'description':'typing.Optional[str]',
+            'abortable':'bool',
+            'logs_path':'typing.Optional[str]',
+            'logs_excerpt':'typing.Optional[str]',
+            'progress':'Progress',
+            'result':'typing.Union[str, int, bool, dict[str], list]',
+            'error':'typing.Optional[str]',
+            'exception':'typing.Optional[str]',
+            'exc_info':'ExcInfo',
+            'state':'str',
+            'time_started':'typing.Optional[str]',
+            'time_finished':'typing.Optional[str]',
+    })
+    Progress_ = typing.TypedDict('Progress_', {
+            'percent':'typing.Optional[int]',
+            'description':'typing.Optional[str]',
+            'extra':'typing.Union[str, int, bool, dict[str], list]',
+    })
+    ExcInfo_ = typing.TypedDict('ExcInfo_', {
+            'repr':'typing.Optional[str]',
+            'type':'typing.Optional[str]',
+            'extra':'typing.Union[str, int, bool, dict[str], list]',
+    })
+    Job_ = typing.TypedDict('Job_', {
+            'id':'int',
+            'method':'str',
+            'arguments':'list',
+            'transient':'bool',
+            'description':'typing.Optional[str]',
+            'abortable':'bool',
+            'logs_path':'typing.Optional[str]',
+            'logs_excerpt':'typing.Optional[str]',
+            'progress':'Progress_',
+            'result':'typing.Union[str, int, bool, dict[str], list]',
+            'error':'typing.Optional[str]',
+            'exception':'typing.Optional[str]',
+            'exc_info':'ExcInfo_',
+            'state':'str',
+            'time_started':'typing.Optional[str]',
+            'time_finished':'typing.Optional[str]',
+    })
+    JobUpdate = typing.TypedDict('JobUpdate', {
+            'progress':'dict[str]',
+    })
+    Options_ = typing.TypedDict('Options_', {
+            'type':'str',
+            'hostname':'str',
+            'timeout':'int',
+    })
+    QueryOptions_ = typing.TypedDict('QueryOptions_', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Session = typing.TypedDict('Session', {
+            'id':'str',
+            'socket_family':'str',
+            'address':'str',
+            'authenticated':'bool',
+            'call_count':'int',
+    })
+    Session_ = typing.TypedDict('Session_', {
+            'id':'str',
+            'socket_family':'str',
+            'address':'str',
+            'authenticated':'bool',
+            'call_count':'int',
+    })
     @typing.overload
     def debug(self, 
         options:'Options'={},
@@ -67,6 +178,117 @@ class Core(Namespace):
         -------
         """
         ...
+    Options = typing.TypedDict('Options', {
+            'bind_address':'str',
+            'bind_port':'int',
+            'threaded':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Progress = typing.TypedDict('Progress', {
+            'percent':'typing.Optional[int]',
+            'description':'typing.Optional[str]',
+            'extra':'typing.Union[str, int, bool, dict[str], list]',
+    })
+    ExcInfo = typing.TypedDict('ExcInfo', {
+            'repr':'typing.Optional[str]',
+            'type':'typing.Optional[str]',
+            'extra':'typing.Union[str, int, bool, dict[str], list]',
+    })
+    Job = typing.TypedDict('Job', {
+            'id':'int',
+            'method':'str',
+            'arguments':'list',
+            'transient':'bool',
+            'description':'typing.Optional[str]',
+            'abortable':'bool',
+            'logs_path':'typing.Optional[str]',
+            'logs_excerpt':'typing.Optional[str]',
+            'progress':'Progress',
+            'result':'typing.Union[str, int, bool, dict[str], list]',
+            'error':'typing.Optional[str]',
+            'exception':'typing.Optional[str]',
+            'exc_info':'ExcInfo',
+            'state':'str',
+            'time_started':'typing.Optional[str]',
+            'time_finished':'typing.Optional[str]',
+    })
+    Progress_ = typing.TypedDict('Progress_', {
+            'percent':'typing.Optional[int]',
+            'description':'typing.Optional[str]',
+            'extra':'typing.Union[str, int, bool, dict[str], list]',
+    })
+    ExcInfo_ = typing.TypedDict('ExcInfo_', {
+            'repr':'typing.Optional[str]',
+            'type':'typing.Optional[str]',
+            'extra':'typing.Union[str, int, bool, dict[str], list]',
+    })
+    Job_ = typing.TypedDict('Job_', {
+            'id':'int',
+            'method':'str',
+            'arguments':'list',
+            'transient':'bool',
+            'description':'typing.Optional[str]',
+            'abortable':'bool',
+            'logs_path':'typing.Optional[str]',
+            'logs_excerpt':'typing.Optional[str]',
+            'progress':'Progress_',
+            'result':'typing.Union[str, int, bool, dict[str], list]',
+            'error':'typing.Optional[str]',
+            'exception':'typing.Optional[str]',
+            'exc_info':'ExcInfo_',
+            'state':'str',
+            'time_started':'typing.Optional[str]',
+            'time_finished':'typing.Optional[str]',
+    })
+    JobUpdate = typing.TypedDict('JobUpdate', {
+            'progress':'dict[str]',
+    })
+    Options_ = typing.TypedDict('Options_', {
+            'type':'str',
+            'hostname':'str',
+            'timeout':'int',
+    })
+    QueryOptions_ = typing.TypedDict('QueryOptions_', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Session = typing.TypedDict('Session', {
+            'id':'str',
+            'socket_family':'str',
+            'address':'str',
+            'authenticated':'bool',
+            'call_count':'int',
+    })
+    Session_ = typing.TypedDict('Session_', {
+            'id':'str',
+            'socket_family':'str',
+            'address':'str',
+            'authenticated':'bool',
+            'call_count':'int',
+    })
     @typing.overload
     def debug_mode_enabled(self, 
     /) -> 'bool': 
@@ -81,6 +303,117 @@ class Core(Namespace):
             debug_mode_enabled
         """
         ...
+    Options = typing.TypedDict('Options', {
+            'bind_address':'str',
+            'bind_port':'int',
+            'threaded':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Progress = typing.TypedDict('Progress', {
+            'percent':'typing.Optional[int]',
+            'description':'typing.Optional[str]',
+            'extra':'typing.Union[str, int, bool, dict[str], list]',
+    })
+    ExcInfo = typing.TypedDict('ExcInfo', {
+            'repr':'typing.Optional[str]',
+            'type':'typing.Optional[str]',
+            'extra':'typing.Union[str, int, bool, dict[str], list]',
+    })
+    Job = typing.TypedDict('Job', {
+            'id':'int',
+            'method':'str',
+            'arguments':'list',
+            'transient':'bool',
+            'description':'typing.Optional[str]',
+            'abortable':'bool',
+            'logs_path':'typing.Optional[str]',
+            'logs_excerpt':'typing.Optional[str]',
+            'progress':'Progress',
+            'result':'typing.Union[str, int, bool, dict[str], list]',
+            'error':'typing.Optional[str]',
+            'exception':'typing.Optional[str]',
+            'exc_info':'ExcInfo',
+            'state':'str',
+            'time_started':'typing.Optional[str]',
+            'time_finished':'typing.Optional[str]',
+    })
+    Progress_ = typing.TypedDict('Progress_', {
+            'percent':'typing.Optional[int]',
+            'description':'typing.Optional[str]',
+            'extra':'typing.Union[str, int, bool, dict[str], list]',
+    })
+    ExcInfo_ = typing.TypedDict('ExcInfo_', {
+            'repr':'typing.Optional[str]',
+            'type':'typing.Optional[str]',
+            'extra':'typing.Union[str, int, bool, dict[str], list]',
+    })
+    Job_ = typing.TypedDict('Job_', {
+            'id':'int',
+            'method':'str',
+            'arguments':'list',
+            'transient':'bool',
+            'description':'typing.Optional[str]',
+            'abortable':'bool',
+            'logs_path':'typing.Optional[str]',
+            'logs_excerpt':'typing.Optional[str]',
+            'progress':'Progress_',
+            'result':'typing.Union[str, int, bool, dict[str], list]',
+            'error':'typing.Optional[str]',
+            'exception':'typing.Optional[str]',
+            'exc_info':'ExcInfo_',
+            'state':'str',
+            'time_started':'typing.Optional[str]',
+            'time_finished':'typing.Optional[str]',
+    })
+    JobUpdate = typing.TypedDict('JobUpdate', {
+            'progress':'dict[str]',
+    })
+    Options_ = typing.TypedDict('Options_', {
+            'type':'str',
+            'hostname':'str',
+            'timeout':'int',
+    })
+    QueryOptions_ = typing.TypedDict('QueryOptions_', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Session = typing.TypedDict('Session', {
+            'id':'str',
+            'socket_family':'str',
+            'address':'str',
+            'authenticated':'bool',
+            'call_count':'int',
+    })
+    Session_ = typing.TypedDict('Session_', {
+            'id':'str',
+            'socket_family':'str',
+            'address':'str',
+            'authenticated':'bool',
+            'call_count':'int',
+    })
     @typing.overload
     def download(self, 
         method:'str',
@@ -113,6 +446,117 @@ class Core(Namespace):
         -------
         """
         ...
+    Options = typing.TypedDict('Options', {
+            'bind_address':'str',
+            'bind_port':'int',
+            'threaded':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Progress = typing.TypedDict('Progress', {
+            'percent':'typing.Optional[int]',
+            'description':'typing.Optional[str]',
+            'extra':'typing.Union[str, int, bool, dict[str], list]',
+    })
+    ExcInfo = typing.TypedDict('ExcInfo', {
+            'repr':'typing.Optional[str]',
+            'type':'typing.Optional[str]',
+            'extra':'typing.Union[str, int, bool, dict[str], list]',
+    })
+    Job = typing.TypedDict('Job', {
+            'id':'int',
+            'method':'str',
+            'arguments':'list',
+            'transient':'bool',
+            'description':'typing.Optional[str]',
+            'abortable':'bool',
+            'logs_path':'typing.Optional[str]',
+            'logs_excerpt':'typing.Optional[str]',
+            'progress':'Progress',
+            'result':'typing.Union[str, int, bool, dict[str], list]',
+            'error':'typing.Optional[str]',
+            'exception':'typing.Optional[str]',
+            'exc_info':'ExcInfo',
+            'state':'str',
+            'time_started':'typing.Optional[str]',
+            'time_finished':'typing.Optional[str]',
+    })
+    Progress_ = typing.TypedDict('Progress_', {
+            'percent':'typing.Optional[int]',
+            'description':'typing.Optional[str]',
+            'extra':'typing.Union[str, int, bool, dict[str], list]',
+    })
+    ExcInfo_ = typing.TypedDict('ExcInfo_', {
+            'repr':'typing.Optional[str]',
+            'type':'typing.Optional[str]',
+            'extra':'typing.Union[str, int, bool, dict[str], list]',
+    })
+    Job_ = typing.TypedDict('Job_', {
+            'id':'int',
+            'method':'str',
+            'arguments':'list',
+            'transient':'bool',
+            'description':'typing.Optional[str]',
+            'abortable':'bool',
+            'logs_path':'typing.Optional[str]',
+            'logs_excerpt':'typing.Optional[str]',
+            'progress':'Progress_',
+            'result':'typing.Union[str, int, bool, dict[str], list]',
+            'error':'typing.Optional[str]',
+            'exception':'typing.Optional[str]',
+            'exc_info':'ExcInfo_',
+            'state':'str',
+            'time_started':'typing.Optional[str]',
+            'time_finished':'typing.Optional[str]',
+    })
+    JobUpdate = typing.TypedDict('JobUpdate', {
+            'progress':'dict[str]',
+    })
+    Options_ = typing.TypedDict('Options_', {
+            'type':'str',
+            'hostname':'str',
+            'timeout':'int',
+    })
+    QueryOptions_ = typing.TypedDict('QueryOptions_', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Session = typing.TypedDict('Session', {
+            'id':'str',
+            'socket_family':'str',
+            'address':'str',
+            'authenticated':'bool',
+            'call_count':'int',
+    })
+    Session_ = typing.TypedDict('Session_', {
+            'id':'str',
+            'socket_family':'str',
+            'address':'str',
+            'authenticated':'bool',
+            'call_count':'int',
+    })
     @typing.overload
     def get_events(self, 
     /) -> None: 
@@ -125,11 +569,122 @@ class Core(Namespace):
         -------
         """
         ...
+    Options = typing.TypedDict('Options', {
+            'bind_address':'str',
+            'bind_port':'int',
+            'threaded':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Progress = typing.TypedDict('Progress', {
+            'percent':'typing.Optional[int]',
+            'description':'typing.Optional[str]',
+            'extra':'typing.Union[str, int, bool, dict[str], list]',
+    })
+    ExcInfo = typing.TypedDict('ExcInfo', {
+            'repr':'typing.Optional[str]',
+            'type':'typing.Optional[str]',
+            'extra':'typing.Union[str, int, bool, dict[str], list]',
+    })
+    Job = typing.TypedDict('Job', {
+            'id':'int',
+            'method':'str',
+            'arguments':'list',
+            'transient':'bool',
+            'description':'typing.Optional[str]',
+            'abortable':'bool',
+            'logs_path':'typing.Optional[str]',
+            'logs_excerpt':'typing.Optional[str]',
+            'progress':'Progress',
+            'result':'typing.Union[str, int, bool, dict[str], list]',
+            'error':'typing.Optional[str]',
+            'exception':'typing.Optional[str]',
+            'exc_info':'ExcInfo',
+            'state':'str',
+            'time_started':'typing.Optional[str]',
+            'time_finished':'typing.Optional[str]',
+    })
+    Progress_ = typing.TypedDict('Progress_', {
+            'percent':'typing.Optional[int]',
+            'description':'typing.Optional[str]',
+            'extra':'typing.Union[str, int, bool, dict[str], list]',
+    })
+    ExcInfo_ = typing.TypedDict('ExcInfo_', {
+            'repr':'typing.Optional[str]',
+            'type':'typing.Optional[str]',
+            'extra':'typing.Union[str, int, bool, dict[str], list]',
+    })
+    Job_ = typing.TypedDict('Job_', {
+            'id':'int',
+            'method':'str',
+            'arguments':'list',
+            'transient':'bool',
+            'description':'typing.Optional[str]',
+            'abortable':'bool',
+            'logs_path':'typing.Optional[str]',
+            'logs_excerpt':'typing.Optional[str]',
+            'progress':'Progress_',
+            'result':'typing.Union[str, int, bool, dict[str], list]',
+            'error':'typing.Optional[str]',
+            'exception':'typing.Optional[str]',
+            'exc_info':'ExcInfo_',
+            'state':'str',
+            'time_started':'typing.Optional[str]',
+            'time_finished':'typing.Optional[str]',
+    })
+    JobUpdate = typing.TypedDict('JobUpdate', {
+            'progress':'dict[str]',
+    })
+    Options_ = typing.TypedDict('Options_', {
+            'type':'str',
+            'hostname':'str',
+            'timeout':'int',
+    })
+    QueryOptions_ = typing.TypedDict('QueryOptions_', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Session = typing.TypedDict('Session', {
+            'id':'str',
+            'socket_family':'str',
+            'address':'str',
+            'authenticated':'bool',
+            'call_count':'int',
+    })
+    Session_ = typing.TypedDict('Session_', {
+            'id':'str',
+            'socket_family':'str',
+            'address':'str',
+            'authenticated':'bool',
+            'call_count':'int',
+    })
     @typing.overload
     def get_jobs(self, 
         query_filters:'list[list]'=[],
         query_options:'QueryOptions'={},
-    /) -> 'int|Job|list[Job]': 
+    /) -> 'typing.Union[int, ForwardRef(Job), list[Job_]]': 
         """
         Get the long running jobs.
 
@@ -141,14 +696,121 @@ class Core(Namespace):
             query-options
         Returns
         -------
-        int:
-            
-        Job:
-            
-        list[Job]:
+        typing.Union[int, ForwardRef(Job), list[Job_]]:
             
         """
         ...
+    Options = typing.TypedDict('Options', {
+            'bind_address':'str',
+            'bind_port':'int',
+            'threaded':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Progress = typing.TypedDict('Progress', {
+            'percent':'typing.Optional[int]',
+            'description':'typing.Optional[str]',
+            'extra':'typing.Union[str, int, bool, dict[str], list]',
+    })
+    ExcInfo = typing.TypedDict('ExcInfo', {
+            'repr':'typing.Optional[str]',
+            'type':'typing.Optional[str]',
+            'extra':'typing.Union[str, int, bool, dict[str], list]',
+    })
+    Job = typing.TypedDict('Job', {
+            'id':'int',
+            'method':'str',
+            'arguments':'list',
+            'transient':'bool',
+            'description':'typing.Optional[str]',
+            'abortable':'bool',
+            'logs_path':'typing.Optional[str]',
+            'logs_excerpt':'typing.Optional[str]',
+            'progress':'Progress',
+            'result':'typing.Union[str, int, bool, dict[str], list]',
+            'error':'typing.Optional[str]',
+            'exception':'typing.Optional[str]',
+            'exc_info':'ExcInfo',
+            'state':'str',
+            'time_started':'typing.Optional[str]',
+            'time_finished':'typing.Optional[str]',
+    })
+    Progress_ = typing.TypedDict('Progress_', {
+            'percent':'typing.Optional[int]',
+            'description':'typing.Optional[str]',
+            'extra':'typing.Union[str, int, bool, dict[str], list]',
+    })
+    ExcInfo_ = typing.TypedDict('ExcInfo_', {
+            'repr':'typing.Optional[str]',
+            'type':'typing.Optional[str]',
+            'extra':'typing.Union[str, int, bool, dict[str], list]',
+    })
+    Job_ = typing.TypedDict('Job_', {
+            'id':'int',
+            'method':'str',
+            'arguments':'list',
+            'transient':'bool',
+            'description':'typing.Optional[str]',
+            'abortable':'bool',
+            'logs_path':'typing.Optional[str]',
+            'logs_excerpt':'typing.Optional[str]',
+            'progress':'Progress_',
+            'result':'typing.Union[str, int, bool, dict[str], list]',
+            'error':'typing.Optional[str]',
+            'exception':'typing.Optional[str]',
+            'exc_info':'ExcInfo_',
+            'state':'str',
+            'time_started':'typing.Optional[str]',
+            'time_finished':'typing.Optional[str]',
+    })
+    JobUpdate = typing.TypedDict('JobUpdate', {
+            'progress':'dict[str]',
+    })
+    Options_ = typing.TypedDict('Options_', {
+            'type':'str',
+            'hostname':'str',
+            'timeout':'int',
+    })
+    QueryOptions_ = typing.TypedDict('QueryOptions_', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Session = typing.TypedDict('Session', {
+            'id':'str',
+            'socket_family':'str',
+            'address':'str',
+            'authenticated':'bool',
+            'call_count':'int',
+    })
+    Session_ = typing.TypedDict('Session_', {
+            'id':'str',
+            'socket_family':'str',
+            'address':'str',
+            'authenticated':'bool',
+            'call_count':'int',
+    })
     @typing.overload
     def job_abort(self, 
         id:'int',
@@ -164,6 +826,117 @@ class Core(Namespace):
         -------
         """
         ...
+    Options = typing.TypedDict('Options', {
+            'bind_address':'str',
+            'bind_port':'int',
+            'threaded':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Progress = typing.TypedDict('Progress', {
+            'percent':'typing.Optional[int]',
+            'description':'typing.Optional[str]',
+            'extra':'typing.Union[str, int, bool, dict[str], list]',
+    })
+    ExcInfo = typing.TypedDict('ExcInfo', {
+            'repr':'typing.Optional[str]',
+            'type':'typing.Optional[str]',
+            'extra':'typing.Union[str, int, bool, dict[str], list]',
+    })
+    Job = typing.TypedDict('Job', {
+            'id':'int',
+            'method':'str',
+            'arguments':'list',
+            'transient':'bool',
+            'description':'typing.Optional[str]',
+            'abortable':'bool',
+            'logs_path':'typing.Optional[str]',
+            'logs_excerpt':'typing.Optional[str]',
+            'progress':'Progress',
+            'result':'typing.Union[str, int, bool, dict[str], list]',
+            'error':'typing.Optional[str]',
+            'exception':'typing.Optional[str]',
+            'exc_info':'ExcInfo',
+            'state':'str',
+            'time_started':'typing.Optional[str]',
+            'time_finished':'typing.Optional[str]',
+    })
+    Progress_ = typing.TypedDict('Progress_', {
+            'percent':'typing.Optional[int]',
+            'description':'typing.Optional[str]',
+            'extra':'typing.Union[str, int, bool, dict[str], list]',
+    })
+    ExcInfo_ = typing.TypedDict('ExcInfo_', {
+            'repr':'typing.Optional[str]',
+            'type':'typing.Optional[str]',
+            'extra':'typing.Union[str, int, bool, dict[str], list]',
+    })
+    Job_ = typing.TypedDict('Job_', {
+            'id':'int',
+            'method':'str',
+            'arguments':'list',
+            'transient':'bool',
+            'description':'typing.Optional[str]',
+            'abortable':'bool',
+            'logs_path':'typing.Optional[str]',
+            'logs_excerpt':'typing.Optional[str]',
+            'progress':'Progress_',
+            'result':'typing.Union[str, int, bool, dict[str], list]',
+            'error':'typing.Optional[str]',
+            'exception':'typing.Optional[str]',
+            'exc_info':'ExcInfo_',
+            'state':'str',
+            'time_started':'typing.Optional[str]',
+            'time_finished':'typing.Optional[str]',
+    })
+    JobUpdate = typing.TypedDict('JobUpdate', {
+            'progress':'dict[str]',
+    })
+    Options_ = typing.TypedDict('Options_', {
+            'type':'str',
+            'hostname':'str',
+            'timeout':'int',
+    })
+    QueryOptions_ = typing.TypedDict('QueryOptions_', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Session = typing.TypedDict('Session', {
+            'id':'str',
+            'socket_family':'str',
+            'address':'str',
+            'authenticated':'bool',
+            'call_count':'int',
+    })
+    Session_ = typing.TypedDict('Session_', {
+            'id':'str',
+            'socket_family':'str',
+            'address':'str',
+            'authenticated':'bool',
+            'call_count':'int',
+    })
     @typing.overload
     def job_update(self, 
         id:'int',
@@ -182,6 +955,117 @@ class Core(Namespace):
         -------
         """
         ...
+    Options = typing.TypedDict('Options', {
+            'bind_address':'str',
+            'bind_port':'int',
+            'threaded':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Progress = typing.TypedDict('Progress', {
+            'percent':'typing.Optional[int]',
+            'description':'typing.Optional[str]',
+            'extra':'typing.Union[str, int, bool, dict[str], list]',
+    })
+    ExcInfo = typing.TypedDict('ExcInfo', {
+            'repr':'typing.Optional[str]',
+            'type':'typing.Optional[str]',
+            'extra':'typing.Union[str, int, bool, dict[str], list]',
+    })
+    Job = typing.TypedDict('Job', {
+            'id':'int',
+            'method':'str',
+            'arguments':'list',
+            'transient':'bool',
+            'description':'typing.Optional[str]',
+            'abortable':'bool',
+            'logs_path':'typing.Optional[str]',
+            'logs_excerpt':'typing.Optional[str]',
+            'progress':'Progress',
+            'result':'typing.Union[str, int, bool, dict[str], list]',
+            'error':'typing.Optional[str]',
+            'exception':'typing.Optional[str]',
+            'exc_info':'ExcInfo',
+            'state':'str',
+            'time_started':'typing.Optional[str]',
+            'time_finished':'typing.Optional[str]',
+    })
+    Progress_ = typing.TypedDict('Progress_', {
+            'percent':'typing.Optional[int]',
+            'description':'typing.Optional[str]',
+            'extra':'typing.Union[str, int, bool, dict[str], list]',
+    })
+    ExcInfo_ = typing.TypedDict('ExcInfo_', {
+            'repr':'typing.Optional[str]',
+            'type':'typing.Optional[str]',
+            'extra':'typing.Union[str, int, bool, dict[str], list]',
+    })
+    Job_ = typing.TypedDict('Job_', {
+            'id':'int',
+            'method':'str',
+            'arguments':'list',
+            'transient':'bool',
+            'description':'typing.Optional[str]',
+            'abortable':'bool',
+            'logs_path':'typing.Optional[str]',
+            'logs_excerpt':'typing.Optional[str]',
+            'progress':'Progress_',
+            'result':'typing.Union[str, int, bool, dict[str], list]',
+            'error':'typing.Optional[str]',
+            'exception':'typing.Optional[str]',
+            'exc_info':'ExcInfo_',
+            'state':'str',
+            'time_started':'typing.Optional[str]',
+            'time_finished':'typing.Optional[str]',
+    })
+    JobUpdate = typing.TypedDict('JobUpdate', {
+            'progress':'dict[str]',
+    })
+    Options_ = typing.TypedDict('Options_', {
+            'type':'str',
+            'hostname':'str',
+            'timeout':'int',
+    })
+    QueryOptions_ = typing.TypedDict('QueryOptions_', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Session = typing.TypedDict('Session', {
+            'id':'str',
+            'socket_family':'str',
+            'address':'str',
+            'authenticated':'bool',
+            'call_count':'int',
+    })
+    Session_ = typing.TypedDict('Session_', {
+            'id':'str',
+            'socket_family':'str',
+            'address':'str',
+            'authenticated':'bool',
+            'call_count':'int',
+    })
     @typing.overload
     def job_wait(self, 
         id:'int',
@@ -197,6 +1081,117 @@ class Core(Namespace):
         -------
         """
         ...
+    Options = typing.TypedDict('Options', {
+            'bind_address':'str',
+            'bind_port':'int',
+            'threaded':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Progress = typing.TypedDict('Progress', {
+            'percent':'typing.Optional[int]',
+            'description':'typing.Optional[str]',
+            'extra':'typing.Union[str, int, bool, dict[str], list]',
+    })
+    ExcInfo = typing.TypedDict('ExcInfo', {
+            'repr':'typing.Optional[str]',
+            'type':'typing.Optional[str]',
+            'extra':'typing.Union[str, int, bool, dict[str], list]',
+    })
+    Job = typing.TypedDict('Job', {
+            'id':'int',
+            'method':'str',
+            'arguments':'list',
+            'transient':'bool',
+            'description':'typing.Optional[str]',
+            'abortable':'bool',
+            'logs_path':'typing.Optional[str]',
+            'logs_excerpt':'typing.Optional[str]',
+            'progress':'Progress',
+            'result':'typing.Union[str, int, bool, dict[str], list]',
+            'error':'typing.Optional[str]',
+            'exception':'typing.Optional[str]',
+            'exc_info':'ExcInfo',
+            'state':'str',
+            'time_started':'typing.Optional[str]',
+            'time_finished':'typing.Optional[str]',
+    })
+    Progress_ = typing.TypedDict('Progress_', {
+            'percent':'typing.Optional[int]',
+            'description':'typing.Optional[str]',
+            'extra':'typing.Union[str, int, bool, dict[str], list]',
+    })
+    ExcInfo_ = typing.TypedDict('ExcInfo_', {
+            'repr':'typing.Optional[str]',
+            'type':'typing.Optional[str]',
+            'extra':'typing.Union[str, int, bool, dict[str], list]',
+    })
+    Job_ = typing.TypedDict('Job_', {
+            'id':'int',
+            'method':'str',
+            'arguments':'list',
+            'transient':'bool',
+            'description':'typing.Optional[str]',
+            'abortable':'bool',
+            'logs_path':'typing.Optional[str]',
+            'logs_excerpt':'typing.Optional[str]',
+            'progress':'Progress_',
+            'result':'typing.Union[str, int, bool, dict[str], list]',
+            'error':'typing.Optional[str]',
+            'exception':'typing.Optional[str]',
+            'exc_info':'ExcInfo_',
+            'state':'str',
+            'time_started':'typing.Optional[str]',
+            'time_finished':'typing.Optional[str]',
+    })
+    JobUpdate = typing.TypedDict('JobUpdate', {
+            'progress':'dict[str]',
+    })
+    Options_ = typing.TypedDict('Options_', {
+            'type':'str',
+            'hostname':'str',
+            'timeout':'int',
+    })
+    QueryOptions_ = typing.TypedDict('QueryOptions_', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Session = typing.TypedDict('Session', {
+            'id':'str',
+            'socket_family':'str',
+            'address':'str',
+            'authenticated':'bool',
+            'call_count':'int',
+    })
+    Session_ = typing.TypedDict('Session_', {
+            'id':'str',
+            'socket_family':'str',
+            'address':'str',
+            'authenticated':'bool',
+            'call_count':'int',
+    })
     @typing.overload
     def ping(self, 
     /) -> None: 
@@ -211,6 +1206,117 @@ class Core(Namespace):
         -------
         """
         ...
+    Options = typing.TypedDict('Options', {
+            'bind_address':'str',
+            'bind_port':'int',
+            'threaded':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Progress = typing.TypedDict('Progress', {
+            'percent':'typing.Optional[int]',
+            'description':'typing.Optional[str]',
+            'extra':'typing.Union[str, int, bool, dict[str], list]',
+    })
+    ExcInfo = typing.TypedDict('ExcInfo', {
+            'repr':'typing.Optional[str]',
+            'type':'typing.Optional[str]',
+            'extra':'typing.Union[str, int, bool, dict[str], list]',
+    })
+    Job = typing.TypedDict('Job', {
+            'id':'int',
+            'method':'str',
+            'arguments':'list',
+            'transient':'bool',
+            'description':'typing.Optional[str]',
+            'abortable':'bool',
+            'logs_path':'typing.Optional[str]',
+            'logs_excerpt':'typing.Optional[str]',
+            'progress':'Progress',
+            'result':'typing.Union[str, int, bool, dict[str], list]',
+            'error':'typing.Optional[str]',
+            'exception':'typing.Optional[str]',
+            'exc_info':'ExcInfo',
+            'state':'str',
+            'time_started':'typing.Optional[str]',
+            'time_finished':'typing.Optional[str]',
+    })
+    Progress_ = typing.TypedDict('Progress_', {
+            'percent':'typing.Optional[int]',
+            'description':'typing.Optional[str]',
+            'extra':'typing.Union[str, int, bool, dict[str], list]',
+    })
+    ExcInfo_ = typing.TypedDict('ExcInfo_', {
+            'repr':'typing.Optional[str]',
+            'type':'typing.Optional[str]',
+            'extra':'typing.Union[str, int, bool, dict[str], list]',
+    })
+    Job_ = typing.TypedDict('Job_', {
+            'id':'int',
+            'method':'str',
+            'arguments':'list',
+            'transient':'bool',
+            'description':'typing.Optional[str]',
+            'abortable':'bool',
+            'logs_path':'typing.Optional[str]',
+            'logs_excerpt':'typing.Optional[str]',
+            'progress':'Progress_',
+            'result':'typing.Union[str, int, bool, dict[str], list]',
+            'error':'typing.Optional[str]',
+            'exception':'typing.Optional[str]',
+            'exc_info':'ExcInfo_',
+            'state':'str',
+            'time_started':'typing.Optional[str]',
+            'time_finished':'typing.Optional[str]',
+    })
+    JobUpdate = typing.TypedDict('JobUpdate', {
+            'progress':'dict[str]',
+    })
+    Options_ = typing.TypedDict('Options_', {
+            'type':'str',
+            'hostname':'str',
+            'timeout':'int',
+    })
+    QueryOptions_ = typing.TypedDict('QueryOptions_', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Session = typing.TypedDict('Session', {
+            'id':'str',
+            'socket_family':'str',
+            'address':'str',
+            'authenticated':'bool',
+            'call_count':'int',
+    })
+    Session_ = typing.TypedDict('Session_', {
+            'id':'str',
+            'socket_family':'str',
+            'address':'str',
+            'authenticated':'bool',
+            'call_count':'int',
+    })
     @typing.overload
     def ping_remote(self, 
         options:'Options_'={},
@@ -227,6 +1333,117 @@ class Core(Namespace):
         -------
         """
         ...
+    Options = typing.TypedDict('Options', {
+            'bind_address':'str',
+            'bind_port':'int',
+            'threaded':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Progress = typing.TypedDict('Progress', {
+            'percent':'typing.Optional[int]',
+            'description':'typing.Optional[str]',
+            'extra':'typing.Union[str, int, bool, dict[str], list]',
+    })
+    ExcInfo = typing.TypedDict('ExcInfo', {
+            'repr':'typing.Optional[str]',
+            'type':'typing.Optional[str]',
+            'extra':'typing.Union[str, int, bool, dict[str], list]',
+    })
+    Job = typing.TypedDict('Job', {
+            'id':'int',
+            'method':'str',
+            'arguments':'list',
+            'transient':'bool',
+            'description':'typing.Optional[str]',
+            'abortable':'bool',
+            'logs_path':'typing.Optional[str]',
+            'logs_excerpt':'typing.Optional[str]',
+            'progress':'Progress',
+            'result':'typing.Union[str, int, bool, dict[str], list]',
+            'error':'typing.Optional[str]',
+            'exception':'typing.Optional[str]',
+            'exc_info':'ExcInfo',
+            'state':'str',
+            'time_started':'typing.Optional[str]',
+            'time_finished':'typing.Optional[str]',
+    })
+    Progress_ = typing.TypedDict('Progress_', {
+            'percent':'typing.Optional[int]',
+            'description':'typing.Optional[str]',
+            'extra':'typing.Union[str, int, bool, dict[str], list]',
+    })
+    ExcInfo_ = typing.TypedDict('ExcInfo_', {
+            'repr':'typing.Optional[str]',
+            'type':'typing.Optional[str]',
+            'extra':'typing.Union[str, int, bool, dict[str], list]',
+    })
+    Job_ = typing.TypedDict('Job_', {
+            'id':'int',
+            'method':'str',
+            'arguments':'list',
+            'transient':'bool',
+            'description':'typing.Optional[str]',
+            'abortable':'bool',
+            'logs_path':'typing.Optional[str]',
+            'logs_excerpt':'typing.Optional[str]',
+            'progress':'Progress_',
+            'result':'typing.Union[str, int, bool, dict[str], list]',
+            'error':'typing.Optional[str]',
+            'exception':'typing.Optional[str]',
+            'exc_info':'ExcInfo_',
+            'state':'str',
+            'time_started':'typing.Optional[str]',
+            'time_finished':'typing.Optional[str]',
+    })
+    JobUpdate = typing.TypedDict('JobUpdate', {
+            'progress':'dict[str]',
+    })
+    Options_ = typing.TypedDict('Options_', {
+            'type':'str',
+            'hostname':'str',
+            'timeout':'int',
+    })
+    QueryOptions_ = typing.TypedDict('QueryOptions_', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Session = typing.TypedDict('Session', {
+            'id':'str',
+            'socket_family':'str',
+            'address':'str',
+            'authenticated':'bool',
+            'call_count':'int',
+    })
+    Session_ = typing.TypedDict('Session_', {
+            'id':'str',
+            'socket_family':'str',
+            'address':'str',
+            'authenticated':'bool',
+            'call_count':'int',
+    })
     @typing.overload
     def resize_shell(self, 
         id:'str',
@@ -248,11 +1465,122 @@ class Core(Namespace):
         -------
         """
         ...
+    Options = typing.TypedDict('Options', {
+            'bind_address':'str',
+            'bind_port':'int',
+            'threaded':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Progress = typing.TypedDict('Progress', {
+            'percent':'typing.Optional[int]',
+            'description':'typing.Optional[str]',
+            'extra':'typing.Union[str, int, bool, dict[str], list]',
+    })
+    ExcInfo = typing.TypedDict('ExcInfo', {
+            'repr':'typing.Optional[str]',
+            'type':'typing.Optional[str]',
+            'extra':'typing.Union[str, int, bool, dict[str], list]',
+    })
+    Job = typing.TypedDict('Job', {
+            'id':'int',
+            'method':'str',
+            'arguments':'list',
+            'transient':'bool',
+            'description':'typing.Optional[str]',
+            'abortable':'bool',
+            'logs_path':'typing.Optional[str]',
+            'logs_excerpt':'typing.Optional[str]',
+            'progress':'Progress',
+            'result':'typing.Union[str, int, bool, dict[str], list]',
+            'error':'typing.Optional[str]',
+            'exception':'typing.Optional[str]',
+            'exc_info':'ExcInfo',
+            'state':'str',
+            'time_started':'typing.Optional[str]',
+            'time_finished':'typing.Optional[str]',
+    })
+    Progress_ = typing.TypedDict('Progress_', {
+            'percent':'typing.Optional[int]',
+            'description':'typing.Optional[str]',
+            'extra':'typing.Union[str, int, bool, dict[str], list]',
+    })
+    ExcInfo_ = typing.TypedDict('ExcInfo_', {
+            'repr':'typing.Optional[str]',
+            'type':'typing.Optional[str]',
+            'extra':'typing.Union[str, int, bool, dict[str], list]',
+    })
+    Job_ = typing.TypedDict('Job_', {
+            'id':'int',
+            'method':'str',
+            'arguments':'list',
+            'transient':'bool',
+            'description':'typing.Optional[str]',
+            'abortable':'bool',
+            'logs_path':'typing.Optional[str]',
+            'logs_excerpt':'typing.Optional[str]',
+            'progress':'Progress_',
+            'result':'typing.Union[str, int, bool, dict[str], list]',
+            'error':'typing.Optional[str]',
+            'exception':'typing.Optional[str]',
+            'exc_info':'ExcInfo_',
+            'state':'str',
+            'time_started':'typing.Optional[str]',
+            'time_finished':'typing.Optional[str]',
+    })
+    JobUpdate = typing.TypedDict('JobUpdate', {
+            'progress':'dict[str]',
+    })
+    Options_ = typing.TypedDict('Options_', {
+            'type':'str',
+            'hostname':'str',
+            'timeout':'int',
+    })
+    QueryOptions_ = typing.TypedDict('QueryOptions_', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Session = typing.TypedDict('Session', {
+            'id':'str',
+            'socket_family':'str',
+            'address':'str',
+            'authenticated':'bool',
+            'call_count':'int',
+    })
+    Session_ = typing.TypedDict('Session_', {
+            'id':'str',
+            'socket_family':'str',
+            'address':'str',
+            'authenticated':'bool',
+            'call_count':'int',
+    })
     @typing.overload
     def sessions(self, 
         query_filters:'list[list]'=[],
-        query_options:'QueryOptions'={},
-    /) -> 'int|Session|list[Session]': 
+        query_options:'QueryOptions_'={},
+    /) -> 'typing.Union[int, ForwardRef(Session), list[Session_]]': 
         """
         Get currently open websocket sessions.
 
@@ -264,14 +1592,121 @@ class Core(Namespace):
             query-options
         Returns
         -------
-        int:
-            
-        Session:
-            
-        list[Session]:
+        typing.Union[int, ForwardRef(Session), list[Session_]]:
             
         """
         ...
+    Options = typing.TypedDict('Options', {
+            'bind_address':'str',
+            'bind_port':'int',
+            'threaded':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Progress = typing.TypedDict('Progress', {
+            'percent':'typing.Optional[int]',
+            'description':'typing.Optional[str]',
+            'extra':'typing.Union[str, int, bool, dict[str], list]',
+    })
+    ExcInfo = typing.TypedDict('ExcInfo', {
+            'repr':'typing.Optional[str]',
+            'type':'typing.Optional[str]',
+            'extra':'typing.Union[str, int, bool, dict[str], list]',
+    })
+    Job = typing.TypedDict('Job', {
+            'id':'int',
+            'method':'str',
+            'arguments':'list',
+            'transient':'bool',
+            'description':'typing.Optional[str]',
+            'abortable':'bool',
+            'logs_path':'typing.Optional[str]',
+            'logs_excerpt':'typing.Optional[str]',
+            'progress':'Progress',
+            'result':'typing.Union[str, int, bool, dict[str], list]',
+            'error':'typing.Optional[str]',
+            'exception':'typing.Optional[str]',
+            'exc_info':'ExcInfo',
+            'state':'str',
+            'time_started':'typing.Optional[str]',
+            'time_finished':'typing.Optional[str]',
+    })
+    Progress_ = typing.TypedDict('Progress_', {
+            'percent':'typing.Optional[int]',
+            'description':'typing.Optional[str]',
+            'extra':'typing.Union[str, int, bool, dict[str], list]',
+    })
+    ExcInfo_ = typing.TypedDict('ExcInfo_', {
+            'repr':'typing.Optional[str]',
+            'type':'typing.Optional[str]',
+            'extra':'typing.Union[str, int, bool, dict[str], list]',
+    })
+    Job_ = typing.TypedDict('Job_', {
+            'id':'int',
+            'method':'str',
+            'arguments':'list',
+            'transient':'bool',
+            'description':'typing.Optional[str]',
+            'abortable':'bool',
+            'logs_path':'typing.Optional[str]',
+            'logs_excerpt':'typing.Optional[str]',
+            'progress':'Progress_',
+            'result':'typing.Union[str, int, bool, dict[str], list]',
+            'error':'typing.Optional[str]',
+            'exception':'typing.Optional[str]',
+            'exc_info':'ExcInfo_',
+            'state':'str',
+            'time_started':'typing.Optional[str]',
+            'time_finished':'typing.Optional[str]',
+    })
+    JobUpdate = typing.TypedDict('JobUpdate', {
+            'progress':'dict[str]',
+    })
+    Options_ = typing.TypedDict('Options_', {
+            'type':'str',
+            'hostname':'str',
+            'timeout':'int',
+    })
+    QueryOptions_ = typing.TypedDict('QueryOptions_', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Session = typing.TypedDict('Session', {
+            'id':'str',
+            'socket_family':'str',
+            'address':'str',
+            'authenticated':'bool',
+            'call_count':'int',
+    })
+    Session_ = typing.TypedDict('Session_', {
+            'id':'str',
+            'socket_family':'str',
+            'address':'str',
+            'authenticated':'bool',
+            'call_count':'int',
+    })
     @typing.overload
     def set_debug_mode(self, 
         debug_mode:'bool',
@@ -287,66 +1722,115 @@ class Core(Namespace):
         -------
         """
         ...
+    Options = typing.TypedDict('Options', {
+            'bind_address':'str',
+            'bind_port':'int',
+            'threaded':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Progress = typing.TypedDict('Progress', {
+            'percent':'typing.Optional[int]',
+            'description':'typing.Optional[str]',
+            'extra':'typing.Union[str, int, bool, dict[str], list]',
+    })
+    ExcInfo = typing.TypedDict('ExcInfo', {
+            'repr':'typing.Optional[str]',
+            'type':'typing.Optional[str]',
+            'extra':'typing.Union[str, int, bool, dict[str], list]',
+    })
+    Job = typing.TypedDict('Job', {
+            'id':'int',
+            'method':'str',
+            'arguments':'list',
+            'transient':'bool',
+            'description':'typing.Optional[str]',
+            'abortable':'bool',
+            'logs_path':'typing.Optional[str]',
+            'logs_excerpt':'typing.Optional[str]',
+            'progress':'Progress',
+            'result':'typing.Union[str, int, bool, dict[str], list]',
+            'error':'typing.Optional[str]',
+            'exception':'typing.Optional[str]',
+            'exc_info':'ExcInfo',
+            'state':'str',
+            'time_started':'typing.Optional[str]',
+            'time_finished':'typing.Optional[str]',
+    })
+    Progress_ = typing.TypedDict('Progress_', {
+            'percent':'typing.Optional[int]',
+            'description':'typing.Optional[str]',
+            'extra':'typing.Union[str, int, bool, dict[str], list]',
+    })
+    ExcInfo_ = typing.TypedDict('ExcInfo_', {
+            'repr':'typing.Optional[str]',
+            'type':'typing.Optional[str]',
+            'extra':'typing.Union[str, int, bool, dict[str], list]',
+    })
+    Job_ = typing.TypedDict('Job_', {
+            'id':'int',
+            'method':'str',
+            'arguments':'list',
+            'transient':'bool',
+            'description':'typing.Optional[str]',
+            'abortable':'bool',
+            'logs_path':'typing.Optional[str]',
+            'logs_excerpt':'typing.Optional[str]',
+            'progress':'Progress_',
+            'result':'typing.Union[str, int, bool, dict[str], list]',
+            'error':'typing.Optional[str]',
+            'exception':'typing.Optional[str]',
+            'exc_info':'ExcInfo_',
+            'state':'str',
+            'time_started':'typing.Optional[str]',
+            'time_finished':'typing.Optional[str]',
+    })
+    JobUpdate = typing.TypedDict('JobUpdate', {
+            'progress':'dict[str]',
+    })
+    Options_ = typing.TypedDict('Options_', {
+            'type':'str',
+            'hostname':'str',
+            'timeout':'int',
+    })
+    QueryOptions_ = typing.TypedDict('QueryOptions_', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Session = typing.TypedDict('Session', {
+            'id':'str',
+            'socket_family':'str',
+            'address':'str',
+            'authenticated':'bool',
+            'call_count':'int',
+    })
+    Session_ = typing.TypedDict('Session_', {
+            'id':'str',
+            'socket_family':'str',
+            'address':'str',
+            'authenticated':'bool',
+            'call_count':'int',
+    })
 
-class Options(typing.TypedDict):
-        bind_address:'str'
-        bind_port:'int'
-        threaded:'bool'
-        ...
-class QueryOptions(typing.TypedDict):
-        relationships:'bool'
-        extend:'typing.Optional[str]'
-        extend_context:'typing.Optional[str]'
-        prefix:'typing.Optional[str]'
-        extra:'dict[str]'
-        order_by:'list'
-        select:'list'
-        count:'bool'
-        get:'bool'
-        offset:'int'
-        limit:'int'
-        force_sql_filters:'bool'
-        ...
-class Job(typing.TypedDict):
-        id:'int'
-        method:'str'
-        arguments:'list'
-        transient:'bool'
-        description:'typing.Optional[str]'
-        abortable:'bool'
-        logs_path:'typing.Optional[str]'
-        logs_excerpt:'typing.Optional[str]'
-        progress:'Progress'
-        result:'typing.Union[str, int, bool, dict[str], list]'
-        error:'typing.Optional[str]'
-        exception:'typing.Optional[str]'
-        exc_info:'ExcInfo'
-        state:'str'
-        time_started:'typing.Optional[str]'
-        time_finished:'typing.Optional[str]'
-        ...
-class Progress(typing.TypedDict):
-        percent:'typing.Optional[int]'
-        description:'typing.Optional[str]'
-        extra:'typing.Union[str, int, bool, dict[str], list]'
-        ...
-class ExcInfo(typing.TypedDict):
-        repr:'typing.Optional[str]'
-        type:'typing.Optional[str]'
-        extra:'typing.Union[str, int, bool, dict[str], list]'
-        ...
-class JobUpdate(typing.TypedDict):
-        progress:'dict[str]'
-        ...
-class Options_(typing.TypedDict):
-        type:'str'
-        hostname:'str'
-        timeout:'int'
-        ...
-class Session(typing.TypedDict):
-        id:'str'
-        socket_family:'str'
-        address:'str'
-        authenticated:'bool'
-        call_count:'int'
-        ...

@@ -16,6 +16,66 @@ class Truenas(Namespace):
         -------
         """
         ...
+    SetProduction = typing.TypedDict('SetProduction', {
+            'ticket':'typing.Optional[int]',
+            'url':'typing.Optional[str]',
+            'has_debug':'bool',
+    })
+    AdministrativeUser = typing.TypedDict('AdministrativeUser', {
+            'first_name':'str',
+            'last_name':'str',
+            'title':'str',
+            'office_phone':'str',
+            'mobile_phone':'str',
+            'primary_email':'str',
+            'secondary_email':'str',
+            'address':'str',
+            'city':'str',
+            'state':'str',
+            'zip':'str',
+            'country':'str',
+    })
+    TechnicalUser = typing.TypedDict('TechnicalUser', {
+            'first_name':'str',
+            'last_name':'str',
+            'title':'str',
+            'office_phone':'str',
+            'mobile_phone':'str',
+            'primary_email':'str',
+            'secondary_email':'str',
+            'address':'str',
+            'city':'str',
+            'state':'str',
+            'zip':'str',
+            'country':'str',
+    })
+    Reseller = typing.TypedDict('Reseller', {
+            'company':'str',
+            'first_name':'str',
+            'last_name':'str',
+            'title':'str',
+            'office_phone':'str',
+            'mobile_phone':'str',
+    })
+    PhysicalLocation = typing.TypedDict('PhysicalLocation', {
+            'address':'str',
+            'city':'str',
+            'state':'str',
+            'zip':'str',
+            'country':'str',
+            'contact_name':'str',
+            'contact_phone_number':'str',
+            'contact_email':'str',
+    })
+    CustomerInformationUpdate = typing.TypedDict('CustomerInformationUpdate', {
+            'company':'str',
+            'administrative_user':'AdministrativeUser',
+            'technical_user':'TechnicalUser',
+            'reseller':'Reseller',
+            'physical_location':'PhysicalLocation',
+            'primary_use_case':'str',
+            'other_primary_use_case':'str',
+    })
     @typing.overload
     def get_chassis_hardware(self, 
     /) -> 'str': 
@@ -30,6 +90,66 @@ class Truenas(Namespace):
             system_chassis_hardware
         """
         ...
+    SetProduction = typing.TypedDict('SetProduction', {
+            'ticket':'typing.Optional[int]',
+            'url':'typing.Optional[str]',
+            'has_debug':'bool',
+    })
+    AdministrativeUser = typing.TypedDict('AdministrativeUser', {
+            'first_name':'str',
+            'last_name':'str',
+            'title':'str',
+            'office_phone':'str',
+            'mobile_phone':'str',
+            'primary_email':'str',
+            'secondary_email':'str',
+            'address':'str',
+            'city':'str',
+            'state':'str',
+            'zip':'str',
+            'country':'str',
+    })
+    TechnicalUser = typing.TypedDict('TechnicalUser', {
+            'first_name':'str',
+            'last_name':'str',
+            'title':'str',
+            'office_phone':'str',
+            'mobile_phone':'str',
+            'primary_email':'str',
+            'secondary_email':'str',
+            'address':'str',
+            'city':'str',
+            'state':'str',
+            'zip':'str',
+            'country':'str',
+    })
+    Reseller = typing.TypedDict('Reseller', {
+            'company':'str',
+            'first_name':'str',
+            'last_name':'str',
+            'title':'str',
+            'office_phone':'str',
+            'mobile_phone':'str',
+    })
+    PhysicalLocation = typing.TypedDict('PhysicalLocation', {
+            'address':'str',
+            'city':'str',
+            'state':'str',
+            'zip':'str',
+            'country':'str',
+            'contact_name':'str',
+            'contact_phone_number':'str',
+            'contact_email':'str',
+    })
+    CustomerInformationUpdate = typing.TypedDict('CustomerInformationUpdate', {
+            'company':'str',
+            'administrative_user':'AdministrativeUser',
+            'technical_user':'TechnicalUser',
+            'reseller':'Reseller',
+            'physical_location':'PhysicalLocation',
+            'primary_use_case':'str',
+            'other_primary_use_case':'str',
+    })
     @typing.overload
     def get_customer_information(self, 
     /) -> None: 
@@ -42,9 +162,69 @@ class Truenas(Namespace):
         -------
         """
         ...
+    SetProduction = typing.TypedDict('SetProduction', {
+            'ticket':'typing.Optional[int]',
+            'url':'typing.Optional[str]',
+            'has_debug':'bool',
+    })
+    AdministrativeUser = typing.TypedDict('AdministrativeUser', {
+            'first_name':'str',
+            'last_name':'str',
+            'title':'str',
+            'office_phone':'str',
+            'mobile_phone':'str',
+            'primary_email':'str',
+            'secondary_email':'str',
+            'address':'str',
+            'city':'str',
+            'state':'str',
+            'zip':'str',
+            'country':'str',
+    })
+    TechnicalUser = typing.TypedDict('TechnicalUser', {
+            'first_name':'str',
+            'last_name':'str',
+            'title':'str',
+            'office_phone':'str',
+            'mobile_phone':'str',
+            'primary_email':'str',
+            'secondary_email':'str',
+            'address':'str',
+            'city':'str',
+            'state':'str',
+            'zip':'str',
+            'country':'str',
+    })
+    Reseller = typing.TypedDict('Reseller', {
+            'company':'str',
+            'first_name':'str',
+            'last_name':'str',
+            'title':'str',
+            'office_phone':'str',
+            'mobile_phone':'str',
+    })
+    PhysicalLocation = typing.TypedDict('PhysicalLocation', {
+            'address':'str',
+            'city':'str',
+            'state':'str',
+            'zip':'str',
+            'country':'str',
+            'contact_name':'str',
+            'contact_phone_number':'str',
+            'contact_email':'str',
+    })
+    CustomerInformationUpdate = typing.TypedDict('CustomerInformationUpdate', {
+            'company':'str',
+            'administrative_user':'AdministrativeUser',
+            'technical_user':'TechnicalUser',
+            'reseller':'Reseller',
+            'physical_location':'PhysicalLocation',
+            'primary_use_case':'str',
+            'other_primary_use_case':'str',
+    })
     @typing.overload
     def get_eula(self, 
-    /) -> 'str|None': 
+    /) -> 'typing.Optional[str]': 
         """
         Returns the TrueNAS End-User License Agreement (EULA).
 
@@ -52,12 +232,70 @@ class Truenas(Namespace):
         ----------
         Returns
         -------
-        str:
-            eula
-        None:
+        typing.Optional[str]:
             eula
         """
         ...
+    SetProduction = typing.TypedDict('SetProduction', {
+            'ticket':'typing.Optional[int]',
+            'url':'typing.Optional[str]',
+            'has_debug':'bool',
+    })
+    AdministrativeUser = typing.TypedDict('AdministrativeUser', {
+            'first_name':'str',
+            'last_name':'str',
+            'title':'str',
+            'office_phone':'str',
+            'mobile_phone':'str',
+            'primary_email':'str',
+            'secondary_email':'str',
+            'address':'str',
+            'city':'str',
+            'state':'str',
+            'zip':'str',
+            'country':'str',
+    })
+    TechnicalUser = typing.TypedDict('TechnicalUser', {
+            'first_name':'str',
+            'last_name':'str',
+            'title':'str',
+            'office_phone':'str',
+            'mobile_phone':'str',
+            'primary_email':'str',
+            'secondary_email':'str',
+            'address':'str',
+            'city':'str',
+            'state':'str',
+            'zip':'str',
+            'country':'str',
+    })
+    Reseller = typing.TypedDict('Reseller', {
+            'company':'str',
+            'first_name':'str',
+            'last_name':'str',
+            'title':'str',
+            'office_phone':'str',
+            'mobile_phone':'str',
+    })
+    PhysicalLocation = typing.TypedDict('PhysicalLocation', {
+            'address':'str',
+            'city':'str',
+            'state':'str',
+            'zip':'str',
+            'country':'str',
+            'contact_name':'str',
+            'contact_phone_number':'str',
+            'contact_email':'str',
+    })
+    CustomerInformationUpdate = typing.TypedDict('CustomerInformationUpdate', {
+            'company':'str',
+            'administrative_user':'AdministrativeUser',
+            'technical_user':'TechnicalUser',
+            'reseller':'Reseller',
+            'physical_location':'PhysicalLocation',
+            'primary_use_case':'str',
+            'other_primary_use_case':'str',
+    })
     @typing.overload
     def is_eula_accepted(self, 
     /) -> 'bool': 
@@ -72,6 +310,66 @@ class Truenas(Namespace):
             system_eula_accepted
         """
         ...
+    SetProduction = typing.TypedDict('SetProduction', {
+            'ticket':'typing.Optional[int]',
+            'url':'typing.Optional[str]',
+            'has_debug':'bool',
+    })
+    AdministrativeUser = typing.TypedDict('AdministrativeUser', {
+            'first_name':'str',
+            'last_name':'str',
+            'title':'str',
+            'office_phone':'str',
+            'mobile_phone':'str',
+            'primary_email':'str',
+            'secondary_email':'str',
+            'address':'str',
+            'city':'str',
+            'state':'str',
+            'zip':'str',
+            'country':'str',
+    })
+    TechnicalUser = typing.TypedDict('TechnicalUser', {
+            'first_name':'str',
+            'last_name':'str',
+            'title':'str',
+            'office_phone':'str',
+            'mobile_phone':'str',
+            'primary_email':'str',
+            'secondary_email':'str',
+            'address':'str',
+            'city':'str',
+            'state':'str',
+            'zip':'str',
+            'country':'str',
+    })
+    Reseller = typing.TypedDict('Reseller', {
+            'company':'str',
+            'first_name':'str',
+            'last_name':'str',
+            'title':'str',
+            'office_phone':'str',
+            'mobile_phone':'str',
+    })
+    PhysicalLocation = typing.TypedDict('PhysicalLocation', {
+            'address':'str',
+            'city':'str',
+            'state':'str',
+            'zip':'str',
+            'country':'str',
+            'contact_name':'str',
+            'contact_phone_number':'str',
+            'contact_email':'str',
+    })
+    CustomerInformationUpdate = typing.TypedDict('CustomerInformationUpdate', {
+            'company':'str',
+            'administrative_user':'AdministrativeUser',
+            'technical_user':'TechnicalUser',
+            'reseller':'Reseller',
+            'physical_location':'PhysicalLocation',
+            'primary_use_case':'str',
+            'other_primary_use_case':'str',
+    })
     @typing.overload
     def is_production(self, 
     /) -> 'bool': 
@@ -86,6 +384,66 @@ class Truenas(Namespace):
             is_production_system
         """
         ...
+    SetProduction = typing.TypedDict('SetProduction', {
+            'ticket':'typing.Optional[int]',
+            'url':'typing.Optional[str]',
+            'has_debug':'bool',
+    })
+    AdministrativeUser = typing.TypedDict('AdministrativeUser', {
+            'first_name':'str',
+            'last_name':'str',
+            'title':'str',
+            'office_phone':'str',
+            'mobile_phone':'str',
+            'primary_email':'str',
+            'secondary_email':'str',
+            'address':'str',
+            'city':'str',
+            'state':'str',
+            'zip':'str',
+            'country':'str',
+    })
+    TechnicalUser = typing.TypedDict('TechnicalUser', {
+            'first_name':'str',
+            'last_name':'str',
+            'title':'str',
+            'office_phone':'str',
+            'mobile_phone':'str',
+            'primary_email':'str',
+            'secondary_email':'str',
+            'address':'str',
+            'city':'str',
+            'state':'str',
+            'zip':'str',
+            'country':'str',
+    })
+    Reseller = typing.TypedDict('Reseller', {
+            'company':'str',
+            'first_name':'str',
+            'last_name':'str',
+            'title':'str',
+            'office_phone':'str',
+            'mobile_phone':'str',
+    })
+    PhysicalLocation = typing.TypedDict('PhysicalLocation', {
+            'address':'str',
+            'city':'str',
+            'state':'str',
+            'zip':'str',
+            'country':'str',
+            'contact_name':'str',
+            'contact_phone_number':'str',
+            'contact_email':'str',
+    })
+    CustomerInformationUpdate = typing.TypedDict('CustomerInformationUpdate', {
+            'company':'str',
+            'administrative_user':'AdministrativeUser',
+            'technical_user':'TechnicalUser',
+            'reseller':'Reseller',
+            'physical_location':'PhysicalLocation',
+            'primary_use_case':'str',
+            'other_primary_use_case':'str',
+    })
     @typing.overload
     def set_production(self, 
         production:'bool',
@@ -106,6 +464,66 @@ class Truenas(Namespace):
             set_production
         """
         ...
+    SetProduction = typing.TypedDict('SetProduction', {
+            'ticket':'typing.Optional[int]',
+            'url':'typing.Optional[str]',
+            'has_debug':'bool',
+    })
+    AdministrativeUser = typing.TypedDict('AdministrativeUser', {
+            'first_name':'str',
+            'last_name':'str',
+            'title':'str',
+            'office_phone':'str',
+            'mobile_phone':'str',
+            'primary_email':'str',
+            'secondary_email':'str',
+            'address':'str',
+            'city':'str',
+            'state':'str',
+            'zip':'str',
+            'country':'str',
+    })
+    TechnicalUser = typing.TypedDict('TechnicalUser', {
+            'first_name':'str',
+            'last_name':'str',
+            'title':'str',
+            'office_phone':'str',
+            'mobile_phone':'str',
+            'primary_email':'str',
+            'secondary_email':'str',
+            'address':'str',
+            'city':'str',
+            'state':'str',
+            'zip':'str',
+            'country':'str',
+    })
+    Reseller = typing.TypedDict('Reseller', {
+            'company':'str',
+            'first_name':'str',
+            'last_name':'str',
+            'title':'str',
+            'office_phone':'str',
+            'mobile_phone':'str',
+    })
+    PhysicalLocation = typing.TypedDict('PhysicalLocation', {
+            'address':'str',
+            'city':'str',
+            'state':'str',
+            'zip':'str',
+            'country':'str',
+            'contact_name':'str',
+            'contact_phone_number':'str',
+            'contact_email':'str',
+    })
+    CustomerInformationUpdate = typing.TypedDict('CustomerInformationUpdate', {
+            'company':'str',
+            'administrative_user':'AdministrativeUser',
+            'technical_user':'TechnicalUser',
+            'reseller':'Reseller',
+            'physical_location':'PhysicalLocation',
+            'primary_use_case':'str',
+            'other_primary_use_case':'str',
+    })
     @typing.overload
     def update_customer_information(self, 
         customer_information_update:'CustomerInformationUpdate'={},
@@ -121,64 +539,64 @@ class Truenas(Namespace):
         -------
         """
         ...
+    SetProduction = typing.TypedDict('SetProduction', {
+            'ticket':'typing.Optional[int]',
+            'url':'typing.Optional[str]',
+            'has_debug':'bool',
+    })
+    AdministrativeUser = typing.TypedDict('AdministrativeUser', {
+            'first_name':'str',
+            'last_name':'str',
+            'title':'str',
+            'office_phone':'str',
+            'mobile_phone':'str',
+            'primary_email':'str',
+            'secondary_email':'str',
+            'address':'str',
+            'city':'str',
+            'state':'str',
+            'zip':'str',
+            'country':'str',
+    })
+    TechnicalUser = typing.TypedDict('TechnicalUser', {
+            'first_name':'str',
+            'last_name':'str',
+            'title':'str',
+            'office_phone':'str',
+            'mobile_phone':'str',
+            'primary_email':'str',
+            'secondary_email':'str',
+            'address':'str',
+            'city':'str',
+            'state':'str',
+            'zip':'str',
+            'country':'str',
+    })
+    Reseller = typing.TypedDict('Reseller', {
+            'company':'str',
+            'first_name':'str',
+            'last_name':'str',
+            'title':'str',
+            'office_phone':'str',
+            'mobile_phone':'str',
+    })
+    PhysicalLocation = typing.TypedDict('PhysicalLocation', {
+            'address':'str',
+            'city':'str',
+            'state':'str',
+            'zip':'str',
+            'country':'str',
+            'contact_name':'str',
+            'contact_phone_number':'str',
+            'contact_email':'str',
+    })
+    CustomerInformationUpdate = typing.TypedDict('CustomerInformationUpdate', {
+            'company':'str',
+            'administrative_user':'AdministrativeUser',
+            'technical_user':'TechnicalUser',
+            'reseller':'Reseller',
+            'physical_location':'PhysicalLocation',
+            'primary_use_case':'str',
+            'other_primary_use_case':'str',
+    })
 
-class SetProduction(typing.TypedDict):
-        ticket:'typing.Optional[int]'
-        url:'typing.Optional[str]'
-        has_debug:'bool'
-        ...
-class CustomerInformationUpdate(typing.TypedDict):
-        company:'str'
-        administrative_user:'AdministrativeUser'
-        technical_user:'TechnicalUser'
-        reseller:'Reseller'
-        physical_location:'PhysicalLocation'
-        primary_use_case:'str'
-        other_primary_use_case:'str'
-        ...
-class AdministrativeUser(typing.TypedDict):
-        first_name:'str'
-        last_name:'str'
-        title:'str'
-        office_phone:'str'
-        mobile_phone:'str'
-        primary_email:'str'
-        secondary_email:'str'
-        address:'str'
-        city:'str'
-        state:'str'
-        zip:'str'
-        country:'str'
-        ...
-class TechnicalUser(typing.TypedDict):
-        first_name:'str'
-        last_name:'str'
-        title:'str'
-        office_phone:'str'
-        mobile_phone:'str'
-        primary_email:'str'
-        secondary_email:'str'
-        address:'str'
-        city:'str'
-        state:'str'
-        zip:'str'
-        country:'str'
-        ...
-class Reseller(typing.TypedDict):
-        company:'str'
-        first_name:'str'
-        last_name:'str'
-        title:'str'
-        office_phone:'str'
-        mobile_phone:'str'
-        ...
-class PhysicalLocation(typing.TypedDict):
-        address:'str'
-        city:'str'
-        state:'str'
-        zip:'str'
-        country:'str'
-        contact_name:'str'
-        contact_phone_number:'str'
-        contact_email:'str'
-        ...

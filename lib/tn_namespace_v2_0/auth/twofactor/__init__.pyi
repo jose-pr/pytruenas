@@ -18,6 +18,38 @@ class AuthTwofactor(Namespace):
             auth_twofactor_entry
         """
         ...
+    Services = typing.TypedDict('Services', {
+            'ssh':'bool',
+    })
+    AuthTwofactorEntry = typing.TypedDict('AuthTwofactorEntry', {
+            'enabled':'bool',
+            'otp_digits':'int',
+            'window':'int',
+            'interval':'int',
+            'services':'Services',
+            'id':'int',
+    })
+    Services_ = typing.TypedDict('Services_', {
+            'ssh':'bool',
+    })
+    AuthTwofactorUpdate = typing.TypedDict('AuthTwofactorUpdate', {
+            'enabled':'bool',
+            'otp_digits':'int',
+            'window':'int',
+            'interval':'int',
+            'services':'Services_',
+    })
+    Services__ = typing.TypedDict('Services__', {
+            'ssh':'bool',
+    })
+    AuthTwofactorUpdateReturns = typing.TypedDict('AuthTwofactorUpdateReturns', {
+            'enabled':'bool',
+            'otp_digits':'int',
+            'window':'int',
+            'interval':'int',
+            'services':'Services__',
+            'id':'int',
+    })
     @typing.overload
     def update(self, 
         auth_twofactor_update:'AuthTwofactorUpdate'={},
@@ -39,30 +71,36 @@ class AuthTwofactor(Namespace):
             auth_twofactor_update_returns
         """
         ...
+    Services = typing.TypedDict('Services', {
+            'ssh':'bool',
+    })
+    AuthTwofactorEntry = typing.TypedDict('AuthTwofactorEntry', {
+            'enabled':'bool',
+            'otp_digits':'int',
+            'window':'int',
+            'interval':'int',
+            'services':'Services',
+            'id':'int',
+    })
+    Services_ = typing.TypedDict('Services_', {
+            'ssh':'bool',
+    })
+    AuthTwofactorUpdate = typing.TypedDict('AuthTwofactorUpdate', {
+            'enabled':'bool',
+            'otp_digits':'int',
+            'window':'int',
+            'interval':'int',
+            'services':'Services_',
+    })
+    Services__ = typing.TypedDict('Services__', {
+            'ssh':'bool',
+    })
+    AuthTwofactorUpdateReturns = typing.TypedDict('AuthTwofactorUpdateReturns', {
+            'enabled':'bool',
+            'otp_digits':'int',
+            'window':'int',
+            'interval':'int',
+            'services':'Services__',
+            'id':'int',
+    })
 
-class AuthTwofactorEntry(typing.TypedDict):
-        enabled:'bool'
-        otp_digits:'int'
-        window:'int'
-        interval:'int'
-        services:'Services'
-        id:'int'
-        ...
-class Services(typing.TypedDict):
-        ssh:'bool'
-        ...
-class AuthTwofactorUpdate(typing.TypedDict):
-        enabled:'bool'
-        otp_digits:'int'
-        window:'int'
-        interval:'int'
-        services:'Services'
-        ...
-class AuthTwofactorUpdateReturns(typing.TypedDict):
-        enabled:'bool'
-        otp_digits:'int'
-        window:'int'
-        interval:'int'
-        services:'Services'
-        id:'int'
-        ...

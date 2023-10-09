@@ -38,6 +38,97 @@ class SystemNtpserver(Namespace):
             system_ntpserver_create_returns
         """
         ...
+    NtpCreate = typing.TypedDict('NtpCreate', {
+            'address':'str',
+            'burst':'bool',
+            'iburst':'bool',
+            'prefer':'bool',
+            'minpoll':'int',
+            'maxpoll':'int',
+            'force':'bool',
+    })
+    SystemNtpserverCreateReturns = typing.TypedDict('SystemNtpserverCreateReturns', {
+            'address':'str',
+            'burst':'bool',
+            'iburst':'bool',
+            'prefer':'bool',
+            'minpoll':'int',
+            'maxpoll':'int',
+            'id':'int',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    NtpEntry = typing.TypedDict('NtpEntry', {
+            'address':'str',
+            'burst':'bool',
+            'iburst':'bool',
+            'prefer':'bool',
+            'minpoll':'int',
+            'maxpoll':'int',
+            'id':'int',
+    })
+    NtpEntry_ = typing.TypedDict('NtpEntry_', {
+            'address':'str',
+            'burst':'bool',
+            'iburst':'bool',
+            'prefer':'bool',
+            'minpoll':'int',
+            'maxpoll':'int',
+            'id':'int',
+    })
+    NtpEntry__ = typing.TypedDict('NtpEntry__', {
+            'address':'str',
+            'burst':'bool',
+            'iburst':'bool',
+            'prefer':'bool',
+            'minpoll':'int',
+            'maxpoll':'int',
+            'id':'int',
+    })
+    NtpUpdate = typing.TypedDict('NtpUpdate', {
+            'address':'str',
+            'burst':'bool',
+            'iburst':'bool',
+            'prefer':'bool',
+            'minpoll':'int',
+            'maxpoll':'int',
+            'force':'bool',
+    })
+    SystemNtpserverUpdateReturns = typing.TypedDict('SystemNtpserverUpdateReturns', {
+            'address':'str',
+            'burst':'bool',
+            'iburst':'bool',
+            'prefer':'bool',
+            'minpoll':'int',
+            'maxpoll':'int',
+            'id':'int',
+    })
     @typing.overload
     def delete(self, 
         id:'int',
@@ -55,9 +146,100 @@ class SystemNtpserver(Namespace):
             Will return `true` if `id` is deleted successfully
         """
         ...
+    NtpCreate = typing.TypedDict('NtpCreate', {
+            'address':'str',
+            'burst':'bool',
+            'iburst':'bool',
+            'prefer':'bool',
+            'minpoll':'int',
+            'maxpoll':'int',
+            'force':'bool',
+    })
+    SystemNtpserverCreateReturns = typing.TypedDict('SystemNtpserverCreateReturns', {
+            'address':'str',
+            'burst':'bool',
+            'iburst':'bool',
+            'prefer':'bool',
+            'minpoll':'int',
+            'maxpoll':'int',
+            'id':'int',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    NtpEntry = typing.TypedDict('NtpEntry', {
+            'address':'str',
+            'burst':'bool',
+            'iburst':'bool',
+            'prefer':'bool',
+            'minpoll':'int',
+            'maxpoll':'int',
+            'id':'int',
+    })
+    NtpEntry_ = typing.TypedDict('NtpEntry_', {
+            'address':'str',
+            'burst':'bool',
+            'iburst':'bool',
+            'prefer':'bool',
+            'minpoll':'int',
+            'maxpoll':'int',
+            'id':'int',
+    })
+    NtpEntry__ = typing.TypedDict('NtpEntry__', {
+            'address':'str',
+            'burst':'bool',
+            'iburst':'bool',
+            'prefer':'bool',
+            'minpoll':'int',
+            'maxpoll':'int',
+            'id':'int',
+    })
+    NtpUpdate = typing.TypedDict('NtpUpdate', {
+            'address':'str',
+            'burst':'bool',
+            'iburst':'bool',
+            'prefer':'bool',
+            'minpoll':'int',
+            'maxpoll':'int',
+            'force':'bool',
+    })
+    SystemNtpserverUpdateReturns = typing.TypedDict('SystemNtpserverUpdateReturns', {
+            'address':'str',
+            'burst':'bool',
+            'iburst':'bool',
+            'prefer':'bool',
+            'minpoll':'int',
+            'maxpoll':'int',
+            'id':'int',
+    })
     @typing.overload
     def get_instance(self, 
-        id:'str|int|bool|dict[str]|list',
+        id:'typing.Union[str, int, bool, dict[str], list]',
         query_options_get_instance:'QueryOptionsGetInstance'={},
     /) -> None: 
         """
@@ -75,11 +257,102 @@ class SystemNtpserver(Namespace):
         -------
         """
         ...
+    NtpCreate = typing.TypedDict('NtpCreate', {
+            'address':'str',
+            'burst':'bool',
+            'iburst':'bool',
+            'prefer':'bool',
+            'minpoll':'int',
+            'maxpoll':'int',
+            'force':'bool',
+    })
+    SystemNtpserverCreateReturns = typing.TypedDict('SystemNtpserverCreateReturns', {
+            'address':'str',
+            'burst':'bool',
+            'iburst':'bool',
+            'prefer':'bool',
+            'minpoll':'int',
+            'maxpoll':'int',
+            'id':'int',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    NtpEntry = typing.TypedDict('NtpEntry', {
+            'address':'str',
+            'burst':'bool',
+            'iburst':'bool',
+            'prefer':'bool',
+            'minpoll':'int',
+            'maxpoll':'int',
+            'id':'int',
+    })
+    NtpEntry_ = typing.TypedDict('NtpEntry_', {
+            'address':'str',
+            'burst':'bool',
+            'iburst':'bool',
+            'prefer':'bool',
+            'minpoll':'int',
+            'maxpoll':'int',
+            'id':'int',
+    })
+    NtpEntry__ = typing.TypedDict('NtpEntry__', {
+            'address':'str',
+            'burst':'bool',
+            'iburst':'bool',
+            'prefer':'bool',
+            'minpoll':'int',
+            'maxpoll':'int',
+            'id':'int',
+    })
+    NtpUpdate = typing.TypedDict('NtpUpdate', {
+            'address':'str',
+            'burst':'bool',
+            'iburst':'bool',
+            'prefer':'bool',
+            'minpoll':'int',
+            'maxpoll':'int',
+            'force':'bool',
+    })
+    SystemNtpserverUpdateReturns = typing.TypedDict('SystemNtpserverUpdateReturns', {
+            'address':'str',
+            'burst':'bool',
+            'iburst':'bool',
+            'prefer':'bool',
+            'minpoll':'int',
+            'maxpoll':'int',
+            'id':'int',
+    })
     @typing.overload
     def query(self, 
         query_filters:'list[list]'=[],
         query_options:'QueryOptions'={},
-    /) -> 'list[NtpEntry]|NtpEntry|int|NtpEntry': 
+    /) -> 'typing.Union[list[NtpEntry], ForwardRef(NtpEntry_), int, ForwardRef(NtpEntry__)]': 
         """
         
 
@@ -91,16 +364,101 @@ class SystemNtpserver(Namespace):
             query-options
         Returns
         -------
-        list[NtpEntry]:
-            
-        NtpEntry:
-            
-        int:
-            
-        NtpEntry:
+        typing.Union[list[NtpEntry], ForwardRef(NtpEntry_), int, ForwardRef(NtpEntry__)]:
             
         """
         ...
+    NtpCreate = typing.TypedDict('NtpCreate', {
+            'address':'str',
+            'burst':'bool',
+            'iburst':'bool',
+            'prefer':'bool',
+            'minpoll':'int',
+            'maxpoll':'int',
+            'force':'bool',
+    })
+    SystemNtpserverCreateReturns = typing.TypedDict('SystemNtpserverCreateReturns', {
+            'address':'str',
+            'burst':'bool',
+            'iburst':'bool',
+            'prefer':'bool',
+            'minpoll':'int',
+            'maxpoll':'int',
+            'id':'int',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    NtpEntry = typing.TypedDict('NtpEntry', {
+            'address':'str',
+            'burst':'bool',
+            'iburst':'bool',
+            'prefer':'bool',
+            'minpoll':'int',
+            'maxpoll':'int',
+            'id':'int',
+    })
+    NtpEntry_ = typing.TypedDict('NtpEntry_', {
+            'address':'str',
+            'burst':'bool',
+            'iburst':'bool',
+            'prefer':'bool',
+            'minpoll':'int',
+            'maxpoll':'int',
+            'id':'int',
+    })
+    NtpEntry__ = typing.TypedDict('NtpEntry__', {
+            'address':'str',
+            'burst':'bool',
+            'iburst':'bool',
+            'prefer':'bool',
+            'minpoll':'int',
+            'maxpoll':'int',
+            'id':'int',
+    })
+    NtpUpdate = typing.TypedDict('NtpUpdate', {
+            'address':'str',
+            'burst':'bool',
+            'iburst':'bool',
+            'prefer':'bool',
+            'minpoll':'int',
+            'maxpoll':'int',
+            'force':'bool',
+    })
+    SystemNtpserverUpdateReturns = typing.TypedDict('SystemNtpserverUpdateReturns', {
+            'address':'str',
+            'burst':'bool',
+            'iburst':'bool',
+            'prefer':'bool',
+            'minpoll':'int',
+            'maxpoll':'int',
+            'id':'int',
+    })
     @typing.overload
     def update(self, 
         id:'int',
@@ -122,77 +480,95 @@ class SystemNtpserver(Namespace):
             system_ntpserver_update_returns
         """
         ...
+    NtpCreate = typing.TypedDict('NtpCreate', {
+            'address':'str',
+            'burst':'bool',
+            'iburst':'bool',
+            'prefer':'bool',
+            'minpoll':'int',
+            'maxpoll':'int',
+            'force':'bool',
+    })
+    SystemNtpserverCreateReturns = typing.TypedDict('SystemNtpserverCreateReturns', {
+            'address':'str',
+            'burst':'bool',
+            'iburst':'bool',
+            'prefer':'bool',
+            'minpoll':'int',
+            'maxpoll':'int',
+            'id':'int',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    NtpEntry = typing.TypedDict('NtpEntry', {
+            'address':'str',
+            'burst':'bool',
+            'iburst':'bool',
+            'prefer':'bool',
+            'minpoll':'int',
+            'maxpoll':'int',
+            'id':'int',
+    })
+    NtpEntry_ = typing.TypedDict('NtpEntry_', {
+            'address':'str',
+            'burst':'bool',
+            'iburst':'bool',
+            'prefer':'bool',
+            'minpoll':'int',
+            'maxpoll':'int',
+            'id':'int',
+    })
+    NtpEntry__ = typing.TypedDict('NtpEntry__', {
+            'address':'str',
+            'burst':'bool',
+            'iburst':'bool',
+            'prefer':'bool',
+            'minpoll':'int',
+            'maxpoll':'int',
+            'id':'int',
+    })
+    NtpUpdate = typing.TypedDict('NtpUpdate', {
+            'address':'str',
+            'burst':'bool',
+            'iburst':'bool',
+            'prefer':'bool',
+            'minpoll':'int',
+            'maxpoll':'int',
+            'force':'bool',
+    })
+    SystemNtpserverUpdateReturns = typing.TypedDict('SystemNtpserverUpdateReturns', {
+            'address':'str',
+            'burst':'bool',
+            'iburst':'bool',
+            'prefer':'bool',
+            'minpoll':'int',
+            'maxpoll':'int',
+            'id':'int',
+    })
 
-class NtpCreate(typing.TypedDict):
-        address:'str'
-        burst:'bool'
-        iburst:'bool'
-        prefer:'bool'
-        minpoll:'int'
-        maxpoll:'int'
-        force:'bool'
-        ...
-class SystemNtpserverCreateReturns(typing.TypedDict):
-        address:'str'
-        burst:'bool'
-        iburst:'bool'
-        prefer:'bool'
-        minpoll:'int'
-        maxpoll:'int'
-        id:'int'
-        ...
-class QueryOptionsGetInstance(typing.TypedDict):
-        relationships:'bool'
-        extend:'typing.Optional[str]'
-        extend_context:'typing.Optional[str]'
-        prefix:'typing.Optional[str]'
-        extra:'dict[str]'
-        order_by:'list'
-        select:'list'
-        count:'bool'
-        get:'bool'
-        offset:'int'
-        limit:'int'
-        force_sql_filters:'bool'
-        ...
-class QueryOptions(typing.TypedDict):
-        relationships:'bool'
-        extend:'typing.Optional[str]'
-        extend_context:'typing.Optional[str]'
-        prefix:'typing.Optional[str]'
-        extra:'dict[str]'
-        order_by:'list'
-        select:'list'
-        count:'bool'
-        get:'bool'
-        offset:'int'
-        limit:'int'
-        force_sql_filters:'bool'
-        ...
-class NtpEntry(typing.TypedDict):
-        address:'str'
-        burst:'bool'
-        iburst:'bool'
-        prefer:'bool'
-        minpoll:'int'
-        maxpoll:'int'
-        id:'int'
-        ...
-class NtpUpdate(typing.TypedDict):
-        address:'str'
-        burst:'bool'
-        iburst:'bool'
-        prefer:'bool'
-        minpoll:'int'
-        maxpoll:'int'
-        force:'bool'
-        ...
-class SystemNtpserverUpdateReturns(typing.TypedDict):
-        address:'str'
-        burst:'bool'
-        iburst:'bool'
-        prefer:'bool'
-        minpoll:'int'
-        maxpoll:'int'
-        id:'int'
-        ...

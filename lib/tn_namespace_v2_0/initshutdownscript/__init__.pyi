@@ -35,6 +35,109 @@ class Initshutdownscript(Namespace):
             initshutdownscript_create_returns
         """
         ...
+    InitShutdownScriptCreate = typing.TypedDict('InitShutdownScriptCreate', {
+            'type':'str',
+            'command':'typing.Optional[str]',
+            'script_text':'typing.Optional[str]',
+            'script':'typing.Optional[str]',
+            'when':'str',
+            'enabled':'bool',
+            'timeout':'int',
+            'comment':'str',
+    })
+    InitshutdownscriptCreateReturns = typing.TypedDict('InitshutdownscriptCreateReturns', {
+            'type':'str',
+            'command':'typing.Optional[str]',
+            'script_text':'typing.Optional[str]',
+            'script':'typing.Optional[str]',
+            'when':'str',
+            'enabled':'bool',
+            'timeout':'int',
+            'comment':'str',
+            'id':'int',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    InitShutdownScriptEntry = typing.TypedDict('InitShutdownScriptEntry', {
+            'type':'str',
+            'command':'typing.Optional[str]',
+            'script_text':'typing.Optional[str]',
+            'script':'typing.Optional[str]',
+            'when':'str',
+            'enabled':'bool',
+            'timeout':'int',
+            'comment':'str',
+            'id':'int',
+    })
+    InitShutdownScriptEntry_ = typing.TypedDict('InitShutdownScriptEntry_', {
+            'type':'str',
+            'command':'typing.Optional[str]',
+            'script_text':'typing.Optional[str]',
+            'script':'typing.Optional[str]',
+            'when':'str',
+            'enabled':'bool',
+            'timeout':'int',
+            'comment':'str',
+            'id':'int',
+    })
+    InitShutdownScriptEntry__ = typing.TypedDict('InitShutdownScriptEntry__', {
+            'type':'str',
+            'command':'typing.Optional[str]',
+            'script_text':'typing.Optional[str]',
+            'script':'typing.Optional[str]',
+            'when':'str',
+            'enabled':'bool',
+            'timeout':'int',
+            'comment':'str',
+            'id':'int',
+    })
+    InitshutdownscriptUpdate = typing.TypedDict('InitshutdownscriptUpdate', {
+            'type':'str',
+            'command':'typing.Optional[str]',
+            'script_text':'typing.Optional[str]',
+            'script':'typing.Optional[str]',
+            'when':'str',
+            'enabled':'bool',
+            'timeout':'int',
+            'comment':'str',
+    })
+    InitshutdownscriptUpdateReturns = typing.TypedDict('InitshutdownscriptUpdateReturns', {
+            'type':'str',
+            'command':'typing.Optional[str]',
+            'script_text':'typing.Optional[str]',
+            'script':'typing.Optional[str]',
+            'when':'str',
+            'enabled':'bool',
+            'timeout':'int',
+            'comment':'str',
+            'id':'int',
+    })
     @typing.overload
     def delete(self, 
         id:'int',
@@ -52,9 +155,112 @@ class Initshutdownscript(Namespace):
             Will return `true` if `id` is deleted successfully
         """
         ...
+    InitShutdownScriptCreate = typing.TypedDict('InitShutdownScriptCreate', {
+            'type':'str',
+            'command':'typing.Optional[str]',
+            'script_text':'typing.Optional[str]',
+            'script':'typing.Optional[str]',
+            'when':'str',
+            'enabled':'bool',
+            'timeout':'int',
+            'comment':'str',
+    })
+    InitshutdownscriptCreateReturns = typing.TypedDict('InitshutdownscriptCreateReturns', {
+            'type':'str',
+            'command':'typing.Optional[str]',
+            'script_text':'typing.Optional[str]',
+            'script':'typing.Optional[str]',
+            'when':'str',
+            'enabled':'bool',
+            'timeout':'int',
+            'comment':'str',
+            'id':'int',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    InitShutdownScriptEntry = typing.TypedDict('InitShutdownScriptEntry', {
+            'type':'str',
+            'command':'typing.Optional[str]',
+            'script_text':'typing.Optional[str]',
+            'script':'typing.Optional[str]',
+            'when':'str',
+            'enabled':'bool',
+            'timeout':'int',
+            'comment':'str',
+            'id':'int',
+    })
+    InitShutdownScriptEntry_ = typing.TypedDict('InitShutdownScriptEntry_', {
+            'type':'str',
+            'command':'typing.Optional[str]',
+            'script_text':'typing.Optional[str]',
+            'script':'typing.Optional[str]',
+            'when':'str',
+            'enabled':'bool',
+            'timeout':'int',
+            'comment':'str',
+            'id':'int',
+    })
+    InitShutdownScriptEntry__ = typing.TypedDict('InitShutdownScriptEntry__', {
+            'type':'str',
+            'command':'typing.Optional[str]',
+            'script_text':'typing.Optional[str]',
+            'script':'typing.Optional[str]',
+            'when':'str',
+            'enabled':'bool',
+            'timeout':'int',
+            'comment':'str',
+            'id':'int',
+    })
+    InitshutdownscriptUpdate = typing.TypedDict('InitshutdownscriptUpdate', {
+            'type':'str',
+            'command':'typing.Optional[str]',
+            'script_text':'typing.Optional[str]',
+            'script':'typing.Optional[str]',
+            'when':'str',
+            'enabled':'bool',
+            'timeout':'int',
+            'comment':'str',
+    })
+    InitshutdownscriptUpdateReturns = typing.TypedDict('InitshutdownscriptUpdateReturns', {
+            'type':'str',
+            'command':'typing.Optional[str]',
+            'script_text':'typing.Optional[str]',
+            'script':'typing.Optional[str]',
+            'when':'str',
+            'enabled':'bool',
+            'timeout':'int',
+            'comment':'str',
+            'id':'int',
+    })
     @typing.overload
     def get_instance(self, 
-        id:'str|int|bool|dict[str]|list',
+        id:'typing.Union[str, int, bool, dict[str], list]',
         query_options_get_instance:'QueryOptionsGetInstance'={},
     /) -> None: 
         """
@@ -72,11 +278,114 @@ class Initshutdownscript(Namespace):
         -------
         """
         ...
+    InitShutdownScriptCreate = typing.TypedDict('InitShutdownScriptCreate', {
+            'type':'str',
+            'command':'typing.Optional[str]',
+            'script_text':'typing.Optional[str]',
+            'script':'typing.Optional[str]',
+            'when':'str',
+            'enabled':'bool',
+            'timeout':'int',
+            'comment':'str',
+    })
+    InitshutdownscriptCreateReturns = typing.TypedDict('InitshutdownscriptCreateReturns', {
+            'type':'str',
+            'command':'typing.Optional[str]',
+            'script_text':'typing.Optional[str]',
+            'script':'typing.Optional[str]',
+            'when':'str',
+            'enabled':'bool',
+            'timeout':'int',
+            'comment':'str',
+            'id':'int',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    InitShutdownScriptEntry = typing.TypedDict('InitShutdownScriptEntry', {
+            'type':'str',
+            'command':'typing.Optional[str]',
+            'script_text':'typing.Optional[str]',
+            'script':'typing.Optional[str]',
+            'when':'str',
+            'enabled':'bool',
+            'timeout':'int',
+            'comment':'str',
+            'id':'int',
+    })
+    InitShutdownScriptEntry_ = typing.TypedDict('InitShutdownScriptEntry_', {
+            'type':'str',
+            'command':'typing.Optional[str]',
+            'script_text':'typing.Optional[str]',
+            'script':'typing.Optional[str]',
+            'when':'str',
+            'enabled':'bool',
+            'timeout':'int',
+            'comment':'str',
+            'id':'int',
+    })
+    InitShutdownScriptEntry__ = typing.TypedDict('InitShutdownScriptEntry__', {
+            'type':'str',
+            'command':'typing.Optional[str]',
+            'script_text':'typing.Optional[str]',
+            'script':'typing.Optional[str]',
+            'when':'str',
+            'enabled':'bool',
+            'timeout':'int',
+            'comment':'str',
+            'id':'int',
+    })
+    InitshutdownscriptUpdate = typing.TypedDict('InitshutdownscriptUpdate', {
+            'type':'str',
+            'command':'typing.Optional[str]',
+            'script_text':'typing.Optional[str]',
+            'script':'typing.Optional[str]',
+            'when':'str',
+            'enabled':'bool',
+            'timeout':'int',
+            'comment':'str',
+    })
+    InitshutdownscriptUpdateReturns = typing.TypedDict('InitshutdownscriptUpdateReturns', {
+            'type':'str',
+            'command':'typing.Optional[str]',
+            'script_text':'typing.Optional[str]',
+            'script':'typing.Optional[str]',
+            'when':'str',
+            'enabled':'bool',
+            'timeout':'int',
+            'comment':'str',
+            'id':'int',
+    })
     @typing.overload
     def query(self, 
         query_filters:'list[list]'=[],
         query_options:'QueryOptions'={},
-    /) -> 'list[InitShutdownScriptEntry]|InitShutdownScriptEntry|int|InitShutdownScriptEntry': 
+    /) -> 'typing.Union[list[InitShutdownScriptEntry], ForwardRef(InitShutdownScriptEntry_), int, ForwardRef(InitShutdownScriptEntry__)]': 
         """
         
 
@@ -88,16 +397,113 @@ class Initshutdownscript(Namespace):
             query-options
         Returns
         -------
-        list[InitShutdownScriptEntry]:
-            
-        InitShutdownScriptEntry:
-            
-        int:
-            
-        InitShutdownScriptEntry:
+        typing.Union[list[InitShutdownScriptEntry], ForwardRef(InitShutdownScriptEntry_), int, ForwardRef(InitShutdownScriptEntry__)]:
             
         """
         ...
+    InitShutdownScriptCreate = typing.TypedDict('InitShutdownScriptCreate', {
+            'type':'str',
+            'command':'typing.Optional[str]',
+            'script_text':'typing.Optional[str]',
+            'script':'typing.Optional[str]',
+            'when':'str',
+            'enabled':'bool',
+            'timeout':'int',
+            'comment':'str',
+    })
+    InitshutdownscriptCreateReturns = typing.TypedDict('InitshutdownscriptCreateReturns', {
+            'type':'str',
+            'command':'typing.Optional[str]',
+            'script_text':'typing.Optional[str]',
+            'script':'typing.Optional[str]',
+            'when':'str',
+            'enabled':'bool',
+            'timeout':'int',
+            'comment':'str',
+            'id':'int',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    InitShutdownScriptEntry = typing.TypedDict('InitShutdownScriptEntry', {
+            'type':'str',
+            'command':'typing.Optional[str]',
+            'script_text':'typing.Optional[str]',
+            'script':'typing.Optional[str]',
+            'when':'str',
+            'enabled':'bool',
+            'timeout':'int',
+            'comment':'str',
+            'id':'int',
+    })
+    InitShutdownScriptEntry_ = typing.TypedDict('InitShutdownScriptEntry_', {
+            'type':'str',
+            'command':'typing.Optional[str]',
+            'script_text':'typing.Optional[str]',
+            'script':'typing.Optional[str]',
+            'when':'str',
+            'enabled':'bool',
+            'timeout':'int',
+            'comment':'str',
+            'id':'int',
+    })
+    InitShutdownScriptEntry__ = typing.TypedDict('InitShutdownScriptEntry__', {
+            'type':'str',
+            'command':'typing.Optional[str]',
+            'script_text':'typing.Optional[str]',
+            'script':'typing.Optional[str]',
+            'when':'str',
+            'enabled':'bool',
+            'timeout':'int',
+            'comment':'str',
+            'id':'int',
+    })
+    InitshutdownscriptUpdate = typing.TypedDict('InitshutdownscriptUpdate', {
+            'type':'str',
+            'command':'typing.Optional[str]',
+            'script_text':'typing.Optional[str]',
+            'script':'typing.Optional[str]',
+            'when':'str',
+            'enabled':'bool',
+            'timeout':'int',
+            'comment':'str',
+    })
+    InitshutdownscriptUpdateReturns = typing.TypedDict('InitshutdownscriptUpdateReturns', {
+            'type':'str',
+            'command':'typing.Optional[str]',
+            'script_text':'typing.Optional[str]',
+            'script':'typing.Optional[str]',
+            'when':'str',
+            'enabled':'bool',
+            'timeout':'int',
+            'comment':'str',
+            'id':'int',
+    })
     @typing.overload
     def update(self, 
         id:'int',
@@ -119,85 +525,107 @@ class Initshutdownscript(Namespace):
             initshutdownscript_update_returns
         """
         ...
+    InitShutdownScriptCreate = typing.TypedDict('InitShutdownScriptCreate', {
+            'type':'str',
+            'command':'typing.Optional[str]',
+            'script_text':'typing.Optional[str]',
+            'script':'typing.Optional[str]',
+            'when':'str',
+            'enabled':'bool',
+            'timeout':'int',
+            'comment':'str',
+    })
+    InitshutdownscriptCreateReturns = typing.TypedDict('InitshutdownscriptCreateReturns', {
+            'type':'str',
+            'command':'typing.Optional[str]',
+            'script_text':'typing.Optional[str]',
+            'script':'typing.Optional[str]',
+            'when':'str',
+            'enabled':'bool',
+            'timeout':'int',
+            'comment':'str',
+            'id':'int',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    InitShutdownScriptEntry = typing.TypedDict('InitShutdownScriptEntry', {
+            'type':'str',
+            'command':'typing.Optional[str]',
+            'script_text':'typing.Optional[str]',
+            'script':'typing.Optional[str]',
+            'when':'str',
+            'enabled':'bool',
+            'timeout':'int',
+            'comment':'str',
+            'id':'int',
+    })
+    InitShutdownScriptEntry_ = typing.TypedDict('InitShutdownScriptEntry_', {
+            'type':'str',
+            'command':'typing.Optional[str]',
+            'script_text':'typing.Optional[str]',
+            'script':'typing.Optional[str]',
+            'when':'str',
+            'enabled':'bool',
+            'timeout':'int',
+            'comment':'str',
+            'id':'int',
+    })
+    InitShutdownScriptEntry__ = typing.TypedDict('InitShutdownScriptEntry__', {
+            'type':'str',
+            'command':'typing.Optional[str]',
+            'script_text':'typing.Optional[str]',
+            'script':'typing.Optional[str]',
+            'when':'str',
+            'enabled':'bool',
+            'timeout':'int',
+            'comment':'str',
+            'id':'int',
+    })
+    InitshutdownscriptUpdate = typing.TypedDict('InitshutdownscriptUpdate', {
+            'type':'str',
+            'command':'typing.Optional[str]',
+            'script_text':'typing.Optional[str]',
+            'script':'typing.Optional[str]',
+            'when':'str',
+            'enabled':'bool',
+            'timeout':'int',
+            'comment':'str',
+    })
+    InitshutdownscriptUpdateReturns = typing.TypedDict('InitshutdownscriptUpdateReturns', {
+            'type':'str',
+            'command':'typing.Optional[str]',
+            'script_text':'typing.Optional[str]',
+            'script':'typing.Optional[str]',
+            'when':'str',
+            'enabled':'bool',
+            'timeout':'int',
+            'comment':'str',
+            'id':'int',
+    })
 
-class InitShutdownScriptCreate(typing.TypedDict):
-        type:'str'
-        command:'typing.Optional[str]'
-        script_text:'typing.Optional[str]'
-        script:'typing.Optional[str]'
-        when:'str'
-        enabled:'bool'
-        timeout:'int'
-        comment:'str'
-        ...
-class InitshutdownscriptCreateReturns(typing.TypedDict):
-        type:'str'
-        command:'typing.Optional[str]'
-        script_text:'typing.Optional[str]'
-        script:'typing.Optional[str]'
-        when:'str'
-        enabled:'bool'
-        timeout:'int'
-        comment:'str'
-        id:'int'
-        ...
-class QueryOptionsGetInstance(typing.TypedDict):
-        relationships:'bool'
-        extend:'typing.Optional[str]'
-        extend_context:'typing.Optional[str]'
-        prefix:'typing.Optional[str]'
-        extra:'dict[str]'
-        order_by:'list'
-        select:'list'
-        count:'bool'
-        get:'bool'
-        offset:'int'
-        limit:'int'
-        force_sql_filters:'bool'
-        ...
-class QueryOptions(typing.TypedDict):
-        relationships:'bool'
-        extend:'typing.Optional[str]'
-        extend_context:'typing.Optional[str]'
-        prefix:'typing.Optional[str]'
-        extra:'dict[str]'
-        order_by:'list'
-        select:'list'
-        count:'bool'
-        get:'bool'
-        offset:'int'
-        limit:'int'
-        force_sql_filters:'bool'
-        ...
-class InitShutdownScriptEntry(typing.TypedDict):
-        type:'str'
-        command:'typing.Optional[str]'
-        script_text:'typing.Optional[str]'
-        script:'typing.Optional[str]'
-        when:'str'
-        enabled:'bool'
-        timeout:'int'
-        comment:'str'
-        id:'int'
-        ...
-class InitshutdownscriptUpdate(typing.TypedDict):
-        type:'str'
-        command:'typing.Optional[str]'
-        script_text:'typing.Optional[str]'
-        script:'typing.Optional[str]'
-        when:'str'
-        enabled:'bool'
-        timeout:'int'
-        comment:'str'
-        ...
-class InitshutdownscriptUpdateReturns(typing.TypedDict):
-        type:'str'
-        command:'typing.Optional[str]'
-        script_text:'typing.Optional[str]'
-        script:'typing.Optional[str]'
-        when:'str'
-        enabled:'bool'
-        timeout:'int'
-        comment:'str'
-        id:'int'
-        ...

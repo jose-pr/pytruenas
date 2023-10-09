@@ -18,6 +18,29 @@ class Smart(Namespace):
             smart_entry
         """
         ...
+    SmartEntry = typing.TypedDict('SmartEntry', {
+            'interval':'int',
+            'id':'int',
+            'powermode':'str',
+            'difference':'int',
+            'informational':'int',
+            'critical':'int',
+    })
+    SmartUpdate = typing.TypedDict('SmartUpdate', {
+            'interval':'int',
+            'powermode':'str',
+            'difference':'int',
+            'informational':'int',
+            'critical':'int',
+    })
+    SmartUpdateReturns = typing.TypedDict('SmartUpdateReturns', {
+            'interval':'int',
+            'id':'int',
+            'powermode':'str',
+            'difference':'int',
+            'informational':'int',
+            'critical':'int',
+    })
     @typing.overload
     def update(self, 
         smart_update:'SmartUpdate'={},
@@ -42,27 +65,27 @@ class Smart(Namespace):
             smart_update_returns
         """
         ...
+    SmartEntry = typing.TypedDict('SmartEntry', {
+            'interval':'int',
+            'id':'int',
+            'powermode':'str',
+            'difference':'int',
+            'informational':'int',
+            'critical':'int',
+    })
+    SmartUpdate = typing.TypedDict('SmartUpdate', {
+            'interval':'int',
+            'powermode':'str',
+            'difference':'int',
+            'informational':'int',
+            'critical':'int',
+    })
+    SmartUpdateReturns = typing.TypedDict('SmartUpdateReturns', {
+            'interval':'int',
+            'id':'int',
+            'powermode':'str',
+            'difference':'int',
+            'informational':'int',
+            'critical':'int',
+    })
 
-class SmartEntry(typing.TypedDict):
-        interval:'int'
-        id:'int'
-        powermode:'str'
-        difference:'int'
-        informational:'int'
-        critical:'int'
-        ...
-class SmartUpdate(typing.TypedDict):
-        interval:'int'
-        powermode:'str'
-        difference:'int'
-        informational:'int'
-        critical:'int'
-        ...
-class SmartUpdateReturns(typing.TypedDict):
-        interval:'int'
-        id:'int'
-        powermode:'str'
-        difference:'int'
-        informational:'int'
-        critical:'int'
-        ...

@@ -22,6 +22,78 @@ class ZfsSnapshot(Namespace):
         -------
         """
         ...
+    SnapshotClone = typing.TypedDict('SnapshotClone', {
+            'snapshot':'str',
+            'dataset_dst':'str',
+            'dataset_properties':'dict[str]',
+    })
+    SnapshotCreate = typing.TypedDict('SnapshotCreate', {
+            'dataset':'str',
+            'name':'str',
+            'naming_schema':'str',
+            'recursive':'bool',
+            'exclude':'list[str]',
+            'suspend_vms':'bool',
+            'vmware_sync':'bool',
+            'properties':'dict[str]',
+    })
+    Options = typing.TypedDict('Options', {
+            'defer':'bool',
+            'recursive':'bool',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Options_ = typing.TypedDict('Options_', {
+            'recursive':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Options__ = typing.TypedDict('Options__', {
+            'recursive':'bool',
+    })
+    SnapshotRemove = typing.TypedDict('SnapshotRemove', {
+            'dataset':'str',
+            'name':'str',
+            'defer_delete':'bool',
+    })
+    Options___ = typing.TypedDict('Options___', {
+            'recursive':'bool',
+            'recursive_clones':'bool',
+            'force':'bool',
+            'recursive_rollback':'bool',
+    })
+    UserProperty = typing.TypedDict('UserProperty', {
+            'key':'str',
+            'value':'str',
+            'remove':'bool',
+    })
+    SnapshotUpdate = typing.TypedDict('SnapshotUpdate', {
+            'user_properties_update':'list[UserProperty]',
+    })
     @typing.overload
     def create(self, 
         snapshot_create:'SnapshotCreate'={},
@@ -39,6 +111,78 @@ class ZfsSnapshot(Namespace):
             zfs_snapshot_create_returns
         """
         ...
+    SnapshotClone = typing.TypedDict('SnapshotClone', {
+            'snapshot':'str',
+            'dataset_dst':'str',
+            'dataset_properties':'dict[str]',
+    })
+    SnapshotCreate = typing.TypedDict('SnapshotCreate', {
+            'dataset':'str',
+            'name':'str',
+            'naming_schema':'str',
+            'recursive':'bool',
+            'exclude':'list[str]',
+            'suspend_vms':'bool',
+            'vmware_sync':'bool',
+            'properties':'dict[str]',
+    })
+    Options = typing.TypedDict('Options', {
+            'defer':'bool',
+            'recursive':'bool',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Options_ = typing.TypedDict('Options_', {
+            'recursive':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Options__ = typing.TypedDict('Options__', {
+            'recursive':'bool',
+    })
+    SnapshotRemove = typing.TypedDict('SnapshotRemove', {
+            'dataset':'str',
+            'name':'str',
+            'defer_delete':'bool',
+    })
+    Options___ = typing.TypedDict('Options___', {
+            'recursive':'bool',
+            'recursive_clones':'bool',
+            'force':'bool',
+            'recursive_rollback':'bool',
+    })
+    UserProperty = typing.TypedDict('UserProperty', {
+            'key':'str',
+            'value':'str',
+            'remove':'bool',
+    })
+    SnapshotUpdate = typing.TypedDict('SnapshotUpdate', {
+            'user_properties_update':'list[UserProperty]',
+    })
     @typing.overload
     def delete(self, 
         id:'str',
@@ -61,9 +205,81 @@ class ZfsSnapshot(Namespace):
             Will return `true` if `id` is deleted successfully
         """
         ...
+    SnapshotClone = typing.TypedDict('SnapshotClone', {
+            'snapshot':'str',
+            'dataset_dst':'str',
+            'dataset_properties':'dict[str]',
+    })
+    SnapshotCreate = typing.TypedDict('SnapshotCreate', {
+            'dataset':'str',
+            'name':'str',
+            'naming_schema':'str',
+            'recursive':'bool',
+            'exclude':'list[str]',
+            'suspend_vms':'bool',
+            'vmware_sync':'bool',
+            'properties':'dict[str]',
+    })
+    Options = typing.TypedDict('Options', {
+            'defer':'bool',
+            'recursive':'bool',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Options_ = typing.TypedDict('Options_', {
+            'recursive':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Options__ = typing.TypedDict('Options__', {
+            'recursive':'bool',
+    })
+    SnapshotRemove = typing.TypedDict('SnapshotRemove', {
+            'dataset':'str',
+            'name':'str',
+            'defer_delete':'bool',
+    })
+    Options___ = typing.TypedDict('Options___', {
+            'recursive':'bool',
+            'recursive_clones':'bool',
+            'force':'bool',
+            'recursive_rollback':'bool',
+    })
+    UserProperty = typing.TypedDict('UserProperty', {
+            'key':'str',
+            'value':'str',
+            'remove':'bool',
+    })
+    SnapshotUpdate = typing.TypedDict('SnapshotUpdate', {
+            'user_properties_update':'list[UserProperty]',
+    })
     @typing.overload
     def get_instance(self, 
-        id:'str|int|bool|dict[str]|list',
+        id:'typing.Union[str, int, bool, dict[str], list]',
         query_options_get_instance:'QueryOptionsGetInstance'={},
     /) -> None: 
         """
@@ -81,6 +297,78 @@ class ZfsSnapshot(Namespace):
         -------
         """
         ...
+    SnapshotClone = typing.TypedDict('SnapshotClone', {
+            'snapshot':'str',
+            'dataset_dst':'str',
+            'dataset_properties':'dict[str]',
+    })
+    SnapshotCreate = typing.TypedDict('SnapshotCreate', {
+            'dataset':'str',
+            'name':'str',
+            'naming_schema':'str',
+            'recursive':'bool',
+            'exclude':'list[str]',
+            'suspend_vms':'bool',
+            'vmware_sync':'bool',
+            'properties':'dict[str]',
+    })
+    Options = typing.TypedDict('Options', {
+            'defer':'bool',
+            'recursive':'bool',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Options_ = typing.TypedDict('Options_', {
+            'recursive':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Options__ = typing.TypedDict('Options__', {
+            'recursive':'bool',
+    })
+    SnapshotRemove = typing.TypedDict('SnapshotRemove', {
+            'dataset':'str',
+            'name':'str',
+            'defer_delete':'bool',
+    })
+    Options___ = typing.TypedDict('Options___', {
+            'recursive':'bool',
+            'recursive_clones':'bool',
+            'force':'bool',
+            'recursive_rollback':'bool',
+    })
+    UserProperty = typing.TypedDict('UserProperty', {
+            'key':'str',
+            'value':'str',
+            'remove':'bool',
+    })
+    SnapshotUpdate = typing.TypedDict('SnapshotUpdate', {
+            'user_properties_update':'list[UserProperty]',
+    })
     @typing.overload
     def hold(self, 
         id:'str',
@@ -103,11 +391,83 @@ class ZfsSnapshot(Namespace):
         -------
         """
         ...
+    SnapshotClone = typing.TypedDict('SnapshotClone', {
+            'snapshot':'str',
+            'dataset_dst':'str',
+            'dataset_properties':'dict[str]',
+    })
+    SnapshotCreate = typing.TypedDict('SnapshotCreate', {
+            'dataset':'str',
+            'name':'str',
+            'naming_schema':'str',
+            'recursive':'bool',
+            'exclude':'list[str]',
+            'suspend_vms':'bool',
+            'vmware_sync':'bool',
+            'properties':'dict[str]',
+    })
+    Options = typing.TypedDict('Options', {
+            'defer':'bool',
+            'recursive':'bool',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Options_ = typing.TypedDict('Options_', {
+            'recursive':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Options__ = typing.TypedDict('Options__', {
+            'recursive':'bool',
+    })
+    SnapshotRemove = typing.TypedDict('SnapshotRemove', {
+            'dataset':'str',
+            'name':'str',
+            'defer_delete':'bool',
+    })
+    Options___ = typing.TypedDict('Options___', {
+            'recursive':'bool',
+            'recursive_clones':'bool',
+            'force':'bool',
+            'recursive_rollback':'bool',
+    })
+    UserProperty = typing.TypedDict('UserProperty', {
+            'key':'str',
+            'value':'str',
+            'remove':'bool',
+    })
+    SnapshotUpdate = typing.TypedDict('SnapshotUpdate', {
+            'user_properties_update':'list[UserProperty]',
+    })
     @typing.overload
     def query(self, 
         query_filters:'list[list]'=[],
         query_options:'QueryOptions'={},
-    /) -> 'list[dict[str]]|dict[str]|int|dict[str]': 
+    /) -> 'typing.Union[list[dict[str]], dict[str], int]': 
         """
         Query all ZFS Snapshots with `query-filters` and `query-options`.
         
@@ -125,20 +485,86 @@ class ZfsSnapshot(Namespace):
             query-options
         Returns
         -------
-        list[dict[str]]:
-            
-        dict[str]:
-            
-        int:
-            
-        dict[str]:
+        typing.Union[list[dict[str]], dict[str], int]:
             
         """
         ...
+    SnapshotClone = typing.TypedDict('SnapshotClone', {
+            'snapshot':'str',
+            'dataset_dst':'str',
+            'dataset_properties':'dict[str]',
+    })
+    SnapshotCreate = typing.TypedDict('SnapshotCreate', {
+            'dataset':'str',
+            'name':'str',
+            'naming_schema':'str',
+            'recursive':'bool',
+            'exclude':'list[str]',
+            'suspend_vms':'bool',
+            'vmware_sync':'bool',
+            'properties':'dict[str]',
+    })
+    Options = typing.TypedDict('Options', {
+            'defer':'bool',
+            'recursive':'bool',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Options_ = typing.TypedDict('Options_', {
+            'recursive':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Options__ = typing.TypedDict('Options__', {
+            'recursive':'bool',
+    })
+    SnapshotRemove = typing.TypedDict('SnapshotRemove', {
+            'dataset':'str',
+            'name':'str',
+            'defer_delete':'bool',
+    })
+    Options___ = typing.TypedDict('Options___', {
+            'recursive':'bool',
+            'recursive_clones':'bool',
+            'force':'bool',
+            'recursive_rollback':'bool',
+    })
+    UserProperty = typing.TypedDict('UserProperty', {
+            'key':'str',
+            'value':'str',
+            'remove':'bool',
+    })
+    SnapshotUpdate = typing.TypedDict('SnapshotUpdate', {
+            'user_properties_update':'list[UserProperty]',
+    })
     @typing.overload
     def release(self, 
         id:'str',
-        options:'Options_'={},
+        options:'Options__'={},
     /) -> None: 
         """
         Release held snapshot `id`.
@@ -158,6 +584,78 @@ class ZfsSnapshot(Namespace):
         -------
         """
         ...
+    SnapshotClone = typing.TypedDict('SnapshotClone', {
+            'snapshot':'str',
+            'dataset_dst':'str',
+            'dataset_properties':'dict[str]',
+    })
+    SnapshotCreate = typing.TypedDict('SnapshotCreate', {
+            'dataset':'str',
+            'name':'str',
+            'naming_schema':'str',
+            'recursive':'bool',
+            'exclude':'list[str]',
+            'suspend_vms':'bool',
+            'vmware_sync':'bool',
+            'properties':'dict[str]',
+    })
+    Options = typing.TypedDict('Options', {
+            'defer':'bool',
+            'recursive':'bool',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Options_ = typing.TypedDict('Options_', {
+            'recursive':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Options__ = typing.TypedDict('Options__', {
+            'recursive':'bool',
+    })
+    SnapshotRemove = typing.TypedDict('SnapshotRemove', {
+            'dataset':'str',
+            'name':'str',
+            'defer_delete':'bool',
+    })
+    Options___ = typing.TypedDict('Options___', {
+            'recursive':'bool',
+            'recursive_clones':'bool',
+            'force':'bool',
+            'recursive_rollback':'bool',
+    })
+    UserProperty = typing.TypedDict('UserProperty', {
+            'key':'str',
+            'value':'str',
+            'remove':'bool',
+    })
+    SnapshotUpdate = typing.TypedDict('SnapshotUpdate', {
+            'user_properties_update':'list[UserProperty]',
+    })
     @typing.overload
     def remove(self, 
         snapshot_remove:'SnapshotRemove'={},
@@ -176,10 +674,82 @@ class ZfsSnapshot(Namespace):
         -------
         """
         ...
+    SnapshotClone = typing.TypedDict('SnapshotClone', {
+            'snapshot':'str',
+            'dataset_dst':'str',
+            'dataset_properties':'dict[str]',
+    })
+    SnapshotCreate = typing.TypedDict('SnapshotCreate', {
+            'dataset':'str',
+            'name':'str',
+            'naming_schema':'str',
+            'recursive':'bool',
+            'exclude':'list[str]',
+            'suspend_vms':'bool',
+            'vmware_sync':'bool',
+            'properties':'dict[str]',
+    })
+    Options = typing.TypedDict('Options', {
+            'defer':'bool',
+            'recursive':'bool',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Options_ = typing.TypedDict('Options_', {
+            'recursive':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Options__ = typing.TypedDict('Options__', {
+            'recursive':'bool',
+    })
+    SnapshotRemove = typing.TypedDict('SnapshotRemove', {
+            'dataset':'str',
+            'name':'str',
+            'defer_delete':'bool',
+    })
+    Options___ = typing.TypedDict('Options___', {
+            'recursive':'bool',
+            'recursive_clones':'bool',
+            'force':'bool',
+            'recursive_rollback':'bool',
+    })
+    UserProperty = typing.TypedDict('UserProperty', {
+            'key':'str',
+            'value':'str',
+            'remove':'bool',
+    })
+    SnapshotUpdate = typing.TypedDict('SnapshotUpdate', {
+            'user_properties_update':'list[UserProperty]',
+    })
     @typing.overload
     def rollback(self, 
         id:'str',
-        options:'Options__'={},
+        options:'Options___'={},
     /) -> None: 
         """
         Rollback to a given snapshot `id`.
@@ -204,6 +774,78 @@ class ZfsSnapshot(Namespace):
         -------
         """
         ...
+    SnapshotClone = typing.TypedDict('SnapshotClone', {
+            'snapshot':'str',
+            'dataset_dst':'str',
+            'dataset_properties':'dict[str]',
+    })
+    SnapshotCreate = typing.TypedDict('SnapshotCreate', {
+            'dataset':'str',
+            'name':'str',
+            'naming_schema':'str',
+            'recursive':'bool',
+            'exclude':'list[str]',
+            'suspend_vms':'bool',
+            'vmware_sync':'bool',
+            'properties':'dict[str]',
+    })
+    Options = typing.TypedDict('Options', {
+            'defer':'bool',
+            'recursive':'bool',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Options_ = typing.TypedDict('Options_', {
+            'recursive':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Options__ = typing.TypedDict('Options__', {
+            'recursive':'bool',
+    })
+    SnapshotRemove = typing.TypedDict('SnapshotRemove', {
+            'dataset':'str',
+            'name':'str',
+            'defer_delete':'bool',
+    })
+    Options___ = typing.TypedDict('Options___', {
+            'recursive':'bool',
+            'recursive_clones':'bool',
+            'force':'bool',
+            'recursive_rollback':'bool',
+    })
+    UserProperty = typing.TypedDict('UserProperty', {
+            'key':'str',
+            'value':'str',
+            'remove':'bool',
+    })
+    SnapshotUpdate = typing.TypedDict('SnapshotUpdate', {
+            'user_properties_update':'list[UserProperty]',
+    })
     @typing.overload
     def update(self, 
         id:'str',
@@ -224,73 +866,76 @@ class ZfsSnapshot(Namespace):
             zfs_snapshot_update_returns
         """
         ...
+    SnapshotClone = typing.TypedDict('SnapshotClone', {
+            'snapshot':'str',
+            'dataset_dst':'str',
+            'dataset_properties':'dict[str]',
+    })
+    SnapshotCreate = typing.TypedDict('SnapshotCreate', {
+            'dataset':'str',
+            'name':'str',
+            'naming_schema':'str',
+            'recursive':'bool',
+            'exclude':'list[str]',
+            'suspend_vms':'bool',
+            'vmware_sync':'bool',
+            'properties':'dict[str]',
+    })
+    Options = typing.TypedDict('Options', {
+            'defer':'bool',
+            'recursive':'bool',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Options_ = typing.TypedDict('Options_', {
+            'recursive':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Options__ = typing.TypedDict('Options__', {
+            'recursive':'bool',
+    })
+    SnapshotRemove = typing.TypedDict('SnapshotRemove', {
+            'dataset':'str',
+            'name':'str',
+            'defer_delete':'bool',
+    })
+    Options___ = typing.TypedDict('Options___', {
+            'recursive':'bool',
+            'recursive_clones':'bool',
+            'force':'bool',
+            'recursive_rollback':'bool',
+    })
+    UserProperty = typing.TypedDict('UserProperty', {
+            'key':'str',
+            'value':'str',
+            'remove':'bool',
+    })
+    SnapshotUpdate = typing.TypedDict('SnapshotUpdate', {
+            'user_properties_update':'list[UserProperty]',
+    })
 
-class SnapshotClone(typing.TypedDict):
-        snapshot:'str'
-        dataset_dst:'str'
-        dataset_properties:'dict[str]'
-        ...
-class SnapshotCreate(typing.TypedDict):
-        dataset:'str'
-        name:'str'
-        naming_schema:'str'
-        recursive:'bool'
-        exclude:'list[str]'
-        suspend_vms:'bool'
-        vmware_sync:'bool'
-        properties:'dict[str]'
-        ...
-class Options(typing.TypedDict):
-        defer:'bool'
-        recursive:'bool'
-        ...
-class QueryOptionsGetInstance(typing.TypedDict):
-        relationships:'bool'
-        extend:'typing.Optional[str]'
-        extend_context:'typing.Optional[str]'
-        prefix:'typing.Optional[str]'
-        extra:'dict[str]'
-        order_by:'list'
-        select:'list'
-        count:'bool'
-        get:'bool'
-        offset:'int'
-        limit:'int'
-        force_sql_filters:'bool'
-        ...
-class Options_(typing.TypedDict):
-        recursive:'bool'
-        ...
-class QueryOptions(typing.TypedDict):
-        relationships:'bool'
-        extend:'typing.Optional[str]'
-        extend_context:'typing.Optional[str]'
-        prefix:'typing.Optional[str]'
-        extra:'dict[str]'
-        order_by:'list'
-        select:'list'
-        count:'bool'
-        get:'bool'
-        offset:'int'
-        limit:'int'
-        force_sql_filters:'bool'
-        ...
-class SnapshotRemove(typing.TypedDict):
-        dataset:'str'
-        name:'str'
-        defer_delete:'bool'
-        ...
-class Options__(typing.TypedDict):
-        recursive:'bool'
-        recursive_clones:'bool'
-        force:'bool'
-        recursive_rollback:'bool'
-        ...
-class SnapshotUpdate(typing.TypedDict):
-        user_properties_update:'list[UserProperty]'
-        ...
-class UserProperty(typing.TypedDict):
-        key:'str'
-        value:'str'
-        remove:'bool'
-        ...
