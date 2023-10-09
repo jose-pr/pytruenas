@@ -3,20 +3,32 @@ from pytruenas.base import Namespace
 from pytruenas.mixins import TableExtMixin
 
 import typing
+from enum import Enum
+
 class IscsiTarget(TableExtMixin, Namespace):
     def __init__(self, client) -> None:
         super().__init__(client, 'iscsi.target')
 
+    class Mode(str,Enum):
+        ISCSI = 'ISCSI'
+        FC = 'FC'
+        BOTH = 'BOTH'
+        ...
+    class Authmethod(str,Enum):
+        NONE = 'NONE'
+        CHAP = 'CHAP'
+        CHAPMUTUAL = 'CHAP_MUTUAL'
+        ...
     Group = typing.TypedDict('Group', {
             'portal':'int',
             'initiator':'typing.Optional[int]',
-            'authmethod':'str',
+            'authmethod':'Authmethod',
             'auth':'typing.Optional[int]',
     })
     IscsiTargetCreate = typing.TypedDict('IscsiTargetCreate', {
             'name':'str',
             'alias':'typing.Optional[str]',
-            'mode':'str',
+            'mode':'Mode',
             'groups':'list[Group]',
             'auth_networks':'list[str]',
     })
@@ -51,13 +63,13 @@ class IscsiTarget(TableExtMixin, Namespace):
     Group_ = typing.TypedDict('Group_', {
             'portal':'int',
             'initiator':'typing.Optional[int]',
-            'authmethod':'str',
+            'authmethod':'Authmethod',
             'auth':'typing.Optional[int]',
     })
     IscsiTargetUpdate = typing.TypedDict('IscsiTargetUpdate', {
             'name':'str',
             'alias':'typing.Optional[str]',
-            'mode':'str',
+            'mode':'Mode',
             'groups':'list[Group_]',
             'auth_networks':'list[str]',
     })

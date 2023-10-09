@@ -3,6 +3,8 @@ from pytruenas.base import Namespace
 from pytruenas.mixins import ConfigMixin
 
 import typing
+from enum import Enum
+
 class Failover(ConfigMixin, Namespace):
     def __init__(self, client) -> None:
         super().__init__(client, 'failover')
@@ -21,6 +23,10 @@ class Failover(ConfigMixin, Namespace):
             'timeout':'int',
             'master':'bool',
     })
+    class Action(str,Enum):
+        ENABLE = 'ENABLE'
+        DISABLE = 'DISABLE'
+        ...
     Options_ = typing.TypedDict('Options_', {
             'active':'bool',
     })

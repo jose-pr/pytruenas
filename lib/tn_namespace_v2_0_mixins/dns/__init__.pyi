@@ -1,7 +1,7 @@
 
 from pytruenas import TrueNASClient
 from pytruenas.base import Namespace
-
+from enum import Enum
 import typing
 class Dns(
     Namespace
@@ -12,7 +12,7 @@ class Dns(
     def query(self, 
         query_filters:'list[list]'=[],
         query_options:'QueryOptions'={},
-    /) -> 'typing.Union[int, ForwardRef(Nameserver), list[Nameserver]]': 
+    /) -> 'typing.Union[int, Nameserver, list[Nameserver]]': 
         """
         Query Name Servers with `query-filters` and `query-options`.
 
@@ -24,7 +24,7 @@ class Dns(
             query-options
         Returns
         -------
-        typing.Union[int, ForwardRef(Nameserver), list[Nameserver]]:
+        typing.Union[int, Nameserver, list[Nameserver]]:
             
         """
         ...
@@ -45,4 +45,3 @@ class Dns(
     Nameserver = typing.TypedDict('Nameserver', {
             'nameserver':'str',
     })
-

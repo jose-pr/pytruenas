@@ -1,7 +1,7 @@
 
 from pytruenas import TrueNASClient
 from pytruenas.base import Namespace
-
+from enum import Enum
 import typing
 class Support(
     Namespace
@@ -23,65 +23,6 @@ class Support(
         -------
         """
         ...
-    AttachTicket = typing.TypedDict('AttachTicket', {
-            'ticket':'int',
-            'filename':'str',
-            'token':'str',
-    })
-    SupportEntry = typing.TypedDict('SupportEntry', {
-            'enabled':'typing.Optional[bool]',
-            'name':'str',
-            'title':'str',
-            'email':'str',
-            'phone':'str',
-            'secondary_name':'str',
-            'secondary_title':'str',
-            'secondary_email':'str',
-            'secondary_phone':'str',
-            'id':'int',
-    })
-    NewTicket = typing.TypedDict('NewTicket', {
-            'title':'str',
-            'body':'str',
-            'category':'str',
-            'attach_debug':'bool',
-            'token':'str',
-            'type':'str',
-            'criticality':'str',
-            'environment':'str',
-            'phone':'str',
-            'name':'str',
-            'email':'str',
-            'cc':'list[str]',
-    })
-    NewTicketResponse = typing.TypedDict('NewTicketResponse', {
-            'ticket':'typing.Optional[int]',
-            'url':'typing.Optional[str]',
-            'has_debug':'bool',
-    })
-    SupportUpdate = typing.TypedDict('SupportUpdate', {
-            'enabled':'typing.Optional[bool]',
-            'name':'str',
-            'title':'str',
-            'email':'str',
-            'phone':'str',
-            'secondary_name':'str',
-            'secondary_title':'str',
-            'secondary_email':'str',
-            'secondary_phone':'str',
-    })
-    SupportUpdateReturns = typing.TypedDict('SupportUpdateReturns', {
-            'enabled':'typing.Optional[bool]',
-            'name':'str',
-            'title':'str',
-            'email':'str',
-            'phone':'str',
-            'secondary_name':'str',
-            'secondary_title':'str',
-            'secondary_email':'str',
-            'secondary_phone':'str',
-            'id':'int',
-    })
     @typing.overload
     def attach_ticket_max_size(self, 
     /) -> 'int': 
@@ -96,65 +37,6 @@ class Support(
             attach_ticket_max_size
         """
         ...
-    AttachTicket = typing.TypedDict('AttachTicket', {
-            'ticket':'int',
-            'filename':'str',
-            'token':'str',
-    })
-    SupportEntry = typing.TypedDict('SupportEntry', {
-            'enabled':'typing.Optional[bool]',
-            'name':'str',
-            'title':'str',
-            'email':'str',
-            'phone':'str',
-            'secondary_name':'str',
-            'secondary_title':'str',
-            'secondary_email':'str',
-            'secondary_phone':'str',
-            'id':'int',
-    })
-    NewTicket = typing.TypedDict('NewTicket', {
-            'title':'str',
-            'body':'str',
-            'category':'str',
-            'attach_debug':'bool',
-            'token':'str',
-            'type':'str',
-            'criticality':'str',
-            'environment':'str',
-            'phone':'str',
-            'name':'str',
-            'email':'str',
-            'cc':'list[str]',
-    })
-    NewTicketResponse = typing.TypedDict('NewTicketResponse', {
-            'ticket':'typing.Optional[int]',
-            'url':'typing.Optional[str]',
-            'has_debug':'bool',
-    })
-    SupportUpdate = typing.TypedDict('SupportUpdate', {
-            'enabled':'typing.Optional[bool]',
-            'name':'str',
-            'title':'str',
-            'email':'str',
-            'phone':'str',
-            'secondary_name':'str',
-            'secondary_title':'str',
-            'secondary_email':'str',
-            'secondary_phone':'str',
-    })
-    SupportUpdateReturns = typing.TypedDict('SupportUpdateReturns', {
-            'enabled':'typing.Optional[bool]',
-            'name':'str',
-            'title':'str',
-            'email':'str',
-            'phone':'str',
-            'secondary_name':'str',
-            'secondary_title':'str',
-            'secondary_email':'str',
-            'secondary_phone':'str',
-            'id':'int',
-    })
     @typing.overload
     def config(self, 
     /) -> 'SupportEntry': 
@@ -169,65 +51,6 @@ class Support(
             support_entry
         """
         ...
-    AttachTicket = typing.TypedDict('AttachTicket', {
-            'ticket':'int',
-            'filename':'str',
-            'token':'str',
-    })
-    SupportEntry = typing.TypedDict('SupportEntry', {
-            'enabled':'typing.Optional[bool]',
-            'name':'str',
-            'title':'str',
-            'email':'str',
-            'phone':'str',
-            'secondary_name':'str',
-            'secondary_title':'str',
-            'secondary_email':'str',
-            'secondary_phone':'str',
-            'id':'int',
-    })
-    NewTicket = typing.TypedDict('NewTicket', {
-            'title':'str',
-            'body':'str',
-            'category':'str',
-            'attach_debug':'bool',
-            'token':'str',
-            'type':'str',
-            'criticality':'str',
-            'environment':'str',
-            'phone':'str',
-            'name':'str',
-            'email':'str',
-            'cc':'list[str]',
-    })
-    NewTicketResponse = typing.TypedDict('NewTicketResponse', {
-            'ticket':'typing.Optional[int]',
-            'url':'typing.Optional[str]',
-            'has_debug':'bool',
-    })
-    SupportUpdate = typing.TypedDict('SupportUpdate', {
-            'enabled':'typing.Optional[bool]',
-            'name':'str',
-            'title':'str',
-            'email':'str',
-            'phone':'str',
-            'secondary_name':'str',
-            'secondary_title':'str',
-            'secondary_email':'str',
-            'secondary_phone':'str',
-    })
-    SupportUpdateReturns = typing.TypedDict('SupportUpdateReturns', {
-            'enabled':'typing.Optional[bool]',
-            'name':'str',
-            'title':'str',
-            'email':'str',
-            'phone':'str',
-            'secondary_name':'str',
-            'secondary_title':'str',
-            'secondary_email':'str',
-            'secondary_phone':'str',
-            'id':'int',
-    })
     @typing.overload
     def fetch_categories(self, 
         token:'str'="",
@@ -252,65 +75,6 @@ class Support(
             ```
         """
         ...
-    AttachTicket = typing.TypedDict('AttachTicket', {
-            'ticket':'int',
-            'filename':'str',
-            'token':'str',
-    })
-    SupportEntry = typing.TypedDict('SupportEntry', {
-            'enabled':'typing.Optional[bool]',
-            'name':'str',
-            'title':'str',
-            'email':'str',
-            'phone':'str',
-            'secondary_name':'str',
-            'secondary_title':'str',
-            'secondary_email':'str',
-            'secondary_phone':'str',
-            'id':'int',
-    })
-    NewTicket = typing.TypedDict('NewTicket', {
-            'title':'str',
-            'body':'str',
-            'category':'str',
-            'attach_debug':'bool',
-            'token':'str',
-            'type':'str',
-            'criticality':'str',
-            'environment':'str',
-            'phone':'str',
-            'name':'str',
-            'email':'str',
-            'cc':'list[str]',
-    })
-    NewTicketResponse = typing.TypedDict('NewTicketResponse', {
-            'ticket':'typing.Optional[int]',
-            'url':'typing.Optional[str]',
-            'has_debug':'bool',
-    })
-    SupportUpdate = typing.TypedDict('SupportUpdate', {
-            'enabled':'typing.Optional[bool]',
-            'name':'str',
-            'title':'str',
-            'email':'str',
-            'phone':'str',
-            'secondary_name':'str',
-            'secondary_title':'str',
-            'secondary_email':'str',
-            'secondary_phone':'str',
-    })
-    SupportUpdateReturns = typing.TypedDict('SupportUpdateReturns', {
-            'enabled':'typing.Optional[bool]',
-            'name':'str',
-            'title':'str',
-            'email':'str',
-            'phone':'str',
-            'secondary_name':'str',
-            'secondary_title':'str',
-            'secondary_email':'str',
-            'secondary_phone':'str',
-            'id':'int',
-    })
     @typing.overload
     def fields(self, 
     /) -> 'list[list[str]]': 
@@ -325,65 +89,6 @@ class Support(
             support_fields
         """
         ...
-    AttachTicket = typing.TypedDict('AttachTicket', {
-            'ticket':'int',
-            'filename':'str',
-            'token':'str',
-    })
-    SupportEntry = typing.TypedDict('SupportEntry', {
-            'enabled':'typing.Optional[bool]',
-            'name':'str',
-            'title':'str',
-            'email':'str',
-            'phone':'str',
-            'secondary_name':'str',
-            'secondary_title':'str',
-            'secondary_email':'str',
-            'secondary_phone':'str',
-            'id':'int',
-    })
-    NewTicket = typing.TypedDict('NewTicket', {
-            'title':'str',
-            'body':'str',
-            'category':'str',
-            'attach_debug':'bool',
-            'token':'str',
-            'type':'str',
-            'criticality':'str',
-            'environment':'str',
-            'phone':'str',
-            'name':'str',
-            'email':'str',
-            'cc':'list[str]',
-    })
-    NewTicketResponse = typing.TypedDict('NewTicketResponse', {
-            'ticket':'typing.Optional[int]',
-            'url':'typing.Optional[str]',
-            'has_debug':'bool',
-    })
-    SupportUpdate = typing.TypedDict('SupportUpdate', {
-            'enabled':'typing.Optional[bool]',
-            'name':'str',
-            'title':'str',
-            'email':'str',
-            'phone':'str',
-            'secondary_name':'str',
-            'secondary_title':'str',
-            'secondary_email':'str',
-            'secondary_phone':'str',
-    })
-    SupportUpdateReturns = typing.TypedDict('SupportUpdateReturns', {
-            'enabled':'typing.Optional[bool]',
-            'name':'str',
-            'title':'str',
-            'email':'str',
-            'phone':'str',
-            'secondary_name':'str',
-            'secondary_title':'str',
-            'secondary_email':'str',
-            'secondary_phone':'str',
-            'id':'int',
-    })
     @typing.overload
     def is_available(self, 
     /) -> 'bool': 
@@ -398,65 +103,6 @@ class Support(
             proactive_support_is_available
         """
         ...
-    AttachTicket = typing.TypedDict('AttachTicket', {
-            'ticket':'int',
-            'filename':'str',
-            'token':'str',
-    })
-    SupportEntry = typing.TypedDict('SupportEntry', {
-            'enabled':'typing.Optional[bool]',
-            'name':'str',
-            'title':'str',
-            'email':'str',
-            'phone':'str',
-            'secondary_name':'str',
-            'secondary_title':'str',
-            'secondary_email':'str',
-            'secondary_phone':'str',
-            'id':'int',
-    })
-    NewTicket = typing.TypedDict('NewTicket', {
-            'title':'str',
-            'body':'str',
-            'category':'str',
-            'attach_debug':'bool',
-            'token':'str',
-            'type':'str',
-            'criticality':'str',
-            'environment':'str',
-            'phone':'str',
-            'name':'str',
-            'email':'str',
-            'cc':'list[str]',
-    })
-    NewTicketResponse = typing.TypedDict('NewTicketResponse', {
-            'ticket':'typing.Optional[int]',
-            'url':'typing.Optional[str]',
-            'has_debug':'bool',
-    })
-    SupportUpdate = typing.TypedDict('SupportUpdate', {
-            'enabled':'typing.Optional[bool]',
-            'name':'str',
-            'title':'str',
-            'email':'str',
-            'phone':'str',
-            'secondary_name':'str',
-            'secondary_title':'str',
-            'secondary_email':'str',
-            'secondary_phone':'str',
-    })
-    SupportUpdateReturns = typing.TypedDict('SupportUpdateReturns', {
-            'enabled':'typing.Optional[bool]',
-            'name':'str',
-            'title':'str',
-            'email':'str',
-            'phone':'str',
-            'secondary_name':'str',
-            'secondary_title':'str',
-            'secondary_email':'str',
-            'secondary_phone':'str',
-            'id':'int',
-    })
     @typing.overload
     def is_available_and_enabled(self, 
     /) -> 'bool': 
@@ -471,65 +117,6 @@ class Support(
             proactive_support_is_available_and_enabled
         """
         ...
-    AttachTicket = typing.TypedDict('AttachTicket', {
-            'ticket':'int',
-            'filename':'str',
-            'token':'str',
-    })
-    SupportEntry = typing.TypedDict('SupportEntry', {
-            'enabled':'typing.Optional[bool]',
-            'name':'str',
-            'title':'str',
-            'email':'str',
-            'phone':'str',
-            'secondary_name':'str',
-            'secondary_title':'str',
-            'secondary_email':'str',
-            'secondary_phone':'str',
-            'id':'int',
-    })
-    NewTicket = typing.TypedDict('NewTicket', {
-            'title':'str',
-            'body':'str',
-            'category':'str',
-            'attach_debug':'bool',
-            'token':'str',
-            'type':'str',
-            'criticality':'str',
-            'environment':'str',
-            'phone':'str',
-            'name':'str',
-            'email':'str',
-            'cc':'list[str]',
-    })
-    NewTicketResponse = typing.TypedDict('NewTicketResponse', {
-            'ticket':'typing.Optional[int]',
-            'url':'typing.Optional[str]',
-            'has_debug':'bool',
-    })
-    SupportUpdate = typing.TypedDict('SupportUpdate', {
-            'enabled':'typing.Optional[bool]',
-            'name':'str',
-            'title':'str',
-            'email':'str',
-            'phone':'str',
-            'secondary_name':'str',
-            'secondary_title':'str',
-            'secondary_email':'str',
-            'secondary_phone':'str',
-    })
-    SupportUpdateReturns = typing.TypedDict('SupportUpdateReturns', {
-            'enabled':'typing.Optional[bool]',
-            'name':'str',
-            'title':'str',
-            'email':'str',
-            'phone':'str',
-            'secondary_name':'str',
-            'secondary_title':'str',
-            'secondary_email':'str',
-            'secondary_phone':'str',
-            'id':'int',
-    })
     @typing.overload
     def new_ticket(self, 
         new_ticket:'NewTicket'={},
@@ -552,65 +139,6 @@ class Support(
             new_ticket_response
         """
         ...
-    AttachTicket = typing.TypedDict('AttachTicket', {
-            'ticket':'int',
-            'filename':'str',
-            'token':'str',
-    })
-    SupportEntry = typing.TypedDict('SupportEntry', {
-            'enabled':'typing.Optional[bool]',
-            'name':'str',
-            'title':'str',
-            'email':'str',
-            'phone':'str',
-            'secondary_name':'str',
-            'secondary_title':'str',
-            'secondary_email':'str',
-            'secondary_phone':'str',
-            'id':'int',
-    })
-    NewTicket = typing.TypedDict('NewTicket', {
-            'title':'str',
-            'body':'str',
-            'category':'str',
-            'attach_debug':'bool',
-            'token':'str',
-            'type':'str',
-            'criticality':'str',
-            'environment':'str',
-            'phone':'str',
-            'name':'str',
-            'email':'str',
-            'cc':'list[str]',
-    })
-    NewTicketResponse = typing.TypedDict('NewTicketResponse', {
-            'ticket':'typing.Optional[int]',
-            'url':'typing.Optional[str]',
-            'has_debug':'bool',
-    })
-    SupportUpdate = typing.TypedDict('SupportUpdate', {
-            'enabled':'typing.Optional[bool]',
-            'name':'str',
-            'title':'str',
-            'email':'str',
-            'phone':'str',
-            'secondary_name':'str',
-            'secondary_title':'str',
-            'secondary_email':'str',
-            'secondary_phone':'str',
-    })
-    SupportUpdateReturns = typing.TypedDict('SupportUpdateReturns', {
-            'enabled':'typing.Optional[bool]',
-            'name':'str',
-            'title':'str',
-            'email':'str',
-            'phone':'str',
-            'secondary_name':'str',
-            'secondary_title':'str',
-            'secondary_email':'str',
-            'secondary_phone':'str',
-            'id':'int',
-    })
     @typing.overload
     def update(self, 
         support_update:'SupportUpdate'={},
@@ -645,13 +173,17 @@ class Support(
             'secondary_phone':'str',
             'id':'int',
     })
+    class Type(str,Enum):
+        BUG = 'BUG'
+        FEATURE = 'FEATURE'
+        ...
     NewTicket = typing.TypedDict('NewTicket', {
             'title':'str',
             'body':'str',
             'category':'str',
             'attach_debug':'bool',
             'token':'str',
-            'type':'str',
+            'type':'Type',
             'criticality':'str',
             'environment':'str',
             'phone':'str',
@@ -687,4 +219,3 @@ class Support(
             'secondary_phone':'str',
             'id':'int',
     })
-

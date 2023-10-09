@@ -2,7 +2,7 @@
 from pytruenas import TrueNASClient
 from pytruenas.base import Namespace
 from pytruenas.mixins import TableExtMixin
-
+from enum import Enum
 import typing
 class IscsiTargetextent(
     TableExtMixin,
@@ -29,44 +29,6 @@ class IscsiTargetextent(
             iscsi_targetextent_create_returns
         """
         ...
-    IscsiTargetextentCreate = typing.TypedDict('IscsiTargetextentCreate', {
-            'target':'int',
-            'lunid':'typing.Optional[int]',
-            'extent':'int',
-    })
-    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    QueryOptions = typing.TypedDict('QueryOptions', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    IscsiTargetextentUpdate = typing.TypedDict('IscsiTargetextentUpdate', {
-            'target':'int',
-            'lunid':'int',
-            'extent':'int',
-    })
     @typing.overload
     def delete(self, 
         id:'int',
@@ -87,44 +49,6 @@ class IscsiTargetextent(
             Will return `true` if `id` is deleted successfully
         """
         ...
-    IscsiTargetextentCreate = typing.TypedDict('IscsiTargetextentCreate', {
-            'target':'int',
-            'lunid':'typing.Optional[int]',
-            'extent':'int',
-    })
-    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    QueryOptions = typing.TypedDict('QueryOptions', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    IscsiTargetextentUpdate = typing.TypedDict('IscsiTargetextentUpdate', {
-            'target':'int',
-            'lunid':'int',
-            'extent':'int',
-    })
     @typing.overload
     def get_instance(self, 
         id:'typing.Union[str, int, bool, dict[str], list]',
@@ -145,44 +69,6 @@ class IscsiTargetextent(
         -------
         """
         ...
-    IscsiTargetextentCreate = typing.TypedDict('IscsiTargetextentCreate', {
-            'target':'int',
-            'lunid':'typing.Optional[int]',
-            'extent':'int',
-    })
-    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    QueryOptions = typing.TypedDict('QueryOptions', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    IscsiTargetextentUpdate = typing.TypedDict('IscsiTargetextentUpdate', {
-            'target':'int',
-            'lunid':'int',
-            'extent':'int',
-    })
     @typing.overload
     def query(self, 
         query_filters:'list[list]'=[],
@@ -203,44 +89,6 @@ class IscsiTargetextent(
             
         """
         ...
-    IscsiTargetextentCreate = typing.TypedDict('IscsiTargetextentCreate', {
-            'target':'int',
-            'lunid':'typing.Optional[int]',
-            'extent':'int',
-    })
-    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    QueryOptions = typing.TypedDict('QueryOptions', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    IscsiTargetextentUpdate = typing.TypedDict('IscsiTargetextentUpdate', {
-            'target':'int',
-            'lunid':'int',
-            'extent':'int',
-    })
     @typing.overload
     def update(self, 
         id:'int',
@@ -300,4 +148,3 @@ class IscsiTargetextent(
             'lunid':'int',
             'extent':'int',
     })
-

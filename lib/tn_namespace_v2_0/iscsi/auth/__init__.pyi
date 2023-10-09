@@ -1,7 +1,7 @@
 
 from pytruenas import TrueNASClient
 from pytruenas.base import Namespace
-
+from enum import Enum
 import typing
 class IscsiAuth(
     Namespace
@@ -32,48 +32,6 @@ class IscsiAuth(
             iscsi_auth_create_returns
         """
         ...
-    IscsiAuthCreate = typing.TypedDict('IscsiAuthCreate', {
-            'tag':'int',
-            'user':'str',
-            'secret':'str',
-            'peeruser':'str',
-            'peersecret':'str',
-    })
-    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    QueryOptions = typing.TypedDict('QueryOptions', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    IscsiAuthUpdate = typing.TypedDict('IscsiAuthUpdate', {
-            'tag':'int',
-            'user':'str',
-            'secret':'str',
-            'peeruser':'str',
-            'peersecret':'str',
-    })
     @typing.overload
     def delete(self, 
         id:'int',
@@ -91,48 +49,6 @@ class IscsiAuth(
             Will return `true` if `id` is deleted successfully
         """
         ...
-    IscsiAuthCreate = typing.TypedDict('IscsiAuthCreate', {
-            'tag':'int',
-            'user':'str',
-            'secret':'str',
-            'peeruser':'str',
-            'peersecret':'str',
-    })
-    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    QueryOptions = typing.TypedDict('QueryOptions', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    IscsiAuthUpdate = typing.TypedDict('IscsiAuthUpdate', {
-            'tag':'int',
-            'user':'str',
-            'secret':'str',
-            'peeruser':'str',
-            'peersecret':'str',
-    })
     @typing.overload
     def get_instance(self, 
         id:'typing.Union[str, int, bool, dict[str], list]',
@@ -153,48 +69,6 @@ class IscsiAuth(
         -------
         """
         ...
-    IscsiAuthCreate = typing.TypedDict('IscsiAuthCreate', {
-            'tag':'int',
-            'user':'str',
-            'secret':'str',
-            'peeruser':'str',
-            'peersecret':'str',
-    })
-    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    QueryOptions = typing.TypedDict('QueryOptions', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    IscsiAuthUpdate = typing.TypedDict('IscsiAuthUpdate', {
-            'tag':'int',
-            'user':'str',
-            'secret':'str',
-            'peeruser':'str',
-            'peersecret':'str',
-    })
     @typing.overload
     def query(self, 
         query_filters:'list[list]'=[],
@@ -215,48 +89,6 @@ class IscsiAuth(
             
         """
         ...
-    IscsiAuthCreate = typing.TypedDict('IscsiAuthCreate', {
-            'tag':'int',
-            'user':'str',
-            'secret':'str',
-            'peeruser':'str',
-            'peersecret':'str',
-    })
-    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    QueryOptions = typing.TypedDict('QueryOptions', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    IscsiAuthUpdate = typing.TypedDict('IscsiAuthUpdate', {
-            'tag':'int',
-            'user':'str',
-            'secret':'str',
-            'peeruser':'str',
-            'peersecret':'str',
-    })
     @typing.overload
     def update(self, 
         id:'int',
@@ -320,4 +152,3 @@ class IscsiAuth(
             'peeruser':'str',
             'peersecret':'str',
     })
-

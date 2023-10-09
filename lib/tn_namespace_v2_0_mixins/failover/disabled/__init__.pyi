@@ -1,7 +1,7 @@
 
 from pytruenas import TrueNASClient
 from pytruenas.base import Namespace
-
+from enum import Enum
 import typing
 class FailoverDisabled(
     Namespace
@@ -38,4 +38,3 @@ class FailoverDisabled(
             reasons
         """
         ...
-

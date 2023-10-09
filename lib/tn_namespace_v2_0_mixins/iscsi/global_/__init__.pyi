@@ -2,7 +2,7 @@
 from pytruenas import TrueNASClient
 from pytruenas.base import Namespace
 from pytruenas.mixins import ConfigMixin
-
+from enum import Enum
 import typing
 class IscsiGlobal_(
     ConfigMixin,
@@ -22,59 +22,6 @@ class IscsiGlobal_(
         -------
         """
         ...
-    QueryOptions = typing.TypedDict('QueryOptions', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    Session = typing.TypedDict('Session', {
-            'initiator':'str',
-            'initiator_addr':'str',
-            'initiator_alias':'typing.Optional[str]',
-            'target':'str',
-            'target_alias':'str',
-            'header_digest':'typing.Optional[str]',
-            'data_digest':'typing.Optional[str]',
-            'max_data_segment_length':'typing.Optional[int]',
-            'max_receive_data_segment_length':'typing.Optional[int]',
-            'max_burst_length':'typing.Optional[int]',
-            'first_burst_length':'typing.Optional[int]',
-            'immediate_data':'bool',
-            'iser':'bool',
-            'offload':'bool',
-    })
-    Session_ = typing.TypedDict('Session_', {
-            'initiator':'str',
-            'initiator_addr':'str',
-            'initiator_alias':'typing.Optional[str]',
-            'target':'str',
-            'target_alias':'str',
-            'header_digest':'typing.Optional[str]',
-            'data_digest':'typing.Optional[str]',
-            'max_data_segment_length':'typing.Optional[int]',
-            'max_receive_data_segment_length':'typing.Optional[int]',
-            'max_burst_length':'typing.Optional[int]',
-            'first_burst_length':'typing.Optional[int]',
-            'immediate_data':'bool',
-            'iser':'bool',
-            'offload':'bool',
-    })
-    IscsiglobalUpdate = typing.TypedDict('IscsiglobalUpdate', {
-            'basename':'str',
-            'isns_servers':'list[str]',
-            'listen_port':'int',
-            'pool_avail_threshold':'typing.Optional[int]',
-            'alua':'bool',
-    })
     @typing.overload
     def client_count(self, 
     /) -> None: 
@@ -87,59 +34,6 @@ class IscsiGlobal_(
         -------
         """
         ...
-    QueryOptions = typing.TypedDict('QueryOptions', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    Session = typing.TypedDict('Session', {
-            'initiator':'str',
-            'initiator_addr':'str',
-            'initiator_alias':'typing.Optional[str]',
-            'target':'str',
-            'target_alias':'str',
-            'header_digest':'typing.Optional[str]',
-            'data_digest':'typing.Optional[str]',
-            'max_data_segment_length':'typing.Optional[int]',
-            'max_receive_data_segment_length':'typing.Optional[int]',
-            'max_burst_length':'typing.Optional[int]',
-            'first_burst_length':'typing.Optional[int]',
-            'immediate_data':'bool',
-            'iser':'bool',
-            'offload':'bool',
-    })
-    Session_ = typing.TypedDict('Session_', {
-            'initiator':'str',
-            'initiator_addr':'str',
-            'initiator_alias':'typing.Optional[str]',
-            'target':'str',
-            'target_alias':'str',
-            'header_digest':'typing.Optional[str]',
-            'data_digest':'typing.Optional[str]',
-            'max_data_segment_length':'typing.Optional[int]',
-            'max_receive_data_segment_length':'typing.Optional[int]',
-            'max_burst_length':'typing.Optional[int]',
-            'first_burst_length':'typing.Optional[int]',
-            'immediate_data':'bool',
-            'iser':'bool',
-            'offload':'bool',
-    })
-    IscsiglobalUpdate = typing.TypedDict('IscsiglobalUpdate', {
-            'basename':'str',
-            'isns_servers':'list[str]',
-            'listen_port':'int',
-            'pool_avail_threshold':'typing.Optional[int]',
-            'alua':'bool',
-    })
     @typing.overload
     def config(self, 
     /) -> 'dict[str]': 
@@ -154,64 +48,11 @@ class IscsiGlobal_(
             iscsi_global_entry
         """
         ...
-    QueryOptions = typing.TypedDict('QueryOptions', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    Session = typing.TypedDict('Session', {
-            'initiator':'str',
-            'initiator_addr':'str',
-            'initiator_alias':'typing.Optional[str]',
-            'target':'str',
-            'target_alias':'str',
-            'header_digest':'typing.Optional[str]',
-            'data_digest':'typing.Optional[str]',
-            'max_data_segment_length':'typing.Optional[int]',
-            'max_receive_data_segment_length':'typing.Optional[int]',
-            'max_burst_length':'typing.Optional[int]',
-            'first_burst_length':'typing.Optional[int]',
-            'immediate_data':'bool',
-            'iser':'bool',
-            'offload':'bool',
-    })
-    Session_ = typing.TypedDict('Session_', {
-            'initiator':'str',
-            'initiator_addr':'str',
-            'initiator_alias':'typing.Optional[str]',
-            'target':'str',
-            'target_alias':'str',
-            'header_digest':'typing.Optional[str]',
-            'data_digest':'typing.Optional[str]',
-            'max_data_segment_length':'typing.Optional[int]',
-            'max_receive_data_segment_length':'typing.Optional[int]',
-            'max_burst_length':'typing.Optional[int]',
-            'first_burst_length':'typing.Optional[int]',
-            'immediate_data':'bool',
-            'iser':'bool',
-            'offload':'bool',
-    })
-    IscsiglobalUpdate = typing.TypedDict('IscsiglobalUpdate', {
-            'basename':'str',
-            'isns_servers':'list[str]',
-            'listen_port':'int',
-            'pool_avail_threshold':'typing.Optional[int]',
-            'alua':'bool',
-    })
     @typing.overload
     def sessions(self, 
         query_filters:'list[list]'=[],
         query_options:'QueryOptions'={},
-    /) -> 'typing.Union[int, ForwardRef(Session), list[Session_]]': 
+    /) -> 'typing.Union[int, Session, list[Session_]]': 
         """
         Get a list of currently running iSCSI sessions. This includes initiator and target names
         and the unique connection IDs.
@@ -224,63 +65,10 @@ class IscsiGlobal_(
             query-options
         Returns
         -------
-        typing.Union[int, ForwardRef(Session), list[Session_]]:
+        typing.Union[int, Session, list[Session_]]:
             
         """
         ...
-    QueryOptions = typing.TypedDict('QueryOptions', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    Session = typing.TypedDict('Session', {
-            'initiator':'str',
-            'initiator_addr':'str',
-            'initiator_alias':'typing.Optional[str]',
-            'target':'str',
-            'target_alias':'str',
-            'header_digest':'typing.Optional[str]',
-            'data_digest':'typing.Optional[str]',
-            'max_data_segment_length':'typing.Optional[int]',
-            'max_receive_data_segment_length':'typing.Optional[int]',
-            'max_burst_length':'typing.Optional[int]',
-            'first_burst_length':'typing.Optional[int]',
-            'immediate_data':'bool',
-            'iser':'bool',
-            'offload':'bool',
-    })
-    Session_ = typing.TypedDict('Session_', {
-            'initiator':'str',
-            'initiator_addr':'str',
-            'initiator_alias':'typing.Optional[str]',
-            'target':'str',
-            'target_alias':'str',
-            'header_digest':'typing.Optional[str]',
-            'data_digest':'typing.Optional[str]',
-            'max_data_segment_length':'typing.Optional[int]',
-            'max_receive_data_segment_length':'typing.Optional[int]',
-            'max_burst_length':'typing.Optional[int]',
-            'first_burst_length':'typing.Optional[int]',
-            'immediate_data':'bool',
-            'iser':'bool',
-            'offload':'bool',
-    })
-    IscsiglobalUpdate = typing.TypedDict('IscsiglobalUpdate', {
-            'basename':'str',
-            'isns_servers':'list[str]',
-            'listen_port':'int',
-            'pool_avail_threshold':'typing.Optional[int]',
-            'alua':'bool',
-    })
     @typing.overload
     def update(self, 
         iscsiglobal_update:'IscsiglobalUpdate'={},
@@ -351,4 +139,3 @@ class IscsiGlobal_(
             'pool_avail_threshold':'typing.Optional[int]',
             'alua':'bool',
     })
-

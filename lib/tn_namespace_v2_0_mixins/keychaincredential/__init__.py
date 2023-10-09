@@ -3,6 +3,8 @@ from pytruenas.base import Namespace
 from pytruenas.mixins import TableExtMixin
 
 import typing
+from enum import Enum
+
 class Keychaincredential(TableExtMixin, Namespace):
     def __init__(self, client) -> None:
         super().__init__(client, 'keychaincredential')
@@ -81,6 +83,10 @@ class Keychaincredential(TableExtMixin, Namespace):
             'existing_key_id':'int',
             'name':'str',
     })
+    class SetupType(str,Enum):
+        SEMIAUTOMATIC = 'SEMI-AUTOMATIC'
+        MANUAL = 'MANUAL'
+        ...
     SemiAutomaticSetup = typing.TypedDict('SemiAutomaticSetup', {
             'url':'str',
             'token':'str',
@@ -94,7 +100,7 @@ class Keychaincredential(TableExtMixin, Namespace):
     SetupSshConnection = typing.TypedDict('SetupSshConnection', {
             'private_key':'PrivateKey',
             'connection_name':'str',
-            'setup_type':'str',
+            'setup_type':'SetupType',
             'semi_automatic_setup':'SemiAutomaticSetup',
             'manual_setup':'dict[str]',
     })

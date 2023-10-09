@@ -2,7 +2,7 @@
 from pytruenas import TrueNASClient
 from pytruenas.base import Namespace
 from pytruenas.mixins import TableExtMixin
-
+from enum import Enum
 import typing
 class Tunable(
     TableExtMixin,
@@ -39,80 +39,6 @@ class Tunable(
             tunable_create_returns
         """
         ...
-    TunableCreate = typing.TypedDict('TunableCreate', {
-            'type':'str',
-            'var':'str',
-            'value':'str',
-            'comment':'str',
-            'enabled':'bool',
-            'update_initramfs':'bool',
-    })
-    TunableCreateReturns = typing.TypedDict('TunableCreateReturns', {
-            'type':'str',
-            'var':'str',
-            'value':'str',
-            'comment':'str',
-            'enabled':'bool',
-            'update_initramfs':'bool',
-            'id':'int',
-    })
-    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    QueryOptions = typing.TypedDict('QueryOptions', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    TunableEntry = typing.TypedDict('TunableEntry', {
-            'type':'str',
-            'var':'str',
-            'value':'str',
-            'comment':'str',
-            'enabled':'bool',
-            'update_initramfs':'bool',
-            'id':'int',
-    })
-    TunableTypeChoices = typing.TypedDict('TunableTypeChoices', {
-            'SYSCTL':'str',
-            'UDEV':'str',
-            'ZFS':'str',
-    })
-    TunableUpdate = typing.TypedDict('TunableUpdate', {
-            'value':'str',
-            'comment':'str',
-            'enabled':'bool',
-            'update_initramfs':'bool',
-    })
-    TunableUpdateReturns = typing.TypedDict('TunableUpdateReturns', {
-            'type':'str',
-            'var':'str',
-            'value':'str',
-            'comment':'str',
-            'enabled':'bool',
-            'update_initramfs':'bool',
-            'id':'int',
-    })
     @typing.overload
     def delete(self, 
         id:'int',
@@ -130,80 +56,6 @@ class Tunable(
             Will return `true` if `id` is deleted successfully
         """
         ...
-    TunableCreate = typing.TypedDict('TunableCreate', {
-            'type':'str',
-            'var':'str',
-            'value':'str',
-            'comment':'str',
-            'enabled':'bool',
-            'update_initramfs':'bool',
-    })
-    TunableCreateReturns = typing.TypedDict('TunableCreateReturns', {
-            'type':'str',
-            'var':'str',
-            'value':'str',
-            'comment':'str',
-            'enabled':'bool',
-            'update_initramfs':'bool',
-            'id':'int',
-    })
-    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    QueryOptions = typing.TypedDict('QueryOptions', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    TunableEntry = typing.TypedDict('TunableEntry', {
-            'type':'str',
-            'var':'str',
-            'value':'str',
-            'comment':'str',
-            'enabled':'bool',
-            'update_initramfs':'bool',
-            'id':'int',
-    })
-    TunableTypeChoices = typing.TypedDict('TunableTypeChoices', {
-            'SYSCTL':'str',
-            'UDEV':'str',
-            'ZFS':'str',
-    })
-    TunableUpdate = typing.TypedDict('TunableUpdate', {
-            'value':'str',
-            'comment':'str',
-            'enabled':'bool',
-            'update_initramfs':'bool',
-    })
-    TunableUpdateReturns = typing.TypedDict('TunableUpdateReturns', {
-            'type':'str',
-            'var':'str',
-            'value':'str',
-            'comment':'str',
-            'enabled':'bool',
-            'update_initramfs':'bool',
-            'id':'int',
-    })
     @typing.overload
     def get_instance(self, 
         id:'typing.Union[str, int, bool, dict[str], list]',
@@ -224,85 +76,11 @@ class Tunable(
         -------
         """
         ...
-    TunableCreate = typing.TypedDict('TunableCreate', {
-            'type':'str',
-            'var':'str',
-            'value':'str',
-            'comment':'str',
-            'enabled':'bool',
-            'update_initramfs':'bool',
-    })
-    TunableCreateReturns = typing.TypedDict('TunableCreateReturns', {
-            'type':'str',
-            'var':'str',
-            'value':'str',
-            'comment':'str',
-            'enabled':'bool',
-            'update_initramfs':'bool',
-            'id':'int',
-    })
-    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    QueryOptions = typing.TypedDict('QueryOptions', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    TunableEntry = typing.TypedDict('TunableEntry', {
-            'type':'str',
-            'var':'str',
-            'value':'str',
-            'comment':'str',
-            'enabled':'bool',
-            'update_initramfs':'bool',
-            'id':'int',
-    })
-    TunableTypeChoices = typing.TypedDict('TunableTypeChoices', {
-            'SYSCTL':'str',
-            'UDEV':'str',
-            'ZFS':'str',
-    })
-    TunableUpdate = typing.TypedDict('TunableUpdate', {
-            'value':'str',
-            'comment':'str',
-            'enabled':'bool',
-            'update_initramfs':'bool',
-    })
-    TunableUpdateReturns = typing.TypedDict('TunableUpdateReturns', {
-            'type':'str',
-            'var':'str',
-            'value':'str',
-            'comment':'str',
-            'enabled':'bool',
-            'update_initramfs':'bool',
-            'id':'int',
-    })
     @typing.overload
     def query(self, 
         query_filters:'list[list]'=[],
         query_options:'QueryOptions'={},
-    /) -> 'typing.Union[list[TunableEntry], ForwardRef(TunableEntry), int]': 
+    /) -> 'typing.Union[list[TunableEntry], TunableEntry, int]': 
         """
         
 
@@ -314,84 +92,10 @@ class Tunable(
             query-options
         Returns
         -------
-        typing.Union[list[TunableEntry], ForwardRef(TunableEntry), int]:
+        typing.Union[list[TunableEntry], TunableEntry, int]:
             
         """
         ...
-    TunableCreate = typing.TypedDict('TunableCreate', {
-            'type':'str',
-            'var':'str',
-            'value':'str',
-            'comment':'str',
-            'enabled':'bool',
-            'update_initramfs':'bool',
-    })
-    TunableCreateReturns = typing.TypedDict('TunableCreateReturns', {
-            'type':'str',
-            'var':'str',
-            'value':'str',
-            'comment':'str',
-            'enabled':'bool',
-            'update_initramfs':'bool',
-            'id':'int',
-    })
-    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    QueryOptions = typing.TypedDict('QueryOptions', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    TunableEntry = typing.TypedDict('TunableEntry', {
-            'type':'str',
-            'var':'str',
-            'value':'str',
-            'comment':'str',
-            'enabled':'bool',
-            'update_initramfs':'bool',
-            'id':'int',
-    })
-    TunableTypeChoices = typing.TypedDict('TunableTypeChoices', {
-            'SYSCTL':'str',
-            'UDEV':'str',
-            'ZFS':'str',
-    })
-    TunableUpdate = typing.TypedDict('TunableUpdate', {
-            'value':'str',
-            'comment':'str',
-            'enabled':'bool',
-            'update_initramfs':'bool',
-    })
-    TunableUpdateReturns = typing.TypedDict('TunableUpdateReturns', {
-            'type':'str',
-            'var':'str',
-            'value':'str',
-            'comment':'str',
-            'enabled':'bool',
-            'update_initramfs':'bool',
-            'id':'int',
-    })
     @typing.overload
     def tunable_type_choices(self, 
     /) -> 'TunableTypeChoices': 
@@ -406,80 +110,6 @@ class Tunable(
             tunable_type_choices
         """
         ...
-    TunableCreate = typing.TypedDict('TunableCreate', {
-            'type':'str',
-            'var':'str',
-            'value':'str',
-            'comment':'str',
-            'enabled':'bool',
-            'update_initramfs':'bool',
-    })
-    TunableCreateReturns = typing.TypedDict('TunableCreateReturns', {
-            'type':'str',
-            'var':'str',
-            'value':'str',
-            'comment':'str',
-            'enabled':'bool',
-            'update_initramfs':'bool',
-            'id':'int',
-    })
-    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    QueryOptions = typing.TypedDict('QueryOptions', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    TunableEntry = typing.TypedDict('TunableEntry', {
-            'type':'str',
-            'var':'str',
-            'value':'str',
-            'comment':'str',
-            'enabled':'bool',
-            'update_initramfs':'bool',
-            'id':'int',
-    })
-    TunableTypeChoices = typing.TypedDict('TunableTypeChoices', {
-            'SYSCTL':'str',
-            'UDEV':'str',
-            'ZFS':'str',
-    })
-    TunableUpdate = typing.TypedDict('TunableUpdate', {
-            'value':'str',
-            'comment':'str',
-            'enabled':'bool',
-            'update_initramfs':'bool',
-    })
-    TunableUpdateReturns = typing.TypedDict('TunableUpdateReturns', {
-            'type':'str',
-            'var':'str',
-            'value':'str',
-            'comment':'str',
-            'enabled':'bool',
-            'update_initramfs':'bool',
-            'id':'int',
-    })
     @typing.overload
     def update(self, 
         id:'int',
@@ -501,8 +131,13 @@ class Tunable(
             tunable_update_returns
         """
         ...
+    class Type(str,Enum):
+        SYSCTL = 'SYSCTL'
+        UDEV = 'UDEV'
+        ZFS = 'ZFS'
+        ...
     TunableCreate = typing.TypedDict('TunableCreate', {
-            'type':'str',
+            'type':'Type',
             'var':'str',
             'value':'str',
             'comment':'str',
@@ -510,7 +145,7 @@ class Tunable(
             'update_initramfs':'bool',
     })
     TunableCreateReturns = typing.TypedDict('TunableCreateReturns', {
-            'type':'str',
+            'type':'Type',
             'var':'str',
             'value':'str',
             'comment':'str',
@@ -547,7 +182,7 @@ class Tunable(
             'force_sql_filters':'bool',
     })
     TunableEntry = typing.TypedDict('TunableEntry', {
-            'type':'str',
+            'type':'Type',
             'var':'str',
             'value':'str',
             'comment':'str',
@@ -555,10 +190,19 @@ class Tunable(
             'update_initramfs':'bool',
             'id':'int',
     })
+    class SYSCTL(str,Enum):
+        SYSCTL = 'SYSCTL'
+        ...
+    class UDEV(str,Enum):
+        UDEV = 'UDEV'
+        ...
+    class ZFS(str,Enum):
+        ZFS = 'ZFS'
+        ...
     TunableTypeChoices = typing.TypedDict('TunableTypeChoices', {
-            'SYSCTL':'str',
-            'UDEV':'str',
-            'ZFS':'str',
+            'SYSCTL':'SYSCTL',
+            'UDEV':'UDEV',
+            'ZFS':'ZFS',
     })
     TunableUpdate = typing.TypedDict('TunableUpdate', {
             'value':'str',
@@ -567,7 +211,7 @@ class Tunable(
             'update_initramfs':'bool',
     })
     TunableUpdateReturns = typing.TypedDict('TunableUpdateReturns', {
-            'type':'str',
+            'type':'Type',
             'var':'str',
             'value':'str',
             'comment':'str',
@@ -575,4 +219,3 @@ class Tunable(
             'update_initramfs':'bool',
             'id':'int',
     })
-

@@ -3,6 +3,8 @@ from pytruenas.base import Namespace
 from pytruenas.mixins import ConfigMixin
 
 import typing
+from enum import Enum
+
 class SystemGeneral(ConfigMixin, Namespace):
     def __init__(self, client) -> None:
         super().__init__(client, 'system.general')
@@ -62,17 +64,28 @@ class SystemGeneral(ConfigMixin, Namespace):
             'crl_path':'str',
             'signed_certificates':'int',
     })
+    class Protocol(str,Enum):
+        TLSv1 = 'TLSv1'
+        TLSv11 = 'TLSv1.1'
+        TLSv12 = 'TLSv1.2'
+        TLSv13 = 'TLSv1.3'
+        ...
+    class UiXFrameOptions(str,Enum):
+        SAMEORIGIN = 'SAMEORIGIN'
+        DENY = 'DENY'
+        ALLOWALL = 'ALLOW_ALL'
+        ...
     SystemGeneralEntry = typing.TypedDict('SystemGeneralEntry', {
             'ui_certificate':'UiCertificate',
             'ui_httpsport':'int',
             'ui_httpsredirect':'bool',
-            'ui_httpsprotocols':'list[str]',
+            'ui_httpsprotocols':'list[Protocol]',
             'ui_port':'int',
             'ui_address':'list[str]',
             'ui_v6address':'list[str]',
             'ui_allowlist':'list[str]',
             'ui_consolemsg':'bool',
-            'ui_x_frame_options':'str',
+            'ui_x_frame_options':'UiXFrameOptions',
             'kbdmap':'str',
             'language':'str',
             'timezone':'str',
@@ -83,22 +96,34 @@ class SystemGeneral(ConfigMixin, Namespace):
             'ds_auth':'bool',
             'id':'int',
     })
+    class TLSv1(str,Enum):
+        TLSv1 = 'TLSv1'
+        ...
+    class TLSv11(str,Enum):
+        TLSv11 = 'TLSv1.1'
+        ...
+    class TLSv12(str,Enum):
+        TLSv12 = 'TLSv1.2'
+        ...
+    class TLSv13(str,Enum):
+        TLSv13 = 'TLSv1.3'
+        ...
     UIHTTPSProtocolChoices = typing.TypedDict('UIHTTPSProtocolChoices', {
-            'TLSv1':'str',
-            'TLSv1.1':'str',
-            'TLSv1.2':'str',
-            'TLSv1.3':'str',
+            'TLSv1':'TLSv1',
+            'TLSv1.1':'TLSv11',
+            'TLSv1.2':'TLSv12',
+            'TLSv1.3':'TLSv13',
     })
     GeneralSettings = typing.TypedDict('GeneralSettings', {
             'ui_httpsport':'int',
             'ui_httpsredirect':'bool',
-            'ui_httpsprotocols':'list[str]',
+            'ui_httpsprotocols':'list[Protocol]',
             'ui_port':'int',
             'ui_address':'list[str]',
             'ui_v6address':'list[str]',
             'ui_allowlist':'list[str]',
             'ui_consolemsg':'bool',
-            'ui_x_frame_options':'str',
+            'ui_x_frame_options':'UiXFrameOptions',
             'kbdmap':'str',
             'language':'str',
             'timezone':'str',
@@ -168,13 +193,13 @@ class SystemGeneral(ConfigMixin, Namespace):
             'ui_certificate':'UiCertificate_',
             'ui_httpsport':'int',
             'ui_httpsredirect':'bool',
-            'ui_httpsprotocols':'list[str]',
+            'ui_httpsprotocols':'list[Protocol]',
             'ui_port':'int',
             'ui_address':'list[str]',
             'ui_v6address':'list[str]',
             'ui_allowlist':'list[str]',
             'ui_consolemsg':'bool',
-            'ui_x_frame_options':'str',
+            'ui_x_frame_options':'UiXFrameOptions',
             'kbdmap':'str',
             'language':'str',
             'timezone':'str',

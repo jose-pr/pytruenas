@@ -25,6 +25,8 @@ def mixinsfn(ns: NamespaceSignature):
             ns.mixins = [mixins.TableExtMixin]
         case "config":
             ns.mixins = [mixins.ConfigMixin]
+        case "service":
+            ...
         case _:
             pass
             ...

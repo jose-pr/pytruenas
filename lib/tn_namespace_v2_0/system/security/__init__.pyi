@@ -1,7 +1,7 @@
 
 from pytruenas import TrueNASClient
 from pytruenas.base import Namespace
-
+from enum import Enum
 import typing
 class SystemSecurity(
     Namespace
@@ -22,17 +22,6 @@ class SystemSecurity(
             system_security_entry
         """
         ...
-    SystemSecurityEntry = typing.TypedDict('SystemSecurityEntry', {
-            'enable_fips':'bool',
-            'id':'int',
-    })
-    SystemSecurityUpdate = typing.TypedDict('SystemSecurityUpdate', {
-            'enable_fips':'bool',
-    })
-    SystemSecurityUpdateReturns = typing.TypedDict('SystemSecurityUpdateReturns', {
-            'enable_fips':'bool',
-            'id':'int',
-    })
     @typing.overload
     def update(self, 
         system_security_update:'SystemSecurityUpdate'={},
@@ -63,4 +52,3 @@ class SystemSecurity(
             'enable_fips':'bool',
             'id':'int',
     })
-

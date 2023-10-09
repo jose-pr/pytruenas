@@ -1,7 +1,7 @@
 
 from pytruenas import TrueNASClient
 from pytruenas.base import Namespace
-
+from enum import Enum
 import typing
 class Auth(
     Namespace
@@ -28,39 +28,6 @@ class Auth(
             Is `true` if `username` was successfully validated with provided `password`
         """
         ...
-    CurrentUserInformation = typing.TypedDict('CurrentUserInformation', {
-            'pw_name':'str',
-            'pw_gecos':'str',
-            'pw_dir':'str',
-            'pw_shell':'str',
-            'pw_uid':'int',
-            'pw_gid':'int',
-            'grouplist':'list',
-            'sid_info':'dict[str]',
-            'attributes':'dict[str]',
-    })
-    QueryOptions = typing.TypedDict('QueryOptions', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    Session = typing.TypedDict('Session', {
-            'id':'str',
-            'current':'bool',
-            'internal':'bool',
-            'origin':'str',
-            'credentials':'str',
-            'created_at':'str',
-    })
     @typing.overload
     def check_user(self, 
         username:'str',
@@ -81,39 +48,6 @@ class Auth(
             Is `true` if `username` was successfully validated with provided `password`
         """
         ...
-    CurrentUserInformation = typing.TypedDict('CurrentUserInformation', {
-            'pw_name':'str',
-            'pw_gecos':'str',
-            'pw_dir':'str',
-            'pw_shell':'str',
-            'pw_uid':'int',
-            'pw_gid':'int',
-            'grouplist':'list',
-            'sid_info':'dict[str]',
-            'attributes':'dict[str]',
-    })
-    QueryOptions = typing.TypedDict('QueryOptions', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    Session = typing.TypedDict('Session', {
-            'id':'str',
-            'current':'bool',
-            'internal':'bool',
-            'origin':'str',
-            'credentials':'str',
-            'created_at':'str',
-    })
     @typing.overload
     def generate_token(self, 
         ttl:'typing.Optional[int]'=600,
@@ -145,39 +79,6 @@ class Auth(
             token
         """
         ...
-    CurrentUserInformation = typing.TypedDict('CurrentUserInformation', {
-            'pw_name':'str',
-            'pw_gecos':'str',
-            'pw_dir':'str',
-            'pw_shell':'str',
-            'pw_uid':'int',
-            'pw_gid':'int',
-            'grouplist':'list',
-            'sid_info':'dict[str]',
-            'attributes':'dict[str]',
-    })
-    QueryOptions = typing.TypedDict('QueryOptions', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    Session = typing.TypedDict('Session', {
-            'id':'str',
-            'current':'bool',
-            'internal':'bool',
-            'origin':'str',
-            'credentials':'str',
-            'created_at':'str',
-    })
     @typing.overload
     def login(self, 
         username:'str',
@@ -202,39 +103,6 @@ class Auth(
             successful_login
         """
         ...
-    CurrentUserInformation = typing.TypedDict('CurrentUserInformation', {
-            'pw_name':'str',
-            'pw_gecos':'str',
-            'pw_dir':'str',
-            'pw_shell':'str',
-            'pw_uid':'int',
-            'pw_gid':'int',
-            'grouplist':'list',
-            'sid_info':'dict[str]',
-            'attributes':'dict[str]',
-    })
-    QueryOptions = typing.TypedDict('QueryOptions', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    Session = typing.TypedDict('Session', {
-            'id':'str',
-            'current':'bool',
-            'internal':'bool',
-            'origin':'str',
-            'credentials':'str',
-            'created_at':'str',
-    })
     @typing.overload
     def login_with_api_key(self, 
         api_key:'str',
@@ -252,39 +120,6 @@ class Auth(
             successful_login
         """
         ...
-    CurrentUserInformation = typing.TypedDict('CurrentUserInformation', {
-            'pw_name':'str',
-            'pw_gecos':'str',
-            'pw_dir':'str',
-            'pw_shell':'str',
-            'pw_uid':'int',
-            'pw_gid':'int',
-            'grouplist':'list',
-            'sid_info':'dict[str]',
-            'attributes':'dict[str]',
-    })
-    QueryOptions = typing.TypedDict('QueryOptions', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    Session = typing.TypedDict('Session', {
-            'id':'str',
-            'current':'bool',
-            'internal':'bool',
-            'origin':'str',
-            'credentials':'str',
-            'created_at':'str',
-    })
     @typing.overload
     def login_with_token(self, 
         token:'str',
@@ -302,39 +137,6 @@ class Auth(
             successful_login
         """
         ...
-    CurrentUserInformation = typing.TypedDict('CurrentUserInformation', {
-            'pw_name':'str',
-            'pw_gecos':'str',
-            'pw_dir':'str',
-            'pw_shell':'str',
-            'pw_uid':'int',
-            'pw_gid':'int',
-            'grouplist':'list',
-            'sid_info':'dict[str]',
-            'attributes':'dict[str]',
-    })
-    QueryOptions = typing.TypedDict('QueryOptions', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    Session = typing.TypedDict('Session', {
-            'id':'str',
-            'current':'bool',
-            'internal':'bool',
-            'origin':'str',
-            'credentials':'str',
-            'created_at':'str',
-    })
     @typing.overload
     def logout(self, 
     /) -> 'bool': 
@@ -350,39 +152,6 @@ class Auth(
             successful_logout
         """
         ...
-    CurrentUserInformation = typing.TypedDict('CurrentUserInformation', {
-            'pw_name':'str',
-            'pw_gecos':'str',
-            'pw_dir':'str',
-            'pw_shell':'str',
-            'pw_uid':'int',
-            'pw_gid':'int',
-            'grouplist':'list',
-            'sid_info':'dict[str]',
-            'attributes':'dict[str]',
-    })
-    QueryOptions = typing.TypedDict('QueryOptions', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    Session = typing.TypedDict('Session', {
-            'id':'str',
-            'current':'bool',
-            'internal':'bool',
-            'origin':'str',
-            'credentials':'str',
-            'created_at':'str',
-    })
     @typing.overload
     def me(self, 
     /) -> 'CurrentUserInformation': 
@@ -397,44 +166,11 @@ class Auth(
             current_user_information
         """
         ...
-    CurrentUserInformation = typing.TypedDict('CurrentUserInformation', {
-            'pw_name':'str',
-            'pw_gecos':'str',
-            'pw_dir':'str',
-            'pw_shell':'str',
-            'pw_uid':'int',
-            'pw_gid':'int',
-            'grouplist':'list',
-            'sid_info':'dict[str]',
-            'attributes':'dict[str]',
-    })
-    QueryOptions = typing.TypedDict('QueryOptions', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    Session = typing.TypedDict('Session', {
-            'id':'str',
-            'current':'bool',
-            'internal':'bool',
-            'origin':'str',
-            'credentials':'str',
-            'created_at':'str',
-    })
     @typing.overload
     def sessions(self, 
         query_filters:'list[list]'=[],
         query_options:'QueryOptions'={},
-    /) -> 'typing.Union[int, ForwardRef(Session), list[Session]]': 
+    /) -> 'typing.Union[int, Session, list[Session]]': 
         """
         Returns list of active auth sessions.
         
@@ -474,43 +210,10 @@ class Auth(
             query-options
         Returns
         -------
-        typing.Union[int, ForwardRef(Session), list[Session]]:
+        typing.Union[int, Session, list[Session]]:
             
         """
         ...
-    CurrentUserInformation = typing.TypedDict('CurrentUserInformation', {
-            'pw_name':'str',
-            'pw_gecos':'str',
-            'pw_dir':'str',
-            'pw_shell':'str',
-            'pw_uid':'int',
-            'pw_gid':'int',
-            'grouplist':'list',
-            'sid_info':'dict[str]',
-            'attributes':'dict[str]',
-    })
-    QueryOptions = typing.TypedDict('QueryOptions', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    Session = typing.TypedDict('Session', {
-            'id':'str',
-            'current':'bool',
-            'internal':'bool',
-            'origin':'str',
-            'credentials':'str',
-            'created_at':'str',
-    })
     @typing.overload
     def set_attribute(self, 
         key:'str',
@@ -531,39 +234,6 @@ class Auth(
         -------
         """
         ...
-    CurrentUserInformation = typing.TypedDict('CurrentUserInformation', {
-            'pw_name':'str',
-            'pw_gecos':'str',
-            'pw_dir':'str',
-            'pw_shell':'str',
-            'pw_uid':'int',
-            'pw_gid':'int',
-            'grouplist':'list',
-            'sid_info':'dict[str]',
-            'attributes':'dict[str]',
-    })
-    QueryOptions = typing.TypedDict('QueryOptions', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    Session = typing.TypedDict('Session', {
-            'id':'str',
-            'current':'bool',
-            'internal':'bool',
-            'origin':'str',
-            'credentials':'str',
-            'created_at':'str',
-    })
     @typing.overload
     def terminate_other_sessions(self, 
     /) -> None: 
@@ -576,39 +246,6 @@ class Auth(
         -------
         """
         ...
-    CurrentUserInformation = typing.TypedDict('CurrentUserInformation', {
-            'pw_name':'str',
-            'pw_gecos':'str',
-            'pw_dir':'str',
-            'pw_shell':'str',
-            'pw_uid':'int',
-            'pw_gid':'int',
-            'grouplist':'list',
-            'sid_info':'dict[str]',
-            'attributes':'dict[str]',
-    })
-    QueryOptions = typing.TypedDict('QueryOptions', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    Session = typing.TypedDict('Session', {
-            'id':'str',
-            'current':'bool',
-            'internal':'bool',
-            'origin':'str',
-            'credentials':'str',
-            'created_at':'str',
-    })
     @typing.overload
     def terminate_session(self, 
         id:'str',
@@ -626,39 +263,6 @@ class Auth(
             Is `true` if session was terminated successfully
         """
         ...
-    CurrentUserInformation = typing.TypedDict('CurrentUserInformation', {
-            'pw_name':'str',
-            'pw_gecos':'str',
-            'pw_dir':'str',
-            'pw_shell':'str',
-            'pw_uid':'int',
-            'pw_gid':'int',
-            'grouplist':'list',
-            'sid_info':'dict[str]',
-            'attributes':'dict[str]',
-    })
-    QueryOptions = typing.TypedDict('QueryOptions', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    Session = typing.TypedDict('Session', {
-            'id':'str',
-            'current':'bool',
-            'internal':'bool',
-            'origin':'str',
-            'credentials':'str',
-            'created_at':'str',
-    })
     @typing.overload
     def two_factor_auth(self, 
         username:'str',
@@ -712,4 +316,3 @@ class Auth(
             'credentials':'str',
             'created_at':'str',
     })
-

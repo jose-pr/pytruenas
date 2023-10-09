@@ -3,6 +3,8 @@ from pytruenas.base import Namespace
 from pytruenas.mixins import TableExtMixin
 
 import typing
+from enum import Enum
+
 class PoolScrub(TableExtMixin, Namespace):
     def __init__(self, client) -> None:
         super().__init__(client, 'pool.scrub')
@@ -67,6 +69,11 @@ class PoolScrub(TableExtMixin, Namespace):
             'id':'int',
             'pool_name':'str',
     })
+    class Action(str,Enum):
+        START = 'START'
+        STOP = 'STOP'
+        PAUSE = 'PAUSE'
+        ...
     PoolScrubUpdate = typing.TypedDict('PoolScrubUpdate', {
             'pool':'int',
             'threshold':'int',

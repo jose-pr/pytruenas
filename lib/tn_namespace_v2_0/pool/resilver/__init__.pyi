@@ -1,7 +1,7 @@
 
 from pytruenas import TrueNASClient
 from pytruenas.base import Namespace
-
+from enum import Enum
 import typing
 class PoolResilver(
     Namespace
@@ -22,26 +22,6 @@ class PoolResilver(
             pool_resilver_entry
         """
         ...
-    PoolResilverEntry = typing.TypedDict('PoolResilverEntry', {
-            'id':'int',
-            'begin':'str',
-            'end':'str',
-            'enabled':'bool',
-            'weekday':'list[int]',
-    })
-    PoolResilverUpdate = typing.TypedDict('PoolResilverUpdate', {
-            'begin':'str',
-            'end':'str',
-            'enabled':'bool',
-            'weekday':'list[int]',
-    })
-    PoolResilverUpdateReturns = typing.TypedDict('PoolResilverUpdateReturns', {
-            'id':'int',
-            'begin':'str',
-            'end':'str',
-            'enabled':'bool',
-            'weekday':'list[int]',
-    })
     @typing.overload
     def update(self, 
         pool_resilver_update:'PoolResilverUpdate'={},
@@ -85,4 +65,3 @@ class PoolResilver(
             'enabled':'bool',
             'weekday':'list[int]',
     })
-

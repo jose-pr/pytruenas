@@ -11,10 +11,13 @@ from .. import _utils, _core
 class Object(_ty.NamedTuple):
     properties: _ty.OrderedDict[str, "OpenApiType"]
 
+    def __bool__(self) -> int:
+        return self.properties.__len__() > 0
+
     def __eq__(self, other):
         if not isinstance(other, Object):
             # don't attempt to compare against unrelated types
-            return NotImplemented
+            return False
         a = self.properties
         b = other.properties
         if len(a) != len(b):
@@ -28,6 +31,14 @@ class Object(_ty.NamedTuple):
                 return False
         return True
 
+class Enum(_ty.NamedTuple):
+    options: list[str]
+    def __bool__(self) -> int:
+        return self.options.__len__() > 0
+    def __eq__(self, other):
+        if not isinstance(other, Enum):
+            return False
+        return self.options == other.options
 
 class OpenApiType:
     _raw: _core.Parameter
@@ -56,11 +67,19 @@ class OpenApiType:
                         t = OpenApiType(t, objects)
                     types.append(t)
                 raw[k] = types
-        obj = Object(_ty.OrderedDict())
-        for name, prop in raw.get("properties", {}).items():
-            obj.properties[name] = OpenApiType(prop, objects)
 
-        if not obj.properties:
+        if 'properties' in raw:
+            obj = Object(_ty.OrderedDict())
+            for name, prop in raw["properties"].items():
+                obj.properties[name] = OpenApiType(prop, objects)
+        elif 'enum' in raw:
+            obj = Enum([])
+            for enum in raw['enum']:
+                obj.options.append(enum)
+        else:
+            obj = None
+
+        if not obj:
             self._obj = None
         else:
             name: str = self._raw.get("title", "Object")
@@ -72,6 +91,9 @@ class OpenApiType:
             objects[name] = obj
             self._obj = name
 
+
+            
+
     @property
     def type(self) -> "list[OpenApiType]|_core.Parameter":
         for k in ["type", "anyOf", "oneOf"]:
@@ -81,12 +103,14 @@ class OpenApiType:
                     return self._raw
                 else:
                     return ty
-
+    _FORWARDREF = _re.compile(r"ForwardRef\('([^']*)'\)")
     def python(self) -> "type | Object":
-        ty = self._python()
-        if "<" in str(ty):
-            ty = ty.__name__
-        return str(ty).replace("'", "")
+        py = self._python()
+        ty = str(py)
+        if "<" in ty:
+            ty = py.__name__
+        ty=self._FORWARDREF.sub(r'\1', ty)
+        return ty.replace("'", "")
 
     def _python(self) -> str:
         types = self.type
@@ -117,7 +141,10 @@ class OpenApiType:
             case "integer":
                 ty = int
             case "string":
-                ty = str
+                if self._obj:
+                    ty = self._obj
+                else:
+                    ty = str
             case "array":
                 if union:
                     ty = list[union]

@@ -2,7 +2,7 @@
 from pytruenas import TrueNASClient
 from pytruenas.base import Namespace
 from pytruenas.mixins import ConfigMixin
-
+from enum import Enum
 import typing
 class Container(
     ConfigMixin,
@@ -24,23 +24,6 @@ class Container(
             container_entry
         """
         ...
-    ContainerEntry = typing.TypedDict('ContainerEntry', {
-            'enable_image_updates':'bool',
-            'id':'int',
-    })
-    PruneOptions = typing.TypedDict('PruneOptions', {
-            'remove_unused_images':'bool',
-    })
-    PrunedResources = typing.TypedDict('PrunedResources', {
-            'images':'dict[str]',
-    })
-    ContainerUpdate = typing.TypedDict('ContainerUpdate', {
-            'enable_image_updates':'bool',
-    })
-    ContainerUpdateReturns = typing.TypedDict('ContainerUpdateReturns', {
-            'enable_image_updates':'bool',
-            'id':'int',
-    })
     @typing.overload
     def prune(self, 
         prune_options:'PruneOptions'={},
@@ -78,23 +61,6 @@ class Container(
             ```
         """
         ...
-    ContainerEntry = typing.TypedDict('ContainerEntry', {
-            'enable_image_updates':'bool',
-            'id':'int',
-    })
-    PruneOptions = typing.TypedDict('PruneOptions', {
-            'remove_unused_images':'bool',
-    })
-    PrunedResources = typing.TypedDict('PrunedResources', {
-            'images':'dict[str]',
-    })
-    ContainerUpdate = typing.TypedDict('ContainerUpdate', {
-            'enable_image_updates':'bool',
-    })
-    ContainerUpdateReturns = typing.TypedDict('ContainerUpdateReturns', {
-            'enable_image_updates':'bool',
-            'id':'int',
-    })
     @typing.overload
     def update(self, 
         container_update:'ContainerUpdate'={},
@@ -134,4 +100,3 @@ class Container(
             'enable_image_updates':'bool',
             'id':'int',
     })
-

@@ -2,16 +2,23 @@
 from pytruenas.base import Namespace
 
 import typing
+from enum import Enum
+
 class IscsiPortal(Namespace):
     def __init__(self, client) -> None:
         super().__init__(client, 'iscsi.portal')
 
+    class DiscoveryAuthmethod(str,Enum):
+        NONE = 'NONE'
+        CHAP = 'CHAP'
+        CHAPMUTUAL = 'CHAP_MUTUAL'
+        ...
     Listen = typing.TypedDict('Listen', {
             'ip':'str',
     })
     IscsiportalCreate = typing.TypedDict('IscsiportalCreate', {
             'comment':'str',
-            'discovery_authmethod':'str',
+            'discovery_authmethod':'DiscoveryAuthmethod',
             'discovery_authgroup':'typing.Optional[int]',
             'listen':'list[Listen]',
     })
@@ -45,7 +52,7 @@ class IscsiPortal(Namespace):
     })
     IscsiportalUpdate = typing.TypedDict('IscsiportalUpdate', {
             'comment':'str',
-            'discovery_authmethod':'str',
+            'discovery_authmethod':'DiscoveryAuthmethod',
             'discovery_authgroup':'typing.Optional[int]',
             'listen':'list[Listen]',
     })

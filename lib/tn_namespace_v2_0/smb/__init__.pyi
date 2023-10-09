@@ -1,7 +1,7 @@
 
 from pytruenas import TrueNASClient
 from pytruenas.base import Namespace
-
+from enum import Enum
 import typing
 class Smb(
     Namespace
@@ -21,59 +21,6 @@ class Smb(
         -------
         """
         ...
-    Options = typing.TypedDict('Options', {
-            'use_kerberos':'bool',
-            'output_format':'str',
-    })
-    GetRemoteAcl = typing.TypedDict('GetRemoteAcl', {
-            'server':'str',
-            'share':'str',
-            'path':'str',
-            'username':'str',
-            'password':'str',
-            'options':'Options',
-    })
-    QueryOptions = typing.TypedDict('QueryOptions', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    StatusOptions = typing.TypedDict('StatusOptions', {
-            'verbose':'bool',
-            'fast':'bool',
-            'restrict_user':'str',
-            'restrict_session':'str',
-    })
-    SmbUpdate = typing.TypedDict('SmbUpdate', {
-            'netbiosname':'str',
-            'netbiosname_b':'str',
-            'netbiosalias':'list[str]',
-            'workgroup':'str',
-            'description':'str',
-            'enable_smb1':'bool',
-            'unixcharset':'str',
-            'loglevel':'str',
-            'syslog':'bool',
-            'aapl_extensions':'bool',
-            'localmaster':'bool',
-            'guest':'str',
-            'admin_group':'typing.Optional[str]',
-            'filemask':'str',
-            'dirmask':'str',
-            'ntlmv1_auth':'bool',
-            'multichannel':'bool',
-            'bindip':'list[str]',
-            'smb_options':'str',
-    })
     @typing.overload
     def client_count(self, 
     /) -> None: 
@@ -86,59 +33,6 @@ class Smb(
         -------
         """
         ...
-    Options = typing.TypedDict('Options', {
-            'use_kerberos':'bool',
-            'output_format':'str',
-    })
-    GetRemoteAcl = typing.TypedDict('GetRemoteAcl', {
-            'server':'str',
-            'share':'str',
-            'path':'str',
-            'username':'str',
-            'password':'str',
-            'options':'Options',
-    })
-    QueryOptions = typing.TypedDict('QueryOptions', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    StatusOptions = typing.TypedDict('StatusOptions', {
-            'verbose':'bool',
-            'fast':'bool',
-            'restrict_user':'str',
-            'restrict_session':'str',
-    })
-    SmbUpdate = typing.TypedDict('SmbUpdate', {
-            'netbiosname':'str',
-            'netbiosname_b':'str',
-            'netbiosalias':'list[str]',
-            'workgroup':'str',
-            'description':'str',
-            'enable_smb1':'bool',
-            'unixcharset':'str',
-            'loglevel':'str',
-            'syslog':'bool',
-            'aapl_extensions':'bool',
-            'localmaster':'bool',
-            'guest':'str',
-            'admin_group':'typing.Optional[str]',
-            'filemask':'str',
-            'dirmask':'str',
-            'ntlmv1_auth':'bool',
-            'multichannel':'bool',
-            'bindip':'list[str]',
-            'smb_options':'str',
-    })
     @typing.overload
     def config(self, 
     /) -> 'dict[str]': 
@@ -153,59 +47,6 @@ class Smb(
             smb_entry
         """
         ...
-    Options = typing.TypedDict('Options', {
-            'use_kerberos':'bool',
-            'output_format':'str',
-    })
-    GetRemoteAcl = typing.TypedDict('GetRemoteAcl', {
-            'server':'str',
-            'share':'str',
-            'path':'str',
-            'username':'str',
-            'password':'str',
-            'options':'Options',
-    })
-    QueryOptions = typing.TypedDict('QueryOptions', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    StatusOptions = typing.TypedDict('StatusOptions', {
-            'verbose':'bool',
-            'fast':'bool',
-            'restrict_user':'str',
-            'restrict_session':'str',
-    })
-    SmbUpdate = typing.TypedDict('SmbUpdate', {
-            'netbiosname':'str',
-            'netbiosname_b':'str',
-            'netbiosalias':'list[str]',
-            'workgroup':'str',
-            'description':'str',
-            'enable_smb1':'bool',
-            'unixcharset':'str',
-            'loglevel':'str',
-            'syslog':'bool',
-            'aapl_extensions':'bool',
-            'localmaster':'bool',
-            'guest':'str',
-            'admin_group':'typing.Optional[str]',
-            'filemask':'str',
-            'dirmask':'str',
-            'ntlmv1_auth':'bool',
-            'multichannel':'bool',
-            'bindip':'list[str]',
-            'smb_options':'str',
-    })
     @typing.overload
     def domain_choices(self, 
     /) -> None: 
@@ -219,59 +60,6 @@ class Smb(
         -------
         """
         ...
-    Options = typing.TypedDict('Options', {
-            'use_kerberos':'bool',
-            'output_format':'str',
-    })
-    GetRemoteAcl = typing.TypedDict('GetRemoteAcl', {
-            'server':'str',
-            'share':'str',
-            'path':'str',
-            'username':'str',
-            'password':'str',
-            'options':'Options',
-    })
-    QueryOptions = typing.TypedDict('QueryOptions', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    StatusOptions = typing.TypedDict('StatusOptions', {
-            'verbose':'bool',
-            'fast':'bool',
-            'restrict_user':'str',
-            'restrict_session':'str',
-    })
-    SmbUpdate = typing.TypedDict('SmbUpdate', {
-            'netbiosname':'str',
-            'netbiosname_b':'str',
-            'netbiosalias':'list[str]',
-            'workgroup':'str',
-            'description':'str',
-            'enable_smb1':'bool',
-            'unixcharset':'str',
-            'loglevel':'str',
-            'syslog':'bool',
-            'aapl_extensions':'bool',
-            'localmaster':'bool',
-            'guest':'str',
-            'admin_group':'typing.Optional[str]',
-            'filemask':'str',
-            'dirmask':'str',
-            'ntlmv1_auth':'bool',
-            'multichannel':'bool',
-            'bindip':'list[str]',
-            'smb_options':'str',
-    })
     @typing.overload
     def get_remote_acl(self, 
         get_remote_acl:'GetRemoteAcl'={},
@@ -304,62 +92,9 @@ class Smb(
         -------
         """
         ...
-    Options = typing.TypedDict('Options', {
-            'use_kerberos':'bool',
-            'output_format':'str',
-    })
-    GetRemoteAcl = typing.TypedDict('GetRemoteAcl', {
-            'server':'str',
-            'share':'str',
-            'path':'str',
-            'username':'str',
-            'password':'str',
-            'options':'Options',
-    })
-    QueryOptions = typing.TypedDict('QueryOptions', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    StatusOptions = typing.TypedDict('StatusOptions', {
-            'verbose':'bool',
-            'fast':'bool',
-            'restrict_user':'str',
-            'restrict_session':'str',
-    })
-    SmbUpdate = typing.TypedDict('SmbUpdate', {
-            'netbiosname':'str',
-            'netbiosname_b':'str',
-            'netbiosalias':'list[str]',
-            'workgroup':'str',
-            'description':'str',
-            'enable_smb1':'bool',
-            'unixcharset':'str',
-            'loglevel':'str',
-            'syslog':'bool',
-            'aapl_extensions':'bool',
-            'localmaster':'bool',
-            'guest':'str',
-            'admin_group':'typing.Optional[str]',
-            'filemask':'str',
-            'dirmask':'str',
-            'ntlmv1_auth':'bool',
-            'multichannel':'bool',
-            'bindip':'list[str]',
-            'smb_options':'str',
-    })
     @typing.overload
     def status(self, 
-        info_level:'str'="ALL",
+        info_level:'InfoLevel'="ALL",
         query_filters:'list[list]'=[],
         query_options:'QueryOptions'={},
         status_options:'StatusOptions'={},
@@ -393,59 +128,6 @@ class Smb(
         -------
         """
         ...
-    Options = typing.TypedDict('Options', {
-            'use_kerberos':'bool',
-            'output_format':'str',
-    })
-    GetRemoteAcl = typing.TypedDict('GetRemoteAcl', {
-            'server':'str',
-            'share':'str',
-            'path':'str',
-            'username':'str',
-            'password':'str',
-            'options':'Options',
-    })
-    QueryOptions = typing.TypedDict('QueryOptions', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    StatusOptions = typing.TypedDict('StatusOptions', {
-            'verbose':'bool',
-            'fast':'bool',
-            'restrict_user':'str',
-            'restrict_session':'str',
-    })
-    SmbUpdate = typing.TypedDict('SmbUpdate', {
-            'netbiosname':'str',
-            'netbiosname_b':'str',
-            'netbiosalias':'list[str]',
-            'workgroup':'str',
-            'description':'str',
-            'enable_smb1':'bool',
-            'unixcharset':'str',
-            'loglevel':'str',
-            'syslog':'bool',
-            'aapl_extensions':'bool',
-            'localmaster':'bool',
-            'guest':'str',
-            'admin_group':'typing.Optional[str]',
-            'filemask':'str',
-            'dirmask':'str',
-            'ntlmv1_auth':'bool',
-            'multichannel':'bool',
-            'bindip':'list[str]',
-            'smb_options':'str',
-    })
     @typing.overload
     def unixcharset_choices(self, 
     /) -> None: 
@@ -458,59 +140,6 @@ class Smb(
         -------
         """
         ...
-    Options = typing.TypedDict('Options', {
-            'use_kerberos':'bool',
-            'output_format':'str',
-    })
-    GetRemoteAcl = typing.TypedDict('GetRemoteAcl', {
-            'server':'str',
-            'share':'str',
-            'path':'str',
-            'username':'str',
-            'password':'str',
-            'options':'Options',
-    })
-    QueryOptions = typing.TypedDict('QueryOptions', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    StatusOptions = typing.TypedDict('StatusOptions', {
-            'verbose':'bool',
-            'fast':'bool',
-            'restrict_user':'str',
-            'restrict_session':'str',
-    })
-    SmbUpdate = typing.TypedDict('SmbUpdate', {
-            'netbiosname':'str',
-            'netbiosname_b':'str',
-            'netbiosalias':'list[str]',
-            'workgroup':'str',
-            'description':'str',
-            'enable_smb1':'bool',
-            'unixcharset':'str',
-            'loglevel':'str',
-            'syslog':'bool',
-            'aapl_extensions':'bool',
-            'localmaster':'bool',
-            'guest':'str',
-            'admin_group':'typing.Optional[str]',
-            'filemask':'str',
-            'dirmask':'str',
-            'ntlmv1_auth':'bool',
-            'multichannel':'bool',
-            'bindip':'list[str]',
-            'smb_options':'str',
-    })
     @typing.overload
     def update(self, 
         smb_update:'SmbUpdate'={},
@@ -557,9 +186,13 @@ class Smb(
             smb_update_returns
         """
         ...
+    class OutputFormat(str,Enum):
+        SMB = 'SMB'
+        LOCAL = 'LOCAL'
+        ...
     Options = typing.TypedDict('Options', {
             'use_kerberos':'bool',
-            'output_format':'str',
+            'output_format':'OutputFormat',
     })
     GetRemoteAcl = typing.TypedDict('GetRemoteAcl', {
             'server':'str',
@@ -569,6 +202,15 @@ class Smb(
             'password':'str',
             'options':'Options',
     })
+    class InfoLevel(str,Enum):
+        AUTHLOG = 'AUTH_LOG'
+        ALL = 'ALL'
+        SESSIONS = 'SESSIONS'
+        SHARES = 'SHARES'
+        LOCKS = 'LOCKS'
+        BYTERANGE = 'BYTERANGE'
+        NOTIFICATIONS = 'NOTIFICATIONS'
+        ...
     QueryOptions = typing.TypedDict('QueryOptions', {
             'relationships':'bool',
             'extend':'typing.Optional[str]',
@@ -589,6 +231,13 @@ class Smb(
             'restrict_user':'str',
             'restrict_session':'str',
     })
+    class Loglevel(str,Enum):
+        NONE = 'NONE'
+        MINIMUM = 'MINIMUM'
+        NORMAL = 'NORMAL'
+        FULL = 'FULL'
+        DEBUG = 'DEBUG'
+        ...
     SmbUpdate = typing.TypedDict('SmbUpdate', {
             'netbiosname':'str',
             'netbiosname_b':'str',
@@ -597,7 +246,7 @@ class Smb(
             'description':'str',
             'enable_smb1':'bool',
             'unixcharset':'str',
-            'loglevel':'str',
+            'loglevel':'Loglevel',
             'syslog':'bool',
             'aapl_extensions':'bool',
             'localmaster':'bool',
@@ -610,4 +259,3 @@ class Smb(
             'bindip':'list[str]',
             'smb_options':'str',
     })
-

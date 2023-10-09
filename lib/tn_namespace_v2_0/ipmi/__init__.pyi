@@ -1,7 +1,7 @@
 
 from pytruenas import TrueNASClient
 from pytruenas.base import Namespace
-
+from enum import Enum
 import typing
 class Ipmi(
     Namespace
@@ -22,4 +22,3 @@ class Ipmi(
             ipmi_loaded
         """
         ...
-

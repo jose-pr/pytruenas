@@ -3,6 +3,8 @@ from pytruenas.base import Namespace
 from pytruenas.mixins import ConfigMixin
 
 import typing
+from enum import Enum
+
 class Activedirectory(ConfigMixin, Namespace):
     def __init__(self, client) -> None:
         super().__init__(client, 'activedirectory')
@@ -18,10 +20,27 @@ class Activedirectory(ConfigMixin, Namespace):
             'Server time offset':'int',
             'Last machine account password change':'int',
     })
+    class DirectoryserviceState(str,Enum):
+        DISABLED = 'DISABLED'
+        FAULTED = 'FAULTED'
+        LEAVING = 'LEAVING'
+        JOINING = 'JOINING'
+        HEALTHY = 'HEALTHY'
+        ...
     KerberosUsernamePassword = typing.TypedDict('KerberosUsernamePassword', {
             'username':'str',
             'password':'str',
     })
+    class NssInfoAd(str,Enum):
+        SFU = 'SFU'
+        SFU20 = 'SFU20'
+        RFC2307 = 'RFC2307'
+        ...
+    class NssInfo(str,Enum):
+        SFU = 'SFU'
+        SFU20 = 'SFU20'
+        RFC2307 = 'RFC2307'
+        ...
     ActivedirectoryUpdate = typing.TypedDict('ActivedirectoryUpdate', {
             'domainname':'str',
             'bindname':'str',
@@ -37,7 +56,7 @@ class Activedirectory(ConfigMixin, Namespace):
             'kerberos_principal':'typing.Optional[str]',
             'timeout':'int',
             'dns_timeout':'int',
-            'nss_info':'typing.Optional[str]',
+            'nss_info':'typing.Optional[NssInfo]',
             'createcomputer':'str',
             'netbiosname':'str',
             'netbiosname_b':'str',

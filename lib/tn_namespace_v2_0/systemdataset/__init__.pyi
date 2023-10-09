@@ -1,7 +1,7 @@
 
 from pytruenas import TrueNASClient
 from pytruenas.base import Namespace
-
+from enum import Enum
 import typing
 class Systemdataset(
     Namespace
@@ -22,33 +22,6 @@ class Systemdataset(
             systemdataset_entry
         """
         ...
-    SystemdatasetEntry = typing.TypedDict('SystemdatasetEntry', {
-            'id':'int',
-            'pool':'str',
-            'pool_set':'bool',
-            'uuid':'str',
-            'uuid_b':'typing.Optional[str]',
-            'basename':'str',
-            'uuid_a':'str',
-            'syslog':'bool',
-            'path':'typing.Optional[str]',
-    })
-    SysdatasetUpdate = typing.TypedDict('SysdatasetUpdate', {
-            'pool':'typing.Optional[str]',
-            'pool_exclude':'typing.Optional[str]',
-            'syslog':'bool',
-    })
-    SystemdatasetUpdateReturns = typing.TypedDict('SystemdatasetUpdateReturns', {
-            'id':'int',
-            'pool':'str',
-            'pool_set':'bool',
-            'uuid':'str',
-            'uuid_b':'typing.Optional[str]',
-            'basename':'str',
-            'uuid_a':'str',
-            'syslog':'bool',
-            'path':'typing.Optional[str]',
-    })
     @typing.overload
     def pool_choices(self, 
         include_current_pool:'bool'=True,
@@ -66,33 +39,6 @@ class Systemdataset(
             systemdataset_pool_choices
         """
         ...
-    SystemdatasetEntry = typing.TypedDict('SystemdatasetEntry', {
-            'id':'int',
-            'pool':'str',
-            'pool_set':'bool',
-            'uuid':'str',
-            'uuid_b':'typing.Optional[str]',
-            'basename':'str',
-            'uuid_a':'str',
-            'syslog':'bool',
-            'path':'typing.Optional[str]',
-    })
-    SysdatasetUpdate = typing.TypedDict('SysdatasetUpdate', {
-            'pool':'typing.Optional[str]',
-            'pool_exclude':'typing.Optional[str]',
-            'syslog':'bool',
-    })
-    SystemdatasetUpdateReturns = typing.TypedDict('SystemdatasetUpdateReturns', {
-            'id':'int',
-            'pool':'str',
-            'pool_set':'bool',
-            'uuid':'str',
-            'uuid_b':'typing.Optional[str]',
-            'basename':'str',
-            'uuid_a':'str',
-            'syslog':'bool',
-            'path':'typing.Optional[str]',
-    })
     @typing.overload
     def update(self, 
         sysdataset_update:'SysdatasetUpdate'={},
@@ -142,4 +88,3 @@ class Systemdataset(
             'syslog':'bool',
             'path':'typing.Optional[str]',
     })
-

@@ -2,10 +2,17 @@
 from pytruenas.base import Namespace
 
 import typing
+from enum import Enum
+
 class Device(Namespace):
     def __init__(self, client) -> None:
         super().__init__(client, 'device')
 
+    class Type(str,Enum):
+        SERIAL = 'SERIAL'
+        DISK = 'DISK'
+        GPU = 'GPU'
+        ...
     SerialInfo = typing.TypedDict('SerialInfo', {
             'name':'str',
             'location':'str',

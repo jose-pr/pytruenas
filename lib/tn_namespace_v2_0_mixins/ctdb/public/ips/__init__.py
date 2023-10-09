@@ -3,6 +3,8 @@ from pytruenas.base import Namespace
 from pytruenas.mixins import TableExtMixin
 
 import typing
+from enum import Enum
+
 class CtdbPublicIps(TableExtMixin, Namespace):
     def __init__(self, client) -> None:
         super().__init__(client, 'ctdb.public.ips')

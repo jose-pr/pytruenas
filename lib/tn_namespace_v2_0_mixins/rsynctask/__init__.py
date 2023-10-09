@@ -3,10 +3,20 @@ from pytruenas.base import Namespace
 from pytruenas.mixins import TableExtMixin
 
 import typing
+from enum import Enum
+
 class Rsynctask(TableExtMixin, Namespace):
     def __init__(self, client) -> None:
         super().__init__(client, 'rsynctask')
 
+    class Mode(str,Enum):
+        MODULE = 'MODULE'
+        SSH = 'SSH'
+        ...
+    class Direction(str,Enum):
+        PULL = 'PULL'
+        PUSH = 'PUSH'
+        ...
     Schedule = typing.TypedDict('Schedule', {
             'minute':'str',
             'hour':'str',
@@ -17,7 +27,7 @@ class Rsynctask(TableExtMixin, Namespace):
     RsyncTaskCreate = typing.TypedDict('RsyncTaskCreate', {
             'path':'str',
             'user':'str',
-            'mode':'str',
+            'mode':'Mode',
             'remotehost':'typing.Optional[str]',
             'remoteport':'typing.Optional[int]',
             'remotemodule':'typing.Optional[str]',
@@ -25,7 +35,7 @@ class Rsynctask(TableExtMixin, Namespace):
             'remotepath':'str',
             'validate_rpath':'bool',
             'ssh_keyscan':'bool',
-            'direction':'str',
+            'direction':'Direction',
             'desc':'str',
             'schedule':'Schedule',
             'recursive':'bool',
@@ -43,12 +53,12 @@ class Rsynctask(TableExtMixin, Namespace):
     RsynctaskCreateReturns = typing.TypedDict('RsynctaskCreateReturns', {
             'path':'str',
             'user':'str',
-            'mode':'str',
+            'mode':'Mode',
             'remotehost':'typing.Optional[str]',
             'remoteport':'typing.Optional[int]',
             'remotemodule':'typing.Optional[str]',
             'remotepath':'str',
-            'direction':'str',
+            'direction':'Direction',
             'desc':'str',
             'schedule':'Schedule',
             'recursive':'bool',
@@ -98,12 +108,12 @@ class Rsynctask(TableExtMixin, Namespace):
     RsyncTaskEntry = typing.TypedDict('RsyncTaskEntry', {
             'path':'str',
             'user':'str',
-            'mode':'str',
+            'mode':'Mode',
             'remotehost':'typing.Optional[str]',
             'remoteport':'typing.Optional[int]',
             'remotemodule':'typing.Optional[str]',
             'remotepath':'str',
-            'direction':'str',
+            'direction':'Direction',
             'desc':'str',
             'schedule':'Schedule',
             'recursive':'bool',
@@ -125,12 +135,12 @@ class Rsynctask(TableExtMixin, Namespace):
     RsyncTaskEntry_ = typing.TypedDict('RsyncTaskEntry_', {
             'path':'str',
             'user':'str',
-            'mode':'str',
+            'mode':'Mode',
             'remotehost':'typing.Optional[str]',
             'remoteport':'typing.Optional[int]',
             'remotemodule':'typing.Optional[str]',
             'remotepath':'str',
-            'direction':'str',
+            'direction':'Direction',
             'desc':'str',
             'schedule':'Schedule',
             'recursive':'bool',
@@ -152,12 +162,12 @@ class Rsynctask(TableExtMixin, Namespace):
     RsyncTaskEntry__ = typing.TypedDict('RsyncTaskEntry__', {
             'path':'str',
             'user':'str',
-            'mode':'str',
+            'mode':'Mode',
             'remotehost':'typing.Optional[str]',
             'remoteport':'typing.Optional[int]',
             'remotemodule':'typing.Optional[str]',
             'remotepath':'str',
-            'direction':'str',
+            'direction':'Direction',
             'desc':'str',
             'schedule':'Schedule',
             'recursive':'bool',
@@ -179,7 +189,7 @@ class Rsynctask(TableExtMixin, Namespace):
     RsyncTaskUpdate = typing.TypedDict('RsyncTaskUpdate', {
             'path':'str',
             'user':'str',
-            'mode':'str',
+            'mode':'Mode',
             'remotehost':'typing.Optional[str]',
             'remoteport':'typing.Optional[int]',
             'remotemodule':'typing.Optional[str]',
@@ -187,7 +197,7 @@ class Rsynctask(TableExtMixin, Namespace):
             'remotepath':'str',
             'validate_rpath':'bool',
             'ssh_keyscan':'bool',
-            'direction':'str',
+            'direction':'Direction',
             'desc':'str',
             'schedule':'Schedule',
             'recursive':'bool',
@@ -205,12 +215,12 @@ class Rsynctask(TableExtMixin, Namespace):
     RsynctaskUpdateReturns = typing.TypedDict('RsynctaskUpdateReturns', {
             'path':'str',
             'user':'str',
-            'mode':'str',
+            'mode':'Mode',
             'remotehost':'typing.Optional[str]',
             'remoteport':'typing.Optional[int]',
             'remotemodule':'typing.Optional[str]',
             'remotepath':'str',
-            'direction':'str',
+            'direction':'Direction',
             'desc':'str',
             'schedule':'Schedule',
             'recursive':'bool',

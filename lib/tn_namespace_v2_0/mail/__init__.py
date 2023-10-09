@@ -2,10 +2,17 @@
 from pytruenas.base import Namespace
 
 import typing
+from enum import Enum
+
 class Mail(Namespace):
     def __init__(self, client) -> None:
         super().__init__(client, 'mail')
 
+    class Security(str,Enum):
+        PLAIN = 'PLAIN'
+        SSL = 'SSL'
+        TLS = 'TLS'
+        ...
     Oauth = typing.TypedDict('Oauth', {
             'client_id':'str',
             'client_secret':'str',
@@ -16,7 +23,7 @@ class Mail(Namespace):
             'fromname':'str',
             'outgoingserver':'str',
             'port':'int',
-            'security':'str',
+            'security':'Security',
             'smtp':'bool',
             'user':'typing.Optional[str]',
             'pass':'typing.Optional[str]',
@@ -46,7 +53,7 @@ class Mail(Namespace):
             'fromname':'str',
             'outgoingserver':'str',
             'port':'int',
-            'security':'str',
+            'security':'Security',
             'smtp':'bool',
             'user':'typing.Optional[str]',
             'pass':'typing.Optional[str]',
@@ -57,7 +64,7 @@ class Mail(Namespace):
             'fromname':'str',
             'outgoingserver':'str',
             'port':'int',
-            'security':'str',
+            'security':'Security',
             'smtp':'bool',
             'user':'typing.Optional[str]',
             'pass':'typing.Optional[str]',
@@ -68,7 +75,7 @@ class Mail(Namespace):
             'fromname':'str',
             'outgoingserver':'str',
             'port':'int',
-            'security':'str',
+            'security':'Security',
             'smtp':'bool',
             'user':'typing.Optional[str]',
             'pass':'typing.Optional[str]',

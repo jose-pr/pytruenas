@@ -3,6 +3,8 @@ from pytruenas.base import Namespace
 from pytruenas.mixins import ConfigMixin
 
 import typing
+from enum import Enum
+
 class NetworkConfiguration(ConfigMixin, Namespace):
     def __init__(self, client) -> None:
         super().__init__(client, 'network.configuration')
@@ -12,8 +14,12 @@ class NetworkConfiguration(ConfigMixin, Namespace):
             'mdns':'bool',
             'wsd':'bool',
     })
+    class Type(str,Enum):
+        ALLOW = 'ALLOW'
+        DENY = 'DENY'
+        ...
     Activity = typing.TypedDict('Activity', {
-            'type':'str',
+            'type':'Type',
             'activities':'list[str]',
     })
     State = typing.TypedDict('State', {
@@ -43,7 +49,7 @@ class NetworkConfiguration(ConfigMixin, Namespace):
             'state':'State',
     })
     Activity_ = typing.TypedDict('Activity_', {
-            'type':'str',
+            'type':'Type',
             'activities':'list[str]',
     })
     GlobalConfigurationUpdate = typing.TypedDict('GlobalConfigurationUpdate', {
@@ -63,7 +69,7 @@ class NetworkConfiguration(ConfigMixin, Namespace):
             'hostname_virtual':'typing.Optional[str]',
     })
     Activity__ = typing.TypedDict('Activity__', {
-            'type':'str',
+            'type':'Type',
             'activities':'list[str]',
     })
     NetworkConfigurationUpdateReturns = typing.TypedDict('NetworkConfigurationUpdateReturns', {

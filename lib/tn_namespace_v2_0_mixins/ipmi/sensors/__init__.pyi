@@ -1,7 +1,7 @@
 
 from pytruenas import TrueNASClient
 from pytruenas.base import Namespace
-
+from enum import Enum
 import typing
 class IpmiSensors(
     Namespace
@@ -42,4 +42,3 @@ class IpmiSensors(
             'limit':'int',
             'force_sql_filters':'bool',
     })
-

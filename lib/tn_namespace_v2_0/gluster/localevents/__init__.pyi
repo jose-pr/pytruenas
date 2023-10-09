@@ -1,7 +1,7 @@
 
 from pytruenas import TrueNASClient
 from pytruenas.base import Namespace
-
+from enum import Enum
 import typing
 class GlusterLocalevents(
     Namespace
@@ -41,10 +41,6 @@ class GlusterLocalevents(
         -------
         """
         ...
-    AddSecret = typing.TypedDict('AddSecret', {
-            'secret':'str',
-            'force':'bool',
-    })
     @typing.overload
     def get_set_jwt_secret(self, 
     /) -> 'str': 
@@ -73,4 +69,3 @@ class GlusterLocalevents(
             'secret':'str',
             'force':'bool',
     })
-

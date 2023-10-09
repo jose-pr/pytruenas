@@ -2,7 +2,7 @@
 from pytruenas import TrueNASClient
 from pytruenas.base import Namespace
 from pytruenas.mixins import ConfigMixin
-
+from enum import Enum
 import typing
 class Smart(
     ConfigMixin,
@@ -24,29 +24,6 @@ class Smart(
             smart_entry
         """
         ...
-    SmartEntry = typing.TypedDict('SmartEntry', {
-            'interval':'int',
-            'id':'int',
-            'powermode':'str',
-            'difference':'int',
-            'informational':'int',
-            'critical':'int',
-    })
-    SmartUpdate = typing.TypedDict('SmartUpdate', {
-            'interval':'int',
-            'powermode':'str',
-            'difference':'int',
-            'informational':'int',
-            'critical':'int',
-    })
-    SmartUpdateReturns = typing.TypedDict('SmartUpdateReturns', {
-            'interval':'int',
-            'id':'int',
-            'powermode':'str',
-            'difference':'int',
-            'informational':'int',
-            'critical':'int',
-    })
     @typing.overload
     def update(self, 
         smart_update:'SmartUpdate'={},
@@ -71,17 +48,23 @@ class Smart(
             smart_update_returns
         """
         ...
+    class Powermode(str,Enum):
+        NEVER = 'NEVER'
+        SLEEP = 'SLEEP'
+        STANDBY = 'STANDBY'
+        IDLE = 'IDLE'
+        ...
     SmartEntry = typing.TypedDict('SmartEntry', {
             'interval':'int',
             'id':'int',
-            'powermode':'str',
+            'powermode':'Powermode',
             'difference':'int',
             'informational':'int',
             'critical':'int',
     })
     SmartUpdate = typing.TypedDict('SmartUpdate', {
             'interval':'int',
-            'powermode':'str',
+            'powermode':'Powermode',
             'difference':'int',
             'informational':'int',
             'critical':'int',
@@ -89,9 +72,8 @@ class Smart(
     SmartUpdateReturns = typing.TypedDict('SmartUpdateReturns', {
             'interval':'int',
             'id':'int',
-            'powermode':'str',
+            'powermode':'Powermode',
             'difference':'int',
             'informational':'int',
             'critical':'int',
     })
-

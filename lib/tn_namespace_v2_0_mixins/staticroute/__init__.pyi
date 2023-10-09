@@ -2,7 +2,7 @@
 from pytruenas import TrueNASClient
 from pytruenas.base import Namespace
 from pytruenas.mixins import TableExtMixin
-
+from enum import Enum
 import typing
 class Staticroute(
     TableExtMixin,
@@ -31,62 +31,6 @@ class Staticroute(
             staticroute_create_returns
         """
         ...
-    StaticrouteCreate = typing.TypedDict('StaticrouteCreate', {
-            'destination':'str',
-            'gateway':'str',
-            'description':'str',
-    })
-    StaticrouteCreateReturns = typing.TypedDict('StaticrouteCreateReturns', {
-            'destination':'str',
-            'gateway':'str',
-            'description':'str',
-            'id':'int',
-    })
-    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    QueryOptions = typing.TypedDict('QueryOptions', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    StaticrouteEntry = typing.TypedDict('StaticrouteEntry', {
-            'destination':'str',
-            'gateway':'str',
-            'description':'str',
-            'id':'int',
-    })
-    StaticrouteUpdate = typing.TypedDict('StaticrouteUpdate', {
-            'destination':'str',
-            'gateway':'str',
-            'description':'str',
-    })
-    StaticrouteUpdateReturns = typing.TypedDict('StaticrouteUpdateReturns', {
-            'destination':'str',
-            'gateway':'str',
-            'description':'str',
-            'id':'int',
-    })
     @typing.overload
     def delete(self, 
         id:'int',
@@ -104,62 +48,6 @@ class Staticroute(
             Will return `true` if `id` is deleted successfully
         """
         ...
-    StaticrouteCreate = typing.TypedDict('StaticrouteCreate', {
-            'destination':'str',
-            'gateway':'str',
-            'description':'str',
-    })
-    StaticrouteCreateReturns = typing.TypedDict('StaticrouteCreateReturns', {
-            'destination':'str',
-            'gateway':'str',
-            'description':'str',
-            'id':'int',
-    })
-    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    QueryOptions = typing.TypedDict('QueryOptions', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    StaticrouteEntry = typing.TypedDict('StaticrouteEntry', {
-            'destination':'str',
-            'gateway':'str',
-            'description':'str',
-            'id':'int',
-    })
-    StaticrouteUpdate = typing.TypedDict('StaticrouteUpdate', {
-            'destination':'str',
-            'gateway':'str',
-            'description':'str',
-    })
-    StaticrouteUpdateReturns = typing.TypedDict('StaticrouteUpdateReturns', {
-            'destination':'str',
-            'gateway':'str',
-            'description':'str',
-            'id':'int',
-    })
     @typing.overload
     def get_instance(self, 
         id:'typing.Union[str, int, bool, dict[str], list]',
@@ -180,67 +68,11 @@ class Staticroute(
         -------
         """
         ...
-    StaticrouteCreate = typing.TypedDict('StaticrouteCreate', {
-            'destination':'str',
-            'gateway':'str',
-            'description':'str',
-    })
-    StaticrouteCreateReturns = typing.TypedDict('StaticrouteCreateReturns', {
-            'destination':'str',
-            'gateway':'str',
-            'description':'str',
-            'id':'int',
-    })
-    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    QueryOptions = typing.TypedDict('QueryOptions', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    StaticrouteEntry = typing.TypedDict('StaticrouteEntry', {
-            'destination':'str',
-            'gateway':'str',
-            'description':'str',
-            'id':'int',
-    })
-    StaticrouteUpdate = typing.TypedDict('StaticrouteUpdate', {
-            'destination':'str',
-            'gateway':'str',
-            'description':'str',
-    })
-    StaticrouteUpdateReturns = typing.TypedDict('StaticrouteUpdateReturns', {
-            'destination':'str',
-            'gateway':'str',
-            'description':'str',
-            'id':'int',
-    })
     @typing.overload
     def query(self, 
         query_filters:'list[list]'=[],
         query_options:'QueryOptions'={},
-    /) -> 'typing.Union[list[StaticrouteEntry], ForwardRef(StaticrouteEntry), int]': 
+    /) -> 'typing.Union[list[StaticrouteEntry], StaticrouteEntry, int]': 
         """
         
 
@@ -252,66 +84,10 @@ class Staticroute(
             query-options
         Returns
         -------
-        typing.Union[list[StaticrouteEntry], ForwardRef(StaticrouteEntry), int]:
+        typing.Union[list[StaticrouteEntry], StaticrouteEntry, int]:
             
         """
         ...
-    StaticrouteCreate = typing.TypedDict('StaticrouteCreate', {
-            'destination':'str',
-            'gateway':'str',
-            'description':'str',
-    })
-    StaticrouteCreateReturns = typing.TypedDict('StaticrouteCreateReturns', {
-            'destination':'str',
-            'gateway':'str',
-            'description':'str',
-            'id':'int',
-    })
-    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    QueryOptions = typing.TypedDict('QueryOptions', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    StaticrouteEntry = typing.TypedDict('StaticrouteEntry', {
-            'destination':'str',
-            'gateway':'str',
-            'description':'str',
-            'id':'int',
-    })
-    StaticrouteUpdate = typing.TypedDict('StaticrouteUpdate', {
-            'destination':'str',
-            'gateway':'str',
-            'description':'str',
-    })
-    StaticrouteUpdateReturns = typing.TypedDict('StaticrouteUpdateReturns', {
-            'destination':'str',
-            'gateway':'str',
-            'description':'str',
-            'id':'int',
-    })
     @typing.overload
     def update(self, 
         id:'int',
@@ -389,4 +165,3 @@ class Staticroute(
             'description':'str',
             'id':'int',
     })
-

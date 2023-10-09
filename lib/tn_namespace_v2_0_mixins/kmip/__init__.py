@@ -3,10 +3,17 @@ from pytruenas.base import Namespace
 from pytruenas.mixins import ConfigMixin
 
 import typing
+from enum import Enum
+
 class Kmip(ConfigMixin, Namespace):
     def __init__(self, client) -> None:
         super().__init__(client, 'kmip')
 
+    class SslVersion(str,Enum):
+        PROTOCOLTLSv1 = 'PROTOCOL_TLSv1'
+        PROTOCOLTLSv11 = 'PROTOCOL_TLSv1_1'
+        PROTOCOLTLSv12 = 'PROTOCOL_TLSv1_2'
+        ...
     KmipEntry = typing.TypedDict('KmipEntry', {
             'id':'int',
             'enabled':'bool',
@@ -16,12 +23,21 @@ class Kmip(ConfigMixin, Namespace):
             'certificate_authority':'typing.Optional[int]',
             'port':'int',
             'server':'typing.Optional[str]',
-            'ssl_version':'str',
+            'ssl_version':'SslVersion',
     })
+    class PROTOCOLTLSv1(str,Enum):
+        PROTOCOLTLSv1 = 'PROTOCOL_TLSv1'
+        ...
+    class PROTOCOLTLSv11(str,Enum):
+        PROTOCOLTLSv11 = 'PROTOCOL_TLSv1_1'
+        ...
+    class PROTOCOLTLSv12(str,Enum):
+        PROTOCOLTLSv12 = 'PROTOCOL_TLSv1_2'
+        ...
     SslVersionChoices = typing.TypedDict('SslVersionChoices', {
-            'PROTOCOL_TLSv1':'str',
-            'PROTOCOL_TLSv1_1':'str',
-            'PROTOCOL_TLSv1_2':'str',
+            'PROTOCOL_TLSv1':'PROTOCOLTLSv1',
+            'PROTOCOL_TLSv1_1':'PROTOCOLTLSv11',
+            'PROTOCOL_TLSv1_2':'PROTOCOLTLSv12',
     })
     KmipUpdate = typing.TypedDict('KmipUpdate', {
             'enabled':'bool',
@@ -31,7 +47,7 @@ class Kmip(ConfigMixin, Namespace):
             'certificate_authority':'typing.Optional[int]',
             'port':'int',
             'server':'typing.Optional[str]',
-            'ssl_version':'str',
+            'ssl_version':'SslVersion',
             'force_clear':'bool',
             'change_server':'bool',
             'validate':'bool',
@@ -45,5 +61,5 @@ class Kmip(ConfigMixin, Namespace):
             'certificate_authority':'typing.Optional[int]',
             'port':'int',
             'server':'typing.Optional[str]',
-            'ssl_version':'str',
+            'ssl_version':'SslVersion',
     })

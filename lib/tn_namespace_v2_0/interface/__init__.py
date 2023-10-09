@@ -2,39 +2,73 @@
 from pytruenas.base import Namespace
 
 import typing
+from enum import Enum
+
 class Interface(Namespace):
     def __init__(self, client) -> None:
         super().__init__(client, 'interface')
 
+    class Type(str,Enum):
+        BRIDGE = 'BRIDGE'
+        LINKAGGREGATION = 'LINK_AGGREGATION'
+        PHYSICAL = 'PHYSICAL'
+        UNKNOWN = 'UNKNOWN'
+        VLAN = 'VLAN'
+        ...
     Options = typing.TypedDict('Options', {
             'bridge_members':'bool',
             'lag_ports':'bool',
             'vlan_parent':'bool',
             'exclude':'list',
-            'exclude_types':'list[str]',
+            'exclude_types':'list[Type]',
             'include':'list',
     })
     Options_ = typing.TypedDict('Options_', {
             'rollback':'bool',
             'checkin_timeout':'int',
     })
+    class Type_(str,Enum):
+        BRIDGE = 'BRIDGE'
+        LINKAGGREGATION = 'LINK_AGGREGATION'
+        VLAN = 'VLAN'
+        ...
+    class Type__(str,Enum):
+        INET = 'INET'
+        INET6 = 'INET6'
+        ...
     InterfaceAlias = typing.TypedDict('InterfaceAlias', {
-            'type':'str',
+            'type':'Type__',
             'address':'str',
             'netmask':'int',
     })
     InterfaceFailoverAlias = typing.TypedDict('InterfaceFailoverAlias', {
-            'type':'str',
+            'type':'Type__',
             'address':'str',
     })
     InterfaceVirtualAlias = typing.TypedDict('InterfaceVirtualAlias', {
-            'type':'str',
+            'type':'Type__',
             'address':'str',
     })
+    class LagProtocol(str,Enum):
+        LACP = 'LACP'
+        FAILOVER = 'FAILOVER'
+        LOADBALANCE = 'LOADBALANCE'
+        ROUNDROBIN = 'ROUNDROBIN'
+        NONE = 'NONE'
+        ...
+    class XmitHashPolicy(str,Enum):
+        LAYER2 = 'LAYER2'
+        LAYER23 = 'LAYER2+3'
+        LAYER34 = 'LAYER3+4'
+        ...
+    class LacpduRate(str,Enum):
+        SLOW = 'SLOW'
+        FAST = 'FAST'
+        ...
     InterfaceCreate = typing.TypedDict('InterfaceCreate', {
             'name':'str',
             'description':'str',
-            'type':'str',
+            'type':'Type_',
             'ipv4_dhcp':'bool',
             'ipv6_auto':'bool',
             'aliases':'list[InterfaceAlias]',
@@ -45,9 +79,9 @@ class Interface(Namespace):
             'failover_virtual_aliases':'list[InterfaceVirtualAlias]',
             'bridge_members':'list',
             'stp':'bool',
-            'lag_protocol':'str',
-            'xmit_hash_policy':'typing.Optional[str]',
-            'lacpdu_rate':'typing.Optional[str]',
+            'lag_protocol':'LagProtocol',
+            'xmit_hash_policy':'typing.Optional[XmitHashPolicy]',
+            'lacpdu_rate':'typing.Optional[LacpduRate]',
             'lag_ports':'list[str]',
             'vlan_parent_interface':'str',
             'vlan_tag':'int',
@@ -144,9 +178,15 @@ class Interface(Namespace):
             'netmask':'int',
             'broadcast':'str',
     })
+    class SLOW(str,Enum):
+        SLOW = 'SLOW'
+        ...
+    class FAST(str,Enum):
+        FAST = 'FAST'
+        ...
     LacpduRateChoices = typing.TypedDict('LacpduRateChoices', {
-            'SLOW':'str',
-            'FAST':'str',
+            'SLOW':'SLOW',
+            'FAST':'FAST',
     })
     QueryOptions = typing.TypedDict('QueryOptions', {
             'relationships':'bool',
@@ -333,9 +373,9 @@ class Interface(Namespace):
             'failover_virtual_aliases':'list[InterfaceVirtualAlias]',
             'bridge_members':'list',
             'stp':'bool',
-            'lag_protocol':'str',
-            'xmit_hash_policy':'typing.Optional[str]',
-            'lacpdu_rate':'typing.Optional[str]',
+            'lag_protocol':'LagProtocol',
+            'xmit_hash_policy':'typing.Optional[XmitHashPolicy]',
+            'lacpdu_rate':'typing.Optional[LacpduRate]',
             'lag_ports':'list[str]',
             'vlan_parent_interface':'str',
             'vlan_tag':'int',
@@ -393,8 +433,17 @@ class Interface(Namespace):
             'lag_ports':'list[str]',
             'bridge_members':'list[str]',
     })
+    class LAYER2(str,Enum):
+        LAYER2 = 'LAYER2'
+        ...
+    class LAYER23(str,Enum):
+        LAYER23 = 'LAYER2+3'
+        ...
+    class LAYER34(str,Enum):
+        LAYER34 = 'LAYER3+4'
+        ...
     XmitHashPolicyChoices = typing.TypedDict('XmitHashPolicyChoices', {
-            'LAYER2':'str',
-            'LAYER2+3':'str',
-            'LAYER3+4':'str',
+            'LAYER2':'LAYER2',
+            'LAYER2+3':'LAYER23',
+            'LAYER3+4':'LAYER34',
     })

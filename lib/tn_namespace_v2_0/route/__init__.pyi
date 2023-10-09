@@ -1,7 +1,7 @@
 
 from pytruenas import TrueNASClient
 from pytruenas.base import Namespace
-
+from enum import Enum
 import typing
 class Route(
     Namespace
@@ -28,45 +28,11 @@ class Route(
             ipv4gw_reachable
         """
         ...
-    QueryOptions = typing.TypedDict('QueryOptions', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    SystemRoute = typing.TypedDict('SystemRoute', {
-            'network':'str',
-            'netmask':'str',
-            'gateway':'typing.Optional[str]',
-            'interface':'str',
-            'flags':'list',
-            'table_id':'int',
-            'scope':'int',
-            'preferred_source':'typing.Optional[str]',
-    })
-    SystemRoute_ = typing.TypedDict('SystemRoute_', {
-            'network':'str',
-            'netmask':'str',
-            'gateway':'typing.Optional[str]',
-            'interface':'str',
-            'flags':'list',
-            'table_id':'int',
-            'scope':'int',
-            'preferred_source':'typing.Optional[str]',
-    })
     @typing.overload
     def system_routes(self, 
         query_filters:'list[list]'=[],
         query_options:'QueryOptions'={},
-    /) -> 'typing.Union[int, ForwardRef(SystemRoute), list[SystemRoute_]]': 
+    /) -> 'typing.Union[int, SystemRoute, list[SystemRoute_]]': 
         """
         Get current/applied network routes.
 
@@ -78,7 +44,7 @@ class Route(
             query-options
         Returns
         -------
-        typing.Union[int, ForwardRef(SystemRoute), list[SystemRoute_]]:
+        typing.Union[int, SystemRoute, list[SystemRoute_]]:
             
         """
         ...
@@ -116,4 +82,3 @@ class Route(
             'scope':'int',
             'preferred_source':'typing.Optional[str]',
     })
-

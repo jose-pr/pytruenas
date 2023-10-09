@@ -1,7 +1,7 @@
 
 from pytruenas import TrueNASClient
 from pytruenas.base import Namespace
-
+from enum import Enum
 import typing
 class IscsiExtent(
     Namespace
@@ -37,68 +37,6 @@ class IscsiExtent(
             iscsi_extent_create_returns
         """
         ...
-    IscsiExtentCreate = typing.TypedDict('IscsiExtentCreate', {
-            'name':'str',
-            'type':'str',
-            'disk':'typing.Optional[str]',
-            'serial':'typing.Optional[str]',
-            'path':'typing.Optional[str]',
-            'filesize':'int',
-            'blocksize':'int',
-            'pblocksize':'bool',
-            'avail_threshold':'typing.Optional[int]',
-            'comment':'str',
-            'insecure_tpc':'bool',
-            'xen':'bool',
-            'rpm':'str',
-            'ro':'bool',
-            'enabled':'bool',
-    })
-    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    QueryOptions = typing.TypedDict('QueryOptions', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    IscsiExtentUpdate = typing.TypedDict('IscsiExtentUpdate', {
-            'name':'str',
-            'type':'str',
-            'disk':'typing.Optional[str]',
-            'serial':'typing.Optional[str]',
-            'path':'typing.Optional[str]',
-            'filesize':'int',
-            'blocksize':'int',
-            'pblocksize':'bool',
-            'avail_threshold':'typing.Optional[int]',
-            'comment':'str',
-            'insecure_tpc':'bool',
-            'xen':'bool',
-            'rpm':'str',
-            'ro':'bool',
-            'enabled':'bool',
-    })
     @typing.overload
     def delete(self, 
         id:'int',
@@ -124,68 +62,6 @@ class IscsiExtent(
             Will return `true` if `id` is deleted successfully
         """
         ...
-    IscsiExtentCreate = typing.TypedDict('IscsiExtentCreate', {
-            'name':'str',
-            'type':'str',
-            'disk':'typing.Optional[str]',
-            'serial':'typing.Optional[str]',
-            'path':'typing.Optional[str]',
-            'filesize':'int',
-            'blocksize':'int',
-            'pblocksize':'bool',
-            'avail_threshold':'typing.Optional[int]',
-            'comment':'str',
-            'insecure_tpc':'bool',
-            'xen':'bool',
-            'rpm':'str',
-            'ro':'bool',
-            'enabled':'bool',
-    })
-    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    QueryOptions = typing.TypedDict('QueryOptions', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    IscsiExtentUpdate = typing.TypedDict('IscsiExtentUpdate', {
-            'name':'str',
-            'type':'str',
-            'disk':'typing.Optional[str]',
-            'serial':'typing.Optional[str]',
-            'path':'typing.Optional[str]',
-            'filesize':'int',
-            'blocksize':'int',
-            'pblocksize':'bool',
-            'avail_threshold':'typing.Optional[int]',
-            'comment':'str',
-            'insecure_tpc':'bool',
-            'xen':'bool',
-            'rpm':'str',
-            'ro':'bool',
-            'enabled':'bool',
-    })
     @typing.overload
     def disk_choices(self, 
     /) -> None: 
@@ -199,68 +75,6 @@ class IscsiExtent(
         -------
         """
         ...
-    IscsiExtentCreate = typing.TypedDict('IscsiExtentCreate', {
-            'name':'str',
-            'type':'str',
-            'disk':'typing.Optional[str]',
-            'serial':'typing.Optional[str]',
-            'path':'typing.Optional[str]',
-            'filesize':'int',
-            'blocksize':'int',
-            'pblocksize':'bool',
-            'avail_threshold':'typing.Optional[int]',
-            'comment':'str',
-            'insecure_tpc':'bool',
-            'xen':'bool',
-            'rpm':'str',
-            'ro':'bool',
-            'enabled':'bool',
-    })
-    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    QueryOptions = typing.TypedDict('QueryOptions', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    IscsiExtentUpdate = typing.TypedDict('IscsiExtentUpdate', {
-            'name':'str',
-            'type':'str',
-            'disk':'typing.Optional[str]',
-            'serial':'typing.Optional[str]',
-            'path':'typing.Optional[str]',
-            'filesize':'int',
-            'blocksize':'int',
-            'pblocksize':'bool',
-            'avail_threshold':'typing.Optional[int]',
-            'comment':'str',
-            'insecure_tpc':'bool',
-            'xen':'bool',
-            'rpm':'str',
-            'ro':'bool',
-            'enabled':'bool',
-    })
     @typing.overload
     def get_instance(self, 
         id:'typing.Union[str, int, bool, dict[str], list]',
@@ -281,68 +95,6 @@ class IscsiExtent(
         -------
         """
         ...
-    IscsiExtentCreate = typing.TypedDict('IscsiExtentCreate', {
-            'name':'str',
-            'type':'str',
-            'disk':'typing.Optional[str]',
-            'serial':'typing.Optional[str]',
-            'path':'typing.Optional[str]',
-            'filesize':'int',
-            'blocksize':'int',
-            'pblocksize':'bool',
-            'avail_threshold':'typing.Optional[int]',
-            'comment':'str',
-            'insecure_tpc':'bool',
-            'xen':'bool',
-            'rpm':'str',
-            'ro':'bool',
-            'enabled':'bool',
-    })
-    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    QueryOptions = typing.TypedDict('QueryOptions', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    IscsiExtentUpdate = typing.TypedDict('IscsiExtentUpdate', {
-            'name':'str',
-            'type':'str',
-            'disk':'typing.Optional[str]',
-            'serial':'typing.Optional[str]',
-            'path':'typing.Optional[str]',
-            'filesize':'int',
-            'blocksize':'int',
-            'pblocksize':'bool',
-            'avail_threshold':'typing.Optional[int]',
-            'comment':'str',
-            'insecure_tpc':'bool',
-            'xen':'bool',
-            'rpm':'str',
-            'ro':'bool',
-            'enabled':'bool',
-    })
     @typing.overload
     def query(self, 
         query_filters:'list[list]'=[],
@@ -363,68 +115,6 @@ class IscsiExtent(
             
         """
         ...
-    IscsiExtentCreate = typing.TypedDict('IscsiExtentCreate', {
-            'name':'str',
-            'type':'str',
-            'disk':'typing.Optional[str]',
-            'serial':'typing.Optional[str]',
-            'path':'typing.Optional[str]',
-            'filesize':'int',
-            'blocksize':'int',
-            'pblocksize':'bool',
-            'avail_threshold':'typing.Optional[int]',
-            'comment':'str',
-            'insecure_tpc':'bool',
-            'xen':'bool',
-            'rpm':'str',
-            'ro':'bool',
-            'enabled':'bool',
-    })
-    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    QueryOptions = typing.TypedDict('QueryOptions', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    IscsiExtentUpdate = typing.TypedDict('IscsiExtentUpdate', {
-            'name':'str',
-            'type':'str',
-            'disk':'typing.Optional[str]',
-            'serial':'typing.Optional[str]',
-            'path':'typing.Optional[str]',
-            'filesize':'int',
-            'blocksize':'int',
-            'pblocksize':'bool',
-            'avail_threshold':'typing.Optional[int]',
-            'comment':'str',
-            'insecure_tpc':'bool',
-            'xen':'bool',
-            'rpm':'str',
-            'ro':'bool',
-            'enabled':'bool',
-    })
     @typing.overload
     def update(self, 
         id:'int',
@@ -446,9 +136,21 @@ class IscsiExtent(
             iscsi_extent_update_returns
         """
         ...
+    class Type(str,Enum):
+        DISK = 'DISK'
+        FILE = 'FILE'
+        ...
+    class Rpm(str,Enum):
+        UNKNOWN = 'UNKNOWN'
+        SSD = 'SSD'
+        _5400 = '5400'
+        _7200 = '7200'
+        _10000 = '10000'
+        _15000 = '15000'
+        ...
     IscsiExtentCreate = typing.TypedDict('IscsiExtentCreate', {
             'name':'str',
-            'type':'str',
+            'type':'Type',
             'disk':'typing.Optional[str]',
             'serial':'typing.Optional[str]',
             'path':'typing.Optional[str]',
@@ -459,7 +161,7 @@ class IscsiExtent(
             'comment':'str',
             'insecure_tpc':'bool',
             'xen':'bool',
-            'rpm':'str',
+            'rpm':'Rpm',
             'ro':'bool',
             'enabled':'bool',
     })
@@ -493,7 +195,7 @@ class IscsiExtent(
     })
     IscsiExtentUpdate = typing.TypedDict('IscsiExtentUpdate', {
             'name':'str',
-            'type':'str',
+            'type':'Type',
             'disk':'typing.Optional[str]',
             'serial':'typing.Optional[str]',
             'path':'typing.Optional[str]',
@@ -504,8 +206,7 @@ class IscsiExtent(
             'comment':'str',
             'insecure_tpc':'bool',
             'xen':'bool',
-            'rpm':'str',
+            'rpm':'Rpm',
             'ro':'bool',
             'enabled':'bool',
     })
-

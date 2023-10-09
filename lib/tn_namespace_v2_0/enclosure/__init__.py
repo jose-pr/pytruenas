@@ -2,6 +2,8 @@
 from pytruenas.base import Namespace
 
 import typing
+from enum import Enum
+
 class Enclosure(Namespace):
     def __init__(self, client) -> None:
         super().__init__(client, 'enclosure')
@@ -34,6 +36,11 @@ class Enclosure(Namespace):
             'limit':'int',
             'force_sql_filters':'bool',
     })
+    class Status(str,Enum):
+        CLEAR = 'CLEAR'
+        FAULT = 'FAULT'
+        IDENTIFY = 'IDENTIFY'
+        ...
     EnclosureUpdate = typing.TypedDict('EnclosureUpdate', {
             'label':'str',
     })

@@ -2,6 +2,8 @@
 from pytruenas.base import Namespace
 
 import typing
+from enum import Enum
+
 class User(Namespace):
     def __init__(self, client) -> None:
         super().__init__(client, 'user')
@@ -178,6 +180,10 @@ class User(Namespace):
             'nt_name':'typing.Optional[str]',
             'sid':'typing.Optional[str]',
     })
+    class Username(str,Enum):
+        Root = 'root'
+        Admin = 'admin'
+        ...
     Ec2 = typing.TypedDict('Ec2', {
             'instance_id':'str',
     })

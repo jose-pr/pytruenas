@@ -2,10 +2,20 @@
 from pytruenas.base import Namespace
 
 import typing
+from enum import Enum
+
 class Rsynctask(Namespace):
     def __init__(self, client) -> None:
         super().__init__(client, 'rsynctask')
 
+    class Mode(str,Enum):
+        MODULE = 'MODULE'
+        SSH = 'SSH'
+        ...
+    class Direction(str,Enum):
+        PULL = 'PULL'
+        PUSH = 'PUSH'
+        ...
     Schedule = typing.TypedDict('Schedule', {
             'minute':'str',
             'hour':'str',
@@ -16,7 +26,7 @@ class Rsynctask(Namespace):
     RsyncTaskCreate = typing.TypedDict('RsyncTaskCreate', {
             'path':'str',
             'user':'str',
-            'mode':'str',
+            'mode':'Mode',
             'remotehost':'typing.Optional[str]',
             'remoteport':'typing.Optional[int]',
             'remotemodule':'typing.Optional[str]',
@@ -24,7 +34,7 @@ class Rsynctask(Namespace):
             'remotepath':'str',
             'validate_rpath':'bool',
             'ssh_keyscan':'bool',
-            'direction':'str',
+            'direction':'Direction',
             'desc':'str',
             'schedule':'Schedule',
             'recursive':'bool',
@@ -42,12 +52,12 @@ class Rsynctask(Namespace):
     RsynctaskCreateReturns = typing.TypedDict('RsynctaskCreateReturns', {
             'path':'str',
             'user':'str',
-            'mode':'str',
+            'mode':'Mode',
             'remotehost':'typing.Optional[str]',
             'remoteport':'typing.Optional[int]',
             'remotemodule':'typing.Optional[str]',
             'remotepath':'str',
-            'direction':'str',
+            'direction':'Direction',
             'desc':'str',
             'schedule':'Schedule',
             'recursive':'bool',
@@ -97,12 +107,12 @@ class Rsynctask(Namespace):
     RsyncTaskEntry = typing.TypedDict('RsyncTaskEntry', {
             'path':'str',
             'user':'str',
-            'mode':'str',
+            'mode':'Mode',
             'remotehost':'typing.Optional[str]',
             'remoteport':'typing.Optional[int]',
             'remotemodule':'typing.Optional[str]',
             'remotepath':'str',
-            'direction':'str',
+            'direction':'Direction',
             'desc':'str',
             'schedule':'Schedule',
             'recursive':'bool',
@@ -124,12 +134,12 @@ class Rsynctask(Namespace):
     RsyncTaskEntry_ = typing.TypedDict('RsyncTaskEntry_', {
             'path':'str',
             'user':'str',
-            'mode':'str',
+            'mode':'Mode',
             'remotehost':'typing.Optional[str]',
             'remoteport':'typing.Optional[int]',
             'remotemodule':'typing.Optional[str]',
             'remotepath':'str',
-            'direction':'str',
+            'direction':'Direction',
             'desc':'str',
             'schedule':'Schedule',
             'recursive':'bool',
@@ -151,12 +161,12 @@ class Rsynctask(Namespace):
     RsyncTaskEntry__ = typing.TypedDict('RsyncTaskEntry__', {
             'path':'str',
             'user':'str',
-            'mode':'str',
+            'mode':'Mode',
             'remotehost':'typing.Optional[str]',
             'remoteport':'typing.Optional[int]',
             'remotemodule':'typing.Optional[str]',
             'remotepath':'str',
-            'direction':'str',
+            'direction':'Direction',
             'desc':'str',
             'schedule':'Schedule',
             'recursive':'bool',
@@ -178,7 +188,7 @@ class Rsynctask(Namespace):
     RsyncTaskUpdate = typing.TypedDict('RsyncTaskUpdate', {
             'path':'str',
             'user':'str',
-            'mode':'str',
+            'mode':'Mode',
             'remotehost':'typing.Optional[str]',
             'remoteport':'typing.Optional[int]',
             'remotemodule':'typing.Optional[str]',
@@ -186,7 +196,7 @@ class Rsynctask(Namespace):
             'remotepath':'str',
             'validate_rpath':'bool',
             'ssh_keyscan':'bool',
-            'direction':'str',
+            'direction':'Direction',
             'desc':'str',
             'schedule':'Schedule',
             'recursive':'bool',
@@ -204,12 +214,12 @@ class Rsynctask(Namespace):
     RsynctaskUpdateReturns = typing.TypedDict('RsynctaskUpdateReturns', {
             'path':'str',
             'user':'str',
-            'mode':'str',
+            'mode':'Mode',
             'remotehost':'typing.Optional[str]',
             'remoteport':'typing.Optional[int]',
             'remotemodule':'typing.Optional[str]',
             'remotepath':'str',
-            'direction':'str',
+            'direction':'Direction',
             'desc':'str',
             'schedule':'Schedule',
             'recursive':'bool',

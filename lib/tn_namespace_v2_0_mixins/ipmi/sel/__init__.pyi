@@ -1,7 +1,7 @@
 
 from pytruenas import TrueNASClient
 from pytruenas.base import Namespace
-
+from enum import Enum
 import typing
 class IpmiSel(
     Namespace
@@ -20,20 +20,6 @@ class IpmiSel(
         -------
         """
         ...
-    QueryOptions = typing.TypedDict('QueryOptions', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
     @typing.overload
     def elist(self, 
         query_filters:'list[list]'=[],
@@ -54,20 +40,6 @@ class IpmiSel(
             
         """
         ...
-    QueryOptions = typing.TypedDict('QueryOptions', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
     @typing.overload
     def info(self, 
     /) -> 'dict[str]': 
@@ -96,4 +68,3 @@ class IpmiSel(
             'limit':'int',
             'force_sql_filters':'bool',
     })
-

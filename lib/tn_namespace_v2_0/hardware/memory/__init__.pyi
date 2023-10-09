@@ -1,7 +1,7 @@
 
 from pytruenas import TrueNASClient
 from pytruenas.base import Namespace
-
+from enum import Enum
 import typing
 class HardwareMemory(
     Namespace
@@ -22,4 +22,3 @@ class HardwareMemory(
             mem_ctrl
         """
         ...
-

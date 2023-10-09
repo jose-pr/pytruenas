@@ -2,15 +2,29 @@
 from pytruenas.base import Namespace
 
 import typing
+from enum import Enum
+
 class Truecommand(Namespace):
     def __init__(self, client) -> None:
         super().__init__(client, 'truecommand')
 
+    class Status(str,Enum):
+        CONNECTED = 'CONNECTED'
+        CONNECTING = 'CONNECTING'
+        DISABLED = 'DISABLED'
+        FAILED = 'FAILED'
+        ...
+    class StatusReason(str,Enum):
+        TruecommandServiceIsConnected = 'Truecommand service is connected.'
+        PendingConfirmationFromIXPortalForTruecommandAPIKey = 'Pending Confirmation From iX Portal for Truecommand API Key.'
+        TruecommandServiceIsDisabled = 'Truecommand service is disabled.'
+        TruecommandAPIKeyDisabledByIXPortal = 'Truecommand API Key Disabled by iX Portal.'
+        ...
     TruecommandEntry = typing.TypedDict('TruecommandEntry', {
             'id':'int',
             'api_key':'typing.Optional[str]',
-            'status':'str',
-            'status_reason':'str',
+            'status':'Status',
+            'status_reason':'StatusReason',
             'remote_url':'typing.Optional[str]',
             'remote_ip_address':'typing.Optional[str]',
             'enabled':'bool',
@@ -29,8 +43,8 @@ class Truecommand(Namespace):
     TruecommandUpdateReturns = typing.TypedDict('TruecommandUpdateReturns', {
             'id':'int',
             'api_key':'typing.Optional[str]',
-            'status':'str',
-            'status_reason':'str',
+            'status':'Status',
+            'status_reason':'StatusReason',
             'remote_url':'typing.Optional[str]',
             'remote_ip_address':'typing.Optional[str]',
             'enabled':'bool',

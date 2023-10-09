@@ -1,7 +1,7 @@
 
 from pytruenas import TrueNASClient
 from pytruenas.base import Namespace
-
+from enum import Enum
 import typing
 class PoolScrub(
     Namespace
@@ -28,83 +28,6 @@ class PoolScrub(
             pool_scrub_create_returns
         """
         ...
-    Schedule = typing.TypedDict('Schedule', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
-    PoolScrubEntry = typing.TypedDict('PoolScrubEntry', {
-            'pool':'int',
-            'threshold':'int',
-            'description':'str',
-            'schedule':'Schedule',
-            'enabled':'bool',
-    })
-    PoolScrubCreateReturns = typing.TypedDict('PoolScrubCreateReturns', {
-            'pool':'int',
-            'threshold':'int',
-            'description':'str',
-            'schedule':'Schedule',
-            'enabled':'bool',
-            'id':'int',
-            'pool_name':'str',
-    })
-    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    QueryOptions = typing.TypedDict('QueryOptions', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    PoolScrubEntry_ = typing.TypedDict('PoolScrubEntry_', {
-            'pool':'int',
-            'threshold':'int',
-            'description':'str',
-            'schedule':'Schedule',
-            'enabled':'bool',
-            'id':'int',
-            'pool_name':'str',
-    })
-    PoolScrubUpdate = typing.TypedDict('PoolScrubUpdate', {
-            'pool':'int',
-            'threshold':'int',
-            'description':'str',
-            'schedule':'Schedule',
-            'enabled':'bool',
-            'pool_name':'str',
-    })
-    PoolScrubUpdateReturns = typing.TypedDict('PoolScrubUpdateReturns', {
-            'pool':'int',
-            'threshold':'int',
-            'description':'str',
-            'schedule':'Schedule',
-            'enabled':'bool',
-            'id':'int',
-            'pool_name':'str',
-    })
     @typing.overload
     def delete(self, 
         id:'int',
@@ -122,83 +45,6 @@ class PoolScrub(
             Will return `true` if `id` is deleted successfully
         """
         ...
-    Schedule = typing.TypedDict('Schedule', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
-    PoolScrubEntry = typing.TypedDict('PoolScrubEntry', {
-            'pool':'int',
-            'threshold':'int',
-            'description':'str',
-            'schedule':'Schedule',
-            'enabled':'bool',
-    })
-    PoolScrubCreateReturns = typing.TypedDict('PoolScrubCreateReturns', {
-            'pool':'int',
-            'threshold':'int',
-            'description':'str',
-            'schedule':'Schedule',
-            'enabled':'bool',
-            'id':'int',
-            'pool_name':'str',
-    })
-    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    QueryOptions = typing.TypedDict('QueryOptions', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    PoolScrubEntry_ = typing.TypedDict('PoolScrubEntry_', {
-            'pool':'int',
-            'threshold':'int',
-            'description':'str',
-            'schedule':'Schedule',
-            'enabled':'bool',
-            'id':'int',
-            'pool_name':'str',
-    })
-    PoolScrubUpdate = typing.TypedDict('PoolScrubUpdate', {
-            'pool':'int',
-            'threshold':'int',
-            'description':'str',
-            'schedule':'Schedule',
-            'enabled':'bool',
-            'pool_name':'str',
-    })
-    PoolScrubUpdateReturns = typing.TypedDict('PoolScrubUpdateReturns', {
-            'pool':'int',
-            'threshold':'int',
-            'description':'str',
-            'schedule':'Schedule',
-            'enabled':'bool',
-            'id':'int',
-            'pool_name':'str',
-    })
     @typing.overload
     def get_instance(self, 
         id:'typing.Union[str, int, bool, dict[str], list]',
@@ -219,88 +65,11 @@ class PoolScrub(
         -------
         """
         ...
-    Schedule = typing.TypedDict('Schedule', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
-    PoolScrubEntry = typing.TypedDict('PoolScrubEntry', {
-            'pool':'int',
-            'threshold':'int',
-            'description':'str',
-            'schedule':'Schedule',
-            'enabled':'bool',
-    })
-    PoolScrubCreateReturns = typing.TypedDict('PoolScrubCreateReturns', {
-            'pool':'int',
-            'threshold':'int',
-            'description':'str',
-            'schedule':'Schedule',
-            'enabled':'bool',
-            'id':'int',
-            'pool_name':'str',
-    })
-    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    QueryOptions = typing.TypedDict('QueryOptions', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    PoolScrubEntry_ = typing.TypedDict('PoolScrubEntry_', {
-            'pool':'int',
-            'threshold':'int',
-            'description':'str',
-            'schedule':'Schedule',
-            'enabled':'bool',
-            'id':'int',
-            'pool_name':'str',
-    })
-    PoolScrubUpdate = typing.TypedDict('PoolScrubUpdate', {
-            'pool':'int',
-            'threshold':'int',
-            'description':'str',
-            'schedule':'Schedule',
-            'enabled':'bool',
-            'pool_name':'str',
-    })
-    PoolScrubUpdateReturns = typing.TypedDict('PoolScrubUpdateReturns', {
-            'pool':'int',
-            'threshold':'int',
-            'description':'str',
-            'schedule':'Schedule',
-            'enabled':'bool',
-            'id':'int',
-            'pool_name':'str',
-    })
     @typing.overload
     def query(self, 
         query_filters:'list[list]'=[],
         query_options:'QueryOptions'={},
-    /) -> 'typing.Union[list[PoolScrubEntry_], ForwardRef(PoolScrubEntry_), int]': 
+    /) -> 'typing.Union[list[PoolScrubEntry_], PoolScrubEntry_, int]': 
         """
         
 
@@ -312,87 +81,10 @@ class PoolScrub(
             query-options
         Returns
         -------
-        typing.Union[list[PoolScrubEntry_], ForwardRef(PoolScrubEntry_), int]:
+        typing.Union[list[PoolScrubEntry_], PoolScrubEntry_, int]:
             
         """
         ...
-    Schedule = typing.TypedDict('Schedule', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
-    PoolScrubEntry = typing.TypedDict('PoolScrubEntry', {
-            'pool':'int',
-            'threshold':'int',
-            'description':'str',
-            'schedule':'Schedule',
-            'enabled':'bool',
-    })
-    PoolScrubCreateReturns = typing.TypedDict('PoolScrubCreateReturns', {
-            'pool':'int',
-            'threshold':'int',
-            'description':'str',
-            'schedule':'Schedule',
-            'enabled':'bool',
-            'id':'int',
-            'pool_name':'str',
-    })
-    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    QueryOptions = typing.TypedDict('QueryOptions', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    PoolScrubEntry_ = typing.TypedDict('PoolScrubEntry_', {
-            'pool':'int',
-            'threshold':'int',
-            'description':'str',
-            'schedule':'Schedule',
-            'enabled':'bool',
-            'id':'int',
-            'pool_name':'str',
-    })
-    PoolScrubUpdate = typing.TypedDict('PoolScrubUpdate', {
-            'pool':'int',
-            'threshold':'int',
-            'description':'str',
-            'schedule':'Schedule',
-            'enabled':'bool',
-            'pool_name':'str',
-    })
-    PoolScrubUpdateReturns = typing.TypedDict('PoolScrubUpdateReturns', {
-            'pool':'int',
-            'threshold':'int',
-            'description':'str',
-            'schedule':'Schedule',
-            'enabled':'bool',
-            'id':'int',
-            'pool_name':'str',
-    })
     @typing.overload
     def run(self, 
         name:'str',
@@ -411,87 +103,10 @@ class PoolScrub(
         -------
         """
         ...
-    Schedule = typing.TypedDict('Schedule', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
-    PoolScrubEntry = typing.TypedDict('PoolScrubEntry', {
-            'pool':'int',
-            'threshold':'int',
-            'description':'str',
-            'schedule':'Schedule',
-            'enabled':'bool',
-    })
-    PoolScrubCreateReturns = typing.TypedDict('PoolScrubCreateReturns', {
-            'pool':'int',
-            'threshold':'int',
-            'description':'str',
-            'schedule':'Schedule',
-            'enabled':'bool',
-            'id':'int',
-            'pool_name':'str',
-    })
-    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    QueryOptions = typing.TypedDict('QueryOptions', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    PoolScrubEntry_ = typing.TypedDict('PoolScrubEntry_', {
-            'pool':'int',
-            'threshold':'int',
-            'description':'str',
-            'schedule':'Schedule',
-            'enabled':'bool',
-            'id':'int',
-            'pool_name':'str',
-    })
-    PoolScrubUpdate = typing.TypedDict('PoolScrubUpdate', {
-            'pool':'int',
-            'threshold':'int',
-            'description':'str',
-            'schedule':'Schedule',
-            'enabled':'bool',
-            'pool_name':'str',
-    })
-    PoolScrubUpdateReturns = typing.TypedDict('PoolScrubUpdateReturns', {
-            'pool':'int',
-            'threshold':'int',
-            'description':'str',
-            'schedule':'Schedule',
-            'enabled':'bool',
-            'id':'int',
-            'pool_name':'str',
-    })
     @typing.overload
     def scrub(self, 
         name:'str',
-        action:'str'="START",
+        action:'Action'="START",
     /) -> None: 
         """
         Start/Stop/Pause a scrub on pool `name`.
@@ -506,83 +121,6 @@ class PoolScrub(
         -------
         """
         ...
-    Schedule = typing.TypedDict('Schedule', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
-    PoolScrubEntry = typing.TypedDict('PoolScrubEntry', {
-            'pool':'int',
-            'threshold':'int',
-            'description':'str',
-            'schedule':'Schedule',
-            'enabled':'bool',
-    })
-    PoolScrubCreateReturns = typing.TypedDict('PoolScrubCreateReturns', {
-            'pool':'int',
-            'threshold':'int',
-            'description':'str',
-            'schedule':'Schedule',
-            'enabled':'bool',
-            'id':'int',
-            'pool_name':'str',
-    })
-    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    QueryOptions = typing.TypedDict('QueryOptions', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    PoolScrubEntry_ = typing.TypedDict('PoolScrubEntry_', {
-            'pool':'int',
-            'threshold':'int',
-            'description':'str',
-            'schedule':'Schedule',
-            'enabled':'bool',
-            'id':'int',
-            'pool_name':'str',
-    })
-    PoolScrubUpdate = typing.TypedDict('PoolScrubUpdate', {
-            'pool':'int',
-            'threshold':'int',
-            'description':'str',
-            'schedule':'Schedule',
-            'enabled':'bool',
-            'pool_name':'str',
-    })
-    PoolScrubUpdateReturns = typing.TypedDict('PoolScrubUpdateReturns', {
-            'pool':'int',
-            'threshold':'int',
-            'description':'str',
-            'schedule':'Schedule',
-            'enabled':'bool',
-            'id':'int',
-            'pool_name':'str',
-    })
     @typing.overload
     def update(self, 
         id:'int',
@@ -664,6 +202,11 @@ class PoolScrub(
             'id':'int',
             'pool_name':'str',
     })
+    class Action(str,Enum):
+        START = 'START'
+        STOP = 'STOP'
+        PAUSE = 'PAUSE'
+        ...
     PoolScrubUpdate = typing.TypedDict('PoolScrubUpdate', {
             'pool':'int',
             'threshold':'int',
@@ -681,4 +224,3 @@ class PoolScrub(
             'id':'int',
             'pool_name':'str',
     })
-

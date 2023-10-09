@@ -3,12 +3,19 @@ from pytruenas.base import Namespace
 from pytruenas.mixins import TableExtMixin
 
 import typing
+from enum import Enum
+
 class Tunable(TableExtMixin, Namespace):
     def __init__(self, client) -> None:
         super().__init__(client, 'tunable')
 
+    class Type(str,Enum):
+        SYSCTL = 'SYSCTL'
+        UDEV = 'UDEV'
+        ZFS = 'ZFS'
+        ...
     TunableCreate = typing.TypedDict('TunableCreate', {
-            'type':'str',
+            'type':'Type',
             'var':'str',
             'value':'str',
             'comment':'str',
@@ -16,7 +23,7 @@ class Tunable(TableExtMixin, Namespace):
             'update_initramfs':'bool',
     })
     TunableCreateReturns = typing.TypedDict('TunableCreateReturns', {
-            'type':'str',
+            'type':'Type',
             'var':'str',
             'value':'str',
             'comment':'str',
@@ -53,7 +60,7 @@ class Tunable(TableExtMixin, Namespace):
             'force_sql_filters':'bool',
     })
     TunableEntry = typing.TypedDict('TunableEntry', {
-            'type':'str',
+            'type':'Type',
             'var':'str',
             'value':'str',
             'comment':'str',
@@ -61,10 +68,19 @@ class Tunable(TableExtMixin, Namespace):
             'update_initramfs':'bool',
             'id':'int',
     })
+    class SYSCTL(str,Enum):
+        SYSCTL = 'SYSCTL'
+        ...
+    class UDEV(str,Enum):
+        UDEV = 'UDEV'
+        ...
+    class ZFS(str,Enum):
+        ZFS = 'ZFS'
+        ...
     TunableTypeChoices = typing.TypedDict('TunableTypeChoices', {
-            'SYSCTL':'str',
-            'UDEV':'str',
-            'ZFS':'str',
+            'SYSCTL':'SYSCTL',
+            'UDEV':'UDEV',
+            'ZFS':'ZFS',
     })
     TunableUpdate = typing.TypedDict('TunableUpdate', {
             'value':'str',
@@ -73,7 +89,7 @@ class Tunable(TableExtMixin, Namespace):
             'update_initramfs':'bool',
     })
     TunableUpdateReturns = typing.TypedDict('TunableUpdateReturns', {
-            'type':'str',
+            'type':'Type',
             'var':'str',
             'value':'str',
             'comment':'str',

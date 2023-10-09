@@ -2,10 +2,18 @@
 from pytruenas.base import Namespace
 
 import typing
+from enum import Enum
+
 class SharingNfs(Namespace):
     def __init__(self, client) -> None:
         super().__init__(client, 'sharing.nfs')
 
+    class Provider(str,Enum):
+        SYS = 'SYS'
+        KRB5 = 'KRB5'
+        KRB5I = 'KRB5I'
+        KRB5P = 'KRB5P'
+        ...
     SharingnfsCreate = typing.TypedDict('SharingnfsCreate', {
             'path':'str',
             'aliases':'list[str]',
@@ -17,7 +25,7 @@ class SharingNfs(Namespace):
             'maproot_group':'typing.Optional[str]',
             'mapall_user':'typing.Optional[str]',
             'mapall_group':'typing.Optional[str]',
-            'security':'list[str]',
+            'security':'list[Provider]',
             'enabled':'bool',
     })
     SharingNfsCreateReturns = typing.TypedDict('SharingNfsCreateReturns', {
@@ -31,7 +39,7 @@ class SharingNfs(Namespace):
             'maproot_group':'typing.Optional[str]',
             'mapall_user':'typing.Optional[str]',
             'mapall_group':'typing.Optional[str]',
-            'security':'list[str]',
+            'security':'list[Provider]',
             'enabled':'bool',
             'id':'int',
             'locked':'bool',
@@ -75,7 +83,7 @@ class SharingNfs(Namespace):
             'maproot_group':'typing.Optional[str]',
             'mapall_user':'typing.Optional[str]',
             'mapall_group':'typing.Optional[str]',
-            'security':'list[str]',
+            'security':'list[Provider]',
             'enabled':'bool',
             'id':'int',
             'locked':'bool',
@@ -91,7 +99,7 @@ class SharingNfs(Namespace):
             'maproot_group':'typing.Optional[str]',
             'mapall_user':'typing.Optional[str]',
             'mapall_group':'typing.Optional[str]',
-            'security':'list[str]',
+            'security':'list[Provider]',
             'enabled':'bool',
             'id':'int',
             'locked':'bool',
@@ -107,7 +115,7 @@ class SharingNfs(Namespace):
             'maproot_group':'typing.Optional[str]',
             'mapall_user':'typing.Optional[str]',
             'mapall_group':'typing.Optional[str]',
-            'security':'list[str]',
+            'security':'list[Provider]',
             'enabled':'bool',
             'id':'int',
             'locked':'bool',
@@ -123,7 +131,7 @@ class SharingNfs(Namespace):
             'maproot_group':'typing.Optional[str]',
             'mapall_user':'typing.Optional[str]',
             'mapall_group':'typing.Optional[str]',
-            'security':'list[str]',
+            'security':'list[Provider]',
             'enabled':'bool',
     })
     SharingNfsUpdateReturns = typing.TypedDict('SharingNfsUpdateReturns', {
@@ -137,7 +145,7 @@ class SharingNfs(Namespace):
             'maproot_group':'typing.Optional[str]',
             'mapall_user':'typing.Optional[str]',
             'mapall_group':'typing.Optional[str]',
-            'security':'list[str]',
+            'security':'list[Provider]',
             'enabled':'bool',
             'id':'int',
             'locked':'bool',

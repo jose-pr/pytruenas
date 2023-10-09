@@ -2,6 +2,8 @@
 from pytruenas.base import Namespace
 
 import typing
+from enum import Enum
+
 class Core(Namespace):
     def __init__(self, client) -> None:
         super().__init__(client, 'core')
@@ -84,8 +86,13 @@ class Core(Namespace):
     JobUpdate = typing.TypedDict('JobUpdate', {
             'progress':'dict[str]',
     })
+    class Type(str,Enum):
+        ICMP = 'ICMP'
+        ICMPV4 = 'ICMPV4'
+        ICMPV6 = 'ICMPV6'
+        ...
     Options_ = typing.TypedDict('Options_', {
-            'type':'str',
+            'type':'Type',
             'hostname':'str',
             'timeout':'int',
     })

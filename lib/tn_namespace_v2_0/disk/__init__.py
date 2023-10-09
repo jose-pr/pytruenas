@@ -2,6 +2,8 @@
 from pytruenas.base import Namespace
 
 import typing
+from enum import Enum
+
 class Disk(Namespace):
     def __init__(self, client) -> None:
         super().__init__(client, 'disk')
@@ -34,6 +36,28 @@ class Disk(Namespace):
             'limit':'int',
             'force_sql_filters':'bool',
     })
+    class Hddstandby(str,Enum):
+        ALWAYSON = 'ALWAYS ON'
+        _5 = '5'
+        _10 = '10'
+        _20 = '20'
+        _30 = '30'
+        _60 = '60'
+        _120 = '120'
+        _180 = '180'
+        _240 = '240'
+        _300 = '300'
+        _330 = '330'
+        ...
+    class Advpowermgmt(str,Enum):
+        DISABLED = 'DISABLED'
+        _1 = '1'
+        _64 = '64'
+        _127 = '127'
+        _128 = '128'
+        _192 = '192'
+        _254 = '254'
+        ...
     Enclosure = typing.TypedDict('Enclosure', {
             'number':'int',
             'slot':'int',
@@ -48,9 +72,9 @@ class Disk(Namespace):
             'size':'int',
             'description':'str',
             'transfermode':'str',
-            'hddstandby':'str',
+            'hddstandby':'Hddstandby',
             'togglesmart':'bool',
-            'advpowermgmt':'str',
+            'advpowermgmt':'Advpowermgmt',
             'smartoptions':'str',
             'expiretime':'typing.Optional[str]',
             'critical':'typing.Optional[int]',
@@ -78,9 +102,9 @@ class Disk(Namespace):
             'size':'int',
             'description':'str',
             'transfermode':'str',
-            'hddstandby':'str',
+            'hddstandby':'Hddstandby',
             'togglesmart':'bool',
-            'advpowermgmt':'str',
+            'advpowermgmt':'Advpowermgmt',
             'smartoptions':'str',
             'expiretime':'typing.Optional[str]',
             'critical':'typing.Optional[int]',
@@ -108,9 +132,9 @@ class Disk(Namespace):
             'size':'int',
             'description':'str',
             'transfermode':'str',
-            'hddstandby':'str',
+            'hddstandby':'Hddstandby',
             'togglesmart':'bool',
-            'advpowermgmt':'str',
+            'advpowermgmt':'Advpowermgmt',
             'smartoptions':'str',
             'expiretime':'typing.Optional[str]',
             'critical':'typing.Optional[int]',
@@ -156,9 +180,15 @@ class Disk(Namespace):
             'flags':'Flags',
             'raw':'Raw',
     })
+    class Powermode(str,Enum):
+        NEVER = 'NEVER'
+        SLEEP = 'SLEEP'
+        STANDBY = 'STANDBY'
+        IDLE = 'IDLE'
+        ...
     Options = typing.TypedDict('Options', {
             'cache':'typing.Optional[int]',
-            'powermode':'str',
+            'powermode':'Powermode',
     })
     Alert = typing.TypedDict('Alert', {
             'uuid':'str',
@@ -180,15 +210,15 @@ class Disk(Namespace):
     Options_ = typing.TypedDict('Options_', {
             'cache':'typing.Optional[int]',
             'only_cached':'bool',
-            'powermode':'str',
+            'powermode':'Powermode',
     })
     DiskUpdate = typing.TypedDict('DiskUpdate', {
             'number':'int',
             'lunid':'typing.Optional[str]',
             'description':'str',
-            'hddstandby':'str',
+            'hddstandby':'Hddstandby',
             'togglesmart':'bool',
-            'advpowermgmt':'str',
+            'advpowermgmt':'Advpowermgmt',
             'smartoptions':'str',
             'critical':'typing.Optional[int]',
             'difference':'typing.Optional[int]',
@@ -209,9 +239,9 @@ class Disk(Namespace):
             'size':'int',
             'description':'str',
             'transfermode':'str',
-            'hddstandby':'str',
+            'hddstandby':'Hddstandby',
             'togglesmart':'bool',
-            'advpowermgmt':'str',
+            'advpowermgmt':'Advpowermgmt',
             'smartoptions':'str',
             'expiretime':'typing.Optional[str]',
             'critical':'typing.Optional[int]',
@@ -229,6 +259,11 @@ class Disk(Namespace):
             'kmip_uid':'typing.Optional[str]',
             'supports_smart':'typing.Optional[bool]',
     })
+    class Mode(str,Enum):
+        QUICK = 'QUICK'
+        FULL = 'FULL'
+        FULLRANDOM = 'FULL_RANDOM'
+        ...
     SwapRemovalOptions = typing.TypedDict('SwapRemovalOptions', {
             'configure_swap':'bool',
     })

@@ -2,18 +2,29 @@
 from pytruenas.base import Namespace
 
 import typing
+from enum import Enum
+
 class VmDevice(Namespace):
     def __init__(self, client) -> None:
         super().__init__(client, 'vm.device')
 
+    class Dtype(str,Enum):
+        NIC = 'NIC'
+        DISK = 'DISK'
+        CDROM = 'CDROM'
+        PCI = 'PCI'
+        DISPLAY = 'DISPLAY'
+        RAW = 'RAW'
+        USB = 'USB'
+        ...
     VmdeviceCreate = typing.TypedDict('VmdeviceCreate', {
-            'dtype':'str',
+            'dtype':'Dtype',
             'vm':'int',
             'attributes':'dict[str]',
             'order':'typing.Optional[int]',
     })
     VmDeviceCreateReturns = typing.TypedDict('VmDeviceCreateReturns', {
-            'dtype':'str',
+            'dtype':'Dtype',
             'vm':'int',
             'attributes':'dict[str]',
             'order':'typing.Optional[int]',
@@ -38,10 +49,19 @@ class VmDevice(Namespace):
             'limit':'int',
             'force_sql_filters':'bool',
     })
+    class NATIVE(str,Enum):
+        NATIVE = 'NATIVE'
+        ...
+    class THREADS(str,Enum):
+        THREADS = 'THREADS'
+        ...
+    class IOURING(str,Enum):
+        IOURING = 'IO_URING'
+        ...
     IotypeChoices = typing.TypedDict('IotypeChoices', {
-            'NATIVE':'str',
-            'THREADS':'str',
-            'IO_URING':'str',
+            'NATIVE':'NATIVE',
+            'THREADS':'THREADS',
+            'IO_URING':'IOURING',
     })
     Capability = typing.TypedDict('Capability', {
             'class':'typing.Optional[str]',
@@ -136,48 +156,72 @@ class VmDevice(Namespace):
             'force_sql_filters':'bool',
     })
     VmDeviceEntry = typing.TypedDict('VmDeviceEntry', {
-            'dtype':'str',
+            'dtype':'Dtype',
             'vm':'int',
             'attributes':'dict[str]',
             'order':'typing.Optional[int]',
             'id':'int',
     })
     VmDeviceEntry_ = typing.TypedDict('VmDeviceEntry_', {
-            'dtype':'str',
+            'dtype':'Dtype',
             'vm':'int',
             'attributes':'dict[str]',
             'order':'typing.Optional[int]',
             'id':'int',
     })
     VmDeviceEntry__ = typing.TypedDict('VmDeviceEntry__', {
-            'dtype':'str',
+            'dtype':'Dtype',
             'vm':'int',
             'attributes':'dict[str]',
             'order':'typing.Optional[int]',
             'id':'int',
     })
     VmDeviceUpdate = typing.TypedDict('VmDeviceUpdate', {
-            'dtype':'str',
+            'dtype':'Dtype',
             'vm':'int',
             'attributes':'dict[str]',
             'order':'typing.Optional[int]',
     })
     VmDeviceUpdateReturns = typing.TypedDict('VmDeviceUpdateReturns', {
-            'dtype':'str',
+            'dtype':'Dtype',
             'vm':'int',
             'attributes':'dict[str]',
             'order':'typing.Optional[int]',
             'id':'int',
     })
+    class Piix3Uhci(str,Enum):
+        Piix3Uhci = 'piix3-uhci'
+        ...
+    class Piix4Uhci(str,Enum):
+        Piix4Uhci = 'piix4-uhci'
+        ...
+    class Ehci(str,Enum):
+        Ehci = 'ehci'
+        ...
+    class Ich9Ehci1(str,Enum):
+        Ich9Ehci1 = 'ich9-ehci1'
+        ...
+    class Vt82c686bUhci(str,Enum):
+        Vt82c686bUhci = 'vt82c686b-uhci'
+        ...
+    class PciOhci(str,Enum):
+        PciOhci = 'pci-ohci'
+        ...
+    class NecXhci(str,Enum):
+        NecXhci = 'nec-xhci'
+        ...
+    class QemuXhci(str,Enum):
+        QemuXhci = 'qemu-xhci'
+        ...
     UsbControllerChoices = typing.TypedDict('UsbControllerChoices', {
-            'piix3-uhci':'str',
-            'piix4-uhci':'str',
-            'ehci':'str',
-            'ich9-ehci1':'str',
-            'vt82c686b-uhci':'str',
-            'pci-ohci':'str',
-            'nec-xhci':'str',
-            'qemu-xhci':'str',
+            'piix3-uhci':'Piix3Uhci',
+            'piix4-uhci':'Piix4Uhci',
+            'ehci':'Ehci',
+            'ich9-ehci1':'Ich9Ehci1',
+            'vt82c686b-uhci':'Vt82c686bUhci',
+            'pci-ohci':'PciOhci',
+            'nec-xhci':'NecXhci',
+            'qemu-xhci':'QemuXhci',
     })
     Capability___ = typing.TypedDict('Capability___', {
             'product':'typing.Optional[str]',

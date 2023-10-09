@@ -2,7 +2,7 @@
 from pytruenas import TrueNASClient
 from pytruenas.base import Namespace
 from pytruenas.mixins import ConfigMixin
-
+from enum import Enum
 import typing
 class Nfs(
     ConfigMixin,
@@ -31,90 +31,6 @@ class Nfs(
             principal_add_status
         """
         ...
-    KerberosUsernamePassword = typing.TypedDict('KerberosUsernamePassword', {
-            'username':'str',
-            'password':'str',
-    })
-    NfsEntry = typing.TypedDict('NfsEntry', {
-            'id':'int',
-            'servers':'int',
-            'udp':'bool',
-            'allow_nonroot':'bool',
-            'protocols':'list[str]',
-            'v4_v3owner':'bool',
-            'v4_krb':'bool',
-            'v4_domain':'str',
-            'bindip':'list[str]',
-            'mountd_port':'typing.Optional[int]',
-            'rpcstatd_port':'typing.Optional[int]',
-            'rpclockd_port':'typing.Optional[int]',
-            'mountd_log':'bool',
-            'statd_lockd_log':'bool',
-            'v4_krb_enabled':'bool',
-            'userd_manage_gids':'bool',
-    })
-    QueryOptions = typing.TypedDict('QueryOptions', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    QueryOptions_ = typing.TypedDict('QueryOptions_', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    NfsUpdate = typing.TypedDict('NfsUpdate', {
-            'servers':'int',
-            'udp':'bool',
-            'allow_nonroot':'bool',
-            'protocols':'list[str]',
-            'v4_v3owner':'bool',
-            'v4_krb':'bool',
-            'v4_domain':'str',
-            'bindip':'list[str]',
-            'mountd_port':'typing.Optional[int]',
-            'rpcstatd_port':'typing.Optional[int]',
-            'rpclockd_port':'typing.Optional[int]',
-            'mountd_log':'bool',
-            'statd_lockd_log':'bool',
-            'userd_manage_gids':'bool',
-    })
-    NfsUpdateReturns = typing.TypedDict('NfsUpdateReturns', {
-            'id':'int',
-            'servers':'int',
-            'udp':'bool',
-            'allow_nonroot':'bool',
-            'protocols':'list[str]',
-            'v4_v3owner':'bool',
-            'v4_krb':'bool',
-            'v4_domain':'str',
-            'bindip':'list[str]',
-            'mountd_port':'typing.Optional[int]',
-            'rpcstatd_port':'typing.Optional[int]',
-            'rpclockd_port':'typing.Optional[int]',
-            'mountd_log':'bool',
-            'statd_lockd_log':'bool',
-            'v4_krb_enabled':'bool',
-            'userd_manage_gids':'bool',
-    })
     @typing.overload
     def bindip_choices(self, 
     /) -> 'dict[str]': 
@@ -129,90 +45,6 @@ class Nfs(
             bindip_choices
         """
         ...
-    KerberosUsernamePassword = typing.TypedDict('KerberosUsernamePassword', {
-            'username':'str',
-            'password':'str',
-    })
-    NfsEntry = typing.TypedDict('NfsEntry', {
-            'id':'int',
-            'servers':'int',
-            'udp':'bool',
-            'allow_nonroot':'bool',
-            'protocols':'list[str]',
-            'v4_v3owner':'bool',
-            'v4_krb':'bool',
-            'v4_domain':'str',
-            'bindip':'list[str]',
-            'mountd_port':'typing.Optional[int]',
-            'rpcstatd_port':'typing.Optional[int]',
-            'rpclockd_port':'typing.Optional[int]',
-            'mountd_log':'bool',
-            'statd_lockd_log':'bool',
-            'v4_krb_enabled':'bool',
-            'userd_manage_gids':'bool',
-    })
-    QueryOptions = typing.TypedDict('QueryOptions', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    QueryOptions_ = typing.TypedDict('QueryOptions_', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    NfsUpdate = typing.TypedDict('NfsUpdate', {
-            'servers':'int',
-            'udp':'bool',
-            'allow_nonroot':'bool',
-            'protocols':'list[str]',
-            'v4_v3owner':'bool',
-            'v4_krb':'bool',
-            'v4_domain':'str',
-            'bindip':'list[str]',
-            'mountd_port':'typing.Optional[int]',
-            'rpcstatd_port':'typing.Optional[int]',
-            'rpclockd_port':'typing.Optional[int]',
-            'mountd_log':'bool',
-            'statd_lockd_log':'bool',
-            'userd_manage_gids':'bool',
-    })
-    NfsUpdateReturns = typing.TypedDict('NfsUpdateReturns', {
-            'id':'int',
-            'servers':'int',
-            'udp':'bool',
-            'allow_nonroot':'bool',
-            'protocols':'list[str]',
-            'v4_v3owner':'bool',
-            'v4_krb':'bool',
-            'v4_domain':'str',
-            'bindip':'list[str]',
-            'mountd_port':'typing.Optional[int]',
-            'rpcstatd_port':'typing.Optional[int]',
-            'rpclockd_port':'typing.Optional[int]',
-            'mountd_log':'bool',
-            'statd_lockd_log':'bool',
-            'v4_krb_enabled':'bool',
-            'userd_manage_gids':'bool',
-    })
     @typing.overload
     def client_count(self, 
     /) -> 'int': 
@@ -229,90 +61,6 @@ class Nfs(
             number_of_clients
         """
         ...
-    KerberosUsernamePassword = typing.TypedDict('KerberosUsernamePassword', {
-            'username':'str',
-            'password':'str',
-    })
-    NfsEntry = typing.TypedDict('NfsEntry', {
-            'id':'int',
-            'servers':'int',
-            'udp':'bool',
-            'allow_nonroot':'bool',
-            'protocols':'list[str]',
-            'v4_v3owner':'bool',
-            'v4_krb':'bool',
-            'v4_domain':'str',
-            'bindip':'list[str]',
-            'mountd_port':'typing.Optional[int]',
-            'rpcstatd_port':'typing.Optional[int]',
-            'rpclockd_port':'typing.Optional[int]',
-            'mountd_log':'bool',
-            'statd_lockd_log':'bool',
-            'v4_krb_enabled':'bool',
-            'userd_manage_gids':'bool',
-    })
-    QueryOptions = typing.TypedDict('QueryOptions', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    QueryOptions_ = typing.TypedDict('QueryOptions_', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    NfsUpdate = typing.TypedDict('NfsUpdate', {
-            'servers':'int',
-            'udp':'bool',
-            'allow_nonroot':'bool',
-            'protocols':'list[str]',
-            'v4_v3owner':'bool',
-            'v4_krb':'bool',
-            'v4_domain':'str',
-            'bindip':'list[str]',
-            'mountd_port':'typing.Optional[int]',
-            'rpcstatd_port':'typing.Optional[int]',
-            'rpclockd_port':'typing.Optional[int]',
-            'mountd_log':'bool',
-            'statd_lockd_log':'bool',
-            'userd_manage_gids':'bool',
-    })
-    NfsUpdateReturns = typing.TypedDict('NfsUpdateReturns', {
-            'id':'int',
-            'servers':'int',
-            'udp':'bool',
-            'allow_nonroot':'bool',
-            'protocols':'list[str]',
-            'v4_v3owner':'bool',
-            'v4_krb':'bool',
-            'v4_domain':'str',
-            'bindip':'list[str]',
-            'mountd_port':'typing.Optional[int]',
-            'rpcstatd_port':'typing.Optional[int]',
-            'rpclockd_port':'typing.Optional[int]',
-            'mountd_log':'bool',
-            'statd_lockd_log':'bool',
-            'v4_krb_enabled':'bool',
-            'userd_manage_gids':'bool',
-    })
     @typing.overload
     def config(self, 
     /) -> 'NfsEntry': 
@@ -327,90 +75,6 @@ class Nfs(
             nfs_entry
         """
         ...
-    KerberosUsernamePassword = typing.TypedDict('KerberosUsernamePassword', {
-            'username':'str',
-            'password':'str',
-    })
-    NfsEntry = typing.TypedDict('NfsEntry', {
-            'id':'int',
-            'servers':'int',
-            'udp':'bool',
-            'allow_nonroot':'bool',
-            'protocols':'list[str]',
-            'v4_v3owner':'bool',
-            'v4_krb':'bool',
-            'v4_domain':'str',
-            'bindip':'list[str]',
-            'mountd_port':'typing.Optional[int]',
-            'rpcstatd_port':'typing.Optional[int]',
-            'rpclockd_port':'typing.Optional[int]',
-            'mountd_log':'bool',
-            'statd_lockd_log':'bool',
-            'v4_krb_enabled':'bool',
-            'userd_manage_gids':'bool',
-    })
-    QueryOptions = typing.TypedDict('QueryOptions', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    QueryOptions_ = typing.TypedDict('QueryOptions_', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    NfsUpdate = typing.TypedDict('NfsUpdate', {
-            'servers':'int',
-            'udp':'bool',
-            'allow_nonroot':'bool',
-            'protocols':'list[str]',
-            'v4_v3owner':'bool',
-            'v4_krb':'bool',
-            'v4_domain':'str',
-            'bindip':'list[str]',
-            'mountd_port':'typing.Optional[int]',
-            'rpcstatd_port':'typing.Optional[int]',
-            'rpclockd_port':'typing.Optional[int]',
-            'mountd_log':'bool',
-            'statd_lockd_log':'bool',
-            'userd_manage_gids':'bool',
-    })
-    NfsUpdateReturns = typing.TypedDict('NfsUpdateReturns', {
-            'id':'int',
-            'servers':'int',
-            'udp':'bool',
-            'allow_nonroot':'bool',
-            'protocols':'list[str]',
-            'v4_v3owner':'bool',
-            'v4_krb':'bool',
-            'v4_domain':'str',
-            'bindip':'list[str]',
-            'mountd_port':'typing.Optional[int]',
-            'rpcstatd_port':'typing.Optional[int]',
-            'rpclockd_port':'typing.Optional[int]',
-            'mountd_log':'bool',
-            'statd_lockd_log':'bool',
-            'v4_krb_enabled':'bool',
-            'userd_manage_gids':'bool',
-    })
     @typing.overload
     def get_nfs3_clients(self, 
         query_filters:'list[list]'=[],
@@ -431,90 +95,6 @@ class Nfs(
         -------
         """
         ...
-    KerberosUsernamePassword = typing.TypedDict('KerberosUsernamePassword', {
-            'username':'str',
-            'password':'str',
-    })
-    NfsEntry = typing.TypedDict('NfsEntry', {
-            'id':'int',
-            'servers':'int',
-            'udp':'bool',
-            'allow_nonroot':'bool',
-            'protocols':'list[str]',
-            'v4_v3owner':'bool',
-            'v4_krb':'bool',
-            'v4_domain':'str',
-            'bindip':'list[str]',
-            'mountd_port':'typing.Optional[int]',
-            'rpcstatd_port':'typing.Optional[int]',
-            'rpclockd_port':'typing.Optional[int]',
-            'mountd_log':'bool',
-            'statd_lockd_log':'bool',
-            'v4_krb_enabled':'bool',
-            'userd_manage_gids':'bool',
-    })
-    QueryOptions = typing.TypedDict('QueryOptions', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    QueryOptions_ = typing.TypedDict('QueryOptions_', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    NfsUpdate = typing.TypedDict('NfsUpdate', {
-            'servers':'int',
-            'udp':'bool',
-            'allow_nonroot':'bool',
-            'protocols':'list[str]',
-            'v4_v3owner':'bool',
-            'v4_krb':'bool',
-            'v4_domain':'str',
-            'bindip':'list[str]',
-            'mountd_port':'typing.Optional[int]',
-            'rpcstatd_port':'typing.Optional[int]',
-            'rpclockd_port':'typing.Optional[int]',
-            'mountd_log':'bool',
-            'statd_lockd_log':'bool',
-            'userd_manage_gids':'bool',
-    })
-    NfsUpdateReturns = typing.TypedDict('NfsUpdateReturns', {
-            'id':'int',
-            'servers':'int',
-            'udp':'bool',
-            'allow_nonroot':'bool',
-            'protocols':'list[str]',
-            'v4_v3owner':'bool',
-            'v4_krb':'bool',
-            'v4_domain':'str',
-            'bindip':'list[str]',
-            'mountd_port':'typing.Optional[int]',
-            'rpcstatd_port':'typing.Optional[int]',
-            'rpclockd_port':'typing.Optional[int]',
-            'mountd_log':'bool',
-            'statd_lockd_log':'bool',
-            'v4_krb_enabled':'bool',
-            'userd_manage_gids':'bool',
-    })
     @typing.overload
     def get_nfs4_clients(self, 
         query_filters:'list[list]'=[],
@@ -534,90 +114,6 @@ class Nfs(
         -------
         """
         ...
-    KerberosUsernamePassword = typing.TypedDict('KerberosUsernamePassword', {
-            'username':'str',
-            'password':'str',
-    })
-    NfsEntry = typing.TypedDict('NfsEntry', {
-            'id':'int',
-            'servers':'int',
-            'udp':'bool',
-            'allow_nonroot':'bool',
-            'protocols':'list[str]',
-            'v4_v3owner':'bool',
-            'v4_krb':'bool',
-            'v4_domain':'str',
-            'bindip':'list[str]',
-            'mountd_port':'typing.Optional[int]',
-            'rpcstatd_port':'typing.Optional[int]',
-            'rpclockd_port':'typing.Optional[int]',
-            'mountd_log':'bool',
-            'statd_lockd_log':'bool',
-            'v4_krb_enabled':'bool',
-            'userd_manage_gids':'bool',
-    })
-    QueryOptions = typing.TypedDict('QueryOptions', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    QueryOptions_ = typing.TypedDict('QueryOptions_', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    NfsUpdate = typing.TypedDict('NfsUpdate', {
-            'servers':'int',
-            'udp':'bool',
-            'allow_nonroot':'bool',
-            'protocols':'list[str]',
-            'v4_v3owner':'bool',
-            'v4_krb':'bool',
-            'v4_domain':'str',
-            'bindip':'list[str]',
-            'mountd_port':'typing.Optional[int]',
-            'rpcstatd_port':'typing.Optional[int]',
-            'rpclockd_port':'typing.Optional[int]',
-            'mountd_log':'bool',
-            'statd_lockd_log':'bool',
-            'userd_manage_gids':'bool',
-    })
-    NfsUpdateReturns = typing.TypedDict('NfsUpdateReturns', {
-            'id':'int',
-            'servers':'int',
-            'udp':'bool',
-            'allow_nonroot':'bool',
-            'protocols':'list[str]',
-            'v4_v3owner':'bool',
-            'v4_krb':'bool',
-            'v4_domain':'str',
-            'bindip':'list[str]',
-            'mountd_port':'typing.Optional[int]',
-            'rpcstatd_port':'typing.Optional[int]',
-            'rpclockd_port':'typing.Optional[int]',
-            'mountd_log':'bool',
-            'statd_lockd_log':'bool',
-            'v4_krb_enabled':'bool',
-            'userd_manage_gids':'bool',
-    })
     @typing.overload
     def update(self, 
         nfs_update:'NfsUpdate'={},
@@ -660,12 +156,16 @@ class Nfs(
             'username':'str',
             'password':'str',
     })
+    class Protocol(str,Enum):
+        NFSV3 = 'NFSV3'
+        NFSV4 = 'NFSV4'
+        ...
     NfsEntry = typing.TypedDict('NfsEntry', {
             'id':'int',
             'servers':'int',
             'udp':'bool',
             'allow_nonroot':'bool',
-            'protocols':'list[str]',
+            'protocols':'list[Protocol]',
             'v4_v3owner':'bool',
             'v4_krb':'bool',
             'v4_domain':'str',
@@ -710,7 +210,7 @@ class Nfs(
             'servers':'int',
             'udp':'bool',
             'allow_nonroot':'bool',
-            'protocols':'list[str]',
+            'protocols':'list[Protocol]',
             'v4_v3owner':'bool',
             'v4_krb':'bool',
             'v4_domain':'str',
@@ -727,7 +227,7 @@ class Nfs(
             'servers':'int',
             'udp':'bool',
             'allow_nonroot':'bool',
-            'protocols':'list[str]',
+            'protocols':'list[Protocol]',
             'v4_v3owner':'bool',
             'v4_krb':'bool',
             'v4_domain':'str',
@@ -740,4 +240,3 @@ class Nfs(
             'v4_krb_enabled':'bool',
             'userd_manage_gids':'bool',
     })
-
