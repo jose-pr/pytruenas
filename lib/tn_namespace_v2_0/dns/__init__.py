@@ -22,6 +22,3 @@ class Dns(Namespace):
     Nameserver = typing.TypedDict('Nameserver', {
             'nameserver':'str',
     })
-    Nameserver_ = typing.TypedDict('Nameserver_', {
-            'nameserver':'str',
-    })

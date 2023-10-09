@@ -58,18 +58,6 @@ class Service(Namespace):
             'ha_propagate':'bool',
             'silent':'bool',
     })
-    ServiceControl_ = typing.TypedDict('ServiceControl_', {
-            'ha_propagate':'bool',
-            'silent':'bool',
-    })
-    ServiceControl__ = typing.TypedDict('ServiceControl__', {
-            'ha_propagate':'bool',
-            'silent':'bool',
-    })
-    ServiceControl___ = typing.TypedDict('ServiceControl___', {
-            'ha_propagate':'bool',
-            'silent':'bool',
-    })
     ServiceUpdate = typing.TypedDict('ServiceUpdate', {
             'enable':'bool',
     })

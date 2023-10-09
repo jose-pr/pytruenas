@@ -72,54 +72,18 @@ class Filesystem(Namespace):
             'offline':'bool',
             'sparse':'bool',
     })
-    Perms__ = typing.TypedDict('Perms__', {
-            'READ_DATA':'bool',
-            'WRITE_DATA':'bool',
-            'APPEND_DATA':'bool',
-            'READ_NAMED_ATTRS':'bool',
-            'WRITE_NAMED_ATTRS':'bool',
-            'EXECUTE':'bool',
-            'DELETE_CHILD':'bool',
-            'READ_ATTRIBUTES':'bool',
-            'WRITE_ATTRIBUTES':'bool',
-            'DELETE':'bool',
-            'READ_ACL':'bool',
-            'WRITE_ACL':'bool',
-            'WRITE_OWNER':'bool',
-            'SYNCHRONIZE':'bool',
-            'BASIC':'str',
-    })
-    Flags_ = typing.TypedDict('Flags_', {
-            'FILE_INHERIT':'bool',
-            'DIRECTORY_INHERIT':'bool',
-            'NO_PROPAGATE_INHERIT':'bool',
-            'INHERIT_ONLY':'bool',
-            'INHERITED':'bool',
-            'BASIC':'str',
-    })
     Nfs4Ace_ = typing.TypedDict('Nfs4Ace_', {
             'tag':'str',
             'id':'typing.Optional[int]',
             'type':'str',
-            'perms':'Perms__',
-            'flags':'Flags_',
-    })
-    Perms___ = typing.TypedDict('Perms___', {
-            'READ':'bool',
-            'WRITE':'bool',
-            'EXECUTE':'bool',
-    })
-    Posix1eAce_ = typing.TypedDict('Posix1eAce_', {
-            'default':'bool',
-            'tag':'str',
-            'id':'int',
-            'perms':'Perms___',
+            'perms':'Perms',
+            'flags':'Flags',
     })
     TruenasAcl = typing.TypedDict('TruenasAcl', {
             'path':'str',
             'trivial':'bool',
             'acltype':'typing.Optional[str]',
-            'acl':'typing.Union[list[Nfs4Ace_], list[Posix1eAce_]]',
+            'acl':'typing.Union[list[Nfs4Ace_], list[Posix1eAce]]',
     })
     QueryOptions = typing.TypedDict('QueryOptions', {
             'relationships':'bool',
@@ -178,61 +142,16 @@ class Filesystem(Namespace):
             'append':'bool',
             'mode':'int',
     })
-    Dosmode_ = typing.TypedDict('Dosmode_', {
-            'readonly':'bool',
-            'hidden':'bool',
-            'system':'bool',
-            'archive':'bool',
-            'reparse':'bool',
-            'offline':'bool',
-            'sparse':'bool',
-    })
     SetDosmode = typing.TypedDict('SetDosmode', {
             'path':'str',
-            'dosmode':'Dosmode_',
-    })
-    Perms____ = typing.TypedDict('Perms____', {
-            'READ_DATA':'bool',
-            'WRITE_DATA':'bool',
-            'APPEND_DATA':'bool',
-            'READ_NAMED_ATTRS':'bool',
-            'WRITE_NAMED_ATTRS':'bool',
-            'EXECUTE':'bool',
-            'DELETE_CHILD':'bool',
-            'READ_ATTRIBUTES':'bool',
-            'WRITE_ATTRIBUTES':'bool',
-            'DELETE':'bool',
-            'READ_ACL':'bool',
-            'WRITE_ACL':'bool',
-            'WRITE_OWNER':'bool',
-            'SYNCHRONIZE':'bool',
-            'BASIC':'str',
-    })
-    Flags__ = typing.TypedDict('Flags__', {
-            'FILE_INHERIT':'bool',
-            'DIRECTORY_INHERIT':'bool',
-            'NO_PROPAGATE_INHERIT':'bool',
-            'INHERIT_ONLY':'bool',
-            'INHERITED':'bool',
-            'BASIC':'str',
+            'dosmode':'Dosmode',
     })
     Nfs4Ace__ = typing.TypedDict('Nfs4Ace__', {
             'tag':'str',
             'id':'typing.Optional[int]',
             'type':'str',
-            'perms':'Perms____',
-            'flags':'Flags__',
-    })
-    Perms_____ = typing.TypedDict('Perms_____', {
-            'READ':'bool',
-            'WRITE':'bool',
-            'EXECUTE':'bool',
-    })
-    Posix1eAce__ = typing.TypedDict('Posix1eAce__', {
-            'default':'bool',
-            'tag':'str',
-            'id':'int',
-            'perms':'Perms_____',
+            'perms':'Perms',
+            'flags':'Flags',
     })
     Nfs41Flags = typing.TypedDict('Nfs41Flags', {
             'autoinherit':'bool',
@@ -248,7 +167,7 @@ class Filesystem(Namespace):
             'path':'str',
             'uid':'typing.Optional[int]',
             'gid':'typing.Optional[int]',
-            'dacl':'typing.Union[list[Nfs4Ace__], list[Posix1eAce__]]',
+            'dacl':'typing.Union[list[Nfs4Ace__], list[Posix1eAce]]',
             'nfs41_flags':'Nfs41Flags',
             'acltype':'typing.Optional[str]',
             'options':'Options__',

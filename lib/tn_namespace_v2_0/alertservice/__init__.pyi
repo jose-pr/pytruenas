@@ -80,31 +80,6 @@ class Alertservice(Namespace):
             'id':'int',
             'type__title':'str',
     })
-    AlertserviceEntry_ = typing.TypedDict('AlertserviceEntry_', {
-            'name':'str',
-            'type':'str',
-            'attributes':'dict[str]',
-            'level':'str',
-            'enabled':'bool',
-            'id':'int',
-            'type__title':'str',
-    })
-    AlertserviceEntry__ = typing.TypedDict('AlertserviceEntry__', {
-            'name':'str',
-            'type':'str',
-            'attributes':'dict[str]',
-            'level':'str',
-            'enabled':'bool',
-            'id':'int',
-            'type__title':'str',
-    })
-    AlertServiceCreate_ = typing.TypedDict('AlertServiceCreate_', {
-            'name':'str',
-            'type':'str',
-            'attributes':'dict[str]',
-            'level':'str',
-            'enabled':'bool',
-    })
     AlertServiceUpdate = typing.TypedDict('AlertServiceUpdate', {
             'name':'str',
             'type':'str',
@@ -194,31 +169,6 @@ class Alertservice(Namespace):
             'enabled':'bool',
             'id':'int',
             'type__title':'str',
-    })
-    AlertserviceEntry_ = typing.TypedDict('AlertserviceEntry_', {
-            'name':'str',
-            'type':'str',
-            'attributes':'dict[str]',
-            'level':'str',
-            'enabled':'bool',
-            'id':'int',
-            'type__title':'str',
-    })
-    AlertserviceEntry__ = typing.TypedDict('AlertserviceEntry__', {
-            'name':'str',
-            'type':'str',
-            'attributes':'dict[str]',
-            'level':'str',
-            'enabled':'bool',
-            'id':'int',
-            'type__title':'str',
-    })
-    AlertServiceCreate_ = typing.TypedDict('AlertServiceCreate_', {
-            'name':'str',
-            'type':'str',
-            'attributes':'dict[str]',
-            'level':'str',
-            'enabled':'bool',
     })
     AlertServiceUpdate = typing.TypedDict('AlertServiceUpdate', {
             'name':'str',
@@ -313,31 +263,6 @@ class Alertservice(Namespace):
             'id':'int',
             'type__title':'str',
     })
-    AlertserviceEntry_ = typing.TypedDict('AlertserviceEntry_', {
-            'name':'str',
-            'type':'str',
-            'attributes':'dict[str]',
-            'level':'str',
-            'enabled':'bool',
-            'id':'int',
-            'type__title':'str',
-    })
-    AlertserviceEntry__ = typing.TypedDict('AlertserviceEntry__', {
-            'name':'str',
-            'type':'str',
-            'attributes':'dict[str]',
-            'level':'str',
-            'enabled':'bool',
-            'id':'int',
-            'type__title':'str',
-    })
-    AlertServiceCreate_ = typing.TypedDict('AlertServiceCreate_', {
-            'name':'str',
-            'type':'str',
-            'attributes':'dict[str]',
-            'level':'str',
-            'enabled':'bool',
-    })
     AlertServiceUpdate = typing.TypedDict('AlertServiceUpdate', {
             'name':'str',
             'type':'str',
@@ -425,31 +350,6 @@ class Alertservice(Namespace):
             'id':'int',
             'type__title':'str',
     })
-    AlertserviceEntry_ = typing.TypedDict('AlertserviceEntry_', {
-            'name':'str',
-            'type':'str',
-            'attributes':'dict[str]',
-            'level':'str',
-            'enabled':'bool',
-            'id':'int',
-            'type__title':'str',
-    })
-    AlertserviceEntry__ = typing.TypedDict('AlertserviceEntry__', {
-            'name':'str',
-            'type':'str',
-            'attributes':'dict[str]',
-            'level':'str',
-            'enabled':'bool',
-            'id':'int',
-            'type__title':'str',
-    })
-    AlertServiceCreate_ = typing.TypedDict('AlertServiceCreate_', {
-            'name':'str',
-            'type':'str',
-            'attributes':'dict[str]',
-            'level':'str',
-            'enabled':'bool',
-    })
     AlertServiceUpdate = typing.TypedDict('AlertServiceUpdate', {
             'name':'str',
             'type':'str',
@@ -470,7 +370,7 @@ class Alertservice(Namespace):
     def query(self, 
         query_filters:'list[list]'=[],
         query_options:'QueryOptions'={},
-    /) -> 'typing.Union[list[AlertserviceEntry], ForwardRef(AlertserviceEntry_), int, ForwardRef(AlertserviceEntry__)]': 
+    /) -> 'typing.Union[list[AlertserviceEntry], ForwardRef(AlertserviceEntry), int]': 
         """
         
 
@@ -482,7 +382,7 @@ class Alertservice(Namespace):
             query-options
         Returns
         -------
-        typing.Union[list[AlertserviceEntry], ForwardRef(AlertserviceEntry_), int, ForwardRef(AlertserviceEntry__)]:
+        typing.Union[list[AlertserviceEntry], ForwardRef(AlertserviceEntry), int]:
             
         """
         ...
@@ -543,31 +443,6 @@ class Alertservice(Namespace):
             'id':'int',
             'type__title':'str',
     })
-    AlertserviceEntry_ = typing.TypedDict('AlertserviceEntry_', {
-            'name':'str',
-            'type':'str',
-            'attributes':'dict[str]',
-            'level':'str',
-            'enabled':'bool',
-            'id':'int',
-            'type__title':'str',
-    })
-    AlertserviceEntry__ = typing.TypedDict('AlertserviceEntry__', {
-            'name':'str',
-            'type':'str',
-            'attributes':'dict[str]',
-            'level':'str',
-            'enabled':'bool',
-            'id':'int',
-            'type__title':'str',
-    })
-    AlertServiceCreate_ = typing.TypedDict('AlertServiceCreate_', {
-            'name':'str',
-            'type':'str',
-            'attributes':'dict[str]',
-            'level':'str',
-            'enabled':'bool',
-    })
     AlertServiceUpdate = typing.TypedDict('AlertServiceUpdate', {
             'name':'str',
             'type':'str',
@@ -586,7 +461,7 @@ class Alertservice(Namespace):
     })
     @typing.overload
     def test(self, 
-        alert_service_create:'AlertServiceCreate_'={},
+        alert_service_create:'AlertServiceCreate'={},
     /) -> 'bool': 
         """
         Send a test alert using `type` of Alert Service.
@@ -657,31 +532,6 @@ class Alertservice(Namespace):
             'enabled':'bool',
             'id':'int',
             'type__title':'str',
-    })
-    AlertserviceEntry_ = typing.TypedDict('AlertserviceEntry_', {
-            'name':'str',
-            'type':'str',
-            'attributes':'dict[str]',
-            'level':'str',
-            'enabled':'bool',
-            'id':'int',
-            'type__title':'str',
-    })
-    AlertserviceEntry__ = typing.TypedDict('AlertserviceEntry__', {
-            'name':'str',
-            'type':'str',
-            'attributes':'dict[str]',
-            'level':'str',
-            'enabled':'bool',
-            'id':'int',
-            'type__title':'str',
-    })
-    AlertServiceCreate_ = typing.TypedDict('AlertServiceCreate_', {
-            'name':'str',
-            'type':'str',
-            'attributes':'dict[str]',
-            'level':'str',
-            'enabled':'bool',
     })
     AlertServiceUpdate = typing.TypedDict('AlertServiceUpdate', {
             'name':'str',
@@ -775,31 +625,6 @@ class Alertservice(Namespace):
             'enabled':'bool',
             'id':'int',
             'type__title':'str',
-    })
-    AlertserviceEntry_ = typing.TypedDict('AlertserviceEntry_', {
-            'name':'str',
-            'type':'str',
-            'attributes':'dict[str]',
-            'level':'str',
-            'enabled':'bool',
-            'id':'int',
-            'type__title':'str',
-    })
-    AlertserviceEntry__ = typing.TypedDict('AlertserviceEntry__', {
-            'name':'str',
-            'type':'str',
-            'attributes':'dict[str]',
-            'level':'str',
-            'enabled':'bool',
-            'id':'int',
-            'type__title':'str',
-    })
-    AlertServiceCreate_ = typing.TypedDict('AlertServiceCreate_', {
-            'name':'str',
-            'type':'str',
-            'attributes':'dict[str]',
-            'level':'str',
-            'enabled':'bool',
     })
     AlertServiceUpdate = typing.TypedDict('AlertServiceUpdate', {
             'name':'str',

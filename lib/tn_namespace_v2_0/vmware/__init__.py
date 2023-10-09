@@ -31,11 +31,6 @@ class Vmware(Namespace):
             'limit':'int',
             'force_sql_filters':'bool',
     })
-    VmwareCreds_ = typing.TypedDict('VmwareCreds_', {
-            'hostname':'str',
-            'username':'str',
-            'password':'str',
-    })
     QueryOptions = typing.TypedDict('QueryOptions', {
             'relationships':'bool',
             'extend':'typing.Optional[str]',

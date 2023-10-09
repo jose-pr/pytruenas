@@ -51,11 +51,6 @@ class Mail(Namespace):
             'pass':'typing.Optional[str]',
             'oauth':'Oauth_',
     })
-    Oauth__ = typing.TypedDict('Oauth__', {
-            'client_id':'str',
-            'client_secret':'str',
-            'refresh_token':'str',
-    })
     MailUpdate_ = typing.TypedDict('MailUpdate_', {
             'fromemail':'str',
             'fromname':'str',
@@ -65,12 +60,7 @@ class Mail(Namespace):
             'smtp':'bool',
             'user':'typing.Optional[str]',
             'pass':'typing.Optional[str]',
-            'oauth':'Oauth__',
-    })
-    Oauth___ = typing.TypedDict('Oauth___', {
-            'client_id':'str',
-            'client_secret':'str',
-            'refresh_token':'str',
+            'oauth':'Oauth_',
     })
     MailUpdateReturns = typing.TypedDict('MailUpdateReturns', {
             'fromemail':'str',
@@ -81,6 +71,6 @@ class Mail(Namespace):
             'smtp':'bool',
             'user':'typing.Optional[str]',
             'pass':'typing.Optional[str]',
-            'oauth':'Oauth___',
+            'oauth':'Oauth',
             'id':'int',
     })

@@ -72,15 +72,12 @@ class ZfsSnapshot(Namespace):
             'limit':'int',
             'force_sql_filters':'bool',
     })
-    Options__ = typing.TypedDict('Options__', {
-            'recursive':'bool',
-    })
     SnapshotRemove = typing.TypedDict('SnapshotRemove', {
             'dataset':'str',
             'name':'str',
             'defer_delete':'bool',
     })
-    Options___ = typing.TypedDict('Options___', {
+    Options__ = typing.TypedDict('Options__', {
             'recursive':'bool',
             'recursive_clones':'bool',
             'force':'bool',
@@ -161,15 +158,12 @@ class ZfsSnapshot(Namespace):
             'limit':'int',
             'force_sql_filters':'bool',
     })
-    Options__ = typing.TypedDict('Options__', {
-            'recursive':'bool',
-    })
     SnapshotRemove = typing.TypedDict('SnapshotRemove', {
             'dataset':'str',
             'name':'str',
             'defer_delete':'bool',
     })
-    Options___ = typing.TypedDict('Options___', {
+    Options__ = typing.TypedDict('Options__', {
             'recursive':'bool',
             'recursive_clones':'bool',
             'force':'bool',
@@ -255,15 +249,12 @@ class ZfsSnapshot(Namespace):
             'limit':'int',
             'force_sql_filters':'bool',
     })
-    Options__ = typing.TypedDict('Options__', {
-            'recursive':'bool',
-    })
     SnapshotRemove = typing.TypedDict('SnapshotRemove', {
             'dataset':'str',
             'name':'str',
             'defer_delete':'bool',
     })
-    Options___ = typing.TypedDict('Options___', {
+    Options__ = typing.TypedDict('Options__', {
             'recursive':'bool',
             'recursive_clones':'bool',
             'force':'bool',
@@ -347,15 +338,12 @@ class ZfsSnapshot(Namespace):
             'limit':'int',
             'force_sql_filters':'bool',
     })
-    Options__ = typing.TypedDict('Options__', {
-            'recursive':'bool',
-    })
     SnapshotRemove = typing.TypedDict('SnapshotRemove', {
             'dataset':'str',
             'name':'str',
             'defer_delete':'bool',
     })
-    Options___ = typing.TypedDict('Options___', {
+    Options__ = typing.TypedDict('Options__', {
             'recursive':'bool',
             'recursive_clones':'bool',
             'force':'bool',
@@ -441,15 +429,12 @@ class ZfsSnapshot(Namespace):
             'limit':'int',
             'force_sql_filters':'bool',
     })
-    Options__ = typing.TypedDict('Options__', {
-            'recursive':'bool',
-    })
     SnapshotRemove = typing.TypedDict('SnapshotRemove', {
             'dataset':'str',
             'name':'str',
             'defer_delete':'bool',
     })
-    Options___ = typing.TypedDict('Options___', {
+    Options__ = typing.TypedDict('Options__', {
             'recursive':'bool',
             'recursive_clones':'bool',
             'force':'bool',
@@ -539,15 +524,12 @@ class ZfsSnapshot(Namespace):
             'limit':'int',
             'force_sql_filters':'bool',
     })
-    Options__ = typing.TypedDict('Options__', {
-            'recursive':'bool',
-    })
     SnapshotRemove = typing.TypedDict('SnapshotRemove', {
             'dataset':'str',
             'name':'str',
             'defer_delete':'bool',
     })
-    Options___ = typing.TypedDict('Options___', {
+    Options__ = typing.TypedDict('Options__', {
             'recursive':'bool',
             'recursive_clones':'bool',
             'force':'bool',
@@ -564,7 +546,7 @@ class ZfsSnapshot(Namespace):
     @typing.overload
     def release(self, 
         id:'str',
-        options:'Options__'={},
+        options:'Options_'={},
     /) -> None: 
         """
         Release held snapshot `id`.
@@ -634,15 +616,12 @@ class ZfsSnapshot(Namespace):
             'limit':'int',
             'force_sql_filters':'bool',
     })
-    Options__ = typing.TypedDict('Options__', {
-            'recursive':'bool',
-    })
     SnapshotRemove = typing.TypedDict('SnapshotRemove', {
             'dataset':'str',
             'name':'str',
             'defer_delete':'bool',
     })
-    Options___ = typing.TypedDict('Options___', {
+    Options__ = typing.TypedDict('Options__', {
             'recursive':'bool',
             'recursive_clones':'bool',
             'force':'bool',
@@ -724,15 +703,12 @@ class ZfsSnapshot(Namespace):
             'limit':'int',
             'force_sql_filters':'bool',
     })
-    Options__ = typing.TypedDict('Options__', {
-            'recursive':'bool',
-    })
     SnapshotRemove = typing.TypedDict('SnapshotRemove', {
             'dataset':'str',
             'name':'str',
             'defer_delete':'bool',
     })
-    Options___ = typing.TypedDict('Options___', {
+    Options__ = typing.TypedDict('Options__', {
             'recursive':'bool',
             'recursive_clones':'bool',
             'force':'bool',
@@ -749,7 +725,7 @@ class ZfsSnapshot(Namespace):
     @typing.overload
     def rollback(self, 
         id:'str',
-        options:'Options___'={},
+        options:'Options__'={},
     /) -> None: 
         """
         Rollback to a given snapshot `id`.
@@ -824,15 +800,12 @@ class ZfsSnapshot(Namespace):
             'limit':'int',
             'force_sql_filters':'bool',
     })
-    Options__ = typing.TypedDict('Options__', {
-            'recursive':'bool',
-    })
     SnapshotRemove = typing.TypedDict('SnapshotRemove', {
             'dataset':'str',
             'name':'str',
             'defer_delete':'bool',
     })
-    Options___ = typing.TypedDict('Options___', {
+    Options__ = typing.TypedDict('Options__', {
             'recursive':'bool',
             'recursive_clones':'bool',
             'force':'bool',
@@ -916,15 +889,12 @@ class ZfsSnapshot(Namespace):
             'limit':'int',
             'force_sql_filters':'bool',
     })
-    Options__ = typing.TypedDict('Options__', {
-            'recursive':'bool',
-    })
     SnapshotRemove = typing.TypedDict('SnapshotRemove', {
             'dataset':'str',
             'name':'str',
             'defer_delete':'bool',
     })
-    Options___ = typing.TypedDict('Options___', {
+    Options__ = typing.TypedDict('Options__', {
             'recursive':'bool',
             'recursive_clones':'bool',
             'force':'bool',

@@ -57,18 +57,6 @@ class Keychaincredential(Namespace):
             'attributes':'dict[str]',
             'id':'int',
     })
-    KeychainCredentialEntry_ = typing.TypedDict('KeychainCredentialEntry_', {
-            'name':'str',
-            'type':'str',
-            'attributes':'dict[str]',
-            'id':'int',
-    })
-    KeychainCredentialEntry__ = typing.TypedDict('KeychainCredentialEntry__', {
-            'name':'str',
-            'type':'str',
-            'attributes':'dict[str]',
-            'id':'int',
-    })
     KeychainRemoteSshHostKeyScan = typing.TypedDict('KeychainRemoteSshHostKeyScan', {
             'host':'str',
             'port':'str',
@@ -85,12 +73,6 @@ class Keychaincredential(Namespace):
             'private_key':'int',
             'connect_timeout':'int',
             'sudo':'bool',
-    })
-    KeychainCredentialEntry___ = typing.TypedDict('KeychainCredentialEntry___', {
-            'name':'str',
-            'type':'str',
-            'attributes':'dict[str]',
-            'id':'int',
     })
     PrivateKey = typing.TypedDict('PrivateKey', {
             'generate_key':'bool',
@@ -113,12 +95,6 @@ class Keychaincredential(Namespace):
             'setup_type':'str',
             'semi_automatic_setup':'SemiAutomaticSetup',
             'manual_setup':'dict[str]',
-    })
-    KeychainCredentialEntry____ = typing.TypedDict('KeychainCredentialEntry____', {
-            'name':'str',
-            'type':'str',
-            'attributes':'dict[str]',
-            'id':'int',
     })
     KeychainCredentialUpdate = typing.TypedDict('KeychainCredentialUpdate', {
             'name':'str',

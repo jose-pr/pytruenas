@@ -53,20 +53,6 @@ class KerberosRealm(Namespace):
             'kpasswd_server':'list',
             'id':'int',
     })
-    KerberosRealmEntry_ = typing.TypedDict('KerberosRealmEntry_', {
-            'realm':'str',
-            'kdc':'list',
-            'admin_server':'list',
-            'kpasswd_server':'list',
-            'id':'int',
-    })
-    KerberosRealmEntry__ = typing.TypedDict('KerberosRealmEntry__', {
-            'realm':'str',
-            'kdc':'list',
-            'admin_server':'list',
-            'kpasswd_server':'list',
-            'id':'int',
-    })
     KerberosRealmUpdate = typing.TypedDict('KerberosRealmUpdate', {
             'realm':'str',
             'kdc':'list',

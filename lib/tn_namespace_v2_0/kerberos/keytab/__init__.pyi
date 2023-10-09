@@ -67,16 +67,6 @@ class KerberosKeytab(Namespace):
             'name':'str',
             'id':'int',
     })
-    KerberosKeytabEntry_ = typing.TypedDict('KerberosKeytabEntry_', {
-            'file':'str',
-            'name':'str',
-            'id':'int',
-    })
-    KerberosKeytabEntry__ = typing.TypedDict('KerberosKeytabEntry__', {
-            'file':'str',
-            'name':'str',
-            'id':'int',
-    })
     KeytabEntry = typing.TypedDict('KeytabEntry', {
             'slot':'int',
             'kvno':'int',
@@ -96,11 +86,6 @@ class KerberosKeytab(Namespace):
     })
     KeytabData = typing.TypedDict('KeytabData', {
             'name':'str',
-    })
-    KerberosKeytabEntry___ = typing.TypedDict('KerberosKeytabEntry___', {
-            'file':'str',
-            'name':'str',
-            'id':'int',
     })
     @typing.overload
     def delete(self, 
@@ -162,16 +147,6 @@ class KerberosKeytab(Namespace):
             'name':'str',
             'id':'int',
     })
-    KerberosKeytabEntry_ = typing.TypedDict('KerberosKeytabEntry_', {
-            'file':'str',
-            'name':'str',
-            'id':'int',
-    })
-    KerberosKeytabEntry__ = typing.TypedDict('KerberosKeytabEntry__', {
-            'file':'str',
-            'name':'str',
-            'id':'int',
-    })
     KeytabEntry = typing.TypedDict('KeytabEntry', {
             'slot':'int',
             'kvno':'int',
@@ -191,11 +166,6 @@ class KerberosKeytab(Namespace):
     })
     KeytabData = typing.TypedDict('KeytabData', {
             'name':'str',
-    })
-    KerberosKeytabEntry___ = typing.TypedDict('KerberosKeytabEntry___', {
-            'file':'str',
-            'name':'str',
-            'id':'int',
     })
     @typing.overload
     def get_instance(self, 
@@ -259,16 +229,6 @@ class KerberosKeytab(Namespace):
             'name':'str',
             'id':'int',
     })
-    KerberosKeytabEntry_ = typing.TypedDict('KerberosKeytabEntry_', {
-            'file':'str',
-            'name':'str',
-            'id':'int',
-    })
-    KerberosKeytabEntry__ = typing.TypedDict('KerberosKeytabEntry__', {
-            'file':'str',
-            'name':'str',
-            'id':'int',
-    })
     KeytabEntry = typing.TypedDict('KeytabEntry', {
             'slot':'int',
             'kvno':'int',
@@ -289,16 +249,11 @@ class KerberosKeytab(Namespace):
     KeytabData = typing.TypedDict('KeytabData', {
             'name':'str',
     })
-    KerberosKeytabEntry___ = typing.TypedDict('KerberosKeytabEntry___', {
-            'file':'str',
-            'name':'str',
-            'id':'int',
-    })
     @typing.overload
     def query(self, 
         query_filters:'list[list]'=[],
         query_options:'QueryOptions'={},
-    /) -> 'typing.Union[list[KerberosKeytabEntry], ForwardRef(KerberosKeytabEntry_), int, ForwardRef(KerberosKeytabEntry__)]': 
+    /) -> 'typing.Union[list[KerberosKeytabEntry], ForwardRef(KerberosKeytabEntry), int]': 
         """
         
 
@@ -310,7 +265,7 @@ class KerberosKeytab(Namespace):
             query-options
         Returns
         -------
-        typing.Union[list[KerberosKeytabEntry], ForwardRef(KerberosKeytabEntry_), int, ForwardRef(KerberosKeytabEntry__)]:
+        typing.Union[list[KerberosKeytabEntry], ForwardRef(KerberosKeytabEntry), int]:
             
         """
         ...
@@ -356,16 +311,6 @@ class KerberosKeytab(Namespace):
             'name':'str',
             'id':'int',
     })
-    KerberosKeytabEntry_ = typing.TypedDict('KerberosKeytabEntry_', {
-            'file':'str',
-            'name':'str',
-            'id':'int',
-    })
-    KerberosKeytabEntry__ = typing.TypedDict('KerberosKeytabEntry__', {
-            'file':'str',
-            'name':'str',
-            'id':'int',
-    })
     KeytabEntry = typing.TypedDict('KeytabEntry', {
             'slot':'int',
             'kvno':'int',
@@ -385,11 +330,6 @@ class KerberosKeytab(Namespace):
     })
     KeytabData = typing.TypedDict('KeytabData', {
             'name':'str',
-    })
-    KerberosKeytabEntry___ = typing.TypedDict('KerberosKeytabEntry___', {
-            'file':'str',
-            'name':'str',
-            'id':'int',
     })
     @typing.overload
     def system_keytab_list(self, 
@@ -447,16 +387,6 @@ class KerberosKeytab(Namespace):
             'name':'str',
             'id':'int',
     })
-    KerberosKeytabEntry_ = typing.TypedDict('KerberosKeytabEntry_', {
-            'file':'str',
-            'name':'str',
-            'id':'int',
-    })
-    KerberosKeytabEntry__ = typing.TypedDict('KerberosKeytabEntry__', {
-            'file':'str',
-            'name':'str',
-            'id':'int',
-    })
     KeytabEntry = typing.TypedDict('KeytabEntry', {
             'slot':'int',
             'kvno':'int',
@@ -476,11 +406,6 @@ class KerberosKeytab(Namespace):
     })
     KeytabData = typing.TypedDict('KeytabData', {
             'name':'str',
-    })
-    KerberosKeytabEntry___ = typing.TypedDict('KerberosKeytabEntry___', {
-            'file':'str',
-            'name':'str',
-            'id':'int',
     })
     @typing.overload
     def update(self, 
@@ -544,16 +469,6 @@ class KerberosKeytab(Namespace):
             'name':'str',
             'id':'int',
     })
-    KerberosKeytabEntry_ = typing.TypedDict('KerberosKeytabEntry_', {
-            'file':'str',
-            'name':'str',
-            'id':'int',
-    })
-    KerberosKeytabEntry__ = typing.TypedDict('KerberosKeytabEntry__', {
-            'file':'str',
-            'name':'str',
-            'id':'int',
-    })
     KeytabEntry = typing.TypedDict('KeytabEntry', {
             'slot':'int',
             'kvno':'int',
@@ -574,15 +489,10 @@ class KerberosKeytab(Namespace):
     KeytabData = typing.TypedDict('KeytabData', {
             'name':'str',
     })
-    KerberosKeytabEntry___ = typing.TypedDict('KerberosKeytabEntry___', {
-            'file':'str',
-            'name':'str',
-            'id':'int',
-    })
     @typing.overload
     def upload_keytab(self, 
         keytab_data:'KeytabData'={},
-    /) -> 'KerberosKeytabEntry___': 
+    /) -> 'KerberosKeytabEntry': 
         """
         Upload a keytab file. This method expects the keytab file to be uploaded using
         the /_upload/ endpoint.
@@ -593,7 +503,7 @@ class KerberosKeytab(Namespace):
             keytab_data
         Returns
         -------
-        KerberosKeytabEntry___:
+        KerberosKeytabEntry:
             kerberos_keytab_entry
         """
         ...
@@ -639,16 +549,6 @@ class KerberosKeytab(Namespace):
             'name':'str',
             'id':'int',
     })
-    KerberosKeytabEntry_ = typing.TypedDict('KerberosKeytabEntry_', {
-            'file':'str',
-            'name':'str',
-            'id':'int',
-    })
-    KerberosKeytabEntry__ = typing.TypedDict('KerberosKeytabEntry__', {
-            'file':'str',
-            'name':'str',
-            'id':'int',
-    })
     KeytabEntry = typing.TypedDict('KeytabEntry', {
             'slot':'int',
             'kvno':'int',
@@ -668,10 +568,5 @@ class KerberosKeytab(Namespace):
     })
     KeytabData = typing.TypedDict('KeytabData', {
             'name':'str',
-    })
-    KerberosKeytabEntry___ = typing.TypedDict('KerberosKeytabEntry___', {
-            'file':'str',
-            'name':'str',
-            'id':'int',
     })
 

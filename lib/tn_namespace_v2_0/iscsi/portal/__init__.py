@@ -42,12 +42,9 @@ class IscsiPortal(Namespace):
             'limit':'int',
             'force_sql_filters':'bool',
     })
-    Listen_ = typing.TypedDict('Listen_', {
-            'ip':'str',
-    })
     IscsiportalUpdate = typing.TypedDict('IscsiportalUpdate', {
             'comment':'str',
             'discovery_authmethod':'str',
             'discovery_authgroup':'typing.Optional[int]',
-            'listen':'list[Listen_]',
+            'listen':'list[Listen]',
     })

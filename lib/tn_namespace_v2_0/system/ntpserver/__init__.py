@@ -60,24 +60,6 @@ class SystemNtpserver(Namespace):
             'maxpoll':'int',
             'id':'int',
     })
-    NtpEntry_ = typing.TypedDict('NtpEntry_', {
-            'address':'str',
-            'burst':'bool',
-            'iburst':'bool',
-            'prefer':'bool',
-            'minpoll':'int',
-            'maxpoll':'int',
-            'id':'int',
-    })
-    NtpEntry__ = typing.TypedDict('NtpEntry__', {
-            'address':'str',
-            'burst':'bool',
-            'iburst':'bool',
-            'prefer':'bool',
-            'minpoll':'int',
-            'maxpoll':'int',
-            'id':'int',
-    })
     NtpUpdate = typing.TypedDict('NtpUpdate', {
             'address':'str',
             'burst':'bool',

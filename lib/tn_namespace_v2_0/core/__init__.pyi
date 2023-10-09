@@ -148,13 +148,6 @@ class Core(Namespace):
             'authenticated':'bool',
             'call_count':'int',
     })
-    Session_ = typing.TypedDict('Session_', {
-            'id':'str',
-            'socket_family':'str',
-            'address':'str',
-            'authenticated':'bool',
-            'call_count':'int',
-    })
     @typing.overload
     def debug(self, 
         options:'Options'={},
@@ -282,13 +275,6 @@ class Core(Namespace):
             'authenticated':'bool',
             'call_count':'int',
     })
-    Session_ = typing.TypedDict('Session_', {
-            'id':'str',
-            'socket_family':'str',
-            'address':'str',
-            'authenticated':'bool',
-            'call_count':'int',
-    })
     @typing.overload
     def debug_mode_enabled(self, 
     /) -> 'bool': 
@@ -401,13 +387,6 @@ class Core(Namespace):
             'force_sql_filters':'bool',
     })
     Session = typing.TypedDict('Session', {
-            'id':'str',
-            'socket_family':'str',
-            'address':'str',
-            'authenticated':'bool',
-            'call_count':'int',
-    })
-    Session_ = typing.TypedDict('Session_', {
             'id':'str',
             'socket_family':'str',
             'address':'str',
@@ -550,13 +529,6 @@ class Core(Namespace):
             'authenticated':'bool',
             'call_count':'int',
     })
-    Session_ = typing.TypedDict('Session_', {
-            'id':'str',
-            'socket_family':'str',
-            'address':'str',
-            'authenticated':'bool',
-            'call_count':'int',
-    })
     @typing.overload
     def get_events(self, 
     /) -> None: 
@@ -667,13 +639,6 @@ class Core(Namespace):
             'force_sql_filters':'bool',
     })
     Session = typing.TypedDict('Session', {
-            'id':'str',
-            'socket_family':'str',
-            'address':'str',
-            'authenticated':'bool',
-            'call_count':'int',
-    })
-    Session_ = typing.TypedDict('Session_', {
             'id':'str',
             'socket_family':'str',
             'address':'str',
@@ -804,13 +769,6 @@ class Core(Namespace):
             'authenticated':'bool',
             'call_count':'int',
     })
-    Session_ = typing.TypedDict('Session_', {
-            'id':'str',
-            'socket_family':'str',
-            'address':'str',
-            'authenticated':'bool',
-            'call_count':'int',
-    })
     @typing.overload
     def job_abort(self, 
         id:'int',
@@ -924,13 +882,6 @@ class Core(Namespace):
             'force_sql_filters':'bool',
     })
     Session = typing.TypedDict('Session', {
-            'id':'str',
-            'socket_family':'str',
-            'address':'str',
-            'authenticated':'bool',
-            'call_count':'int',
-    })
-    Session_ = typing.TypedDict('Session_', {
             'id':'str',
             'socket_family':'str',
             'address':'str',
@@ -1059,13 +1010,6 @@ class Core(Namespace):
             'authenticated':'bool',
             'call_count':'int',
     })
-    Session_ = typing.TypedDict('Session_', {
-            'id':'str',
-            'socket_family':'str',
-            'address':'str',
-            'authenticated':'bool',
-            'call_count':'int',
-    })
     @typing.overload
     def job_wait(self, 
         id:'int',
@@ -1179,13 +1123,6 @@ class Core(Namespace):
             'force_sql_filters':'bool',
     })
     Session = typing.TypedDict('Session', {
-            'id':'str',
-            'socket_family':'str',
-            'address':'str',
-            'authenticated':'bool',
-            'call_count':'int',
-    })
-    Session_ = typing.TypedDict('Session_', {
             'id':'str',
             'socket_family':'str',
             'address':'str',
@@ -1310,13 +1247,6 @@ class Core(Namespace):
             'authenticated':'bool',
             'call_count':'int',
     })
-    Session_ = typing.TypedDict('Session_', {
-            'id':'str',
-            'socket_family':'str',
-            'address':'str',
-            'authenticated':'bool',
-            'call_count':'int',
-    })
     @typing.overload
     def ping_remote(self, 
         options:'Options_'={},
@@ -1431,13 +1361,6 @@ class Core(Namespace):
             'force_sql_filters':'bool',
     })
     Session = typing.TypedDict('Session', {
-            'id':'str',
-            'socket_family':'str',
-            'address':'str',
-            'authenticated':'bool',
-            'call_count':'int',
-    })
-    Session_ = typing.TypedDict('Session_', {
             'id':'str',
             'socket_family':'str',
             'address':'str',
@@ -1569,18 +1492,11 @@ class Core(Namespace):
             'authenticated':'bool',
             'call_count':'int',
     })
-    Session_ = typing.TypedDict('Session_', {
-            'id':'str',
-            'socket_family':'str',
-            'address':'str',
-            'authenticated':'bool',
-            'call_count':'int',
-    })
     @typing.overload
     def sessions(self, 
         query_filters:'list[list]'=[],
         query_options:'QueryOptions_'={},
-    /) -> 'typing.Union[int, ForwardRef(Session), list[Session_]]': 
+    /) -> 'typing.Union[int, ForwardRef(Session), list[Session]]': 
         """
         Get currently open websocket sessions.
 
@@ -1592,7 +1508,7 @@ class Core(Namespace):
             query-options
         Returns
         -------
-        typing.Union[int, ForwardRef(Session), list[Session_]]:
+        typing.Union[int, ForwardRef(Session), list[Session]]:
             
         """
         ...
@@ -1694,13 +1610,6 @@ class Core(Namespace):
             'force_sql_filters':'bool',
     })
     Session = typing.TypedDict('Session', {
-            'id':'str',
-            'socket_family':'str',
-            'address':'str',
-            'authenticated':'bool',
-            'call_count':'int',
-    })
-    Session_ = typing.TypedDict('Session_', {
             'id':'str',
             'socket_family':'str',
             'address':'str',
@@ -1820,13 +1729,6 @@ class Core(Namespace):
             'force_sql_filters':'bool',
     })
     Session = typing.TypedDict('Session', {
-            'id':'str',
-            'socket_family':'str',
-            'address':'str',
-            'authenticated':'bool',
-            'call_count':'int',
-    })
-    Session_ = typing.TypedDict('Session_', {
             'id':'str',
             'socket_family':'str',
             'address':'str',

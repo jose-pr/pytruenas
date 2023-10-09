@@ -115,14 +115,6 @@ class Pool(Namespace):
             'limit':'int',
             'force_sql_filters':'bool',
     })
-    Topology__ = typing.TypedDict('Topology__', {
-            'data':'list',
-            'log':'list',
-            'cache':'list',
-            'spare':'list',
-            'special':'list',
-            'dedup':'list',
-    })
     PoolEntry = typing.TypedDict('PoolEntry', {
             'id':'int',
             'name':'str',
@@ -145,7 +137,7 @@ class Pool(Namespace):
             'free_str':'typing.Optional[str]',
             'freeing_str':'typing.Optional[str]',
             'autotrim':'dict[str]',
-            'topology':'Topology__',
+            'topology':'Topology_',
     })
     PoolInfo = typing.TypedDict('PoolInfo', {
             'name':'str',
@@ -157,12 +149,6 @@ class Pool(Namespace):
             'guid':'str',
             'name':'str',
             'enable_attachments':'bool',
-    })
-    Options__ = typing.TypedDict('Options__', {
-            'label':'str',
-    })
-    Options___ = typing.TypedDict('Options___', {
-            'label':'str',
     })
     Process = typing.TypedDict('Process', {
             'pid':'int',
@@ -183,14 +169,6 @@ class Pool(Namespace):
             'offset':'int',
             'limit':'int',
             'force_sql_filters':'bool',
-    })
-    Topology___ = typing.TypedDict('Topology___', {
-            'data':'list',
-            'log':'list',
-            'cache':'list',
-            'spare':'list',
-            'special':'list',
-            'dedup':'list',
     })
     PoolEntry_ = typing.TypedDict('PoolEntry_', {
             'id':'int',
@@ -214,15 +192,7 @@ class Pool(Namespace):
             'free_str':'typing.Optional[str]',
             'freeing_str':'typing.Optional[str]',
             'autotrim':'dict[str]',
-            'topology':'Topology___',
-    })
-    Topology____ = typing.TypedDict('Topology____', {
-            'data':'list',
-            'log':'list',
-            'cache':'list',
-            'spare':'list',
-            'special':'list',
-            'dedup':'list',
+            'topology':'Topology_',
     })
     PoolEntry__ = typing.TypedDict('PoolEntry__', {
             'id':'int',
@@ -246,15 +216,7 @@ class Pool(Namespace):
             'free_str':'typing.Optional[str]',
             'freeing_str':'typing.Optional[str]',
             'autotrim':'dict[str]',
-            'topology':'Topology____',
-    })
-    Topology_____ = typing.TypedDict('Topology_____', {
-            'data':'list',
-            'log':'list',
-            'cache':'list',
-            'spare':'list',
-            'special':'list',
-            'dedup':'list',
+            'topology':'Topology_',
     })
     PoolEntry___ = typing.TypedDict('PoolEntry___', {
             'id':'int',
@@ -278,12 +240,9 @@ class Pool(Namespace):
             'free_str':'typing.Optional[str]',
             'freeing_str':'typing.Optional[str]',
             'autotrim':'dict[str]',
-            'topology':'Topology_____',
+            'topology':'Topology_',
     })
-    Options____ = typing.TypedDict('Options____', {
-            'label':'str',
-    })
-    Options_____ = typing.TypedDict('Options_____', {
+    Options__ = typing.TypedDict('Options__', {
             'label':'str',
             'disk':'str',
             'force':'bool',
@@ -311,7 +270,7 @@ class Pool(Namespace):
             'type':'str',
             'disks':'list[str]',
     })
-    Topology______ = typing.TypedDict('Topology______', {
+    Topology__ = typing.TypedDict('Topology__', {
             'data':'list[Datavdevs_]',
             'special':'list[Specialvdevs_]',
             'dedup':'list[Dedupvdevs_]',
@@ -320,17 +279,9 @@ class Pool(Namespace):
             'spares':'list[str]',
     })
     PoolUpdate = typing.TypedDict('PoolUpdate', {
-            'topology':'Topology______',
+            'topology':'Topology__',
             'allow_duplicate_serials':'bool',
             'autotrim':'str',
-    })
-    Topology_______ = typing.TypedDict('Topology_______', {
-            'data':'list',
-            'log':'list',
-            'cache':'list',
-            'spare':'list',
-            'special':'list',
-            'dedup':'list',
     })
     PoolUpdateReturns = typing.TypedDict('PoolUpdateReturns', {
             'id':'int',
@@ -354,5 +305,5 @@ class Pool(Namespace):
             'free_str':'typing.Optional[str]',
             'freeing_str':'typing.Optional[str]',
             'autotrim':'dict[str]',
-            'topology':'Topology_______',
+            'topology':'Topology_',
     })

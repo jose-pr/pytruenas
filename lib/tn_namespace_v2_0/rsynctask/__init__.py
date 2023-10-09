@@ -38,13 +38,6 @@ class Rsynctask(Namespace):
             'extra':'list[str]',
             'enabled':'bool',
     })
-    Schedule_ = typing.TypedDict('Schedule_', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
     RsynctaskCreateReturns = typing.TypedDict('RsynctaskCreateReturns', {
             'path':'str',
             'user':'str',
@@ -55,7 +48,7 @@ class Rsynctask(Namespace):
             'remotepath':'str',
             'direction':'str',
             'desc':'str',
-            'schedule':'Schedule_',
+            'schedule':'Schedule',
             'recursive':'bool',
             'times':'bool',
             'compress':'bool',
@@ -100,13 +93,6 @@ class Rsynctask(Namespace):
             'limit':'int',
             'force_sql_filters':'bool',
     })
-    Schedule__ = typing.TypedDict('Schedule__', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
     RsyncTaskEntry = typing.TypedDict('RsyncTaskEntry', {
             'path':'str',
             'user':'str',
@@ -117,7 +103,7 @@ class Rsynctask(Namespace):
             'remotepath':'str',
             'direction':'str',
             'desc':'str',
-            'schedule':'Schedule__',
+            'schedule':'Schedule',
             'recursive':'bool',
             'times':'bool',
             'compress':'bool',
@@ -133,13 +119,6 @@ class Rsynctask(Namespace):
             'ssh_credentials':'dict[str]',
             'locked':'bool',
             'job':'dict[str]',
-    })
-    Schedule___ = typing.TypedDict('Schedule___', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
     })
     RsyncTaskEntry_ = typing.TypedDict('RsyncTaskEntry_', {
             'path':'str',
@@ -151,7 +130,7 @@ class Rsynctask(Namespace):
             'remotepath':'str',
             'direction':'str',
             'desc':'str',
-            'schedule':'Schedule___',
+            'schedule':'Schedule',
             'recursive':'bool',
             'times':'bool',
             'compress':'bool',
@@ -167,13 +146,6 @@ class Rsynctask(Namespace):
             'ssh_credentials':'dict[str]',
             'locked':'bool',
             'job':'dict[str]',
-    })
-    Schedule____ = typing.TypedDict('Schedule____', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
     })
     RsyncTaskEntry__ = typing.TypedDict('RsyncTaskEntry__', {
             'path':'str',
@@ -185,7 +157,7 @@ class Rsynctask(Namespace):
             'remotepath':'str',
             'direction':'str',
             'desc':'str',
-            'schedule':'Schedule____',
+            'schedule':'Schedule',
             'recursive':'bool',
             'times':'bool',
             'compress':'bool',
@@ -201,13 +173,6 @@ class Rsynctask(Namespace):
             'ssh_credentials':'dict[str]',
             'locked':'bool',
             'job':'dict[str]',
-    })
-    Schedule_____ = typing.TypedDict('Schedule_____', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
     })
     RsyncTaskUpdate = typing.TypedDict('RsyncTaskUpdate', {
             'path':'str',
@@ -222,7 +187,7 @@ class Rsynctask(Namespace):
             'ssh_keyscan':'bool',
             'direction':'str',
             'desc':'str',
-            'schedule':'Schedule_____',
+            'schedule':'Schedule',
             'recursive':'bool',
             'times':'bool',
             'compress':'bool',
@@ -235,13 +200,6 @@ class Rsynctask(Namespace):
             'extra':'list[str]',
             'enabled':'bool',
     })
-    Schedule______ = typing.TypedDict('Schedule______', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
     RsynctaskUpdateReturns = typing.TypedDict('RsynctaskUpdateReturns', {
             'path':'str',
             'user':'str',
@@ -252,7 +210,7 @@ class Rsynctask(Namespace):
             'remotepath':'str',
             'direction':'str',
             'desc':'str',
-            'schedule':'Schedule______',
+            'schedule':'Schedule',
             'recursive':'bool',
             'times':'bool',
             'compress':'bool',

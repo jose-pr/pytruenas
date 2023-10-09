@@ -99,13 +99,6 @@ class Cloudsync(Namespace):
     CloudSyncSyncOptions = typing.TypedDict('CloudSyncSyncOptions', {
             'dry_run':'bool',
     })
-    Schedule_ = typing.TypedDict('Schedule_', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
     CloudSyncBwlimit_ = typing.TypedDict('CloudSyncBwlimit_', {
             'time':'str',
             'bandwidth':'typing.Optional[int]',
@@ -115,7 +108,7 @@ class Cloudsync(Namespace):
             'path':'str',
             'credentials':'int',
             'attributes':'dict[str]',
-            'schedule':'Schedule_',
+            'schedule':'Schedule',
             'pre_script':'str',
             'post_script':'str',
             'snapshot':'bool',
@@ -137,13 +130,6 @@ class Cloudsync(Namespace):
     CloudSyncSyncOnetimeOptions = typing.TypedDict('CloudSyncSyncOnetimeOptions', {
             'dry_run':'bool',
     })
-    Schedule__ = typing.TypedDict('Schedule__', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
     CloudSyncBwlimit__ = typing.TypedDict('CloudSyncBwlimit__', {
             'time':'str',
             'bandwidth':'typing.Optional[int]',
@@ -153,7 +139,7 @@ class Cloudsync(Namespace):
             'path':'str',
             'credentials':'int',
             'attributes':'dict[str]',
-            'schedule':'Schedule__',
+            'schedule':'Schedule',
             'pre_script':'str',
             'post_script':'str',
             'snapshot':'bool',
@@ -269,13 +255,6 @@ class Cloudsync(Namespace):
     CloudSyncSyncOptions = typing.TypedDict('CloudSyncSyncOptions', {
             'dry_run':'bool',
     })
-    Schedule_ = typing.TypedDict('Schedule_', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
     CloudSyncBwlimit_ = typing.TypedDict('CloudSyncBwlimit_', {
             'time':'str',
             'bandwidth':'typing.Optional[int]',
@@ -285,7 +264,7 @@ class Cloudsync(Namespace):
             'path':'str',
             'credentials':'int',
             'attributes':'dict[str]',
-            'schedule':'Schedule_',
+            'schedule':'Schedule',
             'pre_script':'str',
             'post_script':'str',
             'snapshot':'bool',
@@ -307,13 +286,6 @@ class Cloudsync(Namespace):
     CloudSyncSyncOnetimeOptions = typing.TypedDict('CloudSyncSyncOnetimeOptions', {
             'dry_run':'bool',
     })
-    Schedule__ = typing.TypedDict('Schedule__', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
     CloudSyncBwlimit__ = typing.TypedDict('CloudSyncBwlimit__', {
             'time':'str',
             'bandwidth':'typing.Optional[int]',
@@ -323,7 +295,7 @@ class Cloudsync(Namespace):
             'path':'str',
             'credentials':'int',
             'attributes':'dict[str]',
-            'schedule':'Schedule__',
+            'schedule':'Schedule',
             'pre_script':'str',
             'post_script':'str',
             'snapshot':'bool',
@@ -440,13 +412,6 @@ class Cloudsync(Namespace):
     CloudSyncSyncOptions = typing.TypedDict('CloudSyncSyncOptions', {
             'dry_run':'bool',
     })
-    Schedule_ = typing.TypedDict('Schedule_', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
     CloudSyncBwlimit_ = typing.TypedDict('CloudSyncBwlimit_', {
             'time':'str',
             'bandwidth':'typing.Optional[int]',
@@ -456,7 +421,7 @@ class Cloudsync(Namespace):
             'path':'str',
             'credentials':'int',
             'attributes':'dict[str]',
-            'schedule':'Schedule_',
+            'schedule':'Schedule',
             'pre_script':'str',
             'post_script':'str',
             'snapshot':'bool',
@@ -478,13 +443,6 @@ class Cloudsync(Namespace):
     CloudSyncSyncOnetimeOptions = typing.TypedDict('CloudSyncSyncOnetimeOptions', {
             'dry_run':'bool',
     })
-    Schedule__ = typing.TypedDict('Schedule__', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
     CloudSyncBwlimit__ = typing.TypedDict('CloudSyncBwlimit__', {
             'time':'str',
             'bandwidth':'typing.Optional[int]',
@@ -494,7 +452,7 @@ class Cloudsync(Namespace):
             'path':'str',
             'credentials':'int',
             'attributes':'dict[str]',
-            'schedule':'Schedule__',
+            'schedule':'Schedule',
             'pre_script':'str',
             'post_script':'str',
             'snapshot':'bool',
@@ -610,13 +568,6 @@ class Cloudsync(Namespace):
     CloudSyncSyncOptions = typing.TypedDict('CloudSyncSyncOptions', {
             'dry_run':'bool',
     })
-    Schedule_ = typing.TypedDict('Schedule_', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
     CloudSyncBwlimit_ = typing.TypedDict('CloudSyncBwlimit_', {
             'time':'str',
             'bandwidth':'typing.Optional[int]',
@@ -626,7 +577,7 @@ class Cloudsync(Namespace):
             'path':'str',
             'credentials':'int',
             'attributes':'dict[str]',
-            'schedule':'Schedule_',
+            'schedule':'Schedule',
             'pre_script':'str',
             'post_script':'str',
             'snapshot':'bool',
@@ -648,13 +599,6 @@ class Cloudsync(Namespace):
     CloudSyncSyncOnetimeOptions = typing.TypedDict('CloudSyncSyncOnetimeOptions', {
             'dry_run':'bool',
     })
-    Schedule__ = typing.TypedDict('Schedule__', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
     CloudSyncBwlimit__ = typing.TypedDict('CloudSyncBwlimit__', {
             'time':'str',
             'bandwidth':'typing.Optional[int]',
@@ -664,7 +608,7 @@ class Cloudsync(Namespace):
             'path':'str',
             'credentials':'int',
             'attributes':'dict[str]',
-            'schedule':'Schedule__',
+            'schedule':'Schedule',
             'pre_script':'str',
             'post_script':'str',
             'snapshot':'bool',
@@ -783,13 +727,6 @@ class Cloudsync(Namespace):
     CloudSyncSyncOptions = typing.TypedDict('CloudSyncSyncOptions', {
             'dry_run':'bool',
     })
-    Schedule_ = typing.TypedDict('Schedule_', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
     CloudSyncBwlimit_ = typing.TypedDict('CloudSyncBwlimit_', {
             'time':'str',
             'bandwidth':'typing.Optional[int]',
@@ -799,7 +736,7 @@ class Cloudsync(Namespace):
             'path':'str',
             'credentials':'int',
             'attributes':'dict[str]',
-            'schedule':'Schedule_',
+            'schedule':'Schedule',
             'pre_script':'str',
             'post_script':'str',
             'snapshot':'bool',
@@ -821,13 +758,6 @@ class Cloudsync(Namespace):
     CloudSyncSyncOnetimeOptions = typing.TypedDict('CloudSyncSyncOnetimeOptions', {
             'dry_run':'bool',
     })
-    Schedule__ = typing.TypedDict('Schedule__', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
     CloudSyncBwlimit__ = typing.TypedDict('CloudSyncBwlimit__', {
             'time':'str',
             'bandwidth':'typing.Optional[int]',
@@ -837,7 +767,7 @@ class Cloudsync(Namespace):
             'path':'str',
             'credentials':'int',
             'attributes':'dict[str]',
-            'schedule':'Schedule__',
+            'schedule':'Schedule',
             'pre_script':'str',
             'post_script':'str',
             'snapshot':'bool',
@@ -951,13 +881,6 @@ class Cloudsync(Namespace):
     CloudSyncSyncOptions = typing.TypedDict('CloudSyncSyncOptions', {
             'dry_run':'bool',
     })
-    Schedule_ = typing.TypedDict('Schedule_', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
     CloudSyncBwlimit_ = typing.TypedDict('CloudSyncBwlimit_', {
             'time':'str',
             'bandwidth':'typing.Optional[int]',
@@ -967,7 +890,7 @@ class Cloudsync(Namespace):
             'path':'str',
             'credentials':'int',
             'attributes':'dict[str]',
-            'schedule':'Schedule_',
+            'schedule':'Schedule',
             'pre_script':'str',
             'post_script':'str',
             'snapshot':'bool',
@@ -989,13 +912,6 @@ class Cloudsync(Namespace):
     CloudSyncSyncOnetimeOptions = typing.TypedDict('CloudSyncSyncOnetimeOptions', {
             'dry_run':'bool',
     })
-    Schedule__ = typing.TypedDict('Schedule__', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
     CloudSyncBwlimit__ = typing.TypedDict('CloudSyncBwlimit__', {
             'time':'str',
             'bandwidth':'typing.Optional[int]',
@@ -1005,7 +921,7 @@ class Cloudsync(Namespace):
             'path':'str',
             'credentials':'int',
             'attributes':'dict[str]',
-            'schedule':'Schedule__',
+            'schedule':'Schedule',
             'pre_script':'str',
             'post_script':'str',
             'snapshot':'bool',
@@ -1133,13 +1049,6 @@ class Cloudsync(Namespace):
     CloudSyncSyncOptions = typing.TypedDict('CloudSyncSyncOptions', {
             'dry_run':'bool',
     })
-    Schedule_ = typing.TypedDict('Schedule_', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
     CloudSyncBwlimit_ = typing.TypedDict('CloudSyncBwlimit_', {
             'time':'str',
             'bandwidth':'typing.Optional[int]',
@@ -1149,7 +1058,7 @@ class Cloudsync(Namespace):
             'path':'str',
             'credentials':'int',
             'attributes':'dict[str]',
-            'schedule':'Schedule_',
+            'schedule':'Schedule',
             'pre_script':'str',
             'post_script':'str',
             'snapshot':'bool',
@@ -1171,13 +1080,6 @@ class Cloudsync(Namespace):
     CloudSyncSyncOnetimeOptions = typing.TypedDict('CloudSyncSyncOnetimeOptions', {
             'dry_run':'bool',
     })
-    Schedule__ = typing.TypedDict('Schedule__', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
     CloudSyncBwlimit__ = typing.TypedDict('CloudSyncBwlimit__', {
             'time':'str',
             'bandwidth':'typing.Optional[int]',
@@ -1187,7 +1089,7 @@ class Cloudsync(Namespace):
             'path':'str',
             'credentials':'int',
             'attributes':'dict[str]',
-            'schedule':'Schedule__',
+            'schedule':'Schedule',
             'pre_script':'str',
             'post_script':'str',
             'snapshot':'bool',
@@ -1335,13 +1237,6 @@ class Cloudsync(Namespace):
     CloudSyncSyncOptions = typing.TypedDict('CloudSyncSyncOptions', {
             'dry_run':'bool',
     })
-    Schedule_ = typing.TypedDict('Schedule_', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
     CloudSyncBwlimit_ = typing.TypedDict('CloudSyncBwlimit_', {
             'time':'str',
             'bandwidth':'typing.Optional[int]',
@@ -1351,7 +1246,7 @@ class Cloudsync(Namespace):
             'path':'str',
             'credentials':'int',
             'attributes':'dict[str]',
-            'schedule':'Schedule_',
+            'schedule':'Schedule',
             'pre_script':'str',
             'post_script':'str',
             'snapshot':'bool',
@@ -1373,13 +1268,6 @@ class Cloudsync(Namespace):
     CloudSyncSyncOnetimeOptions = typing.TypedDict('CloudSyncSyncOnetimeOptions', {
             'dry_run':'bool',
     })
-    Schedule__ = typing.TypedDict('Schedule__', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
     CloudSyncBwlimit__ = typing.TypedDict('CloudSyncBwlimit__', {
             'time':'str',
             'bandwidth':'typing.Optional[int]',
@@ -1389,7 +1277,7 @@ class Cloudsync(Namespace):
             'path':'str',
             'credentials':'int',
             'attributes':'dict[str]',
-            'schedule':'Schedule__',
+            'schedule':'Schedule',
             'pre_script':'str',
             'post_script':'str',
             'snapshot':'bool',
@@ -1508,13 +1396,6 @@ class Cloudsync(Namespace):
     CloudSyncSyncOptions = typing.TypedDict('CloudSyncSyncOptions', {
             'dry_run':'bool',
     })
-    Schedule_ = typing.TypedDict('Schedule_', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
     CloudSyncBwlimit_ = typing.TypedDict('CloudSyncBwlimit_', {
             'time':'str',
             'bandwidth':'typing.Optional[int]',
@@ -1524,7 +1405,7 @@ class Cloudsync(Namespace):
             'path':'str',
             'credentials':'int',
             'attributes':'dict[str]',
-            'schedule':'Schedule_',
+            'schedule':'Schedule',
             'pre_script':'str',
             'post_script':'str',
             'snapshot':'bool',
@@ -1546,13 +1427,6 @@ class Cloudsync(Namespace):
     CloudSyncSyncOnetimeOptions = typing.TypedDict('CloudSyncSyncOnetimeOptions', {
             'dry_run':'bool',
     })
-    Schedule__ = typing.TypedDict('Schedule__', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
     CloudSyncBwlimit__ = typing.TypedDict('CloudSyncBwlimit__', {
             'time':'str',
             'bandwidth':'typing.Optional[int]',
@@ -1562,7 +1436,7 @@ class Cloudsync(Namespace):
             'path':'str',
             'credentials':'int',
             'attributes':'dict[str]',
-            'schedule':'Schedule__',
+            'schedule':'Schedule',
             'pre_script':'str',
             'post_script':'str',
             'snapshot':'bool',
@@ -1679,13 +1553,6 @@ class Cloudsync(Namespace):
     CloudSyncSyncOptions = typing.TypedDict('CloudSyncSyncOptions', {
             'dry_run':'bool',
     })
-    Schedule_ = typing.TypedDict('Schedule_', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
     CloudSyncBwlimit_ = typing.TypedDict('CloudSyncBwlimit_', {
             'time':'str',
             'bandwidth':'typing.Optional[int]',
@@ -1695,7 +1562,7 @@ class Cloudsync(Namespace):
             'path':'str',
             'credentials':'int',
             'attributes':'dict[str]',
-            'schedule':'Schedule_',
+            'schedule':'Schedule',
             'pre_script':'str',
             'post_script':'str',
             'snapshot':'bool',
@@ -1717,13 +1584,6 @@ class Cloudsync(Namespace):
     CloudSyncSyncOnetimeOptions = typing.TypedDict('CloudSyncSyncOnetimeOptions', {
             'dry_run':'bool',
     })
-    Schedule__ = typing.TypedDict('Schedule__', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
     CloudSyncBwlimit__ = typing.TypedDict('CloudSyncBwlimit__', {
             'time':'str',
             'bandwidth':'typing.Optional[int]',
@@ -1733,7 +1593,7 @@ class Cloudsync(Namespace):
             'path':'str',
             'credentials':'int',
             'attributes':'dict[str]',
-            'schedule':'Schedule__',
+            'schedule':'Schedule',
             'pre_script':'str',
             'post_script':'str',
             'snapshot':'bool',
@@ -1850,13 +1710,6 @@ class Cloudsync(Namespace):
     CloudSyncSyncOptions = typing.TypedDict('CloudSyncSyncOptions', {
             'dry_run':'bool',
     })
-    Schedule_ = typing.TypedDict('Schedule_', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
     CloudSyncBwlimit_ = typing.TypedDict('CloudSyncBwlimit_', {
             'time':'str',
             'bandwidth':'typing.Optional[int]',
@@ -1866,7 +1719,7 @@ class Cloudsync(Namespace):
             'path':'str',
             'credentials':'int',
             'attributes':'dict[str]',
-            'schedule':'Schedule_',
+            'schedule':'Schedule',
             'pre_script':'str',
             'post_script':'str',
             'snapshot':'bool',
@@ -1888,13 +1741,6 @@ class Cloudsync(Namespace):
     CloudSyncSyncOnetimeOptions = typing.TypedDict('CloudSyncSyncOnetimeOptions', {
             'dry_run':'bool',
     })
-    Schedule__ = typing.TypedDict('Schedule__', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
     CloudSyncBwlimit__ = typing.TypedDict('CloudSyncBwlimit__', {
             'time':'str',
             'bandwidth':'typing.Optional[int]',
@@ -1904,7 +1750,7 @@ class Cloudsync(Namespace):
             'path':'str',
             'credentials':'int',
             'attributes':'dict[str]',
-            'schedule':'Schedule__',
+            'schedule':'Schedule',
             'pre_script':'str',
             'post_script':'str',
             'snapshot':'bool',
@@ -2021,13 +1867,6 @@ class Cloudsync(Namespace):
     CloudSyncSyncOptions = typing.TypedDict('CloudSyncSyncOptions', {
             'dry_run':'bool',
     })
-    Schedule_ = typing.TypedDict('Schedule_', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
     CloudSyncBwlimit_ = typing.TypedDict('CloudSyncBwlimit_', {
             'time':'str',
             'bandwidth':'typing.Optional[int]',
@@ -2037,7 +1876,7 @@ class Cloudsync(Namespace):
             'path':'str',
             'credentials':'int',
             'attributes':'dict[str]',
-            'schedule':'Schedule_',
+            'schedule':'Schedule',
             'pre_script':'str',
             'post_script':'str',
             'snapshot':'bool',
@@ -2059,13 +1898,6 @@ class Cloudsync(Namespace):
     CloudSyncSyncOnetimeOptions = typing.TypedDict('CloudSyncSyncOnetimeOptions', {
             'dry_run':'bool',
     })
-    Schedule__ = typing.TypedDict('Schedule__', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
     CloudSyncBwlimit__ = typing.TypedDict('CloudSyncBwlimit__', {
             'time':'str',
             'bandwidth':'typing.Optional[int]',
@@ -2075,7 +1907,7 @@ class Cloudsync(Namespace):
             'path':'str',
             'credentials':'int',
             'attributes':'dict[str]',
-            'schedule':'Schedule__',
+            'schedule':'Schedule',
             'pre_script':'str',
             'post_script':'str',
             'snapshot':'bool',
@@ -2195,13 +2027,6 @@ class Cloudsync(Namespace):
     CloudSyncSyncOptions = typing.TypedDict('CloudSyncSyncOptions', {
             'dry_run':'bool',
     })
-    Schedule_ = typing.TypedDict('Schedule_', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
     CloudSyncBwlimit_ = typing.TypedDict('CloudSyncBwlimit_', {
             'time':'str',
             'bandwidth':'typing.Optional[int]',
@@ -2211,7 +2036,7 @@ class Cloudsync(Namespace):
             'path':'str',
             'credentials':'int',
             'attributes':'dict[str]',
-            'schedule':'Schedule_',
+            'schedule':'Schedule',
             'pre_script':'str',
             'post_script':'str',
             'snapshot':'bool',
@@ -2233,13 +2058,6 @@ class Cloudsync(Namespace):
     CloudSyncSyncOnetimeOptions = typing.TypedDict('CloudSyncSyncOnetimeOptions', {
             'dry_run':'bool',
     })
-    Schedule__ = typing.TypedDict('Schedule__', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
     CloudSyncBwlimit__ = typing.TypedDict('CloudSyncBwlimit__', {
             'time':'str',
             'bandwidth':'typing.Optional[int]',
@@ -2249,7 +2067,7 @@ class Cloudsync(Namespace):
             'path':'str',
             'credentials':'int',
             'attributes':'dict[str]',
-            'schedule':'Schedule__',
+            'schedule':'Schedule',
             'pre_script':'str',
             'post_script':'str',
             'snapshot':'bool',

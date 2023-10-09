@@ -77,33 +77,13 @@ class SharingSmb(Namespace):
             'limit':'int',
             'force_sql_filters':'bool',
     })
-    AeWhoId_ = typing.TypedDict('AeWhoId_', {
-            'id_type':'str',
-            'id':'int',
-    })
-    Aclentry_ = typing.TypedDict('Aclentry_', {
-            'ae_who_sid':'str',
-            'ae_who_id':'AeWhoId_',
-            'ae_perm':'str',
-            'ae_type':'str',
-    })
     SmbShareAcl_ = typing.TypedDict('SmbShareAcl_', {
             'share_name':'str',
-            'share_acl':'list[Aclentry_]',
-    })
-    AeWhoId__ = typing.TypedDict('AeWhoId__', {
-            'id_type':'str',
-            'id':'int',
-    })
-    Aclentry__ = typing.TypedDict('Aclentry__', {
-            'ae_who_sid':'str',
-            'ae_who_id':'AeWhoId__',
-            'ae_perm':'str',
-            'ae_type':'str',
+            'share_acl':'list[Aclentry]',
     })
     SmbShareAcl__ = typing.TypedDict('SmbShareAcl__', {
             'share_name':'str',
-            'share_acl':'list[Aclentry__]',
+            'share_acl':'list[Aclentry]',
     })
     SharingsmbUpdate = typing.TypedDict('SharingsmbUpdate', {
             'purpose':'str',

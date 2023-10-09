@@ -81,15 +81,9 @@ class VmDevice(Namespace):
             'product':'typing.Optional[str]',
             'vendor':'typing.Optional[str]',
     })
-    Address_ = typing.TypedDict('Address_', {
-            'domain':'str',
-            'bus':'str',
-            'slot':'str',
-            'function':'str',
-    })
     IommuGroup_ = typing.TypedDict('IommuGroup_', {
             'number':'int',
-            'addresses':'list[Address_]',
+            'addresses':'list[Address]',
     })
     PassthroughDevice_ = typing.TypedDict('PassthroughDevice_', {
             'capability':'Capability_',
@@ -111,15 +105,9 @@ class VmDevice(Namespace):
             'product':'typing.Optional[str]',
             'vendor':'typing.Optional[str]',
     })
-    Address__ = typing.TypedDict('Address__', {
-            'domain':'str',
-            'bus':'str',
-            'slot':'str',
-            'function':'str',
-    })
     IommuGroup__ = typing.TypedDict('IommuGroup__', {
             'number':'int',
-            'addresses':'list[Address__]',
+            'addresses':'list[Address]',
     })
     PassthroughDevice__ = typing.TypedDict('PassthroughDevice__', {
             'capability':'Capability__',

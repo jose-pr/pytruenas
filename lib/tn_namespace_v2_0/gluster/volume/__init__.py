@@ -97,60 +97,12 @@ class GlusterVolume(Namespace):
             'limit':'int',
             'force_sql_filters':'bool',
     })
-    Ports_ = typing.TypedDict('Ports_', {
-            'tcp':'str',
-            'rdma':'str',
-    })
     GlusterVolumeEntry = typing.TypedDict('GlusterVolumeEntry', {
             'name':'str',
             'uuid':'str',
             'type':'str',
             'online':'bool',
-            'ports':'Ports_',
-            'pid':'str',
-            'size_total':'int',
-            'size_free':'int',
-            'size_used':'int',
-            'inodes_total':'int',
-            'inodes_free':'int',
-            'inodes_used':'int',
-            'device':'str',
-            'block_size':'str',
-            'mnt_options':'str',
-            'fs_name':'str',
-    })
-    Ports__ = typing.TypedDict('Ports__', {
-            'tcp':'str',
-            'rdma':'str',
-    })
-    GlusterVolumeEntry_ = typing.TypedDict('GlusterVolumeEntry_', {
-            'name':'str',
-            'uuid':'str',
-            'type':'str',
-            'online':'bool',
-            'ports':'Ports__',
-            'pid':'str',
-            'size_total':'int',
-            'size_free':'int',
-            'size_used':'int',
-            'inodes_total':'int',
-            'inodes_free':'int',
-            'inodes_used':'int',
-            'device':'str',
-            'block_size':'str',
-            'mnt_options':'str',
-            'fs_name':'str',
-    })
-    Ports___ = typing.TypedDict('Ports___', {
-            'tcp':'str',
-            'rdma':'str',
-    })
-    GlusterVolumeEntry__ = typing.TypedDict('GlusterVolumeEntry__', {
-            'name':'str',
-            'uuid':'str',
-            'type':'str',
-            'online':'bool',
-            'ports':'Ports___',
+            'ports':'Ports',
             'pid':'str',
             'size_total':'int',
             'size_free':'int',
@@ -178,28 +130,6 @@ class GlusterVolume(Namespace):
     VolumeStatus = typing.TypedDict('VolumeStatus', {
             'name':'str',
             'verbose':'bool',
-    })
-    Ports____ = typing.TypedDict('Ports____', {
-            'tcp':'str',
-            'rdma':'str',
-    })
-    GlusterVolumeEntry___ = typing.TypedDict('GlusterVolumeEntry___', {
-            'name':'str',
-            'uuid':'str',
-            'type':'str',
-            'online':'bool',
-            'ports':'Ports____',
-            'pid':'str',
-            'size_total':'int',
-            'size_free':'int',
-            'size_used':'int',
-            'inodes_total':'int',
-            'inodes_free':'int',
-            'inodes_used':'int',
-            'device':'str',
-            'block_size':'str',
-            'mnt_options':'str',
-            'fs_name':'str',
     })
     VolumeStop = typing.TypedDict('VolumeStop', {
             'name':'str',

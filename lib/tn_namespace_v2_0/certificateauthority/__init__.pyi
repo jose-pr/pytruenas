@@ -128,11 +128,6 @@ class Certificateauthority(Namespace):
             'path_length':'typing.Optional[int]',
             'extension_critical':'bool',
     })
-    AuthorityKeyIdentifier_ = typing.TypedDict('AuthorityKeyIdentifier_', {
-            'authority_cert_issuer':'bool',
-            'enabled':'bool',
-            'extension_critical':'bool',
-    })
     ExtendedKeyUsage_ = typing.TypedDict('ExtendedKeyUsage_', {
             'usages':'list[str]',
             'enabled':'bool',
@@ -153,7 +148,7 @@ class Certificateauthority(Namespace):
     })
     CertExtensions_ = typing.TypedDict('CertExtensions_', {
             'BasicConstraints':'BasicConstraints_',
-            'AuthorityKeyIdentifier':'AuthorityKeyIdentifier_',
+            'AuthorityKeyIdentifier':'AuthorityKeyIdentifier',
             'ExtendedKeyUsage':'ExtendedKeyUsage_',
             'KeyUsage':'KeyUsage_',
     })
@@ -643,11 +638,6 @@ class Certificateauthority(Namespace):
             'path_length':'typing.Optional[int]',
             'extension_critical':'bool',
     })
-    AuthorityKeyIdentifier_ = typing.TypedDict('AuthorityKeyIdentifier_', {
-            'authority_cert_issuer':'bool',
-            'enabled':'bool',
-            'extension_critical':'bool',
-    })
     ExtendedKeyUsage_ = typing.TypedDict('ExtendedKeyUsage_', {
             'usages':'list[str]',
             'enabled':'bool',
@@ -668,7 +658,7 @@ class Certificateauthority(Namespace):
     })
     CertExtensions_ = typing.TypedDict('CertExtensions_', {
             'BasicConstraints':'BasicConstraints_',
-            'AuthorityKeyIdentifier':'AuthorityKeyIdentifier_',
+            'AuthorityKeyIdentifier':'AuthorityKeyIdentifier',
             'ExtendedKeyUsage':'ExtendedKeyUsage_',
             'KeyUsage':'KeyUsage_',
     })
@@ -1140,11 +1130,6 @@ class Certificateauthority(Namespace):
             'path_length':'typing.Optional[int]',
             'extension_critical':'bool',
     })
-    AuthorityKeyIdentifier_ = typing.TypedDict('AuthorityKeyIdentifier_', {
-            'authority_cert_issuer':'bool',
-            'enabled':'bool',
-            'extension_critical':'bool',
-    })
     ExtendedKeyUsage_ = typing.TypedDict('ExtendedKeyUsage_', {
             'usages':'list[str]',
             'enabled':'bool',
@@ -1165,7 +1150,7 @@ class Certificateauthority(Namespace):
     })
     CertExtensions_ = typing.TypedDict('CertExtensions_', {
             'BasicConstraints':'BasicConstraints_',
-            'AuthorityKeyIdentifier':'AuthorityKeyIdentifier_',
+            'AuthorityKeyIdentifier':'AuthorityKeyIdentifier',
             'ExtendedKeyUsage':'ExtendedKeyUsage_',
             'KeyUsage':'KeyUsage_',
     })
@@ -1640,11 +1625,6 @@ class Certificateauthority(Namespace):
             'path_length':'typing.Optional[int]',
             'extension_critical':'bool',
     })
-    AuthorityKeyIdentifier_ = typing.TypedDict('AuthorityKeyIdentifier_', {
-            'authority_cert_issuer':'bool',
-            'enabled':'bool',
-            'extension_critical':'bool',
-    })
     ExtendedKeyUsage_ = typing.TypedDict('ExtendedKeyUsage_', {
             'usages':'list[str]',
             'enabled':'bool',
@@ -1665,7 +1645,7 @@ class Certificateauthority(Namespace):
     })
     CertExtensions_ = typing.TypedDict('CertExtensions_', {
             'BasicConstraints':'BasicConstraints_',
-            'AuthorityKeyIdentifier':'AuthorityKeyIdentifier_',
+            'AuthorityKeyIdentifier':'AuthorityKeyIdentifier',
             'ExtendedKeyUsage':'ExtendedKeyUsage_',
             'KeyUsage':'KeyUsage_',
     })
@@ -2135,11 +2115,6 @@ class Certificateauthority(Namespace):
             'path_length':'typing.Optional[int]',
             'extension_critical':'bool',
     })
-    AuthorityKeyIdentifier_ = typing.TypedDict('AuthorityKeyIdentifier_', {
-            'authority_cert_issuer':'bool',
-            'enabled':'bool',
-            'extension_critical':'bool',
-    })
     ExtendedKeyUsage_ = typing.TypedDict('ExtendedKeyUsage_', {
             'usages':'list[str]',
             'enabled':'bool',
@@ -2160,7 +2135,7 @@ class Certificateauthority(Namespace):
     })
     CertExtensions_ = typing.TypedDict('CertExtensions_', {
             'BasicConstraints':'BasicConstraints_',
-            'AuthorityKeyIdentifier':'AuthorityKeyIdentifier_',
+            'AuthorityKeyIdentifier':'AuthorityKeyIdentifier',
             'ExtendedKeyUsage':'ExtendedKeyUsage_',
             'KeyUsage':'KeyUsage_',
     })
@@ -2635,11 +2610,6 @@ class Certificateauthority(Namespace):
             'path_length':'typing.Optional[int]',
             'extension_critical':'bool',
     })
-    AuthorityKeyIdentifier_ = typing.TypedDict('AuthorityKeyIdentifier_', {
-            'authority_cert_issuer':'bool',
-            'enabled':'bool',
-            'extension_critical':'bool',
-    })
     ExtendedKeyUsage_ = typing.TypedDict('ExtendedKeyUsage_', {
             'usages':'list[str]',
             'enabled':'bool',
@@ -2660,7 +2630,7 @@ class Certificateauthority(Namespace):
     })
     CertExtensions_ = typing.TypedDict('CertExtensions_', {
             'BasicConstraints':'BasicConstraints_',
-            'AuthorityKeyIdentifier':'AuthorityKeyIdentifier_',
+            'AuthorityKeyIdentifier':'AuthorityKeyIdentifier',
             'ExtendedKeyUsage':'ExtendedKeyUsage_',
             'KeyUsage':'KeyUsage_',
     })
@@ -3140,11 +3110,6 @@ class Certificateauthority(Namespace):
             'path_length':'typing.Optional[int]',
             'extension_critical':'bool',
     })
-    AuthorityKeyIdentifier_ = typing.TypedDict('AuthorityKeyIdentifier_', {
-            'authority_cert_issuer':'bool',
-            'enabled':'bool',
-            'extension_critical':'bool',
-    })
     ExtendedKeyUsage_ = typing.TypedDict('ExtendedKeyUsage_', {
             'usages':'list[str]',
             'enabled':'bool',
@@ -3165,7 +3130,7 @@ class Certificateauthority(Namespace):
     })
     CertExtensions_ = typing.TypedDict('CertExtensions_', {
             'BasicConstraints':'BasicConstraints_',
-            'AuthorityKeyIdentifier':'AuthorityKeyIdentifier_',
+            'AuthorityKeyIdentifier':'AuthorityKeyIdentifier',
             'ExtendedKeyUsage':'ExtendedKeyUsage_',
             'KeyUsage':'KeyUsage_',
     })

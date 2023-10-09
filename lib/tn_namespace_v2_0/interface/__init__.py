@@ -161,12 +161,6 @@ class Interface(Namespace):
             'limit':'int',
             'force_sql_filters':'bool',
     })
-    Alias__ = typing.TypedDict('Alias__', {
-            'type':'str',
-            'address':'str',
-            'netmask':'str',
-            'broadcast':'str',
-    })
     LagPorts_ = typing.TypedDict('LagPorts_', {
             'name':'str',
             'flags':'list[str]',
@@ -190,7 +184,7 @@ class Interface(Namespace):
             'link_address':'str',
             'rx_queues':'int',
             'tx_queues':'int',
-            'aliases':'list[Alias__]',
+            'aliases':'list[Alias]',
             'vrrp_config':'typing.Optional[list]',
             'protocol':'typing.Optional[str]',
             'ports':'list[LagPorts_]',
@@ -200,18 +194,13 @@ class Interface(Namespace):
             'tag':'typing.Optional[int]',
             'pcp':'typing.Optional[int]',
     })
-    Alias___ = typing.TypedDict('Alias___', {
-            'type':'str',
-            'address':'str',
-            'netmask':'str',
-    })
     InterfaceEntry = typing.TypedDict('InterfaceEntry', {
             'id':'str',
             'name':'str',
             'fake':'bool',
             'type':'str',
             'state':'State_',
-            'aliases':'list[Alias___]',
+            'aliases':'list[Alias_]',
             'ipv4_dhcp':'bool',
             'ipv6_auto':'bool',
             'description':'str',
@@ -222,12 +211,6 @@ class Interface(Namespace):
             'lag_protocol':'str',
             'lag_ports':'list[str]',
             'bridge_members':'list[str]',
-    })
-    Alias____ = typing.TypedDict('Alias____', {
-            'type':'str',
-            'address':'str',
-            'netmask':'str',
-            'broadcast':'str',
     })
     LagPorts__ = typing.TypedDict('LagPorts__', {
             'name':'str',
@@ -252,7 +235,7 @@ class Interface(Namespace):
             'link_address':'str',
             'rx_queues':'int',
             'tx_queues':'int',
-            'aliases':'list[Alias____]',
+            'aliases':'list[Alias]',
             'vrrp_config':'typing.Optional[list]',
             'protocol':'typing.Optional[str]',
             'ports':'list[LagPorts__]',
@@ -262,18 +245,13 @@ class Interface(Namespace):
             'tag':'typing.Optional[int]',
             'pcp':'typing.Optional[int]',
     })
-    Alias_____ = typing.TypedDict('Alias_____', {
-            'type':'str',
-            'address':'str',
-            'netmask':'str',
-    })
     InterfaceEntry_ = typing.TypedDict('InterfaceEntry_', {
             'id':'str',
             'name':'str',
             'fake':'bool',
             'type':'str',
             'state':'State__',
-            'aliases':'list[Alias_____]',
+            'aliases':'list[Alias_]',
             'ipv4_dhcp':'bool',
             'ipv6_auto':'bool',
             'description':'str',
@@ -284,12 +262,6 @@ class Interface(Namespace):
             'lag_protocol':'str',
             'lag_ports':'list[str]',
             'bridge_members':'list[str]',
-    })
-    Alias______ = typing.TypedDict('Alias______', {
-            'type':'str',
-            'address':'str',
-            'netmask':'str',
-            'broadcast':'str',
     })
     LagPorts___ = typing.TypedDict('LagPorts___', {
             'name':'str',
@@ -314,7 +286,7 @@ class Interface(Namespace):
             'link_address':'str',
             'rx_queues':'int',
             'tx_queues':'int',
-            'aliases':'list[Alias______]',
+            'aliases':'list[Alias]',
             'vrrp_config':'typing.Optional[list]',
             'protocol':'typing.Optional[str]',
             'ports':'list[LagPorts___]',
@@ -324,18 +296,13 @@ class Interface(Namespace):
             'tag':'typing.Optional[int]',
             'pcp':'typing.Optional[int]',
     })
-    Alias_______ = typing.TypedDict('Alias_______', {
-            'type':'str',
-            'address':'str',
-            'netmask':'str',
-    })
     InterfaceEntry__ = typing.TypedDict('InterfaceEntry__', {
             'id':'str',
             'name':'str',
             'fake':'bool',
             'type':'str',
             'state':'State___',
-            'aliases':'list[Alias_______]',
+            'aliases':'list[Alias_]',
             'ipv4_dhcp':'bool',
             'ipv6_auto':'bool',
             'description':'str',
@@ -352,30 +319,17 @@ class Interface(Namespace):
             'service':'str',
             'ips':'list[str]',
     })
-    InterfaceAlias_ = typing.TypedDict('InterfaceAlias_', {
-            'type':'str',
-            'address':'str',
-            'netmask':'int',
-    })
-    InterfaceFailoverAlias_ = typing.TypedDict('InterfaceFailoverAlias_', {
-            'type':'str',
-            'address':'str',
-    })
-    InterfaceVirtualAlias_ = typing.TypedDict('InterfaceVirtualAlias_', {
-            'type':'str',
-            'address':'str',
-    })
     InterfaceUpdate = typing.TypedDict('InterfaceUpdate', {
             'name':'str',
             'description':'str',
             'ipv4_dhcp':'bool',
             'ipv6_auto':'bool',
-            'aliases':'list[InterfaceAlias_]',
+            'aliases':'list[InterfaceAlias]',
             'failover_critical':'bool',
             'failover_group':'typing.Optional[int]',
             'failover_vhid':'typing.Optional[int]',
-            'failover_aliases':'list[InterfaceFailoverAlias_]',
-            'failover_virtual_aliases':'list[InterfaceVirtualAlias_]',
+            'failover_aliases':'list[InterfaceFailoverAlias]',
+            'failover_virtual_aliases':'list[InterfaceVirtualAlias]',
             'bridge_members':'list',
             'stp':'bool',
             'lag_protocol':'str',
@@ -386,12 +340,6 @@ class Interface(Namespace):
             'vlan_tag':'int',
             'vlan_pcp':'typing.Optional[int]',
             'mtu':'typing.Optional[int]',
-    })
-    Alias________ = typing.TypedDict('Alias________', {
-            'type':'str',
-            'address':'str',
-            'netmask':'str',
-            'broadcast':'str',
     })
     LagPorts____ = typing.TypedDict('LagPorts____', {
             'name':'str',
@@ -416,7 +364,7 @@ class Interface(Namespace):
             'link_address':'str',
             'rx_queues':'int',
             'tx_queues':'int',
-            'aliases':'list[Alias________]',
+            'aliases':'list[Alias]',
             'vrrp_config':'typing.Optional[list]',
             'protocol':'typing.Optional[str]',
             'ports':'list[LagPorts____]',
@@ -426,18 +374,13 @@ class Interface(Namespace):
             'tag':'typing.Optional[int]',
             'pcp':'typing.Optional[int]',
     })
-    Alias_________ = typing.TypedDict('Alias_________', {
-            'type':'str',
-            'address':'str',
-            'netmask':'str',
-    })
     InterfaceUpdateReturns = typing.TypedDict('InterfaceUpdateReturns', {
             'id':'str',
             'name':'str',
             'fake':'bool',
             'type':'str',
             'state':'State____',
-            'aliases':'list[Alias_________]',
+            'aliases':'list[Alias_]',
             'ipv4_dhcp':'bool',
             'ipv6_auto':'bool',
             'description':'str',

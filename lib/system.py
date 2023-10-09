@@ -3,8 +3,8 @@ from typing import (
     TYPE_CHECKING as _TYPING,
     TypedDict as _Dict,
 )
-from pytruenas.mixins import ConfigMixin as _Config
-from tn_namespace_v2_0 import SystemGeneral as _Original
+from .pytruenas.mixins import ConfigMixin as _Config
+
 
 class Certificate(_Dict):
     id: int
@@ -97,5 +97,47 @@ class SystemGeneralConfig(_Dict):
     id: int
 
 
-class SystemGeneral(_Config[SystemGeneralConfig], _Original):
+_NS = _Config[SystemGeneralConfig]
+_Choices = dict[str,str]
+if _TYPING:
+
+    class _NS(_Config[SystemGeneralConfig]):
+        def checkin(self) -> None:
+            ...
+
+        def checkin_waiting(self) -> int | None:
+            ...
+
+        def country_choices(self) -> _Choices:
+            ...
+
+        def kbdmap_choices(self) -> _Choices:
+            ...
+
+        def language_choices(self) -> _Choices:
+            ...
+
+        def local_url(self) -> str:
+            ...
+
+        def timezone_choices(self) -> _Choices:
+            ...
+
+        def ui_address_choices(self) -> _Choices:
+            ...
+
+        def ui_certificate_choices(self) -> _Choices:
+            ...
+
+        def ui_httpsprotocols_choices(self) -> dict[TLSProtocol]:
+            ...
+
+        def ui_restart(self) -> int:
+            ...
+
+        def ui_v6address_choices(self) -> _Choices:
+            ...
+
+
+class SystemGeneral(_NS):
     ...

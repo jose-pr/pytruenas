@@ -77,18 +77,6 @@ class Service(Namespace):
             'ha_propagate':'bool',
             'silent':'bool',
     })
-    ServiceControl_ = typing.TypedDict('ServiceControl_', {
-            'ha_propagate':'bool',
-            'silent':'bool',
-    })
-    ServiceControl__ = typing.TypedDict('ServiceControl__', {
-            'ha_propagate':'bool',
-            'silent':'bool',
-    })
-    ServiceControl___ = typing.TypedDict('ServiceControl___', {
-            'ha_propagate':'bool',
-            'silent':'bool',
-    })
     ServiceUpdate = typing.TypedDict('ServiceUpdate', {
             'enable':'bool',
     })
@@ -169,18 +157,6 @@ class Service(Namespace):
             'ha_propagate':'bool',
             'silent':'bool',
     })
-    ServiceControl_ = typing.TypedDict('ServiceControl_', {
-            'ha_propagate':'bool',
-            'silent':'bool',
-    })
-    ServiceControl__ = typing.TypedDict('ServiceControl__', {
-            'ha_propagate':'bool',
-            'silent':'bool',
-    })
-    ServiceControl___ = typing.TypedDict('ServiceControl___', {
-            'ha_propagate':'bool',
-            'silent':'bool',
-    })
     ServiceUpdate = typing.TypedDict('ServiceUpdate', {
             'enable':'bool',
     })
@@ -257,25 +233,13 @@ class Service(Namespace):
             'ha_propagate':'bool',
             'silent':'bool',
     })
-    ServiceControl_ = typing.TypedDict('ServiceControl_', {
-            'ha_propagate':'bool',
-            'silent':'bool',
-    })
-    ServiceControl__ = typing.TypedDict('ServiceControl__', {
-            'ha_propagate':'bool',
-            'silent':'bool',
-    })
-    ServiceControl___ = typing.TypedDict('ServiceControl___', {
-            'ha_propagate':'bool',
-            'silent':'bool',
-    })
     ServiceUpdate = typing.TypedDict('ServiceUpdate', {
             'enable':'bool',
     })
     @typing.overload
     def restart(self, 
         service:'str',
-        service_control:'ServiceControl_'={},
+        service_control:'ServiceControl'={},
     /) -> 'bool': 
         """
         Restart the service specified by `service`.
@@ -345,25 +309,13 @@ class Service(Namespace):
             'ha_propagate':'bool',
             'silent':'bool',
     })
-    ServiceControl_ = typing.TypedDict('ServiceControl_', {
-            'ha_propagate':'bool',
-            'silent':'bool',
-    })
-    ServiceControl__ = typing.TypedDict('ServiceControl__', {
-            'ha_propagate':'bool',
-            'silent':'bool',
-    })
-    ServiceControl___ = typing.TypedDict('ServiceControl___', {
-            'ha_propagate':'bool',
-            'silent':'bool',
-    })
     ServiceUpdate = typing.TypedDict('ServiceUpdate', {
             'enable':'bool',
     })
     @typing.overload
     def start(self, 
         service:'str',
-        service_control:'ServiceControl__'={},
+        service_control:'ServiceControl'={},
     /) -> 'bool': 
         """
         Start the service specified by `service`.
@@ -433,18 +385,6 @@ class Service(Namespace):
             'pids':'list[int]',
     })
     ServiceControl = typing.TypedDict('ServiceControl', {
-            'ha_propagate':'bool',
-            'silent':'bool',
-    })
-    ServiceControl_ = typing.TypedDict('ServiceControl_', {
-            'ha_propagate':'bool',
-            'silent':'bool',
-    })
-    ServiceControl__ = typing.TypedDict('ServiceControl__', {
-            'ha_propagate':'bool',
-            'silent':'bool',
-    })
-    ServiceControl___ = typing.TypedDict('ServiceControl___', {
             'ha_propagate':'bool',
             'silent':'bool',
     })
@@ -521,18 +461,6 @@ class Service(Namespace):
             'ha_propagate':'bool',
             'silent':'bool',
     })
-    ServiceControl_ = typing.TypedDict('ServiceControl_', {
-            'ha_propagate':'bool',
-            'silent':'bool',
-    })
-    ServiceControl__ = typing.TypedDict('ServiceControl__', {
-            'ha_propagate':'bool',
-            'silent':'bool',
-    })
-    ServiceControl___ = typing.TypedDict('ServiceControl___', {
-            'ha_propagate':'bool',
-            'silent':'bool',
-    })
     ServiceUpdate = typing.TypedDict('ServiceUpdate', {
             'enable':'bool',
     })
@@ -606,25 +534,13 @@ class Service(Namespace):
             'ha_propagate':'bool',
             'silent':'bool',
     })
-    ServiceControl_ = typing.TypedDict('ServiceControl_', {
-            'ha_propagate':'bool',
-            'silent':'bool',
-    })
-    ServiceControl__ = typing.TypedDict('ServiceControl__', {
-            'ha_propagate':'bool',
-            'silent':'bool',
-    })
-    ServiceControl___ = typing.TypedDict('ServiceControl___', {
-            'ha_propagate':'bool',
-            'silent':'bool',
-    })
     ServiceUpdate = typing.TypedDict('ServiceUpdate', {
             'enable':'bool',
     })
     @typing.overload
     def stop(self, 
         service:'str',
-        service_control:'ServiceControl___'={},
+        service_control:'ServiceControl'={},
     /) -> 'bool': 
         """
         Stop the service specified by `service`.
@@ -691,18 +607,6 @@ class Service(Namespace):
             'pids':'list[int]',
     })
     ServiceControl = typing.TypedDict('ServiceControl', {
-            'ha_propagate':'bool',
-            'silent':'bool',
-    })
-    ServiceControl_ = typing.TypedDict('ServiceControl_', {
-            'ha_propagate':'bool',
-            'silent':'bool',
-    })
-    ServiceControl__ = typing.TypedDict('ServiceControl__', {
-            'ha_propagate':'bool',
-            'silent':'bool',
-    })
-    ServiceControl___ = typing.TypedDict('ServiceControl___', {
             'ha_propagate':'bool',
             'silent':'bool',
     })
@@ -784,18 +688,6 @@ class Service(Namespace):
             'ha_propagate':'bool',
             'silent':'bool',
     })
-    ServiceControl_ = typing.TypedDict('ServiceControl_', {
-            'ha_propagate':'bool',
-            'silent':'bool',
-    })
-    ServiceControl__ = typing.TypedDict('ServiceControl__', {
-            'ha_propagate':'bool',
-            'silent':'bool',
-    })
-    ServiceControl___ = typing.TypedDict('ServiceControl___', {
-            'ha_propagate':'bool',
-            'silent':'bool',
-    })
     ServiceUpdate = typing.TypedDict('ServiceUpdate', {
             'enable':'bool',
     })
@@ -872,18 +764,6 @@ class Service(Namespace):
             'pids':'list[int]',
     })
     ServiceControl = typing.TypedDict('ServiceControl', {
-            'ha_propagate':'bool',
-            'silent':'bool',
-    })
-    ServiceControl_ = typing.TypedDict('ServiceControl_', {
-            'ha_propagate':'bool',
-            'silent':'bool',
-    })
-    ServiceControl__ = typing.TypedDict('ServiceControl__', {
-            'ha_propagate':'bool',
-            'silent':'bool',
-    })
-    ServiceControl___ = typing.TypedDict('ServiceControl___', {
             'ha_propagate':'bool',
             'silent':'bool',
     })

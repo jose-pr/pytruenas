@@ -19,18 +19,11 @@ class PoolScrub(Namespace):
             'schedule':'Schedule',
             'enabled':'bool',
     })
-    Schedule_ = typing.TypedDict('Schedule_', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
     PoolScrubCreateReturns = typing.TypedDict('PoolScrubCreateReturns', {
             'pool':'int',
             'threshold':'int',
             'description':'str',
-            'schedule':'Schedule_',
+            'schedule':'Schedule',
             'enabled':'bool',
             'id':'int',
             'pool_name':'str',
@@ -63,81 +56,28 @@ class PoolScrub(Namespace):
             'limit':'int',
             'force_sql_filters':'bool',
     })
-    Schedule__ = typing.TypedDict('Schedule__', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
     PoolScrubEntry_ = typing.TypedDict('PoolScrubEntry_', {
             'pool':'int',
             'threshold':'int',
             'description':'str',
-            'schedule':'Schedule__',
+            'schedule':'Schedule',
             'enabled':'bool',
             'id':'int',
             'pool_name':'str',
-    })
-    Schedule___ = typing.TypedDict('Schedule___', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
-    PoolScrubEntry__ = typing.TypedDict('PoolScrubEntry__', {
-            'pool':'int',
-            'threshold':'int',
-            'description':'str',
-            'schedule':'Schedule___',
-            'enabled':'bool',
-            'id':'int',
-            'pool_name':'str',
-    })
-    Schedule____ = typing.TypedDict('Schedule____', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
-    PoolScrubEntry___ = typing.TypedDict('PoolScrubEntry___', {
-            'pool':'int',
-            'threshold':'int',
-            'description':'str',
-            'schedule':'Schedule____',
-            'enabled':'bool',
-            'id':'int',
-            'pool_name':'str',
-    })
-    Schedule_____ = typing.TypedDict('Schedule_____', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
     })
     PoolScrubUpdate = typing.TypedDict('PoolScrubUpdate', {
             'pool':'int',
             'threshold':'int',
             'description':'str',
-            'schedule':'Schedule_____',
+            'schedule':'Schedule',
             'enabled':'bool',
             'pool_name':'str',
-    })
-    Schedule______ = typing.TypedDict('Schedule______', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
     })
     PoolScrubUpdateReturns = typing.TypedDict('PoolScrubUpdateReturns', {
             'pool':'int',
             'threshold':'int',
             'description':'str',
-            'schedule':'Schedule______',
+            'schedule':'Schedule',
             'enabled':'bool',
             'id':'int',
             'pool_name':'str',

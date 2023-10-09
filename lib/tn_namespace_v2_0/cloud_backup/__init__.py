@@ -64,13 +64,6 @@ class Cloud_backup(Namespace):
     CloudBackupSyncOptions = typing.TypedDict('CloudBackupSyncOptions', {
             'dry_run':'bool',
     })
-    Schedule_ = typing.TypedDict('Schedule_', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
     CloudSyncBwlimit_ = typing.TypedDict('CloudSyncBwlimit_', {
             'time':'str',
             'bandwidth':'typing.Optional[int]',
@@ -80,7 +73,7 @@ class Cloud_backup(Namespace):
             'path':'str',
             'credentials':'int',
             'attributes':'dict[str]',
-            'schedule':'Schedule_',
+            'schedule':'Schedule',
             'pre_script':'str',
             'post_script':'str',
             'snapshot':'bool',

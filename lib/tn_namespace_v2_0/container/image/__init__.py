@@ -59,12 +59,6 @@ class ContainerImage(Namespace):
             'parsed_repo_tags':'list[ParsedRepoTag]',
             'complete_tags':'list[str]',
     })
-    ParsedRepoTag_ = typing.TypedDict('ParsedRepoTag_', {
-            'image':'str',
-            'tag':'str',
-            'registry':'str',
-            'complete_tag':'str',
-    })
     ContainerImageEntry_ = typing.TypedDict('ContainerImageEntry_', {
             'id':'str',
             'repo_tags':'list[str]',
@@ -73,14 +67,8 @@ class ContainerImage(Namespace):
             'dangling':'bool',
             'update_available':'bool',
             'system_image':'bool',
-            'parsed_repo_tags':'list[ParsedRepoTag_]',
+            'parsed_repo_tags':'list[ParsedRepoTag]',
             'complete_tags':'list[str]',
-    })
-    ParsedRepoTag__ = typing.TypedDict('ParsedRepoTag__', {
-            'image':'str',
-            'tag':'str',
-            'registry':'str',
-            'complete_tag':'str',
     })
     ContainerImageEntry__ = typing.TypedDict('ContainerImageEntry__', {
             'id':'str',
@@ -90,6 +78,6 @@ class ContainerImage(Namespace):
             'dangling':'bool',
             'update_available':'bool',
             'system_image':'bool',
-            'parsed_repo_tags':'list[ParsedRepoTag__]',
+            'parsed_repo_tags':'list[ParsedRepoTag]',
             'complete_tags':'list[str]',
     })

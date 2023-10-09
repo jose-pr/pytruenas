@@ -16,24 +16,18 @@ class AuthTwofactor(Namespace):
             'services':'Services',
             'id':'int',
     })
-    Services_ = typing.TypedDict('Services_', {
-            'ssh':'bool',
-    })
     AuthTwofactorUpdate = typing.TypedDict('AuthTwofactorUpdate', {
             'enabled':'bool',
             'otp_digits':'int',
             'window':'int',
             'interval':'int',
-            'services':'Services_',
-    })
-    Services__ = typing.TypedDict('Services__', {
-            'ssh':'bool',
+            'services':'Services',
     })
     AuthTwofactorUpdateReturns = typing.TypedDict('AuthTwofactorUpdateReturns', {
             'enabled':'bool',
             'otp_digits':'int',
             'window':'int',
             'interval':'int',
-            'services':'Services__',
+            'services':'Services',
             'id':'int',
     })

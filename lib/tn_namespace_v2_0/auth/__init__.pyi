@@ -57,14 +57,6 @@ class Auth(Namespace):
             'credentials':'str',
             'created_at':'str',
     })
-    Session_ = typing.TypedDict('Session_', {
-            'id':'str',
-            'current':'bool',
-            'internal':'bool',
-            'origin':'str',
-            'credentials':'str',
-            'created_at':'str',
-    })
     @typing.overload
     def check_user(self, 
         username:'str',
@@ -111,14 +103,6 @@ class Auth(Namespace):
             'force_sql_filters':'bool',
     })
     Session = typing.TypedDict('Session', {
-            'id':'str',
-            'current':'bool',
-            'internal':'bool',
-            'origin':'str',
-            'credentials':'str',
-            'created_at':'str',
-    })
-    Session_ = typing.TypedDict('Session_', {
             'id':'str',
             'current':'bool',
             'internal':'bool',
@@ -190,14 +174,6 @@ class Auth(Namespace):
             'credentials':'str',
             'created_at':'str',
     })
-    Session_ = typing.TypedDict('Session_', {
-            'id':'str',
-            'current':'bool',
-            'internal':'bool',
-            'origin':'str',
-            'credentials':'str',
-            'created_at':'str',
-    })
     @typing.overload
     def login(self, 
         username:'str',
@@ -255,14 +231,6 @@ class Auth(Namespace):
             'credentials':'str',
             'created_at':'str',
     })
-    Session_ = typing.TypedDict('Session_', {
-            'id':'str',
-            'current':'bool',
-            'internal':'bool',
-            'origin':'str',
-            'credentials':'str',
-            'created_at':'str',
-    })
     @typing.overload
     def login_with_api_key(self, 
         api_key:'str',
@@ -306,14 +274,6 @@ class Auth(Namespace):
             'force_sql_filters':'bool',
     })
     Session = typing.TypedDict('Session', {
-            'id':'str',
-            'current':'bool',
-            'internal':'bool',
-            'origin':'str',
-            'credentials':'str',
-            'created_at':'str',
-    })
-    Session_ = typing.TypedDict('Session_', {
             'id':'str',
             'current':'bool',
             'internal':'bool',
@@ -371,14 +331,6 @@ class Auth(Namespace):
             'credentials':'str',
             'created_at':'str',
     })
-    Session_ = typing.TypedDict('Session_', {
-            'id':'str',
-            'current':'bool',
-            'internal':'bool',
-            'origin':'str',
-            'credentials':'str',
-            'created_at':'str',
-    })
     @typing.overload
     def logout(self, 
     /) -> 'bool': 
@@ -420,14 +372,6 @@ class Auth(Namespace):
             'force_sql_filters':'bool',
     })
     Session = typing.TypedDict('Session', {
-            'id':'str',
-            'current':'bool',
-            'internal':'bool',
-            'origin':'str',
-            'credentials':'str',
-            'created_at':'str',
-    })
-    Session_ = typing.TypedDict('Session_', {
             'id':'str',
             'current':'bool',
             'internal':'bool',
@@ -482,19 +426,11 @@ class Auth(Namespace):
             'credentials':'str',
             'created_at':'str',
     })
-    Session_ = typing.TypedDict('Session_', {
-            'id':'str',
-            'current':'bool',
-            'internal':'bool',
-            'origin':'str',
-            'credentials':'str',
-            'created_at':'str',
-    })
     @typing.overload
     def sessions(self, 
         query_filters:'list[list]'=[],
         query_options:'QueryOptions'={},
-    /) -> 'typing.Union[int, ForwardRef(Session), list[Session_]]': 
+    /) -> 'typing.Union[int, ForwardRef(Session), list[Session]]': 
         """
         Returns list of active auth sessions.
         
@@ -534,7 +470,7 @@ class Auth(Namespace):
             query-options
         Returns
         -------
-        typing.Union[int, ForwardRef(Session), list[Session_]]:
+        typing.Union[int, ForwardRef(Session), list[Session]]:
             
         """
         ...
@@ -564,14 +500,6 @@ class Auth(Namespace):
             'force_sql_filters':'bool',
     })
     Session = typing.TypedDict('Session', {
-            'id':'str',
-            'current':'bool',
-            'internal':'bool',
-            'origin':'str',
-            'credentials':'str',
-            'created_at':'str',
-    })
-    Session_ = typing.TypedDict('Session_', {
             'id':'str',
             'current':'bool',
             'internal':'bool',
@@ -632,14 +560,6 @@ class Auth(Namespace):
             'credentials':'str',
             'created_at':'str',
     })
-    Session_ = typing.TypedDict('Session_', {
-            'id':'str',
-            'current':'bool',
-            'internal':'bool',
-            'origin':'str',
-            'credentials':'str',
-            'created_at':'str',
-    })
     @typing.overload
     def terminate_other_sessions(self, 
     /) -> None: 
@@ -678,14 +598,6 @@ class Auth(Namespace):
             'force_sql_filters':'bool',
     })
     Session = typing.TypedDict('Session', {
-            'id':'str',
-            'current':'bool',
-            'internal':'bool',
-            'origin':'str',
-            'credentials':'str',
-            'created_at':'str',
-    })
-    Session_ = typing.TypedDict('Session_', {
             'id':'str',
             'current':'bool',
             'internal':'bool',
@@ -743,14 +655,6 @@ class Auth(Namespace):
             'credentials':'str',
             'created_at':'str',
     })
-    Session_ = typing.TypedDict('Session_', {
-            'id':'str',
-            'current':'bool',
-            'internal':'bool',
-            'origin':'str',
-            'credentials':'str',
-            'created_at':'str',
-    })
     @typing.overload
     def two_factor_auth(self, 
         username:'str',
@@ -797,14 +701,6 @@ class Auth(Namespace):
             'force_sql_filters':'bool',
     })
     Session = typing.TypedDict('Session', {
-            'id':'str',
-            'current':'bool',
-            'internal':'bool',
-            'origin':'str',
-            'credentials':'str',
-            'created_at':'str',
-    })
-    Session_ = typing.TypedDict('Session_', {
             'id':'str',
             'current':'bool',
             'internal':'bool',

@@ -249,19 +249,6 @@ class ChartRelease(Namespace):
             'limit':'int',
             'force_sql_filters':'bool',
     })
-    ChartMetadata_ = typing.TypedDict('ChartMetadata_', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port_ = typing.TypedDict('Port_', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus__ = typing.TypedDict('PodStatus__', {
-            'available':'int',
-            'desired':'int',
-    })
     Resources_ = typing.TypedDict('Resources_', {
             'storage_class':'dict[str]',
             'persistent_volumes':'list',
@@ -284,15 +271,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata_',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port_]',
-            'pod_status':'PodStatus__',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -301,19 +288,6 @@ class ChartRelease(Namespace):
             'chart_schema':'dict[str]',
             'history':'dict[str]',
             'resources':'Resources_',
-    })
-    ChartMetadata__ = typing.TypedDict('ChartMetadata__', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port__ = typing.TypedDict('Port__', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus___ = typing.TypedDict('PodStatus___', {
-            'available':'int',
-            'desired':'int',
     })
     Resources__ = typing.TypedDict('Resources__', {
             'storage_class':'dict[str]',
@@ -337,15 +311,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata__',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port__]',
-            'pod_status':'PodStatus___',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -354,19 +328,6 @@ class ChartRelease(Namespace):
             'chart_schema':'dict[str]',
             'history':'dict[str]',
             'resources':'Resources__',
-    })
-    ChartMetadata___ = typing.TypedDict('ChartMetadata___', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port___ = typing.TypedDict('Port___', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus____ = typing.TypedDict('PodStatus____', {
-            'available':'int',
-            'desired':'int',
     })
     Resources___ = typing.TypedDict('Resources___', {
             'storage_class':'dict[str]',
@@ -390,15 +351,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata___',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port___]',
-            'pod_status':'PodStatus____',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -407,19 +368,6 @@ class ChartRelease(Namespace):
             'chart_schema':'dict[str]',
             'history':'dict[str]',
             'resources':'Resources___',
-    })
-    ChartMetadata____ = typing.TypedDict('ChartMetadata____', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port____ = typing.TypedDict('Port____', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus_____ = typing.TypedDict('PodStatus_____', {
-            'available':'int',
-            'desired':'int',
     })
     Resources____ = typing.TypedDict('Resources____', {
             'storage_class':'dict[str]',
@@ -443,15 +391,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata____',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port____]',
-            'pod_status':'PodStatus_____',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -466,19 +414,6 @@ class ChartRelease(Namespace):
             'recreate_resources':'bool',
             'rollback_snapshot':'bool',
             'item_version':'str',
-    })
-    ChartMetadata_____ = typing.TypedDict('ChartMetadata_____', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port_____ = typing.TypedDict('Port_____', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus______ = typing.TypedDict('PodStatus______', {
-            'available':'int',
-            'desired':'int',
     })
     Resources_____ = typing.TypedDict('Resources_____', {
             'storage_class':'dict[str]',
@@ -502,15 +437,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata_____',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port_____]',
-            'pod_status':'PodStatus______',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -547,19 +482,6 @@ class ChartRelease(Namespace):
     ChartReleaseUpdate = typing.TypedDict('ChartReleaseUpdate', {
             'values':'dict[str]',
     })
-    ChartMetadata______ = typing.TypedDict('ChartMetadata______', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port______ = typing.TypedDict('Port______', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus_______ = typing.TypedDict('PodStatus_______', {
-            'available':'int',
-            'desired':'int',
-    })
     Resources______ = typing.TypedDict('Resources______', {
             'storage_class':'dict[str]',
             'persistent_volumes':'list',
@@ -582,15 +504,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata______',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port______]',
-            'pod_status':'PodStatus_______',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -603,19 +525,6 @@ class ChartRelease(Namespace):
     UpgradeOptions = typing.TypedDict('UpgradeOptions', {
             'values':'dict[str]',
             'item_version':'str',
-    })
-    ChartMetadata_______ = typing.TypedDict('ChartMetadata_______', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port_______ = typing.TypedDict('Port_______', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus________ = typing.TypedDict('PodStatus________', {
-            'available':'int',
-            'desired':'int',
     })
     Resources_______ = typing.TypedDict('Resources_______', {
             'storage_class':'dict[str]',
@@ -639,15 +548,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata_______',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port_______]',
-            'pod_status':'PodStatus________',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -920,19 +829,6 @@ class ChartRelease(Namespace):
             'limit':'int',
             'force_sql_filters':'bool',
     })
-    ChartMetadata_ = typing.TypedDict('ChartMetadata_', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port_ = typing.TypedDict('Port_', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus__ = typing.TypedDict('PodStatus__', {
-            'available':'int',
-            'desired':'int',
-    })
     Resources_ = typing.TypedDict('Resources_', {
             'storage_class':'dict[str]',
             'persistent_volumes':'list',
@@ -955,15 +851,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata_',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port_]',
-            'pod_status':'PodStatus__',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -972,19 +868,6 @@ class ChartRelease(Namespace):
             'chart_schema':'dict[str]',
             'history':'dict[str]',
             'resources':'Resources_',
-    })
-    ChartMetadata__ = typing.TypedDict('ChartMetadata__', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port__ = typing.TypedDict('Port__', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus___ = typing.TypedDict('PodStatus___', {
-            'available':'int',
-            'desired':'int',
     })
     Resources__ = typing.TypedDict('Resources__', {
             'storage_class':'dict[str]',
@@ -1008,15 +891,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata__',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port__]',
-            'pod_status':'PodStatus___',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -1025,19 +908,6 @@ class ChartRelease(Namespace):
             'chart_schema':'dict[str]',
             'history':'dict[str]',
             'resources':'Resources__',
-    })
-    ChartMetadata___ = typing.TypedDict('ChartMetadata___', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port___ = typing.TypedDict('Port___', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus____ = typing.TypedDict('PodStatus____', {
-            'available':'int',
-            'desired':'int',
     })
     Resources___ = typing.TypedDict('Resources___', {
             'storage_class':'dict[str]',
@@ -1061,15 +931,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata___',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port___]',
-            'pod_status':'PodStatus____',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -1078,19 +948,6 @@ class ChartRelease(Namespace):
             'chart_schema':'dict[str]',
             'history':'dict[str]',
             'resources':'Resources___',
-    })
-    ChartMetadata____ = typing.TypedDict('ChartMetadata____', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port____ = typing.TypedDict('Port____', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus_____ = typing.TypedDict('PodStatus_____', {
-            'available':'int',
-            'desired':'int',
     })
     Resources____ = typing.TypedDict('Resources____', {
             'storage_class':'dict[str]',
@@ -1114,15 +971,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata____',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port____]',
-            'pod_status':'PodStatus_____',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -1137,19 +994,6 @@ class ChartRelease(Namespace):
             'recreate_resources':'bool',
             'rollback_snapshot':'bool',
             'item_version':'str',
-    })
-    ChartMetadata_____ = typing.TypedDict('ChartMetadata_____', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port_____ = typing.TypedDict('Port_____', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus______ = typing.TypedDict('PodStatus______', {
-            'available':'int',
-            'desired':'int',
     })
     Resources_____ = typing.TypedDict('Resources_____', {
             'storage_class':'dict[str]',
@@ -1173,15 +1017,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata_____',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port_____]',
-            'pod_status':'PodStatus______',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -1218,19 +1062,6 @@ class ChartRelease(Namespace):
     ChartReleaseUpdate = typing.TypedDict('ChartReleaseUpdate', {
             'values':'dict[str]',
     })
-    ChartMetadata______ = typing.TypedDict('ChartMetadata______', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port______ = typing.TypedDict('Port______', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus_______ = typing.TypedDict('PodStatus_______', {
-            'available':'int',
-            'desired':'int',
-    })
     Resources______ = typing.TypedDict('Resources______', {
             'storage_class':'dict[str]',
             'persistent_volumes':'list',
@@ -1253,15 +1084,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata______',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port______]',
-            'pod_status':'PodStatus_______',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -1274,19 +1105,6 @@ class ChartRelease(Namespace):
     UpgradeOptions = typing.TypedDict('UpgradeOptions', {
             'values':'dict[str]',
             'item_version':'str',
-    })
-    ChartMetadata_______ = typing.TypedDict('ChartMetadata_______', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port_______ = typing.TypedDict('Port_______', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus________ = typing.TypedDict('PodStatus________', {
-            'available':'int',
-            'desired':'int',
     })
     Resources_______ = typing.TypedDict('Resources_______', {
             'storage_class':'dict[str]',
@@ -1310,15 +1128,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata_______',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port_______]',
-            'pod_status':'PodStatus________',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -1605,19 +1423,6 @@ class ChartRelease(Namespace):
             'limit':'int',
             'force_sql_filters':'bool',
     })
-    ChartMetadata_ = typing.TypedDict('ChartMetadata_', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port_ = typing.TypedDict('Port_', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus__ = typing.TypedDict('PodStatus__', {
-            'available':'int',
-            'desired':'int',
-    })
     Resources_ = typing.TypedDict('Resources_', {
             'storage_class':'dict[str]',
             'persistent_volumes':'list',
@@ -1640,15 +1445,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata_',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port_]',
-            'pod_status':'PodStatus__',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -1657,19 +1462,6 @@ class ChartRelease(Namespace):
             'chart_schema':'dict[str]',
             'history':'dict[str]',
             'resources':'Resources_',
-    })
-    ChartMetadata__ = typing.TypedDict('ChartMetadata__', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port__ = typing.TypedDict('Port__', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus___ = typing.TypedDict('PodStatus___', {
-            'available':'int',
-            'desired':'int',
     })
     Resources__ = typing.TypedDict('Resources__', {
             'storage_class':'dict[str]',
@@ -1693,15 +1485,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata__',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port__]',
-            'pod_status':'PodStatus___',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -1710,19 +1502,6 @@ class ChartRelease(Namespace):
             'chart_schema':'dict[str]',
             'history':'dict[str]',
             'resources':'Resources__',
-    })
-    ChartMetadata___ = typing.TypedDict('ChartMetadata___', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port___ = typing.TypedDict('Port___', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus____ = typing.TypedDict('PodStatus____', {
-            'available':'int',
-            'desired':'int',
     })
     Resources___ = typing.TypedDict('Resources___', {
             'storage_class':'dict[str]',
@@ -1746,15 +1525,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata___',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port___]',
-            'pod_status':'PodStatus____',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -1763,19 +1542,6 @@ class ChartRelease(Namespace):
             'chart_schema':'dict[str]',
             'history':'dict[str]',
             'resources':'Resources___',
-    })
-    ChartMetadata____ = typing.TypedDict('ChartMetadata____', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port____ = typing.TypedDict('Port____', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus_____ = typing.TypedDict('PodStatus_____', {
-            'available':'int',
-            'desired':'int',
     })
     Resources____ = typing.TypedDict('Resources____', {
             'storage_class':'dict[str]',
@@ -1799,15 +1565,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata____',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port____]',
-            'pod_status':'PodStatus_____',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -1822,19 +1588,6 @@ class ChartRelease(Namespace):
             'recreate_resources':'bool',
             'rollback_snapshot':'bool',
             'item_version':'str',
-    })
-    ChartMetadata_____ = typing.TypedDict('ChartMetadata_____', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port_____ = typing.TypedDict('Port_____', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus______ = typing.TypedDict('PodStatus______', {
-            'available':'int',
-            'desired':'int',
     })
     Resources_____ = typing.TypedDict('Resources_____', {
             'storage_class':'dict[str]',
@@ -1858,15 +1611,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata_____',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port_____]',
-            'pod_status':'PodStatus______',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -1903,19 +1656,6 @@ class ChartRelease(Namespace):
     ChartReleaseUpdate = typing.TypedDict('ChartReleaseUpdate', {
             'values':'dict[str]',
     })
-    ChartMetadata______ = typing.TypedDict('ChartMetadata______', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port______ = typing.TypedDict('Port______', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus_______ = typing.TypedDict('PodStatus_______', {
-            'available':'int',
-            'desired':'int',
-    })
     Resources______ = typing.TypedDict('Resources______', {
             'storage_class':'dict[str]',
             'persistent_volumes':'list',
@@ -1938,15 +1678,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata______',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port______]',
-            'pod_status':'PodStatus_______',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -1959,19 +1699,6 @@ class ChartRelease(Namespace):
     UpgradeOptions = typing.TypedDict('UpgradeOptions', {
             'values':'dict[str]',
             'item_version':'str',
-    })
-    ChartMetadata_______ = typing.TypedDict('ChartMetadata_______', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port_______ = typing.TypedDict('Port_______', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus________ = typing.TypedDict('PodStatus________', {
-            'available':'int',
-            'desired':'int',
     })
     Resources_______ = typing.TypedDict('Resources_______', {
             'storage_class':'dict[str]',
@@ -1995,15 +1722,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata_______',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port_______]',
-            'pod_status':'PodStatus________',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -2285,19 +2012,6 @@ class ChartRelease(Namespace):
             'limit':'int',
             'force_sql_filters':'bool',
     })
-    ChartMetadata_ = typing.TypedDict('ChartMetadata_', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port_ = typing.TypedDict('Port_', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus__ = typing.TypedDict('PodStatus__', {
-            'available':'int',
-            'desired':'int',
-    })
     Resources_ = typing.TypedDict('Resources_', {
             'storage_class':'dict[str]',
             'persistent_volumes':'list',
@@ -2320,15 +2034,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata_',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port_]',
-            'pod_status':'PodStatus__',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -2337,19 +2051,6 @@ class ChartRelease(Namespace):
             'chart_schema':'dict[str]',
             'history':'dict[str]',
             'resources':'Resources_',
-    })
-    ChartMetadata__ = typing.TypedDict('ChartMetadata__', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port__ = typing.TypedDict('Port__', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus___ = typing.TypedDict('PodStatus___', {
-            'available':'int',
-            'desired':'int',
     })
     Resources__ = typing.TypedDict('Resources__', {
             'storage_class':'dict[str]',
@@ -2373,15 +2074,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata__',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port__]',
-            'pod_status':'PodStatus___',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -2390,19 +2091,6 @@ class ChartRelease(Namespace):
             'chart_schema':'dict[str]',
             'history':'dict[str]',
             'resources':'Resources__',
-    })
-    ChartMetadata___ = typing.TypedDict('ChartMetadata___', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port___ = typing.TypedDict('Port___', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus____ = typing.TypedDict('PodStatus____', {
-            'available':'int',
-            'desired':'int',
     })
     Resources___ = typing.TypedDict('Resources___', {
             'storage_class':'dict[str]',
@@ -2426,15 +2114,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata___',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port___]',
-            'pod_status':'PodStatus____',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -2443,19 +2131,6 @@ class ChartRelease(Namespace):
             'chart_schema':'dict[str]',
             'history':'dict[str]',
             'resources':'Resources___',
-    })
-    ChartMetadata____ = typing.TypedDict('ChartMetadata____', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port____ = typing.TypedDict('Port____', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus_____ = typing.TypedDict('PodStatus_____', {
-            'available':'int',
-            'desired':'int',
     })
     Resources____ = typing.TypedDict('Resources____', {
             'storage_class':'dict[str]',
@@ -2479,15 +2154,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata____',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port____]',
-            'pod_status':'PodStatus_____',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -2502,19 +2177,6 @@ class ChartRelease(Namespace):
             'recreate_resources':'bool',
             'rollback_snapshot':'bool',
             'item_version':'str',
-    })
-    ChartMetadata_____ = typing.TypedDict('ChartMetadata_____', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port_____ = typing.TypedDict('Port_____', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus______ = typing.TypedDict('PodStatus______', {
-            'available':'int',
-            'desired':'int',
     })
     Resources_____ = typing.TypedDict('Resources_____', {
             'storage_class':'dict[str]',
@@ -2538,15 +2200,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata_____',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port_____]',
-            'pod_status':'PodStatus______',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -2583,19 +2245,6 @@ class ChartRelease(Namespace):
     ChartReleaseUpdate = typing.TypedDict('ChartReleaseUpdate', {
             'values':'dict[str]',
     })
-    ChartMetadata______ = typing.TypedDict('ChartMetadata______', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port______ = typing.TypedDict('Port______', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus_______ = typing.TypedDict('PodStatus_______', {
-            'available':'int',
-            'desired':'int',
-    })
     Resources______ = typing.TypedDict('Resources______', {
             'storage_class':'dict[str]',
             'persistent_volumes':'list',
@@ -2618,15 +2267,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata______',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port______]',
-            'pod_status':'PodStatus_______',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -2639,19 +2288,6 @@ class ChartRelease(Namespace):
     UpgradeOptions = typing.TypedDict('UpgradeOptions', {
             'values':'dict[str]',
             'item_version':'str',
-    })
-    ChartMetadata_______ = typing.TypedDict('ChartMetadata_______', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port_______ = typing.TypedDict('Port_______', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus________ = typing.TypedDict('PodStatus________', {
-            'available':'int',
-            'desired':'int',
     })
     Resources_______ = typing.TypedDict('Resources_______', {
             'storage_class':'dict[str]',
@@ -2675,15 +2311,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata_______',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port_______]',
-            'pod_status':'PodStatus________',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -2959,19 +2595,6 @@ class ChartRelease(Namespace):
             'limit':'int',
             'force_sql_filters':'bool',
     })
-    ChartMetadata_ = typing.TypedDict('ChartMetadata_', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port_ = typing.TypedDict('Port_', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus__ = typing.TypedDict('PodStatus__', {
-            'available':'int',
-            'desired':'int',
-    })
     Resources_ = typing.TypedDict('Resources_', {
             'storage_class':'dict[str]',
             'persistent_volumes':'list',
@@ -2994,15 +2617,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata_',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port_]',
-            'pod_status':'PodStatus__',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -3011,19 +2634,6 @@ class ChartRelease(Namespace):
             'chart_schema':'dict[str]',
             'history':'dict[str]',
             'resources':'Resources_',
-    })
-    ChartMetadata__ = typing.TypedDict('ChartMetadata__', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port__ = typing.TypedDict('Port__', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus___ = typing.TypedDict('PodStatus___', {
-            'available':'int',
-            'desired':'int',
     })
     Resources__ = typing.TypedDict('Resources__', {
             'storage_class':'dict[str]',
@@ -3047,15 +2657,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata__',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port__]',
-            'pod_status':'PodStatus___',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -3064,19 +2674,6 @@ class ChartRelease(Namespace):
             'chart_schema':'dict[str]',
             'history':'dict[str]',
             'resources':'Resources__',
-    })
-    ChartMetadata___ = typing.TypedDict('ChartMetadata___', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port___ = typing.TypedDict('Port___', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus____ = typing.TypedDict('PodStatus____', {
-            'available':'int',
-            'desired':'int',
     })
     Resources___ = typing.TypedDict('Resources___', {
             'storage_class':'dict[str]',
@@ -3100,15 +2697,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata___',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port___]',
-            'pod_status':'PodStatus____',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -3117,19 +2714,6 @@ class ChartRelease(Namespace):
             'chart_schema':'dict[str]',
             'history':'dict[str]',
             'resources':'Resources___',
-    })
-    ChartMetadata____ = typing.TypedDict('ChartMetadata____', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port____ = typing.TypedDict('Port____', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus_____ = typing.TypedDict('PodStatus_____', {
-            'available':'int',
-            'desired':'int',
     })
     Resources____ = typing.TypedDict('Resources____', {
             'storage_class':'dict[str]',
@@ -3153,15 +2737,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata____',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port____]',
-            'pod_status':'PodStatus_____',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -3176,19 +2760,6 @@ class ChartRelease(Namespace):
             'recreate_resources':'bool',
             'rollback_snapshot':'bool',
             'item_version':'str',
-    })
-    ChartMetadata_____ = typing.TypedDict('ChartMetadata_____', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port_____ = typing.TypedDict('Port_____', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus______ = typing.TypedDict('PodStatus______', {
-            'available':'int',
-            'desired':'int',
     })
     Resources_____ = typing.TypedDict('Resources_____', {
             'storage_class':'dict[str]',
@@ -3212,15 +2783,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata_____',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port_____]',
-            'pod_status':'PodStatus______',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -3257,19 +2828,6 @@ class ChartRelease(Namespace):
     ChartReleaseUpdate = typing.TypedDict('ChartReleaseUpdate', {
             'values':'dict[str]',
     })
-    ChartMetadata______ = typing.TypedDict('ChartMetadata______', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port______ = typing.TypedDict('Port______', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus_______ = typing.TypedDict('PodStatus_______', {
-            'available':'int',
-            'desired':'int',
-    })
     Resources______ = typing.TypedDict('Resources______', {
             'storage_class':'dict[str]',
             'persistent_volumes':'list',
@@ -3292,15 +2850,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata______',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port______]',
-            'pod_status':'PodStatus_______',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -3313,19 +2871,6 @@ class ChartRelease(Namespace):
     UpgradeOptions = typing.TypedDict('UpgradeOptions', {
             'values':'dict[str]',
             'item_version':'str',
-    })
-    ChartMetadata_______ = typing.TypedDict('ChartMetadata_______', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port_______ = typing.TypedDict('Port_______', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus________ = typing.TypedDict('PodStatus________', {
-            'available':'int',
-            'desired':'int',
     })
     Resources_______ = typing.TypedDict('Resources_______', {
             'storage_class':'dict[str]',
@@ -3349,15 +2894,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata_______',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port_______]',
-            'pod_status':'PodStatus________',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -3640,19 +3185,6 @@ class ChartRelease(Namespace):
             'limit':'int',
             'force_sql_filters':'bool',
     })
-    ChartMetadata_ = typing.TypedDict('ChartMetadata_', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port_ = typing.TypedDict('Port_', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus__ = typing.TypedDict('PodStatus__', {
-            'available':'int',
-            'desired':'int',
-    })
     Resources_ = typing.TypedDict('Resources_', {
             'storage_class':'dict[str]',
             'persistent_volumes':'list',
@@ -3675,15 +3207,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata_',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port_]',
-            'pod_status':'PodStatus__',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -3692,19 +3224,6 @@ class ChartRelease(Namespace):
             'chart_schema':'dict[str]',
             'history':'dict[str]',
             'resources':'Resources_',
-    })
-    ChartMetadata__ = typing.TypedDict('ChartMetadata__', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port__ = typing.TypedDict('Port__', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus___ = typing.TypedDict('PodStatus___', {
-            'available':'int',
-            'desired':'int',
     })
     Resources__ = typing.TypedDict('Resources__', {
             'storage_class':'dict[str]',
@@ -3728,15 +3247,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata__',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port__]',
-            'pod_status':'PodStatus___',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -3745,19 +3264,6 @@ class ChartRelease(Namespace):
             'chart_schema':'dict[str]',
             'history':'dict[str]',
             'resources':'Resources__',
-    })
-    ChartMetadata___ = typing.TypedDict('ChartMetadata___', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port___ = typing.TypedDict('Port___', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus____ = typing.TypedDict('PodStatus____', {
-            'available':'int',
-            'desired':'int',
     })
     Resources___ = typing.TypedDict('Resources___', {
             'storage_class':'dict[str]',
@@ -3781,15 +3287,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata___',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port___]',
-            'pod_status':'PodStatus____',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -3798,19 +3304,6 @@ class ChartRelease(Namespace):
             'chart_schema':'dict[str]',
             'history':'dict[str]',
             'resources':'Resources___',
-    })
-    ChartMetadata____ = typing.TypedDict('ChartMetadata____', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port____ = typing.TypedDict('Port____', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus_____ = typing.TypedDict('PodStatus_____', {
-            'available':'int',
-            'desired':'int',
     })
     Resources____ = typing.TypedDict('Resources____', {
             'storage_class':'dict[str]',
@@ -3834,15 +3327,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata____',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port____]',
-            'pod_status':'PodStatus_____',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -3857,19 +3350,6 @@ class ChartRelease(Namespace):
             'recreate_resources':'bool',
             'rollback_snapshot':'bool',
             'item_version':'str',
-    })
-    ChartMetadata_____ = typing.TypedDict('ChartMetadata_____', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port_____ = typing.TypedDict('Port_____', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus______ = typing.TypedDict('PodStatus______', {
-            'available':'int',
-            'desired':'int',
     })
     Resources_____ = typing.TypedDict('Resources_____', {
             'storage_class':'dict[str]',
@@ -3893,15 +3373,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata_____',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port_____]',
-            'pod_status':'PodStatus______',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -3938,19 +3418,6 @@ class ChartRelease(Namespace):
     ChartReleaseUpdate = typing.TypedDict('ChartReleaseUpdate', {
             'values':'dict[str]',
     })
-    ChartMetadata______ = typing.TypedDict('ChartMetadata______', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port______ = typing.TypedDict('Port______', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus_______ = typing.TypedDict('PodStatus_______', {
-            'available':'int',
-            'desired':'int',
-    })
     Resources______ = typing.TypedDict('Resources______', {
             'storage_class':'dict[str]',
             'persistent_volumes':'list',
@@ -3973,15 +3440,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata______',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port______]',
-            'pod_status':'PodStatus_______',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -3994,19 +3461,6 @@ class ChartRelease(Namespace):
     UpgradeOptions = typing.TypedDict('UpgradeOptions', {
             'values':'dict[str]',
             'item_version':'str',
-    })
-    ChartMetadata_______ = typing.TypedDict('ChartMetadata_______', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port_______ = typing.TypedDict('Port_______', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus________ = typing.TypedDict('PodStatus________', {
-            'available':'int',
-            'desired':'int',
     })
     Resources_______ = typing.TypedDict('Resources_______', {
             'storage_class':'dict[str]',
@@ -4030,15 +3484,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata_______',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port_______]',
-            'pod_status':'PodStatus________',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -4317,19 +3771,6 @@ class ChartRelease(Namespace):
             'limit':'int',
             'force_sql_filters':'bool',
     })
-    ChartMetadata_ = typing.TypedDict('ChartMetadata_', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port_ = typing.TypedDict('Port_', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus__ = typing.TypedDict('PodStatus__', {
-            'available':'int',
-            'desired':'int',
-    })
     Resources_ = typing.TypedDict('Resources_', {
             'storage_class':'dict[str]',
             'persistent_volumes':'list',
@@ -4352,15 +3793,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata_',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port_]',
-            'pod_status':'PodStatus__',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -4369,19 +3810,6 @@ class ChartRelease(Namespace):
             'chart_schema':'dict[str]',
             'history':'dict[str]',
             'resources':'Resources_',
-    })
-    ChartMetadata__ = typing.TypedDict('ChartMetadata__', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port__ = typing.TypedDict('Port__', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus___ = typing.TypedDict('PodStatus___', {
-            'available':'int',
-            'desired':'int',
     })
     Resources__ = typing.TypedDict('Resources__', {
             'storage_class':'dict[str]',
@@ -4405,15 +3833,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata__',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port__]',
-            'pod_status':'PodStatus___',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -4422,19 +3850,6 @@ class ChartRelease(Namespace):
             'chart_schema':'dict[str]',
             'history':'dict[str]',
             'resources':'Resources__',
-    })
-    ChartMetadata___ = typing.TypedDict('ChartMetadata___', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port___ = typing.TypedDict('Port___', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus____ = typing.TypedDict('PodStatus____', {
-            'available':'int',
-            'desired':'int',
     })
     Resources___ = typing.TypedDict('Resources___', {
             'storage_class':'dict[str]',
@@ -4458,15 +3873,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata___',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port___]',
-            'pod_status':'PodStatus____',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -4475,19 +3890,6 @@ class ChartRelease(Namespace):
             'chart_schema':'dict[str]',
             'history':'dict[str]',
             'resources':'Resources___',
-    })
-    ChartMetadata____ = typing.TypedDict('ChartMetadata____', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port____ = typing.TypedDict('Port____', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus_____ = typing.TypedDict('PodStatus_____', {
-            'available':'int',
-            'desired':'int',
     })
     Resources____ = typing.TypedDict('Resources____', {
             'storage_class':'dict[str]',
@@ -4511,15 +3913,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata____',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port____]',
-            'pod_status':'PodStatus_____',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -4534,19 +3936,6 @@ class ChartRelease(Namespace):
             'recreate_resources':'bool',
             'rollback_snapshot':'bool',
             'item_version':'str',
-    })
-    ChartMetadata_____ = typing.TypedDict('ChartMetadata_____', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port_____ = typing.TypedDict('Port_____', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus______ = typing.TypedDict('PodStatus______', {
-            'available':'int',
-            'desired':'int',
     })
     Resources_____ = typing.TypedDict('Resources_____', {
             'storage_class':'dict[str]',
@@ -4570,15 +3959,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata_____',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port_____]',
-            'pod_status':'PodStatus______',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -4615,19 +4004,6 @@ class ChartRelease(Namespace):
     ChartReleaseUpdate = typing.TypedDict('ChartReleaseUpdate', {
             'values':'dict[str]',
     })
-    ChartMetadata______ = typing.TypedDict('ChartMetadata______', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port______ = typing.TypedDict('Port______', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus_______ = typing.TypedDict('PodStatus_______', {
-            'available':'int',
-            'desired':'int',
-    })
     Resources______ = typing.TypedDict('Resources______', {
             'storage_class':'dict[str]',
             'persistent_volumes':'list',
@@ -4650,15 +4026,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata______',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port______]',
-            'pod_status':'PodStatus_______',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -4671,19 +4047,6 @@ class ChartRelease(Namespace):
     UpgradeOptions = typing.TypedDict('UpgradeOptions', {
             'values':'dict[str]',
             'item_version':'str',
-    })
-    ChartMetadata_______ = typing.TypedDict('ChartMetadata_______', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port_______ = typing.TypedDict('Port_______', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus________ = typing.TypedDict('PodStatus________', {
-            'available':'int',
-            'desired':'int',
     })
     Resources_______ = typing.TypedDict('Resources_______', {
             'storage_class':'dict[str]',
@@ -4707,15 +4070,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata_______',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port_______]',
-            'pod_status':'PodStatus________',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -4988,19 +4351,6 @@ class ChartRelease(Namespace):
             'limit':'int',
             'force_sql_filters':'bool',
     })
-    ChartMetadata_ = typing.TypedDict('ChartMetadata_', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port_ = typing.TypedDict('Port_', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus__ = typing.TypedDict('PodStatus__', {
-            'available':'int',
-            'desired':'int',
-    })
     Resources_ = typing.TypedDict('Resources_', {
             'storage_class':'dict[str]',
             'persistent_volumes':'list',
@@ -5023,15 +4373,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata_',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port_]',
-            'pod_status':'PodStatus__',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -5040,19 +4390,6 @@ class ChartRelease(Namespace):
             'chart_schema':'dict[str]',
             'history':'dict[str]',
             'resources':'Resources_',
-    })
-    ChartMetadata__ = typing.TypedDict('ChartMetadata__', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port__ = typing.TypedDict('Port__', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus___ = typing.TypedDict('PodStatus___', {
-            'available':'int',
-            'desired':'int',
     })
     Resources__ = typing.TypedDict('Resources__', {
             'storage_class':'dict[str]',
@@ -5076,15 +4413,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata__',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port__]',
-            'pod_status':'PodStatus___',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -5093,19 +4430,6 @@ class ChartRelease(Namespace):
             'chart_schema':'dict[str]',
             'history':'dict[str]',
             'resources':'Resources__',
-    })
-    ChartMetadata___ = typing.TypedDict('ChartMetadata___', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port___ = typing.TypedDict('Port___', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus____ = typing.TypedDict('PodStatus____', {
-            'available':'int',
-            'desired':'int',
     })
     Resources___ = typing.TypedDict('Resources___', {
             'storage_class':'dict[str]',
@@ -5129,15 +4453,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata___',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port___]',
-            'pod_status':'PodStatus____',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -5146,19 +4470,6 @@ class ChartRelease(Namespace):
             'chart_schema':'dict[str]',
             'history':'dict[str]',
             'resources':'Resources___',
-    })
-    ChartMetadata____ = typing.TypedDict('ChartMetadata____', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port____ = typing.TypedDict('Port____', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus_____ = typing.TypedDict('PodStatus_____', {
-            'available':'int',
-            'desired':'int',
     })
     Resources____ = typing.TypedDict('Resources____', {
             'storage_class':'dict[str]',
@@ -5182,15 +4493,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata____',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port____]',
-            'pod_status':'PodStatus_____',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -5205,19 +4516,6 @@ class ChartRelease(Namespace):
             'recreate_resources':'bool',
             'rollback_snapshot':'bool',
             'item_version':'str',
-    })
-    ChartMetadata_____ = typing.TypedDict('ChartMetadata_____', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port_____ = typing.TypedDict('Port_____', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus______ = typing.TypedDict('PodStatus______', {
-            'available':'int',
-            'desired':'int',
     })
     Resources_____ = typing.TypedDict('Resources_____', {
             'storage_class':'dict[str]',
@@ -5241,15 +4539,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata_____',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port_____]',
-            'pod_status':'PodStatus______',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -5286,19 +4584,6 @@ class ChartRelease(Namespace):
     ChartReleaseUpdate = typing.TypedDict('ChartReleaseUpdate', {
             'values':'dict[str]',
     })
-    ChartMetadata______ = typing.TypedDict('ChartMetadata______', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port______ = typing.TypedDict('Port______', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus_______ = typing.TypedDict('PodStatus_______', {
-            'available':'int',
-            'desired':'int',
-    })
     Resources______ = typing.TypedDict('Resources______', {
             'storage_class':'dict[str]',
             'persistent_volumes':'list',
@@ -5321,15 +4606,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata______',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port______]',
-            'pod_status':'PodStatus_______',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -5342,19 +4627,6 @@ class ChartRelease(Namespace):
     UpgradeOptions = typing.TypedDict('UpgradeOptions', {
             'values':'dict[str]',
             'item_version':'str',
-    })
-    ChartMetadata_______ = typing.TypedDict('ChartMetadata_______', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port_______ = typing.TypedDict('Port_______', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus________ = typing.TypedDict('PodStatus________', {
-            'available':'int',
-            'desired':'int',
     })
     Resources_______ = typing.TypedDict('Resources_______', {
             'storage_class':'dict[str]',
@@ -5378,15 +4650,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata_______',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port_______]',
-            'pod_status':'PodStatus________',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -5672,19 +4944,6 @@ class ChartRelease(Namespace):
             'limit':'int',
             'force_sql_filters':'bool',
     })
-    ChartMetadata_ = typing.TypedDict('ChartMetadata_', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port_ = typing.TypedDict('Port_', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus__ = typing.TypedDict('PodStatus__', {
-            'available':'int',
-            'desired':'int',
-    })
     Resources_ = typing.TypedDict('Resources_', {
             'storage_class':'dict[str]',
             'persistent_volumes':'list',
@@ -5707,15 +4966,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata_',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port_]',
-            'pod_status':'PodStatus__',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -5724,19 +4983,6 @@ class ChartRelease(Namespace):
             'chart_schema':'dict[str]',
             'history':'dict[str]',
             'resources':'Resources_',
-    })
-    ChartMetadata__ = typing.TypedDict('ChartMetadata__', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port__ = typing.TypedDict('Port__', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus___ = typing.TypedDict('PodStatus___', {
-            'available':'int',
-            'desired':'int',
     })
     Resources__ = typing.TypedDict('Resources__', {
             'storage_class':'dict[str]',
@@ -5760,15 +5006,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata__',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port__]',
-            'pod_status':'PodStatus___',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -5777,19 +5023,6 @@ class ChartRelease(Namespace):
             'chart_schema':'dict[str]',
             'history':'dict[str]',
             'resources':'Resources__',
-    })
-    ChartMetadata___ = typing.TypedDict('ChartMetadata___', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port___ = typing.TypedDict('Port___', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus____ = typing.TypedDict('PodStatus____', {
-            'available':'int',
-            'desired':'int',
     })
     Resources___ = typing.TypedDict('Resources___', {
             'storage_class':'dict[str]',
@@ -5813,15 +5046,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata___',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port___]',
-            'pod_status':'PodStatus____',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -5830,19 +5063,6 @@ class ChartRelease(Namespace):
             'chart_schema':'dict[str]',
             'history':'dict[str]',
             'resources':'Resources___',
-    })
-    ChartMetadata____ = typing.TypedDict('ChartMetadata____', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port____ = typing.TypedDict('Port____', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus_____ = typing.TypedDict('PodStatus_____', {
-            'available':'int',
-            'desired':'int',
     })
     Resources____ = typing.TypedDict('Resources____', {
             'storage_class':'dict[str]',
@@ -5866,15 +5086,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata____',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port____]',
-            'pod_status':'PodStatus_____',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -5889,19 +5109,6 @@ class ChartRelease(Namespace):
             'recreate_resources':'bool',
             'rollback_snapshot':'bool',
             'item_version':'str',
-    })
-    ChartMetadata_____ = typing.TypedDict('ChartMetadata_____', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port_____ = typing.TypedDict('Port_____', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus______ = typing.TypedDict('PodStatus______', {
-            'available':'int',
-            'desired':'int',
     })
     Resources_____ = typing.TypedDict('Resources_____', {
             'storage_class':'dict[str]',
@@ -5925,15 +5132,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata_____',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port_____]',
-            'pod_status':'PodStatus______',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -5970,19 +5177,6 @@ class ChartRelease(Namespace):
     ChartReleaseUpdate = typing.TypedDict('ChartReleaseUpdate', {
             'values':'dict[str]',
     })
-    ChartMetadata______ = typing.TypedDict('ChartMetadata______', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port______ = typing.TypedDict('Port______', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus_______ = typing.TypedDict('PodStatus_______', {
-            'available':'int',
-            'desired':'int',
-    })
     Resources______ = typing.TypedDict('Resources______', {
             'storage_class':'dict[str]',
             'persistent_volumes':'list',
@@ -6005,15 +5199,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata______',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port______]',
-            'pod_status':'PodStatus_______',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -6026,19 +5220,6 @@ class ChartRelease(Namespace):
     UpgradeOptions = typing.TypedDict('UpgradeOptions', {
             'values':'dict[str]',
             'item_version':'str',
-    })
-    ChartMetadata_______ = typing.TypedDict('ChartMetadata_______', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port_______ = typing.TypedDict('Port_______', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus________ = typing.TypedDict('PodStatus________', {
-            'available':'int',
-            'desired':'int',
     })
     Resources_______ = typing.TypedDict('Resources_______', {
             'storage_class':'dict[str]',
@@ -6062,15 +5243,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata_______',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port_______]',
-            'pod_status':'PodStatus________',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -6356,19 +5537,6 @@ class ChartRelease(Namespace):
             'limit':'int',
             'force_sql_filters':'bool',
     })
-    ChartMetadata_ = typing.TypedDict('ChartMetadata_', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port_ = typing.TypedDict('Port_', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus__ = typing.TypedDict('PodStatus__', {
-            'available':'int',
-            'desired':'int',
-    })
     Resources_ = typing.TypedDict('Resources_', {
             'storage_class':'dict[str]',
             'persistent_volumes':'list',
@@ -6391,15 +5559,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata_',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port_]',
-            'pod_status':'PodStatus__',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -6408,19 +5576,6 @@ class ChartRelease(Namespace):
             'chart_schema':'dict[str]',
             'history':'dict[str]',
             'resources':'Resources_',
-    })
-    ChartMetadata__ = typing.TypedDict('ChartMetadata__', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port__ = typing.TypedDict('Port__', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus___ = typing.TypedDict('PodStatus___', {
-            'available':'int',
-            'desired':'int',
     })
     Resources__ = typing.TypedDict('Resources__', {
             'storage_class':'dict[str]',
@@ -6444,15 +5599,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata__',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port__]',
-            'pod_status':'PodStatus___',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -6461,19 +5616,6 @@ class ChartRelease(Namespace):
             'chart_schema':'dict[str]',
             'history':'dict[str]',
             'resources':'Resources__',
-    })
-    ChartMetadata___ = typing.TypedDict('ChartMetadata___', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port___ = typing.TypedDict('Port___', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus____ = typing.TypedDict('PodStatus____', {
-            'available':'int',
-            'desired':'int',
     })
     Resources___ = typing.TypedDict('Resources___', {
             'storage_class':'dict[str]',
@@ -6497,15 +5639,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata___',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port___]',
-            'pod_status':'PodStatus____',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -6514,19 +5656,6 @@ class ChartRelease(Namespace):
             'chart_schema':'dict[str]',
             'history':'dict[str]',
             'resources':'Resources___',
-    })
-    ChartMetadata____ = typing.TypedDict('ChartMetadata____', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port____ = typing.TypedDict('Port____', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus_____ = typing.TypedDict('PodStatus_____', {
-            'available':'int',
-            'desired':'int',
     })
     Resources____ = typing.TypedDict('Resources____', {
             'storage_class':'dict[str]',
@@ -6550,15 +5679,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata____',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port____]',
-            'pod_status':'PodStatus_____',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -6573,19 +5702,6 @@ class ChartRelease(Namespace):
             'recreate_resources':'bool',
             'rollback_snapshot':'bool',
             'item_version':'str',
-    })
-    ChartMetadata_____ = typing.TypedDict('ChartMetadata_____', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port_____ = typing.TypedDict('Port_____', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus______ = typing.TypedDict('PodStatus______', {
-            'available':'int',
-            'desired':'int',
     })
     Resources_____ = typing.TypedDict('Resources_____', {
             'storage_class':'dict[str]',
@@ -6609,15 +5725,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata_____',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port_____]',
-            'pod_status':'PodStatus______',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -6654,19 +5770,6 @@ class ChartRelease(Namespace):
     ChartReleaseUpdate = typing.TypedDict('ChartReleaseUpdate', {
             'values':'dict[str]',
     })
-    ChartMetadata______ = typing.TypedDict('ChartMetadata______', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port______ = typing.TypedDict('Port______', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus_______ = typing.TypedDict('PodStatus_______', {
-            'available':'int',
-            'desired':'int',
-    })
     Resources______ = typing.TypedDict('Resources______', {
             'storage_class':'dict[str]',
             'persistent_volumes':'list',
@@ -6689,15 +5792,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata______',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port______]',
-            'pod_status':'PodStatus_______',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -6710,19 +5813,6 @@ class ChartRelease(Namespace):
     UpgradeOptions = typing.TypedDict('UpgradeOptions', {
             'values':'dict[str]',
             'item_version':'str',
-    })
-    ChartMetadata_______ = typing.TypedDict('ChartMetadata_______', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port_______ = typing.TypedDict('Port_______', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus________ = typing.TypedDict('PodStatus________', {
-            'available':'int',
-            'desired':'int',
     })
     Resources_______ = typing.TypedDict('Resources_______', {
             'storage_class':'dict[str]',
@@ -6746,15 +5836,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata_______',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port_______]',
-            'pod_status':'PodStatus________',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -7037,19 +6127,6 @@ class ChartRelease(Namespace):
             'limit':'int',
             'force_sql_filters':'bool',
     })
-    ChartMetadata_ = typing.TypedDict('ChartMetadata_', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port_ = typing.TypedDict('Port_', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus__ = typing.TypedDict('PodStatus__', {
-            'available':'int',
-            'desired':'int',
-    })
     Resources_ = typing.TypedDict('Resources_', {
             'storage_class':'dict[str]',
             'persistent_volumes':'list',
@@ -7072,15 +6149,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata_',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port_]',
-            'pod_status':'PodStatus__',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -7089,19 +6166,6 @@ class ChartRelease(Namespace):
             'chart_schema':'dict[str]',
             'history':'dict[str]',
             'resources':'Resources_',
-    })
-    ChartMetadata__ = typing.TypedDict('ChartMetadata__', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port__ = typing.TypedDict('Port__', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus___ = typing.TypedDict('PodStatus___', {
-            'available':'int',
-            'desired':'int',
     })
     Resources__ = typing.TypedDict('Resources__', {
             'storage_class':'dict[str]',
@@ -7125,15 +6189,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata__',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port__]',
-            'pod_status':'PodStatus___',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -7142,19 +6206,6 @@ class ChartRelease(Namespace):
             'chart_schema':'dict[str]',
             'history':'dict[str]',
             'resources':'Resources__',
-    })
-    ChartMetadata___ = typing.TypedDict('ChartMetadata___', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port___ = typing.TypedDict('Port___', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus____ = typing.TypedDict('PodStatus____', {
-            'available':'int',
-            'desired':'int',
     })
     Resources___ = typing.TypedDict('Resources___', {
             'storage_class':'dict[str]',
@@ -7178,15 +6229,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata___',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port___]',
-            'pod_status':'PodStatus____',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -7195,19 +6246,6 @@ class ChartRelease(Namespace):
             'chart_schema':'dict[str]',
             'history':'dict[str]',
             'resources':'Resources___',
-    })
-    ChartMetadata____ = typing.TypedDict('ChartMetadata____', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port____ = typing.TypedDict('Port____', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus_____ = typing.TypedDict('PodStatus_____', {
-            'available':'int',
-            'desired':'int',
     })
     Resources____ = typing.TypedDict('Resources____', {
             'storage_class':'dict[str]',
@@ -7231,15 +6269,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata____',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port____]',
-            'pod_status':'PodStatus_____',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -7254,19 +6292,6 @@ class ChartRelease(Namespace):
             'recreate_resources':'bool',
             'rollback_snapshot':'bool',
             'item_version':'str',
-    })
-    ChartMetadata_____ = typing.TypedDict('ChartMetadata_____', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port_____ = typing.TypedDict('Port_____', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus______ = typing.TypedDict('PodStatus______', {
-            'available':'int',
-            'desired':'int',
     })
     Resources_____ = typing.TypedDict('Resources_____', {
             'storage_class':'dict[str]',
@@ -7290,15 +6315,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata_____',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port_____]',
-            'pod_status':'PodStatus______',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -7335,19 +6360,6 @@ class ChartRelease(Namespace):
     ChartReleaseUpdate = typing.TypedDict('ChartReleaseUpdate', {
             'values':'dict[str]',
     })
-    ChartMetadata______ = typing.TypedDict('ChartMetadata______', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port______ = typing.TypedDict('Port______', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus_______ = typing.TypedDict('PodStatus_______', {
-            'available':'int',
-            'desired':'int',
-    })
     Resources______ = typing.TypedDict('Resources______', {
             'storage_class':'dict[str]',
             'persistent_volumes':'list',
@@ -7370,15 +6382,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata______',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port______]',
-            'pod_status':'PodStatus_______',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -7391,19 +6403,6 @@ class ChartRelease(Namespace):
     UpgradeOptions = typing.TypedDict('UpgradeOptions', {
             'values':'dict[str]',
             'item_version':'str',
-    })
-    ChartMetadata_______ = typing.TypedDict('ChartMetadata_______', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port_______ = typing.TypedDict('Port_______', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus________ = typing.TypedDict('PodStatus________', {
-            'available':'int',
-            'desired':'int',
     })
     Resources_______ = typing.TypedDict('Resources_______', {
             'storage_class':'dict[str]',
@@ -7427,15 +6426,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata_______',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port_______]',
-            'pod_status':'PodStatus________',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -7711,19 +6710,6 @@ class ChartRelease(Namespace):
             'limit':'int',
             'force_sql_filters':'bool',
     })
-    ChartMetadata_ = typing.TypedDict('ChartMetadata_', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port_ = typing.TypedDict('Port_', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus__ = typing.TypedDict('PodStatus__', {
-            'available':'int',
-            'desired':'int',
-    })
     Resources_ = typing.TypedDict('Resources_', {
             'storage_class':'dict[str]',
             'persistent_volumes':'list',
@@ -7746,15 +6732,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata_',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port_]',
-            'pod_status':'PodStatus__',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -7763,19 +6749,6 @@ class ChartRelease(Namespace):
             'chart_schema':'dict[str]',
             'history':'dict[str]',
             'resources':'Resources_',
-    })
-    ChartMetadata__ = typing.TypedDict('ChartMetadata__', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port__ = typing.TypedDict('Port__', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus___ = typing.TypedDict('PodStatus___', {
-            'available':'int',
-            'desired':'int',
     })
     Resources__ = typing.TypedDict('Resources__', {
             'storage_class':'dict[str]',
@@ -7799,15 +6772,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata__',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port__]',
-            'pod_status':'PodStatus___',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -7816,19 +6789,6 @@ class ChartRelease(Namespace):
             'chart_schema':'dict[str]',
             'history':'dict[str]',
             'resources':'Resources__',
-    })
-    ChartMetadata___ = typing.TypedDict('ChartMetadata___', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port___ = typing.TypedDict('Port___', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus____ = typing.TypedDict('PodStatus____', {
-            'available':'int',
-            'desired':'int',
     })
     Resources___ = typing.TypedDict('Resources___', {
             'storage_class':'dict[str]',
@@ -7852,15 +6812,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata___',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port___]',
-            'pod_status':'PodStatus____',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -7869,19 +6829,6 @@ class ChartRelease(Namespace):
             'chart_schema':'dict[str]',
             'history':'dict[str]',
             'resources':'Resources___',
-    })
-    ChartMetadata____ = typing.TypedDict('ChartMetadata____', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port____ = typing.TypedDict('Port____', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus_____ = typing.TypedDict('PodStatus_____', {
-            'available':'int',
-            'desired':'int',
     })
     Resources____ = typing.TypedDict('Resources____', {
             'storage_class':'dict[str]',
@@ -7905,15 +6852,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata____',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port____]',
-            'pod_status':'PodStatus_____',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -7928,19 +6875,6 @@ class ChartRelease(Namespace):
             'recreate_resources':'bool',
             'rollback_snapshot':'bool',
             'item_version':'str',
-    })
-    ChartMetadata_____ = typing.TypedDict('ChartMetadata_____', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port_____ = typing.TypedDict('Port_____', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus______ = typing.TypedDict('PodStatus______', {
-            'available':'int',
-            'desired':'int',
     })
     Resources_____ = typing.TypedDict('Resources_____', {
             'storage_class':'dict[str]',
@@ -7964,15 +6898,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata_____',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port_____]',
-            'pod_status':'PodStatus______',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -8009,19 +6943,6 @@ class ChartRelease(Namespace):
     ChartReleaseUpdate = typing.TypedDict('ChartReleaseUpdate', {
             'values':'dict[str]',
     })
-    ChartMetadata______ = typing.TypedDict('ChartMetadata______', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port______ = typing.TypedDict('Port______', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus_______ = typing.TypedDict('PodStatus_______', {
-            'available':'int',
-            'desired':'int',
-    })
     Resources______ = typing.TypedDict('Resources______', {
             'storage_class':'dict[str]',
             'persistent_volumes':'list',
@@ -8044,15 +6965,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata______',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port______]',
-            'pod_status':'PodStatus_______',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -8065,19 +6986,6 @@ class ChartRelease(Namespace):
     UpgradeOptions = typing.TypedDict('UpgradeOptions', {
             'values':'dict[str]',
             'item_version':'str',
-    })
-    ChartMetadata_______ = typing.TypedDict('ChartMetadata_______', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port_______ = typing.TypedDict('Port_______', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus________ = typing.TypedDict('PodStatus________', {
-            'available':'int',
-            'desired':'int',
     })
     Resources_______ = typing.TypedDict('Resources_______', {
             'storage_class':'dict[str]',
@@ -8101,15 +7009,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata_______',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port_______]',
-            'pod_status':'PodStatus________',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -8398,19 +7306,6 @@ class ChartRelease(Namespace):
             'limit':'int',
             'force_sql_filters':'bool',
     })
-    ChartMetadata_ = typing.TypedDict('ChartMetadata_', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port_ = typing.TypedDict('Port_', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus__ = typing.TypedDict('PodStatus__', {
-            'available':'int',
-            'desired':'int',
-    })
     Resources_ = typing.TypedDict('Resources_', {
             'storage_class':'dict[str]',
             'persistent_volumes':'list',
@@ -8433,15 +7328,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata_',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port_]',
-            'pod_status':'PodStatus__',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -8450,19 +7345,6 @@ class ChartRelease(Namespace):
             'chart_schema':'dict[str]',
             'history':'dict[str]',
             'resources':'Resources_',
-    })
-    ChartMetadata__ = typing.TypedDict('ChartMetadata__', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port__ = typing.TypedDict('Port__', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus___ = typing.TypedDict('PodStatus___', {
-            'available':'int',
-            'desired':'int',
     })
     Resources__ = typing.TypedDict('Resources__', {
             'storage_class':'dict[str]',
@@ -8486,15 +7368,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata__',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port__]',
-            'pod_status':'PodStatus___',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -8503,19 +7385,6 @@ class ChartRelease(Namespace):
             'chart_schema':'dict[str]',
             'history':'dict[str]',
             'resources':'Resources__',
-    })
-    ChartMetadata___ = typing.TypedDict('ChartMetadata___', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port___ = typing.TypedDict('Port___', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus____ = typing.TypedDict('PodStatus____', {
-            'available':'int',
-            'desired':'int',
     })
     Resources___ = typing.TypedDict('Resources___', {
             'storage_class':'dict[str]',
@@ -8539,15 +7408,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata___',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port___]',
-            'pod_status':'PodStatus____',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -8556,19 +7425,6 @@ class ChartRelease(Namespace):
             'chart_schema':'dict[str]',
             'history':'dict[str]',
             'resources':'Resources___',
-    })
-    ChartMetadata____ = typing.TypedDict('ChartMetadata____', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port____ = typing.TypedDict('Port____', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus_____ = typing.TypedDict('PodStatus_____', {
-            'available':'int',
-            'desired':'int',
     })
     Resources____ = typing.TypedDict('Resources____', {
             'storage_class':'dict[str]',
@@ -8592,15 +7448,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata____',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port____]',
-            'pod_status':'PodStatus_____',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -8615,19 +7471,6 @@ class ChartRelease(Namespace):
             'recreate_resources':'bool',
             'rollback_snapshot':'bool',
             'item_version':'str',
-    })
-    ChartMetadata_____ = typing.TypedDict('ChartMetadata_____', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port_____ = typing.TypedDict('Port_____', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus______ = typing.TypedDict('PodStatus______', {
-            'available':'int',
-            'desired':'int',
     })
     Resources_____ = typing.TypedDict('Resources_____', {
             'storage_class':'dict[str]',
@@ -8651,15 +7494,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata_____',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port_____]',
-            'pod_status':'PodStatus______',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -8696,19 +7539,6 @@ class ChartRelease(Namespace):
     ChartReleaseUpdate = typing.TypedDict('ChartReleaseUpdate', {
             'values':'dict[str]',
     })
-    ChartMetadata______ = typing.TypedDict('ChartMetadata______', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port______ = typing.TypedDict('Port______', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus_______ = typing.TypedDict('PodStatus_______', {
-            'available':'int',
-            'desired':'int',
-    })
     Resources______ = typing.TypedDict('Resources______', {
             'storage_class':'dict[str]',
             'persistent_volumes':'list',
@@ -8731,15 +7561,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata______',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port______]',
-            'pod_status':'PodStatus_______',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -8752,19 +7582,6 @@ class ChartRelease(Namespace):
     UpgradeOptions = typing.TypedDict('UpgradeOptions', {
             'values':'dict[str]',
             'item_version':'str',
-    })
-    ChartMetadata_______ = typing.TypedDict('ChartMetadata_______', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port_______ = typing.TypedDict('Port_______', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus________ = typing.TypedDict('PodStatus________', {
-            'available':'int',
-            'desired':'int',
     })
     Resources_______ = typing.TypedDict('Resources_______', {
             'storage_class':'dict[str]',
@@ -8788,15 +7605,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata_______',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port_______]',
-            'pod_status':'PodStatus________',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -9087,19 +7904,6 @@ class ChartRelease(Namespace):
             'limit':'int',
             'force_sql_filters':'bool',
     })
-    ChartMetadata_ = typing.TypedDict('ChartMetadata_', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port_ = typing.TypedDict('Port_', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus__ = typing.TypedDict('PodStatus__', {
-            'available':'int',
-            'desired':'int',
-    })
     Resources_ = typing.TypedDict('Resources_', {
             'storage_class':'dict[str]',
             'persistent_volumes':'list',
@@ -9122,15 +7926,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata_',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port_]',
-            'pod_status':'PodStatus__',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -9139,19 +7943,6 @@ class ChartRelease(Namespace):
             'chart_schema':'dict[str]',
             'history':'dict[str]',
             'resources':'Resources_',
-    })
-    ChartMetadata__ = typing.TypedDict('ChartMetadata__', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port__ = typing.TypedDict('Port__', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus___ = typing.TypedDict('PodStatus___', {
-            'available':'int',
-            'desired':'int',
     })
     Resources__ = typing.TypedDict('Resources__', {
             'storage_class':'dict[str]',
@@ -9175,15 +7966,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata__',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port__]',
-            'pod_status':'PodStatus___',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -9192,19 +7983,6 @@ class ChartRelease(Namespace):
             'chart_schema':'dict[str]',
             'history':'dict[str]',
             'resources':'Resources__',
-    })
-    ChartMetadata___ = typing.TypedDict('ChartMetadata___', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port___ = typing.TypedDict('Port___', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus____ = typing.TypedDict('PodStatus____', {
-            'available':'int',
-            'desired':'int',
     })
     Resources___ = typing.TypedDict('Resources___', {
             'storage_class':'dict[str]',
@@ -9228,15 +8006,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata___',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port___]',
-            'pod_status':'PodStatus____',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -9245,19 +8023,6 @@ class ChartRelease(Namespace):
             'chart_schema':'dict[str]',
             'history':'dict[str]',
             'resources':'Resources___',
-    })
-    ChartMetadata____ = typing.TypedDict('ChartMetadata____', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port____ = typing.TypedDict('Port____', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus_____ = typing.TypedDict('PodStatus_____', {
-            'available':'int',
-            'desired':'int',
     })
     Resources____ = typing.TypedDict('Resources____', {
             'storage_class':'dict[str]',
@@ -9281,15 +8046,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata____',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port____]',
-            'pod_status':'PodStatus_____',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -9304,19 +8069,6 @@ class ChartRelease(Namespace):
             'recreate_resources':'bool',
             'rollback_snapshot':'bool',
             'item_version':'str',
-    })
-    ChartMetadata_____ = typing.TypedDict('ChartMetadata_____', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port_____ = typing.TypedDict('Port_____', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus______ = typing.TypedDict('PodStatus______', {
-            'available':'int',
-            'desired':'int',
     })
     Resources_____ = typing.TypedDict('Resources_____', {
             'storage_class':'dict[str]',
@@ -9340,15 +8092,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata_____',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port_____]',
-            'pod_status':'PodStatus______',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -9385,19 +8137,6 @@ class ChartRelease(Namespace):
     ChartReleaseUpdate = typing.TypedDict('ChartReleaseUpdate', {
             'values':'dict[str]',
     })
-    ChartMetadata______ = typing.TypedDict('ChartMetadata______', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port______ = typing.TypedDict('Port______', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus_______ = typing.TypedDict('PodStatus_______', {
-            'available':'int',
-            'desired':'int',
-    })
     Resources______ = typing.TypedDict('Resources______', {
             'storage_class':'dict[str]',
             'persistent_volumes':'list',
@@ -9420,15 +8159,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata______',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port______]',
-            'pod_status':'PodStatus_______',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -9441,19 +8180,6 @@ class ChartRelease(Namespace):
     UpgradeOptions = typing.TypedDict('UpgradeOptions', {
             'values':'dict[str]',
             'item_version':'str',
-    })
-    ChartMetadata_______ = typing.TypedDict('ChartMetadata_______', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port_______ = typing.TypedDict('Port_______', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus________ = typing.TypedDict('PodStatus________', {
-            'available':'int',
-            'desired':'int',
     })
     Resources_______ = typing.TypedDict('Resources_______', {
             'storage_class':'dict[str]',
@@ -9477,15 +8203,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata_______',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port_______]',
-            'pod_status':'PodStatus________',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -9762,19 +8488,6 @@ class ChartRelease(Namespace):
             'limit':'int',
             'force_sql_filters':'bool',
     })
-    ChartMetadata_ = typing.TypedDict('ChartMetadata_', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port_ = typing.TypedDict('Port_', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus__ = typing.TypedDict('PodStatus__', {
-            'available':'int',
-            'desired':'int',
-    })
     Resources_ = typing.TypedDict('Resources_', {
             'storage_class':'dict[str]',
             'persistent_volumes':'list',
@@ -9797,15 +8510,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata_',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port_]',
-            'pod_status':'PodStatus__',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -9814,19 +8527,6 @@ class ChartRelease(Namespace):
             'chart_schema':'dict[str]',
             'history':'dict[str]',
             'resources':'Resources_',
-    })
-    ChartMetadata__ = typing.TypedDict('ChartMetadata__', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port__ = typing.TypedDict('Port__', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus___ = typing.TypedDict('PodStatus___', {
-            'available':'int',
-            'desired':'int',
     })
     Resources__ = typing.TypedDict('Resources__', {
             'storage_class':'dict[str]',
@@ -9850,15 +8550,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata__',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port__]',
-            'pod_status':'PodStatus___',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -9867,19 +8567,6 @@ class ChartRelease(Namespace):
             'chart_schema':'dict[str]',
             'history':'dict[str]',
             'resources':'Resources__',
-    })
-    ChartMetadata___ = typing.TypedDict('ChartMetadata___', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port___ = typing.TypedDict('Port___', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus____ = typing.TypedDict('PodStatus____', {
-            'available':'int',
-            'desired':'int',
     })
     Resources___ = typing.TypedDict('Resources___', {
             'storage_class':'dict[str]',
@@ -9903,15 +8590,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata___',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port___]',
-            'pod_status':'PodStatus____',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -9920,19 +8607,6 @@ class ChartRelease(Namespace):
             'chart_schema':'dict[str]',
             'history':'dict[str]',
             'resources':'Resources___',
-    })
-    ChartMetadata____ = typing.TypedDict('ChartMetadata____', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port____ = typing.TypedDict('Port____', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus_____ = typing.TypedDict('PodStatus_____', {
-            'available':'int',
-            'desired':'int',
     })
     Resources____ = typing.TypedDict('Resources____', {
             'storage_class':'dict[str]',
@@ -9956,15 +8630,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata____',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port____]',
-            'pod_status':'PodStatus_____',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -9979,19 +8653,6 @@ class ChartRelease(Namespace):
             'recreate_resources':'bool',
             'rollback_snapshot':'bool',
             'item_version':'str',
-    })
-    ChartMetadata_____ = typing.TypedDict('ChartMetadata_____', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port_____ = typing.TypedDict('Port_____', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus______ = typing.TypedDict('PodStatus______', {
-            'available':'int',
-            'desired':'int',
     })
     Resources_____ = typing.TypedDict('Resources_____', {
             'storage_class':'dict[str]',
@@ -10015,15 +8676,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata_____',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port_____]',
-            'pod_status':'PodStatus______',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -10060,19 +8721,6 @@ class ChartRelease(Namespace):
     ChartReleaseUpdate = typing.TypedDict('ChartReleaseUpdate', {
             'values':'dict[str]',
     })
-    ChartMetadata______ = typing.TypedDict('ChartMetadata______', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port______ = typing.TypedDict('Port______', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus_______ = typing.TypedDict('PodStatus_______', {
-            'available':'int',
-            'desired':'int',
-    })
     Resources______ = typing.TypedDict('Resources______', {
             'storage_class':'dict[str]',
             'persistent_volumes':'list',
@@ -10095,15 +8743,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata______',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port______]',
-            'pod_status':'PodStatus_______',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -10116,19 +8764,6 @@ class ChartRelease(Namespace):
     UpgradeOptions = typing.TypedDict('UpgradeOptions', {
             'values':'dict[str]',
             'item_version':'str',
-    })
-    ChartMetadata_______ = typing.TypedDict('ChartMetadata_______', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port_______ = typing.TypedDict('Port_______', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus________ = typing.TypedDict('PodStatus________', {
-            'available':'int',
-            'desired':'int',
     })
     Resources_______ = typing.TypedDict('Resources_______', {
             'storage_class':'dict[str]',
@@ -10152,15 +8787,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata_______',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port_______]',
-            'pod_status':'PodStatus________',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -10437,19 +9072,6 @@ class ChartRelease(Namespace):
             'limit':'int',
             'force_sql_filters':'bool',
     })
-    ChartMetadata_ = typing.TypedDict('ChartMetadata_', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port_ = typing.TypedDict('Port_', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus__ = typing.TypedDict('PodStatus__', {
-            'available':'int',
-            'desired':'int',
-    })
     Resources_ = typing.TypedDict('Resources_', {
             'storage_class':'dict[str]',
             'persistent_volumes':'list',
@@ -10472,15 +9094,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata_',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port_]',
-            'pod_status':'PodStatus__',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -10489,19 +9111,6 @@ class ChartRelease(Namespace):
             'chart_schema':'dict[str]',
             'history':'dict[str]',
             'resources':'Resources_',
-    })
-    ChartMetadata__ = typing.TypedDict('ChartMetadata__', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port__ = typing.TypedDict('Port__', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus___ = typing.TypedDict('PodStatus___', {
-            'available':'int',
-            'desired':'int',
     })
     Resources__ = typing.TypedDict('Resources__', {
             'storage_class':'dict[str]',
@@ -10525,15 +9134,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata__',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port__]',
-            'pod_status':'PodStatus___',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -10542,19 +9151,6 @@ class ChartRelease(Namespace):
             'chart_schema':'dict[str]',
             'history':'dict[str]',
             'resources':'Resources__',
-    })
-    ChartMetadata___ = typing.TypedDict('ChartMetadata___', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port___ = typing.TypedDict('Port___', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus____ = typing.TypedDict('PodStatus____', {
-            'available':'int',
-            'desired':'int',
     })
     Resources___ = typing.TypedDict('Resources___', {
             'storage_class':'dict[str]',
@@ -10578,15 +9174,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata___',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port___]',
-            'pod_status':'PodStatus____',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -10595,19 +9191,6 @@ class ChartRelease(Namespace):
             'chart_schema':'dict[str]',
             'history':'dict[str]',
             'resources':'Resources___',
-    })
-    ChartMetadata____ = typing.TypedDict('ChartMetadata____', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port____ = typing.TypedDict('Port____', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus_____ = typing.TypedDict('PodStatus_____', {
-            'available':'int',
-            'desired':'int',
     })
     Resources____ = typing.TypedDict('Resources____', {
             'storage_class':'dict[str]',
@@ -10631,15 +9214,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata____',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port____]',
-            'pod_status':'PodStatus_____',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -10654,19 +9237,6 @@ class ChartRelease(Namespace):
             'recreate_resources':'bool',
             'rollback_snapshot':'bool',
             'item_version':'str',
-    })
-    ChartMetadata_____ = typing.TypedDict('ChartMetadata_____', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port_____ = typing.TypedDict('Port_____', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus______ = typing.TypedDict('PodStatus______', {
-            'available':'int',
-            'desired':'int',
     })
     Resources_____ = typing.TypedDict('Resources_____', {
             'storage_class':'dict[str]',
@@ -10690,15 +9260,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata_____',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port_____]',
-            'pod_status':'PodStatus______',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -10735,19 +9305,6 @@ class ChartRelease(Namespace):
     ChartReleaseUpdate = typing.TypedDict('ChartReleaseUpdate', {
             'values':'dict[str]',
     })
-    ChartMetadata______ = typing.TypedDict('ChartMetadata______', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port______ = typing.TypedDict('Port______', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus_______ = typing.TypedDict('PodStatus_______', {
-            'available':'int',
-            'desired':'int',
-    })
     Resources______ = typing.TypedDict('Resources______', {
             'storage_class':'dict[str]',
             'persistent_volumes':'list',
@@ -10770,15 +9327,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata______',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port______]',
-            'pod_status':'PodStatus_______',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -10791,19 +9348,6 @@ class ChartRelease(Namespace):
     UpgradeOptions = typing.TypedDict('UpgradeOptions', {
             'values':'dict[str]',
             'item_version':'str',
-    })
-    ChartMetadata_______ = typing.TypedDict('ChartMetadata_______', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port_______ = typing.TypedDict('Port_______', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus________ = typing.TypedDict('PodStatus________', {
-            'available':'int',
-            'desired':'int',
     })
     Resources_______ = typing.TypedDict('Resources_______', {
             'storage_class':'dict[str]',
@@ -10827,15 +9371,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata_______',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port_______]',
-            'pod_status':'PodStatus________',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -11129,19 +9673,6 @@ class ChartRelease(Namespace):
             'limit':'int',
             'force_sql_filters':'bool',
     })
-    ChartMetadata_ = typing.TypedDict('ChartMetadata_', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port_ = typing.TypedDict('Port_', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus__ = typing.TypedDict('PodStatus__', {
-            'available':'int',
-            'desired':'int',
-    })
     Resources_ = typing.TypedDict('Resources_', {
             'storage_class':'dict[str]',
             'persistent_volumes':'list',
@@ -11164,15 +9695,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata_',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port_]',
-            'pod_status':'PodStatus__',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -11181,19 +9712,6 @@ class ChartRelease(Namespace):
             'chart_schema':'dict[str]',
             'history':'dict[str]',
             'resources':'Resources_',
-    })
-    ChartMetadata__ = typing.TypedDict('ChartMetadata__', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port__ = typing.TypedDict('Port__', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus___ = typing.TypedDict('PodStatus___', {
-            'available':'int',
-            'desired':'int',
     })
     Resources__ = typing.TypedDict('Resources__', {
             'storage_class':'dict[str]',
@@ -11217,15 +9735,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata__',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port__]',
-            'pod_status':'PodStatus___',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -11234,19 +9752,6 @@ class ChartRelease(Namespace):
             'chart_schema':'dict[str]',
             'history':'dict[str]',
             'resources':'Resources__',
-    })
-    ChartMetadata___ = typing.TypedDict('ChartMetadata___', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port___ = typing.TypedDict('Port___', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus____ = typing.TypedDict('PodStatus____', {
-            'available':'int',
-            'desired':'int',
     })
     Resources___ = typing.TypedDict('Resources___', {
             'storage_class':'dict[str]',
@@ -11270,15 +9775,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata___',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port___]',
-            'pod_status':'PodStatus____',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -11287,19 +9792,6 @@ class ChartRelease(Namespace):
             'chart_schema':'dict[str]',
             'history':'dict[str]',
             'resources':'Resources___',
-    })
-    ChartMetadata____ = typing.TypedDict('ChartMetadata____', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port____ = typing.TypedDict('Port____', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus_____ = typing.TypedDict('PodStatus_____', {
-            'available':'int',
-            'desired':'int',
     })
     Resources____ = typing.TypedDict('Resources____', {
             'storage_class':'dict[str]',
@@ -11323,15 +9815,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata____',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port____]',
-            'pod_status':'PodStatus_____',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -11346,19 +9838,6 @@ class ChartRelease(Namespace):
             'recreate_resources':'bool',
             'rollback_snapshot':'bool',
             'item_version':'str',
-    })
-    ChartMetadata_____ = typing.TypedDict('ChartMetadata_____', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port_____ = typing.TypedDict('Port_____', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus______ = typing.TypedDict('PodStatus______', {
-            'available':'int',
-            'desired':'int',
     })
     Resources_____ = typing.TypedDict('Resources_____', {
             'storage_class':'dict[str]',
@@ -11382,15 +9861,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata_____',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port_____]',
-            'pod_status':'PodStatus______',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -11427,19 +9906,6 @@ class ChartRelease(Namespace):
     ChartReleaseUpdate = typing.TypedDict('ChartReleaseUpdate', {
             'values':'dict[str]',
     })
-    ChartMetadata______ = typing.TypedDict('ChartMetadata______', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port______ = typing.TypedDict('Port______', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus_______ = typing.TypedDict('PodStatus_______', {
-            'available':'int',
-            'desired':'int',
-    })
     Resources______ = typing.TypedDict('Resources______', {
             'storage_class':'dict[str]',
             'persistent_volumes':'list',
@@ -11462,15 +9928,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata______',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port______]',
-            'pod_status':'PodStatus_______',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -11483,19 +9949,6 @@ class ChartRelease(Namespace):
     UpgradeOptions = typing.TypedDict('UpgradeOptions', {
             'values':'dict[str]',
             'item_version':'str',
-    })
-    ChartMetadata_______ = typing.TypedDict('ChartMetadata_______', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port_______ = typing.TypedDict('Port_______', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus________ = typing.TypedDict('PodStatus________', {
-            'available':'int',
-            'desired':'int',
     })
     Resources_______ = typing.TypedDict('Resources_______', {
             'storage_class':'dict[str]',
@@ -11519,15 +9972,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata_______',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port_______]',
-            'pod_status':'PodStatus________',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -11808,19 +10261,6 @@ class ChartRelease(Namespace):
             'limit':'int',
             'force_sql_filters':'bool',
     })
-    ChartMetadata_ = typing.TypedDict('ChartMetadata_', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port_ = typing.TypedDict('Port_', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus__ = typing.TypedDict('PodStatus__', {
-            'available':'int',
-            'desired':'int',
-    })
     Resources_ = typing.TypedDict('Resources_', {
             'storage_class':'dict[str]',
             'persistent_volumes':'list',
@@ -11843,15 +10283,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata_',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port_]',
-            'pod_status':'PodStatus__',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -11860,19 +10300,6 @@ class ChartRelease(Namespace):
             'chart_schema':'dict[str]',
             'history':'dict[str]',
             'resources':'Resources_',
-    })
-    ChartMetadata__ = typing.TypedDict('ChartMetadata__', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port__ = typing.TypedDict('Port__', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus___ = typing.TypedDict('PodStatus___', {
-            'available':'int',
-            'desired':'int',
     })
     Resources__ = typing.TypedDict('Resources__', {
             'storage_class':'dict[str]',
@@ -11896,15 +10323,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata__',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port__]',
-            'pod_status':'PodStatus___',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -11913,19 +10340,6 @@ class ChartRelease(Namespace):
             'chart_schema':'dict[str]',
             'history':'dict[str]',
             'resources':'Resources__',
-    })
-    ChartMetadata___ = typing.TypedDict('ChartMetadata___', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port___ = typing.TypedDict('Port___', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus____ = typing.TypedDict('PodStatus____', {
-            'available':'int',
-            'desired':'int',
     })
     Resources___ = typing.TypedDict('Resources___', {
             'storage_class':'dict[str]',
@@ -11949,15 +10363,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata___',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port___]',
-            'pod_status':'PodStatus____',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -11966,19 +10380,6 @@ class ChartRelease(Namespace):
             'chart_schema':'dict[str]',
             'history':'dict[str]',
             'resources':'Resources___',
-    })
-    ChartMetadata____ = typing.TypedDict('ChartMetadata____', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port____ = typing.TypedDict('Port____', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus_____ = typing.TypedDict('PodStatus_____', {
-            'available':'int',
-            'desired':'int',
     })
     Resources____ = typing.TypedDict('Resources____', {
             'storage_class':'dict[str]',
@@ -12002,15 +10403,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata____',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port____]',
-            'pod_status':'PodStatus_____',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -12025,19 +10426,6 @@ class ChartRelease(Namespace):
             'recreate_resources':'bool',
             'rollback_snapshot':'bool',
             'item_version':'str',
-    })
-    ChartMetadata_____ = typing.TypedDict('ChartMetadata_____', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port_____ = typing.TypedDict('Port_____', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus______ = typing.TypedDict('PodStatus______', {
-            'available':'int',
-            'desired':'int',
     })
     Resources_____ = typing.TypedDict('Resources_____', {
             'storage_class':'dict[str]',
@@ -12061,15 +10449,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata_____',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port_____]',
-            'pod_status':'PodStatus______',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -12106,19 +10494,6 @@ class ChartRelease(Namespace):
     ChartReleaseUpdate = typing.TypedDict('ChartReleaseUpdate', {
             'values':'dict[str]',
     })
-    ChartMetadata______ = typing.TypedDict('ChartMetadata______', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port______ = typing.TypedDict('Port______', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus_______ = typing.TypedDict('PodStatus_______', {
-            'available':'int',
-            'desired':'int',
-    })
     Resources______ = typing.TypedDict('Resources______', {
             'storage_class':'dict[str]',
             'persistent_volumes':'list',
@@ -12141,15 +10516,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata______',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port______]',
-            'pod_status':'PodStatus_______',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -12162,19 +10537,6 @@ class ChartRelease(Namespace):
     UpgradeOptions = typing.TypedDict('UpgradeOptions', {
             'values':'dict[str]',
             'item_version':'str',
-    })
-    ChartMetadata_______ = typing.TypedDict('ChartMetadata_______', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port_______ = typing.TypedDict('Port_______', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus________ = typing.TypedDict('PodStatus________', {
-            'available':'int',
-            'desired':'int',
     })
     Resources_______ = typing.TypedDict('Resources_______', {
             'storage_class':'dict[str]',
@@ -12198,15 +10560,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata_______',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port_______]',
-            'pod_status':'PodStatus________',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -12483,19 +10845,6 @@ class ChartRelease(Namespace):
             'limit':'int',
             'force_sql_filters':'bool',
     })
-    ChartMetadata_ = typing.TypedDict('ChartMetadata_', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port_ = typing.TypedDict('Port_', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus__ = typing.TypedDict('PodStatus__', {
-            'available':'int',
-            'desired':'int',
-    })
     Resources_ = typing.TypedDict('Resources_', {
             'storage_class':'dict[str]',
             'persistent_volumes':'list',
@@ -12518,15 +10867,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata_',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port_]',
-            'pod_status':'PodStatus__',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -12535,19 +10884,6 @@ class ChartRelease(Namespace):
             'chart_schema':'dict[str]',
             'history':'dict[str]',
             'resources':'Resources_',
-    })
-    ChartMetadata__ = typing.TypedDict('ChartMetadata__', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port__ = typing.TypedDict('Port__', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus___ = typing.TypedDict('PodStatus___', {
-            'available':'int',
-            'desired':'int',
     })
     Resources__ = typing.TypedDict('Resources__', {
             'storage_class':'dict[str]',
@@ -12571,15 +10907,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata__',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port__]',
-            'pod_status':'PodStatus___',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -12588,19 +10924,6 @@ class ChartRelease(Namespace):
             'chart_schema':'dict[str]',
             'history':'dict[str]',
             'resources':'Resources__',
-    })
-    ChartMetadata___ = typing.TypedDict('ChartMetadata___', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port___ = typing.TypedDict('Port___', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus____ = typing.TypedDict('PodStatus____', {
-            'available':'int',
-            'desired':'int',
     })
     Resources___ = typing.TypedDict('Resources___', {
             'storage_class':'dict[str]',
@@ -12624,15 +10947,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata___',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port___]',
-            'pod_status':'PodStatus____',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -12641,19 +10964,6 @@ class ChartRelease(Namespace):
             'chart_schema':'dict[str]',
             'history':'dict[str]',
             'resources':'Resources___',
-    })
-    ChartMetadata____ = typing.TypedDict('ChartMetadata____', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port____ = typing.TypedDict('Port____', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus_____ = typing.TypedDict('PodStatus_____', {
-            'available':'int',
-            'desired':'int',
     })
     Resources____ = typing.TypedDict('Resources____', {
             'storage_class':'dict[str]',
@@ -12677,15 +10987,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata____',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port____]',
-            'pod_status':'PodStatus_____',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -12700,19 +11010,6 @@ class ChartRelease(Namespace):
             'recreate_resources':'bool',
             'rollback_snapshot':'bool',
             'item_version':'str',
-    })
-    ChartMetadata_____ = typing.TypedDict('ChartMetadata_____', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port_____ = typing.TypedDict('Port_____', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus______ = typing.TypedDict('PodStatus______', {
-            'available':'int',
-            'desired':'int',
     })
     Resources_____ = typing.TypedDict('Resources_____', {
             'storage_class':'dict[str]',
@@ -12736,15 +11033,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata_____',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port_____]',
-            'pod_status':'PodStatus______',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -12781,19 +11078,6 @@ class ChartRelease(Namespace):
     ChartReleaseUpdate = typing.TypedDict('ChartReleaseUpdate', {
             'values':'dict[str]',
     })
-    ChartMetadata______ = typing.TypedDict('ChartMetadata______', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port______ = typing.TypedDict('Port______', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus_______ = typing.TypedDict('PodStatus_______', {
-            'available':'int',
-            'desired':'int',
-    })
     Resources______ = typing.TypedDict('Resources______', {
             'storage_class':'dict[str]',
             'persistent_volumes':'list',
@@ -12816,15 +11100,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata______',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port______]',
-            'pod_status':'PodStatus_______',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -12837,19 +11121,6 @@ class ChartRelease(Namespace):
     UpgradeOptions = typing.TypedDict('UpgradeOptions', {
             'values':'dict[str]',
             'item_version':'str',
-    })
-    ChartMetadata_______ = typing.TypedDict('ChartMetadata_______', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port_______ = typing.TypedDict('Port_______', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus________ = typing.TypedDict('PodStatus________', {
-            'available':'int',
-            'desired':'int',
     })
     Resources_______ = typing.TypedDict('Resources_______', {
             'storage_class':'dict[str]',
@@ -12873,15 +11144,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata_______',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port_______]',
-            'pod_status':'PodStatus________',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -13154,19 +11425,6 @@ class ChartRelease(Namespace):
             'limit':'int',
             'force_sql_filters':'bool',
     })
-    ChartMetadata_ = typing.TypedDict('ChartMetadata_', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port_ = typing.TypedDict('Port_', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus__ = typing.TypedDict('PodStatus__', {
-            'available':'int',
-            'desired':'int',
-    })
     Resources_ = typing.TypedDict('Resources_', {
             'storage_class':'dict[str]',
             'persistent_volumes':'list',
@@ -13189,15 +11447,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata_',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port_]',
-            'pod_status':'PodStatus__',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -13206,19 +11464,6 @@ class ChartRelease(Namespace):
             'chart_schema':'dict[str]',
             'history':'dict[str]',
             'resources':'Resources_',
-    })
-    ChartMetadata__ = typing.TypedDict('ChartMetadata__', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port__ = typing.TypedDict('Port__', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus___ = typing.TypedDict('PodStatus___', {
-            'available':'int',
-            'desired':'int',
     })
     Resources__ = typing.TypedDict('Resources__', {
             'storage_class':'dict[str]',
@@ -13242,15 +11487,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata__',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port__]',
-            'pod_status':'PodStatus___',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -13259,19 +11504,6 @@ class ChartRelease(Namespace):
             'chart_schema':'dict[str]',
             'history':'dict[str]',
             'resources':'Resources__',
-    })
-    ChartMetadata___ = typing.TypedDict('ChartMetadata___', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port___ = typing.TypedDict('Port___', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus____ = typing.TypedDict('PodStatus____', {
-            'available':'int',
-            'desired':'int',
     })
     Resources___ = typing.TypedDict('Resources___', {
             'storage_class':'dict[str]',
@@ -13295,15 +11527,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata___',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port___]',
-            'pod_status':'PodStatus____',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -13312,19 +11544,6 @@ class ChartRelease(Namespace):
             'chart_schema':'dict[str]',
             'history':'dict[str]',
             'resources':'Resources___',
-    })
-    ChartMetadata____ = typing.TypedDict('ChartMetadata____', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port____ = typing.TypedDict('Port____', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus_____ = typing.TypedDict('PodStatus_____', {
-            'available':'int',
-            'desired':'int',
     })
     Resources____ = typing.TypedDict('Resources____', {
             'storage_class':'dict[str]',
@@ -13348,15 +11567,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata____',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port____]',
-            'pod_status':'PodStatus_____',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -13371,19 +11590,6 @@ class ChartRelease(Namespace):
             'recreate_resources':'bool',
             'rollback_snapshot':'bool',
             'item_version':'str',
-    })
-    ChartMetadata_____ = typing.TypedDict('ChartMetadata_____', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port_____ = typing.TypedDict('Port_____', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus______ = typing.TypedDict('PodStatus______', {
-            'available':'int',
-            'desired':'int',
     })
     Resources_____ = typing.TypedDict('Resources_____', {
             'storage_class':'dict[str]',
@@ -13407,15 +11613,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata_____',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port_____]',
-            'pod_status':'PodStatus______',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -13452,19 +11658,6 @@ class ChartRelease(Namespace):
     ChartReleaseUpdate = typing.TypedDict('ChartReleaseUpdate', {
             'values':'dict[str]',
     })
-    ChartMetadata______ = typing.TypedDict('ChartMetadata______', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port______ = typing.TypedDict('Port______', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus_______ = typing.TypedDict('PodStatus_______', {
-            'available':'int',
-            'desired':'int',
-    })
     Resources______ = typing.TypedDict('Resources______', {
             'storage_class':'dict[str]',
             'persistent_volumes':'list',
@@ -13487,15 +11680,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata______',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port______]',
-            'pod_status':'PodStatus_______',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -13508,19 +11701,6 @@ class ChartRelease(Namespace):
     UpgradeOptions = typing.TypedDict('UpgradeOptions', {
             'values':'dict[str]',
             'item_version':'str',
-    })
-    ChartMetadata_______ = typing.TypedDict('ChartMetadata_______', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port_______ = typing.TypedDict('Port_______', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus________ = typing.TypedDict('PodStatus________', {
-            'available':'int',
-            'desired':'int',
     })
     Resources_______ = typing.TypedDict('Resources_______', {
             'storage_class':'dict[str]',
@@ -13544,15 +11724,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata_______',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port_______]',
-            'pod_status':'PodStatus________',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -13834,19 +12014,6 @@ class ChartRelease(Namespace):
             'limit':'int',
             'force_sql_filters':'bool',
     })
-    ChartMetadata_ = typing.TypedDict('ChartMetadata_', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port_ = typing.TypedDict('Port_', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus__ = typing.TypedDict('PodStatus__', {
-            'available':'int',
-            'desired':'int',
-    })
     Resources_ = typing.TypedDict('Resources_', {
             'storage_class':'dict[str]',
             'persistent_volumes':'list',
@@ -13869,15 +12036,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata_',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port_]',
-            'pod_status':'PodStatus__',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -13886,19 +12053,6 @@ class ChartRelease(Namespace):
             'chart_schema':'dict[str]',
             'history':'dict[str]',
             'resources':'Resources_',
-    })
-    ChartMetadata__ = typing.TypedDict('ChartMetadata__', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port__ = typing.TypedDict('Port__', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus___ = typing.TypedDict('PodStatus___', {
-            'available':'int',
-            'desired':'int',
     })
     Resources__ = typing.TypedDict('Resources__', {
             'storage_class':'dict[str]',
@@ -13922,15 +12076,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata__',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port__]',
-            'pod_status':'PodStatus___',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -13939,19 +12093,6 @@ class ChartRelease(Namespace):
             'chart_schema':'dict[str]',
             'history':'dict[str]',
             'resources':'Resources__',
-    })
-    ChartMetadata___ = typing.TypedDict('ChartMetadata___', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port___ = typing.TypedDict('Port___', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus____ = typing.TypedDict('PodStatus____', {
-            'available':'int',
-            'desired':'int',
     })
     Resources___ = typing.TypedDict('Resources___', {
             'storage_class':'dict[str]',
@@ -13975,15 +12116,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata___',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port___]',
-            'pod_status':'PodStatus____',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -13992,19 +12133,6 @@ class ChartRelease(Namespace):
             'chart_schema':'dict[str]',
             'history':'dict[str]',
             'resources':'Resources___',
-    })
-    ChartMetadata____ = typing.TypedDict('ChartMetadata____', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port____ = typing.TypedDict('Port____', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus_____ = typing.TypedDict('PodStatus_____', {
-            'available':'int',
-            'desired':'int',
     })
     Resources____ = typing.TypedDict('Resources____', {
             'storage_class':'dict[str]',
@@ -14028,15 +12156,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata____',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port____]',
-            'pod_status':'PodStatus_____',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -14051,19 +12179,6 @@ class ChartRelease(Namespace):
             'recreate_resources':'bool',
             'rollback_snapshot':'bool',
             'item_version':'str',
-    })
-    ChartMetadata_____ = typing.TypedDict('ChartMetadata_____', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port_____ = typing.TypedDict('Port_____', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus______ = typing.TypedDict('PodStatus______', {
-            'available':'int',
-            'desired':'int',
     })
     Resources_____ = typing.TypedDict('Resources_____', {
             'storage_class':'dict[str]',
@@ -14087,15 +12202,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata_____',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port_____]',
-            'pod_status':'PodStatus______',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -14132,19 +12247,6 @@ class ChartRelease(Namespace):
     ChartReleaseUpdate = typing.TypedDict('ChartReleaseUpdate', {
             'values':'dict[str]',
     })
-    ChartMetadata______ = typing.TypedDict('ChartMetadata______', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port______ = typing.TypedDict('Port______', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus_______ = typing.TypedDict('PodStatus_______', {
-            'available':'int',
-            'desired':'int',
-    })
     Resources______ = typing.TypedDict('Resources______', {
             'storage_class':'dict[str]',
             'persistent_volumes':'list',
@@ -14167,15 +12269,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata______',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port______]',
-            'pod_status':'PodStatus_______',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -14188,19 +12290,6 @@ class ChartRelease(Namespace):
     UpgradeOptions = typing.TypedDict('UpgradeOptions', {
             'values':'dict[str]',
             'item_version':'str',
-    })
-    ChartMetadata_______ = typing.TypedDict('ChartMetadata_______', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port_______ = typing.TypedDict('Port_______', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus________ = typing.TypedDict('PodStatus________', {
-            'available':'int',
-            'desired':'int',
     })
     Resources_______ = typing.TypedDict('Resources_______', {
             'storage_class':'dict[str]',
@@ -14224,15 +12313,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata_______',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port_______]',
-            'pod_status':'PodStatus________',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -14524,19 +12613,6 @@ class ChartRelease(Namespace):
             'limit':'int',
             'force_sql_filters':'bool',
     })
-    ChartMetadata_ = typing.TypedDict('ChartMetadata_', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port_ = typing.TypedDict('Port_', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus__ = typing.TypedDict('PodStatus__', {
-            'available':'int',
-            'desired':'int',
-    })
     Resources_ = typing.TypedDict('Resources_', {
             'storage_class':'dict[str]',
             'persistent_volumes':'list',
@@ -14559,15 +12635,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata_',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port_]',
-            'pod_status':'PodStatus__',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -14576,19 +12652,6 @@ class ChartRelease(Namespace):
             'chart_schema':'dict[str]',
             'history':'dict[str]',
             'resources':'Resources_',
-    })
-    ChartMetadata__ = typing.TypedDict('ChartMetadata__', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port__ = typing.TypedDict('Port__', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus___ = typing.TypedDict('PodStatus___', {
-            'available':'int',
-            'desired':'int',
     })
     Resources__ = typing.TypedDict('Resources__', {
             'storage_class':'dict[str]',
@@ -14612,15 +12675,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata__',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port__]',
-            'pod_status':'PodStatus___',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -14629,19 +12692,6 @@ class ChartRelease(Namespace):
             'chart_schema':'dict[str]',
             'history':'dict[str]',
             'resources':'Resources__',
-    })
-    ChartMetadata___ = typing.TypedDict('ChartMetadata___', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port___ = typing.TypedDict('Port___', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus____ = typing.TypedDict('PodStatus____', {
-            'available':'int',
-            'desired':'int',
     })
     Resources___ = typing.TypedDict('Resources___', {
             'storage_class':'dict[str]',
@@ -14665,15 +12715,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata___',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port___]',
-            'pod_status':'PodStatus____',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -14682,19 +12732,6 @@ class ChartRelease(Namespace):
             'chart_schema':'dict[str]',
             'history':'dict[str]',
             'resources':'Resources___',
-    })
-    ChartMetadata____ = typing.TypedDict('ChartMetadata____', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port____ = typing.TypedDict('Port____', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus_____ = typing.TypedDict('PodStatus_____', {
-            'available':'int',
-            'desired':'int',
     })
     Resources____ = typing.TypedDict('Resources____', {
             'storage_class':'dict[str]',
@@ -14718,15 +12755,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata____',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port____]',
-            'pod_status':'PodStatus_____',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -14741,19 +12778,6 @@ class ChartRelease(Namespace):
             'recreate_resources':'bool',
             'rollback_snapshot':'bool',
             'item_version':'str',
-    })
-    ChartMetadata_____ = typing.TypedDict('ChartMetadata_____', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port_____ = typing.TypedDict('Port_____', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus______ = typing.TypedDict('PodStatus______', {
-            'available':'int',
-            'desired':'int',
     })
     Resources_____ = typing.TypedDict('Resources_____', {
             'storage_class':'dict[str]',
@@ -14777,15 +12801,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata_____',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port_____]',
-            'pod_status':'PodStatus______',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -14822,19 +12846,6 @@ class ChartRelease(Namespace):
     ChartReleaseUpdate = typing.TypedDict('ChartReleaseUpdate', {
             'values':'dict[str]',
     })
-    ChartMetadata______ = typing.TypedDict('ChartMetadata______', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port______ = typing.TypedDict('Port______', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus_______ = typing.TypedDict('PodStatus_______', {
-            'available':'int',
-            'desired':'int',
-    })
     Resources______ = typing.TypedDict('Resources______', {
             'storage_class':'dict[str]',
             'persistent_volumes':'list',
@@ -14857,15 +12868,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata______',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port______]',
-            'pod_status':'PodStatus_______',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -14878,19 +12889,6 @@ class ChartRelease(Namespace):
     UpgradeOptions = typing.TypedDict('UpgradeOptions', {
             'values':'dict[str]',
             'item_version':'str',
-    })
-    ChartMetadata_______ = typing.TypedDict('ChartMetadata_______', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port_______ = typing.TypedDict('Port_______', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus________ = typing.TypedDict('PodStatus________', {
-            'available':'int',
-            'desired':'int',
     })
     Resources_______ = typing.TypedDict('Resources_______', {
             'storage_class':'dict[str]',
@@ -14914,15 +12912,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata_______',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port_______]',
-            'pod_status':'PodStatus________',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -15207,19 +13205,6 @@ class ChartRelease(Namespace):
             'limit':'int',
             'force_sql_filters':'bool',
     })
-    ChartMetadata_ = typing.TypedDict('ChartMetadata_', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port_ = typing.TypedDict('Port_', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus__ = typing.TypedDict('PodStatus__', {
-            'available':'int',
-            'desired':'int',
-    })
     Resources_ = typing.TypedDict('Resources_', {
             'storage_class':'dict[str]',
             'persistent_volumes':'list',
@@ -15242,15 +13227,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata_',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port_]',
-            'pod_status':'PodStatus__',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -15259,19 +13244,6 @@ class ChartRelease(Namespace):
             'chart_schema':'dict[str]',
             'history':'dict[str]',
             'resources':'Resources_',
-    })
-    ChartMetadata__ = typing.TypedDict('ChartMetadata__', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port__ = typing.TypedDict('Port__', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus___ = typing.TypedDict('PodStatus___', {
-            'available':'int',
-            'desired':'int',
     })
     Resources__ = typing.TypedDict('Resources__', {
             'storage_class':'dict[str]',
@@ -15295,15 +13267,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata__',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port__]',
-            'pod_status':'PodStatus___',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -15312,19 +13284,6 @@ class ChartRelease(Namespace):
             'chart_schema':'dict[str]',
             'history':'dict[str]',
             'resources':'Resources__',
-    })
-    ChartMetadata___ = typing.TypedDict('ChartMetadata___', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port___ = typing.TypedDict('Port___', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus____ = typing.TypedDict('PodStatus____', {
-            'available':'int',
-            'desired':'int',
     })
     Resources___ = typing.TypedDict('Resources___', {
             'storage_class':'dict[str]',
@@ -15348,15 +13307,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata___',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port___]',
-            'pod_status':'PodStatus____',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -15365,19 +13324,6 @@ class ChartRelease(Namespace):
             'chart_schema':'dict[str]',
             'history':'dict[str]',
             'resources':'Resources___',
-    })
-    ChartMetadata____ = typing.TypedDict('ChartMetadata____', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port____ = typing.TypedDict('Port____', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus_____ = typing.TypedDict('PodStatus_____', {
-            'available':'int',
-            'desired':'int',
     })
     Resources____ = typing.TypedDict('Resources____', {
             'storage_class':'dict[str]',
@@ -15401,15 +13347,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata____',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port____]',
-            'pod_status':'PodStatus_____',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -15424,19 +13370,6 @@ class ChartRelease(Namespace):
             'recreate_resources':'bool',
             'rollback_snapshot':'bool',
             'item_version':'str',
-    })
-    ChartMetadata_____ = typing.TypedDict('ChartMetadata_____', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port_____ = typing.TypedDict('Port_____', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus______ = typing.TypedDict('PodStatus______', {
-            'available':'int',
-            'desired':'int',
     })
     Resources_____ = typing.TypedDict('Resources_____', {
             'storage_class':'dict[str]',
@@ -15460,15 +13393,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata_____',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port_____]',
-            'pod_status':'PodStatus______',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -15505,19 +13438,6 @@ class ChartRelease(Namespace):
     ChartReleaseUpdate = typing.TypedDict('ChartReleaseUpdate', {
             'values':'dict[str]',
     })
-    ChartMetadata______ = typing.TypedDict('ChartMetadata______', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port______ = typing.TypedDict('Port______', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus_______ = typing.TypedDict('PodStatus_______', {
-            'available':'int',
-            'desired':'int',
-    })
     Resources______ = typing.TypedDict('Resources______', {
             'storage_class':'dict[str]',
             'persistent_volumes':'list',
@@ -15540,15 +13460,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata______',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port______]',
-            'pod_status':'PodStatus_______',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -15561,19 +13481,6 @@ class ChartRelease(Namespace):
     UpgradeOptions = typing.TypedDict('UpgradeOptions', {
             'values':'dict[str]',
             'item_version':'str',
-    })
-    ChartMetadata_______ = typing.TypedDict('ChartMetadata_______', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port_______ = typing.TypedDict('Port_______', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus________ = typing.TypedDict('PodStatus________', {
-            'available':'int',
-            'desired':'int',
     })
     Resources_______ = typing.TypedDict('Resources_______', {
             'storage_class':'dict[str]',
@@ -15597,15 +13504,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata_______',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port_______]',
-            'pod_status':'PodStatus________',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -15878,19 +13785,6 @@ class ChartRelease(Namespace):
             'limit':'int',
             'force_sql_filters':'bool',
     })
-    ChartMetadata_ = typing.TypedDict('ChartMetadata_', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port_ = typing.TypedDict('Port_', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus__ = typing.TypedDict('PodStatus__', {
-            'available':'int',
-            'desired':'int',
-    })
     Resources_ = typing.TypedDict('Resources_', {
             'storage_class':'dict[str]',
             'persistent_volumes':'list',
@@ -15913,15 +13807,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata_',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port_]',
-            'pod_status':'PodStatus__',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -15930,19 +13824,6 @@ class ChartRelease(Namespace):
             'chart_schema':'dict[str]',
             'history':'dict[str]',
             'resources':'Resources_',
-    })
-    ChartMetadata__ = typing.TypedDict('ChartMetadata__', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port__ = typing.TypedDict('Port__', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus___ = typing.TypedDict('PodStatus___', {
-            'available':'int',
-            'desired':'int',
     })
     Resources__ = typing.TypedDict('Resources__', {
             'storage_class':'dict[str]',
@@ -15966,15 +13847,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata__',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port__]',
-            'pod_status':'PodStatus___',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -15983,19 +13864,6 @@ class ChartRelease(Namespace):
             'chart_schema':'dict[str]',
             'history':'dict[str]',
             'resources':'Resources__',
-    })
-    ChartMetadata___ = typing.TypedDict('ChartMetadata___', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port___ = typing.TypedDict('Port___', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus____ = typing.TypedDict('PodStatus____', {
-            'available':'int',
-            'desired':'int',
     })
     Resources___ = typing.TypedDict('Resources___', {
             'storage_class':'dict[str]',
@@ -16019,15 +13887,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata___',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port___]',
-            'pod_status':'PodStatus____',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -16036,19 +13904,6 @@ class ChartRelease(Namespace):
             'chart_schema':'dict[str]',
             'history':'dict[str]',
             'resources':'Resources___',
-    })
-    ChartMetadata____ = typing.TypedDict('ChartMetadata____', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port____ = typing.TypedDict('Port____', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus_____ = typing.TypedDict('PodStatus_____', {
-            'available':'int',
-            'desired':'int',
     })
     Resources____ = typing.TypedDict('Resources____', {
             'storage_class':'dict[str]',
@@ -16072,15 +13927,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata____',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port____]',
-            'pod_status':'PodStatus_____',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -16095,19 +13950,6 @@ class ChartRelease(Namespace):
             'recreate_resources':'bool',
             'rollback_snapshot':'bool',
             'item_version':'str',
-    })
-    ChartMetadata_____ = typing.TypedDict('ChartMetadata_____', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port_____ = typing.TypedDict('Port_____', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus______ = typing.TypedDict('PodStatus______', {
-            'available':'int',
-            'desired':'int',
     })
     Resources_____ = typing.TypedDict('Resources_____', {
             'storage_class':'dict[str]',
@@ -16131,15 +13973,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata_____',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port_____]',
-            'pod_status':'PodStatus______',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -16176,19 +14018,6 @@ class ChartRelease(Namespace):
     ChartReleaseUpdate = typing.TypedDict('ChartReleaseUpdate', {
             'values':'dict[str]',
     })
-    ChartMetadata______ = typing.TypedDict('ChartMetadata______', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port______ = typing.TypedDict('Port______', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus_______ = typing.TypedDict('PodStatus_______', {
-            'available':'int',
-            'desired':'int',
-    })
     Resources______ = typing.TypedDict('Resources______', {
             'storage_class':'dict[str]',
             'persistent_volumes':'list',
@@ -16211,15 +14040,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata______',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port______]',
-            'pod_status':'PodStatus_______',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',
@@ -16232,19 +14061,6 @@ class ChartRelease(Namespace):
     UpgradeOptions = typing.TypedDict('UpgradeOptions', {
             'values':'dict[str]',
             'item_version':'str',
-    })
-    ChartMetadata_______ = typing.TypedDict('ChartMetadata_______', {
-            'name':'str',
-            'version':'str',
-            'latest_chart_version':'str',
-    })
-    Port_______ = typing.TypedDict('Port_______', {
-            'port':'int',
-            'protocol':'str',
-    })
-    PodStatus________ = typing.TypedDict('PodStatus________', {
-            'available':'int',
-            'desired':'int',
     })
     Resources_______ = typing.TypedDict('Resources_______', {
             'storage_class':'dict[str]',
@@ -16268,15 +14084,15 @@ class ChartRelease(Namespace):
             'hooks':'list',
             'version':'int',
             'namespace':'str',
-            'chart_metadata':'ChartMetadata_______',
+            'chart_metadata':'ChartMetadata',
             'id':'str',
             'catalog':'str',
             'catalog_train':'str',
             'path':'str',
             'dataset':'str',
             'status':'str',
-            'used_ports':'list[Port_______]',
-            'pod_status':'PodStatus________',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
             'update_available':'bool',
             'human_version':'str',
             'human_latest_version':'str',

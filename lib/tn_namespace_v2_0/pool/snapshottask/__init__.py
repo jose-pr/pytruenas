@@ -28,19 +28,10 @@ class PoolSnapshottask(Namespace):
     Options = typing.TypedDict('Options', {
             'fixate_removal_date':'bool',
     })
-    Schedule_ = typing.TypedDict('Schedule_', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-            'begin':'str',
-            'end':'str',
-    })
     PeriodicSnapshotForeseenCount = typing.TypedDict('PeriodicSnapshotForeseenCount', {
             'lifetime_value':'int',
             'lifetime_unit':'str',
-            'schedule':'Schedule_',
+            'schedule':'Schedule',
     })
     QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
             'relationships':'bool',
@@ -70,15 +61,6 @@ class PoolSnapshottask(Namespace):
             'limit':'int',
             'force_sql_filters':'bool',
     })
-    Schedule__ = typing.TypedDict('Schedule__', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-            'begin':'str',
-            'end':'str',
-    })
     PeriodicSnapshotUpdate = typing.TypedDict('PeriodicSnapshotUpdate', {
             'dataset':'str',
             'recursive':'bool',
@@ -86,19 +68,10 @@ class PoolSnapshottask(Namespace):
             'lifetime_value':'int',
             'lifetime_unit':'str',
             'naming_schema':'str',
-            'schedule':'Schedule__',
+            'schedule':'Schedule',
             'allow_empty':'bool',
             'enabled':'bool',
             'fixate_removal_date':'bool',
-    })
-    Schedule___ = typing.TypedDict('Schedule___', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-            'begin':'str',
-            'end':'str',
     })
     PeriodicSnapshotUpdateWillChangeRetention = typing.TypedDict('PeriodicSnapshotUpdateWillChangeRetention', {
             'dataset':'str',
@@ -107,7 +80,7 @@ class PoolSnapshottask(Namespace):
             'lifetime_value':'int',
             'lifetime_unit':'str',
             'naming_schema':'str',
-            'schedule':'Schedule___',
+            'schedule':'Schedule',
             'allow_empty':'bool',
             'enabled':'bool',
     })

@@ -55,15 +55,12 @@ class ZfsSnapshot(Namespace):
             'limit':'int',
             'force_sql_filters':'bool',
     })
-    Options__ = typing.TypedDict('Options__', {
-            'recursive':'bool',
-    })
     SnapshotRemove = typing.TypedDict('SnapshotRemove', {
             'dataset':'str',
             'name':'str',
             'defer_delete':'bool',
     })
-    Options___ = typing.TypedDict('Options___', {
+    Options__ = typing.TypedDict('Options__', {
             'recursive':'bool',
             'recursive_clones':'bool',
             'force':'bool',

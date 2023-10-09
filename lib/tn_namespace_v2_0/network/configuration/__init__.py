@@ -40,11 +40,6 @@ class NetworkConfiguration(Namespace):
             'hostname_virtual':'typing.Optional[str]',
             'state':'State',
     })
-    ServiceAnnouncement_ = typing.TypedDict('ServiceAnnouncement_', {
-            'netbios':'bool',
-            'mdns':'bool',
-            'wsd':'bool',
-    })
     Activity_ = typing.TypedDict('Activity_', {
             'type':'str',
             'activities':'list[str]',
@@ -60,26 +55,14 @@ class NetworkConfiguration(Namespace):
             'httpproxy':'str',
             'hosts':'list[str]',
             'domains':'list[str]',
-            'service_announcement':'ServiceAnnouncement_',
+            'service_announcement':'ServiceAnnouncement',
             'activity':'Activity_',
             'hostname_b':'typing.Optional[str]',
             'hostname_virtual':'typing.Optional[str]',
     })
-    ServiceAnnouncement__ = typing.TypedDict('ServiceAnnouncement__', {
-            'netbios':'bool',
-            'mdns':'bool',
-            'wsd':'bool',
-    })
     Activity__ = typing.TypedDict('Activity__', {
             'type':'str',
             'activities':'list[str]',
-    })
-    State_ = typing.TypedDict('State_', {
-            'ipv4gateway':'str',
-            'ipv6gateway':'str',
-            'nameserver1':'str',
-            'nameserver2':'str',
-            'nameserver3':'str',
     })
     NetworkConfigurationUpdateReturns = typing.TypedDict('NetworkConfigurationUpdateReturns', {
             'id':'int',
@@ -93,10 +76,10 @@ class NetworkConfiguration(Namespace):
             'httpproxy':'str',
             'hosts':'list[str]',
             'domains':'list[str]',
-            'service_announcement':'ServiceAnnouncement__',
+            'service_announcement':'ServiceAnnouncement',
             'activity':'Activity__',
             'hostname_local':'str',
             'hostname_b':'typing.Optional[str]',
             'hostname_virtual':'typing.Optional[str]',
-            'state':'State_',
+            'state':'State',
     })

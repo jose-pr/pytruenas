@@ -87,24 +87,6 @@ class Tunable(Namespace):
             'update_initramfs':'bool',
             'id':'int',
     })
-    TunableEntry_ = typing.TypedDict('TunableEntry_', {
-            'type':'str',
-            'var':'str',
-            'value':'str',
-            'comment':'str',
-            'enabled':'bool',
-            'update_initramfs':'bool',
-            'id':'int',
-    })
-    TunableEntry__ = typing.TypedDict('TunableEntry__', {
-            'type':'str',
-            'var':'str',
-            'value':'str',
-            'comment':'str',
-            'enabled':'bool',
-            'update_initramfs':'bool',
-            'id':'int',
-    })
     TunableTypeChoices = typing.TypedDict('TunableTypeChoices', {
             'SYSCTL':'str',
             'UDEV':'str',
@@ -188,24 +170,6 @@ class Tunable(Namespace):
             'force_sql_filters':'bool',
     })
     TunableEntry = typing.TypedDict('TunableEntry', {
-            'type':'str',
-            'var':'str',
-            'value':'str',
-            'comment':'str',
-            'enabled':'bool',
-            'update_initramfs':'bool',
-            'id':'int',
-    })
-    TunableEntry_ = typing.TypedDict('TunableEntry_', {
-            'type':'str',
-            'var':'str',
-            'value':'str',
-            'comment':'str',
-            'enabled':'bool',
-            'update_initramfs':'bool',
-            'id':'int',
-    })
-    TunableEntry__ = typing.TypedDict('TunableEntry__', {
             'type':'str',
             'var':'str',
             'value':'str',
@@ -308,24 +272,6 @@ class Tunable(Namespace):
             'update_initramfs':'bool',
             'id':'int',
     })
-    TunableEntry_ = typing.TypedDict('TunableEntry_', {
-            'type':'str',
-            'var':'str',
-            'value':'str',
-            'comment':'str',
-            'enabled':'bool',
-            'update_initramfs':'bool',
-            'id':'int',
-    })
-    TunableEntry__ = typing.TypedDict('TunableEntry__', {
-            'type':'str',
-            'var':'str',
-            'value':'str',
-            'comment':'str',
-            'enabled':'bool',
-            'update_initramfs':'bool',
-            'id':'int',
-    })
     TunableTypeChoices = typing.TypedDict('TunableTypeChoices', {
             'SYSCTL':'str',
             'UDEV':'str',
@@ -350,7 +296,7 @@ class Tunable(Namespace):
     def query(self, 
         query_filters:'list[list]'=[],
         query_options:'QueryOptions'={},
-    /) -> 'typing.Union[list[TunableEntry], ForwardRef(TunableEntry_), int, ForwardRef(TunableEntry__)]': 
+    /) -> 'typing.Union[list[TunableEntry], ForwardRef(TunableEntry), int]': 
         """
         
 
@@ -362,7 +308,7 @@ class Tunable(Namespace):
             query-options
         Returns
         -------
-        typing.Union[list[TunableEntry], ForwardRef(TunableEntry_), int, ForwardRef(TunableEntry__)]:
+        typing.Union[list[TunableEntry], ForwardRef(TunableEntry), int]:
             
         """
         ...
@@ -412,24 +358,6 @@ class Tunable(Namespace):
             'force_sql_filters':'bool',
     })
     TunableEntry = typing.TypedDict('TunableEntry', {
-            'type':'str',
-            'var':'str',
-            'value':'str',
-            'comment':'str',
-            'enabled':'bool',
-            'update_initramfs':'bool',
-            'id':'int',
-    })
-    TunableEntry_ = typing.TypedDict('TunableEntry_', {
-            'type':'str',
-            'var':'str',
-            'value':'str',
-            'comment':'str',
-            'enabled':'bool',
-            'update_initramfs':'bool',
-            'id':'int',
-    })
-    TunableEntry__ = typing.TypedDict('TunableEntry__', {
             'type':'str',
             'var':'str',
             'value':'str',
@@ -526,24 +454,6 @@ class Tunable(Namespace):
             'update_initramfs':'bool',
             'id':'int',
     })
-    TunableEntry_ = typing.TypedDict('TunableEntry_', {
-            'type':'str',
-            'var':'str',
-            'value':'str',
-            'comment':'str',
-            'enabled':'bool',
-            'update_initramfs':'bool',
-            'id':'int',
-    })
-    TunableEntry__ = typing.TypedDict('TunableEntry__', {
-            'type':'str',
-            'var':'str',
-            'value':'str',
-            'comment':'str',
-            'enabled':'bool',
-            'update_initramfs':'bool',
-            'id':'int',
-    })
     TunableTypeChoices = typing.TypedDict('TunableTypeChoices', {
             'SYSCTL':'str',
             'UDEV':'str',
@@ -631,24 +541,6 @@ class Tunable(Namespace):
             'force_sql_filters':'bool',
     })
     TunableEntry = typing.TypedDict('TunableEntry', {
-            'type':'str',
-            'var':'str',
-            'value':'str',
-            'comment':'str',
-            'enabled':'bool',
-            'update_initramfs':'bool',
-            'id':'int',
-    })
-    TunableEntry_ = typing.TypedDict('TunableEntry_', {
-            'type':'str',
-            'var':'str',
-            'value':'str',
-            'comment':'str',
-            'enabled':'bool',
-            'update_initramfs':'bool',
-            'id':'int',
-    })
-    TunableEntry__ = typing.TypedDict('TunableEntry__', {
             'type':'str',
             'var':'str',
             'value':'str',

@@ -93,24 +93,6 @@ class SystemNtpserver(Namespace):
             'maxpoll':'int',
             'id':'int',
     })
-    NtpEntry_ = typing.TypedDict('NtpEntry_', {
-            'address':'str',
-            'burst':'bool',
-            'iburst':'bool',
-            'prefer':'bool',
-            'minpoll':'int',
-            'maxpoll':'int',
-            'id':'int',
-    })
-    NtpEntry__ = typing.TypedDict('NtpEntry__', {
-            'address':'str',
-            'burst':'bool',
-            'iburst':'bool',
-            'prefer':'bool',
-            'minpoll':'int',
-            'maxpoll':'int',
-            'id':'int',
-    })
     NtpUpdate = typing.TypedDict('NtpUpdate', {
             'address':'str',
             'burst':'bool',
@@ -193,24 +175,6 @@ class SystemNtpserver(Namespace):
             'force_sql_filters':'bool',
     })
     NtpEntry = typing.TypedDict('NtpEntry', {
-            'address':'str',
-            'burst':'bool',
-            'iburst':'bool',
-            'prefer':'bool',
-            'minpoll':'int',
-            'maxpoll':'int',
-            'id':'int',
-    })
-    NtpEntry_ = typing.TypedDict('NtpEntry_', {
-            'address':'str',
-            'burst':'bool',
-            'iburst':'bool',
-            'prefer':'bool',
-            'minpoll':'int',
-            'maxpoll':'int',
-            'id':'int',
-    })
-    NtpEntry__ = typing.TypedDict('NtpEntry__', {
             'address':'str',
             'burst':'bool',
             'iburst':'bool',
@@ -312,24 +276,6 @@ class SystemNtpserver(Namespace):
             'maxpoll':'int',
             'id':'int',
     })
-    NtpEntry_ = typing.TypedDict('NtpEntry_', {
-            'address':'str',
-            'burst':'bool',
-            'iburst':'bool',
-            'prefer':'bool',
-            'minpoll':'int',
-            'maxpoll':'int',
-            'id':'int',
-    })
-    NtpEntry__ = typing.TypedDict('NtpEntry__', {
-            'address':'str',
-            'burst':'bool',
-            'iburst':'bool',
-            'prefer':'bool',
-            'minpoll':'int',
-            'maxpoll':'int',
-            'id':'int',
-    })
     NtpUpdate = typing.TypedDict('NtpUpdate', {
             'address':'str',
             'burst':'bool',
@@ -352,7 +298,7 @@ class SystemNtpserver(Namespace):
     def query(self, 
         query_filters:'list[list]'=[],
         query_options:'QueryOptions'={},
-    /) -> 'typing.Union[list[NtpEntry], ForwardRef(NtpEntry_), int, ForwardRef(NtpEntry__)]': 
+    /) -> 'typing.Union[list[NtpEntry], ForwardRef(NtpEntry), int]': 
         """
         
 
@@ -364,7 +310,7 @@ class SystemNtpserver(Namespace):
             query-options
         Returns
         -------
-        typing.Union[list[NtpEntry], ForwardRef(NtpEntry_), int, ForwardRef(NtpEntry__)]:
+        typing.Union[list[NtpEntry], ForwardRef(NtpEntry), int]:
             
         """
         ...
@@ -415,24 +361,6 @@ class SystemNtpserver(Namespace):
             'force_sql_filters':'bool',
     })
     NtpEntry = typing.TypedDict('NtpEntry', {
-            'address':'str',
-            'burst':'bool',
-            'iburst':'bool',
-            'prefer':'bool',
-            'minpoll':'int',
-            'maxpoll':'int',
-            'id':'int',
-    })
-    NtpEntry_ = typing.TypedDict('NtpEntry_', {
-            'address':'str',
-            'burst':'bool',
-            'iburst':'bool',
-            'prefer':'bool',
-            'minpoll':'int',
-            'maxpoll':'int',
-            'id':'int',
-    })
-    NtpEntry__ = typing.TypedDict('NtpEntry__', {
             'address':'str',
             'burst':'bool',
             'iburst':'bool',
@@ -527,24 +455,6 @@ class SystemNtpserver(Namespace):
             'force_sql_filters':'bool',
     })
     NtpEntry = typing.TypedDict('NtpEntry', {
-            'address':'str',
-            'burst':'bool',
-            'iburst':'bool',
-            'prefer':'bool',
-            'minpoll':'int',
-            'maxpoll':'int',
-            'id':'int',
-    })
-    NtpEntry_ = typing.TypedDict('NtpEntry_', {
-            'address':'str',
-            'burst':'bool',
-            'iburst':'bool',
-            'prefer':'bool',
-            'minpoll':'int',
-            'maxpoll':'int',
-            'id':'int',
-    })
-    NtpEntry__ = typing.TypedDict('NtpEntry__', {
             'address':'str',
             'burst':'bool',
             'iburst':'bool',

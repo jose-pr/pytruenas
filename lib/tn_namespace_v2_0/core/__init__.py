@@ -109,10 +109,3 @@ class Core(Namespace):
             'authenticated':'bool',
             'call_count':'int',
     })
-    Session_ = typing.TypedDict('Session_', {
-            'id':'str',
-            'socket_family':'str',
-            'address':'str',
-            'authenticated':'bool',
-            'call_count':'int',
-    })
