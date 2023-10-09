@@ -3,6 +3,8 @@ from pytruenas.base import Namespace
 from pytruenas.mixins import TableExtMixin
 
 import typing
+from enum import Enum
+
 class Bootenv(TableExtMixin, Namespace):
     def __init__(self, client) -> None:
         super().__init__(client, 'bootenv')

@@ -1,7 +1,7 @@
 
 from pytruenas import TrueNASClient
 from pytruenas.base import Namespace
-
+from enum import Enum
 import typing
 class InterfaceCapabilities(
     Namespace
@@ -28,16 +28,6 @@ class InterfaceCapabilities(
             capabilties
         """
         ...
-    Capabilties = typing.TypedDict('Capabilties', {
-            'enabled':'list[str]',
-            'disabled':'list[str]',
-            'supported':'list[str]',
-    })
-    CapabilitiesSet = typing.TypedDict('CapabilitiesSet', {
-            'name':'str',
-            'capabilties':'list',
-            'action':'str',
-    })
     @typing.overload
     def set(self, 
         capabilities_set:'CapabilitiesSet'={},
@@ -65,9 +55,12 @@ class InterfaceCapabilities(
             'disabled':'list[str]',
             'supported':'list[str]',
     })
+    class Action(str,Enum):
+        ENABLE = 'ENABLE'
+        DISABLE = 'DISABLE'
+        ...
     CapabilitiesSet = typing.TypedDict('CapabilitiesSet', {
             'name':'str',
             'capabilties':'list',
-            'action':'str',
+            'action':'Action',
     })
-

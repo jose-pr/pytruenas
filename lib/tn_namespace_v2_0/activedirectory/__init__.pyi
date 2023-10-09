@@ -1,7 +1,7 @@
 
 from pytruenas import TrueNASClient
 from pytruenas.base import Namespace
-
+from enum import Enum
 import typing
 class Activedirectory(
     Namespace
@@ -22,43 +22,6 @@ class Activedirectory(
             activedirectory_entry
         """
         ...
-    DomainInfo = typing.TypedDict('DomainInfo', {
-            'LDAP server':'str',
-            'LDAP server name':'str',
-            'Realm':'str',
-            'Bind Path':'str',
-            'LDAP port':'int',
-            'Server time':'int',
-            'KDC server':'str',
-            'Server time offset':'int',
-            'Last machine account password change':'int',
-    })
-    KerberosUsernamePassword = typing.TypedDict('KerberosUsernamePassword', {
-            'username':'str',
-            'password':'str',
-    })
-    ActivedirectoryUpdate = typing.TypedDict('ActivedirectoryUpdate', {
-            'domainname':'str',
-            'bindname':'str',
-            'bindpw':'str',
-            'verbose_logging':'bool',
-            'use_default_domain':'bool',
-            'allow_trusted_doms':'bool',
-            'allow_dns_updates':'bool',
-            'disable_freenas_cache':'bool',
-            'restrict_pam':'bool',
-            'site':'typing.Optional[str]',
-            'kerberos_realm':'typing.Optional[int]',
-            'kerberos_principal':'typing.Optional[str]',
-            'timeout':'int',
-            'dns_timeout':'int',
-            'nss_info':'typing.Optional[str]',
-            'createcomputer':'str',
-            'netbiosname':'str',
-            'netbiosname_b':'str',
-            'netbiosalias':'list',
-            'enable':'bool',
-    })
     @typing.overload
     def domain_info(self, 
         domain:'str'="",
@@ -92,46 +55,9 @@ class Activedirectory(
             domain_info
         """
         ...
-    DomainInfo = typing.TypedDict('DomainInfo', {
-            'LDAP server':'str',
-            'LDAP server name':'str',
-            'Realm':'str',
-            'Bind Path':'str',
-            'LDAP port':'int',
-            'Server time':'int',
-            'KDC server':'str',
-            'Server time offset':'int',
-            'Last machine account password change':'int',
-    })
-    KerberosUsernamePassword = typing.TypedDict('KerberosUsernamePassword', {
-            'username':'str',
-            'password':'str',
-    })
-    ActivedirectoryUpdate = typing.TypedDict('ActivedirectoryUpdate', {
-            'domainname':'str',
-            'bindname':'str',
-            'bindpw':'str',
-            'verbose_logging':'bool',
-            'use_default_domain':'bool',
-            'allow_trusted_doms':'bool',
-            'allow_dns_updates':'bool',
-            'disable_freenas_cache':'bool',
-            'restrict_pam':'bool',
-            'site':'typing.Optional[str]',
-            'kerberos_realm':'typing.Optional[int]',
-            'kerberos_principal':'typing.Optional[str]',
-            'timeout':'int',
-            'dns_timeout':'int',
-            'nss_info':'typing.Optional[str]',
-            'createcomputer':'str',
-            'netbiosname':'str',
-            'netbiosname_b':'str',
-            'netbiosalias':'list',
-            'enable':'bool',
-    })
     @typing.overload
     def get_state(self, 
-    /) -> 'str': 
+    /) -> 'DirectoryserviceState': 
         """
         Wrapper function for 'directoryservices.get_state'. Returns only the state of the
         Active Directory service.
@@ -140,47 +66,10 @@ class Activedirectory(
         ----------
         Returns
         -------
-        str:
+        DirectoryserviceState:
             directoryservice_state
         """
         ...
-    DomainInfo = typing.TypedDict('DomainInfo', {
-            'LDAP server':'str',
-            'LDAP server name':'str',
-            'Realm':'str',
-            'Bind Path':'str',
-            'LDAP port':'int',
-            'Server time':'int',
-            'KDC server':'str',
-            'Server time offset':'int',
-            'Last machine account password change':'int',
-    })
-    KerberosUsernamePassword = typing.TypedDict('KerberosUsernamePassword', {
-            'username':'str',
-            'password':'str',
-    })
-    ActivedirectoryUpdate = typing.TypedDict('ActivedirectoryUpdate', {
-            'domainname':'str',
-            'bindname':'str',
-            'bindpw':'str',
-            'verbose_logging':'bool',
-            'use_default_domain':'bool',
-            'allow_trusted_doms':'bool',
-            'allow_dns_updates':'bool',
-            'disable_freenas_cache':'bool',
-            'restrict_pam':'bool',
-            'site':'typing.Optional[str]',
-            'kerberos_realm':'typing.Optional[int]',
-            'kerberos_principal':'typing.Optional[str]',
-            'timeout':'int',
-            'dns_timeout':'int',
-            'nss_info':'typing.Optional[str]',
-            'createcomputer':'str',
-            'netbiosname':'str',
-            'netbiosname_b':'str',
-            'netbiosalias':'list',
-            'enable':'bool',
-    })
     @typing.overload
     def leave(self, 
         kerberos_username_password:'KerberosUsernamePassword'={},
@@ -201,46 +90,9 @@ class Activedirectory(
         -------
         """
         ...
-    DomainInfo = typing.TypedDict('DomainInfo', {
-            'LDAP server':'str',
-            'LDAP server name':'str',
-            'Realm':'str',
-            'Bind Path':'str',
-            'LDAP port':'int',
-            'Server time':'int',
-            'KDC server':'str',
-            'Server time offset':'int',
-            'Last machine account password change':'int',
-    })
-    KerberosUsernamePassword = typing.TypedDict('KerberosUsernamePassword', {
-            'username':'str',
-            'password':'str',
-    })
-    ActivedirectoryUpdate = typing.TypedDict('ActivedirectoryUpdate', {
-            'domainname':'str',
-            'bindname':'str',
-            'bindpw':'str',
-            'verbose_logging':'bool',
-            'use_default_domain':'bool',
-            'allow_trusted_doms':'bool',
-            'allow_dns_updates':'bool',
-            'disable_freenas_cache':'bool',
-            'restrict_pam':'bool',
-            'site':'typing.Optional[str]',
-            'kerberos_realm':'typing.Optional[int]',
-            'kerberos_principal':'typing.Optional[str]',
-            'timeout':'int',
-            'dns_timeout':'int',
-            'nss_info':'typing.Optional[str]',
-            'createcomputer':'str',
-            'netbiosname':'str',
-            'netbiosname_b':'str',
-            'netbiosalias':'list',
-            'enable':'bool',
-    })
     @typing.overload
     def nss_info_choices(self, 
-    /) -> 'str': 
+    /) -> 'NssInfoAd': 
         """
         Returns list of available LDAP schema choices.
 
@@ -248,47 +100,10 @@ class Activedirectory(
         ----------
         Returns
         -------
-        str:
+        NssInfoAd:
             nss_info_ad
         """
         ...
-    DomainInfo = typing.TypedDict('DomainInfo', {
-            'LDAP server':'str',
-            'LDAP server name':'str',
-            'Realm':'str',
-            'Bind Path':'str',
-            'LDAP port':'int',
-            'Server time':'int',
-            'KDC server':'str',
-            'Server time offset':'int',
-            'Last machine account password change':'int',
-    })
-    KerberosUsernamePassword = typing.TypedDict('KerberosUsernamePassword', {
-            'username':'str',
-            'password':'str',
-    })
-    ActivedirectoryUpdate = typing.TypedDict('ActivedirectoryUpdate', {
-            'domainname':'str',
-            'bindname':'str',
-            'bindpw':'str',
-            'verbose_logging':'bool',
-            'use_default_domain':'bool',
-            'allow_trusted_doms':'bool',
-            'allow_dns_updates':'bool',
-            'disable_freenas_cache':'bool',
-            'restrict_pam':'bool',
-            'site':'typing.Optional[str]',
-            'kerberos_realm':'typing.Optional[int]',
-            'kerberos_principal':'typing.Optional[str]',
-            'timeout':'int',
-            'dns_timeout':'int',
-            'nss_info':'typing.Optional[str]',
-            'createcomputer':'str',
-            'netbiosname':'str',
-            'netbiosname_b':'str',
-            'netbiosalias':'list',
-            'enable':'bool',
-    })
     @typing.overload
     def started(self, 
     /) -> None: 
@@ -304,43 +119,6 @@ class Activedirectory(
         -------
         """
         ...
-    DomainInfo = typing.TypedDict('DomainInfo', {
-            'LDAP server':'str',
-            'LDAP server name':'str',
-            'Realm':'str',
-            'Bind Path':'str',
-            'LDAP port':'int',
-            'Server time':'int',
-            'KDC server':'str',
-            'Server time offset':'int',
-            'Last machine account password change':'int',
-    })
-    KerberosUsernamePassword = typing.TypedDict('KerberosUsernamePassword', {
-            'username':'str',
-            'password':'str',
-    })
-    ActivedirectoryUpdate = typing.TypedDict('ActivedirectoryUpdate', {
-            'domainname':'str',
-            'bindname':'str',
-            'bindpw':'str',
-            'verbose_logging':'bool',
-            'use_default_domain':'bool',
-            'allow_trusted_doms':'bool',
-            'allow_dns_updates':'bool',
-            'disable_freenas_cache':'bool',
-            'restrict_pam':'bool',
-            'site':'typing.Optional[str]',
-            'kerberos_realm':'typing.Optional[int]',
-            'kerberos_principal':'typing.Optional[str]',
-            'timeout':'int',
-            'dns_timeout':'int',
-            'nss_info':'typing.Optional[str]',
-            'createcomputer':'str',
-            'netbiosname':'str',
-            'netbiosname_b':'str',
-            'netbiosalias':'list',
-            'enable':'bool',
-    })
     @typing.overload
     def update(self, 
         activedirectory_update:'ActivedirectoryUpdate'={},
@@ -452,10 +230,27 @@ class Activedirectory(
             'Server time offset':'int',
             'Last machine account password change':'int',
     })
+    class DirectoryserviceState(str,Enum):
+        DISABLED = 'DISABLED'
+        FAULTED = 'FAULTED'
+        LEAVING = 'LEAVING'
+        JOINING = 'JOINING'
+        HEALTHY = 'HEALTHY'
+        ...
     KerberosUsernamePassword = typing.TypedDict('KerberosUsernamePassword', {
             'username':'str',
             'password':'str',
     })
+    class NssInfoAd(str,Enum):
+        SFU = 'SFU'
+        SFU20 = 'SFU20'
+        RFC2307 = 'RFC2307'
+        ...
+    class NssInfo(str,Enum):
+        SFU = 'SFU'
+        SFU20 = 'SFU20'
+        RFC2307 = 'RFC2307'
+        ...
     ActivedirectoryUpdate = typing.TypedDict('ActivedirectoryUpdate', {
             'domainname':'str',
             'bindname':'str',
@@ -471,11 +266,10 @@ class Activedirectory(
             'kerberos_principal':'typing.Optional[str]',
             'timeout':'int',
             'dns_timeout':'int',
-            'nss_info':'typing.Optional[str]',
+            'nss_info':'typing.Optional[NssInfo]',
             'createcomputer':'str',
             'netbiosname':'str',
             'netbiosname_b':'str',
             'netbiosalias':'list',
             'enable':'bool',
     })
-

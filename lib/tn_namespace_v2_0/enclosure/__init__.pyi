@@ -1,7 +1,7 @@
 
 from pytruenas import TrueNASClient
 from pytruenas.base import Namespace
-
+from enum import Enum
 import typing
 class Enclosure(
     Namespace
@@ -28,37 +28,6 @@ class Enclosure(
         -------
         """
         ...
-    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    QueryOptions = typing.TypedDict('QueryOptions', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    EnclosureUpdate = typing.TypedDict('EnclosureUpdate', {
-            'label':'str',
-    })
     @typing.overload
     def query(self, 
         query_filters:'list[list]'=[],
@@ -79,42 +48,11 @@ class Enclosure(
             
         """
         ...
-    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    QueryOptions = typing.TypedDict('QueryOptions', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    EnclosureUpdate = typing.TypedDict('EnclosureUpdate', {
-            'label':'str',
-    })
     @typing.overload
     def set_slot_status(self, 
         enclosure_id:'str',
         slot:'int',
-        status:'str',
+        status:'Status',
     /) -> None: 
         """
         
@@ -131,37 +69,6 @@ class Enclosure(
         -------
         """
         ...
-    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    QueryOptions = typing.TypedDict('QueryOptions', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    EnclosureUpdate = typing.TypedDict('EnclosureUpdate', {
-            'label':'str',
-    })
     @typing.overload
     def update(self, 
         id:'str',
@@ -210,7 +117,11 @@ class Enclosure(
             'limit':'int',
             'force_sql_filters':'bool',
     })
+    class Status(str,Enum):
+        CLEAR = 'CLEAR'
+        FAULT = 'FAULT'
+        IDENTIFY = 'IDENTIFY'
+        ...
     EnclosureUpdate = typing.TypedDict('EnclosureUpdate', {
             'label':'str',
     })
-

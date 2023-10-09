@@ -2,10 +2,38 @@
 from pytruenas.base import Namespace
 
 import typing
+from enum import Enum
+
 class SystemAdvanced(Namespace):
     def __init__(self, client) -> None:
         super().__init__(client, 'system.advanced')
 
+    class Serialspeed(str,Enum):
+        _9600 = '9600'
+        _19200 = '19200'
+        _38400 = '38400'
+        _57600 = '57600'
+        _115200 = '115200'
+        ...
+    class SedUser(str,Enum):
+        USER = 'USER'
+        MASTER = 'MASTER'
+        ...
+    class Sysloglevel(str,Enum):
+        FEMERG = 'F_EMERG'
+        FALERT = 'F_ALERT'
+        FCRIT = 'F_CRIT'
+        FERR = 'F_ERR'
+        FWARNING = 'F_WARNING'
+        FNOTICE = 'F_NOTICE'
+        FINFO = 'F_INFO'
+        FDEBUG = 'F_DEBUG'
+        ...
+    class SyslogTransport(str,Enum):
+        UDP = 'UDP'
+        TCP = 'TCP'
+        TLS = 'TLS'
+        ...
     SystemAdvancedEntry = typing.TypedDict('SystemAdvancedEntry', {
             'advancedmode':'bool',
             'autotune':'bool',
@@ -20,16 +48,16 @@ class SystemAdvanced(Namespace):
             'serialconsole':'bool',
             'serialport':'str',
             'anonstats_token':'str',
-            'serialspeed':'str',
+            'serialspeed':'Serialspeed',
             'swapondrive':'int',
             'overprovision':'typing.Optional[int]',
             'traceback':'bool',
             'uploadcrash':'bool',
             'anonstats':'bool',
-            'sed_user':'str',
-            'sysloglevel':'str',
+            'sed_user':'SedUser',
+            'sysloglevel':'Sysloglevel',
             'syslogserver':'str',
-            'syslog_transport':'str',
+            'syslog_transport':'SyslogTransport',
             'syslog_tls_certificate':'typing.Optional[int]',
             'syslog_tls_certificate_authority':'typing.Optional[int]',
             'isolated_gpu_pci_ids':'list[str]',
@@ -49,16 +77,16 @@ class SystemAdvanced(Namespace):
             'powerdaemon':'bool',
             'serialconsole':'bool',
             'serialport':'str',
-            'serialspeed':'str',
+            'serialspeed':'Serialspeed',
             'swapondrive':'int',
             'overprovision':'typing.Optional[int]',
             'traceback':'bool',
             'uploadcrash':'bool',
             'anonstats':'bool',
-            'sed_user':'str',
-            'sysloglevel':'str',
+            'sed_user':'SedUser',
+            'sysloglevel':'Sysloglevel',
             'syslogserver':'str',
-            'syslog_transport':'str',
+            'syslog_transport':'SyslogTransport',
             'syslog_tls_certificate':'typing.Optional[int]',
             'syslog_tls_certificate_authority':'typing.Optional[int]',
             'isolated_gpu_pci_ids':'list[str]',
@@ -79,16 +107,16 @@ class SystemAdvanced(Namespace):
             'serialconsole':'bool',
             'serialport':'str',
             'anonstats_token':'str',
-            'serialspeed':'str',
+            'serialspeed':'Serialspeed',
             'swapondrive':'int',
             'overprovision':'typing.Optional[int]',
             'traceback':'bool',
             'uploadcrash':'bool',
             'anonstats':'bool',
-            'sed_user':'str',
-            'sysloglevel':'str',
+            'sed_user':'SedUser',
+            'sysloglevel':'Sysloglevel',
             'syslogserver':'str',
-            'syslog_transport':'str',
+            'syslog_transport':'SyslogTransport',
             'syslog_tls_certificate':'typing.Optional[int]',
             'syslog_tls_certificate_authority':'typing.Optional[int]',
             'isolated_gpu_pci_ids':'list[str]',

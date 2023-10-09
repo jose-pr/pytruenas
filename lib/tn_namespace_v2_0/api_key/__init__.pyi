@@ -1,7 +1,7 @@
 
 from pytruenas import TrueNASClient
 from pytruenas.base import Namespace
-
+from enum import Enum
 import typing
 class Api_key(
     Namespace
@@ -27,47 +27,6 @@ class Api_key(
             api_key_create_returns
         """
         ...
-    AllowlistItem = typing.TypedDict('AllowlistItem', {
-            'method':'str',
-            'resource':'str',
-    })
-    ApiKeyCreate = typing.TypedDict('ApiKeyCreate', {
-            'name':'str',
-            'allowlist':'list[AllowlistItem]',
-    })
-    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    QueryOptions = typing.TypedDict('QueryOptions', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    ApiKeyUpdate = typing.TypedDict('ApiKeyUpdate', {
-            'name':'str',
-            'allowlist':'list[AllowlistItem]',
-            'reset':'bool',
-    })
     @typing.overload
     def delete(self, 
         id:'int',
@@ -85,47 +44,6 @@ class Api_key(
             Will return `true` if `id` is deleted successfully
         """
         ...
-    AllowlistItem = typing.TypedDict('AllowlistItem', {
-            'method':'str',
-            'resource':'str',
-    })
-    ApiKeyCreate = typing.TypedDict('ApiKeyCreate', {
-            'name':'str',
-            'allowlist':'list[AllowlistItem]',
-    })
-    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    QueryOptions = typing.TypedDict('QueryOptions', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    ApiKeyUpdate = typing.TypedDict('ApiKeyUpdate', {
-            'name':'str',
-            'allowlist':'list[AllowlistItem]',
-            'reset':'bool',
-    })
     @typing.overload
     def get_instance(self, 
         id:'typing.Union[str, int, bool, dict[str], list]',
@@ -146,47 +64,6 @@ class Api_key(
         -------
         """
         ...
-    AllowlistItem = typing.TypedDict('AllowlistItem', {
-            'method':'str',
-            'resource':'str',
-    })
-    ApiKeyCreate = typing.TypedDict('ApiKeyCreate', {
-            'name':'str',
-            'allowlist':'list[AllowlistItem]',
-    })
-    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    QueryOptions = typing.TypedDict('QueryOptions', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    ApiKeyUpdate = typing.TypedDict('ApiKeyUpdate', {
-            'name':'str',
-            'allowlist':'list[AllowlistItem]',
-            'reset':'bool',
-    })
     @typing.overload
     def query(self, 
         query_filters:'list[list]'=[],
@@ -207,47 +84,6 @@ class Api_key(
             
         """
         ...
-    AllowlistItem = typing.TypedDict('AllowlistItem', {
-            'method':'str',
-            'resource':'str',
-    })
-    ApiKeyCreate = typing.TypedDict('ApiKeyCreate', {
-            'name':'str',
-            'allowlist':'list[AllowlistItem]',
-    })
-    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    QueryOptions = typing.TypedDict('QueryOptions', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    ApiKeyUpdate = typing.TypedDict('ApiKeyUpdate', {
-            'name':'str',
-            'allowlist':'list[AllowlistItem]',
-            'reset':'bool',
-    })
     @typing.overload
     def update(self, 
         id:'int',
@@ -270,8 +106,17 @@ class Api_key(
             api_key_update_returns
         """
         ...
+    class Method(str,Enum):
+        GET = 'GET'
+        POST = 'POST'
+        PUT = 'PUT'
+        DELETE = 'DELETE'
+        CALL = 'CALL'
+        SUBSCRIBE = 'SUBSCRIBE'
+        _ = '*'
+        ...
     AllowlistItem = typing.TypedDict('AllowlistItem', {
-            'method':'str',
+            'method':'Method',
             'resource':'str',
     })
     ApiKeyCreate = typing.TypedDict('ApiKeyCreate', {
@@ -311,4 +156,3 @@ class Api_key(
             'allowlist':'list[AllowlistItem]',
             'reset':'bool',
     })
-

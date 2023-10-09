@@ -2,6 +2,8 @@
 from pytruenas.base import Namespace
 
 import typing
+from enum import Enum
+
 class ClusterManagement(Namespace):
     def __init__(self, client) -> None:
         super().__init__(client, 'cluster.management')
@@ -17,7 +19,7 @@ class ClusterManagement(Namespace):
             'api_key':'str',
     })
     ClusterPeer = typing.TypedDict('ClusterPeer', {
-            'remote_credential':'typing.Union[ForwardRef(PlainCred), ForwardRef(AuthenticationToken), ForwardRef(ApiKey)]',
+            'remote_credential':'typing.Union[PlainCred, AuthenticationToken, ApiKey]',
             'hostname':'str',
             'private_address':'str',
             'brick_path':'str',
@@ -98,7 +100,7 @@ class ClusterManagement(Namespace):
     })
     VolumeConfiguration = typing.TypedDict('VolumeConfiguration', {
             'name':'str',
-            'brick_layout':'typing.Union[ForwardRef(ReplicatedBrickLayout), ForwardRef(DispersedBrickLayout), ForwardRef(DistributedBrickLayout)]',
+            'brick_layout':'typing.Union[ReplicatedBrickLayout, DispersedBrickLayout, DistributedBrickLayout]',
     })
     LocalNodeConfiguration = typing.TypedDict('LocalNodeConfiguration', {
             'hostname':'str',
@@ -106,7 +108,7 @@ class ClusterManagement(Namespace):
             'brick_path':'str',
     })
     ClusterPeer_ = typing.TypedDict('ClusterPeer_', {
-            'remote_credential':'typing.Union[ForwardRef(PlainCred), ForwardRef(AuthenticationToken), ForwardRef(ApiKey)]',
+            'remote_credential':'typing.Union[PlainCred, AuthenticationToken, ApiKey]',
             'hostname':'str',
             'private_address':'str',
             'brick_path':'str',

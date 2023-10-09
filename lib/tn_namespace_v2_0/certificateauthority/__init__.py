@@ -2,6 +2,8 @@
 from pytruenas.base import Namespace
 
 import typing
+from enum import Enum
+
 class Certificateauthority(Namespace):
     def __init__(self, client) -> None:
         super().__init__(client, 'certificateauthority')
@@ -17,8 +19,21 @@ class Certificateauthority(Namespace):
             'enabled':'bool',
             'extension_critical':'bool',
     })
+    class Usage(str,Enum):
+        ANYEXTENDEDKEYUSAGE = 'ANY_EXTENDED_KEY_USAGE'
+        CERTIFICATETRANSPARENCY = 'CERTIFICATE_TRANSPARENCY'
+        CLIENTAUTH = 'CLIENT_AUTH'
+        CODESIGNING = 'CODE_SIGNING'
+        EMAILPROTECTION = 'EMAIL_PROTECTION'
+        IPSECIKE = 'IPSEC_IKE'
+        KERBEROSPKINITKDC = 'KERBEROS_PKINIT_KDC'
+        OCSPSIGNING = 'OCSP_SIGNING'
+        SERVERAUTH = 'SERVER_AUTH'
+        SMARTCARDLOGON = 'SMARTCARD_LOGON'
+        TIMESTAMPING = 'TIME_STAMPING'
+        ...
     ExtendedKeyUsage = typing.TypedDict('ExtendedKeyUsage', {
-            'usages':'list[str]',
+            'usages':'list[Usage]',
             'enabled':'bool',
             'extension_critical':'bool',
     })
@@ -102,6 +117,27 @@ class Certificateauthority(Namespace):
             'crl_path':'str',
             'signed_certificates':'int',
     })
+    class EcCurve(str,Enum):
+        SECP256R1 = 'SECP256R1'
+        SECP384R1 = 'SECP384R1'
+        SECP521R1 = 'SECP521R1'
+        Ed25519 = 'ed25519'
+        ...
+    class KeyType(str,Enum):
+        RSA = 'RSA'
+        EC = 'EC'
+        ...
+    class CreateType(str,Enum):
+        CACREATEINTERNAL = 'CA_CREATE_INTERNAL'
+        CACREATEIMPORTED = 'CA_CREATE_IMPORTED'
+        CACREATEINTERMEDIATE = 'CA_CREATE_INTERMEDIATE'
+        ...
+    class DigestAlgorithm(str,Enum):
+        SHA224 = 'SHA224'
+        SHA256 = 'SHA256'
+        SHA384 = 'SHA384'
+        SHA512 = 'SHA512'
+        ...
     BasicConstraints_ = typing.TypedDict('BasicConstraints_', {
             'ca':'bool',
             'enabled':'bool',
@@ -109,7 +145,7 @@ class Certificateauthority(Namespace):
             'extension_critical':'bool',
     })
     ExtendedKeyUsage_ = typing.TypedDict('ExtendedKeyUsage_', {
-            'usages':'list[str]',
+            'usages':'list[Usage]',
             'enabled':'bool',
             'extension_critical':'bool',
     })
@@ -147,17 +183,17 @@ class Certificateauthority(Namespace):
             'common':'typing.Optional[str]',
             'country':'str',
             'CSR':'str',
-            'ec_curve':'str',
+            'ec_curve':'EcCurve',
             'email':'str',
-            'key_type':'str',
+            'key_type':'KeyType',
             'name':'str',
             'organization':'str',
             'organizational_unit':'str',
             'passphrase':'str',
             'privatekey':'str',
             'state':'str',
-            'create_type':'str',
-            'digest_algorithm':'str',
+            'create_type':'CreateType',
+            'digest_algorithm':'DigestAlgorithm',
             'san':'list[str]',
             'cert_extensions':'CertExtensions_',
             'add_to_trusted_store':'bool',
@@ -417,12 +453,15 @@ class Certificateauthority(Namespace):
             'signed_certificates':'int',
             'add_to_trusted_store':'bool',
     })
+    class CreateType_(str,Enum):
+        CASIGNCSR = 'CA_SIGN_CSR'
+        ...
     CaUpdate = typing.TypedDict('CaUpdate', {
             'revoked':'bool',
             'add_to_trusted_store':'bool',
             'ca_id':'int',
             'csr_cert_id':'int',
-            'create_type':'str',
+            'create_type':'CreateType_',
             'name':'str',
     })
     CertificateauthorityUpdateReturns = typing.TypedDict('CertificateauthorityUpdateReturns', {

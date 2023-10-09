@@ -1,7 +1,7 @@
 
 from pytruenas import TrueNASClient
 from pytruenas.base import Namespace
-
+from enum import Enum
 import typing
 class Cronjob(
     Namespace
@@ -28,89 +28,6 @@ class Cronjob(
             cronjob_create_returns
         """
         ...
-    Schedule = typing.TypedDict('Schedule', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
-    CronJobCreate = typing.TypedDict('CronJobCreate', {
-            'enabled':'bool',
-            'stderr':'bool',
-            'stdout':'bool',
-            'schedule':'Schedule',
-            'command':'str',
-            'description':'str',
-            'user':'str',
-    })
-    CronjobCreateReturns = typing.TypedDict('CronjobCreateReturns', {
-            'enabled':'bool',
-            'stderr':'bool',
-            'stdout':'bool',
-            'schedule':'Schedule',
-            'command':'str',
-            'description':'str',
-            'user':'str',
-            'id':'int',
-    })
-    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    QueryOptions = typing.TypedDict('QueryOptions', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    CronJobEntry = typing.TypedDict('CronJobEntry', {
-            'enabled':'bool',
-            'stderr':'bool',
-            'stdout':'bool',
-            'schedule':'Schedule',
-            'command':'str',
-            'description':'str',
-            'user':'str',
-            'id':'int',
-    })
-    CronjobUpdate = typing.TypedDict('CronjobUpdate', {
-            'enabled':'bool',
-            'stderr':'bool',
-            'stdout':'bool',
-            'schedule':'Schedule',
-            'command':'str',
-            'description':'str',
-            'user':'str',
-    })
-    CronjobUpdateReturns = typing.TypedDict('CronjobUpdateReturns', {
-            'enabled':'bool',
-            'stderr':'bool',
-            'stdout':'bool',
-            'schedule':'Schedule',
-            'command':'str',
-            'description':'str',
-            'user':'str',
-            'id':'int',
-    })
     @typing.overload
     def delete(self, 
         id:'int',
@@ -128,89 +45,6 @@ class Cronjob(
             Will return `true` if `id` is deleted successfully
         """
         ...
-    Schedule = typing.TypedDict('Schedule', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
-    CronJobCreate = typing.TypedDict('CronJobCreate', {
-            'enabled':'bool',
-            'stderr':'bool',
-            'stdout':'bool',
-            'schedule':'Schedule',
-            'command':'str',
-            'description':'str',
-            'user':'str',
-    })
-    CronjobCreateReturns = typing.TypedDict('CronjobCreateReturns', {
-            'enabled':'bool',
-            'stderr':'bool',
-            'stdout':'bool',
-            'schedule':'Schedule',
-            'command':'str',
-            'description':'str',
-            'user':'str',
-            'id':'int',
-    })
-    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    QueryOptions = typing.TypedDict('QueryOptions', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    CronJobEntry = typing.TypedDict('CronJobEntry', {
-            'enabled':'bool',
-            'stderr':'bool',
-            'stdout':'bool',
-            'schedule':'Schedule',
-            'command':'str',
-            'description':'str',
-            'user':'str',
-            'id':'int',
-    })
-    CronjobUpdate = typing.TypedDict('CronjobUpdate', {
-            'enabled':'bool',
-            'stderr':'bool',
-            'stdout':'bool',
-            'schedule':'Schedule',
-            'command':'str',
-            'description':'str',
-            'user':'str',
-    })
-    CronjobUpdateReturns = typing.TypedDict('CronjobUpdateReturns', {
-            'enabled':'bool',
-            'stderr':'bool',
-            'stdout':'bool',
-            'schedule':'Schedule',
-            'command':'str',
-            'description':'str',
-            'user':'str',
-            'id':'int',
-    })
     @typing.overload
     def get_instance(self, 
         id:'typing.Union[str, int, bool, dict[str], list]',
@@ -231,94 +65,11 @@ class Cronjob(
         -------
         """
         ...
-    Schedule = typing.TypedDict('Schedule', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
-    CronJobCreate = typing.TypedDict('CronJobCreate', {
-            'enabled':'bool',
-            'stderr':'bool',
-            'stdout':'bool',
-            'schedule':'Schedule',
-            'command':'str',
-            'description':'str',
-            'user':'str',
-    })
-    CronjobCreateReturns = typing.TypedDict('CronjobCreateReturns', {
-            'enabled':'bool',
-            'stderr':'bool',
-            'stdout':'bool',
-            'schedule':'Schedule',
-            'command':'str',
-            'description':'str',
-            'user':'str',
-            'id':'int',
-    })
-    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    QueryOptions = typing.TypedDict('QueryOptions', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    CronJobEntry = typing.TypedDict('CronJobEntry', {
-            'enabled':'bool',
-            'stderr':'bool',
-            'stdout':'bool',
-            'schedule':'Schedule',
-            'command':'str',
-            'description':'str',
-            'user':'str',
-            'id':'int',
-    })
-    CronjobUpdate = typing.TypedDict('CronjobUpdate', {
-            'enabled':'bool',
-            'stderr':'bool',
-            'stdout':'bool',
-            'schedule':'Schedule',
-            'command':'str',
-            'description':'str',
-            'user':'str',
-    })
-    CronjobUpdateReturns = typing.TypedDict('CronjobUpdateReturns', {
-            'enabled':'bool',
-            'stderr':'bool',
-            'stdout':'bool',
-            'schedule':'Schedule',
-            'command':'str',
-            'description':'str',
-            'user':'str',
-            'id':'int',
-    })
     @typing.overload
     def query(self, 
         query_filters:'list[list]'=[],
         query_options:'QueryOptions'={},
-    /) -> 'typing.Union[list[CronJobEntry], ForwardRef(CronJobEntry), int]': 
+    /) -> 'typing.Union[list[CronJobEntry], CronJobEntry, int]': 
         """
         
 
@@ -330,93 +81,10 @@ class Cronjob(
             query-options
         Returns
         -------
-        typing.Union[list[CronJobEntry], ForwardRef(CronJobEntry), int]:
+        typing.Union[list[CronJobEntry], CronJobEntry, int]:
             
         """
         ...
-    Schedule = typing.TypedDict('Schedule', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
-    CronJobCreate = typing.TypedDict('CronJobCreate', {
-            'enabled':'bool',
-            'stderr':'bool',
-            'stdout':'bool',
-            'schedule':'Schedule',
-            'command':'str',
-            'description':'str',
-            'user':'str',
-    })
-    CronjobCreateReturns = typing.TypedDict('CronjobCreateReturns', {
-            'enabled':'bool',
-            'stderr':'bool',
-            'stdout':'bool',
-            'schedule':'Schedule',
-            'command':'str',
-            'description':'str',
-            'user':'str',
-            'id':'int',
-    })
-    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    QueryOptions = typing.TypedDict('QueryOptions', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    CronJobEntry = typing.TypedDict('CronJobEntry', {
-            'enabled':'bool',
-            'stderr':'bool',
-            'stdout':'bool',
-            'schedule':'Schedule',
-            'command':'str',
-            'description':'str',
-            'user':'str',
-            'id':'int',
-    })
-    CronjobUpdate = typing.TypedDict('CronjobUpdate', {
-            'enabled':'bool',
-            'stderr':'bool',
-            'stdout':'bool',
-            'schedule':'Schedule',
-            'command':'str',
-            'description':'str',
-            'user':'str',
-    })
-    CronjobUpdateReturns = typing.TypedDict('CronjobUpdateReturns', {
-            'enabled':'bool',
-            'stderr':'bool',
-            'stdout':'bool',
-            'schedule':'Schedule',
-            'command':'str',
-            'description':'str',
-            'user':'str',
-            'id':'int',
-    })
     @typing.overload
     def run(self, 
         id:'int',
@@ -435,89 +103,6 @@ class Cronjob(
         -------
         """
         ...
-    Schedule = typing.TypedDict('Schedule', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
-    CronJobCreate = typing.TypedDict('CronJobCreate', {
-            'enabled':'bool',
-            'stderr':'bool',
-            'stdout':'bool',
-            'schedule':'Schedule',
-            'command':'str',
-            'description':'str',
-            'user':'str',
-    })
-    CronjobCreateReturns = typing.TypedDict('CronjobCreateReturns', {
-            'enabled':'bool',
-            'stderr':'bool',
-            'stdout':'bool',
-            'schedule':'Schedule',
-            'command':'str',
-            'description':'str',
-            'user':'str',
-            'id':'int',
-    })
-    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    QueryOptions = typing.TypedDict('QueryOptions', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    CronJobEntry = typing.TypedDict('CronJobEntry', {
-            'enabled':'bool',
-            'stderr':'bool',
-            'stdout':'bool',
-            'schedule':'Schedule',
-            'command':'str',
-            'description':'str',
-            'user':'str',
-            'id':'int',
-    })
-    CronjobUpdate = typing.TypedDict('CronjobUpdate', {
-            'enabled':'bool',
-            'stderr':'bool',
-            'stdout':'bool',
-            'schedule':'Schedule',
-            'command':'str',
-            'description':'str',
-            'user':'str',
-    })
-    CronjobUpdateReturns = typing.TypedDict('CronjobUpdateReturns', {
-            'enabled':'bool',
-            'stderr':'bool',
-            'stdout':'bool',
-            'schedule':'Schedule',
-            'command':'str',
-            'description':'str',
-            'user':'str',
-            'id':'int',
-    })
     @typing.overload
     def update(self, 
         id:'int',
@@ -622,4 +207,3 @@ class Cronjob(
             'user':'str',
             'id':'int',
     })
-

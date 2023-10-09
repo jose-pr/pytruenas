@@ -2,10 +2,21 @@
 from pytruenas.base import Namespace
 
 import typing
+from enum import Enum
+
 class System(Namespace):
     def __init__(self, client) -> None:
         super().__init__(client, 'system')
 
+    class ProductRunningEnvironment(str,Enum):
+        DEFAULT = 'DEFAULT'
+        EC2 = 'EC2'
+        ...
+    class Feature(str,Enum):
+        DEDUP = 'DEDUP'
+        FIBRECHANNEL = 'FIBRECHANNEL'
+        VM = 'VM'
+        ...
     SystemInfo = typing.TypedDict('SystemInfo', {
             'version':'str',
             'buildtime':'str',
@@ -34,3 +45,8 @@ class System(Namespace):
     SystemShutdown = typing.TypedDict('SystemShutdown', {
             'delay':'int',
     })
+    class SystemState(str,Enum):
+        SHUTTINGDOWN = 'SHUTTING_DOWN'
+        READY = 'READY'
+        BOOTING = 'BOOTING'
+        ...

@@ -2,7 +2,7 @@
 from pytruenas import TrueNASClient
 from pytruenas.base import Namespace
 from pytruenas.mixins import ConfigMixin
-
+from enum import Enum
 import typing
 class ReplicationConfig(
     ConfigMixin,
@@ -24,9 +24,6 @@ class ReplicationConfig(
             replication_config_entry
         """
         ...
-    ReplicationConfigUpdate = typing.TypedDict('ReplicationConfigUpdate', {
-            'max_parallel_replication_tasks':'typing.Optional[int]',
-    })
     @typing.overload
     def update(self, 
         replication_config_update:'ReplicationConfigUpdate'={},
@@ -47,4 +44,3 @@ class ReplicationConfig(
     ReplicationConfigUpdate = typing.TypedDict('ReplicationConfigUpdate', {
             'max_parallel_replication_tasks':'typing.Optional[int]',
     })
-

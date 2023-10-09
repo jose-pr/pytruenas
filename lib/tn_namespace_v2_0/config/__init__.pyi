@@ -1,7 +1,7 @@
 
 from pytruenas import TrueNASClient
 from pytruenas.base import Namespace
-
+from enum import Enum
 import typing
 class Config(
     Namespace
@@ -26,15 +26,6 @@ class Config(
         -------
         """
         ...
-    Options = typing.TypedDict('Options', {
-            'reboot':'bool',
-    })
-    Configsave = typing.TypedDict('Configsave', {
-            'secretseed':'bool',
-            'pool_keys':'bool',
-            'root_authorized_keys':'bool',
-            'gluster_config':'bool',
-    })
     @typing.overload
     def save(self, 
         configsave:'Configsave'={},
@@ -58,15 +49,6 @@ class Config(
         -------
         """
         ...
-    Options = typing.TypedDict('Options', {
-            'reboot':'bool',
-    })
-    Configsave = typing.TypedDict('Configsave', {
-            'secretseed':'bool',
-            'pool_keys':'bool',
-            'root_authorized_keys':'bool',
-            'gluster_config':'bool',
-    })
     @typing.overload
     def upload(self, 
     /) -> None: 
@@ -88,4 +70,3 @@ class Config(
             'root_authorized_keys':'bool',
             'gluster_config':'bool',
     })
-

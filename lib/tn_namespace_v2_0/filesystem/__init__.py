@@ -2,6 +2,8 @@
 from pytruenas.base import Namespace
 
 import typing
+from enum import Enum
+
 class Filesystem(Namespace):
     def __init__(self, client) -> None:
         super().__init__(client, 'filesystem')
@@ -21,6 +23,28 @@ class Filesystem(Namespace):
             'gid':'typing.Optional[int]',
             'options':'Options',
     })
+    class ShareType(str,Enum):
+        NONE = 'NONE'
+        SMB = 'SMB'
+        NFS = 'NFS'
+        ...
+    class Tag(str,Enum):
+        Owner = 'owner@'
+        Group = 'group@'
+        Everyone = 'everyone@'
+        USER = 'USER'
+        GROUP = 'GROUP'
+        ...
+    class Type(str,Enum):
+        ALLOW = 'ALLOW'
+        DENY = 'DENY'
+        ...
+    class BASIC(str,Enum):
+        FULLCONTROL = 'FULL_CONTROL'
+        MODIFY = 'MODIFY'
+        READ = 'READ'
+        TRAVERSE = 'TRAVERSE'
+        ...
     Perms = typing.TypedDict('Perms', {
             'READ_DATA':'bool',
             'WRITE_DATA':'bool',
@@ -36,23 +60,35 @@ class Filesystem(Namespace):
             'WRITE_ACL':'bool',
             'WRITE_OWNER':'bool',
             'SYNCHRONIZE':'bool',
-            'BASIC':'str',
+            'BASIC':'BASIC',
     })
+    class BASIC_(str,Enum):
+        INHERIT = 'INHERIT'
+        NOINHERIT = 'NOINHERIT'
+        ...
     Flags = typing.TypedDict('Flags', {
             'FILE_INHERIT':'bool',
             'DIRECTORY_INHERIT':'bool',
             'NO_PROPAGATE_INHERIT':'bool',
             'INHERIT_ONLY':'bool',
             'INHERITED':'bool',
-            'BASIC':'str',
+            'BASIC':'BASIC_',
     })
     Nfs4Ace = typing.TypedDict('Nfs4Ace', {
-            'tag':'str',
+            'tag':'Tag',
             'id':'typing.Optional[int]',
-            'type':'str',
+            'type':'Type',
             'perms':'Perms',
             'flags':'Flags',
     })
+    class Tag_(str,Enum):
+        USEROBJ = 'USER_OBJ'
+        GROUPOBJ = 'GROUP_OBJ'
+        USER = 'USER'
+        GROUP = 'GROUP'
+        OTHER = 'OTHER'
+        MASK = 'MASK'
+        ...
     Perms_ = typing.TypedDict('Perms_', {
             'READ':'bool',
             'WRITE':'bool',
@@ -60,7 +96,7 @@ class Filesystem(Namespace):
     })
     Posix1eAce = typing.TypedDict('Posix1eAce', {
             'default':'bool',
-            'tag':'str',
+            'tag':'Tag_',
             'id':'int',
             'perms':'Perms_',
     })
@@ -73,17 +109,22 @@ class Filesystem(Namespace):
             'offline':'bool',
             'sparse':'bool',
     })
+    class Acltype(str,Enum):
+        NFS4 = 'NFS4'
+        POSIX1E = 'POSIX1E'
+        DISABLED = 'DISABLED'
+        ...
     Nfs4Ace_ = typing.TypedDict('Nfs4Ace_', {
-            'tag':'str',
+            'tag':'Tag',
             'id':'typing.Optional[int]',
-            'type':'str',
+            'type':'Type',
             'perms':'Perms',
             'flags':'Flags',
     })
     TruenasAcl = typing.TypedDict('TruenasAcl', {
             'path':'str',
             'trivial':'bool',
-            'acltype':'typing.Optional[str]',
+            'acltype':'typing.Optional[Acltype]',
             'acl':'typing.Union[list[Nfs4Ace_], list[Posix1eAce]]',
     })
     QueryOptions = typing.TypedDict('QueryOptions', {
@@ -100,11 +141,17 @@ class Filesystem(Namespace):
             'limit':'int',
             'force_sql_filters':'bool',
     })
+    class Type_(str,Enum):
+        DIRECTORY = 'DIRECTORY'
+        FILE = 'FILE'
+        SYMLINK = 'SYMLINK'
+        OTHER = 'OTHER'
+        ...
     PathEntry = typing.TypedDict('PathEntry', {
             'name':'str',
             'path':'str',
             'realpath':'str',
-            'type':'str',
+            'type':'Type_',
             'size':'typing.Optional[int]',
             'mode':'typing.Optional[int]',
             'acl':'typing.Optional[bool]',
@@ -117,7 +164,7 @@ class Filesystem(Namespace):
             'name':'str',
             'path':'str',
             'realpath':'str',
-            'type':'str',
+            'type':'Type_',
             'size':'typing.Optional[int]',
             'mode':'typing.Optional[int]',
             'acl':'typing.Optional[bool]',
@@ -130,7 +177,7 @@ class Filesystem(Namespace):
             'name':'str',
             'path':'str',
             'realpath':'str',
-            'type':'str',
+            'type':'Type_',
             'size':'typing.Optional[int]',
             'mode':'typing.Optional[int]',
             'acl':'typing.Optional[bool]',
@@ -148,9 +195,9 @@ class Filesystem(Namespace):
             'dosmode':'Dosmode',
     })
     Nfs4Ace__ = typing.TypedDict('Nfs4Ace__', {
-            'tag':'str',
+            'tag':'Tag',
             'id':'typing.Optional[int]',
-            'type':'str',
+            'type':'Type',
             'perms':'Perms',
             'flags':'Flags',
     })
@@ -170,7 +217,7 @@ class Filesystem(Namespace):
             'gid':'typing.Optional[int]',
             'dacl':'typing.Union[list[Nfs4Ace__], list[Posix1eAce]]',
             'nfs41_flags':'Nfs41Flags',
-            'acltype':'typing.Optional[str]',
+            'acltype':'typing.Optional[Acltype]',
             'options':'Options__',
     })
     Options___ = typing.TypedDict('Options___', {

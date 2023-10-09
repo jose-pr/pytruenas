@@ -2,7 +2,7 @@
 from pytruenas import TrueNASClient
 from pytruenas.base import Namespace
 from pytruenas.mixins import ConfigMixin
-
+from enum import Enum
 import typing
 class Ups(
     ConfigMixin,
@@ -24,73 +24,6 @@ class Ups(
             ups_entry
         """
         ...
-    UpsEntry = typing.TypedDict('UpsEntry', {
-            'powerdown':'bool',
-            'rmonitor':'bool',
-            'id':'int',
-            'nocommwarntime':'typing.Optional[int]',
-            'remoteport':'int',
-            'shutdowntimer':'int',
-            'hostsync':'int',
-            'description':'str',
-            'driver':'str',
-            'extrausers':'str',
-            'identifier':'str',
-            'mode':'str',
-            'monpwd':'str',
-            'monuser':'str',
-            'options':'str',
-            'optionsupsd':'str',
-            'port':'str',
-            'remotehost':'str',
-            'shutdown':'str',
-            'shutdowncmd':'typing.Optional[str]',
-            'complete_identifier':'str',
-    })
-    UpsUpdate = typing.TypedDict('UpsUpdate', {
-            'powerdown':'bool',
-            'rmonitor':'bool',
-            'nocommwarntime':'typing.Optional[int]',
-            'remoteport':'int',
-            'shutdowntimer':'int',
-            'hostsync':'int',
-            'description':'str',
-            'driver':'str',
-            'extrausers':'str',
-            'identifier':'str',
-            'mode':'str',
-            'monpwd':'str',
-            'monuser':'str',
-            'options':'str',
-            'optionsupsd':'str',
-            'port':'str',
-            'remotehost':'str',
-            'shutdown':'str',
-            'shutdowncmd':'typing.Optional[str]',
-    })
-    UpsUpdateReturns = typing.TypedDict('UpsUpdateReturns', {
-            'powerdown':'bool',
-            'rmonitor':'bool',
-            'id':'int',
-            'nocommwarntime':'typing.Optional[int]',
-            'remoteport':'int',
-            'shutdowntimer':'int',
-            'hostsync':'int',
-            'description':'str',
-            'driver':'str',
-            'extrausers':'str',
-            'identifier':'str',
-            'mode':'str',
-            'monpwd':'str',
-            'monuser':'str',
-            'options':'str',
-            'optionsupsd':'str',
-            'port':'str',
-            'remotehost':'str',
-            'shutdown':'str',
-            'shutdowncmd':'typing.Optional[str]',
-            'complete_identifier':'str',
-    })
     @typing.overload
     def driver_choices(self, 
     /) -> 'dict[str]': 
@@ -110,73 +43,6 @@ class Ups(
             ```
         """
         ...
-    UpsEntry = typing.TypedDict('UpsEntry', {
-            'powerdown':'bool',
-            'rmonitor':'bool',
-            'id':'int',
-            'nocommwarntime':'typing.Optional[int]',
-            'remoteport':'int',
-            'shutdowntimer':'int',
-            'hostsync':'int',
-            'description':'str',
-            'driver':'str',
-            'extrausers':'str',
-            'identifier':'str',
-            'mode':'str',
-            'monpwd':'str',
-            'monuser':'str',
-            'options':'str',
-            'optionsupsd':'str',
-            'port':'str',
-            'remotehost':'str',
-            'shutdown':'str',
-            'shutdowncmd':'typing.Optional[str]',
-            'complete_identifier':'str',
-    })
-    UpsUpdate = typing.TypedDict('UpsUpdate', {
-            'powerdown':'bool',
-            'rmonitor':'bool',
-            'nocommwarntime':'typing.Optional[int]',
-            'remoteport':'int',
-            'shutdowntimer':'int',
-            'hostsync':'int',
-            'description':'str',
-            'driver':'str',
-            'extrausers':'str',
-            'identifier':'str',
-            'mode':'str',
-            'monpwd':'str',
-            'monuser':'str',
-            'options':'str',
-            'optionsupsd':'str',
-            'port':'str',
-            'remotehost':'str',
-            'shutdown':'str',
-            'shutdowncmd':'typing.Optional[str]',
-    })
-    UpsUpdateReturns = typing.TypedDict('UpsUpdateReturns', {
-            'powerdown':'bool',
-            'rmonitor':'bool',
-            'id':'int',
-            'nocommwarntime':'typing.Optional[int]',
-            'remoteport':'int',
-            'shutdowntimer':'int',
-            'hostsync':'int',
-            'description':'str',
-            'driver':'str',
-            'extrausers':'str',
-            'identifier':'str',
-            'mode':'str',
-            'monpwd':'str',
-            'monuser':'str',
-            'options':'str',
-            'optionsupsd':'str',
-            'port':'str',
-            'remotehost':'str',
-            'shutdown':'str',
-            'shutdowncmd':'typing.Optional[str]',
-            'complete_identifier':'str',
-    })
     @typing.overload
     def port_choices(self, 
     /) -> 'list[str]': 
@@ -191,73 +57,6 @@ class Ups(
             port_choices
         """
         ...
-    UpsEntry = typing.TypedDict('UpsEntry', {
-            'powerdown':'bool',
-            'rmonitor':'bool',
-            'id':'int',
-            'nocommwarntime':'typing.Optional[int]',
-            'remoteport':'int',
-            'shutdowntimer':'int',
-            'hostsync':'int',
-            'description':'str',
-            'driver':'str',
-            'extrausers':'str',
-            'identifier':'str',
-            'mode':'str',
-            'monpwd':'str',
-            'monuser':'str',
-            'options':'str',
-            'optionsupsd':'str',
-            'port':'str',
-            'remotehost':'str',
-            'shutdown':'str',
-            'shutdowncmd':'typing.Optional[str]',
-            'complete_identifier':'str',
-    })
-    UpsUpdate = typing.TypedDict('UpsUpdate', {
-            'powerdown':'bool',
-            'rmonitor':'bool',
-            'nocommwarntime':'typing.Optional[int]',
-            'remoteport':'int',
-            'shutdowntimer':'int',
-            'hostsync':'int',
-            'description':'str',
-            'driver':'str',
-            'extrausers':'str',
-            'identifier':'str',
-            'mode':'str',
-            'monpwd':'str',
-            'monuser':'str',
-            'options':'str',
-            'optionsupsd':'str',
-            'port':'str',
-            'remotehost':'str',
-            'shutdown':'str',
-            'shutdowncmd':'typing.Optional[str]',
-    })
-    UpsUpdateReturns = typing.TypedDict('UpsUpdateReturns', {
-            'powerdown':'bool',
-            'rmonitor':'bool',
-            'id':'int',
-            'nocommwarntime':'typing.Optional[int]',
-            'remoteport':'int',
-            'shutdowntimer':'int',
-            'hostsync':'int',
-            'description':'str',
-            'driver':'str',
-            'extrausers':'str',
-            'identifier':'str',
-            'mode':'str',
-            'monpwd':'str',
-            'monuser':'str',
-            'options':'str',
-            'optionsupsd':'str',
-            'port':'str',
-            'remotehost':'str',
-            'shutdown':'str',
-            'shutdowncmd':'typing.Optional[str]',
-            'complete_identifier':'str',
-    })
     @typing.overload
     def update(self, 
         ups_update:'UpsUpdate'={},
@@ -285,6 +84,14 @@ class Ups(
             ups_update_returns
         """
         ...
+    class Mode(str,Enum):
+        MASTER = 'MASTER'
+        SLAVE = 'SLAVE'
+        ...
+    class Shutdown(str,Enum):
+        LOWBATT = 'LOWBATT'
+        BATT = 'BATT'
+        ...
     UpsEntry = typing.TypedDict('UpsEntry', {
             'powerdown':'bool',
             'rmonitor':'bool',
@@ -297,14 +104,14 @@ class Ups(
             'driver':'str',
             'extrausers':'str',
             'identifier':'str',
-            'mode':'str',
+            'mode':'Mode',
             'monpwd':'str',
             'monuser':'str',
             'options':'str',
             'optionsupsd':'str',
             'port':'str',
             'remotehost':'str',
-            'shutdown':'str',
+            'shutdown':'Shutdown',
             'shutdowncmd':'typing.Optional[str]',
             'complete_identifier':'str',
     })
@@ -319,14 +126,14 @@ class Ups(
             'driver':'str',
             'extrausers':'str',
             'identifier':'str',
-            'mode':'str',
+            'mode':'Mode',
             'monpwd':'str',
             'monuser':'str',
             'options':'str',
             'optionsupsd':'str',
             'port':'str',
             'remotehost':'str',
-            'shutdown':'str',
+            'shutdown':'Shutdown',
             'shutdowncmd':'typing.Optional[str]',
     })
     UpsUpdateReturns = typing.TypedDict('UpsUpdateReturns', {
@@ -341,15 +148,14 @@ class Ups(
             'driver':'str',
             'extrausers':'str',
             'identifier':'str',
-            'mode':'str',
+            'mode':'Mode',
             'monpwd':'str',
             'monuser':'str',
             'options':'str',
             'optionsupsd':'str',
             'port':'str',
             'remotehost':'str',
-            'shutdown':'str',
+            'shutdown':'Shutdown',
             'shutdowncmd':'typing.Optional[str]',
             'complete_identifier':'str',
     })
-

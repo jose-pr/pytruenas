@@ -3,10 +3,17 @@ from pytruenas.base import Namespace
 from pytruenas.mixins import ConfigMixin
 
 import typing
+from enum import Enum
+
 class Mail(ConfigMixin, Namespace):
     def __init__(self, client) -> None:
         super().__init__(client, 'mail')
 
+    class Security(str,Enum):
+        PLAIN = 'PLAIN'
+        SSL = 'SSL'
+        TLS = 'TLS'
+        ...
     Oauth = typing.TypedDict('Oauth', {
             'client_id':'str',
             'client_secret':'str',
@@ -17,7 +24,7 @@ class Mail(ConfigMixin, Namespace):
             'fromname':'str',
             'outgoingserver':'str',
             'port':'int',
-            'security':'str',
+            'security':'Security',
             'smtp':'bool',
             'user':'typing.Optional[str]',
             'pass':'typing.Optional[str]',
@@ -47,7 +54,7 @@ class Mail(ConfigMixin, Namespace):
             'fromname':'str',
             'outgoingserver':'str',
             'port':'int',
-            'security':'str',
+            'security':'Security',
             'smtp':'bool',
             'user':'typing.Optional[str]',
             'pass':'typing.Optional[str]',
@@ -58,7 +65,7 @@ class Mail(ConfigMixin, Namespace):
             'fromname':'str',
             'outgoingserver':'str',
             'port':'int',
-            'security':'str',
+            'security':'Security',
             'smtp':'bool',
             'user':'typing.Optional[str]',
             'pass':'typing.Optional[str]',
@@ -69,7 +76,7 @@ class Mail(ConfigMixin, Namespace):
             'fromname':'str',
             'outgoingserver':'str',
             'port':'int',
-            'security':'str',
+            'security':'Security',
             'smtp':'bool',
             'user':'typing.Optional[str]',
             'pass':'typing.Optional[str]',

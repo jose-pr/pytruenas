@@ -1,7 +1,7 @@
 
 from pytruenas import TrueNASClient
 from pytruenas.base import Namespace
-
+from enum import Enum
 import typing
 class Snmp(
     Namespace
@@ -22,53 +22,6 @@ class Snmp(
             snmp_entry
         """
         ...
-    SnmpEntry = typing.TypedDict('SnmpEntry', {
-            'location':'str',
-            'contact':'str',
-            'traps':'bool',
-            'v3':'bool',
-            'community':'str',
-            'v3_username':'str',
-            'v3_authtype':'str',
-            'v3_password':'str',
-            'v3_privproto':'typing.Optional[str]',
-            'v3_privpassphrase':'typing.Optional[str]',
-            'loglevel':'int',
-            'options':'str',
-            'zilstat':'bool',
-            'id':'int',
-    })
-    SnmpUpdate = typing.TypedDict('SnmpUpdate', {
-            'location':'str',
-            'contact':'str',
-            'traps':'bool',
-            'v3':'bool',
-            'community':'str',
-            'v3_username':'str',
-            'v3_authtype':'str',
-            'v3_password':'str',
-            'v3_privproto':'typing.Optional[str]',
-            'v3_privpassphrase':'typing.Optional[str]',
-            'loglevel':'int',
-            'options':'str',
-            'zilstat':'bool',
-    })
-    SnmpUpdateReturns = typing.TypedDict('SnmpUpdateReturns', {
-            'location':'str',
-            'contact':'str',
-            'traps':'bool',
-            'v3':'bool',
-            'community':'str',
-            'v3_username':'str',
-            'v3_authtype':'str',
-            'v3_password':'str',
-            'v3_privproto':'typing.Optional[str]',
-            'v3_privpassphrase':'typing.Optional[str]',
-            'loglevel':'int',
-            'options':'str',
-            'zilstat':'bool',
-            'id':'int',
-    })
     @typing.overload
     def update(self, 
         snmp_update:'SnmpUpdate'={},
@@ -91,6 +44,16 @@ class Snmp(
             snmp_update_returns
         """
         ...
+    class V3Authtype(str,Enum):
+        _ = ''
+        MD5 = 'MD5'
+        SHA = 'SHA'
+        ...
+    class V3Privproto(str,Enum):
+        NONE = None
+        AES = 'AES'
+        DES = 'DES'
+        ...
     SnmpEntry = typing.TypedDict('SnmpEntry', {
             'location':'str',
             'contact':'str',
@@ -98,9 +61,9 @@ class Snmp(
             'v3':'bool',
             'community':'str',
             'v3_username':'str',
-            'v3_authtype':'str',
+            'v3_authtype':'V3Authtype',
             'v3_password':'str',
-            'v3_privproto':'typing.Optional[str]',
+            'v3_privproto':'typing.Optional[V3Privproto]',
             'v3_privpassphrase':'typing.Optional[str]',
             'loglevel':'int',
             'options':'str',
@@ -114,9 +77,9 @@ class Snmp(
             'v3':'bool',
             'community':'str',
             'v3_username':'str',
-            'v3_authtype':'str',
+            'v3_authtype':'V3Authtype',
             'v3_password':'str',
-            'v3_privproto':'typing.Optional[str]',
+            'v3_privproto':'typing.Optional[V3Privproto]',
             'v3_privpassphrase':'typing.Optional[str]',
             'loglevel':'int',
             'options':'str',
@@ -129,13 +92,12 @@ class Snmp(
             'v3':'bool',
             'community':'str',
             'v3_username':'str',
-            'v3_authtype':'str',
+            'v3_authtype':'V3Authtype',
             'v3_password':'str',
-            'v3_privproto':'typing.Optional[str]',
+            'v3_privproto':'typing.Optional[V3Privproto]',
             'v3_privpassphrase':'typing.Optional[str]',
             'loglevel':'int',
             'options':'str',
             'zilstat':'bool',
             'id':'int',
     })
-

@@ -3,6 +3,8 @@ from pytruenas.base import Namespace
 from pytruenas.mixins import ConfigMixin
 
 import typing
+from enum import Enum
+
 class Kubernetes(ConfigMixin, Namespace):
     def __init__(self, client) -> None:
         super().__init__(client, 'kubernetes')
@@ -34,8 +36,17 @@ class Kubernetes(ConfigMixin, Namespace):
     Options = typing.TypedDict('Options', {
             'wait_for_csi':'bool',
     })
-    Status = typing.TypedDict('Status', {
-            'status':'str',
+    class Status(str,Enum):
+        PENDING = 'PENDING'
+        RUNNING = 'RUNNING'
+        INITIALIZING = 'INITIALIZING'
+        STOPPING = 'STOPPING'
+        STOPPED = 'STOPPED'
+        UNCONFIGURED = 'UNCONFIGURED'
+        FAILED = 'FAILED'
+        ...
+    Status_ = typing.TypedDict('Status_', {
+            'status':'Status',
             'description':'str',
     })
     MigrationOptions = typing.TypedDict('MigrationOptions', {

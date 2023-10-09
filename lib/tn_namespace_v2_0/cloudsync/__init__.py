@@ -2,6 +2,8 @@
 from pytruenas.base import Namespace
 
 import typing
+from enum import Enum
+
 class Cloudsync(Namespace):
     def __init__(self, client) -> None:
         super().__init__(client, 'cloudsync')
@@ -17,6 +19,15 @@ class Cloudsync(Namespace):
             'time':'str',
             'bandwidth':'typing.Optional[int]',
     })
+    class Direction(str,Enum):
+        PUSH = 'PUSH'
+        PULL = 'PULL'
+        ...
+    class TransferMode(str,Enum):
+        SYNC = 'SYNC'
+        COPY = 'COPY'
+        MOVE = 'MOVE'
+        ...
     CloudSyncCreate = typing.TypedDict('CloudSyncCreate', {
             'description':'str',
             'path':'str',
@@ -32,8 +43,8 @@ class Cloudsync(Namespace):
             'transfers':'typing.Optional[int]',
             'args':'str',
             'enabled':'bool',
-            'direction':'str',
-            'transfer_mode':'str',
+            'direction':'Direction',
+            'transfer_mode':'TransferMode',
             'encryption':'bool',
             'filename_encryption':'bool',
             'encryption_password':'str',
@@ -78,9 +89,13 @@ class Cloudsync(Namespace):
             'limit':'int',
             'force_sql_filters':'bool',
     })
+    class TransferMode_(str,Enum):
+        SYNC = 'SYNC'
+        COPY = 'COPY'
+        ...
     CloudSyncRestore = typing.TypedDict('CloudSyncRestore', {
             'description':'str',
-            'transfer_mode':'str',
+            'transfer_mode':'TransferMode_',
             'path':'str',
     })
     CloudSyncSyncOptions = typing.TypedDict('CloudSyncSyncOptions', {
@@ -105,8 +120,8 @@ class Cloudsync(Namespace):
             'transfers':'typing.Optional[int]',
             'args':'str',
             'enabled':'bool',
-            'direction':'str',
-            'transfer_mode':'str',
+            'direction':'Direction',
+            'transfer_mode':'TransferMode',
             'encryption':'bool',
             'filename_encryption':'bool',
             'encryption_password':'str',
@@ -136,8 +151,8 @@ class Cloudsync(Namespace):
             'transfers':'typing.Optional[int]',
             'args':'str',
             'enabled':'bool',
-            'direction':'str',
-            'transfer_mode':'str',
+            'direction':'Direction',
+            'transfer_mode':'TransferMode',
             'encryption':'bool',
             'filename_encryption':'bool',
             'encryption_password':'str',

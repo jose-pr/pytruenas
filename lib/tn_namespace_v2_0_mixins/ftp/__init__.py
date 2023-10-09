@@ -3,10 +3,24 @@ from pytruenas.base import Namespace
 from pytruenas.mixins import ConfigMixin
 
 import typing
+from enum import Enum
+
 class Ftp(ConfigMixin, Namespace):
     def __init__(self, client) -> None:
         super().__init__(client, 'ftp')
 
+    class TlsPolicy(str,Enum):
+        On = 'on'
+        Off = 'off'
+        Data = 'data'
+        _data = '!data'
+        Auth = 'auth'
+        Ctrl = 'ctrl'
+        CtrlData = 'ctrl+data'
+        CtrlData = 'ctrl+!data'
+        AuthData = 'auth+data'
+        AuthData = 'auth+!data'
+        ...
     FtpEntry = typing.TypedDict('FtpEntry', {
             'port':'int',
             'clients':'int',
@@ -34,7 +48,7 @@ class Ftp(ConfigMixin, Namespace):
             'anonuserbw':'int',
             'anonuserdlbw':'int',
             'tls':'bool',
-            'tls_policy':'str',
+            'tls_policy':'TlsPolicy',
             'tls_opt_allow_client_renegotiations':'bool',
             'tls_opt_allow_dot_login':'bool',
             'tls_opt_allow_per_user':'bool',
@@ -77,7 +91,7 @@ class Ftp(ConfigMixin, Namespace):
             'anonuserbw':'int',
             'anonuserdlbw':'int',
             'tls':'bool',
-            'tls_policy':'str',
+            'tls_policy':'TlsPolicy',
             'tls_opt_allow_client_renegotiations':'bool',
             'tls_opt_allow_dot_login':'bool',
             'tls_opt_allow_per_user':'bool',
@@ -119,7 +133,7 @@ class Ftp(ConfigMixin, Namespace):
             'anonuserbw':'int',
             'anonuserdlbw':'int',
             'tls':'bool',
-            'tls_policy':'str',
+            'tls_policy':'TlsPolicy',
             'tls_opt_allow_client_renegotiations':'bool',
             'tls_opt_allow_dot_login':'bool',
             'tls_opt_allow_per_user':'bool',

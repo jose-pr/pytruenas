@@ -2,7 +2,7 @@
 from pytruenas import TrueNASClient
 from pytruenas.base import Namespace
 from pytruenas.mixins import TableExtMixin
-
+from enum import Enum
 import typing
 class IscsiInitiator(
     TableExtMixin,
@@ -30,42 +30,6 @@ class IscsiInitiator(
             iscsi_initiator_create_returns
         """
         ...
-    IscsiInitiatorCreate = typing.TypedDict('IscsiInitiatorCreate', {
-            'initiators':'list',
-            'comment':'str',
-    })
-    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    QueryOptions = typing.TypedDict('QueryOptions', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    IscsiInitiatorUpdate = typing.TypedDict('IscsiInitiatorUpdate', {
-            'initiators':'list',
-            'comment':'str',
-    })
     @typing.overload
     def delete(self, 
         id:'int',
@@ -83,42 +47,6 @@ class IscsiInitiator(
             Will return `true` if `id` is deleted successfully
         """
         ...
-    IscsiInitiatorCreate = typing.TypedDict('IscsiInitiatorCreate', {
-            'initiators':'list',
-            'comment':'str',
-    })
-    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    QueryOptions = typing.TypedDict('QueryOptions', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    IscsiInitiatorUpdate = typing.TypedDict('IscsiInitiatorUpdate', {
-            'initiators':'list',
-            'comment':'str',
-    })
     @typing.overload
     def get_instance(self, 
         id:'typing.Union[str, int, bool, dict[str], list]',
@@ -139,42 +67,6 @@ class IscsiInitiator(
         -------
         """
         ...
-    IscsiInitiatorCreate = typing.TypedDict('IscsiInitiatorCreate', {
-            'initiators':'list',
-            'comment':'str',
-    })
-    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    QueryOptions = typing.TypedDict('QueryOptions', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    IscsiInitiatorUpdate = typing.TypedDict('IscsiInitiatorUpdate', {
-            'initiators':'list',
-            'comment':'str',
-    })
     @typing.overload
     def query(self, 
         query_filters:'list[list]'=[],
@@ -195,42 +87,6 @@ class IscsiInitiator(
             
         """
         ...
-    IscsiInitiatorCreate = typing.TypedDict('IscsiInitiatorCreate', {
-            'initiators':'list',
-            'comment':'str',
-    })
-    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    QueryOptions = typing.TypedDict('QueryOptions', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    IscsiInitiatorUpdate = typing.TypedDict('IscsiInitiatorUpdate', {
-            'initiators':'list',
-            'comment':'str',
-    })
     @typing.overload
     def update(self, 
         id:'int',
@@ -288,4 +144,3 @@ class IscsiInitiator(
             'initiators':'list',
             'comment':'str',
     })
-

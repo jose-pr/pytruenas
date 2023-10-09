@@ -3,13 +3,27 @@ from pytruenas.base import Namespace
 from pytruenas.mixins import TableExtMixin
 
 import typing
+from enum import Enum
+
 class IscsiExtent(TableExtMixin, Namespace):
     def __init__(self, client) -> None:
         super().__init__(client, 'iscsi.extent')
 
+    class Type(str,Enum):
+        DISK = 'DISK'
+        FILE = 'FILE'
+        ...
+    class Rpm(str,Enum):
+        UNKNOWN = 'UNKNOWN'
+        SSD = 'SSD'
+        _5400 = '5400'
+        _7200 = '7200'
+        _10000 = '10000'
+        _15000 = '15000'
+        ...
     IscsiExtentCreate = typing.TypedDict('IscsiExtentCreate', {
             'name':'str',
-            'type':'str',
+            'type':'Type',
             'disk':'typing.Optional[str]',
             'serial':'typing.Optional[str]',
             'path':'typing.Optional[str]',
@@ -20,7 +34,7 @@ class IscsiExtent(TableExtMixin, Namespace):
             'comment':'str',
             'insecure_tpc':'bool',
             'xen':'bool',
-            'rpm':'str',
+            'rpm':'Rpm',
             'ro':'bool',
             'enabled':'bool',
     })
@@ -54,7 +68,7 @@ class IscsiExtent(TableExtMixin, Namespace):
     })
     IscsiExtentUpdate = typing.TypedDict('IscsiExtentUpdate', {
             'name':'str',
-            'type':'str',
+            'type':'Type',
             'disk':'typing.Optional[str]',
             'serial':'typing.Optional[str]',
             'path':'typing.Optional[str]',
@@ -65,7 +79,7 @@ class IscsiExtent(TableExtMixin, Namespace):
             'comment':'str',
             'insecure_tpc':'bool',
             'xen':'bool',
-            'rpm':'str',
+            'rpm':'Rpm',
             'ro':'bool',
             'enabled':'bool',
     })

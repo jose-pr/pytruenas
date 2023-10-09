@@ -2,7 +2,7 @@
 from pytruenas import TrueNASClient
 from pytruenas.base import Namespace
 from pytruenas.mixins import TableExtMixin
-
+from enum import Enum
 import typing
 class PoolSnapshottask(
     TableExtMixin,
@@ -37,85 +37,6 @@ class PoolSnapshottask(
             pool_snapshottask_create_returns
         """
         ...
-    Schedule = typing.TypedDict('Schedule', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-            'begin':'str',
-            'end':'str',
-    })
-    PeriodicSnapshotCreate = typing.TypedDict('PeriodicSnapshotCreate', {
-            'dataset':'str',
-            'recursive':'bool',
-            'exclude':'list[str]',
-            'lifetime_value':'int',
-            'lifetime_unit':'str',
-            'naming_schema':'str',
-            'schedule':'Schedule',
-            'allow_empty':'bool',
-            'enabled':'bool',
-    })
-    Options = typing.TypedDict('Options', {
-            'fixate_removal_date':'bool',
-    })
-    PeriodicSnapshotForeseenCount = typing.TypedDict('PeriodicSnapshotForeseenCount', {
-            'lifetime_value':'int',
-            'lifetime_unit':'str',
-            'schedule':'Schedule',
-    })
-    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    QueryOptions = typing.TypedDict('QueryOptions', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    PeriodicSnapshotUpdate = typing.TypedDict('PeriodicSnapshotUpdate', {
-            'dataset':'str',
-            'recursive':'bool',
-            'exclude':'list[str]',
-            'lifetime_value':'int',
-            'lifetime_unit':'str',
-            'naming_schema':'str',
-            'schedule':'Schedule',
-            'allow_empty':'bool',
-            'enabled':'bool',
-            'fixate_removal_date':'bool',
-    })
-    PeriodicSnapshotUpdateWillChangeRetention = typing.TypedDict('PeriodicSnapshotUpdateWillChangeRetention', {
-            'dataset':'str',
-            'recursive':'bool',
-            'exclude':'list[str]',
-            'lifetime_value':'int',
-            'lifetime_unit':'str',
-            'naming_schema':'str',
-            'schedule':'Schedule',
-            'allow_empty':'bool',
-            'enabled':'bool',
-    })
     @typing.overload
     def delete(self, 
         id:'int',
@@ -136,85 +57,6 @@ class PoolSnapshottask(
             Will return `true` if `id` is deleted successfully
         """
         ...
-    Schedule = typing.TypedDict('Schedule', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-            'begin':'str',
-            'end':'str',
-    })
-    PeriodicSnapshotCreate = typing.TypedDict('PeriodicSnapshotCreate', {
-            'dataset':'str',
-            'recursive':'bool',
-            'exclude':'list[str]',
-            'lifetime_value':'int',
-            'lifetime_unit':'str',
-            'naming_schema':'str',
-            'schedule':'Schedule',
-            'allow_empty':'bool',
-            'enabled':'bool',
-    })
-    Options = typing.TypedDict('Options', {
-            'fixate_removal_date':'bool',
-    })
-    PeriodicSnapshotForeseenCount = typing.TypedDict('PeriodicSnapshotForeseenCount', {
-            'lifetime_value':'int',
-            'lifetime_unit':'str',
-            'schedule':'Schedule',
-    })
-    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    QueryOptions = typing.TypedDict('QueryOptions', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    PeriodicSnapshotUpdate = typing.TypedDict('PeriodicSnapshotUpdate', {
-            'dataset':'str',
-            'recursive':'bool',
-            'exclude':'list[str]',
-            'lifetime_value':'int',
-            'lifetime_unit':'str',
-            'naming_schema':'str',
-            'schedule':'Schedule',
-            'allow_empty':'bool',
-            'enabled':'bool',
-            'fixate_removal_date':'bool',
-    })
-    PeriodicSnapshotUpdateWillChangeRetention = typing.TypedDict('PeriodicSnapshotUpdateWillChangeRetention', {
-            'dataset':'str',
-            'recursive':'bool',
-            'exclude':'list[str]',
-            'lifetime_value':'int',
-            'lifetime_unit':'str',
-            'naming_schema':'str',
-            'schedule':'Schedule',
-            'allow_empty':'bool',
-            'enabled':'bool',
-    })
     @typing.overload
     def delete_will_change_retention_for(self, 
         id:'int',
@@ -232,85 +74,6 @@ class PoolSnapshottask(
             snapshots
         """
         ...
-    Schedule = typing.TypedDict('Schedule', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-            'begin':'str',
-            'end':'str',
-    })
-    PeriodicSnapshotCreate = typing.TypedDict('PeriodicSnapshotCreate', {
-            'dataset':'str',
-            'recursive':'bool',
-            'exclude':'list[str]',
-            'lifetime_value':'int',
-            'lifetime_unit':'str',
-            'naming_schema':'str',
-            'schedule':'Schedule',
-            'allow_empty':'bool',
-            'enabled':'bool',
-    })
-    Options = typing.TypedDict('Options', {
-            'fixate_removal_date':'bool',
-    })
-    PeriodicSnapshotForeseenCount = typing.TypedDict('PeriodicSnapshotForeseenCount', {
-            'lifetime_value':'int',
-            'lifetime_unit':'str',
-            'schedule':'Schedule',
-    })
-    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    QueryOptions = typing.TypedDict('QueryOptions', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    PeriodicSnapshotUpdate = typing.TypedDict('PeriodicSnapshotUpdate', {
-            'dataset':'str',
-            'recursive':'bool',
-            'exclude':'list[str]',
-            'lifetime_value':'int',
-            'lifetime_unit':'str',
-            'naming_schema':'str',
-            'schedule':'Schedule',
-            'allow_empty':'bool',
-            'enabled':'bool',
-            'fixate_removal_date':'bool',
-    })
-    PeriodicSnapshotUpdateWillChangeRetention = typing.TypedDict('PeriodicSnapshotUpdateWillChangeRetention', {
-            'dataset':'str',
-            'recursive':'bool',
-            'exclude':'list[str]',
-            'lifetime_value':'int',
-            'lifetime_unit':'str',
-            'naming_schema':'str',
-            'schedule':'Schedule',
-            'allow_empty':'bool',
-            'enabled':'bool',
-    })
     @typing.overload
     def foreseen_count(self, 
         periodic_snapshot_foreseen_count:'PeriodicSnapshotForeseenCount'={},
@@ -329,85 +92,6 @@ class PoolSnapshottask(
             foreseen_count
         """
         ...
-    Schedule = typing.TypedDict('Schedule', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-            'begin':'str',
-            'end':'str',
-    })
-    PeriodicSnapshotCreate = typing.TypedDict('PeriodicSnapshotCreate', {
-            'dataset':'str',
-            'recursive':'bool',
-            'exclude':'list[str]',
-            'lifetime_value':'int',
-            'lifetime_unit':'str',
-            'naming_schema':'str',
-            'schedule':'Schedule',
-            'allow_empty':'bool',
-            'enabled':'bool',
-    })
-    Options = typing.TypedDict('Options', {
-            'fixate_removal_date':'bool',
-    })
-    PeriodicSnapshotForeseenCount = typing.TypedDict('PeriodicSnapshotForeseenCount', {
-            'lifetime_value':'int',
-            'lifetime_unit':'str',
-            'schedule':'Schedule',
-    })
-    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    QueryOptions = typing.TypedDict('QueryOptions', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    PeriodicSnapshotUpdate = typing.TypedDict('PeriodicSnapshotUpdate', {
-            'dataset':'str',
-            'recursive':'bool',
-            'exclude':'list[str]',
-            'lifetime_value':'int',
-            'lifetime_unit':'str',
-            'naming_schema':'str',
-            'schedule':'Schedule',
-            'allow_empty':'bool',
-            'enabled':'bool',
-            'fixate_removal_date':'bool',
-    })
-    PeriodicSnapshotUpdateWillChangeRetention = typing.TypedDict('PeriodicSnapshotUpdateWillChangeRetention', {
-            'dataset':'str',
-            'recursive':'bool',
-            'exclude':'list[str]',
-            'lifetime_value':'int',
-            'lifetime_unit':'str',
-            'naming_schema':'str',
-            'schedule':'Schedule',
-            'allow_empty':'bool',
-            'enabled':'bool',
-    })
     @typing.overload
     def get_instance(self, 
         id:'typing.Union[str, int, bool, dict[str], list]',
@@ -428,85 +112,6 @@ class PoolSnapshottask(
         -------
         """
         ...
-    Schedule = typing.TypedDict('Schedule', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-            'begin':'str',
-            'end':'str',
-    })
-    PeriodicSnapshotCreate = typing.TypedDict('PeriodicSnapshotCreate', {
-            'dataset':'str',
-            'recursive':'bool',
-            'exclude':'list[str]',
-            'lifetime_value':'int',
-            'lifetime_unit':'str',
-            'naming_schema':'str',
-            'schedule':'Schedule',
-            'allow_empty':'bool',
-            'enabled':'bool',
-    })
-    Options = typing.TypedDict('Options', {
-            'fixate_removal_date':'bool',
-    })
-    PeriodicSnapshotForeseenCount = typing.TypedDict('PeriodicSnapshotForeseenCount', {
-            'lifetime_value':'int',
-            'lifetime_unit':'str',
-            'schedule':'Schedule',
-    })
-    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    QueryOptions = typing.TypedDict('QueryOptions', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    PeriodicSnapshotUpdate = typing.TypedDict('PeriodicSnapshotUpdate', {
-            'dataset':'str',
-            'recursive':'bool',
-            'exclude':'list[str]',
-            'lifetime_value':'int',
-            'lifetime_unit':'str',
-            'naming_schema':'str',
-            'schedule':'Schedule',
-            'allow_empty':'bool',
-            'enabled':'bool',
-            'fixate_removal_date':'bool',
-    })
-    PeriodicSnapshotUpdateWillChangeRetention = typing.TypedDict('PeriodicSnapshotUpdateWillChangeRetention', {
-            'dataset':'str',
-            'recursive':'bool',
-            'exclude':'list[str]',
-            'lifetime_value':'int',
-            'lifetime_unit':'str',
-            'naming_schema':'str',
-            'schedule':'Schedule',
-            'allow_empty':'bool',
-            'enabled':'bool',
-    })
     @typing.overload
     def max_count(self, 
     /) -> 'int': 
@@ -521,85 +126,6 @@ class PoolSnapshottask(
             max_count
         """
         ...
-    Schedule = typing.TypedDict('Schedule', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-            'begin':'str',
-            'end':'str',
-    })
-    PeriodicSnapshotCreate = typing.TypedDict('PeriodicSnapshotCreate', {
-            'dataset':'str',
-            'recursive':'bool',
-            'exclude':'list[str]',
-            'lifetime_value':'int',
-            'lifetime_unit':'str',
-            'naming_schema':'str',
-            'schedule':'Schedule',
-            'allow_empty':'bool',
-            'enabled':'bool',
-    })
-    Options = typing.TypedDict('Options', {
-            'fixate_removal_date':'bool',
-    })
-    PeriodicSnapshotForeseenCount = typing.TypedDict('PeriodicSnapshotForeseenCount', {
-            'lifetime_value':'int',
-            'lifetime_unit':'str',
-            'schedule':'Schedule',
-    })
-    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    QueryOptions = typing.TypedDict('QueryOptions', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    PeriodicSnapshotUpdate = typing.TypedDict('PeriodicSnapshotUpdate', {
-            'dataset':'str',
-            'recursive':'bool',
-            'exclude':'list[str]',
-            'lifetime_value':'int',
-            'lifetime_unit':'str',
-            'naming_schema':'str',
-            'schedule':'Schedule',
-            'allow_empty':'bool',
-            'enabled':'bool',
-            'fixate_removal_date':'bool',
-    })
-    PeriodicSnapshotUpdateWillChangeRetention = typing.TypedDict('PeriodicSnapshotUpdateWillChangeRetention', {
-            'dataset':'str',
-            'recursive':'bool',
-            'exclude':'list[str]',
-            'lifetime_value':'int',
-            'lifetime_unit':'str',
-            'naming_schema':'str',
-            'schedule':'Schedule',
-            'allow_empty':'bool',
-            'enabled':'bool',
-    })
     @typing.overload
     def max_total_count(self, 
     /) -> 'int': 
@@ -614,85 +140,6 @@ class PoolSnapshottask(
             max_total_count
         """
         ...
-    Schedule = typing.TypedDict('Schedule', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-            'begin':'str',
-            'end':'str',
-    })
-    PeriodicSnapshotCreate = typing.TypedDict('PeriodicSnapshotCreate', {
-            'dataset':'str',
-            'recursive':'bool',
-            'exclude':'list[str]',
-            'lifetime_value':'int',
-            'lifetime_unit':'str',
-            'naming_schema':'str',
-            'schedule':'Schedule',
-            'allow_empty':'bool',
-            'enabled':'bool',
-    })
-    Options = typing.TypedDict('Options', {
-            'fixate_removal_date':'bool',
-    })
-    PeriodicSnapshotForeseenCount = typing.TypedDict('PeriodicSnapshotForeseenCount', {
-            'lifetime_value':'int',
-            'lifetime_unit':'str',
-            'schedule':'Schedule',
-    })
-    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    QueryOptions = typing.TypedDict('QueryOptions', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    PeriodicSnapshotUpdate = typing.TypedDict('PeriodicSnapshotUpdate', {
-            'dataset':'str',
-            'recursive':'bool',
-            'exclude':'list[str]',
-            'lifetime_value':'int',
-            'lifetime_unit':'str',
-            'naming_schema':'str',
-            'schedule':'Schedule',
-            'allow_empty':'bool',
-            'enabled':'bool',
-            'fixate_removal_date':'bool',
-    })
-    PeriodicSnapshotUpdateWillChangeRetention = typing.TypedDict('PeriodicSnapshotUpdateWillChangeRetention', {
-            'dataset':'str',
-            'recursive':'bool',
-            'exclude':'list[str]',
-            'lifetime_value':'int',
-            'lifetime_unit':'str',
-            'naming_schema':'str',
-            'schedule':'Schedule',
-            'allow_empty':'bool',
-            'enabled':'bool',
-    })
     @typing.overload
     def query(self, 
         query_filters:'list[list]'=[],
@@ -713,85 +160,6 @@ class PoolSnapshottask(
             
         """
         ...
-    Schedule = typing.TypedDict('Schedule', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-            'begin':'str',
-            'end':'str',
-    })
-    PeriodicSnapshotCreate = typing.TypedDict('PeriodicSnapshotCreate', {
-            'dataset':'str',
-            'recursive':'bool',
-            'exclude':'list[str]',
-            'lifetime_value':'int',
-            'lifetime_unit':'str',
-            'naming_schema':'str',
-            'schedule':'Schedule',
-            'allow_empty':'bool',
-            'enabled':'bool',
-    })
-    Options = typing.TypedDict('Options', {
-            'fixate_removal_date':'bool',
-    })
-    PeriodicSnapshotForeseenCount = typing.TypedDict('PeriodicSnapshotForeseenCount', {
-            'lifetime_value':'int',
-            'lifetime_unit':'str',
-            'schedule':'Schedule',
-    })
-    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    QueryOptions = typing.TypedDict('QueryOptions', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    PeriodicSnapshotUpdate = typing.TypedDict('PeriodicSnapshotUpdate', {
-            'dataset':'str',
-            'recursive':'bool',
-            'exclude':'list[str]',
-            'lifetime_value':'int',
-            'lifetime_unit':'str',
-            'naming_schema':'str',
-            'schedule':'Schedule',
-            'allow_empty':'bool',
-            'enabled':'bool',
-            'fixate_removal_date':'bool',
-    })
-    PeriodicSnapshotUpdateWillChangeRetention = typing.TypedDict('PeriodicSnapshotUpdateWillChangeRetention', {
-            'dataset':'str',
-            'recursive':'bool',
-            'exclude':'list[str]',
-            'lifetime_value':'int',
-            'lifetime_unit':'str',
-            'naming_schema':'str',
-            'schedule':'Schedule',
-            'allow_empty':'bool',
-            'enabled':'bool',
-    })
     @typing.overload
     def run(self, 
         id:'int',
@@ -807,85 +175,6 @@ class PoolSnapshottask(
         -------
         """
         ...
-    Schedule = typing.TypedDict('Schedule', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-            'begin':'str',
-            'end':'str',
-    })
-    PeriodicSnapshotCreate = typing.TypedDict('PeriodicSnapshotCreate', {
-            'dataset':'str',
-            'recursive':'bool',
-            'exclude':'list[str]',
-            'lifetime_value':'int',
-            'lifetime_unit':'str',
-            'naming_schema':'str',
-            'schedule':'Schedule',
-            'allow_empty':'bool',
-            'enabled':'bool',
-    })
-    Options = typing.TypedDict('Options', {
-            'fixate_removal_date':'bool',
-    })
-    PeriodicSnapshotForeseenCount = typing.TypedDict('PeriodicSnapshotForeseenCount', {
-            'lifetime_value':'int',
-            'lifetime_unit':'str',
-            'schedule':'Schedule',
-    })
-    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    QueryOptions = typing.TypedDict('QueryOptions', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    PeriodicSnapshotUpdate = typing.TypedDict('PeriodicSnapshotUpdate', {
-            'dataset':'str',
-            'recursive':'bool',
-            'exclude':'list[str]',
-            'lifetime_value':'int',
-            'lifetime_unit':'str',
-            'naming_schema':'str',
-            'schedule':'Schedule',
-            'allow_empty':'bool',
-            'enabled':'bool',
-            'fixate_removal_date':'bool',
-    })
-    PeriodicSnapshotUpdateWillChangeRetention = typing.TypedDict('PeriodicSnapshotUpdateWillChangeRetention', {
-            'dataset':'str',
-            'recursive':'bool',
-            'exclude':'list[str]',
-            'lifetime_value':'int',
-            'lifetime_unit':'str',
-            'naming_schema':'str',
-            'schedule':'Schedule',
-            'allow_empty':'bool',
-            'enabled':'bool',
-    })
     @typing.overload
     def update(self, 
         id:'int',
@@ -908,85 +197,6 @@ class PoolSnapshottask(
             pool_snapshottask_update_returns
         """
         ...
-    Schedule = typing.TypedDict('Schedule', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-            'begin':'str',
-            'end':'str',
-    })
-    PeriodicSnapshotCreate = typing.TypedDict('PeriodicSnapshotCreate', {
-            'dataset':'str',
-            'recursive':'bool',
-            'exclude':'list[str]',
-            'lifetime_value':'int',
-            'lifetime_unit':'str',
-            'naming_schema':'str',
-            'schedule':'Schedule',
-            'allow_empty':'bool',
-            'enabled':'bool',
-    })
-    Options = typing.TypedDict('Options', {
-            'fixate_removal_date':'bool',
-    })
-    PeriodicSnapshotForeseenCount = typing.TypedDict('PeriodicSnapshotForeseenCount', {
-            'lifetime_value':'int',
-            'lifetime_unit':'str',
-            'schedule':'Schedule',
-    })
-    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    QueryOptions = typing.TypedDict('QueryOptions', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    PeriodicSnapshotUpdate = typing.TypedDict('PeriodicSnapshotUpdate', {
-            'dataset':'str',
-            'recursive':'bool',
-            'exclude':'list[str]',
-            'lifetime_value':'int',
-            'lifetime_unit':'str',
-            'naming_schema':'str',
-            'schedule':'Schedule',
-            'allow_empty':'bool',
-            'enabled':'bool',
-            'fixate_removal_date':'bool',
-    })
-    PeriodicSnapshotUpdateWillChangeRetention = typing.TypedDict('PeriodicSnapshotUpdateWillChangeRetention', {
-            'dataset':'str',
-            'recursive':'bool',
-            'exclude':'list[str]',
-            'lifetime_value':'int',
-            'lifetime_unit':'str',
-            'naming_schema':'str',
-            'schedule':'Schedule',
-            'allow_empty':'bool',
-            'enabled':'bool',
-    })
     @typing.overload
     def update_will_change_retention_for(self, 
         id:'int',
@@ -1008,6 +218,13 @@ class PoolSnapshottask(
             snapshots
         """
         ...
+    class LifetimeUnit(str,Enum):
+        HOUR = 'HOUR'
+        DAY = 'DAY'
+        WEEK = 'WEEK'
+        MONTH = 'MONTH'
+        YEAR = 'YEAR'
+        ...
     Schedule = typing.TypedDict('Schedule', {
             'minute':'str',
             'hour':'str',
@@ -1022,7 +239,7 @@ class PoolSnapshottask(
             'recursive':'bool',
             'exclude':'list[str]',
             'lifetime_value':'int',
-            'lifetime_unit':'str',
+            'lifetime_unit':'LifetimeUnit',
             'naming_schema':'str',
             'schedule':'Schedule',
             'allow_empty':'bool',
@@ -1033,7 +250,7 @@ class PoolSnapshottask(
     })
     PeriodicSnapshotForeseenCount = typing.TypedDict('PeriodicSnapshotForeseenCount', {
             'lifetime_value':'int',
-            'lifetime_unit':'str',
+            'lifetime_unit':'LifetimeUnit',
             'schedule':'Schedule',
     })
     QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
@@ -1069,7 +286,7 @@ class PoolSnapshottask(
             'recursive':'bool',
             'exclude':'list[str]',
             'lifetime_value':'int',
-            'lifetime_unit':'str',
+            'lifetime_unit':'LifetimeUnit',
             'naming_schema':'str',
             'schedule':'Schedule',
             'allow_empty':'bool',
@@ -1081,10 +298,9 @@ class PoolSnapshottask(
             'recursive':'bool',
             'exclude':'list[str]',
             'lifetime_value':'int',
-            'lifetime_unit':'str',
+            'lifetime_unit':'LifetimeUnit',
             'naming_schema':'str',
             'schedule':'Schedule',
             'allow_empty':'bool',
             'enabled':'bool',
     })
-

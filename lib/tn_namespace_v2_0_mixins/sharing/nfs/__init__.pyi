@@ -2,7 +2,7 @@
 from pytruenas import TrueNASClient
 from pytruenas.base import Namespace
 from pytruenas.mixins import TableExtMixin
-
+from enum import Enum
 import typing
 class SharingNfs(
     TableExtMixin,
@@ -37,142 +37,6 @@ class SharingNfs(
             sharing_nfs_create_returns
         """
         ...
-    SharingnfsCreate = typing.TypedDict('SharingnfsCreate', {
-            'path':'str',
-            'aliases':'list[str]',
-            'comment':'str',
-            'networks':'list[str]',
-            'hosts':'list[str]',
-            'ro':'bool',
-            'maproot_user':'typing.Optional[str]',
-            'maproot_group':'typing.Optional[str]',
-            'mapall_user':'typing.Optional[str]',
-            'mapall_group':'typing.Optional[str]',
-            'security':'list[str]',
-            'enabled':'bool',
-    })
-    SharingNfsCreateReturns = typing.TypedDict('SharingNfsCreateReturns', {
-            'path':'str',
-            'aliases':'list[str]',
-            'comment':'str',
-            'networks':'list[str]',
-            'hosts':'list[str]',
-            'ro':'bool',
-            'maproot_user':'typing.Optional[str]',
-            'maproot_group':'typing.Optional[str]',
-            'mapall_user':'typing.Optional[str]',
-            'mapall_group':'typing.Optional[str]',
-            'security':'list[str]',
-            'enabled':'bool',
-            'id':'int',
-            'locked':'bool',
-    })
-    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    QueryOptions = typing.TypedDict('QueryOptions', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    SharingNfsEntry = typing.TypedDict('SharingNfsEntry', {
-            'path':'str',
-            'aliases':'list[str]',
-            'comment':'str',
-            'networks':'list[str]',
-            'hosts':'list[str]',
-            'ro':'bool',
-            'maproot_user':'typing.Optional[str]',
-            'maproot_group':'typing.Optional[str]',
-            'mapall_user':'typing.Optional[str]',
-            'mapall_group':'typing.Optional[str]',
-            'security':'list[str]',
-            'enabled':'bool',
-            'id':'int',
-            'locked':'bool',
-    })
-    SharingNfsEntry_ = typing.TypedDict('SharingNfsEntry_', {
-            'path':'str',
-            'aliases':'list[str]',
-            'comment':'str',
-            'networks':'list[str]',
-            'hosts':'list[str]',
-            'ro':'bool',
-            'maproot_user':'typing.Optional[str]',
-            'maproot_group':'typing.Optional[str]',
-            'mapall_user':'typing.Optional[str]',
-            'mapall_group':'typing.Optional[str]',
-            'security':'list[str]',
-            'enabled':'bool',
-            'id':'int',
-            'locked':'bool',
-    })
-    SharingNfsEntry__ = typing.TypedDict('SharingNfsEntry__', {
-            'path':'str',
-            'aliases':'list[str]',
-            'comment':'str',
-            'networks':'list[str]',
-            'hosts':'list[str]',
-            'ro':'bool',
-            'maproot_user':'typing.Optional[str]',
-            'maproot_group':'typing.Optional[str]',
-            'mapall_user':'typing.Optional[str]',
-            'mapall_group':'typing.Optional[str]',
-            'security':'list[str]',
-            'enabled':'bool',
-            'id':'int',
-            'locked':'bool',
-    })
-    SharingnfsUpdate = typing.TypedDict('SharingnfsUpdate', {
-            'path':'str',
-            'aliases':'list[str]',
-            'comment':'str',
-            'networks':'list[str]',
-            'hosts':'list[str]',
-            'ro':'bool',
-            'maproot_user':'typing.Optional[str]',
-            'maproot_group':'typing.Optional[str]',
-            'mapall_user':'typing.Optional[str]',
-            'mapall_group':'typing.Optional[str]',
-            'security':'list[str]',
-            'enabled':'bool',
-    })
-    SharingNfsUpdateReturns = typing.TypedDict('SharingNfsUpdateReturns', {
-            'path':'str',
-            'aliases':'list[str]',
-            'comment':'str',
-            'networks':'list[str]',
-            'hosts':'list[str]',
-            'ro':'bool',
-            'maproot_user':'typing.Optional[str]',
-            'maproot_group':'typing.Optional[str]',
-            'mapall_user':'typing.Optional[str]',
-            'mapall_group':'typing.Optional[str]',
-            'security':'list[str]',
-            'enabled':'bool',
-            'id':'int',
-            'locked':'bool',
-    })
     @typing.overload
     def delete(self, 
         id:'int',
@@ -188,142 +52,6 @@ class SharingNfs(
         -------
         """
         ...
-    SharingnfsCreate = typing.TypedDict('SharingnfsCreate', {
-            'path':'str',
-            'aliases':'list[str]',
-            'comment':'str',
-            'networks':'list[str]',
-            'hosts':'list[str]',
-            'ro':'bool',
-            'maproot_user':'typing.Optional[str]',
-            'maproot_group':'typing.Optional[str]',
-            'mapall_user':'typing.Optional[str]',
-            'mapall_group':'typing.Optional[str]',
-            'security':'list[str]',
-            'enabled':'bool',
-    })
-    SharingNfsCreateReturns = typing.TypedDict('SharingNfsCreateReturns', {
-            'path':'str',
-            'aliases':'list[str]',
-            'comment':'str',
-            'networks':'list[str]',
-            'hosts':'list[str]',
-            'ro':'bool',
-            'maproot_user':'typing.Optional[str]',
-            'maproot_group':'typing.Optional[str]',
-            'mapall_user':'typing.Optional[str]',
-            'mapall_group':'typing.Optional[str]',
-            'security':'list[str]',
-            'enabled':'bool',
-            'id':'int',
-            'locked':'bool',
-    })
-    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    QueryOptions = typing.TypedDict('QueryOptions', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    SharingNfsEntry = typing.TypedDict('SharingNfsEntry', {
-            'path':'str',
-            'aliases':'list[str]',
-            'comment':'str',
-            'networks':'list[str]',
-            'hosts':'list[str]',
-            'ro':'bool',
-            'maproot_user':'typing.Optional[str]',
-            'maproot_group':'typing.Optional[str]',
-            'mapall_user':'typing.Optional[str]',
-            'mapall_group':'typing.Optional[str]',
-            'security':'list[str]',
-            'enabled':'bool',
-            'id':'int',
-            'locked':'bool',
-    })
-    SharingNfsEntry_ = typing.TypedDict('SharingNfsEntry_', {
-            'path':'str',
-            'aliases':'list[str]',
-            'comment':'str',
-            'networks':'list[str]',
-            'hosts':'list[str]',
-            'ro':'bool',
-            'maproot_user':'typing.Optional[str]',
-            'maproot_group':'typing.Optional[str]',
-            'mapall_user':'typing.Optional[str]',
-            'mapall_group':'typing.Optional[str]',
-            'security':'list[str]',
-            'enabled':'bool',
-            'id':'int',
-            'locked':'bool',
-    })
-    SharingNfsEntry__ = typing.TypedDict('SharingNfsEntry__', {
-            'path':'str',
-            'aliases':'list[str]',
-            'comment':'str',
-            'networks':'list[str]',
-            'hosts':'list[str]',
-            'ro':'bool',
-            'maproot_user':'typing.Optional[str]',
-            'maproot_group':'typing.Optional[str]',
-            'mapall_user':'typing.Optional[str]',
-            'mapall_group':'typing.Optional[str]',
-            'security':'list[str]',
-            'enabled':'bool',
-            'id':'int',
-            'locked':'bool',
-    })
-    SharingnfsUpdate = typing.TypedDict('SharingnfsUpdate', {
-            'path':'str',
-            'aliases':'list[str]',
-            'comment':'str',
-            'networks':'list[str]',
-            'hosts':'list[str]',
-            'ro':'bool',
-            'maproot_user':'typing.Optional[str]',
-            'maproot_group':'typing.Optional[str]',
-            'mapall_user':'typing.Optional[str]',
-            'mapall_group':'typing.Optional[str]',
-            'security':'list[str]',
-            'enabled':'bool',
-    })
-    SharingNfsUpdateReturns = typing.TypedDict('SharingNfsUpdateReturns', {
-            'path':'str',
-            'aliases':'list[str]',
-            'comment':'str',
-            'networks':'list[str]',
-            'hosts':'list[str]',
-            'ro':'bool',
-            'maproot_user':'typing.Optional[str]',
-            'maproot_group':'typing.Optional[str]',
-            'mapall_user':'typing.Optional[str]',
-            'mapall_group':'typing.Optional[str]',
-            'security':'list[str]',
-            'enabled':'bool',
-            'id':'int',
-            'locked':'bool',
-    })
     @typing.overload
     def get_instance(self, 
         id:'typing.Union[str, int, bool, dict[str], list]',
@@ -344,147 +72,11 @@ class SharingNfs(
         -------
         """
         ...
-    SharingnfsCreate = typing.TypedDict('SharingnfsCreate', {
-            'path':'str',
-            'aliases':'list[str]',
-            'comment':'str',
-            'networks':'list[str]',
-            'hosts':'list[str]',
-            'ro':'bool',
-            'maproot_user':'typing.Optional[str]',
-            'maproot_group':'typing.Optional[str]',
-            'mapall_user':'typing.Optional[str]',
-            'mapall_group':'typing.Optional[str]',
-            'security':'list[str]',
-            'enabled':'bool',
-    })
-    SharingNfsCreateReturns = typing.TypedDict('SharingNfsCreateReturns', {
-            'path':'str',
-            'aliases':'list[str]',
-            'comment':'str',
-            'networks':'list[str]',
-            'hosts':'list[str]',
-            'ro':'bool',
-            'maproot_user':'typing.Optional[str]',
-            'maproot_group':'typing.Optional[str]',
-            'mapall_user':'typing.Optional[str]',
-            'mapall_group':'typing.Optional[str]',
-            'security':'list[str]',
-            'enabled':'bool',
-            'id':'int',
-            'locked':'bool',
-    })
-    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    QueryOptions = typing.TypedDict('QueryOptions', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    SharingNfsEntry = typing.TypedDict('SharingNfsEntry', {
-            'path':'str',
-            'aliases':'list[str]',
-            'comment':'str',
-            'networks':'list[str]',
-            'hosts':'list[str]',
-            'ro':'bool',
-            'maproot_user':'typing.Optional[str]',
-            'maproot_group':'typing.Optional[str]',
-            'mapall_user':'typing.Optional[str]',
-            'mapall_group':'typing.Optional[str]',
-            'security':'list[str]',
-            'enabled':'bool',
-            'id':'int',
-            'locked':'bool',
-    })
-    SharingNfsEntry_ = typing.TypedDict('SharingNfsEntry_', {
-            'path':'str',
-            'aliases':'list[str]',
-            'comment':'str',
-            'networks':'list[str]',
-            'hosts':'list[str]',
-            'ro':'bool',
-            'maproot_user':'typing.Optional[str]',
-            'maproot_group':'typing.Optional[str]',
-            'mapall_user':'typing.Optional[str]',
-            'mapall_group':'typing.Optional[str]',
-            'security':'list[str]',
-            'enabled':'bool',
-            'id':'int',
-            'locked':'bool',
-    })
-    SharingNfsEntry__ = typing.TypedDict('SharingNfsEntry__', {
-            'path':'str',
-            'aliases':'list[str]',
-            'comment':'str',
-            'networks':'list[str]',
-            'hosts':'list[str]',
-            'ro':'bool',
-            'maproot_user':'typing.Optional[str]',
-            'maproot_group':'typing.Optional[str]',
-            'mapall_user':'typing.Optional[str]',
-            'mapall_group':'typing.Optional[str]',
-            'security':'list[str]',
-            'enabled':'bool',
-            'id':'int',
-            'locked':'bool',
-    })
-    SharingnfsUpdate = typing.TypedDict('SharingnfsUpdate', {
-            'path':'str',
-            'aliases':'list[str]',
-            'comment':'str',
-            'networks':'list[str]',
-            'hosts':'list[str]',
-            'ro':'bool',
-            'maproot_user':'typing.Optional[str]',
-            'maproot_group':'typing.Optional[str]',
-            'mapall_user':'typing.Optional[str]',
-            'mapall_group':'typing.Optional[str]',
-            'security':'list[str]',
-            'enabled':'bool',
-    })
-    SharingNfsUpdateReturns = typing.TypedDict('SharingNfsUpdateReturns', {
-            'path':'str',
-            'aliases':'list[str]',
-            'comment':'str',
-            'networks':'list[str]',
-            'hosts':'list[str]',
-            'ro':'bool',
-            'maproot_user':'typing.Optional[str]',
-            'maproot_group':'typing.Optional[str]',
-            'mapall_user':'typing.Optional[str]',
-            'mapall_group':'typing.Optional[str]',
-            'security':'list[str]',
-            'enabled':'bool',
-            'id':'int',
-            'locked':'bool',
-    })
     @typing.overload
     def query(self, 
         query_filters:'list[list]'=[],
         query_options:'QueryOptions'={},
-    /) -> 'typing.Union[list[SharingNfsEntry], ForwardRef(SharingNfsEntry_), int, ForwardRef(SharingNfsEntry__)]': 
+    /) -> 'typing.Union[list[SharingNfsEntry], SharingNfsEntry_, int, SharingNfsEntry__]': 
         """
         
 
@@ -496,146 +88,10 @@ class SharingNfs(
             query-options
         Returns
         -------
-        typing.Union[list[SharingNfsEntry], ForwardRef(SharingNfsEntry_), int, ForwardRef(SharingNfsEntry__)]:
+        typing.Union[list[SharingNfsEntry], SharingNfsEntry_, int, SharingNfsEntry__]:
             
         """
         ...
-    SharingnfsCreate = typing.TypedDict('SharingnfsCreate', {
-            'path':'str',
-            'aliases':'list[str]',
-            'comment':'str',
-            'networks':'list[str]',
-            'hosts':'list[str]',
-            'ro':'bool',
-            'maproot_user':'typing.Optional[str]',
-            'maproot_group':'typing.Optional[str]',
-            'mapall_user':'typing.Optional[str]',
-            'mapall_group':'typing.Optional[str]',
-            'security':'list[str]',
-            'enabled':'bool',
-    })
-    SharingNfsCreateReturns = typing.TypedDict('SharingNfsCreateReturns', {
-            'path':'str',
-            'aliases':'list[str]',
-            'comment':'str',
-            'networks':'list[str]',
-            'hosts':'list[str]',
-            'ro':'bool',
-            'maproot_user':'typing.Optional[str]',
-            'maproot_group':'typing.Optional[str]',
-            'mapall_user':'typing.Optional[str]',
-            'mapall_group':'typing.Optional[str]',
-            'security':'list[str]',
-            'enabled':'bool',
-            'id':'int',
-            'locked':'bool',
-    })
-    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    QueryOptions = typing.TypedDict('QueryOptions', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    SharingNfsEntry = typing.TypedDict('SharingNfsEntry', {
-            'path':'str',
-            'aliases':'list[str]',
-            'comment':'str',
-            'networks':'list[str]',
-            'hosts':'list[str]',
-            'ro':'bool',
-            'maproot_user':'typing.Optional[str]',
-            'maproot_group':'typing.Optional[str]',
-            'mapall_user':'typing.Optional[str]',
-            'mapall_group':'typing.Optional[str]',
-            'security':'list[str]',
-            'enabled':'bool',
-            'id':'int',
-            'locked':'bool',
-    })
-    SharingNfsEntry_ = typing.TypedDict('SharingNfsEntry_', {
-            'path':'str',
-            'aliases':'list[str]',
-            'comment':'str',
-            'networks':'list[str]',
-            'hosts':'list[str]',
-            'ro':'bool',
-            'maproot_user':'typing.Optional[str]',
-            'maproot_group':'typing.Optional[str]',
-            'mapall_user':'typing.Optional[str]',
-            'mapall_group':'typing.Optional[str]',
-            'security':'list[str]',
-            'enabled':'bool',
-            'id':'int',
-            'locked':'bool',
-    })
-    SharingNfsEntry__ = typing.TypedDict('SharingNfsEntry__', {
-            'path':'str',
-            'aliases':'list[str]',
-            'comment':'str',
-            'networks':'list[str]',
-            'hosts':'list[str]',
-            'ro':'bool',
-            'maproot_user':'typing.Optional[str]',
-            'maproot_group':'typing.Optional[str]',
-            'mapall_user':'typing.Optional[str]',
-            'mapall_group':'typing.Optional[str]',
-            'security':'list[str]',
-            'enabled':'bool',
-            'id':'int',
-            'locked':'bool',
-    })
-    SharingnfsUpdate = typing.TypedDict('SharingnfsUpdate', {
-            'path':'str',
-            'aliases':'list[str]',
-            'comment':'str',
-            'networks':'list[str]',
-            'hosts':'list[str]',
-            'ro':'bool',
-            'maproot_user':'typing.Optional[str]',
-            'maproot_group':'typing.Optional[str]',
-            'mapall_user':'typing.Optional[str]',
-            'mapall_group':'typing.Optional[str]',
-            'security':'list[str]',
-            'enabled':'bool',
-    })
-    SharingNfsUpdateReturns = typing.TypedDict('SharingNfsUpdateReturns', {
-            'path':'str',
-            'aliases':'list[str]',
-            'comment':'str',
-            'networks':'list[str]',
-            'hosts':'list[str]',
-            'ro':'bool',
-            'maproot_user':'typing.Optional[str]',
-            'maproot_group':'typing.Optional[str]',
-            'mapall_user':'typing.Optional[str]',
-            'mapall_group':'typing.Optional[str]',
-            'security':'list[str]',
-            'enabled':'bool',
-            'id':'int',
-            'locked':'bool',
-    })
     @typing.overload
     def update(self, 
         id:'int',
@@ -657,6 +113,12 @@ class SharingNfs(
             sharing_nfs_update_returns
         """
         ...
+    class Provider(str,Enum):
+        SYS = 'SYS'
+        KRB5 = 'KRB5'
+        KRB5I = 'KRB5I'
+        KRB5P = 'KRB5P'
+        ...
     SharingnfsCreate = typing.TypedDict('SharingnfsCreate', {
             'path':'str',
             'aliases':'list[str]',
@@ -668,7 +130,7 @@ class SharingNfs(
             'maproot_group':'typing.Optional[str]',
             'mapall_user':'typing.Optional[str]',
             'mapall_group':'typing.Optional[str]',
-            'security':'list[str]',
+            'security':'list[Provider]',
             'enabled':'bool',
     })
     SharingNfsCreateReturns = typing.TypedDict('SharingNfsCreateReturns', {
@@ -682,7 +144,7 @@ class SharingNfs(
             'maproot_group':'typing.Optional[str]',
             'mapall_user':'typing.Optional[str]',
             'mapall_group':'typing.Optional[str]',
-            'security':'list[str]',
+            'security':'list[Provider]',
             'enabled':'bool',
             'id':'int',
             'locked':'bool',
@@ -726,7 +188,7 @@ class SharingNfs(
             'maproot_group':'typing.Optional[str]',
             'mapall_user':'typing.Optional[str]',
             'mapall_group':'typing.Optional[str]',
-            'security':'list[str]',
+            'security':'list[Provider]',
             'enabled':'bool',
             'id':'int',
             'locked':'bool',
@@ -742,7 +204,7 @@ class SharingNfs(
             'maproot_group':'typing.Optional[str]',
             'mapall_user':'typing.Optional[str]',
             'mapall_group':'typing.Optional[str]',
-            'security':'list[str]',
+            'security':'list[Provider]',
             'enabled':'bool',
             'id':'int',
             'locked':'bool',
@@ -758,7 +220,7 @@ class SharingNfs(
             'maproot_group':'typing.Optional[str]',
             'mapall_user':'typing.Optional[str]',
             'mapall_group':'typing.Optional[str]',
-            'security':'list[str]',
+            'security':'list[Provider]',
             'enabled':'bool',
             'id':'int',
             'locked':'bool',
@@ -774,7 +236,7 @@ class SharingNfs(
             'maproot_group':'typing.Optional[str]',
             'mapall_user':'typing.Optional[str]',
             'mapall_group':'typing.Optional[str]',
-            'security':'list[str]',
+            'security':'list[Provider]',
             'enabled':'bool',
     })
     SharingNfsUpdateReturns = typing.TypedDict('SharingNfsUpdateReturns', {
@@ -788,9 +250,8 @@ class SharingNfs(
             'maproot_group':'typing.Optional[str]',
             'mapall_user':'typing.Optional[str]',
             'mapall_group':'typing.Optional[str]',
-            'security':'list[str]',
+            'security':'list[Provider]',
             'enabled':'bool',
             'id':'int',
             'locked':'bool',
     })
-

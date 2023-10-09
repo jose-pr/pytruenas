@@ -2,17 +2,38 @@
 from pytruenas.base import Namespace
 
 import typing
+from enum import Enum
+
 class Vm(Namespace):
     def __init__(self, client) -> None:
         super().__init__(client, 'vm')
 
+    class UEFI(str,Enum):
+        UEFI = 'UEFI'
+        ...
+    class UEFICSM(str,Enum):
+        LegacyBIOS = 'Legacy BIOS'
+        ...
     BootloaderOptions = typing.TypedDict('BootloaderOptions', {
-            'UEFI':'str',
-            'UEFI_CSM':'str',
+            'UEFI':'UEFI',
+            'UEFI_CSM':'UEFICSM',
     })
+    class CpuMode(str,Enum):
+        CUSTOM = 'CUSTOM'
+        HOSTMODEL = 'HOST-MODEL'
+        HOSTPASSTHROUGH = 'HOST-PASSTHROUGH'
+        ...
+    class Bootloader(str,Enum):
+        UEFI = 'UEFI'
+        UEFICSM = 'UEFI_CSM'
+        ...
+    class Time(str,Enum):
+        LOCAL = 'LOCAL'
+        UTC = 'UTC'
+        ...
     VmCreate = typing.TypedDict('VmCreate', {
             'command_line_args':'str',
-            'cpu_mode':'str',
+            'cpu_mode':'CpuMode',
             'cpu_model':'typing.Optional[str]',
             'name':'str',
             'description':'str',
@@ -27,12 +48,12 @@ class Vm(Namespace):
             'memory':'int',
             'min_memory':'typing.Optional[int]',
             'hyperv_enlightenments':'bool',
-            'bootloader':'str',
+            'bootloader':'Bootloader',
             'bootloader_ovmf':'str',
             'autostart':'bool',
             'hide_from_msr':'bool',
             'ensure_display_device':'bool',
-            'time':'str',
+            'time':'Time',
             'shutdown_timeout':'int',
             'arch_type':'typing.Optional[str]',
             'machine_type':'typing.Optional[str]',
@@ -45,7 +66,7 @@ class Vm(Namespace):
     })
     VmCreateReturns = typing.TypedDict('VmCreateReturns', {
             'command_line_args':'str',
-            'cpu_mode':'str',
+            'cpu_mode':'CpuMode',
             'cpu_model':'typing.Optional[str]',
             'name':'str',
             'description':'str',
@@ -60,12 +81,12 @@ class Vm(Namespace):
             'memory':'int',
             'min_memory':'typing.Optional[int]',
             'hyperv_enlightenments':'bool',
-            'bootloader':'str',
+            'bootloader':'Bootloader',
             'bootloader_ovmf':'str',
             'autostart':'bool',
             'hide_from_msr':'bool',
             'ensure_display_device':'bool',
-            'time':'str',
+            'time':'Time',
             'shutdown_timeout':'int',
             'arch_type':'typing.Optional[str]',
             'machine_type':'typing.Optional[str]',
@@ -84,15 +105,28 @@ class Vm(Namespace):
             'amd_rvi':'bool',
             'amd_asids':'bool',
     })
+    class Dtype(str,Enum):
+        NIC = 'NIC'
+        DISK = 'DISK'
+        CDROM = 'CDROM'
+        PCI = 'PCI'
+        DISPLAY = 'DISPLAY'
+        RAW = 'RAW'
+        USB = 'USB'
+        ...
     VmDeviceEntry = typing.TypedDict('VmDeviceEntry', {
-            'dtype':'str',
+            'dtype':'Dtype',
             'vm':'int',
             'attributes':'dict[str]',
             'order':'typing.Optional[int]',
             'id':'int',
     })
+    class Protocol(str,Enum):
+        HTTP = 'HTTP'
+        HTTPS = 'HTTPS'
+        ...
     Options = typing.TypedDict('Options', {
-            'protocol':'str',
+            'protocol':'Protocol',
     })
     DisplayDevicesUri = typing.TypedDict('DisplayDevicesUri', {
             'error':'typing.Optional[str]',
@@ -153,7 +187,7 @@ class Vm(Namespace):
     })
     VmEntry = typing.TypedDict('VmEntry', {
             'command_line_args':'str',
-            'cpu_mode':'str',
+            'cpu_mode':'CpuMode',
             'cpu_model':'typing.Optional[str]',
             'name':'str',
             'description':'str',
@@ -168,12 +202,12 @@ class Vm(Namespace):
             'memory':'int',
             'min_memory':'typing.Optional[int]',
             'hyperv_enlightenments':'bool',
-            'bootloader':'str',
+            'bootloader':'Bootloader',
             'bootloader_ovmf':'str',
             'autostart':'bool',
             'hide_from_msr':'bool',
             'ensure_display_device':'bool',
-            'time':'str',
+            'time':'Time',
             'shutdown_timeout':'int',
             'arch_type':'typing.Optional[str]',
             'machine_type':'typing.Optional[str]',
@@ -189,7 +223,7 @@ class Vm(Namespace):
     })
     VmEntry_ = typing.TypedDict('VmEntry_', {
             'command_line_args':'str',
-            'cpu_mode':'str',
+            'cpu_mode':'CpuMode',
             'cpu_model':'typing.Optional[str]',
             'name':'str',
             'description':'str',
@@ -204,12 +238,12 @@ class Vm(Namespace):
             'memory':'int',
             'min_memory':'typing.Optional[int]',
             'hyperv_enlightenments':'bool',
-            'bootloader':'str',
+            'bootloader':'Bootloader',
             'bootloader_ovmf':'str',
             'autostart':'bool',
             'hide_from_msr':'bool',
             'ensure_display_device':'bool',
-            'time':'str',
+            'time':'Time',
             'shutdown_timeout':'int',
             'arch_type':'typing.Optional[str]',
             'machine_type':'typing.Optional[str]',
@@ -225,7 +259,7 @@ class Vm(Namespace):
     })
     VmEntry__ = typing.TypedDict('VmEntry__', {
             'command_line_args':'str',
-            'cpu_mode':'str',
+            'cpu_mode':'CpuMode',
             'cpu_model':'typing.Optional[str]',
             'name':'str',
             'description':'str',
@@ -240,12 +274,12 @@ class Vm(Namespace):
             'memory':'int',
             'min_memory':'typing.Optional[int]',
             'hyperv_enlightenments':'bool',
-            'bootloader':'str',
+            'bootloader':'Bootloader',
             'bootloader_ovmf':'str',
             'autostart':'bool',
             'hide_from_msr':'bool',
             'ensure_display_device':'bool',
-            'time':'str',
+            'time':'Time',
             'shutdown_timeout':'int',
             'arch_type':'typing.Optional[str]',
             'machine_type':'typing.Optional[str]',
@@ -254,17 +288,47 @@ class Vm(Namespace):
             'status':'Status___',
             'id':'int',
     })
+    class _1920x1200(str,Enum):
+        _1920x1200 = '1920x1200'
+        ...
+    class _1920x1080(str,Enum):
+        _1920x1080 = '1920x1080'
+        ...
+    class _1600x1200(str,Enum):
+        _1600x1200 = '1600x1200'
+        ...
+    class _1600x900(str,Enum):
+        _1600x900 = '1600x900'
+        ...
+    class _1400x1050(str,Enum):
+        _1400x1050 = '1400x1050'
+        ...
+    class _1280x1024(str,Enum):
+        _1280x1024 = '1280x1024'
+        ...
+    class _1280x720(str,Enum):
+        _1280x720 = '1280x720'
+        ...
+    class _1024x768(str,Enum):
+        _1024x768 = '1024x768'
+        ...
+    class _800x600(str,Enum):
+        _800x600 = '800x600'
+        ...
+    class _640x480(str,Enum):
+        _640x480 = '640x480'
+        ...
     ResolutionChoices = typing.TypedDict('ResolutionChoices', {
-            '1920x1200':'str',
-            '1920x1080':'str',
-            '1600x1200':'str',
-            '1600x900':'str',
-            '1400x1050':'str',
-            '1280x1024':'str',
-            '1280x720':'str',
-            '1024x768':'str',
-            '800x600':'str',
-            '640x480':'str',
+            '1920x1200':'_1920x1200',
+            '1920x1080':'_1920x1080',
+            '1600x1200':'_1600x1200',
+            '1600x900':'_1600x900',
+            '1400x1050':'_1400x1050',
+            '1280x1024':'_1280x1024',
+            '1280x720':'_1280x720',
+            '1024x768':'_1024x768',
+            '800x600':'_800x600',
+            '640x480':'_640x480',
     })
     Options_ = typing.TypedDict('Options_', {
             'overcommit':'bool',
@@ -280,7 +344,7 @@ class Vm(Namespace):
     })
     VmUpdate = typing.TypedDict('VmUpdate', {
             'command_line_args':'str',
-            'cpu_mode':'str',
+            'cpu_mode':'CpuMode',
             'cpu_model':'typing.Optional[str]',
             'name':'str',
             'description':'str',
@@ -295,12 +359,12 @@ class Vm(Namespace):
             'memory':'int',
             'min_memory':'typing.Optional[int]',
             'hyperv_enlightenments':'bool',
-            'bootloader':'str',
+            'bootloader':'Bootloader',
             'bootloader_ovmf':'str',
             'autostart':'bool',
             'hide_from_msr':'bool',
             'ensure_display_device':'bool',
-            'time':'str',
+            'time':'Time',
             'shutdown_timeout':'int',
             'arch_type':'typing.Optional[str]',
             'machine_type':'typing.Optional[str]',
@@ -314,7 +378,7 @@ class Vm(Namespace):
     })
     VmUpdateReturns = typing.TypedDict('VmUpdateReturns', {
             'command_line_args':'str',
-            'cpu_mode':'str',
+            'cpu_mode':'CpuMode',
             'cpu_model':'typing.Optional[str]',
             'name':'str',
             'description':'str',
@@ -329,12 +393,12 @@ class Vm(Namespace):
             'memory':'int',
             'min_memory':'typing.Optional[int]',
             'hyperv_enlightenments':'bool',
-            'bootloader':'str',
+            'bootloader':'Bootloader',
             'bootloader_ovmf':'str',
             'autostart':'bool',
             'hide_from_msr':'bool',
             'ensure_display_device':'bool',
-            'time':'str',
+            'time':'Time',
             'shutdown_timeout':'int',
             'arch_type':'typing.Optional[str]',
             'machine_type':'typing.Optional[str]',

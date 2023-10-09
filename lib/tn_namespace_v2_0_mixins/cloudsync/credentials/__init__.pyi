@@ -2,7 +2,7 @@
 from pytruenas import TrueNASClient
 from pytruenas.base import Namespace
 from pytruenas.mixins import TableExtMixin
-
+from enum import Enum
 import typing
 class CloudsyncCredentials(
     TableExtMixin,
@@ -29,48 +29,6 @@ class CloudsyncCredentials(
             cloudsync_credentials_create_returns
         """
         ...
-    CloudSyncCredentialsCreate = typing.TypedDict('CloudSyncCredentialsCreate', {
-            'name':'str',
-            'provider':'str',
-            'attributes':'dict[str]',
-    })
-    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    QueryOptions = typing.TypedDict('QueryOptions', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    CloudSyncCredentialsUpdate = typing.TypedDict('CloudSyncCredentialsUpdate', {
-            'name':'str',
-            'provider':'str',
-            'attributes':'dict[str]',
-    })
-    CloudSyncCredentialsVerify = typing.TypedDict('CloudSyncCredentialsVerify', {
-            'provider':'str',
-            'attributes':'dict[str]',
-    })
     @typing.overload
     def delete(self, 
         id:'int',
@@ -88,48 +46,6 @@ class CloudsyncCredentials(
             Will return `true` if `id` is deleted successfully
         """
         ...
-    CloudSyncCredentialsCreate = typing.TypedDict('CloudSyncCredentialsCreate', {
-            'name':'str',
-            'provider':'str',
-            'attributes':'dict[str]',
-    })
-    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    QueryOptions = typing.TypedDict('QueryOptions', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    CloudSyncCredentialsUpdate = typing.TypedDict('CloudSyncCredentialsUpdate', {
-            'name':'str',
-            'provider':'str',
-            'attributes':'dict[str]',
-    })
-    CloudSyncCredentialsVerify = typing.TypedDict('CloudSyncCredentialsVerify', {
-            'provider':'str',
-            'attributes':'dict[str]',
-    })
     @typing.overload
     def get_instance(self, 
         id:'typing.Union[str, int, bool, dict[str], list]',
@@ -150,48 +66,6 @@ class CloudsyncCredentials(
         -------
         """
         ...
-    CloudSyncCredentialsCreate = typing.TypedDict('CloudSyncCredentialsCreate', {
-            'name':'str',
-            'provider':'str',
-            'attributes':'dict[str]',
-    })
-    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    QueryOptions = typing.TypedDict('QueryOptions', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    CloudSyncCredentialsUpdate = typing.TypedDict('CloudSyncCredentialsUpdate', {
-            'name':'str',
-            'provider':'str',
-            'attributes':'dict[str]',
-    })
-    CloudSyncCredentialsVerify = typing.TypedDict('CloudSyncCredentialsVerify', {
-            'provider':'str',
-            'attributes':'dict[str]',
-    })
     @typing.overload
     def query(self, 
         query_filters:'list[list]'=[],
@@ -212,48 +86,6 @@ class CloudsyncCredentials(
             
         """
         ...
-    CloudSyncCredentialsCreate = typing.TypedDict('CloudSyncCredentialsCreate', {
-            'name':'str',
-            'provider':'str',
-            'attributes':'dict[str]',
-    })
-    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    QueryOptions = typing.TypedDict('QueryOptions', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    CloudSyncCredentialsUpdate = typing.TypedDict('CloudSyncCredentialsUpdate', {
-            'name':'str',
-            'provider':'str',
-            'attributes':'dict[str]',
-    })
-    CloudSyncCredentialsVerify = typing.TypedDict('CloudSyncCredentialsVerify', {
-            'provider':'str',
-            'attributes':'dict[str]',
-    })
     @typing.overload
     def update(self, 
         id:'int',
@@ -275,48 +107,6 @@ class CloudsyncCredentials(
             cloudsync_credentials_update_returns
         """
         ...
-    CloudSyncCredentialsCreate = typing.TypedDict('CloudSyncCredentialsCreate', {
-            'name':'str',
-            'provider':'str',
-            'attributes':'dict[str]',
-    })
-    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    QueryOptions = typing.TypedDict('QueryOptions', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    CloudSyncCredentialsUpdate = typing.TypedDict('CloudSyncCredentialsUpdate', {
-            'name':'str',
-            'provider':'str',
-            'attributes':'dict[str]',
-    })
-    CloudSyncCredentialsVerify = typing.TypedDict('CloudSyncCredentialsVerify', {
-            'provider':'str',
-            'attributes':'dict[str]',
-    })
     @typing.overload
     def verify(self, 
         cloud_sync_credentials_verify:'CloudSyncCredentialsVerify'={},
@@ -374,4 +164,3 @@ class CloudsyncCredentials(
             'provider':'str',
             'attributes':'dict[str]',
     })
-

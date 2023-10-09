@@ -2,7 +2,7 @@
 from pytruenas import TrueNASClient
 from pytruenas.base import Namespace
 from pytruenas.mixins import ConfigMixin
-
+from enum import Enum
 import typing
 class Kubernetes(
     ConfigMixin,
@@ -30,75 +30,6 @@ class Kubernetes(
             backup_name
         """
         ...
-    KubernetesEntry = typing.TypedDict('KubernetesEntry', {
-            'servicelb':'bool',
-            'configure_gpus':'bool',
-            'metrics_server':'bool',
-            'passthrough_mode':'bool',
-            'pool':'typing.Optional[str]',
-            'cluster_cidr':'str',
-            'service_cidr':'str',
-            'cluster_dns_ip':'str',
-            'node_ip':'str',
-            'route_v4_interface':'typing.Optional[str]',
-            'route_v4_gateway':'typing.Optional[str]',
-            'route_v6_interface':'typing.Optional[str]',
-            'route_v6_gateway':'typing.Optional[str]',
-            'dataset':'typing.Optional[str]',
-            'id':'int',
-    })
-    Metadata = typing.TypedDict('Metadata', {
-            'name':'str',
-    })
-    Event = typing.TypedDict('Event', {
-            'metadata':'Metadata',
-            'message':'str',
-    })
-    Options = typing.TypedDict('Options', {
-            'wait_for_csi':'bool',
-    })
-    Status = typing.TypedDict('Status', {
-            'status':'str',
-            'description':'str',
-    })
-    MigrationOptions = typing.TypedDict('MigrationOptions', {
-            'passphrase':'str',
-    })
-    KubernetesUpdate = typing.TypedDict('KubernetesUpdate', {
-            'servicelb':'bool',
-            'configure_gpus':'bool',
-            'metrics_server':'bool',
-            'passthrough_mode':'bool',
-            'pool':'typing.Optional[str]',
-            'cluster_cidr':'str',
-            'service_cidr':'str',
-            'cluster_dns_ip':'str',
-            'node_ip':'str',
-            'route_v4_interface':'typing.Optional[str]',
-            'route_v4_gateway':'typing.Optional[str]',
-            'route_v6_interface':'typing.Optional[str]',
-            'route_v6_gateway':'typing.Optional[str]',
-            'migrate_applications':'bool',
-            'force':'bool',
-            'migration_options':'MigrationOptions',
-    })
-    KubernetesUpdateReturns = typing.TypedDict('KubernetesUpdateReturns', {
-            'servicelb':'bool',
-            'configure_gpus':'bool',
-            'metrics_server':'bool',
-            'passthrough_mode':'bool',
-            'pool':'typing.Optional[str]',
-            'cluster_cidr':'str',
-            'service_cidr':'str',
-            'cluster_dns_ip':'str',
-            'node_ip':'str',
-            'route_v4_interface':'typing.Optional[str]',
-            'route_v4_gateway':'typing.Optional[str]',
-            'route_v6_interface':'typing.Optional[str]',
-            'route_v6_gateway':'typing.Optional[str]',
-            'dataset':'typing.Optional[str]',
-            'id':'int',
-    })
     @typing.overload
     def bindip_choices(self, 
     /) -> 'dict[str]': 
@@ -113,75 +44,6 @@ class Kubernetes(
             kubernetes_bind_ip_choices
         """
         ...
-    KubernetesEntry = typing.TypedDict('KubernetesEntry', {
-            'servicelb':'bool',
-            'configure_gpus':'bool',
-            'metrics_server':'bool',
-            'passthrough_mode':'bool',
-            'pool':'typing.Optional[str]',
-            'cluster_cidr':'str',
-            'service_cidr':'str',
-            'cluster_dns_ip':'str',
-            'node_ip':'str',
-            'route_v4_interface':'typing.Optional[str]',
-            'route_v4_gateway':'typing.Optional[str]',
-            'route_v6_interface':'typing.Optional[str]',
-            'route_v6_gateway':'typing.Optional[str]',
-            'dataset':'typing.Optional[str]',
-            'id':'int',
-    })
-    Metadata = typing.TypedDict('Metadata', {
-            'name':'str',
-    })
-    Event = typing.TypedDict('Event', {
-            'metadata':'Metadata',
-            'message':'str',
-    })
-    Options = typing.TypedDict('Options', {
-            'wait_for_csi':'bool',
-    })
-    Status = typing.TypedDict('Status', {
-            'status':'str',
-            'description':'str',
-    })
-    MigrationOptions = typing.TypedDict('MigrationOptions', {
-            'passphrase':'str',
-    })
-    KubernetesUpdate = typing.TypedDict('KubernetesUpdate', {
-            'servicelb':'bool',
-            'configure_gpus':'bool',
-            'metrics_server':'bool',
-            'passthrough_mode':'bool',
-            'pool':'typing.Optional[str]',
-            'cluster_cidr':'str',
-            'service_cidr':'str',
-            'cluster_dns_ip':'str',
-            'node_ip':'str',
-            'route_v4_interface':'typing.Optional[str]',
-            'route_v4_gateway':'typing.Optional[str]',
-            'route_v6_interface':'typing.Optional[str]',
-            'route_v6_gateway':'typing.Optional[str]',
-            'migrate_applications':'bool',
-            'force':'bool',
-            'migration_options':'MigrationOptions',
-    })
-    KubernetesUpdateReturns = typing.TypedDict('KubernetesUpdateReturns', {
-            'servicelb':'bool',
-            'configure_gpus':'bool',
-            'metrics_server':'bool',
-            'passthrough_mode':'bool',
-            'pool':'typing.Optional[str]',
-            'cluster_cidr':'str',
-            'service_cidr':'str',
-            'cluster_dns_ip':'str',
-            'node_ip':'str',
-            'route_v4_interface':'typing.Optional[str]',
-            'route_v4_gateway':'typing.Optional[str]',
-            'route_v6_interface':'typing.Optional[str]',
-            'route_v6_gateway':'typing.Optional[str]',
-            'dataset':'typing.Optional[str]',
-            'id':'int',
-    })
     @typing.overload
     def config(self, 
     /) -> 'KubernetesEntry': 
@@ -196,75 +58,6 @@ class Kubernetes(
             kubernetes_entry
         """
         ...
-    KubernetesEntry = typing.TypedDict('KubernetesEntry', {
-            'servicelb':'bool',
-            'configure_gpus':'bool',
-            'metrics_server':'bool',
-            'passthrough_mode':'bool',
-            'pool':'typing.Optional[str]',
-            'cluster_cidr':'str',
-            'service_cidr':'str',
-            'cluster_dns_ip':'str',
-            'node_ip':'str',
-            'route_v4_interface':'typing.Optional[str]',
-            'route_v4_gateway':'typing.Optional[str]',
-            'route_v6_interface':'typing.Optional[str]',
-            'route_v6_gateway':'typing.Optional[str]',
-            'dataset':'typing.Optional[str]',
-            'id':'int',
-    })
-    Metadata = typing.TypedDict('Metadata', {
-            'name':'str',
-    })
-    Event = typing.TypedDict('Event', {
-            'metadata':'Metadata',
-            'message':'str',
-    })
-    Options = typing.TypedDict('Options', {
-            'wait_for_csi':'bool',
-    })
-    Status = typing.TypedDict('Status', {
-            'status':'str',
-            'description':'str',
-    })
-    MigrationOptions = typing.TypedDict('MigrationOptions', {
-            'passphrase':'str',
-    })
-    KubernetesUpdate = typing.TypedDict('KubernetesUpdate', {
-            'servicelb':'bool',
-            'configure_gpus':'bool',
-            'metrics_server':'bool',
-            'passthrough_mode':'bool',
-            'pool':'typing.Optional[str]',
-            'cluster_cidr':'str',
-            'service_cidr':'str',
-            'cluster_dns_ip':'str',
-            'node_ip':'str',
-            'route_v4_interface':'typing.Optional[str]',
-            'route_v4_gateway':'typing.Optional[str]',
-            'route_v6_interface':'typing.Optional[str]',
-            'route_v6_gateway':'typing.Optional[str]',
-            'migrate_applications':'bool',
-            'force':'bool',
-            'migration_options':'MigrationOptions',
-    })
-    KubernetesUpdateReturns = typing.TypedDict('KubernetesUpdateReturns', {
-            'servicelb':'bool',
-            'configure_gpus':'bool',
-            'metrics_server':'bool',
-            'passthrough_mode':'bool',
-            'pool':'typing.Optional[str]',
-            'cluster_cidr':'str',
-            'service_cidr':'str',
-            'cluster_dns_ip':'str',
-            'node_ip':'str',
-            'route_v4_interface':'typing.Optional[str]',
-            'route_v4_gateway':'typing.Optional[str]',
-            'route_v6_interface':'typing.Optional[str]',
-            'route_v6_gateway':'typing.Optional[str]',
-            'dataset':'typing.Optional[str]',
-            'id':'int',
-    })
     @typing.overload
     def delete_backup(self, 
         backup_name:'str',
@@ -280,75 +73,6 @@ class Kubernetes(
         -------
         """
         ...
-    KubernetesEntry = typing.TypedDict('KubernetesEntry', {
-            'servicelb':'bool',
-            'configure_gpus':'bool',
-            'metrics_server':'bool',
-            'passthrough_mode':'bool',
-            'pool':'typing.Optional[str]',
-            'cluster_cidr':'str',
-            'service_cidr':'str',
-            'cluster_dns_ip':'str',
-            'node_ip':'str',
-            'route_v4_interface':'typing.Optional[str]',
-            'route_v4_gateway':'typing.Optional[str]',
-            'route_v6_interface':'typing.Optional[str]',
-            'route_v6_gateway':'typing.Optional[str]',
-            'dataset':'typing.Optional[str]',
-            'id':'int',
-    })
-    Metadata = typing.TypedDict('Metadata', {
-            'name':'str',
-    })
-    Event = typing.TypedDict('Event', {
-            'metadata':'Metadata',
-            'message':'str',
-    })
-    Options = typing.TypedDict('Options', {
-            'wait_for_csi':'bool',
-    })
-    Status = typing.TypedDict('Status', {
-            'status':'str',
-            'description':'str',
-    })
-    MigrationOptions = typing.TypedDict('MigrationOptions', {
-            'passphrase':'str',
-    })
-    KubernetesUpdate = typing.TypedDict('KubernetesUpdate', {
-            'servicelb':'bool',
-            'configure_gpus':'bool',
-            'metrics_server':'bool',
-            'passthrough_mode':'bool',
-            'pool':'typing.Optional[str]',
-            'cluster_cidr':'str',
-            'service_cidr':'str',
-            'cluster_dns_ip':'str',
-            'node_ip':'str',
-            'route_v4_interface':'typing.Optional[str]',
-            'route_v4_gateway':'typing.Optional[str]',
-            'route_v6_interface':'typing.Optional[str]',
-            'route_v6_gateway':'typing.Optional[str]',
-            'migrate_applications':'bool',
-            'force':'bool',
-            'migration_options':'MigrationOptions',
-    })
-    KubernetesUpdateReturns = typing.TypedDict('KubernetesUpdateReturns', {
-            'servicelb':'bool',
-            'configure_gpus':'bool',
-            'metrics_server':'bool',
-            'passthrough_mode':'bool',
-            'pool':'typing.Optional[str]',
-            'cluster_cidr':'str',
-            'service_cidr':'str',
-            'cluster_dns_ip':'str',
-            'node_ip':'str',
-            'route_v4_interface':'typing.Optional[str]',
-            'route_v4_gateway':'typing.Optional[str]',
-            'route_v6_interface':'typing.Optional[str]',
-            'route_v6_gateway':'typing.Optional[str]',
-            'dataset':'typing.Optional[str]',
-            'id':'int',
-    })
     @typing.overload
     def events(self, 
     /) -> 'list[Event]': 
@@ -363,75 +87,6 @@ class Kubernetes(
             kubernetes_node_events
         """
         ...
-    KubernetesEntry = typing.TypedDict('KubernetesEntry', {
-            'servicelb':'bool',
-            'configure_gpus':'bool',
-            'metrics_server':'bool',
-            'passthrough_mode':'bool',
-            'pool':'typing.Optional[str]',
-            'cluster_cidr':'str',
-            'service_cidr':'str',
-            'cluster_dns_ip':'str',
-            'node_ip':'str',
-            'route_v4_interface':'typing.Optional[str]',
-            'route_v4_gateway':'typing.Optional[str]',
-            'route_v6_interface':'typing.Optional[str]',
-            'route_v6_gateway':'typing.Optional[str]',
-            'dataset':'typing.Optional[str]',
-            'id':'int',
-    })
-    Metadata = typing.TypedDict('Metadata', {
-            'name':'str',
-    })
-    Event = typing.TypedDict('Event', {
-            'metadata':'Metadata',
-            'message':'str',
-    })
-    Options = typing.TypedDict('Options', {
-            'wait_for_csi':'bool',
-    })
-    Status = typing.TypedDict('Status', {
-            'status':'str',
-            'description':'str',
-    })
-    MigrationOptions = typing.TypedDict('MigrationOptions', {
-            'passphrase':'str',
-    })
-    KubernetesUpdate = typing.TypedDict('KubernetesUpdate', {
-            'servicelb':'bool',
-            'configure_gpus':'bool',
-            'metrics_server':'bool',
-            'passthrough_mode':'bool',
-            'pool':'typing.Optional[str]',
-            'cluster_cidr':'str',
-            'service_cidr':'str',
-            'cluster_dns_ip':'str',
-            'node_ip':'str',
-            'route_v4_interface':'typing.Optional[str]',
-            'route_v4_gateway':'typing.Optional[str]',
-            'route_v6_interface':'typing.Optional[str]',
-            'route_v6_gateway':'typing.Optional[str]',
-            'migrate_applications':'bool',
-            'force':'bool',
-            'migration_options':'MigrationOptions',
-    })
-    KubernetesUpdateReturns = typing.TypedDict('KubernetesUpdateReturns', {
-            'servicelb':'bool',
-            'configure_gpus':'bool',
-            'metrics_server':'bool',
-            'passthrough_mode':'bool',
-            'pool':'typing.Optional[str]',
-            'cluster_cidr':'str',
-            'service_cidr':'str',
-            'cluster_dns_ip':'str',
-            'node_ip':'str',
-            'route_v4_interface':'typing.Optional[str]',
-            'route_v4_gateway':'typing.Optional[str]',
-            'route_v6_interface':'typing.Optional[str]',
-            'route_v6_gateway':'typing.Optional[str]',
-            'dataset':'typing.Optional[str]',
-            'id':'int',
-    })
     @typing.overload
     def list_backups(self, 
     /) -> 'dict[str]': 
@@ -446,75 +101,6 @@ class Kubernetes(
             backups
         """
         ...
-    KubernetesEntry = typing.TypedDict('KubernetesEntry', {
-            'servicelb':'bool',
-            'configure_gpus':'bool',
-            'metrics_server':'bool',
-            'passthrough_mode':'bool',
-            'pool':'typing.Optional[str]',
-            'cluster_cidr':'str',
-            'service_cidr':'str',
-            'cluster_dns_ip':'str',
-            'node_ip':'str',
-            'route_v4_interface':'typing.Optional[str]',
-            'route_v4_gateway':'typing.Optional[str]',
-            'route_v6_interface':'typing.Optional[str]',
-            'route_v6_gateway':'typing.Optional[str]',
-            'dataset':'typing.Optional[str]',
-            'id':'int',
-    })
-    Metadata = typing.TypedDict('Metadata', {
-            'name':'str',
-    })
-    Event = typing.TypedDict('Event', {
-            'metadata':'Metadata',
-            'message':'str',
-    })
-    Options = typing.TypedDict('Options', {
-            'wait_for_csi':'bool',
-    })
-    Status = typing.TypedDict('Status', {
-            'status':'str',
-            'description':'str',
-    })
-    MigrationOptions = typing.TypedDict('MigrationOptions', {
-            'passphrase':'str',
-    })
-    KubernetesUpdate = typing.TypedDict('KubernetesUpdate', {
-            'servicelb':'bool',
-            'configure_gpus':'bool',
-            'metrics_server':'bool',
-            'passthrough_mode':'bool',
-            'pool':'typing.Optional[str]',
-            'cluster_cidr':'str',
-            'service_cidr':'str',
-            'cluster_dns_ip':'str',
-            'node_ip':'str',
-            'route_v4_interface':'typing.Optional[str]',
-            'route_v4_gateway':'typing.Optional[str]',
-            'route_v6_interface':'typing.Optional[str]',
-            'route_v6_gateway':'typing.Optional[str]',
-            'migrate_applications':'bool',
-            'force':'bool',
-            'migration_options':'MigrationOptions',
-    })
-    KubernetesUpdateReturns = typing.TypedDict('KubernetesUpdateReturns', {
-            'servicelb':'bool',
-            'configure_gpus':'bool',
-            'metrics_server':'bool',
-            'passthrough_mode':'bool',
-            'pool':'typing.Optional[str]',
-            'cluster_cidr':'str',
-            'service_cidr':'str',
-            'cluster_dns_ip':'str',
-            'node_ip':'str',
-            'route_v4_interface':'typing.Optional[str]',
-            'route_v4_gateway':'typing.Optional[str]',
-            'route_v6_interface':'typing.Optional[str]',
-            'route_v6_gateway':'typing.Optional[str]',
-            'dataset':'typing.Optional[str]',
-            'id':'int',
-    })
     @typing.overload
     def node_ip(self, 
     /) -> 'typing.Optional[str]': 
@@ -529,75 +115,6 @@ class Kubernetes(
             kubernetes_node_ip
         """
         ...
-    KubernetesEntry = typing.TypedDict('KubernetesEntry', {
-            'servicelb':'bool',
-            'configure_gpus':'bool',
-            'metrics_server':'bool',
-            'passthrough_mode':'bool',
-            'pool':'typing.Optional[str]',
-            'cluster_cidr':'str',
-            'service_cidr':'str',
-            'cluster_dns_ip':'str',
-            'node_ip':'str',
-            'route_v4_interface':'typing.Optional[str]',
-            'route_v4_gateway':'typing.Optional[str]',
-            'route_v6_interface':'typing.Optional[str]',
-            'route_v6_gateway':'typing.Optional[str]',
-            'dataset':'typing.Optional[str]',
-            'id':'int',
-    })
-    Metadata = typing.TypedDict('Metadata', {
-            'name':'str',
-    })
-    Event = typing.TypedDict('Event', {
-            'metadata':'Metadata',
-            'message':'str',
-    })
-    Options = typing.TypedDict('Options', {
-            'wait_for_csi':'bool',
-    })
-    Status = typing.TypedDict('Status', {
-            'status':'str',
-            'description':'str',
-    })
-    MigrationOptions = typing.TypedDict('MigrationOptions', {
-            'passphrase':'str',
-    })
-    KubernetesUpdate = typing.TypedDict('KubernetesUpdate', {
-            'servicelb':'bool',
-            'configure_gpus':'bool',
-            'metrics_server':'bool',
-            'passthrough_mode':'bool',
-            'pool':'typing.Optional[str]',
-            'cluster_cidr':'str',
-            'service_cidr':'str',
-            'cluster_dns_ip':'str',
-            'node_ip':'str',
-            'route_v4_interface':'typing.Optional[str]',
-            'route_v4_gateway':'typing.Optional[str]',
-            'route_v6_interface':'typing.Optional[str]',
-            'route_v6_gateway':'typing.Optional[str]',
-            'migrate_applications':'bool',
-            'force':'bool',
-            'migration_options':'MigrationOptions',
-    })
-    KubernetesUpdateReturns = typing.TypedDict('KubernetesUpdateReturns', {
-            'servicelb':'bool',
-            'configure_gpus':'bool',
-            'metrics_server':'bool',
-            'passthrough_mode':'bool',
-            'pool':'typing.Optional[str]',
-            'cluster_cidr':'str',
-            'service_cidr':'str',
-            'cluster_dns_ip':'str',
-            'node_ip':'str',
-            'route_v4_interface':'typing.Optional[str]',
-            'route_v4_gateway':'typing.Optional[str]',
-            'route_v6_interface':'typing.Optional[str]',
-            'route_v6_gateway':'typing.Optional[str]',
-            'dataset':'typing.Optional[str]',
-            'id':'int',
-    })
     @typing.overload
     def restore_backup(self, 
         backup_name:'str',
@@ -619,75 +136,6 @@ class Kubernetes(
         -------
         """
         ...
-    KubernetesEntry = typing.TypedDict('KubernetesEntry', {
-            'servicelb':'bool',
-            'configure_gpus':'bool',
-            'metrics_server':'bool',
-            'passthrough_mode':'bool',
-            'pool':'typing.Optional[str]',
-            'cluster_cidr':'str',
-            'service_cidr':'str',
-            'cluster_dns_ip':'str',
-            'node_ip':'str',
-            'route_v4_interface':'typing.Optional[str]',
-            'route_v4_gateway':'typing.Optional[str]',
-            'route_v6_interface':'typing.Optional[str]',
-            'route_v6_gateway':'typing.Optional[str]',
-            'dataset':'typing.Optional[str]',
-            'id':'int',
-    })
-    Metadata = typing.TypedDict('Metadata', {
-            'name':'str',
-    })
-    Event = typing.TypedDict('Event', {
-            'metadata':'Metadata',
-            'message':'str',
-    })
-    Options = typing.TypedDict('Options', {
-            'wait_for_csi':'bool',
-    })
-    Status = typing.TypedDict('Status', {
-            'status':'str',
-            'description':'str',
-    })
-    MigrationOptions = typing.TypedDict('MigrationOptions', {
-            'passphrase':'str',
-    })
-    KubernetesUpdate = typing.TypedDict('KubernetesUpdate', {
-            'servicelb':'bool',
-            'configure_gpus':'bool',
-            'metrics_server':'bool',
-            'passthrough_mode':'bool',
-            'pool':'typing.Optional[str]',
-            'cluster_cidr':'str',
-            'service_cidr':'str',
-            'cluster_dns_ip':'str',
-            'node_ip':'str',
-            'route_v4_interface':'typing.Optional[str]',
-            'route_v4_gateway':'typing.Optional[str]',
-            'route_v6_interface':'typing.Optional[str]',
-            'route_v6_gateway':'typing.Optional[str]',
-            'migrate_applications':'bool',
-            'force':'bool',
-            'migration_options':'MigrationOptions',
-    })
-    KubernetesUpdateReturns = typing.TypedDict('KubernetesUpdateReturns', {
-            'servicelb':'bool',
-            'configure_gpus':'bool',
-            'metrics_server':'bool',
-            'passthrough_mode':'bool',
-            'pool':'typing.Optional[str]',
-            'cluster_cidr':'str',
-            'service_cidr':'str',
-            'cluster_dns_ip':'str',
-            'node_ip':'str',
-            'route_v4_interface':'typing.Optional[str]',
-            'route_v4_gateway':'typing.Optional[str]',
-            'route_v6_interface':'typing.Optional[str]',
-            'route_v6_gateway':'typing.Optional[str]',
-            'dataset':'typing.Optional[str]',
-            'id':'int',
-    })
     @typing.overload
     def route_interface_choices(self, 
     /) -> 'dict[str]': 
@@ -702,78 +150,9 @@ class Kubernetes(
             route_interface_choices
         """
         ...
-    KubernetesEntry = typing.TypedDict('KubernetesEntry', {
-            'servicelb':'bool',
-            'configure_gpus':'bool',
-            'metrics_server':'bool',
-            'passthrough_mode':'bool',
-            'pool':'typing.Optional[str]',
-            'cluster_cidr':'str',
-            'service_cidr':'str',
-            'cluster_dns_ip':'str',
-            'node_ip':'str',
-            'route_v4_interface':'typing.Optional[str]',
-            'route_v4_gateway':'typing.Optional[str]',
-            'route_v6_interface':'typing.Optional[str]',
-            'route_v6_gateway':'typing.Optional[str]',
-            'dataset':'typing.Optional[str]',
-            'id':'int',
-    })
-    Metadata = typing.TypedDict('Metadata', {
-            'name':'str',
-    })
-    Event = typing.TypedDict('Event', {
-            'metadata':'Metadata',
-            'message':'str',
-    })
-    Options = typing.TypedDict('Options', {
-            'wait_for_csi':'bool',
-    })
-    Status = typing.TypedDict('Status', {
-            'status':'str',
-            'description':'str',
-    })
-    MigrationOptions = typing.TypedDict('MigrationOptions', {
-            'passphrase':'str',
-    })
-    KubernetesUpdate = typing.TypedDict('KubernetesUpdate', {
-            'servicelb':'bool',
-            'configure_gpus':'bool',
-            'metrics_server':'bool',
-            'passthrough_mode':'bool',
-            'pool':'typing.Optional[str]',
-            'cluster_cidr':'str',
-            'service_cidr':'str',
-            'cluster_dns_ip':'str',
-            'node_ip':'str',
-            'route_v4_interface':'typing.Optional[str]',
-            'route_v4_gateway':'typing.Optional[str]',
-            'route_v6_interface':'typing.Optional[str]',
-            'route_v6_gateway':'typing.Optional[str]',
-            'migrate_applications':'bool',
-            'force':'bool',
-            'migration_options':'MigrationOptions',
-    })
-    KubernetesUpdateReturns = typing.TypedDict('KubernetesUpdateReturns', {
-            'servicelb':'bool',
-            'configure_gpus':'bool',
-            'metrics_server':'bool',
-            'passthrough_mode':'bool',
-            'pool':'typing.Optional[str]',
-            'cluster_cidr':'str',
-            'service_cidr':'str',
-            'cluster_dns_ip':'str',
-            'node_ip':'str',
-            'route_v4_interface':'typing.Optional[str]',
-            'route_v4_gateway':'typing.Optional[str]',
-            'route_v6_interface':'typing.Optional[str]',
-            'route_v6_gateway':'typing.Optional[str]',
-            'dataset':'typing.Optional[str]',
-            'id':'int',
-    })
     @typing.overload
     def status(self, 
-    /) -> 'Status': 
+    /) -> 'Status_': 
         """
         Returns the status of the Kubernetes service.
 
@@ -781,79 +160,10 @@ class Kubernetes(
         ----------
         Returns
         -------
-        Status:
+        Status_:
             status
         """
         ...
-    KubernetesEntry = typing.TypedDict('KubernetesEntry', {
-            'servicelb':'bool',
-            'configure_gpus':'bool',
-            'metrics_server':'bool',
-            'passthrough_mode':'bool',
-            'pool':'typing.Optional[str]',
-            'cluster_cidr':'str',
-            'service_cidr':'str',
-            'cluster_dns_ip':'str',
-            'node_ip':'str',
-            'route_v4_interface':'typing.Optional[str]',
-            'route_v4_gateway':'typing.Optional[str]',
-            'route_v6_interface':'typing.Optional[str]',
-            'route_v6_gateway':'typing.Optional[str]',
-            'dataset':'typing.Optional[str]',
-            'id':'int',
-    })
-    Metadata = typing.TypedDict('Metadata', {
-            'name':'str',
-    })
-    Event = typing.TypedDict('Event', {
-            'metadata':'Metadata',
-            'message':'str',
-    })
-    Options = typing.TypedDict('Options', {
-            'wait_for_csi':'bool',
-    })
-    Status = typing.TypedDict('Status', {
-            'status':'str',
-            'description':'str',
-    })
-    MigrationOptions = typing.TypedDict('MigrationOptions', {
-            'passphrase':'str',
-    })
-    KubernetesUpdate = typing.TypedDict('KubernetesUpdate', {
-            'servicelb':'bool',
-            'configure_gpus':'bool',
-            'metrics_server':'bool',
-            'passthrough_mode':'bool',
-            'pool':'typing.Optional[str]',
-            'cluster_cidr':'str',
-            'service_cidr':'str',
-            'cluster_dns_ip':'str',
-            'node_ip':'str',
-            'route_v4_interface':'typing.Optional[str]',
-            'route_v4_gateway':'typing.Optional[str]',
-            'route_v6_interface':'typing.Optional[str]',
-            'route_v6_gateway':'typing.Optional[str]',
-            'migrate_applications':'bool',
-            'force':'bool',
-            'migration_options':'MigrationOptions',
-    })
-    KubernetesUpdateReturns = typing.TypedDict('KubernetesUpdateReturns', {
-            'servicelb':'bool',
-            'configure_gpus':'bool',
-            'metrics_server':'bool',
-            'passthrough_mode':'bool',
-            'pool':'typing.Optional[str]',
-            'cluster_cidr':'str',
-            'service_cidr':'str',
-            'cluster_dns_ip':'str',
-            'node_ip':'str',
-            'route_v4_interface':'typing.Optional[str]',
-            'route_v4_gateway':'typing.Optional[str]',
-            'route_v6_interface':'typing.Optional[str]',
-            'route_v6_gateway':'typing.Optional[str]',
-            'dataset':'typing.Optional[str]',
-            'id':'int',
-    })
     @typing.overload
     def update(self, 
         kubernetes_update:'KubernetesUpdate'={},
@@ -941,8 +251,17 @@ class Kubernetes(
     Options = typing.TypedDict('Options', {
             'wait_for_csi':'bool',
     })
-    Status = typing.TypedDict('Status', {
-            'status':'str',
+    class Status(str,Enum):
+        PENDING = 'PENDING'
+        RUNNING = 'RUNNING'
+        INITIALIZING = 'INITIALIZING'
+        STOPPING = 'STOPPING'
+        STOPPED = 'STOPPED'
+        UNCONFIGURED = 'UNCONFIGURED'
+        FAILED = 'FAILED'
+        ...
+    Status_ = typing.TypedDict('Status_', {
+            'status':'Status',
             'description':'str',
     })
     MigrationOptions = typing.TypedDict('MigrationOptions', {
@@ -983,4 +302,3 @@ class Kubernetes(
             'dataset':'typing.Optional[str]',
             'id':'int',
     })
-

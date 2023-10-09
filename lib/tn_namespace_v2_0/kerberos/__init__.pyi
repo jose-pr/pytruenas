@@ -1,7 +1,7 @@
 
 from pytruenas import TrueNASClient
 from pytruenas.base import Namespace
-
+from enum import Enum
 import typing
 class Kerberos(
     Namespace
@@ -22,10 +22,6 @@ class Kerberos(
             kerberos_entry
         """
         ...
-    KerberosSettingsUpdate = typing.TypedDict('KerberosSettingsUpdate', {
-            'appdefaults_aux':'str',
-            'libdefaults_aux':'str',
-    })
     @typing.overload
     def update(self, 
         kerberos_settings_update:'KerberosSettingsUpdate'={},
@@ -49,4 +45,3 @@ class Kerberos(
             'appdefaults_aux':'str',
             'libdefaults_aux':'str',
     })
-

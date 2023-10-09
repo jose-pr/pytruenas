@@ -2,6 +2,8 @@
 from pytruenas.base import Namespace
 
 import typing
+from enum import Enum
+
 class Alert(Namespace):
     def __init__(self, client) -> None:
         super().__init__(client, 'alert')
@@ -34,3 +36,9 @@ class Alert(Namespace):
             'title':'str',
             'classes':'list[CategoryClass]',
     })
+    class Policy(str,Enum):
+        IMMEDIATELY = 'IMMEDIATELY'
+        HOURLY = 'HOURLY'
+        DAILY = 'DAILY'
+        NEVER = 'NEVER'
+        ...

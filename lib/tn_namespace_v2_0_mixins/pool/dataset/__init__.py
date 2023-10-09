@@ -3,6 +3,8 @@ from pytruenas.base import Namespace
 from pytruenas.mixins import TableExtMixin
 
 import typing
+from enum import Enum
+
 class PoolDataset(TableExtMixin, Namespace):
     def __init__(self, client) -> None:
         super().__init__(client, 'pool.dataset')
@@ -19,70 +21,379 @@ class PoolDataset(TableExtMixin, Namespace):
             'passphrase':'typing.Optional[str]',
             'key':'typing.Optional[str]',
     })
+    class ON(str,Enum):
+        ON = 'ON'
+        ...
+    class FLETCHER2(str,Enum):
+        FLETCHER2 = 'FLETCHER2'
+        ...
+    class FLETCHER4(str,Enum):
+        FLETCHER4 = 'FLETCHER4'
+        ...
+    class SHA256(str,Enum):
+        SHA256 = 'SHA256'
+        ...
+    class SHA512(str,Enum):
+        SHA512 = 'SHA512'
+        ...
+    class SKEIN(str,Enum):
+        SKEIN = 'SKEIN'
+        ...
+    class EDONR(str,Enum):
+        EDONR = 'EDONR'
+        ...
     ChecksumChoices = typing.TypedDict('ChecksumChoices', {
-            'ON':'str',
-            'FLETCHER2':'str',
-            'FLETCHER4':'str',
-            'SHA256':'str',
-            'SHA512':'str',
-            'SKEIN':'str',
-            'EDONR':'str',
+            'ON':'ON',
+            'FLETCHER2':'FLETCHER2',
+            'FLETCHER4':'FLETCHER4',
+            'SHA256':'SHA256',
+            'SHA512':'SHA512',
+            'SKEIN':'SKEIN',
+            'EDONR':'EDONR',
     })
+    class OFF(str,Enum):
+        OFF = 'OFF'
+        ...
+    class LZ4(str,Enum):
+        LZ4 = 'LZ4'
+        ...
+    class GZIP(str,Enum):
+        GZIP = 'GZIP'
+        ...
+    class GZIP1(str,Enum):
+        GZIP1 = 'GZIP-1'
+        ...
+    class GZIP9(str,Enum):
+        GZIP9 = 'GZIP-9'
+        ...
+    class ZSTD(str,Enum):
+        ZSTD = 'ZSTD'
+        ...
+    class ZSTDFAST(str,Enum):
+        ZSTDFAST = 'ZSTD-FAST'
+        ...
+    class ZLE(str,Enum):
+        ZLE = 'ZLE'
+        ...
+    class LZJB(str,Enum):
+        LZJB = 'LZJB'
+        ...
+    class ZSTD1(str,Enum):
+        ZSTD1 = 'ZSTD-1'
+        ...
+    class ZSTD2(str,Enum):
+        ZSTD2 = 'ZSTD-2'
+        ...
+    class ZSTD3(str,Enum):
+        ZSTD3 = 'ZSTD-3'
+        ...
+    class ZSTD4(str,Enum):
+        ZSTD4 = 'ZSTD-4'
+        ...
+    class ZSTD5(str,Enum):
+        ZSTD5 = 'ZSTD-5'
+        ...
+    class ZSTD6(str,Enum):
+        ZSTD6 = 'ZSTD-6'
+        ...
+    class ZSTD7(str,Enum):
+        ZSTD7 = 'ZSTD-7'
+        ...
+    class ZSTD8(str,Enum):
+        ZSTD8 = 'ZSTD-8'
+        ...
+    class ZSTD9(str,Enum):
+        ZSTD9 = 'ZSTD-9'
+        ...
+    class ZSTD10(str,Enum):
+        ZSTD10 = 'ZSTD-10'
+        ...
+    class ZSTD11(str,Enum):
+        ZSTD11 = 'ZSTD-11'
+        ...
+    class ZSTD12(str,Enum):
+        ZSTD12 = 'ZSTD-12'
+        ...
+    class ZSTD13(str,Enum):
+        ZSTD13 = 'ZSTD-13'
+        ...
+    class ZSTD14(str,Enum):
+        ZSTD14 = 'ZSTD-14'
+        ...
+    class ZSTD15(str,Enum):
+        ZSTD15 = 'ZSTD-15'
+        ...
+    class ZSTD16(str,Enum):
+        ZSTD16 = 'ZSTD-16'
+        ...
+    class ZSTD17(str,Enum):
+        ZSTD17 = 'ZSTD-17'
+        ...
+    class ZSTD18(str,Enum):
+        ZSTD18 = 'ZSTD-18'
+        ...
+    class ZSTD19(str,Enum):
+        ZSTD19 = 'ZSTD-19'
+        ...
+    class ZSTDFAST1(str,Enum):
+        ZSTDFAST1 = 'ZSTD-FAST-1'
+        ...
+    class ZSTDFAST2(str,Enum):
+        ZSTDFAST2 = 'ZSTD-FAST-2'
+        ...
+    class ZSTDFAST3(str,Enum):
+        ZSTDFAST3 = 'ZSTD-FAST-3'
+        ...
+    class ZSTDFAST4(str,Enum):
+        ZSTDFAST4 = 'ZSTD-FAST-4'
+        ...
+    class ZSTDFAST5(str,Enum):
+        ZSTDFAST5 = 'ZSTD-FAST-5'
+        ...
+    class ZSTDFAST6(str,Enum):
+        ZSTDFAST6 = 'ZSTD-FAST-6'
+        ...
+    class ZSTDFAST7(str,Enum):
+        ZSTDFAST7 = 'ZSTD-FAST-7'
+        ...
+    class ZSTDFAST8(str,Enum):
+        ZSTDFAST8 = 'ZSTD-FAST-8'
+        ...
+    class ZSTDFAST9(str,Enum):
+        ZSTDFAST9 = 'ZSTD-FAST-9'
+        ...
+    class ZSTDFAST10(str,Enum):
+        ZSTDFAST10 = 'ZSTD-FAST-10'
+        ...
+    class ZSTDFAST20(str,Enum):
+        ZSTDFAST20 = 'ZSTD-FAST-20'
+        ...
+    class ZSTDFAST30(str,Enum):
+        ZSTDFAST30 = 'ZSTD-FAST-30'
+        ...
+    class ZSTDFAST40(str,Enum):
+        ZSTDFAST40 = 'ZSTD-FAST-40'
+        ...
+    class ZSTDFAST50(str,Enum):
+        ZSTDFAST50 = 'ZSTD-FAST-50'
+        ...
+    class ZSTDFAST60(str,Enum):
+        ZSTDFAST60 = 'ZSTD-FAST-60'
+        ...
+    class ZSTDFAST70(str,Enum):
+        ZSTDFAST70 = 'ZSTD-FAST-70'
+        ...
+    class ZSTDFAST80(str,Enum):
+        ZSTDFAST80 = 'ZSTD-FAST-80'
+        ...
+    class ZSTDFAST90(str,Enum):
+        ZSTDFAST90 = 'ZSTD-FAST-90'
+        ...
+    class ZSTDFAST100(str,Enum):
+        ZSTDFAST100 = 'ZSTD-FAST-100'
+        ...
+    class ZSTDFAST500(str,Enum):
+        ZSTDFAST500 = 'ZSTD-FAST-500'
+        ...
+    class ZSTDFAST1000(str,Enum):
+        ZSTDFAST1000 = 'ZSTD-FAST-1000'
+        ...
     CompressionChoices = typing.TypedDict('CompressionChoices', {
-            'OFF':'str',
-            'LZ4':'str',
-            'GZIP':'str',
-            'GZIP-1':'str',
-            'GZIP-9':'str',
-            'ZSTD':'str',
-            'ZSTD-FAST':'str',
-            'ZLE':'str',
-            'LZJB':'str',
-            'ZSTD-1':'str',
-            'ZSTD-2':'str',
-            'ZSTD-3':'str',
-            'ZSTD-4':'str',
-            'ZSTD-5':'str',
-            'ZSTD-6':'str',
-            'ZSTD-7':'str',
-            'ZSTD-8':'str',
-            'ZSTD-9':'str',
-            'ZSTD-10':'str',
-            'ZSTD-11':'str',
-            'ZSTD-12':'str',
-            'ZSTD-13':'str',
-            'ZSTD-14':'str',
-            'ZSTD-15':'str',
-            'ZSTD-16':'str',
-            'ZSTD-17':'str',
-            'ZSTD-18':'str',
-            'ZSTD-19':'str',
-            'ZSTD-FAST-1':'str',
-            'ZSTD-FAST-2':'str',
-            'ZSTD-FAST-3':'str',
-            'ZSTD-FAST-4':'str',
-            'ZSTD-FAST-5':'str',
-            'ZSTD-FAST-6':'str',
-            'ZSTD-FAST-7':'str',
-            'ZSTD-FAST-8':'str',
-            'ZSTD-FAST-9':'str',
-            'ZSTD-FAST-10':'str',
-            'ZSTD-FAST-20':'str',
-            'ZSTD-FAST-30':'str',
-            'ZSTD-FAST-40':'str',
-            'ZSTD-FAST-50':'str',
-            'ZSTD-FAST-60':'str',
-            'ZSTD-FAST-70':'str',
-            'ZSTD-FAST-80':'str',
-            'ZSTD-FAST-90':'str',
-            'ZSTD-FAST-100':'str',
-            'ZSTD-FAST-500':'str',
-            'ZSTD-FAST-1000':'str',
+            'OFF':'OFF',
+            'LZ4':'LZ4',
+            'GZIP':'GZIP',
+            'GZIP-1':'GZIP1',
+            'GZIP-9':'GZIP9',
+            'ZSTD':'ZSTD',
+            'ZSTD-FAST':'ZSTDFAST',
+            'ZLE':'ZLE',
+            'LZJB':'LZJB',
+            'ZSTD-1':'ZSTD1',
+            'ZSTD-2':'ZSTD2',
+            'ZSTD-3':'ZSTD3',
+            'ZSTD-4':'ZSTD4',
+            'ZSTD-5':'ZSTD5',
+            'ZSTD-6':'ZSTD6',
+            'ZSTD-7':'ZSTD7',
+            'ZSTD-8':'ZSTD8',
+            'ZSTD-9':'ZSTD9',
+            'ZSTD-10':'ZSTD10',
+            'ZSTD-11':'ZSTD11',
+            'ZSTD-12':'ZSTD12',
+            'ZSTD-13':'ZSTD13',
+            'ZSTD-14':'ZSTD14',
+            'ZSTD-15':'ZSTD15',
+            'ZSTD-16':'ZSTD16',
+            'ZSTD-17':'ZSTD17',
+            'ZSTD-18':'ZSTD18',
+            'ZSTD-19':'ZSTD19',
+            'ZSTD-FAST-1':'ZSTDFAST1',
+            'ZSTD-FAST-2':'ZSTDFAST2',
+            'ZSTD-FAST-3':'ZSTDFAST3',
+            'ZSTD-FAST-4':'ZSTDFAST4',
+            'ZSTD-FAST-5':'ZSTDFAST5',
+            'ZSTD-FAST-6':'ZSTDFAST6',
+            'ZSTD-FAST-7':'ZSTDFAST7',
+            'ZSTD-FAST-8':'ZSTDFAST8',
+            'ZSTD-FAST-9':'ZSTDFAST9',
+            'ZSTD-FAST-10':'ZSTDFAST10',
+            'ZSTD-FAST-20':'ZSTDFAST20',
+            'ZSTD-FAST-30':'ZSTDFAST30',
+            'ZSTD-FAST-40':'ZSTDFAST40',
+            'ZSTD-FAST-50':'ZSTDFAST50',
+            'ZSTD-FAST-60':'ZSTDFAST60',
+            'ZSTD-FAST-70':'ZSTDFAST70',
+            'ZSTD-FAST-80':'ZSTDFAST80',
+            'ZSTD-FAST-90':'ZSTDFAST90',
+            'ZSTD-FAST-100':'ZSTDFAST100',
+            'ZSTD-FAST-500':'ZSTDFAST500',
+            'ZSTD-FAST-1000':'ZSTDFAST1000',
     })
+    class Type(str,Enum):
+        FILESYSTEM = 'FILESYSTEM'
+        VOLUME = 'VOLUME'
+        ...
+    class Volblocksize(str,Enum):
+        _512 = '512'
+        _512B = '512B'
+        _1K = '1K'
+        _2K = '2K'
+        _4K = '4K'
+        _8K = '8K'
+        _16K = '16K'
+        _32K = '32K'
+        _64K = '64K'
+        _128K = '128K'
+        ...
+    class Object(str,Enum):
+        INHERIT = 'INHERIT'
+        ...
+    class Sync(str,Enum):
+        STANDARD = 'STANDARD'
+        ALWAYS = 'ALWAYS'
+        DISABLED = 'DISABLED'
+        ...
+    class Snapdev(str,Enum):
+        HIDDEN = 'HIDDEN'
+        VISIBLE = 'VISIBLE'
+        ...
+    class Compression(str,Enum):
+        OFF = 'OFF'
+        LZ4 = 'LZ4'
+        GZIP = 'GZIP'
+        GZIP1 = 'GZIP-1'
+        GZIP9 = 'GZIP-9'
+        ZSTD = 'ZSTD'
+        ZSTDFAST = 'ZSTD-FAST'
+        ZLE = 'ZLE'
+        LZJB = 'LZJB'
+        ZSTD1 = 'ZSTD-1'
+        ZSTD2 = 'ZSTD-2'
+        ZSTD3 = 'ZSTD-3'
+        ZSTD4 = 'ZSTD-4'
+        ZSTD5 = 'ZSTD-5'
+        ZSTD6 = 'ZSTD-6'
+        ZSTD7 = 'ZSTD-7'
+        ZSTD8 = 'ZSTD-8'
+        ZSTD9 = 'ZSTD-9'
+        ZSTD10 = 'ZSTD-10'
+        ZSTD11 = 'ZSTD-11'
+        ZSTD12 = 'ZSTD-12'
+        ZSTD13 = 'ZSTD-13'
+        ZSTD14 = 'ZSTD-14'
+        ZSTD15 = 'ZSTD-15'
+        ZSTD16 = 'ZSTD-16'
+        ZSTD17 = 'ZSTD-17'
+        ZSTD18 = 'ZSTD-18'
+        ZSTD19 = 'ZSTD-19'
+        ZSTDFAST1 = 'ZSTD-FAST-1'
+        ZSTDFAST2 = 'ZSTD-FAST-2'
+        ZSTDFAST3 = 'ZSTD-FAST-3'
+        ZSTDFAST4 = 'ZSTD-FAST-4'
+        ZSTDFAST5 = 'ZSTD-FAST-5'
+        ZSTDFAST6 = 'ZSTD-FAST-6'
+        ZSTDFAST7 = 'ZSTD-FAST-7'
+        ZSTDFAST8 = 'ZSTD-FAST-8'
+        ZSTDFAST9 = 'ZSTD-FAST-9'
+        ZSTDFAST10 = 'ZSTD-FAST-10'
+        ZSTDFAST20 = 'ZSTD-FAST-20'
+        ZSTDFAST30 = 'ZSTD-FAST-30'
+        ZSTDFAST40 = 'ZSTD-FAST-40'
+        ZSTDFAST50 = 'ZSTD-FAST-50'
+        ZSTDFAST60 = 'ZSTD-FAST-60'
+        ZSTDFAST70 = 'ZSTD-FAST-70'
+        ZSTDFAST80 = 'ZSTD-FAST-80'
+        ZSTDFAST90 = 'ZSTD-FAST-90'
+        ZSTDFAST100 = 'ZSTD-FAST-100'
+        ZSTDFAST500 = 'ZSTD-FAST-500'
+        ZSTDFAST1000 = 'ZSTD-FAST-1000'
+        ...
+    class Atime(str,Enum):
+        ON = 'ON'
+        OFF = 'OFF'
+        ...
+    class Exec(str,Enum):
+        ON = 'ON'
+        OFF = 'OFF'
+        ...
+    class Snapdir(str,Enum):
+        VISIBLE = 'VISIBLE'
+        HIDDEN = 'HIDDEN'
+        ...
+    class Deduplication(str,Enum):
+        ON = 'ON'
+        VERIFY = 'VERIFY'
+        OFF = 'OFF'
+        ...
+    class Checksum(str,Enum):
+        ON = 'ON'
+        OFF = 'OFF'
+        FLETCHER2 = 'FLETCHER2'
+        FLETCHER4 = 'FLETCHER4'
+        SHA256 = 'SHA256'
+        SHA512 = 'SHA512'
+        SKEIN = 'SKEIN'
+        EDONR = 'EDONR'
+        ...
+    class Readonly(str,Enum):
+        ON = 'ON'
+        OFF = 'OFF'
+        ...
+    class Casesensitivity(str,Enum):
+        SENSITIVE = 'SENSITIVE'
+        INSENSITIVE = 'INSENSITIVE'
+        ...
+    class Aclmode(str,Enum):
+        PASSTHROUGH = 'PASSTHROUGH'
+        RESTRICTED = 'RESTRICTED'
+        DISCARD = 'DISCARD'
+        ...
+    class Acltype(str,Enum):
+        OFF = 'OFF'
+        NFSV4 = 'NFSV4'
+        POSIX = 'POSIX'
+        ...
+    class ShareType(str,Enum):
+        GENERIC = 'GENERIC'
+        SMB = 'SMB'
+        APPS = 'APPS'
+        ...
+    class Xattr(str,Enum):
+        ON = 'ON'
+        SA = 'SA'
+        ...
+    class Algorithm(str,Enum):
+        AES128CCM = 'AES-128-CCM'
+        AES192CCM = 'AES-192-CCM'
+        AES256CCM = 'AES-256-CCM'
+        AES128GCM = 'AES-128-GCM'
+        AES192GCM = 'AES-192-GCM'
+        AES256GCM = 'AES-256-GCM'
+        ...
     EncryptionOptions = typing.TypedDict('EncryptionOptions', {
             'generate_key':'bool',
             'pbkdf2iters':'int',
-            'algorithm':'str',
+            'algorithm':'Algorithm',
             'passphrase':'typing.Optional[str]',
             'key':'typing.Optional[str]',
     })
@@ -92,38 +403,38 @@ class PoolDataset(TableExtMixin, Namespace):
     })
     PoolDatasetCreate = typing.TypedDict('PoolDatasetCreate', {
             'name':'str',
-            'type':'str',
+            'type':'Type',
             'volsize':'int',
-            'volblocksize':'str',
+            'volblocksize':'Volblocksize',
             'sparse':'bool',
             'force_size':'bool',
-            'comments':'str',
-            'sync':'str',
-            'snapdev':'str',
-            'compression':'str',
-            'atime':'str',
-            'exec':'str',
-            'managedby':'str',
+            'comments':'typing.Union[str, Object]',
+            'sync':'typing.Union[str, Object]',
+            'snapdev':'typing.Union[str, Object]',
+            'compression':'typing.Union[str, Object]',
+            'atime':'typing.Union[str, Object]',
+            'exec':'typing.Union[str, Object]',
+            'managedby':'typing.Union[str, Object]',
             'quota':'typing.Optional[int]',
-            'quota_warning':'typing.Union[int, str]',
-            'quota_critical':'typing.Union[int, str]',
+            'quota_warning':'typing.Union[int, Object]',
+            'quota_critical':'typing.Union[int, Object]',
             'refquota':'typing.Optional[int]',
-            'refquota_warning':'typing.Union[int, str]',
-            'refquota_critical':'typing.Union[int, str]',
+            'refquota_warning':'typing.Union[int, Object]',
+            'refquota_critical':'typing.Union[int, Object]',
             'reservation':'int',
             'refreservation':'int',
-            'special_small_block_size':'typing.Union[int, str]',
-            'copies':'typing.Union[int, str]',
-            'snapdir':'str',
-            'deduplication':'str',
-            'checksum':'str',
-            'readonly':'str',
-            'recordsize':'str',
-            'casesensitivity':'str',
-            'aclmode':'str',
-            'acltype':'str',
-            'share_type':'str',
-            'xattr':'str',
+            'special_small_block_size':'typing.Union[int, Object]',
+            'copies':'typing.Union[int, Object]',
+            'snapdir':'typing.Union[str, Object]',
+            'deduplication':'typing.Union[str, Object]',
+            'checksum':'typing.Union[str, Object]',
+            'readonly':'typing.Union[str, Object]',
+            'recordsize':'typing.Union[str, Object]',
+            'casesensitivity':'typing.Union[str, Object]',
+            'aclmode':'typing.Union[str, Object]',
+            'acltype':'typing.Union[str, Object]',
+            'share_type':'ShareType',
+            'xattr':'typing.Union[str, Object]',
             'encryption_options':'EncryptionOptions',
             'encryption':'bool',
             'inherit_encryption':'bool',
@@ -172,70 +483,70 @@ class PoolDataset(TableExtMixin, Namespace):
             'source':'typing.Optional[str]',
             'source_info':'typing.Union[str, int, bool, dict[str], list]',
     })
-    Deduplication = typing.TypedDict('Deduplication', {
+    Deduplication_ = typing.TypedDict('Deduplication_', {
             'parsed':'typing.Union[str, int, bool, dict[str], list]',
             'rawvalue':'typing.Optional[str]',
             'value':'typing.Optional[str]',
             'source':'typing.Optional[str]',
             'source_info':'typing.Union[str, int, bool, dict[str], list]',
     })
-    Aclmode = typing.TypedDict('Aclmode', {
+    Aclmode_ = typing.TypedDict('Aclmode_', {
             'parsed':'typing.Union[str, int, bool, dict[str], list]',
             'rawvalue':'typing.Optional[str]',
             'value':'typing.Optional[str]',
             'source':'typing.Optional[str]',
             'source_info':'typing.Union[str, int, bool, dict[str], list]',
     })
-    Acltype = typing.TypedDict('Acltype', {
+    Acltype_ = typing.TypedDict('Acltype_', {
             'parsed':'typing.Union[str, int, bool, dict[str], list]',
             'rawvalue':'typing.Optional[str]',
             'value':'typing.Optional[str]',
             'source':'typing.Optional[str]',
             'source_info':'typing.Union[str, int, bool, dict[str], list]',
     })
-    Xattr = typing.TypedDict('Xattr', {
+    Xattr_ = typing.TypedDict('Xattr_', {
             'parsed':'typing.Union[str, int, bool, dict[str], list]',
             'rawvalue':'typing.Optional[str]',
             'value':'typing.Optional[str]',
             'source':'typing.Optional[str]',
             'source_info':'typing.Union[str, int, bool, dict[str], list]',
     })
-    Atime = typing.TypedDict('Atime', {
+    Atime_ = typing.TypedDict('Atime_', {
             'parsed':'typing.Union[str, int, bool, dict[str], list]',
             'rawvalue':'typing.Optional[str]',
             'value':'typing.Optional[str]',
             'source':'typing.Optional[str]',
             'source_info':'typing.Union[str, int, bool, dict[str], list]',
     })
-    Casesensitivity = typing.TypedDict('Casesensitivity', {
+    Casesensitivity_ = typing.TypedDict('Casesensitivity_', {
             'parsed':'typing.Union[str, int, bool, dict[str], list]',
             'rawvalue':'typing.Optional[str]',
             'value':'typing.Optional[str]',
             'source':'typing.Optional[str]',
             'source_info':'typing.Union[str, int, bool, dict[str], list]',
     })
-    Checksum = typing.TypedDict('Checksum', {
+    Checksum_ = typing.TypedDict('Checksum_', {
             'parsed':'typing.Union[str, int, bool, dict[str], list]',
             'rawvalue':'typing.Optional[str]',
             'value':'typing.Optional[str]',
             'source':'typing.Optional[str]',
             'source_info':'typing.Union[str, int, bool, dict[str], list]',
     })
-    Exec = typing.TypedDict('Exec', {
+    Exec_ = typing.TypedDict('Exec_', {
             'parsed':'typing.Union[str, int, bool, dict[str], list]',
             'rawvalue':'typing.Optional[str]',
             'value':'typing.Optional[str]',
             'source':'typing.Optional[str]',
             'source_info':'typing.Union[str, int, bool, dict[str], list]',
     })
-    Sync = typing.TypedDict('Sync', {
+    Sync_ = typing.TypedDict('Sync_', {
             'parsed':'typing.Union[str, int, bool, dict[str], list]',
             'rawvalue':'typing.Optional[str]',
             'value':'typing.Optional[str]',
             'source':'typing.Optional[str]',
             'source_info':'typing.Union[str, int, bool, dict[str], list]',
     })
-    Compression = typing.TypedDict('Compression', {
+    Compression_ = typing.TypedDict('Compression_', {
             'parsed':'typing.Union[str, int, bool, dict[str], list]',
             'rawvalue':'typing.Optional[str]',
             'value':'typing.Optional[str]',
@@ -291,14 +602,14 @@ class PoolDataset(TableExtMixin, Namespace):
             'source':'typing.Optional[str]',
             'source_info':'typing.Union[str, int, bool, dict[str], list]',
     })
-    Snapdir = typing.TypedDict('Snapdir', {
+    Snapdir_ = typing.TypedDict('Snapdir_', {
             'parsed':'typing.Union[str, int, bool, dict[str], list]',
             'rawvalue':'typing.Optional[str]',
             'value':'typing.Optional[str]',
             'source':'typing.Optional[str]',
             'source_info':'typing.Union[str, int, bool, dict[str], list]',
     })
-    Readonly = typing.TypedDict('Readonly', {
+    Readonly_ = typing.TypedDict('Readonly_', {
             'parsed':'typing.Union[str, int, bool, dict[str], list]',
             'rawvalue':'typing.Optional[str]',
             'value':'typing.Optional[str]',
@@ -326,7 +637,7 @@ class PoolDataset(TableExtMixin, Namespace):
             'source':'typing.Optional[str]',
             'source_info':'typing.Union[str, int, bool, dict[str], list]',
     })
-    Volblocksize = typing.TypedDict('Volblocksize', {
+    Volblocksize_ = typing.TypedDict('Volblocksize_', {
             'parsed':'typing.Union[str, int, bool, dict[str], list]',
             'rawvalue':'typing.Optional[str]',
             'value':'typing.Optional[str]',
@@ -410,7 +721,7 @@ class PoolDataset(TableExtMixin, Namespace):
             'source':'typing.Optional[str]',
             'source_info':'typing.Union[str, int, bool, dict[str], list]',
     })
-    Snapdev = typing.TypedDict('Snapdev', {
+    Snapdev_ = typing.TypedDict('Snapdev_', {
             'parsed':'typing.Union[str, int, bool, dict[str], list]',
             'rawvalue':'typing.Optional[str]',
             'value':'typing.Optional[str]',
@@ -434,16 +745,16 @@ class PoolDataset(TableExtMixin, Namespace):
             'refquota_warning':'RefquotaWarning',
             'refquota_critical':'RefquotaCritical',
             'managedby':'Managedby',
-            'deduplication':'Deduplication',
-            'aclmode':'Aclmode',
-            'acltype':'Acltype',
-            'xattr':'Xattr',
-            'atime':'Atime',
-            'casesensitivity':'Casesensitivity',
-            'checksum':'Checksum',
-            'exec':'Exec',
-            'sync':'Sync',
-            'compression':'Compression',
+            'deduplication':'Deduplication_',
+            'aclmode':'Aclmode_',
+            'acltype':'Acltype_',
+            'xattr':'Xattr_',
+            'atime':'Atime_',
+            'casesensitivity':'Casesensitivity_',
+            'checksum':'Checksum_',
+            'exec':'Exec_',
+            'sync':'Sync_',
+            'compression':'Compression_',
             'compressratio':'Compressratio',
             'origin':'Origin',
             'quota':'Quota',
@@ -451,12 +762,12 @@ class PoolDataset(TableExtMixin, Namespace):
             'reservation':'Reservation',
             'refreservation':'Refreservation',
             'copies':'Copies',
-            'snapdir':'Snapdir',
-            'readonly':'Readonly',
+            'snapdir':'Snapdir_',
+            'readonly':'Readonly_',
             'recordsize':'Recordsize',
             'sparse':'Sparse',
             'volsize':'Volsize',
-            'volblocksize':'Volblocksize',
+            'volblocksize':'Volblocksize_',
             'key_format':'KeyFormat',
             'encryption_algorithm':'EncryptionAlgorithm',
             'used':'Used',
@@ -468,7 +779,7 @@ class PoolDataset(TableExtMixin, Namespace):
             'special_small_block_size':'SpecialSmallBlockSize',
             'pbkdf2iters':'Pbkdf2iters',
             'creation':'Creation',
-            'snapdev':'Snapdev',
+            'snapdev':'Snapdev_',
             'mountpoint':'typing.Optional[str]',
     })
     DatasetDelete = typing.TypedDict('DatasetDelete', {
@@ -482,15 +793,33 @@ class PoolDataset(TableExtMixin, Namespace):
     Snapshots = typing.TypedDict('Snapshots', {
             'all':'bool',
             'recursive':'bool',
-            'snapshots':'list[typing.Union[ForwardRef(SnapshotSpec), str]]',
+            'snapshots':'list[typing.Union[SnapshotSpec, str]]',
     })
+    class AES128CCM(str,Enum):
+        AES128CCM = 'AES-128-CCM'
+        ...
+    class AES192CCM(str,Enum):
+        AES192CCM = 'AES-192-CCM'
+        ...
+    class AES256CCM(str,Enum):
+        AES256CCM = 'AES-256-CCM'
+        ...
+    class AES128GCM(str,Enum):
+        AES128GCM = 'AES-128-GCM'
+        ...
+    class AES192GCM(str,Enum):
+        AES192GCM = 'AES-192-GCM'
+        ...
+    class AES256GCM(str,Enum):
+        AES256GCM = 'AES-256-GCM'
+        ...
     EncryptionAlgorithmChoices = typing.TypedDict('EncryptionAlgorithmChoices', {
-            'AES-128-CCM':'str',
-            'AES-192-CCM':'str',
-            'AES-256-CCM':'str',
-            'AES-128-GCM':'str',
-            'AES-192-GCM':'str',
-            'AES-256-GCM':'str',
+            'AES-128-CCM':'AES128CCM',
+            'AES-192-CCM':'AES192CCM',
+            'AES-256-CCM':'AES256CCM',
+            'AES-128-GCM':'AES128GCM',
+            'AES-192-GCM':'AES192GCM',
+            'AES-256-GCM':'AES256GCM',
     })
     Dataset = typing.TypedDict('Dataset', {
             'force':'bool',
@@ -526,6 +855,12 @@ class PoolDataset(TableExtMixin, Namespace):
             'limit':'int',
             'force_sql_filters':'bool',
     })
+    class QuotaType(str,Enum):
+        USER = 'USER'
+        GROUP = 'GROUP'
+        DATASET = 'DATASET'
+        PROJECT = 'PROJECT'
+        ...
     QueryOptions = typing.TypedDict('QueryOptions', {
             'relationships':'bool',
             'extend':'typing.Optional[str]',
@@ -543,6 +878,23 @@ class PoolDataset(TableExtMixin, Namespace):
     LockOptions = typing.TypedDict('LockOptions', {
             'force_umount':'bool',
     })
+    class Tag(str,Enum):
+        Owner = 'owner@'
+        Group = 'group@'
+        Everyone = 'everyone@'
+        USER = 'USER'
+        GROUP = 'GROUP'
+        ...
+    class Type_(str,Enum):
+        ALLOW = 'ALLOW'
+        DENY = 'DENY'
+        ...
+    class BASIC(str,Enum):
+        FULLCONTROL = 'FULL_CONTROL'
+        MODIFY = 'MODIFY'
+        READ = 'READ'
+        TRAVERSE = 'TRAVERSE'
+        ...
     Perms = typing.TypedDict('Perms', {
             'READ_DATA':'bool',
             'WRITE_DATA':'bool',
@@ -558,23 +910,35 @@ class PoolDataset(TableExtMixin, Namespace):
             'WRITE_ACL':'bool',
             'WRITE_OWNER':'bool',
             'SYNCHRONIZE':'bool',
-            'BASIC':'str',
+            'BASIC':'BASIC',
     })
+    class BASIC_(str,Enum):
+        INHERIT = 'INHERIT'
+        NOINHERIT = 'NOINHERIT'
+        ...
     Flags = typing.TypedDict('Flags', {
             'FILE_INHERIT':'bool',
             'DIRECTORY_INHERIT':'bool',
             'NO_PROPAGATE_INHERIT':'bool',
             'INHERIT_ONLY':'bool',
             'INHERITED':'bool',
-            'BASIC':'str',
+            'BASIC':'BASIC_',
     })
     Nfs4Ace = typing.TypedDict('Nfs4Ace', {
-            'tag':'str',
+            'tag':'Tag',
             'id':'typing.Optional[int]',
-            'type':'str',
+            'type':'Type_',
             'perms':'Perms',
             'flags':'Flags',
     })
+    class Tag_(str,Enum):
+        USEROBJ = 'USER_OBJ'
+        GROUPOBJ = 'GROUP_OBJ'
+        USER = 'USER'
+        GROUP = 'GROUP'
+        OTHER = 'OTHER'
+        MASK = 'MASK'
+        ...
     Perms_ = typing.TypedDict('Perms_', {
             'READ':'bool',
             'WRITE':'bool',
@@ -582,7 +946,7 @@ class PoolDataset(TableExtMixin, Namespace):
     })
     Posix1eAce = typing.TypedDict('Posix1eAce', {
             'default':'bool',
-            'tag':'str',
+            'tag':'Tag_',
             'id':'int',
             'perms':'Perms_',
     })
@@ -600,9 +964,9 @@ class PoolDataset(TableExtMixin, Namespace):
             'options':'Options',
     })
     Nfs4Ace_ = typing.TypedDict('Nfs4Ace_', {
-            'tag':'str',
+            'tag':'Tag',
             'id':'typing.Optional[int]',
-            'type':'str',
+            'type':'Type_',
             'perms':'Perms',
             'flags':'Flags',
     })
@@ -675,70 +1039,70 @@ class PoolDataset(TableExtMixin, Namespace):
             'source':'typing.Optional[str]',
             'source_info':'typing.Union[str, int, bool, dict[str], list]',
     })
-    Deduplication_ = typing.TypedDict('Deduplication_', {
+    Deduplication__ = typing.TypedDict('Deduplication__', {
             'parsed':'typing.Union[str, int, bool, dict[str], list]',
             'rawvalue':'typing.Optional[str]',
             'value':'typing.Optional[str]',
             'source':'typing.Optional[str]',
             'source_info':'typing.Union[str, int, bool, dict[str], list]',
     })
-    Aclmode_ = typing.TypedDict('Aclmode_', {
+    Aclmode__ = typing.TypedDict('Aclmode__', {
             'parsed':'typing.Union[str, int, bool, dict[str], list]',
             'rawvalue':'typing.Optional[str]',
             'value':'typing.Optional[str]',
             'source':'typing.Optional[str]',
             'source_info':'typing.Union[str, int, bool, dict[str], list]',
     })
-    Acltype_ = typing.TypedDict('Acltype_', {
+    Acltype__ = typing.TypedDict('Acltype__', {
             'parsed':'typing.Union[str, int, bool, dict[str], list]',
             'rawvalue':'typing.Optional[str]',
             'value':'typing.Optional[str]',
             'source':'typing.Optional[str]',
             'source_info':'typing.Union[str, int, bool, dict[str], list]',
     })
-    Xattr_ = typing.TypedDict('Xattr_', {
+    Xattr__ = typing.TypedDict('Xattr__', {
             'parsed':'typing.Union[str, int, bool, dict[str], list]',
             'rawvalue':'typing.Optional[str]',
             'value':'typing.Optional[str]',
             'source':'typing.Optional[str]',
             'source_info':'typing.Union[str, int, bool, dict[str], list]',
     })
-    Atime_ = typing.TypedDict('Atime_', {
+    Atime__ = typing.TypedDict('Atime__', {
             'parsed':'typing.Union[str, int, bool, dict[str], list]',
             'rawvalue':'typing.Optional[str]',
             'value':'typing.Optional[str]',
             'source':'typing.Optional[str]',
             'source_info':'typing.Union[str, int, bool, dict[str], list]',
     })
-    Casesensitivity_ = typing.TypedDict('Casesensitivity_', {
+    Casesensitivity__ = typing.TypedDict('Casesensitivity__', {
             'parsed':'typing.Union[str, int, bool, dict[str], list]',
             'rawvalue':'typing.Optional[str]',
             'value':'typing.Optional[str]',
             'source':'typing.Optional[str]',
             'source_info':'typing.Union[str, int, bool, dict[str], list]',
     })
-    Checksum_ = typing.TypedDict('Checksum_', {
+    Checksum__ = typing.TypedDict('Checksum__', {
             'parsed':'typing.Union[str, int, bool, dict[str], list]',
             'rawvalue':'typing.Optional[str]',
             'value':'typing.Optional[str]',
             'source':'typing.Optional[str]',
             'source_info':'typing.Union[str, int, bool, dict[str], list]',
     })
-    Exec_ = typing.TypedDict('Exec_', {
+    Exec__ = typing.TypedDict('Exec__', {
             'parsed':'typing.Union[str, int, bool, dict[str], list]',
             'rawvalue':'typing.Optional[str]',
             'value':'typing.Optional[str]',
             'source':'typing.Optional[str]',
             'source_info':'typing.Union[str, int, bool, dict[str], list]',
     })
-    Sync_ = typing.TypedDict('Sync_', {
+    Sync__ = typing.TypedDict('Sync__', {
             'parsed':'typing.Union[str, int, bool, dict[str], list]',
             'rawvalue':'typing.Optional[str]',
             'value':'typing.Optional[str]',
             'source':'typing.Optional[str]',
             'source_info':'typing.Union[str, int, bool, dict[str], list]',
     })
-    Compression_ = typing.TypedDict('Compression_', {
+    Compression__ = typing.TypedDict('Compression__', {
             'parsed':'typing.Union[str, int, bool, dict[str], list]',
             'rawvalue':'typing.Optional[str]',
             'value':'typing.Optional[str]',
@@ -794,14 +1158,14 @@ class PoolDataset(TableExtMixin, Namespace):
             'source':'typing.Optional[str]',
             'source_info':'typing.Union[str, int, bool, dict[str], list]',
     })
-    Snapdir_ = typing.TypedDict('Snapdir_', {
+    Snapdir__ = typing.TypedDict('Snapdir__', {
             'parsed':'typing.Union[str, int, bool, dict[str], list]',
             'rawvalue':'typing.Optional[str]',
             'value':'typing.Optional[str]',
             'source':'typing.Optional[str]',
             'source_info':'typing.Union[str, int, bool, dict[str], list]',
     })
-    Readonly_ = typing.TypedDict('Readonly_', {
+    Readonly__ = typing.TypedDict('Readonly__', {
             'parsed':'typing.Union[str, int, bool, dict[str], list]',
             'rawvalue':'typing.Optional[str]',
             'value':'typing.Optional[str]',
@@ -829,7 +1193,7 @@ class PoolDataset(TableExtMixin, Namespace):
             'source':'typing.Optional[str]',
             'source_info':'typing.Union[str, int, bool, dict[str], list]',
     })
-    Volblocksize_ = typing.TypedDict('Volblocksize_', {
+    Volblocksize__ = typing.TypedDict('Volblocksize__', {
             'parsed':'typing.Union[str, int, bool, dict[str], list]',
             'rawvalue':'typing.Optional[str]',
             'value':'typing.Optional[str]',
@@ -913,7 +1277,7 @@ class PoolDataset(TableExtMixin, Namespace):
             'source':'typing.Optional[str]',
             'source_info':'typing.Union[str, int, bool, dict[str], list]',
     })
-    Snapdev_ = typing.TypedDict('Snapdev_', {
+    Snapdev__ = typing.TypedDict('Snapdev__', {
             'parsed':'typing.Union[str, int, bool, dict[str], list]',
             'rawvalue':'typing.Optional[str]',
             'value':'typing.Optional[str]',
@@ -937,16 +1301,16 @@ class PoolDataset(TableExtMixin, Namespace):
             'refquota_warning':'RefquotaWarning_',
             'refquota_critical':'RefquotaCritical_',
             'managedby':'Managedby_',
-            'deduplication':'Deduplication_',
-            'aclmode':'Aclmode_',
-            'acltype':'Acltype_',
-            'xattr':'Xattr_',
-            'atime':'Atime_',
-            'casesensitivity':'Casesensitivity_',
-            'checksum':'Checksum_',
-            'exec':'Exec_',
-            'sync':'Sync_',
-            'compression':'Compression_',
+            'deduplication':'Deduplication__',
+            'aclmode':'Aclmode__',
+            'acltype':'Acltype__',
+            'xattr':'Xattr__',
+            'atime':'Atime__',
+            'casesensitivity':'Casesensitivity__',
+            'checksum':'Checksum__',
+            'exec':'Exec__',
+            'sync':'Sync__',
+            'compression':'Compression__',
             'compressratio':'Compressratio_',
             'origin':'Origin_',
             'quota':'Quota_',
@@ -954,12 +1318,12 @@ class PoolDataset(TableExtMixin, Namespace):
             'reservation':'Reservation_',
             'refreservation':'Refreservation_',
             'copies':'Copies_',
-            'snapdir':'Snapdir_',
-            'readonly':'Readonly_',
+            'snapdir':'Snapdir__',
+            'readonly':'Readonly__',
             'recordsize':'Recordsize_',
             'sparse':'Sparse_',
             'volsize':'Volsize_',
-            'volblocksize':'Volblocksize_',
+            'volblocksize':'Volblocksize__',
             'key_format':'KeyFormat_',
             'encryption_algorithm':'EncryptionAlgorithm_',
             'used':'Used_',
@@ -971,7 +1335,7 @@ class PoolDataset(TableExtMixin, Namespace):
             'special_small_block_size':'SpecialSmallBlockSize_',
             'pbkdf2iters':'Pbkdf2iters_',
             'creation':'Creation_',
-            'snapdev':'Snapdev_',
+            'snapdev':'Snapdev__',
             'mountpoint':'typing.Optional[str]',
     })
     Comments__ = typing.TypedDict('Comments__', {
@@ -1016,70 +1380,70 @@ class PoolDataset(TableExtMixin, Namespace):
             'source':'typing.Optional[str]',
             'source_info':'typing.Union[str, int, bool, dict[str], list]',
     })
-    Deduplication__ = typing.TypedDict('Deduplication__', {
+    Deduplication___ = typing.TypedDict('Deduplication___', {
             'parsed':'typing.Union[str, int, bool, dict[str], list]',
             'rawvalue':'typing.Optional[str]',
             'value':'typing.Optional[str]',
             'source':'typing.Optional[str]',
             'source_info':'typing.Union[str, int, bool, dict[str], list]',
     })
-    Aclmode__ = typing.TypedDict('Aclmode__', {
+    Aclmode___ = typing.TypedDict('Aclmode___', {
             'parsed':'typing.Union[str, int, bool, dict[str], list]',
             'rawvalue':'typing.Optional[str]',
             'value':'typing.Optional[str]',
             'source':'typing.Optional[str]',
             'source_info':'typing.Union[str, int, bool, dict[str], list]',
     })
-    Acltype__ = typing.TypedDict('Acltype__', {
+    Acltype___ = typing.TypedDict('Acltype___', {
             'parsed':'typing.Union[str, int, bool, dict[str], list]',
             'rawvalue':'typing.Optional[str]',
             'value':'typing.Optional[str]',
             'source':'typing.Optional[str]',
             'source_info':'typing.Union[str, int, bool, dict[str], list]',
     })
-    Xattr__ = typing.TypedDict('Xattr__', {
+    Xattr___ = typing.TypedDict('Xattr___', {
             'parsed':'typing.Union[str, int, bool, dict[str], list]',
             'rawvalue':'typing.Optional[str]',
             'value':'typing.Optional[str]',
             'source':'typing.Optional[str]',
             'source_info':'typing.Union[str, int, bool, dict[str], list]',
     })
-    Atime__ = typing.TypedDict('Atime__', {
+    Atime___ = typing.TypedDict('Atime___', {
             'parsed':'typing.Union[str, int, bool, dict[str], list]',
             'rawvalue':'typing.Optional[str]',
             'value':'typing.Optional[str]',
             'source':'typing.Optional[str]',
             'source_info':'typing.Union[str, int, bool, dict[str], list]',
     })
-    Casesensitivity__ = typing.TypedDict('Casesensitivity__', {
+    Casesensitivity___ = typing.TypedDict('Casesensitivity___', {
             'parsed':'typing.Union[str, int, bool, dict[str], list]',
             'rawvalue':'typing.Optional[str]',
             'value':'typing.Optional[str]',
             'source':'typing.Optional[str]',
             'source_info':'typing.Union[str, int, bool, dict[str], list]',
     })
-    Checksum__ = typing.TypedDict('Checksum__', {
+    Checksum___ = typing.TypedDict('Checksum___', {
             'parsed':'typing.Union[str, int, bool, dict[str], list]',
             'rawvalue':'typing.Optional[str]',
             'value':'typing.Optional[str]',
             'source':'typing.Optional[str]',
             'source_info':'typing.Union[str, int, bool, dict[str], list]',
     })
-    Exec__ = typing.TypedDict('Exec__', {
+    Exec___ = typing.TypedDict('Exec___', {
             'parsed':'typing.Union[str, int, bool, dict[str], list]',
             'rawvalue':'typing.Optional[str]',
             'value':'typing.Optional[str]',
             'source':'typing.Optional[str]',
             'source_info':'typing.Union[str, int, bool, dict[str], list]',
     })
-    Sync__ = typing.TypedDict('Sync__', {
+    Sync___ = typing.TypedDict('Sync___', {
             'parsed':'typing.Union[str, int, bool, dict[str], list]',
             'rawvalue':'typing.Optional[str]',
             'value':'typing.Optional[str]',
             'source':'typing.Optional[str]',
             'source_info':'typing.Union[str, int, bool, dict[str], list]',
     })
-    Compression__ = typing.TypedDict('Compression__', {
+    Compression___ = typing.TypedDict('Compression___', {
             'parsed':'typing.Union[str, int, bool, dict[str], list]',
             'rawvalue':'typing.Optional[str]',
             'value':'typing.Optional[str]',
@@ -1135,14 +1499,14 @@ class PoolDataset(TableExtMixin, Namespace):
             'source':'typing.Optional[str]',
             'source_info':'typing.Union[str, int, bool, dict[str], list]',
     })
-    Snapdir__ = typing.TypedDict('Snapdir__', {
+    Snapdir___ = typing.TypedDict('Snapdir___', {
             'parsed':'typing.Union[str, int, bool, dict[str], list]',
             'rawvalue':'typing.Optional[str]',
             'value':'typing.Optional[str]',
             'source':'typing.Optional[str]',
             'source_info':'typing.Union[str, int, bool, dict[str], list]',
     })
-    Readonly__ = typing.TypedDict('Readonly__', {
+    Readonly___ = typing.TypedDict('Readonly___', {
             'parsed':'typing.Union[str, int, bool, dict[str], list]',
             'rawvalue':'typing.Optional[str]',
             'value':'typing.Optional[str]',
@@ -1170,7 +1534,7 @@ class PoolDataset(TableExtMixin, Namespace):
             'source':'typing.Optional[str]',
             'source_info':'typing.Union[str, int, bool, dict[str], list]',
     })
-    Volblocksize__ = typing.TypedDict('Volblocksize__', {
+    Volblocksize___ = typing.TypedDict('Volblocksize___', {
             'parsed':'typing.Union[str, int, bool, dict[str], list]',
             'rawvalue':'typing.Optional[str]',
             'value':'typing.Optional[str]',
@@ -1254,7 +1618,7 @@ class PoolDataset(TableExtMixin, Namespace):
             'source':'typing.Optional[str]',
             'source_info':'typing.Union[str, int, bool, dict[str], list]',
     })
-    Snapdev__ = typing.TypedDict('Snapdev__', {
+    Snapdev___ = typing.TypedDict('Snapdev___', {
             'parsed':'typing.Union[str, int, bool, dict[str], list]',
             'rawvalue':'typing.Optional[str]',
             'value':'typing.Optional[str]',
@@ -1278,16 +1642,16 @@ class PoolDataset(TableExtMixin, Namespace):
             'refquota_warning':'RefquotaWarning__',
             'refquota_critical':'RefquotaCritical__',
             'managedby':'Managedby__',
-            'deduplication':'Deduplication__',
-            'aclmode':'Aclmode__',
-            'acltype':'Acltype__',
-            'xattr':'Xattr__',
-            'atime':'Atime__',
-            'casesensitivity':'Casesensitivity__',
-            'checksum':'Checksum__',
-            'exec':'Exec__',
-            'sync':'Sync__',
-            'compression':'Compression__',
+            'deduplication':'Deduplication___',
+            'aclmode':'Aclmode___',
+            'acltype':'Acltype___',
+            'xattr':'Xattr___',
+            'atime':'Atime___',
+            'casesensitivity':'Casesensitivity___',
+            'checksum':'Checksum___',
+            'exec':'Exec___',
+            'sync':'Sync___',
+            'compression':'Compression___',
             'compressratio':'Compressratio__',
             'origin':'Origin__',
             'quota':'Quota__',
@@ -1295,12 +1659,12 @@ class PoolDataset(TableExtMixin, Namespace):
             'reservation':'Reservation__',
             'refreservation':'Refreservation__',
             'copies':'Copies__',
-            'snapdir':'Snapdir__',
-            'readonly':'Readonly__',
+            'snapdir':'Snapdir___',
+            'readonly':'Readonly___',
             'recordsize':'Recordsize__',
             'sparse':'Sparse__',
             'volsize':'Volsize__',
-            'volblocksize':'Volblocksize__',
+            'volblocksize':'Volblocksize___',
             'key_format':'KeyFormat__',
             'encryption_algorithm':'EncryptionAlgorithm__',
             'used':'Used__',
@@ -1312,7 +1676,7 @@ class PoolDataset(TableExtMixin, Namespace):
             'special_small_block_size':'SpecialSmallBlockSize__',
             'pbkdf2iters':'Pbkdf2iters__',
             'creation':'Creation__',
-            'snapdev':'Snapdev__',
+            'snapdev':'Snapdev___',
             'mountpoint':'typing.Optional[str]',
     })
     Comments___ = typing.TypedDict('Comments___', {
@@ -1357,70 +1721,70 @@ class PoolDataset(TableExtMixin, Namespace):
             'source':'typing.Optional[str]',
             'source_info':'typing.Union[str, int, bool, dict[str], list]',
     })
-    Deduplication___ = typing.TypedDict('Deduplication___', {
+    Deduplication____ = typing.TypedDict('Deduplication____', {
             'parsed':'typing.Union[str, int, bool, dict[str], list]',
             'rawvalue':'typing.Optional[str]',
             'value':'typing.Optional[str]',
             'source':'typing.Optional[str]',
             'source_info':'typing.Union[str, int, bool, dict[str], list]',
     })
-    Aclmode___ = typing.TypedDict('Aclmode___', {
+    Aclmode____ = typing.TypedDict('Aclmode____', {
             'parsed':'typing.Union[str, int, bool, dict[str], list]',
             'rawvalue':'typing.Optional[str]',
             'value':'typing.Optional[str]',
             'source':'typing.Optional[str]',
             'source_info':'typing.Union[str, int, bool, dict[str], list]',
     })
-    Acltype___ = typing.TypedDict('Acltype___', {
+    Acltype____ = typing.TypedDict('Acltype____', {
             'parsed':'typing.Union[str, int, bool, dict[str], list]',
             'rawvalue':'typing.Optional[str]',
             'value':'typing.Optional[str]',
             'source':'typing.Optional[str]',
             'source_info':'typing.Union[str, int, bool, dict[str], list]',
     })
-    Xattr___ = typing.TypedDict('Xattr___', {
+    Xattr____ = typing.TypedDict('Xattr____', {
             'parsed':'typing.Union[str, int, bool, dict[str], list]',
             'rawvalue':'typing.Optional[str]',
             'value':'typing.Optional[str]',
             'source':'typing.Optional[str]',
             'source_info':'typing.Union[str, int, bool, dict[str], list]',
     })
-    Atime___ = typing.TypedDict('Atime___', {
+    Atime____ = typing.TypedDict('Atime____', {
             'parsed':'typing.Union[str, int, bool, dict[str], list]',
             'rawvalue':'typing.Optional[str]',
             'value':'typing.Optional[str]',
             'source':'typing.Optional[str]',
             'source_info':'typing.Union[str, int, bool, dict[str], list]',
     })
-    Casesensitivity___ = typing.TypedDict('Casesensitivity___', {
+    Casesensitivity____ = typing.TypedDict('Casesensitivity____', {
             'parsed':'typing.Union[str, int, bool, dict[str], list]',
             'rawvalue':'typing.Optional[str]',
             'value':'typing.Optional[str]',
             'source':'typing.Optional[str]',
             'source_info':'typing.Union[str, int, bool, dict[str], list]',
     })
-    Checksum___ = typing.TypedDict('Checksum___', {
+    Checksum____ = typing.TypedDict('Checksum____', {
             'parsed':'typing.Union[str, int, bool, dict[str], list]',
             'rawvalue':'typing.Optional[str]',
             'value':'typing.Optional[str]',
             'source':'typing.Optional[str]',
             'source_info':'typing.Union[str, int, bool, dict[str], list]',
     })
-    Exec___ = typing.TypedDict('Exec___', {
+    Exec____ = typing.TypedDict('Exec____', {
             'parsed':'typing.Union[str, int, bool, dict[str], list]',
             'rawvalue':'typing.Optional[str]',
             'value':'typing.Optional[str]',
             'source':'typing.Optional[str]',
             'source_info':'typing.Union[str, int, bool, dict[str], list]',
     })
-    Sync___ = typing.TypedDict('Sync___', {
+    Sync____ = typing.TypedDict('Sync____', {
             'parsed':'typing.Union[str, int, bool, dict[str], list]',
             'rawvalue':'typing.Optional[str]',
             'value':'typing.Optional[str]',
             'source':'typing.Optional[str]',
             'source_info':'typing.Union[str, int, bool, dict[str], list]',
     })
-    Compression___ = typing.TypedDict('Compression___', {
+    Compression____ = typing.TypedDict('Compression____', {
             'parsed':'typing.Union[str, int, bool, dict[str], list]',
             'rawvalue':'typing.Optional[str]',
             'value':'typing.Optional[str]',
@@ -1476,14 +1840,14 @@ class PoolDataset(TableExtMixin, Namespace):
             'source':'typing.Optional[str]',
             'source_info':'typing.Union[str, int, bool, dict[str], list]',
     })
-    Snapdir___ = typing.TypedDict('Snapdir___', {
+    Snapdir____ = typing.TypedDict('Snapdir____', {
             'parsed':'typing.Union[str, int, bool, dict[str], list]',
             'rawvalue':'typing.Optional[str]',
             'value':'typing.Optional[str]',
             'source':'typing.Optional[str]',
             'source_info':'typing.Union[str, int, bool, dict[str], list]',
     })
-    Readonly___ = typing.TypedDict('Readonly___', {
+    Readonly____ = typing.TypedDict('Readonly____', {
             'parsed':'typing.Union[str, int, bool, dict[str], list]',
             'rawvalue':'typing.Optional[str]',
             'value':'typing.Optional[str]',
@@ -1511,7 +1875,7 @@ class PoolDataset(TableExtMixin, Namespace):
             'source':'typing.Optional[str]',
             'source_info':'typing.Union[str, int, bool, dict[str], list]',
     })
-    Volblocksize___ = typing.TypedDict('Volblocksize___', {
+    Volblocksize____ = typing.TypedDict('Volblocksize____', {
             'parsed':'typing.Union[str, int, bool, dict[str], list]',
             'rawvalue':'typing.Optional[str]',
             'value':'typing.Optional[str]',
@@ -1595,7 +1959,7 @@ class PoolDataset(TableExtMixin, Namespace):
             'source':'typing.Optional[str]',
             'source_info':'typing.Union[str, int, bool, dict[str], list]',
     })
-    Snapdev___ = typing.TypedDict('Snapdev___', {
+    Snapdev____ = typing.TypedDict('Snapdev____', {
             'parsed':'typing.Union[str, int, bool, dict[str], list]',
             'rawvalue':'typing.Optional[str]',
             'value':'typing.Optional[str]',
@@ -1619,16 +1983,16 @@ class PoolDataset(TableExtMixin, Namespace):
             'refquota_warning':'RefquotaWarning___',
             'refquota_critical':'RefquotaCritical___',
             'managedby':'Managedby___',
-            'deduplication':'Deduplication___',
-            'aclmode':'Aclmode___',
-            'acltype':'Acltype___',
-            'xattr':'Xattr___',
-            'atime':'Atime___',
-            'casesensitivity':'Casesensitivity___',
-            'checksum':'Checksum___',
-            'exec':'Exec___',
-            'sync':'Sync___',
-            'compression':'Compression___',
+            'deduplication':'Deduplication____',
+            'aclmode':'Aclmode____',
+            'acltype':'Acltype____',
+            'xattr':'Xattr____',
+            'atime':'Atime____',
+            'casesensitivity':'Casesensitivity____',
+            'checksum':'Checksum____',
+            'exec':'Exec____',
+            'sync':'Sync____',
+            'compression':'Compression____',
             'compressratio':'Compressratio___',
             'origin':'Origin___',
             'quota':'Quota___',
@@ -1636,12 +2000,12 @@ class PoolDataset(TableExtMixin, Namespace):
             'reservation':'Reservation___',
             'refreservation':'Refreservation___',
             'copies':'Copies___',
-            'snapdir':'Snapdir___',
-            'readonly':'Readonly___',
+            'snapdir':'Snapdir____',
+            'readonly':'Readonly____',
             'recordsize':'Recordsize___',
             'sparse':'Sparse___',
             'volsize':'Volsize___',
-            'volblocksize':'Volblocksize___',
+            'volblocksize':'Volblocksize____',
             'key_format':'KeyFormat___',
             'encryption_algorithm':'EncryptionAlgorithm___',
             'used':'Used___',
@@ -1653,11 +2017,18 @@ class PoolDataset(TableExtMixin, Namespace):
             'special_small_block_size':'SpecialSmallBlockSize___',
             'pbkdf2iters':'Pbkdf2iters___',
             'creation':'Creation___',
-            'snapdev':'Snapdev___',
+            'snapdev':'Snapdev____',
             'mountpoint':'typing.Optional[str]',
     })
+    class QuotaType_(str,Enum):
+        DATASET = 'DATASET'
+        USER = 'USER'
+        USEROBJ = 'USEROBJ'
+        GROUP = 'GROUP'
+        GROUPOBJ = 'GROUPOBJ'
+        ...
     QuotaEntry = typing.TypedDict('QuotaEntry', {
-            'quota_type':'str',
+            'quota_type':'QuotaType_',
             'id':'str',
             'quota_value':'typing.Optional[int]',
     })
@@ -1687,31 +2058,31 @@ class PoolDataset(TableExtMixin, Namespace):
     PoolDatasetUpdate = typing.TypedDict('PoolDatasetUpdate', {
             'volsize':'int',
             'force_size':'bool',
-            'comments':'str',
-            'sync':'str',
-            'snapdev':'str',
-            'compression':'str',
-            'atime':'str',
-            'exec':'str',
-            'managedby':'str',
+            'comments':'typing.Union[str, Object]',
+            'sync':'typing.Union[str, Object]',
+            'snapdev':'typing.Union[str, Object]',
+            'compression':'typing.Union[str, Object]',
+            'atime':'typing.Union[str, Object]',
+            'exec':'typing.Union[str, Object]',
+            'managedby':'typing.Union[str, Object]',
             'quota':'typing.Optional[int]',
-            'quota_warning':'typing.Union[int, str]',
-            'quota_critical':'typing.Union[int, str]',
+            'quota_warning':'typing.Union[int, Object]',
+            'quota_critical':'typing.Union[int, Object]',
             'refquota':'typing.Optional[int]',
-            'refquota_warning':'typing.Union[int, str]',
-            'refquota_critical':'typing.Union[int, str]',
+            'refquota_warning':'typing.Union[int, Object]',
+            'refquota_critical':'typing.Union[int, Object]',
             'reservation':'int',
             'refreservation':'int',
-            'special_small_block_size':'typing.Union[int, str]',
-            'copies':'typing.Union[int, str]',
-            'snapdir':'str',
-            'deduplication':'str',
-            'checksum':'str',
-            'readonly':'str',
-            'recordsize':'str',
-            'aclmode':'str',
-            'acltype':'str',
-            'xattr':'str',
+            'special_small_block_size':'typing.Union[int, Object]',
+            'copies':'typing.Union[int, Object]',
+            'snapdir':'typing.Union[str, Object]',
+            'deduplication':'typing.Union[str, Object]',
+            'checksum':'typing.Union[str, Object]',
+            'readonly':'typing.Union[str, Object]',
+            'recordsize':'typing.Union[str, Object]',
+            'aclmode':'typing.Union[str, Object]',
+            'acltype':'typing.Union[str, Object]',
+            'xattr':'typing.Union[str, Object]',
             'user_properties':'list[UserProperty]',
             'create_ancestors':'bool',
             'user_properties_update':'list[UserProperty_]',
@@ -1758,70 +2129,70 @@ class PoolDataset(TableExtMixin, Namespace):
             'source':'typing.Optional[str]',
             'source_info':'typing.Union[str, int, bool, dict[str], list]',
     })
-    Deduplication____ = typing.TypedDict('Deduplication____', {
+    Deduplication_____ = typing.TypedDict('Deduplication_____', {
             'parsed':'typing.Union[str, int, bool, dict[str], list]',
             'rawvalue':'typing.Optional[str]',
             'value':'typing.Optional[str]',
             'source':'typing.Optional[str]',
             'source_info':'typing.Union[str, int, bool, dict[str], list]',
     })
-    Aclmode____ = typing.TypedDict('Aclmode____', {
+    Aclmode_____ = typing.TypedDict('Aclmode_____', {
             'parsed':'typing.Union[str, int, bool, dict[str], list]',
             'rawvalue':'typing.Optional[str]',
             'value':'typing.Optional[str]',
             'source':'typing.Optional[str]',
             'source_info':'typing.Union[str, int, bool, dict[str], list]',
     })
-    Acltype____ = typing.TypedDict('Acltype____', {
+    Acltype_____ = typing.TypedDict('Acltype_____', {
             'parsed':'typing.Union[str, int, bool, dict[str], list]',
             'rawvalue':'typing.Optional[str]',
             'value':'typing.Optional[str]',
             'source':'typing.Optional[str]',
             'source_info':'typing.Union[str, int, bool, dict[str], list]',
     })
-    Xattr____ = typing.TypedDict('Xattr____', {
+    Xattr_____ = typing.TypedDict('Xattr_____', {
             'parsed':'typing.Union[str, int, bool, dict[str], list]',
             'rawvalue':'typing.Optional[str]',
             'value':'typing.Optional[str]',
             'source':'typing.Optional[str]',
             'source_info':'typing.Union[str, int, bool, dict[str], list]',
     })
-    Atime____ = typing.TypedDict('Atime____', {
+    Atime_____ = typing.TypedDict('Atime_____', {
             'parsed':'typing.Union[str, int, bool, dict[str], list]',
             'rawvalue':'typing.Optional[str]',
             'value':'typing.Optional[str]',
             'source':'typing.Optional[str]',
             'source_info':'typing.Union[str, int, bool, dict[str], list]',
     })
-    Casesensitivity____ = typing.TypedDict('Casesensitivity____', {
+    Casesensitivity_____ = typing.TypedDict('Casesensitivity_____', {
             'parsed':'typing.Union[str, int, bool, dict[str], list]',
             'rawvalue':'typing.Optional[str]',
             'value':'typing.Optional[str]',
             'source':'typing.Optional[str]',
             'source_info':'typing.Union[str, int, bool, dict[str], list]',
     })
-    Checksum____ = typing.TypedDict('Checksum____', {
+    Checksum_____ = typing.TypedDict('Checksum_____', {
             'parsed':'typing.Union[str, int, bool, dict[str], list]',
             'rawvalue':'typing.Optional[str]',
             'value':'typing.Optional[str]',
             'source':'typing.Optional[str]',
             'source_info':'typing.Union[str, int, bool, dict[str], list]',
     })
-    Exec____ = typing.TypedDict('Exec____', {
+    Exec_____ = typing.TypedDict('Exec_____', {
             'parsed':'typing.Union[str, int, bool, dict[str], list]',
             'rawvalue':'typing.Optional[str]',
             'value':'typing.Optional[str]',
             'source':'typing.Optional[str]',
             'source_info':'typing.Union[str, int, bool, dict[str], list]',
     })
-    Sync____ = typing.TypedDict('Sync____', {
+    Sync_____ = typing.TypedDict('Sync_____', {
             'parsed':'typing.Union[str, int, bool, dict[str], list]',
             'rawvalue':'typing.Optional[str]',
             'value':'typing.Optional[str]',
             'source':'typing.Optional[str]',
             'source_info':'typing.Union[str, int, bool, dict[str], list]',
     })
-    Compression____ = typing.TypedDict('Compression____', {
+    Compression_____ = typing.TypedDict('Compression_____', {
             'parsed':'typing.Union[str, int, bool, dict[str], list]',
             'rawvalue':'typing.Optional[str]',
             'value':'typing.Optional[str]',
@@ -1877,14 +2248,14 @@ class PoolDataset(TableExtMixin, Namespace):
             'source':'typing.Optional[str]',
             'source_info':'typing.Union[str, int, bool, dict[str], list]',
     })
-    Snapdir____ = typing.TypedDict('Snapdir____', {
+    Snapdir_____ = typing.TypedDict('Snapdir_____', {
             'parsed':'typing.Union[str, int, bool, dict[str], list]',
             'rawvalue':'typing.Optional[str]',
             'value':'typing.Optional[str]',
             'source':'typing.Optional[str]',
             'source_info':'typing.Union[str, int, bool, dict[str], list]',
     })
-    Readonly____ = typing.TypedDict('Readonly____', {
+    Readonly_____ = typing.TypedDict('Readonly_____', {
             'parsed':'typing.Union[str, int, bool, dict[str], list]',
             'rawvalue':'typing.Optional[str]',
             'value':'typing.Optional[str]',
@@ -1912,7 +2283,7 @@ class PoolDataset(TableExtMixin, Namespace):
             'source':'typing.Optional[str]',
             'source_info':'typing.Union[str, int, bool, dict[str], list]',
     })
-    Volblocksize____ = typing.TypedDict('Volblocksize____', {
+    Volblocksize_____ = typing.TypedDict('Volblocksize_____', {
             'parsed':'typing.Union[str, int, bool, dict[str], list]',
             'rawvalue':'typing.Optional[str]',
             'value':'typing.Optional[str]',
@@ -1996,7 +2367,7 @@ class PoolDataset(TableExtMixin, Namespace):
             'source':'typing.Optional[str]',
             'source_info':'typing.Union[str, int, bool, dict[str], list]',
     })
-    Snapdev____ = typing.TypedDict('Snapdev____', {
+    Snapdev_____ = typing.TypedDict('Snapdev_____', {
             'parsed':'typing.Union[str, int, bool, dict[str], list]',
             'rawvalue':'typing.Optional[str]',
             'value':'typing.Optional[str]',
@@ -2020,16 +2391,16 @@ class PoolDataset(TableExtMixin, Namespace):
             'refquota_warning':'RefquotaWarning____',
             'refquota_critical':'RefquotaCritical____',
             'managedby':'Managedby____',
-            'deduplication':'Deduplication____',
-            'aclmode':'Aclmode____',
-            'acltype':'Acltype____',
-            'xattr':'Xattr____',
-            'atime':'Atime____',
-            'casesensitivity':'Casesensitivity____',
-            'checksum':'Checksum____',
-            'exec':'Exec____',
-            'sync':'Sync____',
-            'compression':'Compression____',
+            'deduplication':'Deduplication_____',
+            'aclmode':'Aclmode_____',
+            'acltype':'Acltype_____',
+            'xattr':'Xattr_____',
+            'atime':'Atime_____',
+            'casesensitivity':'Casesensitivity_____',
+            'checksum':'Checksum_____',
+            'exec':'Exec_____',
+            'sync':'Sync_____',
+            'compression':'Compression_____',
             'compressratio':'Compressratio____',
             'origin':'Origin____',
             'quota':'Quota____',
@@ -2037,12 +2408,12 @@ class PoolDataset(TableExtMixin, Namespace):
             'reservation':'Reservation____',
             'refreservation':'Refreservation____',
             'copies':'Copies____',
-            'snapdir':'Snapdir____',
-            'readonly':'Readonly____',
+            'snapdir':'Snapdir_____',
+            'readonly':'Readonly_____',
             'recordsize':'Recordsize____',
             'sparse':'Sparse____',
             'volsize':'Volsize____',
-            'volblocksize':'Volblocksize____',
+            'volblocksize':'Volblocksize_____',
             'key_format':'KeyFormat____',
             'encryption_algorithm':'EncryptionAlgorithm____',
             'used':'Used____',
@@ -2054,6 +2425,6 @@ class PoolDataset(TableExtMixin, Namespace):
             'special_small_block_size':'SpecialSmallBlockSize____',
             'pbkdf2iters':'Pbkdf2iters____',
             'creation':'Creation____',
-            'snapdev':'Snapdev____',
+            'snapdev':'Snapdev_____',
             'mountpoint':'typing.Optional[str]',
     })

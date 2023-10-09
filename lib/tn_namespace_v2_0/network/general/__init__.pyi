@@ -1,7 +1,7 @@
 
 from pytruenas import TrueNASClient
 from pytruenas.base import Namespace
-
+from enum import Enum
 import typing
 class NetworkGeneral(
     Namespace
@@ -29,4 +29,3 @@ class NetworkGeneral(
             'default_routes':'list[str]',
             'nameservers':'list[str]',
     })
-

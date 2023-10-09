@@ -1,7 +1,7 @@
 
 from pytruenas import TrueNASClient
 from pytruenas.base import Namespace
-
+from enum import Enum
 import typing
 class Device(
     Namespace
@@ -10,7 +10,7 @@ class Device(
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload
     def get_info(self, 
-        type:'str',
+        type:'Type',
     /) -> 'typing.Union[list[SerialInfo], list[GpuInfo], dict[str]]': 
         """
         Get info for SERIAL/DISK/GPU device types.
@@ -25,33 +25,6 @@ class Device(
             
         """
         ...
-    SerialInfo = typing.TypedDict('SerialInfo', {
-            'name':'str',
-            'location':'str',
-            'drivername':'str',
-            'start':'str',
-            'size':'int',
-            'description':'str',
-    })
-    Addr = typing.TypedDict('Addr', {
-            'pci_slot':'str',
-            'domain':'str',
-            'bus':'str',
-            'slot':'str',
-    })
-    GpuDevice = typing.TypedDict('GpuDevice', {
-            'pci_id':'str',
-            'pci_slot':'str',
-            'vm_pci_slot':'str',
-    })
-    GpuInfo = typing.TypedDict('GpuInfo', {
-            'addr':'Addr',
-            'description':'str',
-            'devices':'list[GpuDevice]',
-            'vendor':'typing.Optional[str]',
-            'available_to_host':'bool',
-            'uses_system_critical_devices':'bool',
-    })
     @typing.overload
     def gpu_pci_ids_choices(self, 
     /) -> 'dict[str]': 
@@ -73,6 +46,11 @@ class Device(
             ```
         """
         ...
+    class Type(str,Enum):
+        SERIAL = 'SERIAL'
+        DISK = 'DISK'
+        GPU = 'GPU'
+        ...
     SerialInfo = typing.TypedDict('SerialInfo', {
             'name':'str',
             'location':'str',
@@ -100,4 +78,3 @@ class Device(
             'available_to_host':'bool',
             'uses_system_critical_devices':'bool',
     })
-

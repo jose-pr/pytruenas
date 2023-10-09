@@ -1,7 +1,7 @@
 
 from pytruenas import TrueNASClient
 from pytruenas.base import Namespace
-
+from enum import Enum
 import typing
 class GlusterFuse(
     Namespace
@@ -27,19 +27,6 @@ class GlusterFuse(
             is_mounted
         """
         ...
-    GlusterfuseMounted = typing.TypedDict('GlusterfuseMounted', {
-            'name':'str',
-    })
-    GluserfuseMount = typing.TypedDict('GluserfuseMount', {
-            'name':'str',
-            'all':'bool',
-            'raise':'bool',
-    })
-    GlusterfuseUmount = typing.TypedDict('GlusterfuseUmount', {
-            'name':'str',
-            'all':'bool',
-            'raise':'bool',
-    })
     @typing.overload
     def mount(self, 
         gluserfuse_mount:'GluserfuseMount'={},
@@ -66,19 +53,6 @@ class GlusterFuse(
             mount
         """
         ...
-    GlusterfuseMounted = typing.TypedDict('GlusterfuseMounted', {
-            'name':'str',
-    })
-    GluserfuseMount = typing.TypedDict('GluserfuseMount', {
-            'name':'str',
-            'all':'bool',
-            'raise':'bool',
-    })
-    GlusterfuseUmount = typing.TypedDict('GlusterfuseUmount', {
-            'name':'str',
-            'all':'bool',
-            'raise':'bool',
-    })
     @typing.overload
     def umount(self, 
         glusterfuse_umount:'GlusterfuseUmount'={},
@@ -118,4 +92,3 @@ class GlusterFuse(
             'all':'bool',
             'raise':'bool',
     })
-

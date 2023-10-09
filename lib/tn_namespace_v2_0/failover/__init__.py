@@ -2,6 +2,8 @@
 from pytruenas.base import Namespace
 
 import typing
+from enum import Enum
+
 class Failover(Namespace):
     def __init__(self, client) -> None:
         super().__init__(client, 'failover')
@@ -20,6 +22,10 @@ class Failover(Namespace):
             'timeout':'int',
             'master':'bool',
     })
+    class Action(str,Enum):
+        ENABLE = 'ENABLE'
+        DISABLE = 'DISABLE'
+        ...
     Options_ = typing.TypedDict('Options_', {
             'active':'bool',
     })

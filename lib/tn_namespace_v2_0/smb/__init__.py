@@ -2,13 +2,19 @@
 from pytruenas.base import Namespace
 
 import typing
+from enum import Enum
+
 class Smb(Namespace):
     def __init__(self, client) -> None:
         super().__init__(client, 'smb')
 
+    class OutputFormat(str,Enum):
+        SMB = 'SMB'
+        LOCAL = 'LOCAL'
+        ...
     Options = typing.TypedDict('Options', {
             'use_kerberos':'bool',
-            'output_format':'str',
+            'output_format':'OutputFormat',
     })
     GetRemoteAcl = typing.TypedDict('GetRemoteAcl', {
             'server':'str',
@@ -18,6 +24,15 @@ class Smb(Namespace):
             'password':'str',
             'options':'Options',
     })
+    class InfoLevel(str,Enum):
+        AUTHLOG = 'AUTH_LOG'
+        ALL = 'ALL'
+        SESSIONS = 'SESSIONS'
+        SHARES = 'SHARES'
+        LOCKS = 'LOCKS'
+        BYTERANGE = 'BYTERANGE'
+        NOTIFICATIONS = 'NOTIFICATIONS'
+        ...
     QueryOptions = typing.TypedDict('QueryOptions', {
             'relationships':'bool',
             'extend':'typing.Optional[str]',
@@ -38,6 +53,13 @@ class Smb(Namespace):
             'restrict_user':'str',
             'restrict_session':'str',
     })
+    class Loglevel(str,Enum):
+        NONE = 'NONE'
+        MINIMUM = 'MINIMUM'
+        NORMAL = 'NORMAL'
+        FULL = 'FULL'
+        DEBUG = 'DEBUG'
+        ...
     SmbUpdate = typing.TypedDict('SmbUpdate', {
             'netbiosname':'str',
             'netbiosname_b':'str',
@@ -46,7 +68,7 @@ class Smb(Namespace):
             'description':'str',
             'enable_smb1':'bool',
             'unixcharset':'str',
-            'loglevel':'str',
+            'loglevel':'Loglevel',
             'syslog':'bool',
             'aapl_extensions':'bool',
             'localmaster':'bool',

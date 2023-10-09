@@ -2,6 +2,8 @@
 from pytruenas.base import Namespace
 
 import typing
+from enum import Enum
+
 class NetworkConfiguration(Namespace):
     def __init__(self, client) -> None:
         super().__init__(client, 'network.configuration')
@@ -11,8 +13,12 @@ class NetworkConfiguration(Namespace):
             'mdns':'bool',
             'wsd':'bool',
     })
+    class Type(str,Enum):
+        ALLOW = 'ALLOW'
+        DENY = 'DENY'
+        ...
     Activity = typing.TypedDict('Activity', {
-            'type':'str',
+            'type':'Type',
             'activities':'list[str]',
     })
     State = typing.TypedDict('State', {
@@ -42,7 +48,7 @@ class NetworkConfiguration(Namespace):
             'state':'State',
     })
     Activity_ = typing.TypedDict('Activity_', {
-            'type':'str',
+            'type':'Type',
             'activities':'list[str]',
     })
     GlobalConfigurationUpdate = typing.TypedDict('GlobalConfigurationUpdate', {
@@ -62,7 +68,7 @@ class NetworkConfiguration(Namespace):
             'hostname_virtual':'typing.Optional[str]',
     })
     Activity__ = typing.TypedDict('Activity__', {
-            'type':'str',
+            'type':'Type',
             'activities':'list[str]',
     })
     NetworkConfigurationUpdateReturns = typing.TypedDict('NetworkConfigurationUpdateReturns', {

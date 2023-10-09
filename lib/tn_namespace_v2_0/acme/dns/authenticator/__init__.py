@@ -2,6 +2,8 @@
 from pytruenas.base import Namespace
 
 import typing
+from enum import Enum
+
 class AcmeDnsAuthenticator(Namespace):
     def __init__(self, client) -> None:
         super().__init__(client, 'acme.dns.authenticator')
@@ -15,14 +17,20 @@ class AcmeDnsAuthenticator(Namespace):
             'key':'str',
             'schema':'list[AttributeSchema]',
     })
+    class Authenticator(str,Enum):
+        Cloudflare = 'cloudflare'
+        Route53 = 'route53'
+        OVH = 'OVH'
+        Shell = 'shell'
+        ...
     AcmeDnsAuthenticatorCreate = typing.TypedDict('AcmeDnsAuthenticatorCreate', {
-            'authenticator':'str',
+            'authenticator':'Authenticator',
             'attributes':'dict[str]',
             'name':'str',
     })
     AcmeDnsAuthenticatorCreateReturns = typing.TypedDict('AcmeDnsAuthenticatorCreateReturns', {
             'id':'int',
-            'authenticator':'str',
+            'authenticator':'Authenticator',
             'attributes':'dict[str]',
             'name':'str',
     })
@@ -56,7 +64,7 @@ class AcmeDnsAuthenticator(Namespace):
     })
     AcmeDnsAuthenticatorEntry = typing.TypedDict('AcmeDnsAuthenticatorEntry', {
             'id':'int',
-            'authenticator':'str',
+            'authenticator':'Authenticator',
             'attributes':'dict[str]',
             'name':'str',
     })
@@ -66,7 +74,7 @@ class AcmeDnsAuthenticator(Namespace):
     })
     AcmeDnsAuthenticatorUpdateReturns = typing.TypedDict('AcmeDnsAuthenticatorUpdateReturns', {
             'id':'int',
-            'authenticator':'str',
+            'authenticator':'Authenticator',
             'attributes':'dict[str]',
             'name':'str',
     })

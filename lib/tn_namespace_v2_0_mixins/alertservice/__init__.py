@@ -3,22 +3,33 @@ from pytruenas.base import Namespace
 from pytruenas.mixins import TableExtMixin
 
 import typing
+from enum import Enum
+
 class Alertservice(TableExtMixin, Namespace):
     def __init__(self, client) -> None:
         super().__init__(client, 'alertservice')
 
+    class Level(str,Enum):
+        INFO = 'INFO'
+        NOTICE = 'NOTICE'
+        WARNING = 'WARNING'
+        ERROR = 'ERROR'
+        CRITICAL = 'CRITICAL'
+        ALERT = 'ALERT'
+        EMERGENCY = 'EMERGENCY'
+        ...
     AlertServiceCreate = typing.TypedDict('AlertServiceCreate', {
             'name':'str',
             'type':'str',
             'attributes':'dict[str]',
-            'level':'str',
+            'level':'Level',
             'enabled':'bool',
     })
     AlertserviceCreateReturns = typing.TypedDict('AlertserviceCreateReturns', {
             'name':'str',
             'type':'str',
             'attributes':'dict[str]',
-            'level':'str',
+            'level':'Level',
             'enabled':'bool',
             'id':'int',
             'type__title':'str',
@@ -59,7 +70,7 @@ class Alertservice(TableExtMixin, Namespace):
             'name':'str',
             'type':'str',
             'attributes':'dict[str]',
-            'level':'str',
+            'level':'Level',
             'enabled':'bool',
             'id':'int',
             'type__title':'str',
@@ -68,14 +79,14 @@ class Alertservice(TableExtMixin, Namespace):
             'name':'str',
             'type':'str',
             'attributes':'dict[str]',
-            'level':'str',
+            'level':'Level',
             'enabled':'bool',
     })
     AlertserviceUpdateReturns = typing.TypedDict('AlertserviceUpdateReturns', {
             'name':'str',
             'type':'str',
             'attributes':'dict[str]',
-            'level':'str',
+            'level':'Level',
             'enabled':'bool',
             'id':'int',
             'type__title':'str',

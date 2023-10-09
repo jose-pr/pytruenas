@@ -3,6 +3,8 @@ from pytruenas.base import Namespace
 from pytruenas.mixins import TableExtMixin
 
 import typing
+from enum import Enum
+
 class ChartRelease(TableExtMixin, Namespace):
     def __init__(self, client) -> None:
         super().__init__(client, 'chart.release')
@@ -216,10 +218,15 @@ class ChartRelease(TableExtMixin, Namespace):
             'pod_name':'str',
             'container_name':'str',
     })
+    class Status(str,Enum):
+        ACTIVE = 'ACTIVE'
+        DEPLOYING = 'DEPLOYING'
+        STOPPED = 'STOPPED'
+        ...
     PodStatus_ = typing.TypedDict('PodStatus_', {
             'available':'int',
             'desired':'int',
-            'status':'str',
+            'status':'Status',
     })
     PullContainerImagesOptions = typing.TypedDict('PullContainerImagesOptions', {
             'redeploy':'bool',
@@ -459,14 +466,24 @@ class ChartRelease(TableExtMixin, Namespace):
             'before_scale':'BeforeScale',
             'after_scale':'AfterScale',
     })
+    class Type(str,Enum):
+        DEPLOYMENT = 'DEPLOYMENT'
+        STATEFULSET = 'STATEFULSET'
+        ...
     ScaleWorkload = typing.TypedDict('ScaleWorkload', {
             'replica_count':'int',
-            'type':'str',
+            'type':'Type',
             'name':'str',
     })
+    class DEPLOYMENT(str,Enum):
+        DEPLOYMENT = 'DEPLOYMENT'
+        ...
+    class STATEFULSET(str,Enum):
+        STATEFULSET = 'STATEFULSET'
+        ...
     ScaleableResources = typing.TypedDict('ScaleableResources', {
-            'DEPLOYMENT':'str',
-            'STATEFULSET':'str',
+            'DEPLOYMENT':'DEPLOYMENT',
+            'STATEFULSET':'STATEFULSET',
     })
     ChartReleaseUpdate = typing.TypedDict('ChartReleaseUpdate', {
             'values':'dict[str]',

@@ -2,7 +2,7 @@
 from pytruenas import TrueNASClient
 from pytruenas.base import Namespace
 from pytruenas.mixins import ConfigMixin
-
+from enum import Enum
 import typing
 class AuthTwofactor(
     ConfigMixin,
@@ -24,32 +24,6 @@ class AuthTwofactor(
             auth_twofactor_entry
         """
         ...
-    Services = typing.TypedDict('Services', {
-            'ssh':'bool',
-    })
-    AuthTwofactorEntry = typing.TypedDict('AuthTwofactorEntry', {
-            'enabled':'bool',
-            'otp_digits':'int',
-            'window':'int',
-            'interval':'int',
-            'services':'Services',
-            'id':'int',
-    })
-    AuthTwofactorUpdate = typing.TypedDict('AuthTwofactorUpdate', {
-            'enabled':'bool',
-            'otp_digits':'int',
-            'window':'int',
-            'interval':'int',
-            'services':'Services',
-    })
-    AuthTwofactorUpdateReturns = typing.TypedDict('AuthTwofactorUpdateReturns', {
-            'enabled':'bool',
-            'otp_digits':'int',
-            'window':'int',
-            'interval':'int',
-            'services':'Services',
-            'id':'int',
-    })
     @typing.overload
     def update(self, 
         auth_twofactor_update:'AuthTwofactorUpdate'={},
@@ -97,4 +71,3 @@ class AuthTwofactor(
             'services':'Services',
             'id':'int',
     })
-

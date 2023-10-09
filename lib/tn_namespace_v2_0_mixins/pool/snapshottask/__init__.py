@@ -3,10 +3,19 @@ from pytruenas.base import Namespace
 from pytruenas.mixins import TableExtMixin
 
 import typing
+from enum import Enum
+
 class PoolSnapshottask(TableExtMixin, Namespace):
     def __init__(self, client) -> None:
         super().__init__(client, 'pool.snapshottask')
 
+    class LifetimeUnit(str,Enum):
+        HOUR = 'HOUR'
+        DAY = 'DAY'
+        WEEK = 'WEEK'
+        MONTH = 'MONTH'
+        YEAR = 'YEAR'
+        ...
     Schedule = typing.TypedDict('Schedule', {
             'minute':'str',
             'hour':'str',
@@ -21,7 +30,7 @@ class PoolSnapshottask(TableExtMixin, Namespace):
             'recursive':'bool',
             'exclude':'list[str]',
             'lifetime_value':'int',
-            'lifetime_unit':'str',
+            'lifetime_unit':'LifetimeUnit',
             'naming_schema':'str',
             'schedule':'Schedule',
             'allow_empty':'bool',
@@ -32,7 +41,7 @@ class PoolSnapshottask(TableExtMixin, Namespace):
     })
     PeriodicSnapshotForeseenCount = typing.TypedDict('PeriodicSnapshotForeseenCount', {
             'lifetime_value':'int',
-            'lifetime_unit':'str',
+            'lifetime_unit':'LifetimeUnit',
             'schedule':'Schedule',
     })
     QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
@@ -68,7 +77,7 @@ class PoolSnapshottask(TableExtMixin, Namespace):
             'recursive':'bool',
             'exclude':'list[str]',
             'lifetime_value':'int',
-            'lifetime_unit':'str',
+            'lifetime_unit':'LifetimeUnit',
             'naming_schema':'str',
             'schedule':'Schedule',
             'allow_empty':'bool',
@@ -80,7 +89,7 @@ class PoolSnapshottask(TableExtMixin, Namespace):
             'recursive':'bool',
             'exclude':'list[str]',
             'lifetime_value':'int',
-            'lifetime_unit':'str',
+            'lifetime_unit':'LifetimeUnit',
             'naming_schema':'str',
             'schedule':'Schedule',
             'allow_empty':'bool',

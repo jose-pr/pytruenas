@@ -3,6 +3,8 @@ from pytruenas.base import Namespace
 from pytruenas.mixins import ConfigMixin
 
 import typing
+from enum import Enum
+
 class Support(ConfigMixin, Namespace):
     def __init__(self, client) -> None:
         super().__init__(client, 'support')
@@ -24,13 +26,17 @@ class Support(ConfigMixin, Namespace):
             'secondary_phone':'str',
             'id':'int',
     })
+    class Type(str,Enum):
+        BUG = 'BUG'
+        FEATURE = 'FEATURE'
+        ...
     NewTicket = typing.TypedDict('NewTicket', {
             'title':'str',
             'body':'str',
             'category':'str',
             'attach_debug':'bool',
             'token':'str',
-            'type':'str',
+            'type':'Type',
             'criticality':'str',
             'environment':'str',
             'phone':'str',

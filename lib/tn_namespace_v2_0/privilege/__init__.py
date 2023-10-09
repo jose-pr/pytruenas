@@ -2,12 +2,23 @@
 from pytruenas.base import Namespace
 
 import typing
+from enum import Enum
+
 class Privilege(Namespace):
     def __init__(self, client) -> None:
         super().__init__(client, 'privilege')
 
+    class Method(str,Enum):
+        GET = 'GET'
+        POST = 'POST'
+        PUT = 'PUT'
+        DELETE = 'DELETE'
+        CALL = 'CALL'
+        SUBSCRIBE = 'SUBSCRIBE'
+        _ = '*'
+        ...
     AllowlistItem = typing.TypedDict('AllowlistItem', {
-            'method':'str',
+            'method':'Method',
             'resource':'str',
     })
     PrivilegeCreate = typing.TypedDict('PrivilegeCreate', {

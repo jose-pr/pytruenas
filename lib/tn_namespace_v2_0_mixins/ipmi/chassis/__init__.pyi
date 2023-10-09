@@ -1,7 +1,7 @@
 
 from pytruenas import TrueNASClient
 from pytruenas.base import Namespace
-
+from enum import Enum
 import typing
 class IpmiChassis(
     Namespace
@@ -10,7 +10,7 @@ class IpmiChassis(
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload
     def identify(self, 
-        verb:'str'="ON",
+        verb:'Verb'="ON",
     /) -> None: 
         """
         Toggle the chassis identify light.
@@ -53,4 +53,7 @@ class IpmiChassis(
             chassis_info
         """
         ...
-
+    class Verb(str,Enum):
+        ON = 'ON'
+        OFF = 'OFF'
+        ...

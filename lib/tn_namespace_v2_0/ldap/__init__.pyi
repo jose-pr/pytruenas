@@ -1,7 +1,7 @@
 
 from pytruenas import TrueNASClient
 from pytruenas.base import Namespace
-
+from enum import Enum
 import typing
 class Ldap(
     Namespace
@@ -22,28 +22,9 @@ class Ldap(
             ldap_entry
         """
         ...
-    LdapUpdate = typing.TypedDict('LdapUpdate', {
-            'hostname':'list',
-            'basedn':'str',
-            'binddn':'str',
-            'bindpw':'str',
-            'anonbind':'bool',
-            'ssl':'str',
-            'certificate':'typing.Optional[int]',
-            'validate_certificates':'bool',
-            'disable_freenas_cache':'bool',
-            'timeout':'int',
-            'dns_timeout':'int',
-            'kerberos_realm':'typing.Optional[int]',
-            'kerberos_principal':'str',
-            'has_samba_schema':'bool',
-            'auxiliary_parameters':'str',
-            'schema':'str',
-            'enable':'bool',
-    })
     @typing.overload
     def get_state(self, 
-    /) -> 'str': 
+    /) -> 'DirectoryserviceState': 
         """
         Wrapper function for 'directoryservices.get_state'. Returns only the state of the
         LDAP service.
@@ -52,32 +33,13 @@ class Ldap(
         ----------
         Returns
         -------
-        str:
+        DirectoryserviceState:
             directoryservice_state
         """
         ...
-    LdapUpdate = typing.TypedDict('LdapUpdate', {
-            'hostname':'list',
-            'basedn':'str',
-            'binddn':'str',
-            'bindpw':'str',
-            'anonbind':'bool',
-            'ssl':'str',
-            'certificate':'typing.Optional[int]',
-            'validate_certificates':'bool',
-            'disable_freenas_cache':'bool',
-            'timeout':'int',
-            'dns_timeout':'int',
-            'kerberos_realm':'typing.Optional[int]',
-            'kerberos_principal':'str',
-            'has_samba_schema':'bool',
-            'auxiliary_parameters':'str',
-            'schema':'str',
-            'enable':'bool',
-    })
     @typing.overload
     def schema_choices(self, 
-    /) -> 'list[str]': 
+    /) -> 'list[NssInfoLdap]': 
         """
         Returns list of available LDAP schema choices.
 
@@ -85,32 +47,13 @@ class Ldap(
         ----------
         Returns
         -------
-        list[str]:
+        list[NssInfoLdap]:
             schema_choices
         """
         ...
-    LdapUpdate = typing.TypedDict('LdapUpdate', {
-            'hostname':'list',
-            'basedn':'str',
-            'binddn':'str',
-            'bindpw':'str',
-            'anonbind':'bool',
-            'ssl':'str',
-            'certificate':'typing.Optional[int]',
-            'validate_certificates':'bool',
-            'disable_freenas_cache':'bool',
-            'timeout':'int',
-            'dns_timeout':'int',
-            'kerberos_realm':'typing.Optional[int]',
-            'kerberos_principal':'str',
-            'has_samba_schema':'bool',
-            'auxiliary_parameters':'str',
-            'schema':'str',
-            'enable':'bool',
-    })
     @typing.overload
     def ssl_choices(self, 
-    /) -> 'list[str]': 
+    /) -> 'list[LdapSslChoice]': 
         """
         Returns list of SSL choices.
 
@@ -118,29 +61,10 @@ class Ldap(
         ----------
         Returns
         -------
-        list[str]:
+        list[LdapSslChoice]:
             ssl_choices
         """
         ...
-    LdapUpdate = typing.TypedDict('LdapUpdate', {
-            'hostname':'list',
-            'basedn':'str',
-            'binddn':'str',
-            'bindpw':'str',
-            'anonbind':'bool',
-            'ssl':'str',
-            'certificate':'typing.Optional[int]',
-            'validate_certificates':'bool',
-            'disable_freenas_cache':'bool',
-            'timeout':'int',
-            'dns_timeout':'int',
-            'kerberos_realm':'typing.Optional[int]',
-            'kerberos_principal':'str',
-            'has_samba_schema':'bool',
-            'auxiliary_parameters':'str',
-            'schema':'str',
-            'enable':'bool',
-    })
     @typing.overload
     def update(self, 
         ldap_update:'LdapUpdate'={},
@@ -207,13 +131,29 @@ class Ldap(
             ldap_update_returns
         """
         ...
+    class DirectoryserviceState(str,Enum):
+        DISABLED = 'DISABLED'
+        FAULTED = 'FAULTED'
+        LEAVING = 'LEAVING'
+        JOINING = 'JOINING'
+        HEALTHY = 'HEALTHY'
+        ...
+    class NssInfoLdap(str,Enum):
+        RFC2307 = 'RFC2307'
+        RFC2307BIS = 'RFC2307BIS'
+        ...
+    class LdapSslChoice(str,Enum):
+        OFF = 'OFF'
+        ON = 'ON'
+        STARTTLS = 'START_TLS'
+        ...
     LdapUpdate = typing.TypedDict('LdapUpdate', {
             'hostname':'list',
             'basedn':'str',
             'binddn':'str',
             'bindpw':'str',
             'anonbind':'bool',
-            'ssl':'str',
+            'ssl':'LdapSslChoice',
             'certificate':'typing.Optional[int]',
             'validate_certificates':'bool',
             'disable_freenas_cache':'bool',
@@ -223,7 +163,6 @@ class Ldap(
             'kerberos_principal':'str',
             'has_samba_schema':'bool',
             'auxiliary_parameters':'str',
-            'schema':'str',
+            'schema':'NssInfoLdap',
             'enable':'bool',
     })
-

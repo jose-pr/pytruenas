@@ -3,12 +3,25 @@ from pytruenas.base import Namespace
 from pytruenas.mixins import TableExtMixin
 
 import typing
+from enum import Enum
+
 class SharingSmb(TableExtMixin, Namespace):
     def __init__(self, client) -> None:
         super().__init__(client, 'sharing.smb')
 
+    class Purpose(str,Enum):
+        NOPRESET = 'NO_PRESET'
+        DEFAULTCLUSTERSHARE = 'DEFAULT_CLUSTER_SHARE'
+        DEFAULTSHARE = 'DEFAULT_SHARE'
+        TIMEMACHINE = 'TIMEMACHINE'
+        ENHANCEDTIMEMACHINE = 'ENHANCED_TIMEMACHINE'
+        MULTIPROTOCOLNFS = 'MULTI_PROTOCOL_NFS'
+        PRIVATEDATASETS = 'PRIVATE_DATASETS'
+        READONLY = 'READ_ONLY'
+        WORMDROPBOX = 'WORM_DROPBOX'
+        ...
     SharingsmbCreate = typing.TypedDict('SharingsmbCreate', {
-            'purpose':'str',
+            'purpose':'Purpose',
             'path':'str',
             'path_suffix':'str',
             'home':'bool',
@@ -51,15 +64,29 @@ class SharingSmb(TableExtMixin, Namespace):
     SmbGetacl = typing.TypedDict('SmbGetacl', {
             'share_name':'str',
     })
+    class IdType(str,Enum):
+        USER = 'USER'
+        GROUP = 'GROUP'
+        BOTH = 'BOTH'
+        ...
     AeWhoId = typing.TypedDict('AeWhoId', {
-            'id_type':'str',
+            'id_type':'IdType',
             'id':'int',
     })
+    class AePerm(str,Enum):
+        FULL = 'FULL'
+        CHANGE = 'CHANGE'
+        READ = 'READ'
+        ...
+    class AeType(str,Enum):
+        ALLOWED = 'ALLOWED'
+        DENIED = 'DENIED'
+        ...
     Aclentry = typing.TypedDict('Aclentry', {
             'ae_who_sid':'str',
             'ae_who_id':'AeWhoId',
-            'ae_perm':'str',
-            'ae_type':'str',
+            'ae_perm':'AePerm',
+            'ae_type':'AeType',
     })
     SmbShareAcl = typing.TypedDict('SmbShareAcl', {
             'share_name':'str',
@@ -88,7 +115,7 @@ class SharingSmb(TableExtMixin, Namespace):
             'share_acl':'list[Aclentry]',
     })
     SharingsmbUpdate = typing.TypedDict('SharingsmbUpdate', {
-            'purpose':'str',
+            'purpose':'Purpose',
             'path':'str',
             'path_suffix':'str',
             'home':'bool',

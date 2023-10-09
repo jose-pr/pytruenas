@@ -1,7 +1,7 @@
 
 from pytruenas import TrueNASClient
 from pytruenas.base import Namespace
-
+from enum import Enum
 import typing
 class Directoryservices(
     Namespace
@@ -30,10 +30,6 @@ class Directoryservices(
         -------
         """
         ...
-    DirectoryServicesStates = typing.TypedDict('DirectoryServicesStates', {
-            'activedirectory':'str',
-            'ldap':'str',
-    })
     @typing.overload
     def get_state(self, 
     /) -> 'DirectoryServicesStates': 
@@ -57,8 +53,14 @@ class Directoryservices(
             directory_services_states
         """
         ...
+    class DirectoryserviceState(str,Enum):
+        DISABLED = 'DISABLED'
+        FAULTED = 'FAULTED'
+        LEAVING = 'LEAVING'
+        JOINING = 'JOINING'
+        HEALTHY = 'HEALTHY'
+        ...
     DirectoryServicesStates = typing.TypedDict('DirectoryServicesStates', {
-            'activedirectory':'str',
-            'ldap':'str',
+            'activedirectory':'DirectoryserviceState',
+            'ldap':'DirectoryserviceState',
     })
-

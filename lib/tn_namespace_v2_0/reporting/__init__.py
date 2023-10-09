@@ -2,6 +2,8 @@
 from pytruenas.base import Namespace
 
 import typing
+from enum import Enum
+
 class Reporting(Namespace):
     def __init__(self, client) -> None:
         super().__init__(client, 'reporting')
@@ -17,8 +19,15 @@ class Reporting(Namespace):
             'name':'str',
             'identifier':'typing.Optional[str]',
     })
+    class Unit(str,Enum):
+        HOUR = 'HOUR'
+        DAY = 'DAY'
+        WEEK = 'WEEK'
+        MONTH = 'MONTH'
+        YEAR = 'YEAR'
+        ...
     ReportingQuery = typing.TypedDict('ReportingQuery', {
-            'unit':'str',
+            'unit':'Unit',
             'page':'int',
             'start':'str',
             'end':'str',
@@ -65,12 +74,27 @@ class Reporting(Namespace):
             'stacked':'bool',
             'stacked_show_total':'bool',
     })
+    class Name(str,Enum):
+        Cpu = 'cpu'
+        Cputemp = 'cputemp'
+        Disk = 'disk'
+        Interface = 'interface'
+        Load = 'load'
+        Memory = 'memory'
+        Swap = 'swap'
+        Uptime = 'uptime'
+        Arcactualrate = 'arcactualrate'
+        Arcrate = 'arcrate'
+        Arcsize = 'arcsize'
+        Arcresult = 'arcresult'
+        Disktemp = 'disktemp'
+        ...
     Graph___ = typing.TypedDict('Graph___', {
-            'name':'str',
+            'name':'Name',
             'identifier':'typing.Optional[str]',
     })
     ReportingQueryNetdata = typing.TypedDict('ReportingQueryNetdata', {
-            'unit':'str',
+            'unit':'Unit',
             'page':'int',
             'aggregate':'bool',
             'start':'int',

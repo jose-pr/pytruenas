@@ -2,12 +2,23 @@
 from pytruenas.base import Namespace
 
 import typing
+from enum import Enum
+
 class Api_key(Namespace):
     def __init__(self, client) -> None:
         super().__init__(client, 'api_key')
 
+    class Method(str,Enum):
+        GET = 'GET'
+        POST = 'POST'
+        PUT = 'PUT'
+        DELETE = 'DELETE'
+        CALL = 'CALL'
+        SUBSCRIBE = 'SUBSCRIBE'
+        _ = '*'
+        ...
     AllowlistItem = typing.TypedDict('AllowlistItem', {
-            'method':'str',
+            'method':'Method',
             'resource':'str',
     })
     ApiKeyCreate = typing.TypedDict('ApiKeyCreate', {

@@ -2,7 +2,7 @@
 from pytruenas import TrueNASClient
 from pytruenas.base import Namespace
 from pytruenas.mixins import TableExtMixin
-
+from enum import Enum
 import typing
 class Privilege(
     TableExtMixin,
@@ -37,106 +37,6 @@ class Privilege(
             privilege_create_returns
         """
         ...
-    AllowlistItem = typing.TypedDict('AllowlistItem', {
-            'method':'str',
-            'resource':'str',
-    })
-    PrivilegeCreate = typing.TypedDict('PrivilegeCreate', {
-            'id':'int',
-            'name':'str',
-            'local_groups':'list[int]',
-            'ds_groups':'list[typing.Union[int, str]]',
-            'allowlist':'list[AllowlistItem]',
-            'roles':'list[str]',
-            'web_shell':'bool',
-    })
-    PrivilegeCreateReturns = typing.TypedDict('PrivilegeCreateReturns', {
-            'id':'int',
-            'builtin_name':'typing.Optional[str]',
-            'name':'str',
-            'local_groups':'list[int]',
-            'ds_groups':'list[typing.Union[int, str]]',
-            'allowlist':'list[AllowlistItem]',
-            'roles':'list[str]',
-            'web_shell':'bool',
-    })
-    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    QueryOptions = typing.TypedDict('QueryOptions', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    PrivilegeEntry = typing.TypedDict('PrivilegeEntry', {
-            'id':'int',
-            'builtin_name':'typing.Optional[str]',
-            'name':'str',
-            'local_groups':'list[int]',
-            'ds_groups':'list[typing.Union[int, str]]',
-            'allowlist':'list[AllowlistItem]',
-            'roles':'list[str]',
-            'web_shell':'bool',
-    })
-    PrivilegeEntry_ = typing.TypedDict('PrivilegeEntry_', {
-            'id':'int',
-            'builtin_name':'typing.Optional[str]',
-            'name':'str',
-            'local_groups':'list[int]',
-            'ds_groups':'list[typing.Union[int, str]]',
-            'allowlist':'list[AllowlistItem]',
-            'roles':'list[str]',
-            'web_shell':'bool',
-    })
-    PrivilegeEntry__ = typing.TypedDict('PrivilegeEntry__', {
-            'id':'int',
-            'builtin_name':'typing.Optional[str]',
-            'name':'str',
-            'local_groups':'list[int]',
-            'ds_groups':'list[typing.Union[int, str]]',
-            'allowlist':'list[AllowlistItem]',
-            'roles':'list[str]',
-            'web_shell':'bool',
-    })
-    PrivilegeUpdate = typing.TypedDict('PrivilegeUpdate', {
-            'id':'int',
-            'name':'str',
-            'local_groups':'list[int]',
-            'ds_groups':'list[typing.Union[int, str]]',
-            'allowlist':'list[AllowlistItem]',
-            'roles':'list[str]',
-            'web_shell':'bool',
-    })
-    PrivilegeUpdateReturns = typing.TypedDict('PrivilegeUpdateReturns', {
-            'id':'int',
-            'builtin_name':'typing.Optional[str]',
-            'name':'str',
-            'local_groups':'list[int]',
-            'ds_groups':'list[typing.Union[int, str]]',
-            'allowlist':'list[AllowlistItem]',
-            'roles':'list[str]',
-            'web_shell':'bool',
-    })
     @typing.overload
     def delete(self, 
         id:'int',
@@ -154,106 +54,6 @@ class Privilege(
             Will return `true` if `id` is deleted successfully
         """
         ...
-    AllowlistItem = typing.TypedDict('AllowlistItem', {
-            'method':'str',
-            'resource':'str',
-    })
-    PrivilegeCreate = typing.TypedDict('PrivilegeCreate', {
-            'id':'int',
-            'name':'str',
-            'local_groups':'list[int]',
-            'ds_groups':'list[typing.Union[int, str]]',
-            'allowlist':'list[AllowlistItem]',
-            'roles':'list[str]',
-            'web_shell':'bool',
-    })
-    PrivilegeCreateReturns = typing.TypedDict('PrivilegeCreateReturns', {
-            'id':'int',
-            'builtin_name':'typing.Optional[str]',
-            'name':'str',
-            'local_groups':'list[int]',
-            'ds_groups':'list[typing.Union[int, str]]',
-            'allowlist':'list[AllowlistItem]',
-            'roles':'list[str]',
-            'web_shell':'bool',
-    })
-    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    QueryOptions = typing.TypedDict('QueryOptions', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    PrivilegeEntry = typing.TypedDict('PrivilegeEntry', {
-            'id':'int',
-            'builtin_name':'typing.Optional[str]',
-            'name':'str',
-            'local_groups':'list[int]',
-            'ds_groups':'list[typing.Union[int, str]]',
-            'allowlist':'list[AllowlistItem]',
-            'roles':'list[str]',
-            'web_shell':'bool',
-    })
-    PrivilegeEntry_ = typing.TypedDict('PrivilegeEntry_', {
-            'id':'int',
-            'builtin_name':'typing.Optional[str]',
-            'name':'str',
-            'local_groups':'list[int]',
-            'ds_groups':'list[typing.Union[int, str]]',
-            'allowlist':'list[AllowlistItem]',
-            'roles':'list[str]',
-            'web_shell':'bool',
-    })
-    PrivilegeEntry__ = typing.TypedDict('PrivilegeEntry__', {
-            'id':'int',
-            'builtin_name':'typing.Optional[str]',
-            'name':'str',
-            'local_groups':'list[int]',
-            'ds_groups':'list[typing.Union[int, str]]',
-            'allowlist':'list[AllowlistItem]',
-            'roles':'list[str]',
-            'web_shell':'bool',
-    })
-    PrivilegeUpdate = typing.TypedDict('PrivilegeUpdate', {
-            'id':'int',
-            'name':'str',
-            'local_groups':'list[int]',
-            'ds_groups':'list[typing.Union[int, str]]',
-            'allowlist':'list[AllowlistItem]',
-            'roles':'list[str]',
-            'web_shell':'bool',
-    })
-    PrivilegeUpdateReturns = typing.TypedDict('PrivilegeUpdateReturns', {
-            'id':'int',
-            'builtin_name':'typing.Optional[str]',
-            'name':'str',
-            'local_groups':'list[int]',
-            'ds_groups':'list[typing.Union[int, str]]',
-            'allowlist':'list[AllowlistItem]',
-            'roles':'list[str]',
-            'web_shell':'bool',
-    })
     @typing.overload
     def get_instance(self, 
         id:'typing.Union[str, int, bool, dict[str], list]',
@@ -274,111 +74,11 @@ class Privilege(
         -------
         """
         ...
-    AllowlistItem = typing.TypedDict('AllowlistItem', {
-            'method':'str',
-            'resource':'str',
-    })
-    PrivilegeCreate = typing.TypedDict('PrivilegeCreate', {
-            'id':'int',
-            'name':'str',
-            'local_groups':'list[int]',
-            'ds_groups':'list[typing.Union[int, str]]',
-            'allowlist':'list[AllowlistItem]',
-            'roles':'list[str]',
-            'web_shell':'bool',
-    })
-    PrivilegeCreateReturns = typing.TypedDict('PrivilegeCreateReturns', {
-            'id':'int',
-            'builtin_name':'typing.Optional[str]',
-            'name':'str',
-            'local_groups':'list[int]',
-            'ds_groups':'list[typing.Union[int, str]]',
-            'allowlist':'list[AllowlistItem]',
-            'roles':'list[str]',
-            'web_shell':'bool',
-    })
-    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    QueryOptions = typing.TypedDict('QueryOptions', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    PrivilegeEntry = typing.TypedDict('PrivilegeEntry', {
-            'id':'int',
-            'builtin_name':'typing.Optional[str]',
-            'name':'str',
-            'local_groups':'list[int]',
-            'ds_groups':'list[typing.Union[int, str]]',
-            'allowlist':'list[AllowlistItem]',
-            'roles':'list[str]',
-            'web_shell':'bool',
-    })
-    PrivilegeEntry_ = typing.TypedDict('PrivilegeEntry_', {
-            'id':'int',
-            'builtin_name':'typing.Optional[str]',
-            'name':'str',
-            'local_groups':'list[int]',
-            'ds_groups':'list[typing.Union[int, str]]',
-            'allowlist':'list[AllowlistItem]',
-            'roles':'list[str]',
-            'web_shell':'bool',
-    })
-    PrivilegeEntry__ = typing.TypedDict('PrivilegeEntry__', {
-            'id':'int',
-            'builtin_name':'typing.Optional[str]',
-            'name':'str',
-            'local_groups':'list[int]',
-            'ds_groups':'list[typing.Union[int, str]]',
-            'allowlist':'list[AllowlistItem]',
-            'roles':'list[str]',
-            'web_shell':'bool',
-    })
-    PrivilegeUpdate = typing.TypedDict('PrivilegeUpdate', {
-            'id':'int',
-            'name':'str',
-            'local_groups':'list[int]',
-            'ds_groups':'list[typing.Union[int, str]]',
-            'allowlist':'list[AllowlistItem]',
-            'roles':'list[str]',
-            'web_shell':'bool',
-    })
-    PrivilegeUpdateReturns = typing.TypedDict('PrivilegeUpdateReturns', {
-            'id':'int',
-            'builtin_name':'typing.Optional[str]',
-            'name':'str',
-            'local_groups':'list[int]',
-            'ds_groups':'list[typing.Union[int, str]]',
-            'allowlist':'list[AllowlistItem]',
-            'roles':'list[str]',
-            'web_shell':'bool',
-    })
     @typing.overload
     def query(self, 
         query_filters:'list[list]'=[],
         query_options:'QueryOptions'={},
-    /) -> 'typing.Union[list[PrivilegeEntry], ForwardRef(PrivilegeEntry_), int, ForwardRef(PrivilegeEntry__)]': 
+    /) -> 'typing.Union[list[PrivilegeEntry], PrivilegeEntry_, int, PrivilegeEntry__]': 
         """
         
 
@@ -390,110 +90,10 @@ class Privilege(
             query-options
         Returns
         -------
-        typing.Union[list[PrivilegeEntry], ForwardRef(PrivilegeEntry_), int, ForwardRef(PrivilegeEntry__)]:
+        typing.Union[list[PrivilegeEntry], PrivilegeEntry_, int, PrivilegeEntry__]:
             
         """
         ...
-    AllowlistItem = typing.TypedDict('AllowlistItem', {
-            'method':'str',
-            'resource':'str',
-    })
-    PrivilegeCreate = typing.TypedDict('PrivilegeCreate', {
-            'id':'int',
-            'name':'str',
-            'local_groups':'list[int]',
-            'ds_groups':'list[typing.Union[int, str]]',
-            'allowlist':'list[AllowlistItem]',
-            'roles':'list[str]',
-            'web_shell':'bool',
-    })
-    PrivilegeCreateReturns = typing.TypedDict('PrivilegeCreateReturns', {
-            'id':'int',
-            'builtin_name':'typing.Optional[str]',
-            'name':'str',
-            'local_groups':'list[int]',
-            'ds_groups':'list[typing.Union[int, str]]',
-            'allowlist':'list[AllowlistItem]',
-            'roles':'list[str]',
-            'web_shell':'bool',
-    })
-    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    QueryOptions = typing.TypedDict('QueryOptions', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    PrivilegeEntry = typing.TypedDict('PrivilegeEntry', {
-            'id':'int',
-            'builtin_name':'typing.Optional[str]',
-            'name':'str',
-            'local_groups':'list[int]',
-            'ds_groups':'list[typing.Union[int, str]]',
-            'allowlist':'list[AllowlistItem]',
-            'roles':'list[str]',
-            'web_shell':'bool',
-    })
-    PrivilegeEntry_ = typing.TypedDict('PrivilegeEntry_', {
-            'id':'int',
-            'builtin_name':'typing.Optional[str]',
-            'name':'str',
-            'local_groups':'list[int]',
-            'ds_groups':'list[typing.Union[int, str]]',
-            'allowlist':'list[AllowlistItem]',
-            'roles':'list[str]',
-            'web_shell':'bool',
-    })
-    PrivilegeEntry__ = typing.TypedDict('PrivilegeEntry__', {
-            'id':'int',
-            'builtin_name':'typing.Optional[str]',
-            'name':'str',
-            'local_groups':'list[int]',
-            'ds_groups':'list[typing.Union[int, str]]',
-            'allowlist':'list[AllowlistItem]',
-            'roles':'list[str]',
-            'web_shell':'bool',
-    })
-    PrivilegeUpdate = typing.TypedDict('PrivilegeUpdate', {
-            'id':'int',
-            'name':'str',
-            'local_groups':'list[int]',
-            'ds_groups':'list[typing.Union[int, str]]',
-            'allowlist':'list[AllowlistItem]',
-            'roles':'list[str]',
-            'web_shell':'bool',
-    })
-    PrivilegeUpdateReturns = typing.TypedDict('PrivilegeUpdateReturns', {
-            'id':'int',
-            'builtin_name':'typing.Optional[str]',
-            'name':'str',
-            'local_groups':'list[int]',
-            'ds_groups':'list[typing.Union[int, str]]',
-            'allowlist':'list[AllowlistItem]',
-            'roles':'list[str]',
-            'web_shell':'bool',
-    })
     @typing.overload
     def update(self, 
         id:'int',
@@ -515,8 +115,17 @@ class Privilege(
             privilege_update_returns
         """
         ...
+    class Method(str,Enum):
+        GET = 'GET'
+        POST = 'POST'
+        PUT = 'PUT'
+        DELETE = 'DELETE'
+        CALL = 'CALL'
+        SUBSCRIBE = 'SUBSCRIBE'
+        _ = '*'
+        ...
     AllowlistItem = typing.TypedDict('AllowlistItem', {
-            'method':'str',
+            'method':'Method',
             'resource':'str',
     })
     PrivilegeCreate = typing.TypedDict('PrivilegeCreate', {
@@ -615,4 +224,3 @@ class Privilege(
             'roles':'list[str]',
             'web_shell':'bool',
     })
-

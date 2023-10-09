@@ -2,7 +2,7 @@
 from pytruenas import TrueNASClient
 from pytruenas.base import Namespace
 from pytruenas.mixins import ConfigMixin
-
+from enum import Enum
 import typing
 class Ftp(
     ConfigMixin,
@@ -24,134 +24,6 @@ class Ftp(
             ftp_entry
         """
         ...
-    FtpEntry = typing.TypedDict('FtpEntry', {
-            'port':'int',
-            'clients':'int',
-            'ipconnections':'int',
-            'loginattempt':'int',
-            'timeout':'int',
-            'timeout_notransfer':'int',
-            'rootlogin':'bool',
-            'onlyanonymous':'bool',
-            'anonpath':'typing.Optional[str]',
-            'onlylocal':'bool',
-            'banner':'str',
-            'filemask':'str',
-            'dirmask':'str',
-            'fxp':'bool',
-            'resume':'bool',
-            'defaultroot':'bool',
-            'ident':'bool',
-            'reversedns':'bool',
-            'masqaddress':'str',
-            'passiveportsmin':'int',
-            'passiveportsmax':'int',
-            'localuserbw':'int',
-            'localuserdlbw':'int',
-            'anonuserbw':'int',
-            'anonuserdlbw':'int',
-            'tls':'bool',
-            'tls_policy':'str',
-            'tls_opt_allow_client_renegotiations':'bool',
-            'tls_opt_allow_dot_login':'bool',
-            'tls_opt_allow_per_user':'bool',
-            'tls_opt_common_name_required':'bool',
-            'tls_opt_enable_diags':'bool',
-            'tls_opt_export_cert_data':'bool',
-            'tls_opt_no_empty_fragments':'bool',
-            'tls_opt_no_session_reuse_required':'bool',
-            'tls_opt_stdenvvars':'bool',
-            'tls_opt_dns_name_required':'bool',
-            'tls_opt_ip_address_required':'bool',
-            'ssltls_certificate':'typing.Optional[int]',
-            'options':'str',
-            'id':'int',
-    })
-    FtpUpdate = typing.TypedDict('FtpUpdate', {
-            'port':'int',
-            'clients':'int',
-            'ipconnections':'int',
-            'loginattempt':'int',
-            'timeout':'int',
-            'timeout_notransfer':'int',
-            'rootlogin':'bool',
-            'onlyanonymous':'bool',
-            'anonpath':'typing.Optional[str]',
-            'onlylocal':'bool',
-            'banner':'str',
-            'filemask':'str',
-            'dirmask':'str',
-            'fxp':'bool',
-            'resume':'bool',
-            'defaultroot':'bool',
-            'ident':'bool',
-            'reversedns':'bool',
-            'masqaddress':'str',
-            'passiveportsmin':'int',
-            'passiveportsmax':'int',
-            'localuserbw':'int',
-            'localuserdlbw':'int',
-            'anonuserbw':'int',
-            'anonuserdlbw':'int',
-            'tls':'bool',
-            'tls_policy':'str',
-            'tls_opt_allow_client_renegotiations':'bool',
-            'tls_opt_allow_dot_login':'bool',
-            'tls_opt_allow_per_user':'bool',
-            'tls_opt_common_name_required':'bool',
-            'tls_opt_enable_diags':'bool',
-            'tls_opt_export_cert_data':'bool',
-            'tls_opt_no_empty_fragments':'bool',
-            'tls_opt_no_session_reuse_required':'bool',
-            'tls_opt_stdenvvars':'bool',
-            'tls_opt_dns_name_required':'bool',
-            'tls_opt_ip_address_required':'bool',
-            'ssltls_certificate':'typing.Optional[int]',
-            'options':'str',
-    })
-    FtpUpdateReturns = typing.TypedDict('FtpUpdateReturns', {
-            'port':'int',
-            'clients':'int',
-            'ipconnections':'int',
-            'loginattempt':'int',
-            'timeout':'int',
-            'timeout_notransfer':'int',
-            'rootlogin':'bool',
-            'onlyanonymous':'bool',
-            'anonpath':'typing.Optional[str]',
-            'onlylocal':'bool',
-            'banner':'str',
-            'filemask':'str',
-            'dirmask':'str',
-            'fxp':'bool',
-            'resume':'bool',
-            'defaultroot':'bool',
-            'ident':'bool',
-            'reversedns':'bool',
-            'masqaddress':'str',
-            'passiveportsmin':'int',
-            'passiveportsmax':'int',
-            'localuserbw':'int',
-            'localuserdlbw':'int',
-            'anonuserbw':'int',
-            'anonuserdlbw':'int',
-            'tls':'bool',
-            'tls_policy':'str',
-            'tls_opt_allow_client_renegotiations':'bool',
-            'tls_opt_allow_dot_login':'bool',
-            'tls_opt_allow_per_user':'bool',
-            'tls_opt_common_name_required':'bool',
-            'tls_opt_enable_diags':'bool',
-            'tls_opt_export_cert_data':'bool',
-            'tls_opt_no_empty_fragments':'bool',
-            'tls_opt_no_session_reuse_required':'bool',
-            'tls_opt_stdenvvars':'bool',
-            'tls_opt_dns_name_required':'bool',
-            'tls_opt_ip_address_required':'bool',
-            'ssltls_certificate':'typing.Optional[int]',
-            'options':'str',
-            'id':'int',
-    })
     @typing.overload
     def update(self, 
         ftp_update:'FtpUpdate'={},
@@ -231,6 +103,18 @@ class Ftp(
             ftp_update_returns
         """
         ...
+    class TlsPolicy(str,Enum):
+        On = 'on'
+        Off = 'off'
+        Data = 'data'
+        _data = '!data'
+        Auth = 'auth'
+        Ctrl = 'ctrl'
+        CtrlData = 'ctrl+data'
+        CtrlData = 'ctrl+!data'
+        AuthData = 'auth+data'
+        AuthData = 'auth+!data'
+        ...
     FtpEntry = typing.TypedDict('FtpEntry', {
             'port':'int',
             'clients':'int',
@@ -258,7 +142,7 @@ class Ftp(
             'anonuserbw':'int',
             'anonuserdlbw':'int',
             'tls':'bool',
-            'tls_policy':'str',
+            'tls_policy':'TlsPolicy',
             'tls_opt_allow_client_renegotiations':'bool',
             'tls_opt_allow_dot_login':'bool',
             'tls_opt_allow_per_user':'bool',
@@ -301,7 +185,7 @@ class Ftp(
             'anonuserbw':'int',
             'anonuserdlbw':'int',
             'tls':'bool',
-            'tls_policy':'str',
+            'tls_policy':'TlsPolicy',
             'tls_opt_allow_client_renegotiations':'bool',
             'tls_opt_allow_dot_login':'bool',
             'tls_opt_allow_per_user':'bool',
@@ -343,7 +227,7 @@ class Ftp(
             'anonuserbw':'int',
             'anonuserdlbw':'int',
             'tls':'bool',
-            'tls_policy':'str',
+            'tls_policy':'TlsPolicy',
             'tls_opt_allow_client_renegotiations':'bool',
             'tls_opt_allow_dot_login':'bool',
             'tls_opt_allow_per_user':'bool',
@@ -359,4 +243,3 @@ class Ftp(
             'options':'str',
             'id':'int',
     })
-

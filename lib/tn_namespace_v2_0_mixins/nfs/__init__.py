@@ -3,6 +3,8 @@ from pytruenas.base import Namespace
 from pytruenas.mixins import ConfigMixin
 
 import typing
+from enum import Enum
+
 class Nfs(ConfigMixin, Namespace):
     def __init__(self, client) -> None:
         super().__init__(client, 'nfs')
@@ -11,12 +13,16 @@ class Nfs(ConfigMixin, Namespace):
             'username':'str',
             'password':'str',
     })
+    class Protocol(str,Enum):
+        NFSV3 = 'NFSV3'
+        NFSV4 = 'NFSV4'
+        ...
     NfsEntry = typing.TypedDict('NfsEntry', {
             'id':'int',
             'servers':'int',
             'udp':'bool',
             'allow_nonroot':'bool',
-            'protocols':'list[str]',
+            'protocols':'list[Protocol]',
             'v4_v3owner':'bool',
             'v4_krb':'bool',
             'v4_domain':'str',
@@ -61,7 +67,7 @@ class Nfs(ConfigMixin, Namespace):
             'servers':'int',
             'udp':'bool',
             'allow_nonroot':'bool',
-            'protocols':'list[str]',
+            'protocols':'list[Protocol]',
             'v4_v3owner':'bool',
             'v4_krb':'bool',
             'v4_domain':'str',
@@ -78,7 +84,7 @@ class Nfs(ConfigMixin, Namespace):
             'servers':'int',
             'udp':'bool',
             'allow_nonroot':'bool',
-            'protocols':'list[str]',
+            'protocols':'list[Protocol]',
             'v4_v3owner':'bool',
             'v4_krb':'bool',
             'v4_domain':'str',

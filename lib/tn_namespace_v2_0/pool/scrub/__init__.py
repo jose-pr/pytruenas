@@ -2,6 +2,8 @@
 from pytruenas.base import Namespace
 
 import typing
+from enum import Enum
+
 class PoolScrub(Namespace):
     def __init__(self, client) -> None:
         super().__init__(client, 'pool.scrub')
@@ -66,6 +68,11 @@ class PoolScrub(Namespace):
             'id':'int',
             'pool_name':'str',
     })
+    class Action(str,Enum):
+        START = 'START'
+        STOP = 'STOP'
+        PAUSE = 'PAUSE'
+        ...
     PoolScrubUpdate = typing.TypedDict('PoolScrubUpdate', {
             'pool':'int',
             'threshold':'int',
