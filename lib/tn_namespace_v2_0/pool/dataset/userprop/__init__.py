@@ -52,14 +52,6 @@ class PoolDatasetUserprop(Namespace):
             'id':'str',
             'properties':'dict[str]',
     })
-    PoolDatasetUserpropEntry_ = typing.TypedDict('PoolDatasetUserpropEntry_', {
-            'id':'str',
-            'properties':'dict[str]',
-    })
-    PoolDatasetUserpropEntry__ = typing.TypedDict('PoolDatasetUserpropEntry__', {
-            'id':'str',
-            'properties':'dict[str]',
-    })
     DatasetUserPropUpdate = typing.TypedDict('DatasetUserPropUpdate', {
             'name':'str',
             'value':'str',

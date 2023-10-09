@@ -70,18 +70,6 @@ class Staticroute(Namespace):
             'description':'str',
             'id':'int',
     })
-    StaticrouteEntry_ = typing.TypedDict('StaticrouteEntry_', {
-            'destination':'str',
-            'gateway':'str',
-            'description':'str',
-            'id':'int',
-    })
-    StaticrouteEntry__ = typing.TypedDict('StaticrouteEntry__', {
-            'destination':'str',
-            'gateway':'str',
-            'description':'str',
-            'id':'int',
-    })
     StaticrouteUpdate = typing.TypedDict('StaticrouteUpdate', {
             'destination':'str',
             'gateway':'str',
@@ -150,18 +138,6 @@ class Staticroute(Namespace):
             'force_sql_filters':'bool',
     })
     StaticrouteEntry = typing.TypedDict('StaticrouteEntry', {
-            'destination':'str',
-            'gateway':'str',
-            'description':'str',
-            'id':'int',
-    })
-    StaticrouteEntry_ = typing.TypedDict('StaticrouteEntry_', {
-            'destination':'str',
-            'gateway':'str',
-            'description':'str',
-            'id':'int',
-    })
-    StaticrouteEntry__ = typing.TypedDict('StaticrouteEntry__', {
             'destination':'str',
             'gateway':'str',
             'description':'str',
@@ -243,18 +219,6 @@ class Staticroute(Namespace):
             'description':'str',
             'id':'int',
     })
-    StaticrouteEntry_ = typing.TypedDict('StaticrouteEntry_', {
-            'destination':'str',
-            'gateway':'str',
-            'description':'str',
-            'id':'int',
-    })
-    StaticrouteEntry__ = typing.TypedDict('StaticrouteEntry__', {
-            'destination':'str',
-            'gateway':'str',
-            'description':'str',
-            'id':'int',
-    })
     StaticrouteUpdate = typing.TypedDict('StaticrouteUpdate', {
             'destination':'str',
             'gateway':'str',
@@ -270,7 +234,7 @@ class Staticroute(Namespace):
     def query(self, 
         query_filters:'list[list]'=[],
         query_options:'QueryOptions'={},
-    /) -> 'typing.Union[list[StaticrouteEntry], ForwardRef(StaticrouteEntry_), int, ForwardRef(StaticrouteEntry__)]': 
+    /) -> 'typing.Union[list[StaticrouteEntry], ForwardRef(StaticrouteEntry), int]': 
         """
         
 
@@ -282,7 +246,7 @@ class Staticroute(Namespace):
             query-options
         Returns
         -------
-        typing.Union[list[StaticrouteEntry], ForwardRef(StaticrouteEntry_), int, ForwardRef(StaticrouteEntry__)]:
+        typing.Union[list[StaticrouteEntry], ForwardRef(StaticrouteEntry), int]:
             
         """
         ...
@@ -326,18 +290,6 @@ class Staticroute(Namespace):
             'force_sql_filters':'bool',
     })
     StaticrouteEntry = typing.TypedDict('StaticrouteEntry', {
-            'destination':'str',
-            'gateway':'str',
-            'description':'str',
-            'id':'int',
-    })
-    StaticrouteEntry_ = typing.TypedDict('StaticrouteEntry_', {
-            'destination':'str',
-            'gateway':'str',
-            'description':'str',
-            'id':'int',
-    })
-    StaticrouteEntry__ = typing.TypedDict('StaticrouteEntry__', {
             'destination':'str',
             'gateway':'str',
             'description':'str',
@@ -415,18 +367,6 @@ class Staticroute(Namespace):
             'force_sql_filters':'bool',
     })
     StaticrouteEntry = typing.TypedDict('StaticrouteEntry', {
-            'destination':'str',
-            'gateway':'str',
-            'description':'str',
-            'id':'int',
-    })
-    StaticrouteEntry_ = typing.TypedDict('StaticrouteEntry_', {
-            'destination':'str',
-            'gateway':'str',
-            'description':'str',
-            'id':'int',
-    })
-    StaticrouteEntry__ = typing.TypedDict('StaticrouteEntry__', {
             'destination':'str',
             'gateway':'str',
             'description':'str',

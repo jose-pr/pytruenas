@@ -60,14 +60,11 @@ class IscsiPortal(Namespace):
             'limit':'int',
             'force_sql_filters':'bool',
     })
-    Listen_ = typing.TypedDict('Listen_', {
-            'ip':'str',
-    })
     IscsiportalUpdate = typing.TypedDict('IscsiportalUpdate', {
             'comment':'str',
             'discovery_authmethod':'str',
             'discovery_authgroup':'typing.Optional[int]',
-            'listen':'list[Listen_]',
+            'listen':'list[Listen]',
     })
     @typing.overload
     def delete(self, 
@@ -123,14 +120,11 @@ class IscsiPortal(Namespace):
             'limit':'int',
             'force_sql_filters':'bool',
     })
-    Listen_ = typing.TypedDict('Listen_', {
-            'ip':'str',
-    })
     IscsiportalUpdate = typing.TypedDict('IscsiportalUpdate', {
             'comment':'str',
             'discovery_authmethod':'str',
             'discovery_authgroup':'typing.Optional[int]',
-            'listen':'list[Listen_]',
+            'listen':'list[Listen]',
     })
     @typing.overload
     def get_instance(self, 
@@ -189,14 +183,11 @@ class IscsiPortal(Namespace):
             'limit':'int',
             'force_sql_filters':'bool',
     })
-    Listen_ = typing.TypedDict('Listen_', {
-            'ip':'str',
-    })
     IscsiportalUpdate = typing.TypedDict('IscsiportalUpdate', {
             'comment':'str',
             'discovery_authmethod':'str',
             'discovery_authgroup':'typing.Optional[int]',
-            'listen':'list[Listen_]',
+            'listen':'list[Listen]',
     })
     @typing.overload
     def listen_ip_choices(self, 
@@ -247,14 +238,11 @@ class IscsiPortal(Namespace):
             'limit':'int',
             'force_sql_filters':'bool',
     })
-    Listen_ = typing.TypedDict('Listen_', {
-            'ip':'str',
-    })
     IscsiportalUpdate = typing.TypedDict('IscsiportalUpdate', {
             'comment':'str',
             'discovery_authmethod':'str',
             'discovery_authgroup':'typing.Optional[int]',
-            'listen':'list[Listen_]',
+            'listen':'list[Listen]',
     })
     @typing.overload
     def query(self, 
@@ -313,14 +301,11 @@ class IscsiPortal(Namespace):
             'limit':'int',
             'force_sql_filters':'bool',
     })
-    Listen_ = typing.TypedDict('Listen_', {
-            'ip':'str',
-    })
     IscsiportalUpdate = typing.TypedDict('IscsiportalUpdate', {
             'comment':'str',
             'discovery_authmethod':'str',
             'discovery_authgroup':'typing.Optional[int]',
-            'listen':'list[Listen_]',
+            'listen':'list[Listen]',
     })
     @typing.overload
     def update(self, 
@@ -380,13 +365,10 @@ class IscsiPortal(Namespace):
             'limit':'int',
             'force_sql_filters':'bool',
     })
-    Listen_ = typing.TypedDict('Listen_', {
-            'ip':'str',
-    })
     IscsiportalUpdate = typing.TypedDict('IscsiportalUpdate', {
             'comment':'str',
             'discovery_authmethod':'str',
             'discovery_authgroup':'typing.Optional[int]',
-            'listen':'list[Listen_]',
+            'listen':'list[Listen]',
     })
 

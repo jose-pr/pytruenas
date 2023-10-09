@@ -53,30 +53,6 @@ class GlusterPeer(Namespace):
             'state':'str',
             'status':'str',
     })
-    GlusterPeerEntry_ = typing.TypedDict('GlusterPeerEntry_', {
-            'id':'str',
-            'uuid':'str',
-            'hostname':'str',
-            'connected':'str',
-            'state':'str',
-            'status':'str',
-    })
-    GlusterPeerEntry__ = typing.TypedDict('GlusterPeerEntry__', {
-            'id':'str',
-            'uuid':'str',
-            'hostname':'str',
-            'connected':'str',
-            'state':'str',
-            'status':'str',
-    })
     PeerStatus = typing.TypedDict('PeerStatus', {
             'localhost':'bool',
-    })
-    GlusterPeerEntry___ = typing.TypedDict('GlusterPeerEntry___', {
-            'id':'str',
-            'uuid':'str',
-            'hostname':'str',
-            'connected':'str',
-            'state':'str',
-            'status':'str',
     })

@@ -14,7 +14,7 @@ class UpdateReturn(_Enum):
     Both = 2
 
 
-class Config(_ty.Generic[D]):
+class ConfigMixin(_ty.Generic[D]):
     def config(self, normalize: bool = True) -> D:
         config = self("config")
         if normalize:
@@ -77,7 +77,7 @@ class Config(_ty.Generic[D]):
             return config
 
 
-class Map(_ty.Generic[D]):
+class TableMixin(_ty.Generic[D]):
     _idattr = "id"
 
     def query(self) -> list[D]:
@@ -167,5 +167,5 @@ class Map(_ty.Generic[D]):
             return config
 
 
-class MapExtended(Map[D], _ty.Mapping[str, D], _ty.Generic[D]):
+class TableExtMixin(TableMixin[D], _ty.Mapping[str, D], _ty.Generic[D]):
     ...

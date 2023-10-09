@@ -50,32 +50,6 @@ class Bootenv(Namespace):
             'keep':'bool',
             'rawspace':'int',
     })
-    BootenvEntry_ = typing.TypedDict('BootenvEntry_', {
-            'id':'str',
-            'realname':'str',
-            'name':'str',
-            'active':'str',
-            'activated':'bool',
-            'can_activate':'bool',
-            'mountpoint':'str',
-            'space':'str',
-            'created':'str',
-            'keep':'bool',
-            'rawspace':'int',
-    })
-    BootenvEntry__ = typing.TypedDict('BootenvEntry__', {
-            'id':'str',
-            'realname':'str',
-            'name':'str',
-            'active':'str',
-            'activated':'bool',
-            'can_activate':'bool',
-            'mountpoint':'str',
-            'space':'str',
-            'created':'str',
-            'keep':'bool',
-            'rawspace':'int',
-    })
     Attributes = typing.TypedDict('Attributes', {
             'keep':'bool',
     })

@@ -11,6 +11,23 @@ from .. import _utils, _core
 class Object(_ty.NamedTuple):
     properties: _ty.OrderedDict[str, "OpenApiType"]
 
+    def __eq__(self, other): 
+        if not isinstance(other, Object):
+            # don't attempt to compare against unrelated types
+            return NotImplemented
+        a = self.properties
+        b = other.properties
+        if len(a) != len(b):
+            return False
+        for k, v in a.items():
+            if k not in b:
+                return False
+            diff = _utils.diff(b[k]._raw,v._raw)
+            diff.pop('description', None)
+            if diff:
+                return False
+        return True
+
 
 class OpenApiType:
     _raw: _core.Parameter
@@ -48,7 +65,9 @@ class OpenApiType:
         else:
             name: str = self._raw.get("title", "Object")
             name = _utils.classname(name).rstrip("_")
-            while name in objects and objects[name] != obj:
+            if name in objects:
+                ...
+            while name in objects and not objects[name].__eq__(obj):
                 name += "_"
             objects[name] = obj
             self._obj = name
@@ -156,7 +175,7 @@ class NamespaceSignature:
     def __init__(self, raw: _core.NamespaceInfo) -> None:
         self._raw = raw
         self.methods = {}
-        self.objects = _ty.OrderedDict()
+        self.objects = dict()
         for name, method in self._raw["methods"].items():
             signatures = []
             descr = method["description"]

@@ -8,7 +8,7 @@ class Dns(Namespace):
     def query(self, 
         query_filters:'list[list]'=[],
         query_options:'QueryOptions'={},
-    /) -> 'typing.Union[int, ForwardRef(Nameserver), list[Nameserver_]]': 
+    /) -> 'typing.Union[int, ForwardRef(Nameserver), list[Nameserver]]': 
         """
         Query Name Servers with `query-filters` and `query-options`.
 
@@ -20,7 +20,7 @@ class Dns(Namespace):
             query-options
         Returns
         -------
-        typing.Union[int, ForwardRef(Nameserver), list[Nameserver_]]:
+        typing.Union[int, ForwardRef(Nameserver), list[Nameserver]]:
             
         """
         ...
@@ -39,9 +39,6 @@ class Dns(Namespace):
             'force_sql_filters':'bool',
     })
     Nameserver = typing.TypedDict('Nameserver', {
-            'nameserver':'str',
-    })
-    Nameserver_ = typing.TypedDict('Nameserver_', {
             'nameserver':'str',
     })
 

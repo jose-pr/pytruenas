@@ -47,16 +47,6 @@ class KerberosKeytab(Namespace):
             'name':'str',
             'id':'int',
     })
-    KerberosKeytabEntry_ = typing.TypedDict('KerberosKeytabEntry_', {
-            'file':'str',
-            'name':'str',
-            'id':'int',
-    })
-    KerberosKeytabEntry__ = typing.TypedDict('KerberosKeytabEntry__', {
-            'file':'str',
-            'name':'str',
-            'id':'int',
-    })
     KeytabEntry = typing.TypedDict('KeytabEntry', {
             'slot':'int',
             'kvno':'int',
@@ -76,9 +66,4 @@ class KerberosKeytab(Namespace):
     })
     KeytabData = typing.TypedDict('KeytabData', {
             'name':'str',
-    })
-    KerberosKeytabEntry___ = typing.TypedDict('KerberosKeytabEntry___', {
-            'file':'str',
-            'name':'str',
-            'id':'int',
     })

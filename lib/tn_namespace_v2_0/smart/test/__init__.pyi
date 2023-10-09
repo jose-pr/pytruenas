@@ -40,14 +40,8 @@ class SmartTest(Namespace):
             'disks':'list[str]',
             'type':'str',
     })
-    Schedule_ = typing.TypedDict('Schedule_', {
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
     SmartTestCreateReturns = typing.TypedDict('SmartTestCreateReturns', {
-            'schedule':'Schedule_',
+            'schedule':'Schedule',
             'desc':'str',
             'all_disks':'bool',
             'disks':'list[str]',
@@ -94,42 +88,24 @@ class SmartTest(Namespace):
             'limit':'int',
             'force_sql_filters':'bool',
     })
-    Schedule__ = typing.TypedDict('Schedule__', {
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
     SmartTaskEntry = typing.TypedDict('SmartTaskEntry', {
-            'schedule':'Schedule__',
+            'schedule':'Schedule',
             'desc':'str',
             'all_disks':'bool',
             'disks':'list[str]',
             'type':'str',
             'id':'int',
-    })
-    Schedule___ = typing.TypedDict('Schedule___', {
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
     })
     SmartTaskEntry_ = typing.TypedDict('SmartTaskEntry_', {
-            'schedule':'Schedule___',
+            'schedule':'Schedule',
             'desc':'str',
             'all_disks':'bool',
             'disks':'list[str]',
             'type':'str',
             'id':'int',
     })
-    Schedule____ = typing.TypedDict('Schedule____', {
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
     SmartTaskEntry__ = typing.TypedDict('SmartTaskEntry__', {
-            'schedule':'Schedule____',
+            'schedule':'Schedule',
             'desc':'str',
             'all_disks':'bool',
             'disks':'list[str]',
@@ -176,35 +152,20 @@ class SmartTest(Namespace):
             'lifetime':'int',
             'lba_of_first_error':'typing.Optional[str]',
     })
-    CurrentTest_ = typing.TypedDict('CurrentTest_', {
-            'progress':'int',
-    })
     DiskSmartTestResult_ = typing.TypedDict('DiskSmartTestResult_', {
             'disk':'str',
             'tests':'list[TestResult_]',
-            'current_test':'CurrentTest_',
-    })
-    Schedule_____ = typing.TypedDict('Schedule_____', {
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
+            'current_test':'CurrentTest',
     })
     SmartTestUpdate = typing.TypedDict('SmartTestUpdate', {
-            'schedule':'Schedule_____',
+            'schedule':'Schedule',
             'desc':'str',
             'all_disks':'bool',
             'disks':'list[str]',
             'type':'str',
     })
-    Schedule______ = typing.TypedDict('Schedule______', {
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
     SmartTestUpdateReturns = typing.TypedDict('SmartTestUpdateReturns', {
-            'schedule':'Schedule______',
+            'schedule':'Schedule',
             'desc':'str',
             'all_disks':'bool',
             'disks':'list[str]',
@@ -241,14 +202,8 @@ class SmartTest(Namespace):
             'disks':'list[str]',
             'type':'str',
     })
-    Schedule_ = typing.TypedDict('Schedule_', {
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
     SmartTestCreateReturns = typing.TypedDict('SmartTestCreateReturns', {
-            'schedule':'Schedule_',
+            'schedule':'Schedule',
             'desc':'str',
             'all_disks':'bool',
             'disks':'list[str]',
@@ -295,42 +250,24 @@ class SmartTest(Namespace):
             'limit':'int',
             'force_sql_filters':'bool',
     })
-    Schedule__ = typing.TypedDict('Schedule__', {
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
     SmartTaskEntry = typing.TypedDict('SmartTaskEntry', {
-            'schedule':'Schedule__',
+            'schedule':'Schedule',
             'desc':'str',
             'all_disks':'bool',
             'disks':'list[str]',
             'type':'str',
             'id':'int',
-    })
-    Schedule___ = typing.TypedDict('Schedule___', {
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
     })
     SmartTaskEntry_ = typing.TypedDict('SmartTaskEntry_', {
-            'schedule':'Schedule___',
+            'schedule':'Schedule',
             'desc':'str',
             'all_disks':'bool',
             'disks':'list[str]',
             'type':'str',
             'id':'int',
     })
-    Schedule____ = typing.TypedDict('Schedule____', {
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
     SmartTaskEntry__ = typing.TypedDict('SmartTaskEntry__', {
-            'schedule':'Schedule____',
+            'schedule':'Schedule',
             'desc':'str',
             'all_disks':'bool',
             'disks':'list[str]',
@@ -377,35 +314,20 @@ class SmartTest(Namespace):
             'lifetime':'int',
             'lba_of_first_error':'typing.Optional[str]',
     })
-    CurrentTest_ = typing.TypedDict('CurrentTest_', {
-            'progress':'int',
-    })
     DiskSmartTestResult_ = typing.TypedDict('DiskSmartTestResult_', {
             'disk':'str',
             'tests':'list[TestResult_]',
-            'current_test':'CurrentTest_',
-    })
-    Schedule_____ = typing.TypedDict('Schedule_____', {
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
+            'current_test':'CurrentTest',
     })
     SmartTestUpdate = typing.TypedDict('SmartTestUpdate', {
-            'schedule':'Schedule_____',
+            'schedule':'Schedule',
             'desc':'str',
             'all_disks':'bool',
             'disks':'list[str]',
             'type':'str',
     })
-    Schedule______ = typing.TypedDict('Schedule______', {
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
     SmartTestUpdateReturns = typing.TypedDict('SmartTestUpdateReturns', {
-            'schedule':'Schedule______',
+            'schedule':'Schedule',
             'desc':'str',
             'all_disks':'bool',
             'disks':'list[str]',
@@ -442,14 +364,8 @@ class SmartTest(Namespace):
             'disks':'list[str]',
             'type':'str',
     })
-    Schedule_ = typing.TypedDict('Schedule_', {
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
     SmartTestCreateReturns = typing.TypedDict('SmartTestCreateReturns', {
-            'schedule':'Schedule_',
+            'schedule':'Schedule',
             'desc':'str',
             'all_disks':'bool',
             'disks':'list[str]',
@@ -496,42 +412,24 @@ class SmartTest(Namespace):
             'limit':'int',
             'force_sql_filters':'bool',
     })
-    Schedule__ = typing.TypedDict('Schedule__', {
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
     SmartTaskEntry = typing.TypedDict('SmartTaskEntry', {
-            'schedule':'Schedule__',
+            'schedule':'Schedule',
             'desc':'str',
             'all_disks':'bool',
             'disks':'list[str]',
             'type':'str',
             'id':'int',
-    })
-    Schedule___ = typing.TypedDict('Schedule___', {
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
     })
     SmartTaskEntry_ = typing.TypedDict('SmartTaskEntry_', {
-            'schedule':'Schedule___',
+            'schedule':'Schedule',
             'desc':'str',
             'all_disks':'bool',
             'disks':'list[str]',
             'type':'str',
             'id':'int',
     })
-    Schedule____ = typing.TypedDict('Schedule____', {
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
     SmartTaskEntry__ = typing.TypedDict('SmartTaskEntry__', {
-            'schedule':'Schedule____',
+            'schedule':'Schedule',
             'desc':'str',
             'all_disks':'bool',
             'disks':'list[str]',
@@ -578,35 +476,20 @@ class SmartTest(Namespace):
             'lifetime':'int',
             'lba_of_first_error':'typing.Optional[str]',
     })
-    CurrentTest_ = typing.TypedDict('CurrentTest_', {
-            'progress':'int',
-    })
     DiskSmartTestResult_ = typing.TypedDict('DiskSmartTestResult_', {
             'disk':'str',
             'tests':'list[TestResult_]',
-            'current_test':'CurrentTest_',
-    })
-    Schedule_____ = typing.TypedDict('Schedule_____', {
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
+            'current_test':'CurrentTest',
     })
     SmartTestUpdate = typing.TypedDict('SmartTestUpdate', {
-            'schedule':'Schedule_____',
+            'schedule':'Schedule',
             'desc':'str',
             'all_disks':'bool',
             'disks':'list[str]',
             'type':'str',
     })
-    Schedule______ = typing.TypedDict('Schedule______', {
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
     SmartTestUpdateReturns = typing.TypedDict('SmartTestUpdateReturns', {
-            'schedule':'Schedule______',
+            'schedule':'Schedule',
             'desc':'str',
             'all_disks':'bool',
             'disks':'list[str]',
@@ -646,14 +529,8 @@ class SmartTest(Namespace):
             'disks':'list[str]',
             'type':'str',
     })
-    Schedule_ = typing.TypedDict('Schedule_', {
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
     SmartTestCreateReturns = typing.TypedDict('SmartTestCreateReturns', {
-            'schedule':'Schedule_',
+            'schedule':'Schedule',
             'desc':'str',
             'all_disks':'bool',
             'disks':'list[str]',
@@ -700,42 +577,24 @@ class SmartTest(Namespace):
             'limit':'int',
             'force_sql_filters':'bool',
     })
-    Schedule__ = typing.TypedDict('Schedule__', {
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
     SmartTaskEntry = typing.TypedDict('SmartTaskEntry', {
-            'schedule':'Schedule__',
+            'schedule':'Schedule',
             'desc':'str',
             'all_disks':'bool',
             'disks':'list[str]',
             'type':'str',
             'id':'int',
-    })
-    Schedule___ = typing.TypedDict('Schedule___', {
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
     })
     SmartTaskEntry_ = typing.TypedDict('SmartTaskEntry_', {
-            'schedule':'Schedule___',
+            'schedule':'Schedule',
             'desc':'str',
             'all_disks':'bool',
             'disks':'list[str]',
             'type':'str',
             'id':'int',
     })
-    Schedule____ = typing.TypedDict('Schedule____', {
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
     SmartTaskEntry__ = typing.TypedDict('SmartTaskEntry__', {
-            'schedule':'Schedule____',
+            'schedule':'Schedule',
             'desc':'str',
             'all_disks':'bool',
             'disks':'list[str]',
@@ -782,35 +641,20 @@ class SmartTest(Namespace):
             'lifetime':'int',
             'lba_of_first_error':'typing.Optional[str]',
     })
-    CurrentTest_ = typing.TypedDict('CurrentTest_', {
-            'progress':'int',
-    })
     DiskSmartTestResult_ = typing.TypedDict('DiskSmartTestResult_', {
             'disk':'str',
             'tests':'list[TestResult_]',
-            'current_test':'CurrentTest_',
-    })
-    Schedule_____ = typing.TypedDict('Schedule_____', {
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
+            'current_test':'CurrentTest',
     })
     SmartTestUpdate = typing.TypedDict('SmartTestUpdate', {
-            'schedule':'Schedule_____',
+            'schedule':'Schedule',
             'desc':'str',
             'all_disks':'bool',
             'disks':'list[str]',
             'type':'str',
     })
-    Schedule______ = typing.TypedDict('Schedule______', {
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
     SmartTestUpdateReturns = typing.TypedDict('SmartTestUpdateReturns', {
-            'schedule':'Schedule______',
+            'schedule':'Schedule',
             'desc':'str',
             'all_disks':'bool',
             'disks':'list[str]',
@@ -849,14 +693,8 @@ class SmartTest(Namespace):
             'disks':'list[str]',
             'type':'str',
     })
-    Schedule_ = typing.TypedDict('Schedule_', {
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
     SmartTestCreateReturns = typing.TypedDict('SmartTestCreateReturns', {
-            'schedule':'Schedule_',
+            'schedule':'Schedule',
             'desc':'str',
             'all_disks':'bool',
             'disks':'list[str]',
@@ -903,42 +741,24 @@ class SmartTest(Namespace):
             'limit':'int',
             'force_sql_filters':'bool',
     })
-    Schedule__ = typing.TypedDict('Schedule__', {
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
     SmartTaskEntry = typing.TypedDict('SmartTaskEntry', {
-            'schedule':'Schedule__',
+            'schedule':'Schedule',
             'desc':'str',
             'all_disks':'bool',
             'disks':'list[str]',
             'type':'str',
             'id':'int',
-    })
-    Schedule___ = typing.TypedDict('Schedule___', {
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
     })
     SmartTaskEntry_ = typing.TypedDict('SmartTaskEntry_', {
-            'schedule':'Schedule___',
+            'schedule':'Schedule',
             'desc':'str',
             'all_disks':'bool',
             'disks':'list[str]',
             'type':'str',
             'id':'int',
     })
-    Schedule____ = typing.TypedDict('Schedule____', {
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
     SmartTaskEntry__ = typing.TypedDict('SmartTaskEntry__', {
-            'schedule':'Schedule____',
+            'schedule':'Schedule',
             'desc':'str',
             'all_disks':'bool',
             'disks':'list[str]',
@@ -985,35 +805,20 @@ class SmartTest(Namespace):
             'lifetime':'int',
             'lba_of_first_error':'typing.Optional[str]',
     })
-    CurrentTest_ = typing.TypedDict('CurrentTest_', {
-            'progress':'int',
-    })
     DiskSmartTestResult_ = typing.TypedDict('DiskSmartTestResult_', {
             'disk':'str',
             'tests':'list[TestResult_]',
-            'current_test':'CurrentTest_',
-    })
-    Schedule_____ = typing.TypedDict('Schedule_____', {
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
+            'current_test':'CurrentTest',
     })
     SmartTestUpdate = typing.TypedDict('SmartTestUpdate', {
-            'schedule':'Schedule_____',
+            'schedule':'Schedule',
             'desc':'str',
             'all_disks':'bool',
             'disks':'list[str]',
             'type':'str',
     })
-    Schedule______ = typing.TypedDict('Schedule______', {
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
     SmartTestUpdateReturns = typing.TypedDict('SmartTestUpdateReturns', {
-            'schedule':'Schedule______',
+            'schedule':'Schedule',
             'desc':'str',
             'all_disks':'bool',
             'disks':'list[str]',
@@ -1053,14 +858,8 @@ class SmartTest(Namespace):
             'disks':'list[str]',
             'type':'str',
     })
-    Schedule_ = typing.TypedDict('Schedule_', {
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
     SmartTestCreateReturns = typing.TypedDict('SmartTestCreateReturns', {
-            'schedule':'Schedule_',
+            'schedule':'Schedule',
             'desc':'str',
             'all_disks':'bool',
             'disks':'list[str]',
@@ -1107,42 +906,24 @@ class SmartTest(Namespace):
             'limit':'int',
             'force_sql_filters':'bool',
     })
-    Schedule__ = typing.TypedDict('Schedule__', {
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
     SmartTaskEntry = typing.TypedDict('SmartTaskEntry', {
-            'schedule':'Schedule__',
+            'schedule':'Schedule',
             'desc':'str',
             'all_disks':'bool',
             'disks':'list[str]',
             'type':'str',
             'id':'int',
-    })
-    Schedule___ = typing.TypedDict('Schedule___', {
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
     })
     SmartTaskEntry_ = typing.TypedDict('SmartTaskEntry_', {
-            'schedule':'Schedule___',
+            'schedule':'Schedule',
             'desc':'str',
             'all_disks':'bool',
             'disks':'list[str]',
             'type':'str',
             'id':'int',
     })
-    Schedule____ = typing.TypedDict('Schedule____', {
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
     SmartTaskEntry__ = typing.TypedDict('SmartTaskEntry__', {
-            'schedule':'Schedule____',
+            'schedule':'Schedule',
             'desc':'str',
             'all_disks':'bool',
             'disks':'list[str]',
@@ -1189,35 +970,20 @@ class SmartTest(Namespace):
             'lifetime':'int',
             'lba_of_first_error':'typing.Optional[str]',
     })
-    CurrentTest_ = typing.TypedDict('CurrentTest_', {
-            'progress':'int',
-    })
     DiskSmartTestResult_ = typing.TypedDict('DiskSmartTestResult_', {
             'disk':'str',
             'tests':'list[TestResult_]',
-            'current_test':'CurrentTest_',
-    })
-    Schedule_____ = typing.TypedDict('Schedule_____', {
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
+            'current_test':'CurrentTest',
     })
     SmartTestUpdate = typing.TypedDict('SmartTestUpdate', {
-            'schedule':'Schedule_____',
+            'schedule':'Schedule',
             'desc':'str',
             'all_disks':'bool',
             'disks':'list[str]',
             'type':'str',
     })
-    Schedule______ = typing.TypedDict('Schedule______', {
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
     SmartTestUpdateReturns = typing.TypedDict('SmartTestUpdateReturns', {
-            'schedule':'Schedule______',
+            'schedule':'Schedule',
             'desc':'str',
             'all_disks':'bool',
             'disks':'list[str]',
@@ -1252,14 +1018,8 @@ class SmartTest(Namespace):
             'disks':'list[str]',
             'type':'str',
     })
-    Schedule_ = typing.TypedDict('Schedule_', {
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
     SmartTestCreateReturns = typing.TypedDict('SmartTestCreateReturns', {
-            'schedule':'Schedule_',
+            'schedule':'Schedule',
             'desc':'str',
             'all_disks':'bool',
             'disks':'list[str]',
@@ -1306,42 +1066,24 @@ class SmartTest(Namespace):
             'limit':'int',
             'force_sql_filters':'bool',
     })
-    Schedule__ = typing.TypedDict('Schedule__', {
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
     SmartTaskEntry = typing.TypedDict('SmartTaskEntry', {
-            'schedule':'Schedule__',
+            'schedule':'Schedule',
             'desc':'str',
             'all_disks':'bool',
             'disks':'list[str]',
             'type':'str',
             'id':'int',
-    })
-    Schedule___ = typing.TypedDict('Schedule___', {
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
     })
     SmartTaskEntry_ = typing.TypedDict('SmartTaskEntry_', {
-            'schedule':'Schedule___',
+            'schedule':'Schedule',
             'desc':'str',
             'all_disks':'bool',
             'disks':'list[str]',
             'type':'str',
             'id':'int',
     })
-    Schedule____ = typing.TypedDict('Schedule____', {
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
     SmartTaskEntry__ = typing.TypedDict('SmartTaskEntry__', {
-            'schedule':'Schedule____',
+            'schedule':'Schedule',
             'desc':'str',
             'all_disks':'bool',
             'disks':'list[str]',
@@ -1388,35 +1130,20 @@ class SmartTest(Namespace):
             'lifetime':'int',
             'lba_of_first_error':'typing.Optional[str]',
     })
-    CurrentTest_ = typing.TypedDict('CurrentTest_', {
-            'progress':'int',
-    })
     DiskSmartTestResult_ = typing.TypedDict('DiskSmartTestResult_', {
             'disk':'str',
             'tests':'list[TestResult_]',
-            'current_test':'CurrentTest_',
-    })
-    Schedule_____ = typing.TypedDict('Schedule_____', {
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
+            'current_test':'CurrentTest',
     })
     SmartTestUpdate = typing.TypedDict('SmartTestUpdate', {
-            'schedule':'Schedule_____',
+            'schedule':'Schedule',
             'desc':'str',
             'all_disks':'bool',
             'disks':'list[str]',
             'type':'str',
     })
-    Schedule______ = typing.TypedDict('Schedule______', {
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
     SmartTestUpdateReturns = typing.TypedDict('SmartTestUpdateReturns', {
-            'schedule':'Schedule______',
+            'schedule':'Schedule',
             'desc':'str',
             'all_disks':'bool',
             'disks':'list[str]',
@@ -1458,14 +1185,8 @@ class SmartTest(Namespace):
             'disks':'list[str]',
             'type':'str',
     })
-    Schedule_ = typing.TypedDict('Schedule_', {
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
     SmartTestCreateReturns = typing.TypedDict('SmartTestCreateReturns', {
-            'schedule':'Schedule_',
+            'schedule':'Schedule',
             'desc':'str',
             'all_disks':'bool',
             'disks':'list[str]',
@@ -1512,42 +1233,24 @@ class SmartTest(Namespace):
             'limit':'int',
             'force_sql_filters':'bool',
     })
-    Schedule__ = typing.TypedDict('Schedule__', {
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
     SmartTaskEntry = typing.TypedDict('SmartTaskEntry', {
-            'schedule':'Schedule__',
+            'schedule':'Schedule',
             'desc':'str',
             'all_disks':'bool',
             'disks':'list[str]',
             'type':'str',
             'id':'int',
-    })
-    Schedule___ = typing.TypedDict('Schedule___', {
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
     })
     SmartTaskEntry_ = typing.TypedDict('SmartTaskEntry_', {
-            'schedule':'Schedule___',
+            'schedule':'Schedule',
             'desc':'str',
             'all_disks':'bool',
             'disks':'list[str]',
             'type':'str',
             'id':'int',
     })
-    Schedule____ = typing.TypedDict('Schedule____', {
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
     SmartTaskEntry__ = typing.TypedDict('SmartTaskEntry__', {
-            'schedule':'Schedule____',
+            'schedule':'Schedule',
             'desc':'str',
             'all_disks':'bool',
             'disks':'list[str]',
@@ -1594,35 +1297,20 @@ class SmartTest(Namespace):
             'lifetime':'int',
             'lba_of_first_error':'typing.Optional[str]',
     })
-    CurrentTest_ = typing.TypedDict('CurrentTest_', {
-            'progress':'int',
-    })
     DiskSmartTestResult_ = typing.TypedDict('DiskSmartTestResult_', {
             'disk':'str',
             'tests':'list[TestResult_]',
-            'current_test':'CurrentTest_',
-    })
-    Schedule_____ = typing.TypedDict('Schedule_____', {
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
+            'current_test':'CurrentTest',
     })
     SmartTestUpdate = typing.TypedDict('SmartTestUpdate', {
-            'schedule':'Schedule_____',
+            'schedule':'Schedule',
             'desc':'str',
             'all_disks':'bool',
             'disks':'list[str]',
             'type':'str',
     })
-    Schedule______ = typing.TypedDict('Schedule______', {
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
     SmartTestUpdateReturns = typing.TypedDict('SmartTestUpdateReturns', {
-            'schedule':'Schedule______',
+            'schedule':'Schedule',
             'desc':'str',
             'all_disks':'bool',
             'disks':'list[str]',
@@ -1663,14 +1351,8 @@ class SmartTest(Namespace):
             'disks':'list[str]',
             'type':'str',
     })
-    Schedule_ = typing.TypedDict('Schedule_', {
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
     SmartTestCreateReturns = typing.TypedDict('SmartTestCreateReturns', {
-            'schedule':'Schedule_',
+            'schedule':'Schedule',
             'desc':'str',
             'all_disks':'bool',
             'disks':'list[str]',
@@ -1717,42 +1399,24 @@ class SmartTest(Namespace):
             'limit':'int',
             'force_sql_filters':'bool',
     })
-    Schedule__ = typing.TypedDict('Schedule__', {
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
     SmartTaskEntry = typing.TypedDict('SmartTaskEntry', {
-            'schedule':'Schedule__',
+            'schedule':'Schedule',
             'desc':'str',
             'all_disks':'bool',
             'disks':'list[str]',
             'type':'str',
             'id':'int',
-    })
-    Schedule___ = typing.TypedDict('Schedule___', {
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
     })
     SmartTaskEntry_ = typing.TypedDict('SmartTaskEntry_', {
-            'schedule':'Schedule___',
+            'schedule':'Schedule',
             'desc':'str',
             'all_disks':'bool',
             'disks':'list[str]',
             'type':'str',
             'id':'int',
     })
-    Schedule____ = typing.TypedDict('Schedule____', {
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
     SmartTaskEntry__ = typing.TypedDict('SmartTaskEntry__', {
-            'schedule':'Schedule____',
+            'schedule':'Schedule',
             'desc':'str',
             'all_disks':'bool',
             'disks':'list[str]',
@@ -1799,35 +1463,20 @@ class SmartTest(Namespace):
             'lifetime':'int',
             'lba_of_first_error':'typing.Optional[str]',
     })
-    CurrentTest_ = typing.TypedDict('CurrentTest_', {
-            'progress':'int',
-    })
     DiskSmartTestResult_ = typing.TypedDict('DiskSmartTestResult_', {
             'disk':'str',
             'tests':'list[TestResult_]',
-            'current_test':'CurrentTest_',
-    })
-    Schedule_____ = typing.TypedDict('Schedule_____', {
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
+            'current_test':'CurrentTest',
     })
     SmartTestUpdate = typing.TypedDict('SmartTestUpdate', {
-            'schedule':'Schedule_____',
+            'schedule':'Schedule',
             'desc':'str',
             'all_disks':'bool',
             'disks':'list[str]',
             'type':'str',
     })
-    Schedule______ = typing.TypedDict('Schedule______', {
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
     SmartTestUpdateReturns = typing.TypedDict('SmartTestUpdateReturns', {
-            'schedule':'Schedule______',
+            'schedule':'Schedule',
             'desc':'str',
             'all_disks':'bool',
             'disks':'list[str]',

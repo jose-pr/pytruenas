@@ -50,18 +50,6 @@ class Staticroute(Namespace):
             'description':'str',
             'id':'int',
     })
-    StaticrouteEntry_ = typing.TypedDict('StaticrouteEntry_', {
-            'destination':'str',
-            'gateway':'str',
-            'description':'str',
-            'id':'int',
-    })
-    StaticrouteEntry__ = typing.TypedDict('StaticrouteEntry__', {
-            'destination':'str',
-            'gateway':'str',
-            'description':'str',
-            'id':'int',
-    })
     StaticrouteUpdate = typing.TypedDict('StaticrouteUpdate', {
             'destination':'str',
             'gateway':'str',

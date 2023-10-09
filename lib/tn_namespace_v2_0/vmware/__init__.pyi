@@ -54,11 +54,6 @@ class Vmware(Namespace):
             'limit':'int',
             'force_sql_filters':'bool',
     })
-    VmwareCreds_ = typing.TypedDict('VmwareCreds_', {
-            'hostname':'str',
-            'username':'str',
-            'password':'str',
-    })
     QueryOptions = typing.TypedDict('QueryOptions', {
             'relationships':'bool',
             'extend':'typing.Optional[str]',
@@ -124,11 +119,6 @@ class Vmware(Namespace):
             'limit':'int',
             'force_sql_filters':'bool',
     })
-    VmwareCreds_ = typing.TypedDict('VmwareCreds_', {
-            'hostname':'str',
-            'username':'str',
-            'password':'str',
-    })
     QueryOptions = typing.TypedDict('QueryOptions', {
             'relationships':'bool',
             'extend':'typing.Optional[str]',
@@ -193,11 +183,6 @@ class Vmware(Namespace):
             'limit':'int',
             'force_sql_filters':'bool',
     })
-    VmwareCreds_ = typing.TypedDict('VmwareCreds_', {
-            'hostname':'str',
-            'username':'str',
-            'password':'str',
-    })
     QueryOptions = typing.TypedDict('QueryOptions', {
             'relationships':'bool',
             'extend':'typing.Optional[str]',
@@ -259,11 +244,6 @@ class Vmware(Namespace):
             'offset':'int',
             'limit':'int',
             'force_sql_filters':'bool',
-    })
-    VmwareCreds_ = typing.TypedDict('VmwareCreds_', {
-            'hostname':'str',
-            'username':'str',
-            'password':'str',
     })
     QueryOptions = typing.TypedDict('QueryOptions', {
             'relationships':'bool',
@@ -332,11 +312,6 @@ class Vmware(Namespace):
             'limit':'int',
             'force_sql_filters':'bool',
     })
-    VmwareCreds_ = typing.TypedDict('VmwareCreds_', {
-            'hostname':'str',
-            'username':'str',
-            'password':'str',
-    })
     QueryOptions = typing.TypedDict('QueryOptions', {
             'relationships':'bool',
             'extend':'typing.Optional[str]',
@@ -399,11 +374,6 @@ class Vmware(Namespace):
             'limit':'int',
             'force_sql_filters':'bool',
     })
-    VmwareCreds_ = typing.TypedDict('VmwareCreds_', {
-            'hostname':'str',
-            'username':'str',
-            'password':'str',
-    })
     QueryOptions = typing.TypedDict('QueryOptions', {
             'relationships':'bool',
             'extend':'typing.Optional[str]',
@@ -427,7 +397,7 @@ class Vmware(Namespace):
     })
     @typing.overload
     def match_datastores_with_datasets(self, 
-        vmware_creds:'VmwareCreds_'={},
+        vmware_creds:'VmwareCreds'={},
     /) -> None: 
         """
         Requests datastores from vCenter server and tries to match them with local filesystems.
@@ -467,11 +437,6 @@ class Vmware(Namespace):
             'offset':'int',
             'limit':'int',
             'force_sql_filters':'bool',
-    })
-    VmwareCreds_ = typing.TypedDict('VmwareCreds_', {
-            'hostname':'str',
-            'username':'str',
-            'password':'str',
     })
     QueryOptions = typing.TypedDict('QueryOptions', {
             'relationships':'bool',
@@ -540,11 +505,6 @@ class Vmware(Namespace):
             'limit':'int',
             'force_sql_filters':'bool',
     })
-    VmwareCreds_ = typing.TypedDict('VmwareCreds_', {
-            'hostname':'str',
-            'username':'str',
-            'password':'str',
-    })
     QueryOptions = typing.TypedDict('QueryOptions', {
             'relationships':'bool',
             'extend':'typing.Optional[str]',
@@ -612,11 +572,6 @@ class Vmware(Namespace):
             'offset':'int',
             'limit':'int',
             'force_sql_filters':'bool',
-    })
-    VmwareCreds_ = typing.TypedDict('VmwareCreds_', {
-            'hostname':'str',
-            'username':'str',
-            'password':'str',
     })
     QueryOptions = typing.TypedDict('QueryOptions', {
             'relationships':'bool',

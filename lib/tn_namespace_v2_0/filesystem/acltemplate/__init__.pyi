@@ -106,103 +106,31 @@ class FilesystemAcltemplate(Namespace):
             'id':'int',
             'builtin':'bool',
     })
-    Perms__ = typing.TypedDict('Perms__', {
-            'READ_DATA':'bool',
-            'WRITE_DATA':'bool',
-            'APPEND_DATA':'bool',
-            'READ_NAMED_ATTRS':'bool',
-            'WRITE_NAMED_ATTRS':'bool',
-            'EXECUTE':'bool',
-            'DELETE_CHILD':'bool',
-            'READ_ATTRIBUTES':'bool',
-            'WRITE_ATTRIBUTES':'bool',
-            'DELETE':'bool',
-            'READ_ACL':'bool',
-            'WRITE_ACL':'bool',
-            'WRITE_OWNER':'bool',
-            'SYNCHRONIZE':'bool',
-            'BASIC':'str',
-    })
-    Flags_ = typing.TypedDict('Flags_', {
-            'FILE_INHERIT':'bool',
-            'DIRECTORY_INHERIT':'bool',
-            'NO_PROPAGATE_INHERIT':'bool',
-            'INHERIT_ONLY':'bool',
-            'INHERITED':'bool',
-            'BASIC':'str',
-    })
     Nfs4Ace_ = typing.TypedDict('Nfs4Ace_', {
             'tag':'str',
             'id':'typing.Optional[int]',
             'type':'str',
-            'perms':'Perms__',
-            'flags':'Flags_',
-    })
-    Perms___ = typing.TypedDict('Perms___', {
-            'READ':'bool',
-            'WRITE':'bool',
-            'EXECUTE':'bool',
-    })
-    Posix1eAce_ = typing.TypedDict('Posix1eAce_', {
-            'default':'bool',
-            'tag':'str',
-            'id':'int',
-            'perms':'Perms___',
+            'perms':'Perms',
+            'flags':'Flags',
     })
     AcltemplateCreate = typing.TypedDict('AcltemplateCreate', {
             'name':'str',
             'acltype':'str',
             'comment':'str',
-            'acl':'typing.Union[list[Nfs4Ace_], list[Posix1eAce_]]',
-    })
-    Perms____ = typing.TypedDict('Perms____', {
-            'READ_DATA':'bool',
-            'WRITE_DATA':'bool',
-            'APPEND_DATA':'bool',
-            'READ_NAMED_ATTRS':'bool',
-            'WRITE_NAMED_ATTRS':'bool',
-            'EXECUTE':'bool',
-            'DELETE_CHILD':'bool',
-            'READ_ATTRIBUTES':'bool',
-            'WRITE_ATTRIBUTES':'bool',
-            'DELETE':'bool',
-            'READ_ACL':'bool',
-            'WRITE_ACL':'bool',
-            'WRITE_OWNER':'bool',
-            'SYNCHRONIZE':'bool',
-            'BASIC':'str',
-    })
-    Flags__ = typing.TypedDict('Flags__', {
-            'FILE_INHERIT':'bool',
-            'DIRECTORY_INHERIT':'bool',
-            'NO_PROPAGATE_INHERIT':'bool',
-            'INHERIT_ONLY':'bool',
-            'INHERITED':'bool',
-            'BASIC':'str',
+            'acl':'typing.Union[list[Nfs4Ace_], list[Posix1eAce]]',
     })
     Nfs4Ace__ = typing.TypedDict('Nfs4Ace__', {
             'tag':'str',
             'id':'typing.Optional[int]',
             'type':'str',
-            'perms':'Perms____',
-            'flags':'Flags__',
-    })
-    Perms_____ = typing.TypedDict('Perms_____', {
-            'READ':'bool',
-            'WRITE':'bool',
-            'EXECUTE':'bool',
-    })
-    Posix1eAce__ = typing.TypedDict('Posix1eAce__', {
-            'default':'bool',
-            'tag':'str',
-            'id':'int',
-            'perms':'Perms_____',
+            'perms':'Perms',
+            'flags':'Flags',
     })
     FilesystemAcltemplateCreateReturns = typing.TypedDict('FilesystemAcltemplateCreateReturns', {
             'name':'str',
             'acltype':'str',
             'comment':'str',
-            'acl':'typing.Union[list[Nfs4Ace__], list[Posix1eAce__]]',
+            'acl':'typing.Union[list[Nfs4Ace__], list[Posix1eAce]]',
             'id':'int',
             'builtin':'bool',
     })
@@ -234,256 +162,76 @@ class FilesystemAcltemplate(Namespace):
             'limit':'int',
             'force_sql_filters':'bool',
     })
-    Perms______ = typing.TypedDict('Perms______', {
-            'READ_DATA':'bool',
-            'WRITE_DATA':'bool',
-            'APPEND_DATA':'bool',
-            'READ_NAMED_ATTRS':'bool',
-            'WRITE_NAMED_ATTRS':'bool',
-            'EXECUTE':'bool',
-            'DELETE_CHILD':'bool',
-            'READ_ATTRIBUTES':'bool',
-            'WRITE_ATTRIBUTES':'bool',
-            'DELETE':'bool',
-            'READ_ACL':'bool',
-            'WRITE_ACL':'bool',
-            'WRITE_OWNER':'bool',
-            'SYNCHRONIZE':'bool',
-            'BASIC':'str',
-    })
-    Flags___ = typing.TypedDict('Flags___', {
-            'FILE_INHERIT':'bool',
-            'DIRECTORY_INHERIT':'bool',
-            'NO_PROPAGATE_INHERIT':'bool',
-            'INHERIT_ONLY':'bool',
-            'INHERITED':'bool',
-            'BASIC':'str',
-    })
     Nfs4Ace___ = typing.TypedDict('Nfs4Ace___', {
             'tag':'str',
             'id':'typing.Optional[int]',
             'type':'str',
-            'perms':'Perms______',
-            'flags':'Flags___',
-    })
-    Perms_______ = typing.TypedDict('Perms_______', {
-            'READ':'bool',
-            'WRITE':'bool',
-            'EXECUTE':'bool',
-    })
-    Posix1eAce___ = typing.TypedDict('Posix1eAce___', {
-            'default':'bool',
-            'tag':'str',
-            'id':'int',
-            'perms':'Perms_______',
+            'perms':'Perms',
+            'flags':'Flags',
     })
     AcltemplateEntry_ = typing.TypedDict('AcltemplateEntry_', {
             'name':'str',
             'acltype':'str',
             'comment':'str',
-            'acl':'typing.Union[list[Nfs4Ace___], list[Posix1eAce___]]',
+            'acl':'typing.Union[list[Nfs4Ace___], list[Posix1eAce]]',
             'id':'int',
             'builtin':'bool',
-    })
-    Perms________ = typing.TypedDict('Perms________', {
-            'READ_DATA':'bool',
-            'WRITE_DATA':'bool',
-            'APPEND_DATA':'bool',
-            'READ_NAMED_ATTRS':'bool',
-            'WRITE_NAMED_ATTRS':'bool',
-            'EXECUTE':'bool',
-            'DELETE_CHILD':'bool',
-            'READ_ATTRIBUTES':'bool',
-            'WRITE_ATTRIBUTES':'bool',
-            'DELETE':'bool',
-            'READ_ACL':'bool',
-            'WRITE_ACL':'bool',
-            'WRITE_OWNER':'bool',
-            'SYNCHRONIZE':'bool',
-            'BASIC':'str',
-    })
-    Flags____ = typing.TypedDict('Flags____', {
-            'FILE_INHERIT':'bool',
-            'DIRECTORY_INHERIT':'bool',
-            'NO_PROPAGATE_INHERIT':'bool',
-            'INHERIT_ONLY':'bool',
-            'INHERITED':'bool',
-            'BASIC':'str',
     })
     Nfs4Ace____ = typing.TypedDict('Nfs4Ace____', {
             'tag':'str',
             'id':'typing.Optional[int]',
             'type':'str',
-            'perms':'Perms________',
-            'flags':'Flags____',
-    })
-    Perms_________ = typing.TypedDict('Perms_________', {
-            'READ':'bool',
-            'WRITE':'bool',
-            'EXECUTE':'bool',
-    })
-    Posix1eAce____ = typing.TypedDict('Posix1eAce____', {
-            'default':'bool',
-            'tag':'str',
-            'id':'int',
-            'perms':'Perms_________',
+            'perms':'Perms',
+            'flags':'Flags',
     })
     AcltemplateEntry__ = typing.TypedDict('AcltemplateEntry__', {
             'name':'str',
             'acltype':'str',
             'comment':'str',
-            'acl':'typing.Union[list[Nfs4Ace____], list[Posix1eAce____]]',
+            'acl':'typing.Union[list[Nfs4Ace____], list[Posix1eAce]]',
             'id':'int',
             'builtin':'bool',
-    })
-    Perms__________ = typing.TypedDict('Perms__________', {
-            'READ_DATA':'bool',
-            'WRITE_DATA':'bool',
-            'APPEND_DATA':'bool',
-            'READ_NAMED_ATTRS':'bool',
-            'WRITE_NAMED_ATTRS':'bool',
-            'EXECUTE':'bool',
-            'DELETE_CHILD':'bool',
-            'READ_ATTRIBUTES':'bool',
-            'WRITE_ATTRIBUTES':'bool',
-            'DELETE':'bool',
-            'READ_ACL':'bool',
-            'WRITE_ACL':'bool',
-            'WRITE_OWNER':'bool',
-            'SYNCHRONIZE':'bool',
-            'BASIC':'str',
-    })
-    Flags_____ = typing.TypedDict('Flags_____', {
-            'FILE_INHERIT':'bool',
-            'DIRECTORY_INHERIT':'bool',
-            'NO_PROPAGATE_INHERIT':'bool',
-            'INHERIT_ONLY':'bool',
-            'INHERITED':'bool',
-            'BASIC':'str',
     })
     Nfs4Ace_____ = typing.TypedDict('Nfs4Ace_____', {
             'tag':'str',
             'id':'typing.Optional[int]',
             'type':'str',
-            'perms':'Perms__________',
-            'flags':'Flags_____',
-    })
-    Perms___________ = typing.TypedDict('Perms___________', {
-            'READ':'bool',
-            'WRITE':'bool',
-            'EXECUTE':'bool',
-    })
-    Posix1eAce_____ = typing.TypedDict('Posix1eAce_____', {
-            'default':'bool',
-            'tag':'str',
-            'id':'int',
-            'perms':'Perms___________',
+            'perms':'Perms',
+            'flags':'Flags',
     })
     AcltemplateEntry___ = typing.TypedDict('AcltemplateEntry___', {
             'name':'str',
             'acltype':'str',
             'comment':'str',
-            'acl':'typing.Union[list[Nfs4Ace_____], list[Posix1eAce_____]]',
+            'acl':'typing.Union[list[Nfs4Ace_____], list[Posix1eAce]]',
             'id':'int',
             'builtin':'bool',
-    })
-    Perms____________ = typing.TypedDict('Perms____________', {
-            'READ_DATA':'bool',
-            'WRITE_DATA':'bool',
-            'APPEND_DATA':'bool',
-            'READ_NAMED_ATTRS':'bool',
-            'WRITE_NAMED_ATTRS':'bool',
-            'EXECUTE':'bool',
-            'DELETE_CHILD':'bool',
-            'READ_ATTRIBUTES':'bool',
-            'WRITE_ATTRIBUTES':'bool',
-            'DELETE':'bool',
-            'READ_ACL':'bool',
-            'WRITE_ACL':'bool',
-            'WRITE_OWNER':'bool',
-            'SYNCHRONIZE':'bool',
-            'BASIC':'str',
-    })
-    Flags______ = typing.TypedDict('Flags______', {
-            'FILE_INHERIT':'bool',
-            'DIRECTORY_INHERIT':'bool',
-            'NO_PROPAGATE_INHERIT':'bool',
-            'INHERIT_ONLY':'bool',
-            'INHERITED':'bool',
-            'BASIC':'str',
     })
     Nfs4Ace______ = typing.TypedDict('Nfs4Ace______', {
             'tag':'str',
             'id':'typing.Optional[int]',
             'type':'str',
-            'perms':'Perms____________',
-            'flags':'Flags______',
-    })
-    Perms_____________ = typing.TypedDict('Perms_____________', {
-            'READ':'bool',
-            'WRITE':'bool',
-            'EXECUTE':'bool',
-    })
-    Posix1eAce______ = typing.TypedDict('Posix1eAce______', {
-            'default':'bool',
-            'tag':'str',
-            'id':'int',
-            'perms':'Perms_____________',
+            'perms':'Perms',
+            'flags':'Flags',
     })
     AcltemplateUpdate = typing.TypedDict('AcltemplateUpdate', {
             'name':'str',
             'acltype':'str',
             'comment':'str',
-            'acl':'typing.Union[list[Nfs4Ace______], list[Posix1eAce______]]',
-    })
-    Perms______________ = typing.TypedDict('Perms______________', {
-            'READ_DATA':'bool',
-            'WRITE_DATA':'bool',
-            'APPEND_DATA':'bool',
-            'READ_NAMED_ATTRS':'bool',
-            'WRITE_NAMED_ATTRS':'bool',
-            'EXECUTE':'bool',
-            'DELETE_CHILD':'bool',
-            'READ_ATTRIBUTES':'bool',
-            'WRITE_ATTRIBUTES':'bool',
-            'DELETE':'bool',
-            'READ_ACL':'bool',
-            'WRITE_ACL':'bool',
-            'WRITE_OWNER':'bool',
-            'SYNCHRONIZE':'bool',
-            'BASIC':'str',
-    })
-    Flags_______ = typing.TypedDict('Flags_______', {
-            'FILE_INHERIT':'bool',
-            'DIRECTORY_INHERIT':'bool',
-            'NO_PROPAGATE_INHERIT':'bool',
-            'INHERIT_ONLY':'bool',
-            'INHERITED':'bool',
-            'BASIC':'str',
+            'acl':'typing.Union[list[Nfs4Ace______], list[Posix1eAce]]',
     })
     Nfs4Ace_______ = typing.TypedDict('Nfs4Ace_______', {
             'tag':'str',
             'id':'typing.Optional[int]',
             'type':'str',
-            'perms':'Perms______________',
-            'flags':'Flags_______',
-    })
-    Perms_______________ = typing.TypedDict('Perms_______________', {
-            'READ':'bool',
-            'WRITE':'bool',
-            'EXECUTE':'bool',
-    })
-    Posix1eAce_______ = typing.TypedDict('Posix1eAce_______', {
-            'default':'bool',
-            'tag':'str',
-            'id':'int',
-            'perms':'Perms_______________',
+            'perms':'Perms',
+            'flags':'Flags',
     })
     FilesystemAcltemplateUpdateReturns = typing.TypedDict('FilesystemAcltemplateUpdateReturns', {
             'name':'str',
             'acltype':'str',
             'comment':'str',
-            'acl':'typing.Union[list[Nfs4Ace_______], list[Posix1eAce_______]]',
+            'acl':'typing.Union[list[Nfs4Ace_______], list[Posix1eAce]]',
             'id':'int',
             'builtin':'bool',
     })
@@ -580,103 +328,31 @@ class FilesystemAcltemplate(Namespace):
             'id':'int',
             'builtin':'bool',
     })
-    Perms__ = typing.TypedDict('Perms__', {
-            'READ_DATA':'bool',
-            'WRITE_DATA':'bool',
-            'APPEND_DATA':'bool',
-            'READ_NAMED_ATTRS':'bool',
-            'WRITE_NAMED_ATTRS':'bool',
-            'EXECUTE':'bool',
-            'DELETE_CHILD':'bool',
-            'READ_ATTRIBUTES':'bool',
-            'WRITE_ATTRIBUTES':'bool',
-            'DELETE':'bool',
-            'READ_ACL':'bool',
-            'WRITE_ACL':'bool',
-            'WRITE_OWNER':'bool',
-            'SYNCHRONIZE':'bool',
-            'BASIC':'str',
-    })
-    Flags_ = typing.TypedDict('Flags_', {
-            'FILE_INHERIT':'bool',
-            'DIRECTORY_INHERIT':'bool',
-            'NO_PROPAGATE_INHERIT':'bool',
-            'INHERIT_ONLY':'bool',
-            'INHERITED':'bool',
-            'BASIC':'str',
-    })
     Nfs4Ace_ = typing.TypedDict('Nfs4Ace_', {
             'tag':'str',
             'id':'typing.Optional[int]',
             'type':'str',
-            'perms':'Perms__',
-            'flags':'Flags_',
-    })
-    Perms___ = typing.TypedDict('Perms___', {
-            'READ':'bool',
-            'WRITE':'bool',
-            'EXECUTE':'bool',
-    })
-    Posix1eAce_ = typing.TypedDict('Posix1eAce_', {
-            'default':'bool',
-            'tag':'str',
-            'id':'int',
-            'perms':'Perms___',
+            'perms':'Perms',
+            'flags':'Flags',
     })
     AcltemplateCreate = typing.TypedDict('AcltemplateCreate', {
             'name':'str',
             'acltype':'str',
             'comment':'str',
-            'acl':'typing.Union[list[Nfs4Ace_], list[Posix1eAce_]]',
-    })
-    Perms____ = typing.TypedDict('Perms____', {
-            'READ_DATA':'bool',
-            'WRITE_DATA':'bool',
-            'APPEND_DATA':'bool',
-            'READ_NAMED_ATTRS':'bool',
-            'WRITE_NAMED_ATTRS':'bool',
-            'EXECUTE':'bool',
-            'DELETE_CHILD':'bool',
-            'READ_ATTRIBUTES':'bool',
-            'WRITE_ATTRIBUTES':'bool',
-            'DELETE':'bool',
-            'READ_ACL':'bool',
-            'WRITE_ACL':'bool',
-            'WRITE_OWNER':'bool',
-            'SYNCHRONIZE':'bool',
-            'BASIC':'str',
-    })
-    Flags__ = typing.TypedDict('Flags__', {
-            'FILE_INHERIT':'bool',
-            'DIRECTORY_INHERIT':'bool',
-            'NO_PROPAGATE_INHERIT':'bool',
-            'INHERIT_ONLY':'bool',
-            'INHERITED':'bool',
-            'BASIC':'str',
+            'acl':'typing.Union[list[Nfs4Ace_], list[Posix1eAce]]',
     })
     Nfs4Ace__ = typing.TypedDict('Nfs4Ace__', {
             'tag':'str',
             'id':'typing.Optional[int]',
             'type':'str',
-            'perms':'Perms____',
-            'flags':'Flags__',
-    })
-    Perms_____ = typing.TypedDict('Perms_____', {
-            'READ':'bool',
-            'WRITE':'bool',
-            'EXECUTE':'bool',
-    })
-    Posix1eAce__ = typing.TypedDict('Posix1eAce__', {
-            'default':'bool',
-            'tag':'str',
-            'id':'int',
-            'perms':'Perms_____',
+            'perms':'Perms',
+            'flags':'Flags',
     })
     FilesystemAcltemplateCreateReturns = typing.TypedDict('FilesystemAcltemplateCreateReturns', {
             'name':'str',
             'acltype':'str',
             'comment':'str',
-            'acl':'typing.Union[list[Nfs4Ace__], list[Posix1eAce__]]',
+            'acl':'typing.Union[list[Nfs4Ace__], list[Posix1eAce]]',
             'id':'int',
             'builtin':'bool',
     })
@@ -708,256 +384,76 @@ class FilesystemAcltemplate(Namespace):
             'limit':'int',
             'force_sql_filters':'bool',
     })
-    Perms______ = typing.TypedDict('Perms______', {
-            'READ_DATA':'bool',
-            'WRITE_DATA':'bool',
-            'APPEND_DATA':'bool',
-            'READ_NAMED_ATTRS':'bool',
-            'WRITE_NAMED_ATTRS':'bool',
-            'EXECUTE':'bool',
-            'DELETE_CHILD':'bool',
-            'READ_ATTRIBUTES':'bool',
-            'WRITE_ATTRIBUTES':'bool',
-            'DELETE':'bool',
-            'READ_ACL':'bool',
-            'WRITE_ACL':'bool',
-            'WRITE_OWNER':'bool',
-            'SYNCHRONIZE':'bool',
-            'BASIC':'str',
-    })
-    Flags___ = typing.TypedDict('Flags___', {
-            'FILE_INHERIT':'bool',
-            'DIRECTORY_INHERIT':'bool',
-            'NO_PROPAGATE_INHERIT':'bool',
-            'INHERIT_ONLY':'bool',
-            'INHERITED':'bool',
-            'BASIC':'str',
-    })
     Nfs4Ace___ = typing.TypedDict('Nfs4Ace___', {
             'tag':'str',
             'id':'typing.Optional[int]',
             'type':'str',
-            'perms':'Perms______',
-            'flags':'Flags___',
-    })
-    Perms_______ = typing.TypedDict('Perms_______', {
-            'READ':'bool',
-            'WRITE':'bool',
-            'EXECUTE':'bool',
-    })
-    Posix1eAce___ = typing.TypedDict('Posix1eAce___', {
-            'default':'bool',
-            'tag':'str',
-            'id':'int',
-            'perms':'Perms_______',
+            'perms':'Perms',
+            'flags':'Flags',
     })
     AcltemplateEntry_ = typing.TypedDict('AcltemplateEntry_', {
             'name':'str',
             'acltype':'str',
             'comment':'str',
-            'acl':'typing.Union[list[Nfs4Ace___], list[Posix1eAce___]]',
+            'acl':'typing.Union[list[Nfs4Ace___], list[Posix1eAce]]',
             'id':'int',
             'builtin':'bool',
-    })
-    Perms________ = typing.TypedDict('Perms________', {
-            'READ_DATA':'bool',
-            'WRITE_DATA':'bool',
-            'APPEND_DATA':'bool',
-            'READ_NAMED_ATTRS':'bool',
-            'WRITE_NAMED_ATTRS':'bool',
-            'EXECUTE':'bool',
-            'DELETE_CHILD':'bool',
-            'READ_ATTRIBUTES':'bool',
-            'WRITE_ATTRIBUTES':'bool',
-            'DELETE':'bool',
-            'READ_ACL':'bool',
-            'WRITE_ACL':'bool',
-            'WRITE_OWNER':'bool',
-            'SYNCHRONIZE':'bool',
-            'BASIC':'str',
-    })
-    Flags____ = typing.TypedDict('Flags____', {
-            'FILE_INHERIT':'bool',
-            'DIRECTORY_INHERIT':'bool',
-            'NO_PROPAGATE_INHERIT':'bool',
-            'INHERIT_ONLY':'bool',
-            'INHERITED':'bool',
-            'BASIC':'str',
     })
     Nfs4Ace____ = typing.TypedDict('Nfs4Ace____', {
             'tag':'str',
             'id':'typing.Optional[int]',
             'type':'str',
-            'perms':'Perms________',
-            'flags':'Flags____',
-    })
-    Perms_________ = typing.TypedDict('Perms_________', {
-            'READ':'bool',
-            'WRITE':'bool',
-            'EXECUTE':'bool',
-    })
-    Posix1eAce____ = typing.TypedDict('Posix1eAce____', {
-            'default':'bool',
-            'tag':'str',
-            'id':'int',
-            'perms':'Perms_________',
+            'perms':'Perms',
+            'flags':'Flags',
     })
     AcltemplateEntry__ = typing.TypedDict('AcltemplateEntry__', {
             'name':'str',
             'acltype':'str',
             'comment':'str',
-            'acl':'typing.Union[list[Nfs4Ace____], list[Posix1eAce____]]',
+            'acl':'typing.Union[list[Nfs4Ace____], list[Posix1eAce]]',
             'id':'int',
             'builtin':'bool',
-    })
-    Perms__________ = typing.TypedDict('Perms__________', {
-            'READ_DATA':'bool',
-            'WRITE_DATA':'bool',
-            'APPEND_DATA':'bool',
-            'READ_NAMED_ATTRS':'bool',
-            'WRITE_NAMED_ATTRS':'bool',
-            'EXECUTE':'bool',
-            'DELETE_CHILD':'bool',
-            'READ_ATTRIBUTES':'bool',
-            'WRITE_ATTRIBUTES':'bool',
-            'DELETE':'bool',
-            'READ_ACL':'bool',
-            'WRITE_ACL':'bool',
-            'WRITE_OWNER':'bool',
-            'SYNCHRONIZE':'bool',
-            'BASIC':'str',
-    })
-    Flags_____ = typing.TypedDict('Flags_____', {
-            'FILE_INHERIT':'bool',
-            'DIRECTORY_INHERIT':'bool',
-            'NO_PROPAGATE_INHERIT':'bool',
-            'INHERIT_ONLY':'bool',
-            'INHERITED':'bool',
-            'BASIC':'str',
     })
     Nfs4Ace_____ = typing.TypedDict('Nfs4Ace_____', {
             'tag':'str',
             'id':'typing.Optional[int]',
             'type':'str',
-            'perms':'Perms__________',
-            'flags':'Flags_____',
-    })
-    Perms___________ = typing.TypedDict('Perms___________', {
-            'READ':'bool',
-            'WRITE':'bool',
-            'EXECUTE':'bool',
-    })
-    Posix1eAce_____ = typing.TypedDict('Posix1eAce_____', {
-            'default':'bool',
-            'tag':'str',
-            'id':'int',
-            'perms':'Perms___________',
+            'perms':'Perms',
+            'flags':'Flags',
     })
     AcltemplateEntry___ = typing.TypedDict('AcltemplateEntry___', {
             'name':'str',
             'acltype':'str',
             'comment':'str',
-            'acl':'typing.Union[list[Nfs4Ace_____], list[Posix1eAce_____]]',
+            'acl':'typing.Union[list[Nfs4Ace_____], list[Posix1eAce]]',
             'id':'int',
             'builtin':'bool',
-    })
-    Perms____________ = typing.TypedDict('Perms____________', {
-            'READ_DATA':'bool',
-            'WRITE_DATA':'bool',
-            'APPEND_DATA':'bool',
-            'READ_NAMED_ATTRS':'bool',
-            'WRITE_NAMED_ATTRS':'bool',
-            'EXECUTE':'bool',
-            'DELETE_CHILD':'bool',
-            'READ_ATTRIBUTES':'bool',
-            'WRITE_ATTRIBUTES':'bool',
-            'DELETE':'bool',
-            'READ_ACL':'bool',
-            'WRITE_ACL':'bool',
-            'WRITE_OWNER':'bool',
-            'SYNCHRONIZE':'bool',
-            'BASIC':'str',
-    })
-    Flags______ = typing.TypedDict('Flags______', {
-            'FILE_INHERIT':'bool',
-            'DIRECTORY_INHERIT':'bool',
-            'NO_PROPAGATE_INHERIT':'bool',
-            'INHERIT_ONLY':'bool',
-            'INHERITED':'bool',
-            'BASIC':'str',
     })
     Nfs4Ace______ = typing.TypedDict('Nfs4Ace______', {
             'tag':'str',
             'id':'typing.Optional[int]',
             'type':'str',
-            'perms':'Perms____________',
-            'flags':'Flags______',
-    })
-    Perms_____________ = typing.TypedDict('Perms_____________', {
-            'READ':'bool',
-            'WRITE':'bool',
-            'EXECUTE':'bool',
-    })
-    Posix1eAce______ = typing.TypedDict('Posix1eAce______', {
-            'default':'bool',
-            'tag':'str',
-            'id':'int',
-            'perms':'Perms_____________',
+            'perms':'Perms',
+            'flags':'Flags',
     })
     AcltemplateUpdate = typing.TypedDict('AcltemplateUpdate', {
             'name':'str',
             'acltype':'str',
             'comment':'str',
-            'acl':'typing.Union[list[Nfs4Ace______], list[Posix1eAce______]]',
-    })
-    Perms______________ = typing.TypedDict('Perms______________', {
-            'READ_DATA':'bool',
-            'WRITE_DATA':'bool',
-            'APPEND_DATA':'bool',
-            'READ_NAMED_ATTRS':'bool',
-            'WRITE_NAMED_ATTRS':'bool',
-            'EXECUTE':'bool',
-            'DELETE_CHILD':'bool',
-            'READ_ATTRIBUTES':'bool',
-            'WRITE_ATTRIBUTES':'bool',
-            'DELETE':'bool',
-            'READ_ACL':'bool',
-            'WRITE_ACL':'bool',
-            'WRITE_OWNER':'bool',
-            'SYNCHRONIZE':'bool',
-            'BASIC':'str',
-    })
-    Flags_______ = typing.TypedDict('Flags_______', {
-            'FILE_INHERIT':'bool',
-            'DIRECTORY_INHERIT':'bool',
-            'NO_PROPAGATE_INHERIT':'bool',
-            'INHERIT_ONLY':'bool',
-            'INHERITED':'bool',
-            'BASIC':'str',
+            'acl':'typing.Union[list[Nfs4Ace______], list[Posix1eAce]]',
     })
     Nfs4Ace_______ = typing.TypedDict('Nfs4Ace_______', {
             'tag':'str',
             'id':'typing.Optional[int]',
             'type':'str',
-            'perms':'Perms______________',
-            'flags':'Flags_______',
-    })
-    Perms_______________ = typing.TypedDict('Perms_______________', {
-            'READ':'bool',
-            'WRITE':'bool',
-            'EXECUTE':'bool',
-    })
-    Posix1eAce_______ = typing.TypedDict('Posix1eAce_______', {
-            'default':'bool',
-            'tag':'str',
-            'id':'int',
-            'perms':'Perms_______________',
+            'perms':'Perms',
+            'flags':'Flags',
     })
     FilesystemAcltemplateUpdateReturns = typing.TypedDict('FilesystemAcltemplateUpdateReturns', {
             'name':'str',
             'acltype':'str',
             'comment':'str',
-            'acl':'typing.Union[list[Nfs4Ace_______], list[Posix1eAce_______]]',
+            'acl':'typing.Union[list[Nfs4Ace_______], list[Posix1eAce]]',
             'id':'int',
             'builtin':'bool',
     })
@@ -1054,103 +550,31 @@ class FilesystemAcltemplate(Namespace):
             'id':'int',
             'builtin':'bool',
     })
-    Perms__ = typing.TypedDict('Perms__', {
-            'READ_DATA':'bool',
-            'WRITE_DATA':'bool',
-            'APPEND_DATA':'bool',
-            'READ_NAMED_ATTRS':'bool',
-            'WRITE_NAMED_ATTRS':'bool',
-            'EXECUTE':'bool',
-            'DELETE_CHILD':'bool',
-            'READ_ATTRIBUTES':'bool',
-            'WRITE_ATTRIBUTES':'bool',
-            'DELETE':'bool',
-            'READ_ACL':'bool',
-            'WRITE_ACL':'bool',
-            'WRITE_OWNER':'bool',
-            'SYNCHRONIZE':'bool',
-            'BASIC':'str',
-    })
-    Flags_ = typing.TypedDict('Flags_', {
-            'FILE_INHERIT':'bool',
-            'DIRECTORY_INHERIT':'bool',
-            'NO_PROPAGATE_INHERIT':'bool',
-            'INHERIT_ONLY':'bool',
-            'INHERITED':'bool',
-            'BASIC':'str',
-    })
     Nfs4Ace_ = typing.TypedDict('Nfs4Ace_', {
             'tag':'str',
             'id':'typing.Optional[int]',
             'type':'str',
-            'perms':'Perms__',
-            'flags':'Flags_',
-    })
-    Perms___ = typing.TypedDict('Perms___', {
-            'READ':'bool',
-            'WRITE':'bool',
-            'EXECUTE':'bool',
-    })
-    Posix1eAce_ = typing.TypedDict('Posix1eAce_', {
-            'default':'bool',
-            'tag':'str',
-            'id':'int',
-            'perms':'Perms___',
+            'perms':'Perms',
+            'flags':'Flags',
     })
     AcltemplateCreate = typing.TypedDict('AcltemplateCreate', {
             'name':'str',
             'acltype':'str',
             'comment':'str',
-            'acl':'typing.Union[list[Nfs4Ace_], list[Posix1eAce_]]',
-    })
-    Perms____ = typing.TypedDict('Perms____', {
-            'READ_DATA':'bool',
-            'WRITE_DATA':'bool',
-            'APPEND_DATA':'bool',
-            'READ_NAMED_ATTRS':'bool',
-            'WRITE_NAMED_ATTRS':'bool',
-            'EXECUTE':'bool',
-            'DELETE_CHILD':'bool',
-            'READ_ATTRIBUTES':'bool',
-            'WRITE_ATTRIBUTES':'bool',
-            'DELETE':'bool',
-            'READ_ACL':'bool',
-            'WRITE_ACL':'bool',
-            'WRITE_OWNER':'bool',
-            'SYNCHRONIZE':'bool',
-            'BASIC':'str',
-    })
-    Flags__ = typing.TypedDict('Flags__', {
-            'FILE_INHERIT':'bool',
-            'DIRECTORY_INHERIT':'bool',
-            'NO_PROPAGATE_INHERIT':'bool',
-            'INHERIT_ONLY':'bool',
-            'INHERITED':'bool',
-            'BASIC':'str',
+            'acl':'typing.Union[list[Nfs4Ace_], list[Posix1eAce]]',
     })
     Nfs4Ace__ = typing.TypedDict('Nfs4Ace__', {
             'tag':'str',
             'id':'typing.Optional[int]',
             'type':'str',
-            'perms':'Perms____',
-            'flags':'Flags__',
-    })
-    Perms_____ = typing.TypedDict('Perms_____', {
-            'READ':'bool',
-            'WRITE':'bool',
-            'EXECUTE':'bool',
-    })
-    Posix1eAce__ = typing.TypedDict('Posix1eAce__', {
-            'default':'bool',
-            'tag':'str',
-            'id':'int',
-            'perms':'Perms_____',
+            'perms':'Perms',
+            'flags':'Flags',
     })
     FilesystemAcltemplateCreateReturns = typing.TypedDict('FilesystemAcltemplateCreateReturns', {
             'name':'str',
             'acltype':'str',
             'comment':'str',
-            'acl':'typing.Union[list[Nfs4Ace__], list[Posix1eAce__]]',
+            'acl':'typing.Union[list[Nfs4Ace__], list[Posix1eAce]]',
             'id':'int',
             'builtin':'bool',
     })
@@ -1182,256 +606,76 @@ class FilesystemAcltemplate(Namespace):
             'limit':'int',
             'force_sql_filters':'bool',
     })
-    Perms______ = typing.TypedDict('Perms______', {
-            'READ_DATA':'bool',
-            'WRITE_DATA':'bool',
-            'APPEND_DATA':'bool',
-            'READ_NAMED_ATTRS':'bool',
-            'WRITE_NAMED_ATTRS':'bool',
-            'EXECUTE':'bool',
-            'DELETE_CHILD':'bool',
-            'READ_ATTRIBUTES':'bool',
-            'WRITE_ATTRIBUTES':'bool',
-            'DELETE':'bool',
-            'READ_ACL':'bool',
-            'WRITE_ACL':'bool',
-            'WRITE_OWNER':'bool',
-            'SYNCHRONIZE':'bool',
-            'BASIC':'str',
-    })
-    Flags___ = typing.TypedDict('Flags___', {
-            'FILE_INHERIT':'bool',
-            'DIRECTORY_INHERIT':'bool',
-            'NO_PROPAGATE_INHERIT':'bool',
-            'INHERIT_ONLY':'bool',
-            'INHERITED':'bool',
-            'BASIC':'str',
-    })
     Nfs4Ace___ = typing.TypedDict('Nfs4Ace___', {
             'tag':'str',
             'id':'typing.Optional[int]',
             'type':'str',
-            'perms':'Perms______',
-            'flags':'Flags___',
-    })
-    Perms_______ = typing.TypedDict('Perms_______', {
-            'READ':'bool',
-            'WRITE':'bool',
-            'EXECUTE':'bool',
-    })
-    Posix1eAce___ = typing.TypedDict('Posix1eAce___', {
-            'default':'bool',
-            'tag':'str',
-            'id':'int',
-            'perms':'Perms_______',
+            'perms':'Perms',
+            'flags':'Flags',
     })
     AcltemplateEntry_ = typing.TypedDict('AcltemplateEntry_', {
             'name':'str',
             'acltype':'str',
             'comment':'str',
-            'acl':'typing.Union[list[Nfs4Ace___], list[Posix1eAce___]]',
+            'acl':'typing.Union[list[Nfs4Ace___], list[Posix1eAce]]',
             'id':'int',
             'builtin':'bool',
-    })
-    Perms________ = typing.TypedDict('Perms________', {
-            'READ_DATA':'bool',
-            'WRITE_DATA':'bool',
-            'APPEND_DATA':'bool',
-            'READ_NAMED_ATTRS':'bool',
-            'WRITE_NAMED_ATTRS':'bool',
-            'EXECUTE':'bool',
-            'DELETE_CHILD':'bool',
-            'READ_ATTRIBUTES':'bool',
-            'WRITE_ATTRIBUTES':'bool',
-            'DELETE':'bool',
-            'READ_ACL':'bool',
-            'WRITE_ACL':'bool',
-            'WRITE_OWNER':'bool',
-            'SYNCHRONIZE':'bool',
-            'BASIC':'str',
-    })
-    Flags____ = typing.TypedDict('Flags____', {
-            'FILE_INHERIT':'bool',
-            'DIRECTORY_INHERIT':'bool',
-            'NO_PROPAGATE_INHERIT':'bool',
-            'INHERIT_ONLY':'bool',
-            'INHERITED':'bool',
-            'BASIC':'str',
     })
     Nfs4Ace____ = typing.TypedDict('Nfs4Ace____', {
             'tag':'str',
             'id':'typing.Optional[int]',
             'type':'str',
-            'perms':'Perms________',
-            'flags':'Flags____',
-    })
-    Perms_________ = typing.TypedDict('Perms_________', {
-            'READ':'bool',
-            'WRITE':'bool',
-            'EXECUTE':'bool',
-    })
-    Posix1eAce____ = typing.TypedDict('Posix1eAce____', {
-            'default':'bool',
-            'tag':'str',
-            'id':'int',
-            'perms':'Perms_________',
+            'perms':'Perms',
+            'flags':'Flags',
     })
     AcltemplateEntry__ = typing.TypedDict('AcltemplateEntry__', {
             'name':'str',
             'acltype':'str',
             'comment':'str',
-            'acl':'typing.Union[list[Nfs4Ace____], list[Posix1eAce____]]',
+            'acl':'typing.Union[list[Nfs4Ace____], list[Posix1eAce]]',
             'id':'int',
             'builtin':'bool',
-    })
-    Perms__________ = typing.TypedDict('Perms__________', {
-            'READ_DATA':'bool',
-            'WRITE_DATA':'bool',
-            'APPEND_DATA':'bool',
-            'READ_NAMED_ATTRS':'bool',
-            'WRITE_NAMED_ATTRS':'bool',
-            'EXECUTE':'bool',
-            'DELETE_CHILD':'bool',
-            'READ_ATTRIBUTES':'bool',
-            'WRITE_ATTRIBUTES':'bool',
-            'DELETE':'bool',
-            'READ_ACL':'bool',
-            'WRITE_ACL':'bool',
-            'WRITE_OWNER':'bool',
-            'SYNCHRONIZE':'bool',
-            'BASIC':'str',
-    })
-    Flags_____ = typing.TypedDict('Flags_____', {
-            'FILE_INHERIT':'bool',
-            'DIRECTORY_INHERIT':'bool',
-            'NO_PROPAGATE_INHERIT':'bool',
-            'INHERIT_ONLY':'bool',
-            'INHERITED':'bool',
-            'BASIC':'str',
     })
     Nfs4Ace_____ = typing.TypedDict('Nfs4Ace_____', {
             'tag':'str',
             'id':'typing.Optional[int]',
             'type':'str',
-            'perms':'Perms__________',
-            'flags':'Flags_____',
-    })
-    Perms___________ = typing.TypedDict('Perms___________', {
-            'READ':'bool',
-            'WRITE':'bool',
-            'EXECUTE':'bool',
-    })
-    Posix1eAce_____ = typing.TypedDict('Posix1eAce_____', {
-            'default':'bool',
-            'tag':'str',
-            'id':'int',
-            'perms':'Perms___________',
+            'perms':'Perms',
+            'flags':'Flags',
     })
     AcltemplateEntry___ = typing.TypedDict('AcltemplateEntry___', {
             'name':'str',
             'acltype':'str',
             'comment':'str',
-            'acl':'typing.Union[list[Nfs4Ace_____], list[Posix1eAce_____]]',
+            'acl':'typing.Union[list[Nfs4Ace_____], list[Posix1eAce]]',
             'id':'int',
             'builtin':'bool',
-    })
-    Perms____________ = typing.TypedDict('Perms____________', {
-            'READ_DATA':'bool',
-            'WRITE_DATA':'bool',
-            'APPEND_DATA':'bool',
-            'READ_NAMED_ATTRS':'bool',
-            'WRITE_NAMED_ATTRS':'bool',
-            'EXECUTE':'bool',
-            'DELETE_CHILD':'bool',
-            'READ_ATTRIBUTES':'bool',
-            'WRITE_ATTRIBUTES':'bool',
-            'DELETE':'bool',
-            'READ_ACL':'bool',
-            'WRITE_ACL':'bool',
-            'WRITE_OWNER':'bool',
-            'SYNCHRONIZE':'bool',
-            'BASIC':'str',
-    })
-    Flags______ = typing.TypedDict('Flags______', {
-            'FILE_INHERIT':'bool',
-            'DIRECTORY_INHERIT':'bool',
-            'NO_PROPAGATE_INHERIT':'bool',
-            'INHERIT_ONLY':'bool',
-            'INHERITED':'bool',
-            'BASIC':'str',
     })
     Nfs4Ace______ = typing.TypedDict('Nfs4Ace______', {
             'tag':'str',
             'id':'typing.Optional[int]',
             'type':'str',
-            'perms':'Perms____________',
-            'flags':'Flags______',
-    })
-    Perms_____________ = typing.TypedDict('Perms_____________', {
-            'READ':'bool',
-            'WRITE':'bool',
-            'EXECUTE':'bool',
-    })
-    Posix1eAce______ = typing.TypedDict('Posix1eAce______', {
-            'default':'bool',
-            'tag':'str',
-            'id':'int',
-            'perms':'Perms_____________',
+            'perms':'Perms',
+            'flags':'Flags',
     })
     AcltemplateUpdate = typing.TypedDict('AcltemplateUpdate', {
             'name':'str',
             'acltype':'str',
             'comment':'str',
-            'acl':'typing.Union[list[Nfs4Ace______], list[Posix1eAce______]]',
-    })
-    Perms______________ = typing.TypedDict('Perms______________', {
-            'READ_DATA':'bool',
-            'WRITE_DATA':'bool',
-            'APPEND_DATA':'bool',
-            'READ_NAMED_ATTRS':'bool',
-            'WRITE_NAMED_ATTRS':'bool',
-            'EXECUTE':'bool',
-            'DELETE_CHILD':'bool',
-            'READ_ATTRIBUTES':'bool',
-            'WRITE_ATTRIBUTES':'bool',
-            'DELETE':'bool',
-            'READ_ACL':'bool',
-            'WRITE_ACL':'bool',
-            'WRITE_OWNER':'bool',
-            'SYNCHRONIZE':'bool',
-            'BASIC':'str',
-    })
-    Flags_______ = typing.TypedDict('Flags_______', {
-            'FILE_INHERIT':'bool',
-            'DIRECTORY_INHERIT':'bool',
-            'NO_PROPAGATE_INHERIT':'bool',
-            'INHERIT_ONLY':'bool',
-            'INHERITED':'bool',
-            'BASIC':'str',
+            'acl':'typing.Union[list[Nfs4Ace______], list[Posix1eAce]]',
     })
     Nfs4Ace_______ = typing.TypedDict('Nfs4Ace_______', {
             'tag':'str',
             'id':'typing.Optional[int]',
             'type':'str',
-            'perms':'Perms______________',
-            'flags':'Flags_______',
-    })
-    Perms_______________ = typing.TypedDict('Perms_______________', {
-            'READ':'bool',
-            'WRITE':'bool',
-            'EXECUTE':'bool',
-    })
-    Posix1eAce_______ = typing.TypedDict('Posix1eAce_______', {
-            'default':'bool',
-            'tag':'str',
-            'id':'int',
-            'perms':'Perms_______________',
+            'perms':'Perms',
+            'flags':'Flags',
     })
     FilesystemAcltemplateUpdateReturns = typing.TypedDict('FilesystemAcltemplateUpdateReturns', {
             'name':'str',
             'acltype':'str',
             'comment':'str',
-            'acl':'typing.Union[list[Nfs4Ace_______], list[Posix1eAce_______]]',
+            'acl':'typing.Union[list[Nfs4Ace_______], list[Posix1eAce]]',
             'id':'int',
             'builtin':'bool',
     })
@@ -1531,103 +775,31 @@ class FilesystemAcltemplate(Namespace):
             'id':'int',
             'builtin':'bool',
     })
-    Perms__ = typing.TypedDict('Perms__', {
-            'READ_DATA':'bool',
-            'WRITE_DATA':'bool',
-            'APPEND_DATA':'bool',
-            'READ_NAMED_ATTRS':'bool',
-            'WRITE_NAMED_ATTRS':'bool',
-            'EXECUTE':'bool',
-            'DELETE_CHILD':'bool',
-            'READ_ATTRIBUTES':'bool',
-            'WRITE_ATTRIBUTES':'bool',
-            'DELETE':'bool',
-            'READ_ACL':'bool',
-            'WRITE_ACL':'bool',
-            'WRITE_OWNER':'bool',
-            'SYNCHRONIZE':'bool',
-            'BASIC':'str',
-    })
-    Flags_ = typing.TypedDict('Flags_', {
-            'FILE_INHERIT':'bool',
-            'DIRECTORY_INHERIT':'bool',
-            'NO_PROPAGATE_INHERIT':'bool',
-            'INHERIT_ONLY':'bool',
-            'INHERITED':'bool',
-            'BASIC':'str',
-    })
     Nfs4Ace_ = typing.TypedDict('Nfs4Ace_', {
             'tag':'str',
             'id':'typing.Optional[int]',
             'type':'str',
-            'perms':'Perms__',
-            'flags':'Flags_',
-    })
-    Perms___ = typing.TypedDict('Perms___', {
-            'READ':'bool',
-            'WRITE':'bool',
-            'EXECUTE':'bool',
-    })
-    Posix1eAce_ = typing.TypedDict('Posix1eAce_', {
-            'default':'bool',
-            'tag':'str',
-            'id':'int',
-            'perms':'Perms___',
+            'perms':'Perms',
+            'flags':'Flags',
     })
     AcltemplateCreate = typing.TypedDict('AcltemplateCreate', {
             'name':'str',
             'acltype':'str',
             'comment':'str',
-            'acl':'typing.Union[list[Nfs4Ace_], list[Posix1eAce_]]',
-    })
-    Perms____ = typing.TypedDict('Perms____', {
-            'READ_DATA':'bool',
-            'WRITE_DATA':'bool',
-            'APPEND_DATA':'bool',
-            'READ_NAMED_ATTRS':'bool',
-            'WRITE_NAMED_ATTRS':'bool',
-            'EXECUTE':'bool',
-            'DELETE_CHILD':'bool',
-            'READ_ATTRIBUTES':'bool',
-            'WRITE_ATTRIBUTES':'bool',
-            'DELETE':'bool',
-            'READ_ACL':'bool',
-            'WRITE_ACL':'bool',
-            'WRITE_OWNER':'bool',
-            'SYNCHRONIZE':'bool',
-            'BASIC':'str',
-    })
-    Flags__ = typing.TypedDict('Flags__', {
-            'FILE_INHERIT':'bool',
-            'DIRECTORY_INHERIT':'bool',
-            'NO_PROPAGATE_INHERIT':'bool',
-            'INHERIT_ONLY':'bool',
-            'INHERITED':'bool',
-            'BASIC':'str',
+            'acl':'typing.Union[list[Nfs4Ace_], list[Posix1eAce]]',
     })
     Nfs4Ace__ = typing.TypedDict('Nfs4Ace__', {
             'tag':'str',
             'id':'typing.Optional[int]',
             'type':'str',
-            'perms':'Perms____',
-            'flags':'Flags__',
-    })
-    Perms_____ = typing.TypedDict('Perms_____', {
-            'READ':'bool',
-            'WRITE':'bool',
-            'EXECUTE':'bool',
-    })
-    Posix1eAce__ = typing.TypedDict('Posix1eAce__', {
-            'default':'bool',
-            'tag':'str',
-            'id':'int',
-            'perms':'Perms_____',
+            'perms':'Perms',
+            'flags':'Flags',
     })
     FilesystemAcltemplateCreateReturns = typing.TypedDict('FilesystemAcltemplateCreateReturns', {
             'name':'str',
             'acltype':'str',
             'comment':'str',
-            'acl':'typing.Union[list[Nfs4Ace__], list[Posix1eAce__]]',
+            'acl':'typing.Union[list[Nfs4Ace__], list[Posix1eAce]]',
             'id':'int',
             'builtin':'bool',
     })
@@ -1659,256 +831,76 @@ class FilesystemAcltemplate(Namespace):
             'limit':'int',
             'force_sql_filters':'bool',
     })
-    Perms______ = typing.TypedDict('Perms______', {
-            'READ_DATA':'bool',
-            'WRITE_DATA':'bool',
-            'APPEND_DATA':'bool',
-            'READ_NAMED_ATTRS':'bool',
-            'WRITE_NAMED_ATTRS':'bool',
-            'EXECUTE':'bool',
-            'DELETE_CHILD':'bool',
-            'READ_ATTRIBUTES':'bool',
-            'WRITE_ATTRIBUTES':'bool',
-            'DELETE':'bool',
-            'READ_ACL':'bool',
-            'WRITE_ACL':'bool',
-            'WRITE_OWNER':'bool',
-            'SYNCHRONIZE':'bool',
-            'BASIC':'str',
-    })
-    Flags___ = typing.TypedDict('Flags___', {
-            'FILE_INHERIT':'bool',
-            'DIRECTORY_INHERIT':'bool',
-            'NO_PROPAGATE_INHERIT':'bool',
-            'INHERIT_ONLY':'bool',
-            'INHERITED':'bool',
-            'BASIC':'str',
-    })
     Nfs4Ace___ = typing.TypedDict('Nfs4Ace___', {
             'tag':'str',
             'id':'typing.Optional[int]',
             'type':'str',
-            'perms':'Perms______',
-            'flags':'Flags___',
-    })
-    Perms_______ = typing.TypedDict('Perms_______', {
-            'READ':'bool',
-            'WRITE':'bool',
-            'EXECUTE':'bool',
-    })
-    Posix1eAce___ = typing.TypedDict('Posix1eAce___', {
-            'default':'bool',
-            'tag':'str',
-            'id':'int',
-            'perms':'Perms_______',
+            'perms':'Perms',
+            'flags':'Flags',
     })
     AcltemplateEntry_ = typing.TypedDict('AcltemplateEntry_', {
             'name':'str',
             'acltype':'str',
             'comment':'str',
-            'acl':'typing.Union[list[Nfs4Ace___], list[Posix1eAce___]]',
+            'acl':'typing.Union[list[Nfs4Ace___], list[Posix1eAce]]',
             'id':'int',
             'builtin':'bool',
-    })
-    Perms________ = typing.TypedDict('Perms________', {
-            'READ_DATA':'bool',
-            'WRITE_DATA':'bool',
-            'APPEND_DATA':'bool',
-            'READ_NAMED_ATTRS':'bool',
-            'WRITE_NAMED_ATTRS':'bool',
-            'EXECUTE':'bool',
-            'DELETE_CHILD':'bool',
-            'READ_ATTRIBUTES':'bool',
-            'WRITE_ATTRIBUTES':'bool',
-            'DELETE':'bool',
-            'READ_ACL':'bool',
-            'WRITE_ACL':'bool',
-            'WRITE_OWNER':'bool',
-            'SYNCHRONIZE':'bool',
-            'BASIC':'str',
-    })
-    Flags____ = typing.TypedDict('Flags____', {
-            'FILE_INHERIT':'bool',
-            'DIRECTORY_INHERIT':'bool',
-            'NO_PROPAGATE_INHERIT':'bool',
-            'INHERIT_ONLY':'bool',
-            'INHERITED':'bool',
-            'BASIC':'str',
     })
     Nfs4Ace____ = typing.TypedDict('Nfs4Ace____', {
             'tag':'str',
             'id':'typing.Optional[int]',
             'type':'str',
-            'perms':'Perms________',
-            'flags':'Flags____',
-    })
-    Perms_________ = typing.TypedDict('Perms_________', {
-            'READ':'bool',
-            'WRITE':'bool',
-            'EXECUTE':'bool',
-    })
-    Posix1eAce____ = typing.TypedDict('Posix1eAce____', {
-            'default':'bool',
-            'tag':'str',
-            'id':'int',
-            'perms':'Perms_________',
+            'perms':'Perms',
+            'flags':'Flags',
     })
     AcltemplateEntry__ = typing.TypedDict('AcltemplateEntry__', {
             'name':'str',
             'acltype':'str',
             'comment':'str',
-            'acl':'typing.Union[list[Nfs4Ace____], list[Posix1eAce____]]',
+            'acl':'typing.Union[list[Nfs4Ace____], list[Posix1eAce]]',
             'id':'int',
             'builtin':'bool',
-    })
-    Perms__________ = typing.TypedDict('Perms__________', {
-            'READ_DATA':'bool',
-            'WRITE_DATA':'bool',
-            'APPEND_DATA':'bool',
-            'READ_NAMED_ATTRS':'bool',
-            'WRITE_NAMED_ATTRS':'bool',
-            'EXECUTE':'bool',
-            'DELETE_CHILD':'bool',
-            'READ_ATTRIBUTES':'bool',
-            'WRITE_ATTRIBUTES':'bool',
-            'DELETE':'bool',
-            'READ_ACL':'bool',
-            'WRITE_ACL':'bool',
-            'WRITE_OWNER':'bool',
-            'SYNCHRONIZE':'bool',
-            'BASIC':'str',
-    })
-    Flags_____ = typing.TypedDict('Flags_____', {
-            'FILE_INHERIT':'bool',
-            'DIRECTORY_INHERIT':'bool',
-            'NO_PROPAGATE_INHERIT':'bool',
-            'INHERIT_ONLY':'bool',
-            'INHERITED':'bool',
-            'BASIC':'str',
     })
     Nfs4Ace_____ = typing.TypedDict('Nfs4Ace_____', {
             'tag':'str',
             'id':'typing.Optional[int]',
             'type':'str',
-            'perms':'Perms__________',
-            'flags':'Flags_____',
-    })
-    Perms___________ = typing.TypedDict('Perms___________', {
-            'READ':'bool',
-            'WRITE':'bool',
-            'EXECUTE':'bool',
-    })
-    Posix1eAce_____ = typing.TypedDict('Posix1eAce_____', {
-            'default':'bool',
-            'tag':'str',
-            'id':'int',
-            'perms':'Perms___________',
+            'perms':'Perms',
+            'flags':'Flags',
     })
     AcltemplateEntry___ = typing.TypedDict('AcltemplateEntry___', {
             'name':'str',
             'acltype':'str',
             'comment':'str',
-            'acl':'typing.Union[list[Nfs4Ace_____], list[Posix1eAce_____]]',
+            'acl':'typing.Union[list[Nfs4Ace_____], list[Posix1eAce]]',
             'id':'int',
             'builtin':'bool',
-    })
-    Perms____________ = typing.TypedDict('Perms____________', {
-            'READ_DATA':'bool',
-            'WRITE_DATA':'bool',
-            'APPEND_DATA':'bool',
-            'READ_NAMED_ATTRS':'bool',
-            'WRITE_NAMED_ATTRS':'bool',
-            'EXECUTE':'bool',
-            'DELETE_CHILD':'bool',
-            'READ_ATTRIBUTES':'bool',
-            'WRITE_ATTRIBUTES':'bool',
-            'DELETE':'bool',
-            'READ_ACL':'bool',
-            'WRITE_ACL':'bool',
-            'WRITE_OWNER':'bool',
-            'SYNCHRONIZE':'bool',
-            'BASIC':'str',
-    })
-    Flags______ = typing.TypedDict('Flags______', {
-            'FILE_INHERIT':'bool',
-            'DIRECTORY_INHERIT':'bool',
-            'NO_PROPAGATE_INHERIT':'bool',
-            'INHERIT_ONLY':'bool',
-            'INHERITED':'bool',
-            'BASIC':'str',
     })
     Nfs4Ace______ = typing.TypedDict('Nfs4Ace______', {
             'tag':'str',
             'id':'typing.Optional[int]',
             'type':'str',
-            'perms':'Perms____________',
-            'flags':'Flags______',
-    })
-    Perms_____________ = typing.TypedDict('Perms_____________', {
-            'READ':'bool',
-            'WRITE':'bool',
-            'EXECUTE':'bool',
-    })
-    Posix1eAce______ = typing.TypedDict('Posix1eAce______', {
-            'default':'bool',
-            'tag':'str',
-            'id':'int',
-            'perms':'Perms_____________',
+            'perms':'Perms',
+            'flags':'Flags',
     })
     AcltemplateUpdate = typing.TypedDict('AcltemplateUpdate', {
             'name':'str',
             'acltype':'str',
             'comment':'str',
-            'acl':'typing.Union[list[Nfs4Ace______], list[Posix1eAce______]]',
-    })
-    Perms______________ = typing.TypedDict('Perms______________', {
-            'READ_DATA':'bool',
-            'WRITE_DATA':'bool',
-            'APPEND_DATA':'bool',
-            'READ_NAMED_ATTRS':'bool',
-            'WRITE_NAMED_ATTRS':'bool',
-            'EXECUTE':'bool',
-            'DELETE_CHILD':'bool',
-            'READ_ATTRIBUTES':'bool',
-            'WRITE_ATTRIBUTES':'bool',
-            'DELETE':'bool',
-            'READ_ACL':'bool',
-            'WRITE_ACL':'bool',
-            'WRITE_OWNER':'bool',
-            'SYNCHRONIZE':'bool',
-            'BASIC':'str',
-    })
-    Flags_______ = typing.TypedDict('Flags_______', {
-            'FILE_INHERIT':'bool',
-            'DIRECTORY_INHERIT':'bool',
-            'NO_PROPAGATE_INHERIT':'bool',
-            'INHERIT_ONLY':'bool',
-            'INHERITED':'bool',
-            'BASIC':'str',
+            'acl':'typing.Union[list[Nfs4Ace______], list[Posix1eAce]]',
     })
     Nfs4Ace_______ = typing.TypedDict('Nfs4Ace_______', {
             'tag':'str',
             'id':'typing.Optional[int]',
             'type':'str',
-            'perms':'Perms______________',
-            'flags':'Flags_______',
-    })
-    Perms_______________ = typing.TypedDict('Perms_______________', {
-            'READ':'bool',
-            'WRITE':'bool',
-            'EXECUTE':'bool',
-    })
-    Posix1eAce_______ = typing.TypedDict('Posix1eAce_______', {
-            'default':'bool',
-            'tag':'str',
-            'id':'int',
-            'perms':'Perms_______________',
+            'perms':'Perms',
+            'flags':'Flags',
     })
     FilesystemAcltemplateUpdateReturns = typing.TypedDict('FilesystemAcltemplateUpdateReturns', {
             'name':'str',
             'acltype':'str',
             'comment':'str',
-            'acl':'typing.Union[list[Nfs4Ace_______], list[Posix1eAce_______]]',
+            'acl':'typing.Union[list[Nfs4Ace_______], list[Posix1eAce]]',
             'id':'int',
             'builtin':'bool',
     })
@@ -2008,103 +1000,31 @@ class FilesystemAcltemplate(Namespace):
             'id':'int',
             'builtin':'bool',
     })
-    Perms__ = typing.TypedDict('Perms__', {
-            'READ_DATA':'bool',
-            'WRITE_DATA':'bool',
-            'APPEND_DATA':'bool',
-            'READ_NAMED_ATTRS':'bool',
-            'WRITE_NAMED_ATTRS':'bool',
-            'EXECUTE':'bool',
-            'DELETE_CHILD':'bool',
-            'READ_ATTRIBUTES':'bool',
-            'WRITE_ATTRIBUTES':'bool',
-            'DELETE':'bool',
-            'READ_ACL':'bool',
-            'WRITE_ACL':'bool',
-            'WRITE_OWNER':'bool',
-            'SYNCHRONIZE':'bool',
-            'BASIC':'str',
-    })
-    Flags_ = typing.TypedDict('Flags_', {
-            'FILE_INHERIT':'bool',
-            'DIRECTORY_INHERIT':'bool',
-            'NO_PROPAGATE_INHERIT':'bool',
-            'INHERIT_ONLY':'bool',
-            'INHERITED':'bool',
-            'BASIC':'str',
-    })
     Nfs4Ace_ = typing.TypedDict('Nfs4Ace_', {
             'tag':'str',
             'id':'typing.Optional[int]',
             'type':'str',
-            'perms':'Perms__',
-            'flags':'Flags_',
-    })
-    Perms___ = typing.TypedDict('Perms___', {
-            'READ':'bool',
-            'WRITE':'bool',
-            'EXECUTE':'bool',
-    })
-    Posix1eAce_ = typing.TypedDict('Posix1eAce_', {
-            'default':'bool',
-            'tag':'str',
-            'id':'int',
-            'perms':'Perms___',
+            'perms':'Perms',
+            'flags':'Flags',
     })
     AcltemplateCreate = typing.TypedDict('AcltemplateCreate', {
             'name':'str',
             'acltype':'str',
             'comment':'str',
-            'acl':'typing.Union[list[Nfs4Ace_], list[Posix1eAce_]]',
-    })
-    Perms____ = typing.TypedDict('Perms____', {
-            'READ_DATA':'bool',
-            'WRITE_DATA':'bool',
-            'APPEND_DATA':'bool',
-            'READ_NAMED_ATTRS':'bool',
-            'WRITE_NAMED_ATTRS':'bool',
-            'EXECUTE':'bool',
-            'DELETE_CHILD':'bool',
-            'READ_ATTRIBUTES':'bool',
-            'WRITE_ATTRIBUTES':'bool',
-            'DELETE':'bool',
-            'READ_ACL':'bool',
-            'WRITE_ACL':'bool',
-            'WRITE_OWNER':'bool',
-            'SYNCHRONIZE':'bool',
-            'BASIC':'str',
-    })
-    Flags__ = typing.TypedDict('Flags__', {
-            'FILE_INHERIT':'bool',
-            'DIRECTORY_INHERIT':'bool',
-            'NO_PROPAGATE_INHERIT':'bool',
-            'INHERIT_ONLY':'bool',
-            'INHERITED':'bool',
-            'BASIC':'str',
+            'acl':'typing.Union[list[Nfs4Ace_], list[Posix1eAce]]',
     })
     Nfs4Ace__ = typing.TypedDict('Nfs4Ace__', {
             'tag':'str',
             'id':'typing.Optional[int]',
             'type':'str',
-            'perms':'Perms____',
-            'flags':'Flags__',
-    })
-    Perms_____ = typing.TypedDict('Perms_____', {
-            'READ':'bool',
-            'WRITE':'bool',
-            'EXECUTE':'bool',
-    })
-    Posix1eAce__ = typing.TypedDict('Posix1eAce__', {
-            'default':'bool',
-            'tag':'str',
-            'id':'int',
-            'perms':'Perms_____',
+            'perms':'Perms',
+            'flags':'Flags',
     })
     FilesystemAcltemplateCreateReturns = typing.TypedDict('FilesystemAcltemplateCreateReturns', {
             'name':'str',
             'acltype':'str',
             'comment':'str',
-            'acl':'typing.Union[list[Nfs4Ace__], list[Posix1eAce__]]',
+            'acl':'typing.Union[list[Nfs4Ace__], list[Posix1eAce]]',
             'id':'int',
             'builtin':'bool',
     })
@@ -2136,256 +1056,76 @@ class FilesystemAcltemplate(Namespace):
             'limit':'int',
             'force_sql_filters':'bool',
     })
-    Perms______ = typing.TypedDict('Perms______', {
-            'READ_DATA':'bool',
-            'WRITE_DATA':'bool',
-            'APPEND_DATA':'bool',
-            'READ_NAMED_ATTRS':'bool',
-            'WRITE_NAMED_ATTRS':'bool',
-            'EXECUTE':'bool',
-            'DELETE_CHILD':'bool',
-            'READ_ATTRIBUTES':'bool',
-            'WRITE_ATTRIBUTES':'bool',
-            'DELETE':'bool',
-            'READ_ACL':'bool',
-            'WRITE_ACL':'bool',
-            'WRITE_OWNER':'bool',
-            'SYNCHRONIZE':'bool',
-            'BASIC':'str',
-    })
-    Flags___ = typing.TypedDict('Flags___', {
-            'FILE_INHERIT':'bool',
-            'DIRECTORY_INHERIT':'bool',
-            'NO_PROPAGATE_INHERIT':'bool',
-            'INHERIT_ONLY':'bool',
-            'INHERITED':'bool',
-            'BASIC':'str',
-    })
     Nfs4Ace___ = typing.TypedDict('Nfs4Ace___', {
             'tag':'str',
             'id':'typing.Optional[int]',
             'type':'str',
-            'perms':'Perms______',
-            'flags':'Flags___',
-    })
-    Perms_______ = typing.TypedDict('Perms_______', {
-            'READ':'bool',
-            'WRITE':'bool',
-            'EXECUTE':'bool',
-    })
-    Posix1eAce___ = typing.TypedDict('Posix1eAce___', {
-            'default':'bool',
-            'tag':'str',
-            'id':'int',
-            'perms':'Perms_______',
+            'perms':'Perms',
+            'flags':'Flags',
     })
     AcltemplateEntry_ = typing.TypedDict('AcltemplateEntry_', {
             'name':'str',
             'acltype':'str',
             'comment':'str',
-            'acl':'typing.Union[list[Nfs4Ace___], list[Posix1eAce___]]',
+            'acl':'typing.Union[list[Nfs4Ace___], list[Posix1eAce]]',
             'id':'int',
             'builtin':'bool',
-    })
-    Perms________ = typing.TypedDict('Perms________', {
-            'READ_DATA':'bool',
-            'WRITE_DATA':'bool',
-            'APPEND_DATA':'bool',
-            'READ_NAMED_ATTRS':'bool',
-            'WRITE_NAMED_ATTRS':'bool',
-            'EXECUTE':'bool',
-            'DELETE_CHILD':'bool',
-            'READ_ATTRIBUTES':'bool',
-            'WRITE_ATTRIBUTES':'bool',
-            'DELETE':'bool',
-            'READ_ACL':'bool',
-            'WRITE_ACL':'bool',
-            'WRITE_OWNER':'bool',
-            'SYNCHRONIZE':'bool',
-            'BASIC':'str',
-    })
-    Flags____ = typing.TypedDict('Flags____', {
-            'FILE_INHERIT':'bool',
-            'DIRECTORY_INHERIT':'bool',
-            'NO_PROPAGATE_INHERIT':'bool',
-            'INHERIT_ONLY':'bool',
-            'INHERITED':'bool',
-            'BASIC':'str',
     })
     Nfs4Ace____ = typing.TypedDict('Nfs4Ace____', {
             'tag':'str',
             'id':'typing.Optional[int]',
             'type':'str',
-            'perms':'Perms________',
-            'flags':'Flags____',
-    })
-    Perms_________ = typing.TypedDict('Perms_________', {
-            'READ':'bool',
-            'WRITE':'bool',
-            'EXECUTE':'bool',
-    })
-    Posix1eAce____ = typing.TypedDict('Posix1eAce____', {
-            'default':'bool',
-            'tag':'str',
-            'id':'int',
-            'perms':'Perms_________',
+            'perms':'Perms',
+            'flags':'Flags',
     })
     AcltemplateEntry__ = typing.TypedDict('AcltemplateEntry__', {
             'name':'str',
             'acltype':'str',
             'comment':'str',
-            'acl':'typing.Union[list[Nfs4Ace____], list[Posix1eAce____]]',
+            'acl':'typing.Union[list[Nfs4Ace____], list[Posix1eAce]]',
             'id':'int',
             'builtin':'bool',
-    })
-    Perms__________ = typing.TypedDict('Perms__________', {
-            'READ_DATA':'bool',
-            'WRITE_DATA':'bool',
-            'APPEND_DATA':'bool',
-            'READ_NAMED_ATTRS':'bool',
-            'WRITE_NAMED_ATTRS':'bool',
-            'EXECUTE':'bool',
-            'DELETE_CHILD':'bool',
-            'READ_ATTRIBUTES':'bool',
-            'WRITE_ATTRIBUTES':'bool',
-            'DELETE':'bool',
-            'READ_ACL':'bool',
-            'WRITE_ACL':'bool',
-            'WRITE_OWNER':'bool',
-            'SYNCHRONIZE':'bool',
-            'BASIC':'str',
-    })
-    Flags_____ = typing.TypedDict('Flags_____', {
-            'FILE_INHERIT':'bool',
-            'DIRECTORY_INHERIT':'bool',
-            'NO_PROPAGATE_INHERIT':'bool',
-            'INHERIT_ONLY':'bool',
-            'INHERITED':'bool',
-            'BASIC':'str',
     })
     Nfs4Ace_____ = typing.TypedDict('Nfs4Ace_____', {
             'tag':'str',
             'id':'typing.Optional[int]',
             'type':'str',
-            'perms':'Perms__________',
-            'flags':'Flags_____',
-    })
-    Perms___________ = typing.TypedDict('Perms___________', {
-            'READ':'bool',
-            'WRITE':'bool',
-            'EXECUTE':'bool',
-    })
-    Posix1eAce_____ = typing.TypedDict('Posix1eAce_____', {
-            'default':'bool',
-            'tag':'str',
-            'id':'int',
-            'perms':'Perms___________',
+            'perms':'Perms',
+            'flags':'Flags',
     })
     AcltemplateEntry___ = typing.TypedDict('AcltemplateEntry___', {
             'name':'str',
             'acltype':'str',
             'comment':'str',
-            'acl':'typing.Union[list[Nfs4Ace_____], list[Posix1eAce_____]]',
+            'acl':'typing.Union[list[Nfs4Ace_____], list[Posix1eAce]]',
             'id':'int',
             'builtin':'bool',
-    })
-    Perms____________ = typing.TypedDict('Perms____________', {
-            'READ_DATA':'bool',
-            'WRITE_DATA':'bool',
-            'APPEND_DATA':'bool',
-            'READ_NAMED_ATTRS':'bool',
-            'WRITE_NAMED_ATTRS':'bool',
-            'EXECUTE':'bool',
-            'DELETE_CHILD':'bool',
-            'READ_ATTRIBUTES':'bool',
-            'WRITE_ATTRIBUTES':'bool',
-            'DELETE':'bool',
-            'READ_ACL':'bool',
-            'WRITE_ACL':'bool',
-            'WRITE_OWNER':'bool',
-            'SYNCHRONIZE':'bool',
-            'BASIC':'str',
-    })
-    Flags______ = typing.TypedDict('Flags______', {
-            'FILE_INHERIT':'bool',
-            'DIRECTORY_INHERIT':'bool',
-            'NO_PROPAGATE_INHERIT':'bool',
-            'INHERIT_ONLY':'bool',
-            'INHERITED':'bool',
-            'BASIC':'str',
     })
     Nfs4Ace______ = typing.TypedDict('Nfs4Ace______', {
             'tag':'str',
             'id':'typing.Optional[int]',
             'type':'str',
-            'perms':'Perms____________',
-            'flags':'Flags______',
-    })
-    Perms_____________ = typing.TypedDict('Perms_____________', {
-            'READ':'bool',
-            'WRITE':'bool',
-            'EXECUTE':'bool',
-    })
-    Posix1eAce______ = typing.TypedDict('Posix1eAce______', {
-            'default':'bool',
-            'tag':'str',
-            'id':'int',
-            'perms':'Perms_____________',
+            'perms':'Perms',
+            'flags':'Flags',
     })
     AcltemplateUpdate = typing.TypedDict('AcltemplateUpdate', {
             'name':'str',
             'acltype':'str',
             'comment':'str',
-            'acl':'typing.Union[list[Nfs4Ace______], list[Posix1eAce______]]',
-    })
-    Perms______________ = typing.TypedDict('Perms______________', {
-            'READ_DATA':'bool',
-            'WRITE_DATA':'bool',
-            'APPEND_DATA':'bool',
-            'READ_NAMED_ATTRS':'bool',
-            'WRITE_NAMED_ATTRS':'bool',
-            'EXECUTE':'bool',
-            'DELETE_CHILD':'bool',
-            'READ_ATTRIBUTES':'bool',
-            'WRITE_ATTRIBUTES':'bool',
-            'DELETE':'bool',
-            'READ_ACL':'bool',
-            'WRITE_ACL':'bool',
-            'WRITE_OWNER':'bool',
-            'SYNCHRONIZE':'bool',
-            'BASIC':'str',
-    })
-    Flags_______ = typing.TypedDict('Flags_______', {
-            'FILE_INHERIT':'bool',
-            'DIRECTORY_INHERIT':'bool',
-            'NO_PROPAGATE_INHERIT':'bool',
-            'INHERIT_ONLY':'bool',
-            'INHERITED':'bool',
-            'BASIC':'str',
+            'acl':'typing.Union[list[Nfs4Ace______], list[Posix1eAce]]',
     })
     Nfs4Ace_______ = typing.TypedDict('Nfs4Ace_______', {
             'tag':'str',
             'id':'typing.Optional[int]',
             'type':'str',
-            'perms':'Perms______________',
-            'flags':'Flags_______',
-    })
-    Perms_______________ = typing.TypedDict('Perms_______________', {
-            'READ':'bool',
-            'WRITE':'bool',
-            'EXECUTE':'bool',
-    })
-    Posix1eAce_______ = typing.TypedDict('Posix1eAce_______', {
-            'default':'bool',
-            'tag':'str',
-            'id':'int',
-            'perms':'Perms_______________',
+            'perms':'Perms',
+            'flags':'Flags',
     })
     FilesystemAcltemplateUpdateReturns = typing.TypedDict('FilesystemAcltemplateUpdateReturns', {
             'name':'str',
             'acltype':'str',
             'comment':'str',
-            'acl':'typing.Union[list[Nfs4Ace_______], list[Posix1eAce_______]]',
+            'acl':'typing.Union[list[Nfs4Ace_______], list[Posix1eAce]]',
             'id':'int',
             'builtin':'bool',
     })
@@ -2485,103 +1225,31 @@ class FilesystemAcltemplate(Namespace):
             'id':'int',
             'builtin':'bool',
     })
-    Perms__ = typing.TypedDict('Perms__', {
-            'READ_DATA':'bool',
-            'WRITE_DATA':'bool',
-            'APPEND_DATA':'bool',
-            'READ_NAMED_ATTRS':'bool',
-            'WRITE_NAMED_ATTRS':'bool',
-            'EXECUTE':'bool',
-            'DELETE_CHILD':'bool',
-            'READ_ATTRIBUTES':'bool',
-            'WRITE_ATTRIBUTES':'bool',
-            'DELETE':'bool',
-            'READ_ACL':'bool',
-            'WRITE_ACL':'bool',
-            'WRITE_OWNER':'bool',
-            'SYNCHRONIZE':'bool',
-            'BASIC':'str',
-    })
-    Flags_ = typing.TypedDict('Flags_', {
-            'FILE_INHERIT':'bool',
-            'DIRECTORY_INHERIT':'bool',
-            'NO_PROPAGATE_INHERIT':'bool',
-            'INHERIT_ONLY':'bool',
-            'INHERITED':'bool',
-            'BASIC':'str',
-    })
     Nfs4Ace_ = typing.TypedDict('Nfs4Ace_', {
             'tag':'str',
             'id':'typing.Optional[int]',
             'type':'str',
-            'perms':'Perms__',
-            'flags':'Flags_',
-    })
-    Perms___ = typing.TypedDict('Perms___', {
-            'READ':'bool',
-            'WRITE':'bool',
-            'EXECUTE':'bool',
-    })
-    Posix1eAce_ = typing.TypedDict('Posix1eAce_', {
-            'default':'bool',
-            'tag':'str',
-            'id':'int',
-            'perms':'Perms___',
+            'perms':'Perms',
+            'flags':'Flags',
     })
     AcltemplateCreate = typing.TypedDict('AcltemplateCreate', {
             'name':'str',
             'acltype':'str',
             'comment':'str',
-            'acl':'typing.Union[list[Nfs4Ace_], list[Posix1eAce_]]',
-    })
-    Perms____ = typing.TypedDict('Perms____', {
-            'READ_DATA':'bool',
-            'WRITE_DATA':'bool',
-            'APPEND_DATA':'bool',
-            'READ_NAMED_ATTRS':'bool',
-            'WRITE_NAMED_ATTRS':'bool',
-            'EXECUTE':'bool',
-            'DELETE_CHILD':'bool',
-            'READ_ATTRIBUTES':'bool',
-            'WRITE_ATTRIBUTES':'bool',
-            'DELETE':'bool',
-            'READ_ACL':'bool',
-            'WRITE_ACL':'bool',
-            'WRITE_OWNER':'bool',
-            'SYNCHRONIZE':'bool',
-            'BASIC':'str',
-    })
-    Flags__ = typing.TypedDict('Flags__', {
-            'FILE_INHERIT':'bool',
-            'DIRECTORY_INHERIT':'bool',
-            'NO_PROPAGATE_INHERIT':'bool',
-            'INHERIT_ONLY':'bool',
-            'INHERITED':'bool',
-            'BASIC':'str',
+            'acl':'typing.Union[list[Nfs4Ace_], list[Posix1eAce]]',
     })
     Nfs4Ace__ = typing.TypedDict('Nfs4Ace__', {
             'tag':'str',
             'id':'typing.Optional[int]',
             'type':'str',
-            'perms':'Perms____',
-            'flags':'Flags__',
-    })
-    Perms_____ = typing.TypedDict('Perms_____', {
-            'READ':'bool',
-            'WRITE':'bool',
-            'EXECUTE':'bool',
-    })
-    Posix1eAce__ = typing.TypedDict('Posix1eAce__', {
-            'default':'bool',
-            'tag':'str',
-            'id':'int',
-            'perms':'Perms_____',
+            'perms':'Perms',
+            'flags':'Flags',
     })
     FilesystemAcltemplateCreateReturns = typing.TypedDict('FilesystemAcltemplateCreateReturns', {
             'name':'str',
             'acltype':'str',
             'comment':'str',
-            'acl':'typing.Union[list[Nfs4Ace__], list[Posix1eAce__]]',
+            'acl':'typing.Union[list[Nfs4Ace__], list[Posix1eAce]]',
             'id':'int',
             'builtin':'bool',
     })
@@ -2613,256 +1281,76 @@ class FilesystemAcltemplate(Namespace):
             'limit':'int',
             'force_sql_filters':'bool',
     })
-    Perms______ = typing.TypedDict('Perms______', {
-            'READ_DATA':'bool',
-            'WRITE_DATA':'bool',
-            'APPEND_DATA':'bool',
-            'READ_NAMED_ATTRS':'bool',
-            'WRITE_NAMED_ATTRS':'bool',
-            'EXECUTE':'bool',
-            'DELETE_CHILD':'bool',
-            'READ_ATTRIBUTES':'bool',
-            'WRITE_ATTRIBUTES':'bool',
-            'DELETE':'bool',
-            'READ_ACL':'bool',
-            'WRITE_ACL':'bool',
-            'WRITE_OWNER':'bool',
-            'SYNCHRONIZE':'bool',
-            'BASIC':'str',
-    })
-    Flags___ = typing.TypedDict('Flags___', {
-            'FILE_INHERIT':'bool',
-            'DIRECTORY_INHERIT':'bool',
-            'NO_PROPAGATE_INHERIT':'bool',
-            'INHERIT_ONLY':'bool',
-            'INHERITED':'bool',
-            'BASIC':'str',
-    })
     Nfs4Ace___ = typing.TypedDict('Nfs4Ace___', {
             'tag':'str',
             'id':'typing.Optional[int]',
             'type':'str',
-            'perms':'Perms______',
-            'flags':'Flags___',
-    })
-    Perms_______ = typing.TypedDict('Perms_______', {
-            'READ':'bool',
-            'WRITE':'bool',
-            'EXECUTE':'bool',
-    })
-    Posix1eAce___ = typing.TypedDict('Posix1eAce___', {
-            'default':'bool',
-            'tag':'str',
-            'id':'int',
-            'perms':'Perms_______',
+            'perms':'Perms',
+            'flags':'Flags',
     })
     AcltemplateEntry_ = typing.TypedDict('AcltemplateEntry_', {
             'name':'str',
             'acltype':'str',
             'comment':'str',
-            'acl':'typing.Union[list[Nfs4Ace___], list[Posix1eAce___]]',
+            'acl':'typing.Union[list[Nfs4Ace___], list[Posix1eAce]]',
             'id':'int',
             'builtin':'bool',
-    })
-    Perms________ = typing.TypedDict('Perms________', {
-            'READ_DATA':'bool',
-            'WRITE_DATA':'bool',
-            'APPEND_DATA':'bool',
-            'READ_NAMED_ATTRS':'bool',
-            'WRITE_NAMED_ATTRS':'bool',
-            'EXECUTE':'bool',
-            'DELETE_CHILD':'bool',
-            'READ_ATTRIBUTES':'bool',
-            'WRITE_ATTRIBUTES':'bool',
-            'DELETE':'bool',
-            'READ_ACL':'bool',
-            'WRITE_ACL':'bool',
-            'WRITE_OWNER':'bool',
-            'SYNCHRONIZE':'bool',
-            'BASIC':'str',
-    })
-    Flags____ = typing.TypedDict('Flags____', {
-            'FILE_INHERIT':'bool',
-            'DIRECTORY_INHERIT':'bool',
-            'NO_PROPAGATE_INHERIT':'bool',
-            'INHERIT_ONLY':'bool',
-            'INHERITED':'bool',
-            'BASIC':'str',
     })
     Nfs4Ace____ = typing.TypedDict('Nfs4Ace____', {
             'tag':'str',
             'id':'typing.Optional[int]',
             'type':'str',
-            'perms':'Perms________',
-            'flags':'Flags____',
-    })
-    Perms_________ = typing.TypedDict('Perms_________', {
-            'READ':'bool',
-            'WRITE':'bool',
-            'EXECUTE':'bool',
-    })
-    Posix1eAce____ = typing.TypedDict('Posix1eAce____', {
-            'default':'bool',
-            'tag':'str',
-            'id':'int',
-            'perms':'Perms_________',
+            'perms':'Perms',
+            'flags':'Flags',
     })
     AcltemplateEntry__ = typing.TypedDict('AcltemplateEntry__', {
             'name':'str',
             'acltype':'str',
             'comment':'str',
-            'acl':'typing.Union[list[Nfs4Ace____], list[Posix1eAce____]]',
+            'acl':'typing.Union[list[Nfs4Ace____], list[Posix1eAce]]',
             'id':'int',
             'builtin':'bool',
-    })
-    Perms__________ = typing.TypedDict('Perms__________', {
-            'READ_DATA':'bool',
-            'WRITE_DATA':'bool',
-            'APPEND_DATA':'bool',
-            'READ_NAMED_ATTRS':'bool',
-            'WRITE_NAMED_ATTRS':'bool',
-            'EXECUTE':'bool',
-            'DELETE_CHILD':'bool',
-            'READ_ATTRIBUTES':'bool',
-            'WRITE_ATTRIBUTES':'bool',
-            'DELETE':'bool',
-            'READ_ACL':'bool',
-            'WRITE_ACL':'bool',
-            'WRITE_OWNER':'bool',
-            'SYNCHRONIZE':'bool',
-            'BASIC':'str',
-    })
-    Flags_____ = typing.TypedDict('Flags_____', {
-            'FILE_INHERIT':'bool',
-            'DIRECTORY_INHERIT':'bool',
-            'NO_PROPAGATE_INHERIT':'bool',
-            'INHERIT_ONLY':'bool',
-            'INHERITED':'bool',
-            'BASIC':'str',
     })
     Nfs4Ace_____ = typing.TypedDict('Nfs4Ace_____', {
             'tag':'str',
             'id':'typing.Optional[int]',
             'type':'str',
-            'perms':'Perms__________',
-            'flags':'Flags_____',
-    })
-    Perms___________ = typing.TypedDict('Perms___________', {
-            'READ':'bool',
-            'WRITE':'bool',
-            'EXECUTE':'bool',
-    })
-    Posix1eAce_____ = typing.TypedDict('Posix1eAce_____', {
-            'default':'bool',
-            'tag':'str',
-            'id':'int',
-            'perms':'Perms___________',
+            'perms':'Perms',
+            'flags':'Flags',
     })
     AcltemplateEntry___ = typing.TypedDict('AcltemplateEntry___', {
             'name':'str',
             'acltype':'str',
             'comment':'str',
-            'acl':'typing.Union[list[Nfs4Ace_____], list[Posix1eAce_____]]',
+            'acl':'typing.Union[list[Nfs4Ace_____], list[Posix1eAce]]',
             'id':'int',
             'builtin':'bool',
-    })
-    Perms____________ = typing.TypedDict('Perms____________', {
-            'READ_DATA':'bool',
-            'WRITE_DATA':'bool',
-            'APPEND_DATA':'bool',
-            'READ_NAMED_ATTRS':'bool',
-            'WRITE_NAMED_ATTRS':'bool',
-            'EXECUTE':'bool',
-            'DELETE_CHILD':'bool',
-            'READ_ATTRIBUTES':'bool',
-            'WRITE_ATTRIBUTES':'bool',
-            'DELETE':'bool',
-            'READ_ACL':'bool',
-            'WRITE_ACL':'bool',
-            'WRITE_OWNER':'bool',
-            'SYNCHRONIZE':'bool',
-            'BASIC':'str',
-    })
-    Flags______ = typing.TypedDict('Flags______', {
-            'FILE_INHERIT':'bool',
-            'DIRECTORY_INHERIT':'bool',
-            'NO_PROPAGATE_INHERIT':'bool',
-            'INHERIT_ONLY':'bool',
-            'INHERITED':'bool',
-            'BASIC':'str',
     })
     Nfs4Ace______ = typing.TypedDict('Nfs4Ace______', {
             'tag':'str',
             'id':'typing.Optional[int]',
             'type':'str',
-            'perms':'Perms____________',
-            'flags':'Flags______',
-    })
-    Perms_____________ = typing.TypedDict('Perms_____________', {
-            'READ':'bool',
-            'WRITE':'bool',
-            'EXECUTE':'bool',
-    })
-    Posix1eAce______ = typing.TypedDict('Posix1eAce______', {
-            'default':'bool',
-            'tag':'str',
-            'id':'int',
-            'perms':'Perms_____________',
+            'perms':'Perms',
+            'flags':'Flags',
     })
     AcltemplateUpdate = typing.TypedDict('AcltemplateUpdate', {
             'name':'str',
             'acltype':'str',
             'comment':'str',
-            'acl':'typing.Union[list[Nfs4Ace______], list[Posix1eAce______]]',
-    })
-    Perms______________ = typing.TypedDict('Perms______________', {
-            'READ_DATA':'bool',
-            'WRITE_DATA':'bool',
-            'APPEND_DATA':'bool',
-            'READ_NAMED_ATTRS':'bool',
-            'WRITE_NAMED_ATTRS':'bool',
-            'EXECUTE':'bool',
-            'DELETE_CHILD':'bool',
-            'READ_ATTRIBUTES':'bool',
-            'WRITE_ATTRIBUTES':'bool',
-            'DELETE':'bool',
-            'READ_ACL':'bool',
-            'WRITE_ACL':'bool',
-            'WRITE_OWNER':'bool',
-            'SYNCHRONIZE':'bool',
-            'BASIC':'str',
-    })
-    Flags_______ = typing.TypedDict('Flags_______', {
-            'FILE_INHERIT':'bool',
-            'DIRECTORY_INHERIT':'bool',
-            'NO_PROPAGATE_INHERIT':'bool',
-            'INHERIT_ONLY':'bool',
-            'INHERITED':'bool',
-            'BASIC':'str',
+            'acl':'typing.Union[list[Nfs4Ace______], list[Posix1eAce]]',
     })
     Nfs4Ace_______ = typing.TypedDict('Nfs4Ace_______', {
             'tag':'str',
             'id':'typing.Optional[int]',
             'type':'str',
-            'perms':'Perms______________',
-            'flags':'Flags_______',
-    })
-    Perms_______________ = typing.TypedDict('Perms_______________', {
-            'READ':'bool',
-            'WRITE':'bool',
-            'EXECUTE':'bool',
-    })
-    Posix1eAce_______ = typing.TypedDict('Posix1eAce_______', {
-            'default':'bool',
-            'tag':'str',
-            'id':'int',
-            'perms':'Perms_______________',
+            'perms':'Perms',
+            'flags':'Flags',
     })
     FilesystemAcltemplateUpdateReturns = typing.TypedDict('FilesystemAcltemplateUpdateReturns', {
             'name':'str',
             'acltype':'str',
             'comment':'str',
-            'acl':'typing.Union[list[Nfs4Ace_______], list[Posix1eAce_______]]',
+            'acl':'typing.Union[list[Nfs4Ace_______], list[Posix1eAce]]',
             'id':'int',
             'builtin':'bool',
     })

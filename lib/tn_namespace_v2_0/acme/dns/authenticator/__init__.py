@@ -59,18 +59,6 @@ class AcmeDnsAuthenticator(Namespace):
             'attributes':'dict[str]',
             'name':'str',
     })
-    AcmeDnsAuthenticatorEntry_ = typing.TypedDict('AcmeDnsAuthenticatorEntry_', {
-            'id':'int',
-            'authenticator':'str',
-            'attributes':'dict[str]',
-            'name':'str',
-    })
-    AcmeDnsAuthenticatorEntry__ = typing.TypedDict('AcmeDnsAuthenticatorEntry__', {
-            'id':'int',
-            'authenticator':'str',
-            'attributes':'dict[str]',
-            'name':'str',
-    })
     DnsAuthenticatorUpdate = typing.TypedDict('DnsAuthenticatorUpdate', {
             'attributes':'dict[str]',
             'name':'str',

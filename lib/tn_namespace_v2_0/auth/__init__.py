@@ -38,11 +38,3 @@ class Auth(Namespace):
             'credentials':'str',
             'created_at':'str',
     })
-    Session_ = typing.TypedDict('Session_', {
-            'id':'str',
-            'current':'bool',
-            'internal':'bool',
-            'origin':'str',
-            'credentials':'str',
-            'created_at':'str',
-    })

@@ -73,18 +73,6 @@ class AcmeDnsAuthenticator(Namespace):
             'attributes':'dict[str]',
             'name':'str',
     })
-    AcmeDnsAuthenticatorEntry_ = typing.TypedDict('AcmeDnsAuthenticatorEntry_', {
-            'id':'int',
-            'authenticator':'str',
-            'attributes':'dict[str]',
-            'name':'str',
-    })
-    AcmeDnsAuthenticatorEntry__ = typing.TypedDict('AcmeDnsAuthenticatorEntry__', {
-            'id':'int',
-            'authenticator':'str',
-            'attributes':'dict[str]',
-            'name':'str',
-    })
     DnsAuthenticatorUpdate = typing.TypedDict('DnsAuthenticatorUpdate', {
             'attributes':'dict[str]',
             'name':'str',
@@ -169,18 +157,6 @@ class AcmeDnsAuthenticator(Namespace):
             'attributes':'dict[str]',
             'name':'str',
     })
-    AcmeDnsAuthenticatorEntry_ = typing.TypedDict('AcmeDnsAuthenticatorEntry_', {
-            'id':'int',
-            'authenticator':'str',
-            'attributes':'dict[str]',
-            'name':'str',
-    })
-    AcmeDnsAuthenticatorEntry__ = typing.TypedDict('AcmeDnsAuthenticatorEntry__', {
-            'id':'int',
-            'authenticator':'str',
-            'attributes':'dict[str]',
-            'name':'str',
-    })
     DnsAuthenticatorUpdate = typing.TypedDict('DnsAuthenticatorUpdate', {
             'attributes':'dict[str]',
             'name':'str',
@@ -257,18 +233,6 @@ class AcmeDnsAuthenticator(Namespace):
             'force_sql_filters':'bool',
     })
     AcmeDnsAuthenticatorEntry = typing.TypedDict('AcmeDnsAuthenticatorEntry', {
-            'id':'int',
-            'authenticator':'str',
-            'attributes':'dict[str]',
-            'name':'str',
-    })
-    AcmeDnsAuthenticatorEntry_ = typing.TypedDict('AcmeDnsAuthenticatorEntry_', {
-            'id':'int',
-            'authenticator':'str',
-            'attributes':'dict[str]',
-            'name':'str',
-    })
-    AcmeDnsAuthenticatorEntry__ = typing.TypedDict('AcmeDnsAuthenticatorEntry__', {
             'id':'int',
             'authenticator':'str',
             'attributes':'dict[str]',
@@ -358,18 +322,6 @@ class AcmeDnsAuthenticator(Namespace):
             'attributes':'dict[str]',
             'name':'str',
     })
-    AcmeDnsAuthenticatorEntry_ = typing.TypedDict('AcmeDnsAuthenticatorEntry_', {
-            'id':'int',
-            'authenticator':'str',
-            'attributes':'dict[str]',
-            'name':'str',
-    })
-    AcmeDnsAuthenticatorEntry__ = typing.TypedDict('AcmeDnsAuthenticatorEntry__', {
-            'id':'int',
-            'authenticator':'str',
-            'attributes':'dict[str]',
-            'name':'str',
-    })
     DnsAuthenticatorUpdate = typing.TypedDict('DnsAuthenticatorUpdate', {
             'attributes':'dict[str]',
             'name':'str',
@@ -384,7 +336,7 @@ class AcmeDnsAuthenticator(Namespace):
     def query(self, 
         query_filters:'list[list]'=[],
         query_options:'QueryOptions'={},
-    /) -> 'typing.Union[list[AcmeDnsAuthenticatorEntry], ForwardRef(AcmeDnsAuthenticatorEntry_), int, ForwardRef(AcmeDnsAuthenticatorEntry__)]': 
+    /) -> 'typing.Union[list[AcmeDnsAuthenticatorEntry], ForwardRef(AcmeDnsAuthenticatorEntry), int]': 
         """
         
 
@@ -396,7 +348,7 @@ class AcmeDnsAuthenticator(Namespace):
             query-options
         Returns
         -------
-        typing.Union[list[AcmeDnsAuthenticatorEntry], ForwardRef(AcmeDnsAuthenticatorEntry_), int, ForwardRef(AcmeDnsAuthenticatorEntry__)]:
+        typing.Union[list[AcmeDnsAuthenticatorEntry], ForwardRef(AcmeDnsAuthenticatorEntry), int]:
             
         """
         ...
@@ -449,18 +401,6 @@ class AcmeDnsAuthenticator(Namespace):
             'force_sql_filters':'bool',
     })
     AcmeDnsAuthenticatorEntry = typing.TypedDict('AcmeDnsAuthenticatorEntry', {
-            'id':'int',
-            'authenticator':'str',
-            'attributes':'dict[str]',
-            'name':'str',
-    })
-    AcmeDnsAuthenticatorEntry_ = typing.TypedDict('AcmeDnsAuthenticatorEntry_', {
-            'id':'int',
-            'authenticator':'str',
-            'attributes':'dict[str]',
-            'name':'str',
-    })
-    AcmeDnsAuthenticatorEntry__ = typing.TypedDict('AcmeDnsAuthenticatorEntry__', {
             'id':'int',
             'authenticator':'str',
             'attributes':'dict[str]',
@@ -545,18 +485,6 @@ class AcmeDnsAuthenticator(Namespace):
             'force_sql_filters':'bool',
     })
     AcmeDnsAuthenticatorEntry = typing.TypedDict('AcmeDnsAuthenticatorEntry', {
-            'id':'int',
-            'authenticator':'str',
-            'attributes':'dict[str]',
-            'name':'str',
-    })
-    AcmeDnsAuthenticatorEntry_ = typing.TypedDict('AcmeDnsAuthenticatorEntry_', {
-            'id':'int',
-            'authenticator':'str',
-            'attributes':'dict[str]',
-            'name':'str',
-    })
-    AcmeDnsAuthenticatorEntry__ = typing.TypedDict('AcmeDnsAuthenticatorEntry__', {
             'id':'int',
             'authenticator':'str',
             'attributes':'dict[str]',

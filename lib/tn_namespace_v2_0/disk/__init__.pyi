@@ -86,10 +86,6 @@ class Disk(Namespace):
             'kmip_uid':'typing.Optional[str]',
             'supports_smart':'typing.Optional[bool]',
     })
-    Enclosure_ = typing.TypedDict('Enclosure_', {
-            'number':'int',
-            'slot':'int',
-    })
     DiskEntry_ = typing.TypedDict('DiskEntry_', {
             'identifier':'str',
             'name':'str',
@@ -114,15 +110,11 @@ class Disk(Namespace):
             'zfs_guid':'typing.Optional[str]',
             'bus':'str',
             'devname':'str',
-            'enclosure':'Enclosure_',
+            'enclosure':'Enclosure',
             'pool':'typing.Optional[str]',
             'passwd':'str',
             'kmip_uid':'typing.Optional[str]',
             'supports_smart':'typing.Optional[bool]',
-    })
-    Enclosure__ = typing.TypedDict('Enclosure__', {
-            'number':'int',
-            'slot':'int',
     })
     DiskEntry__ = typing.TypedDict('DiskEntry__', {
             'identifier':'str',
@@ -148,7 +140,7 @@ class Disk(Namespace):
             'zfs_guid':'typing.Optional[str]',
             'bus':'str',
             'devname':'str',
-            'enclosure':'Enclosure__',
+            'enclosure':'Enclosure',
             'pool':'typing.Optional[str]',
             'passwd':'str',
             'kmip_uid':'typing.Optional[str]',
@@ -208,10 +200,6 @@ class Disk(Namespace):
             'only_cached':'bool',
             'powermode':'str',
     })
-    Enclosure___ = typing.TypedDict('Enclosure___', {
-            'number':'int',
-            'slot':'int',
-    })
     DiskUpdate = typing.TypedDict('DiskUpdate', {
             'number':'int',
             'lunid':'typing.Optional[str]',
@@ -224,14 +212,10 @@ class Disk(Namespace):
             'difference':'typing.Optional[int]',
             'informational':'typing.Optional[int]',
             'bus':'str',
-            'enclosure':'Enclosure___',
+            'enclosure':'Enclosure',
             'pool':'typing.Optional[str]',
             'passwd':'str',
             'supports_smart':'typing.Optional[bool]',
-    })
-    Enclosure____ = typing.TypedDict('Enclosure____', {
-            'number':'int',
-            'slot':'int',
     })
     DiskUpdateReturns = typing.TypedDict('DiskUpdateReturns', {
             'identifier':'str',
@@ -257,7 +241,7 @@ class Disk(Namespace):
             'zfs_guid':'typing.Optional[str]',
             'bus':'str',
             'devname':'str',
-            'enclosure':'Enclosure____',
+            'enclosure':'Enclosure',
             'pool':'typing.Optional[str]',
             'passwd':'str',
             'kmip_uid':'typing.Optional[str]',
@@ -347,10 +331,6 @@ class Disk(Namespace):
             'kmip_uid':'typing.Optional[str]',
             'supports_smart':'typing.Optional[bool]',
     })
-    Enclosure_ = typing.TypedDict('Enclosure_', {
-            'number':'int',
-            'slot':'int',
-    })
     DiskEntry_ = typing.TypedDict('DiskEntry_', {
             'identifier':'str',
             'name':'str',
@@ -375,15 +355,11 @@ class Disk(Namespace):
             'zfs_guid':'typing.Optional[str]',
             'bus':'str',
             'devname':'str',
-            'enclosure':'Enclosure_',
+            'enclosure':'Enclosure',
             'pool':'typing.Optional[str]',
             'passwd':'str',
             'kmip_uid':'typing.Optional[str]',
             'supports_smart':'typing.Optional[bool]',
-    })
-    Enclosure__ = typing.TypedDict('Enclosure__', {
-            'number':'int',
-            'slot':'int',
     })
     DiskEntry__ = typing.TypedDict('DiskEntry__', {
             'identifier':'str',
@@ -409,7 +385,7 @@ class Disk(Namespace):
             'zfs_guid':'typing.Optional[str]',
             'bus':'str',
             'devname':'str',
-            'enclosure':'Enclosure__',
+            'enclosure':'Enclosure',
             'pool':'typing.Optional[str]',
             'passwd':'str',
             'kmip_uid':'typing.Optional[str]',
@@ -469,10 +445,6 @@ class Disk(Namespace):
             'only_cached':'bool',
             'powermode':'str',
     })
-    Enclosure___ = typing.TypedDict('Enclosure___', {
-            'number':'int',
-            'slot':'int',
-    })
     DiskUpdate = typing.TypedDict('DiskUpdate', {
             'number':'int',
             'lunid':'typing.Optional[str]',
@@ -485,14 +457,10 @@ class Disk(Namespace):
             'difference':'typing.Optional[int]',
             'informational':'typing.Optional[int]',
             'bus':'str',
-            'enclosure':'Enclosure___',
+            'enclosure':'Enclosure',
             'pool':'typing.Optional[str]',
             'passwd':'str',
             'supports_smart':'typing.Optional[bool]',
-    })
-    Enclosure____ = typing.TypedDict('Enclosure____', {
-            'number':'int',
-            'slot':'int',
     })
     DiskUpdateReturns = typing.TypedDict('DiskUpdateReturns', {
             'identifier':'str',
@@ -518,7 +486,7 @@ class Disk(Namespace):
             'zfs_guid':'typing.Optional[str]',
             'bus':'str',
             'devname':'str',
-            'enclosure':'Enclosure____',
+            'enclosure':'Enclosure',
             'pool':'typing.Optional[str]',
             'passwd':'str',
             'kmip_uid':'typing.Optional[str]',
@@ -617,10 +585,6 @@ class Disk(Namespace):
             'kmip_uid':'typing.Optional[str]',
             'supports_smart':'typing.Optional[bool]',
     })
-    Enclosure_ = typing.TypedDict('Enclosure_', {
-            'number':'int',
-            'slot':'int',
-    })
     DiskEntry_ = typing.TypedDict('DiskEntry_', {
             'identifier':'str',
             'name':'str',
@@ -645,15 +609,11 @@ class Disk(Namespace):
             'zfs_guid':'typing.Optional[str]',
             'bus':'str',
             'devname':'str',
-            'enclosure':'Enclosure_',
+            'enclosure':'Enclosure',
             'pool':'typing.Optional[str]',
             'passwd':'str',
             'kmip_uid':'typing.Optional[str]',
             'supports_smart':'typing.Optional[bool]',
-    })
-    Enclosure__ = typing.TypedDict('Enclosure__', {
-            'number':'int',
-            'slot':'int',
     })
     DiskEntry__ = typing.TypedDict('DiskEntry__', {
             'identifier':'str',
@@ -679,7 +639,7 @@ class Disk(Namespace):
             'zfs_guid':'typing.Optional[str]',
             'bus':'str',
             'devname':'str',
-            'enclosure':'Enclosure__',
+            'enclosure':'Enclosure',
             'pool':'typing.Optional[str]',
             'passwd':'str',
             'kmip_uid':'typing.Optional[str]',
@@ -739,10 +699,6 @@ class Disk(Namespace):
             'only_cached':'bool',
             'powermode':'str',
     })
-    Enclosure___ = typing.TypedDict('Enclosure___', {
-            'number':'int',
-            'slot':'int',
-    })
     DiskUpdate = typing.TypedDict('DiskUpdate', {
             'number':'int',
             'lunid':'typing.Optional[str]',
@@ -755,14 +711,10 @@ class Disk(Namespace):
             'difference':'typing.Optional[int]',
             'informational':'typing.Optional[int]',
             'bus':'str',
-            'enclosure':'Enclosure___',
+            'enclosure':'Enclosure',
             'pool':'typing.Optional[str]',
             'passwd':'str',
             'supports_smart':'typing.Optional[bool]',
-    })
-    Enclosure____ = typing.TypedDict('Enclosure____', {
-            'number':'int',
-            'slot':'int',
     })
     DiskUpdateReturns = typing.TypedDict('DiskUpdateReturns', {
             'identifier':'str',
@@ -788,7 +740,7 @@ class Disk(Namespace):
             'zfs_guid':'typing.Optional[str]',
             'bus':'str',
             'devname':'str',
-            'enclosure':'Enclosure____',
+            'enclosure':'Enclosure',
             'pool':'typing.Optional[str]',
             'passwd':'str',
             'kmip_uid':'typing.Optional[str]',
@@ -896,10 +848,6 @@ class Disk(Namespace):
             'kmip_uid':'typing.Optional[str]',
             'supports_smart':'typing.Optional[bool]',
     })
-    Enclosure_ = typing.TypedDict('Enclosure_', {
-            'number':'int',
-            'slot':'int',
-    })
     DiskEntry_ = typing.TypedDict('DiskEntry_', {
             'identifier':'str',
             'name':'str',
@@ -924,15 +872,11 @@ class Disk(Namespace):
             'zfs_guid':'typing.Optional[str]',
             'bus':'str',
             'devname':'str',
-            'enclosure':'Enclosure_',
+            'enclosure':'Enclosure',
             'pool':'typing.Optional[str]',
             'passwd':'str',
             'kmip_uid':'typing.Optional[str]',
             'supports_smart':'typing.Optional[bool]',
-    })
-    Enclosure__ = typing.TypedDict('Enclosure__', {
-            'number':'int',
-            'slot':'int',
     })
     DiskEntry__ = typing.TypedDict('DiskEntry__', {
             'identifier':'str',
@@ -958,7 +902,7 @@ class Disk(Namespace):
             'zfs_guid':'typing.Optional[str]',
             'bus':'str',
             'devname':'str',
-            'enclosure':'Enclosure__',
+            'enclosure':'Enclosure',
             'pool':'typing.Optional[str]',
             'passwd':'str',
             'kmip_uid':'typing.Optional[str]',
@@ -1018,10 +962,6 @@ class Disk(Namespace):
             'only_cached':'bool',
             'powermode':'str',
     })
-    Enclosure___ = typing.TypedDict('Enclosure___', {
-            'number':'int',
-            'slot':'int',
-    })
     DiskUpdate = typing.TypedDict('DiskUpdate', {
             'number':'int',
             'lunid':'typing.Optional[str]',
@@ -1034,14 +974,10 @@ class Disk(Namespace):
             'difference':'typing.Optional[int]',
             'informational':'typing.Optional[int]',
             'bus':'str',
-            'enclosure':'Enclosure___',
+            'enclosure':'Enclosure',
             'pool':'typing.Optional[str]',
             'passwd':'str',
             'supports_smart':'typing.Optional[bool]',
-    })
-    Enclosure____ = typing.TypedDict('Enclosure____', {
-            'number':'int',
-            'slot':'int',
     })
     DiskUpdateReturns = typing.TypedDict('DiskUpdateReturns', {
             'identifier':'str',
@@ -1067,7 +1003,7 @@ class Disk(Namespace):
             'zfs_guid':'typing.Optional[str]',
             'bus':'str',
             'devname':'str',
-            'enclosure':'Enclosure____',
+            'enclosure':'Enclosure',
             'pool':'typing.Optional[str]',
             'passwd':'str',
             'kmip_uid':'typing.Optional[str]',
@@ -1153,10 +1089,6 @@ class Disk(Namespace):
             'kmip_uid':'typing.Optional[str]',
             'supports_smart':'typing.Optional[bool]',
     })
-    Enclosure_ = typing.TypedDict('Enclosure_', {
-            'number':'int',
-            'slot':'int',
-    })
     DiskEntry_ = typing.TypedDict('DiskEntry_', {
             'identifier':'str',
             'name':'str',
@@ -1181,15 +1113,11 @@ class Disk(Namespace):
             'zfs_guid':'typing.Optional[str]',
             'bus':'str',
             'devname':'str',
-            'enclosure':'Enclosure_',
+            'enclosure':'Enclosure',
             'pool':'typing.Optional[str]',
             'passwd':'str',
             'kmip_uid':'typing.Optional[str]',
             'supports_smart':'typing.Optional[bool]',
-    })
-    Enclosure__ = typing.TypedDict('Enclosure__', {
-            'number':'int',
-            'slot':'int',
     })
     DiskEntry__ = typing.TypedDict('DiskEntry__', {
             'identifier':'str',
@@ -1215,7 +1143,7 @@ class Disk(Namespace):
             'zfs_guid':'typing.Optional[str]',
             'bus':'str',
             'devname':'str',
-            'enclosure':'Enclosure__',
+            'enclosure':'Enclosure',
             'pool':'typing.Optional[str]',
             'passwd':'str',
             'kmip_uid':'typing.Optional[str]',
@@ -1275,10 +1203,6 @@ class Disk(Namespace):
             'only_cached':'bool',
             'powermode':'str',
     })
-    Enclosure___ = typing.TypedDict('Enclosure___', {
-            'number':'int',
-            'slot':'int',
-    })
     DiskUpdate = typing.TypedDict('DiskUpdate', {
             'number':'int',
             'lunid':'typing.Optional[str]',
@@ -1291,14 +1215,10 @@ class Disk(Namespace):
             'difference':'typing.Optional[int]',
             'informational':'typing.Optional[int]',
             'bus':'str',
-            'enclosure':'Enclosure___',
+            'enclosure':'Enclosure',
             'pool':'typing.Optional[str]',
             'passwd':'str',
             'supports_smart':'typing.Optional[bool]',
-    })
-    Enclosure____ = typing.TypedDict('Enclosure____', {
-            'number':'int',
-            'slot':'int',
     })
     DiskUpdateReturns = typing.TypedDict('DiskUpdateReturns', {
             'identifier':'str',
@@ -1324,7 +1244,7 @@ class Disk(Namespace):
             'zfs_guid':'typing.Optional[str]',
             'bus':'str',
             'devname':'str',
-            'enclosure':'Enclosure____',
+            'enclosure':'Enclosure',
             'pool':'typing.Optional[str]',
             'passwd':'str',
             'kmip_uid':'typing.Optional[str]',
@@ -1412,10 +1332,6 @@ class Disk(Namespace):
             'kmip_uid':'typing.Optional[str]',
             'supports_smart':'typing.Optional[bool]',
     })
-    Enclosure_ = typing.TypedDict('Enclosure_', {
-            'number':'int',
-            'slot':'int',
-    })
     DiskEntry_ = typing.TypedDict('DiskEntry_', {
             'identifier':'str',
             'name':'str',
@@ -1440,15 +1356,11 @@ class Disk(Namespace):
             'zfs_guid':'typing.Optional[str]',
             'bus':'str',
             'devname':'str',
-            'enclosure':'Enclosure_',
+            'enclosure':'Enclosure',
             'pool':'typing.Optional[str]',
             'passwd':'str',
             'kmip_uid':'typing.Optional[str]',
             'supports_smart':'typing.Optional[bool]',
-    })
-    Enclosure__ = typing.TypedDict('Enclosure__', {
-            'number':'int',
-            'slot':'int',
     })
     DiskEntry__ = typing.TypedDict('DiskEntry__', {
             'identifier':'str',
@@ -1474,7 +1386,7 @@ class Disk(Namespace):
             'zfs_guid':'typing.Optional[str]',
             'bus':'str',
             'devname':'str',
-            'enclosure':'Enclosure__',
+            'enclosure':'Enclosure',
             'pool':'typing.Optional[str]',
             'passwd':'str',
             'kmip_uid':'typing.Optional[str]',
@@ -1534,10 +1446,6 @@ class Disk(Namespace):
             'only_cached':'bool',
             'powermode':'str',
     })
-    Enclosure___ = typing.TypedDict('Enclosure___', {
-            'number':'int',
-            'slot':'int',
-    })
     DiskUpdate = typing.TypedDict('DiskUpdate', {
             'number':'int',
             'lunid':'typing.Optional[str]',
@@ -1550,14 +1458,10 @@ class Disk(Namespace):
             'difference':'typing.Optional[int]',
             'informational':'typing.Optional[int]',
             'bus':'str',
-            'enclosure':'Enclosure___',
+            'enclosure':'Enclosure',
             'pool':'typing.Optional[str]',
             'passwd':'str',
             'supports_smart':'typing.Optional[bool]',
-    })
-    Enclosure____ = typing.TypedDict('Enclosure____', {
-            'number':'int',
-            'slot':'int',
     })
     DiskUpdateReturns = typing.TypedDict('DiskUpdateReturns', {
             'identifier':'str',
@@ -1583,7 +1487,7 @@ class Disk(Namespace):
             'zfs_guid':'typing.Optional[str]',
             'bus':'str',
             'devname':'str',
-            'enclosure':'Enclosure____',
+            'enclosure':'Enclosure',
             'pool':'typing.Optional[str]',
             'passwd':'str',
             'kmip_uid':'typing.Optional[str]',
@@ -1675,10 +1579,6 @@ class Disk(Namespace):
             'kmip_uid':'typing.Optional[str]',
             'supports_smart':'typing.Optional[bool]',
     })
-    Enclosure_ = typing.TypedDict('Enclosure_', {
-            'number':'int',
-            'slot':'int',
-    })
     DiskEntry_ = typing.TypedDict('DiskEntry_', {
             'identifier':'str',
             'name':'str',
@@ -1703,15 +1603,11 @@ class Disk(Namespace):
             'zfs_guid':'typing.Optional[str]',
             'bus':'str',
             'devname':'str',
-            'enclosure':'Enclosure_',
+            'enclosure':'Enclosure',
             'pool':'typing.Optional[str]',
             'passwd':'str',
             'kmip_uid':'typing.Optional[str]',
             'supports_smart':'typing.Optional[bool]',
-    })
-    Enclosure__ = typing.TypedDict('Enclosure__', {
-            'number':'int',
-            'slot':'int',
     })
     DiskEntry__ = typing.TypedDict('DiskEntry__', {
             'identifier':'str',
@@ -1737,7 +1633,7 @@ class Disk(Namespace):
             'zfs_guid':'typing.Optional[str]',
             'bus':'str',
             'devname':'str',
-            'enclosure':'Enclosure__',
+            'enclosure':'Enclosure',
             'pool':'typing.Optional[str]',
             'passwd':'str',
             'kmip_uid':'typing.Optional[str]',
@@ -1797,10 +1693,6 @@ class Disk(Namespace):
             'only_cached':'bool',
             'powermode':'str',
     })
-    Enclosure___ = typing.TypedDict('Enclosure___', {
-            'number':'int',
-            'slot':'int',
-    })
     DiskUpdate = typing.TypedDict('DiskUpdate', {
             'number':'int',
             'lunid':'typing.Optional[str]',
@@ -1813,14 +1705,10 @@ class Disk(Namespace):
             'difference':'typing.Optional[int]',
             'informational':'typing.Optional[int]',
             'bus':'str',
-            'enclosure':'Enclosure___',
+            'enclosure':'Enclosure',
             'pool':'typing.Optional[str]',
             'passwd':'str',
             'supports_smart':'typing.Optional[bool]',
-    })
-    Enclosure____ = typing.TypedDict('Enclosure____', {
-            'number':'int',
-            'slot':'int',
     })
     DiskUpdateReturns = typing.TypedDict('DiskUpdateReturns', {
             'identifier':'str',
@@ -1846,7 +1734,7 @@ class Disk(Namespace):
             'zfs_guid':'typing.Optional[str]',
             'bus':'str',
             'devname':'str',
-            'enclosure':'Enclosure____',
+            'enclosure':'Enclosure',
             'pool':'typing.Optional[str]',
             'passwd':'str',
             'kmip_uid':'typing.Optional[str]',
@@ -1937,10 +1825,6 @@ class Disk(Namespace):
             'kmip_uid':'typing.Optional[str]',
             'supports_smart':'typing.Optional[bool]',
     })
-    Enclosure_ = typing.TypedDict('Enclosure_', {
-            'number':'int',
-            'slot':'int',
-    })
     DiskEntry_ = typing.TypedDict('DiskEntry_', {
             'identifier':'str',
             'name':'str',
@@ -1965,15 +1849,11 @@ class Disk(Namespace):
             'zfs_guid':'typing.Optional[str]',
             'bus':'str',
             'devname':'str',
-            'enclosure':'Enclosure_',
+            'enclosure':'Enclosure',
             'pool':'typing.Optional[str]',
             'passwd':'str',
             'kmip_uid':'typing.Optional[str]',
             'supports_smart':'typing.Optional[bool]',
-    })
-    Enclosure__ = typing.TypedDict('Enclosure__', {
-            'number':'int',
-            'slot':'int',
     })
     DiskEntry__ = typing.TypedDict('DiskEntry__', {
             'identifier':'str',
@@ -1999,7 +1879,7 @@ class Disk(Namespace):
             'zfs_guid':'typing.Optional[str]',
             'bus':'str',
             'devname':'str',
-            'enclosure':'Enclosure__',
+            'enclosure':'Enclosure',
             'pool':'typing.Optional[str]',
             'passwd':'str',
             'kmip_uid':'typing.Optional[str]',
@@ -2059,10 +1939,6 @@ class Disk(Namespace):
             'only_cached':'bool',
             'powermode':'str',
     })
-    Enclosure___ = typing.TypedDict('Enclosure___', {
-            'number':'int',
-            'slot':'int',
-    })
     DiskUpdate = typing.TypedDict('DiskUpdate', {
             'number':'int',
             'lunid':'typing.Optional[str]',
@@ -2075,14 +1951,10 @@ class Disk(Namespace):
             'difference':'typing.Optional[int]',
             'informational':'typing.Optional[int]',
             'bus':'str',
-            'enclosure':'Enclosure___',
+            'enclosure':'Enclosure',
             'pool':'typing.Optional[str]',
             'passwd':'str',
             'supports_smart':'typing.Optional[bool]',
-    })
-    Enclosure____ = typing.TypedDict('Enclosure____', {
-            'number':'int',
-            'slot':'int',
     })
     DiskUpdateReturns = typing.TypedDict('DiskUpdateReturns', {
             'identifier':'str',
@@ -2108,7 +1980,7 @@ class Disk(Namespace):
             'zfs_guid':'typing.Optional[str]',
             'bus':'str',
             'devname':'str',
-            'enclosure':'Enclosure____',
+            'enclosure':'Enclosure',
             'pool':'typing.Optional[str]',
             'passwd':'str',
             'kmip_uid':'typing.Optional[str]',
@@ -2196,10 +2068,6 @@ class Disk(Namespace):
             'kmip_uid':'typing.Optional[str]',
             'supports_smart':'typing.Optional[bool]',
     })
-    Enclosure_ = typing.TypedDict('Enclosure_', {
-            'number':'int',
-            'slot':'int',
-    })
     DiskEntry_ = typing.TypedDict('DiskEntry_', {
             'identifier':'str',
             'name':'str',
@@ -2224,15 +2092,11 @@ class Disk(Namespace):
             'zfs_guid':'typing.Optional[str]',
             'bus':'str',
             'devname':'str',
-            'enclosure':'Enclosure_',
+            'enclosure':'Enclosure',
             'pool':'typing.Optional[str]',
             'passwd':'str',
             'kmip_uid':'typing.Optional[str]',
             'supports_smart':'typing.Optional[bool]',
-    })
-    Enclosure__ = typing.TypedDict('Enclosure__', {
-            'number':'int',
-            'slot':'int',
     })
     DiskEntry__ = typing.TypedDict('DiskEntry__', {
             'identifier':'str',
@@ -2258,7 +2122,7 @@ class Disk(Namespace):
             'zfs_guid':'typing.Optional[str]',
             'bus':'str',
             'devname':'str',
-            'enclosure':'Enclosure__',
+            'enclosure':'Enclosure',
             'pool':'typing.Optional[str]',
             'passwd':'str',
             'kmip_uid':'typing.Optional[str]',
@@ -2318,10 +2182,6 @@ class Disk(Namespace):
             'only_cached':'bool',
             'powermode':'str',
     })
-    Enclosure___ = typing.TypedDict('Enclosure___', {
-            'number':'int',
-            'slot':'int',
-    })
     DiskUpdate = typing.TypedDict('DiskUpdate', {
             'number':'int',
             'lunid':'typing.Optional[str]',
@@ -2334,14 +2194,10 @@ class Disk(Namespace):
             'difference':'typing.Optional[int]',
             'informational':'typing.Optional[int]',
             'bus':'str',
-            'enclosure':'Enclosure___',
+            'enclosure':'Enclosure',
             'pool':'typing.Optional[str]',
             'passwd':'str',
             'supports_smart':'typing.Optional[bool]',
-    })
-    Enclosure____ = typing.TypedDict('Enclosure____', {
-            'number':'int',
-            'slot':'int',
     })
     DiskUpdateReturns = typing.TypedDict('DiskUpdateReturns', {
             'identifier':'str',
@@ -2367,7 +2223,7 @@ class Disk(Namespace):
             'zfs_guid':'typing.Optional[str]',
             'bus':'str',
             'devname':'str',
-            'enclosure':'Enclosure____',
+            'enclosure':'Enclosure',
             'pool':'typing.Optional[str]',
             'passwd':'str',
             'kmip_uid':'typing.Optional[str]',
@@ -2460,10 +2316,6 @@ class Disk(Namespace):
             'kmip_uid':'typing.Optional[str]',
             'supports_smart':'typing.Optional[bool]',
     })
-    Enclosure_ = typing.TypedDict('Enclosure_', {
-            'number':'int',
-            'slot':'int',
-    })
     DiskEntry_ = typing.TypedDict('DiskEntry_', {
             'identifier':'str',
             'name':'str',
@@ -2488,15 +2340,11 @@ class Disk(Namespace):
             'zfs_guid':'typing.Optional[str]',
             'bus':'str',
             'devname':'str',
-            'enclosure':'Enclosure_',
+            'enclosure':'Enclosure',
             'pool':'typing.Optional[str]',
             'passwd':'str',
             'kmip_uid':'typing.Optional[str]',
             'supports_smart':'typing.Optional[bool]',
-    })
-    Enclosure__ = typing.TypedDict('Enclosure__', {
-            'number':'int',
-            'slot':'int',
     })
     DiskEntry__ = typing.TypedDict('DiskEntry__', {
             'identifier':'str',
@@ -2522,7 +2370,7 @@ class Disk(Namespace):
             'zfs_guid':'typing.Optional[str]',
             'bus':'str',
             'devname':'str',
-            'enclosure':'Enclosure__',
+            'enclosure':'Enclosure',
             'pool':'typing.Optional[str]',
             'passwd':'str',
             'kmip_uid':'typing.Optional[str]',
@@ -2582,10 +2430,6 @@ class Disk(Namespace):
             'only_cached':'bool',
             'powermode':'str',
     })
-    Enclosure___ = typing.TypedDict('Enclosure___', {
-            'number':'int',
-            'slot':'int',
-    })
     DiskUpdate = typing.TypedDict('DiskUpdate', {
             'number':'int',
             'lunid':'typing.Optional[str]',
@@ -2598,14 +2442,10 @@ class Disk(Namespace):
             'difference':'typing.Optional[int]',
             'informational':'typing.Optional[int]',
             'bus':'str',
-            'enclosure':'Enclosure___',
+            'enclosure':'Enclosure',
             'pool':'typing.Optional[str]',
             'passwd':'str',
             'supports_smart':'typing.Optional[bool]',
-    })
-    Enclosure____ = typing.TypedDict('Enclosure____', {
-            'number':'int',
-            'slot':'int',
     })
     DiskUpdateReturns = typing.TypedDict('DiskUpdateReturns', {
             'identifier':'str',
@@ -2631,7 +2471,7 @@ class Disk(Namespace):
             'zfs_guid':'typing.Optional[str]',
             'bus':'str',
             'devname':'str',
-            'enclosure':'Enclosure____',
+            'enclosure':'Enclosure',
             'pool':'typing.Optional[str]',
             'passwd':'str',
             'kmip_uid':'typing.Optional[str]',
@@ -2735,10 +2575,6 @@ class Disk(Namespace):
             'kmip_uid':'typing.Optional[str]',
             'supports_smart':'typing.Optional[bool]',
     })
-    Enclosure_ = typing.TypedDict('Enclosure_', {
-            'number':'int',
-            'slot':'int',
-    })
     DiskEntry_ = typing.TypedDict('DiskEntry_', {
             'identifier':'str',
             'name':'str',
@@ -2763,15 +2599,11 @@ class Disk(Namespace):
             'zfs_guid':'typing.Optional[str]',
             'bus':'str',
             'devname':'str',
-            'enclosure':'Enclosure_',
+            'enclosure':'Enclosure',
             'pool':'typing.Optional[str]',
             'passwd':'str',
             'kmip_uid':'typing.Optional[str]',
             'supports_smart':'typing.Optional[bool]',
-    })
-    Enclosure__ = typing.TypedDict('Enclosure__', {
-            'number':'int',
-            'slot':'int',
     })
     DiskEntry__ = typing.TypedDict('DiskEntry__', {
             'identifier':'str',
@@ -2797,7 +2629,7 @@ class Disk(Namespace):
             'zfs_guid':'typing.Optional[str]',
             'bus':'str',
             'devname':'str',
-            'enclosure':'Enclosure__',
+            'enclosure':'Enclosure',
             'pool':'typing.Optional[str]',
             'passwd':'str',
             'kmip_uid':'typing.Optional[str]',
@@ -2857,10 +2689,6 @@ class Disk(Namespace):
             'only_cached':'bool',
             'powermode':'str',
     })
-    Enclosure___ = typing.TypedDict('Enclosure___', {
-            'number':'int',
-            'slot':'int',
-    })
     DiskUpdate = typing.TypedDict('DiskUpdate', {
             'number':'int',
             'lunid':'typing.Optional[str]',
@@ -2873,14 +2701,10 @@ class Disk(Namespace):
             'difference':'typing.Optional[int]',
             'informational':'typing.Optional[int]',
             'bus':'str',
-            'enclosure':'Enclosure___',
+            'enclosure':'Enclosure',
             'pool':'typing.Optional[str]',
             'passwd':'str',
             'supports_smart':'typing.Optional[bool]',
-    })
-    Enclosure____ = typing.TypedDict('Enclosure____', {
-            'number':'int',
-            'slot':'int',
     })
     DiskUpdateReturns = typing.TypedDict('DiskUpdateReturns', {
             'identifier':'str',
@@ -2906,7 +2730,7 @@ class Disk(Namespace):
             'zfs_guid':'typing.Optional[str]',
             'bus':'str',
             'devname':'str',
-            'enclosure':'Enclosure____',
+            'enclosure':'Enclosure',
             'pool':'typing.Optional[str]',
             'passwd':'str',
             'kmip_uid':'typing.Optional[str]',
@@ -3005,10 +2829,6 @@ class Disk(Namespace):
             'kmip_uid':'typing.Optional[str]',
             'supports_smart':'typing.Optional[bool]',
     })
-    Enclosure_ = typing.TypedDict('Enclosure_', {
-            'number':'int',
-            'slot':'int',
-    })
     DiskEntry_ = typing.TypedDict('DiskEntry_', {
             'identifier':'str',
             'name':'str',
@@ -3033,15 +2853,11 @@ class Disk(Namespace):
             'zfs_guid':'typing.Optional[str]',
             'bus':'str',
             'devname':'str',
-            'enclosure':'Enclosure_',
+            'enclosure':'Enclosure',
             'pool':'typing.Optional[str]',
             'passwd':'str',
             'kmip_uid':'typing.Optional[str]',
             'supports_smart':'typing.Optional[bool]',
-    })
-    Enclosure__ = typing.TypedDict('Enclosure__', {
-            'number':'int',
-            'slot':'int',
     })
     DiskEntry__ = typing.TypedDict('DiskEntry__', {
             'identifier':'str',
@@ -3067,7 +2883,7 @@ class Disk(Namespace):
             'zfs_guid':'typing.Optional[str]',
             'bus':'str',
             'devname':'str',
-            'enclosure':'Enclosure__',
+            'enclosure':'Enclosure',
             'pool':'typing.Optional[str]',
             'passwd':'str',
             'kmip_uid':'typing.Optional[str]',
@@ -3127,10 +2943,6 @@ class Disk(Namespace):
             'only_cached':'bool',
             'powermode':'str',
     })
-    Enclosure___ = typing.TypedDict('Enclosure___', {
-            'number':'int',
-            'slot':'int',
-    })
     DiskUpdate = typing.TypedDict('DiskUpdate', {
             'number':'int',
             'lunid':'typing.Optional[str]',
@@ -3143,14 +2955,10 @@ class Disk(Namespace):
             'difference':'typing.Optional[int]',
             'informational':'typing.Optional[int]',
             'bus':'str',
-            'enclosure':'Enclosure___',
+            'enclosure':'Enclosure',
             'pool':'typing.Optional[str]',
             'passwd':'str',
             'supports_smart':'typing.Optional[bool]',
-    })
-    Enclosure____ = typing.TypedDict('Enclosure____', {
-            'number':'int',
-            'slot':'int',
     })
     DiskUpdateReturns = typing.TypedDict('DiskUpdateReturns', {
             'identifier':'str',
@@ -3176,7 +2984,7 @@ class Disk(Namespace):
             'zfs_guid':'typing.Optional[str]',
             'bus':'str',
             'devname':'str',
-            'enclosure':'Enclosure____',
+            'enclosure':'Enclosure',
             'pool':'typing.Optional[str]',
             'passwd':'str',
             'kmip_uid':'typing.Optional[str]',

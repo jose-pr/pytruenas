@@ -597,61 +597,19 @@ class PoolDataset(Namespace):
             'acl':'typing.Union[list[Nfs4Ace], list[Posix1eAce]]',
             'options':'Options',
     })
-    Perms__ = typing.TypedDict('Perms__', {
-            'READ_DATA':'bool',
-            'WRITE_DATA':'bool',
-            'APPEND_DATA':'bool',
-            'READ_NAMED_ATTRS':'bool',
-            'WRITE_NAMED_ATTRS':'bool',
-            'EXECUTE':'bool',
-            'DELETE_CHILD':'bool',
-            'READ_ATTRIBUTES':'bool',
-            'WRITE_ATTRIBUTES':'bool',
-            'DELETE':'bool',
-            'READ_ACL':'bool',
-            'WRITE_ACL':'bool',
-            'WRITE_OWNER':'bool',
-            'SYNCHRONIZE':'bool',
-            'BASIC':'str',
-    })
-    Flags_ = typing.TypedDict('Flags_', {
-            'FILE_INHERIT':'bool',
-            'DIRECTORY_INHERIT':'bool',
-            'NO_PROPAGATE_INHERIT':'bool',
-            'INHERIT_ONLY':'bool',
-            'INHERITED':'bool',
-            'BASIC':'str',
-    })
     Nfs4Ace_ = typing.TypedDict('Nfs4Ace_', {
             'tag':'str',
             'id':'typing.Optional[int]',
             'type':'str',
-            'perms':'Perms__',
-            'flags':'Flags_',
-    })
-    Perms___ = typing.TypedDict('Perms___', {
-            'READ':'bool',
-            'WRITE':'bool',
-            'EXECUTE':'bool',
-    })
-    Posix1eAce_ = typing.TypedDict('Posix1eAce_', {
-            'default':'bool',
-            'tag':'str',
-            'id':'int',
-            'perms':'Perms___',
-    })
-    Options_ = typing.TypedDict('Options_', {
-            'set_default_acl':'bool',
-            'stripacl':'bool',
-            'recursive':'bool',
-            'traverse':'bool',
+            'perms':'Perms',
+            'flags':'Flags',
     })
     PoolDatasetPermission_ = typing.TypedDict('PoolDatasetPermission_', {
             'user':'str',
             'group':'str',
             'mode':'typing.Optional[str]',
-            'acl':'typing.Union[list[Nfs4Ace_], list[Posix1eAce_]]',
-            'options':'Options_',
+            'acl':'typing.Union[list[Nfs4Ace_], list[Posix1eAce]]',
+            'options':'Options',
     })
     Process = typing.TypedDict('Process', {
             'pid':'int',
@@ -1722,10 +1680,6 @@ class PoolDataset(Namespace):
     UserProperty_ = typing.TypedDict('UserProperty_', {
             'key':'str',
             'value':'str',
-    })
-    UserProperty__ = typing.TypedDict('UserProperty__', {
-            'key':'str',
-            'value':'str',
             'remove':'bool',
     })
     PoolDatasetUpdate = typing.TypedDict('PoolDatasetUpdate', {
@@ -1756,9 +1710,9 @@ class PoolDataset(Namespace):
             'aclmode':'str',
             'acltype':'str',
             'xattr':'str',
-            'user_properties':'list[UserProperty_]',
+            'user_properties':'list[UserProperty]',
             'create_ancestors':'bool',
-            'user_properties_update':'list[UserProperty__]',
+            'user_properties_update':'list[UserProperty_]',
     })
     Comments____ = typing.TypedDict('Comments____', {
             'parsed':'typing.Union[str, int, bool, dict[str], list]',

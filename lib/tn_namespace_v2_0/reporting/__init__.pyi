@@ -86,34 +86,17 @@ class Reporting(Namespace):
             'start':'int',
             'end':'int',
     })
-    Aggregations_ = typing.TypedDict('Aggregations_', {
-            'min':'list',
-            'max':'list',
-            'mean':'list',
-    })
     NetdataGraphReportingData = typing.TypedDict('NetdataGraphReportingData', {
             'name':'str',
             'identifier':'typing.Optional[str]',
             'data':'list',
-            'aggregations':'Aggregations_',
-    })
-    ReportingQueryNetdata_ = typing.TypedDict('ReportingQueryNetdata_', {
-            'unit':'str',
-            'page':'int',
-            'aggregate':'bool',
-            'start':'int',
-            'end':'int',
-    })
-    Aggregations__ = typing.TypedDict('Aggregations__', {
-            'min':'list',
-            'max':'list',
-            'mean':'list',
+            'aggregations':'Aggregations',
     })
     NetdataGraphReportingData_ = typing.TypedDict('NetdataGraphReportingData_', {
             'name':'str',
             'identifier':'typing.Optional[str]',
             'data':'list',
-            'aggregations':'Aggregations__',
+            'aggregations':'Aggregations',
     })
     QueryOptions_ = typing.TypedDict('QueryOptions_', {
             'relationships':'bool',
@@ -239,34 +222,17 @@ class Reporting(Namespace):
             'start':'int',
             'end':'int',
     })
-    Aggregations_ = typing.TypedDict('Aggregations_', {
-            'min':'list',
-            'max':'list',
-            'mean':'list',
-    })
     NetdataGraphReportingData = typing.TypedDict('NetdataGraphReportingData', {
             'name':'str',
             'identifier':'typing.Optional[str]',
             'data':'list',
-            'aggregations':'Aggregations_',
-    })
-    ReportingQueryNetdata_ = typing.TypedDict('ReportingQueryNetdata_', {
-            'unit':'str',
-            'page':'int',
-            'aggregate':'bool',
-            'start':'int',
-            'end':'int',
-    })
-    Aggregations__ = typing.TypedDict('Aggregations__', {
-            'min':'list',
-            'max':'list',
-            'mean':'list',
+            'aggregations':'Aggregations',
     })
     NetdataGraphReportingData_ = typing.TypedDict('NetdataGraphReportingData_', {
             'name':'str',
             'identifier':'typing.Optional[str]',
             'data':'list',
-            'aggregations':'Aggregations__',
+            'aggregations':'Aggregations',
     })
     QueryOptions_ = typing.TypedDict('QueryOptions_', {
             'relationships':'bool',
@@ -405,34 +371,17 @@ class Reporting(Namespace):
             'start':'int',
             'end':'int',
     })
-    Aggregations_ = typing.TypedDict('Aggregations_', {
-            'min':'list',
-            'max':'list',
-            'mean':'list',
-    })
     NetdataGraphReportingData = typing.TypedDict('NetdataGraphReportingData', {
             'name':'str',
             'identifier':'typing.Optional[str]',
             'data':'list',
-            'aggregations':'Aggregations_',
-    })
-    ReportingQueryNetdata_ = typing.TypedDict('ReportingQueryNetdata_', {
-            'unit':'str',
-            'page':'int',
-            'aggregate':'bool',
-            'start':'int',
-            'end':'int',
-    })
-    Aggregations__ = typing.TypedDict('Aggregations__', {
-            'min':'list',
-            'max':'list',
-            'mean':'list',
+            'aggregations':'Aggregations',
     })
     NetdataGraphReportingData_ = typing.TypedDict('NetdataGraphReportingData_', {
             'name':'str',
             'identifier':'typing.Optional[str]',
             'data':'list',
-            'aggregations':'Aggregations__',
+            'aggregations':'Aggregations',
     })
     QueryOptions_ = typing.TypedDict('QueryOptions_', {
             'relationships':'bool',
@@ -564,34 +513,17 @@ class Reporting(Namespace):
             'start':'int',
             'end':'int',
     })
-    Aggregations_ = typing.TypedDict('Aggregations_', {
-            'min':'list',
-            'max':'list',
-            'mean':'list',
-    })
     NetdataGraphReportingData = typing.TypedDict('NetdataGraphReportingData', {
             'name':'str',
             'identifier':'typing.Optional[str]',
             'data':'list',
-            'aggregations':'Aggregations_',
-    })
-    ReportingQueryNetdata_ = typing.TypedDict('ReportingQueryNetdata_', {
-            'unit':'str',
-            'page':'int',
-            'aggregate':'bool',
-            'start':'int',
-            'end':'int',
-    })
-    Aggregations__ = typing.TypedDict('Aggregations__', {
-            'min':'list',
-            'max':'list',
-            'mean':'list',
+            'aggregations':'Aggregations',
     })
     NetdataGraphReportingData_ = typing.TypedDict('NetdataGraphReportingData_', {
             'name':'str',
             'identifier':'typing.Optional[str]',
             'data':'list',
-            'aggregations':'Aggregations__',
+            'aggregations':'Aggregations',
     })
     QueryOptions_ = typing.TypedDict('QueryOptions_', {
             'relationships':'bool',
@@ -730,34 +662,17 @@ class Reporting(Namespace):
             'start':'int',
             'end':'int',
     })
-    Aggregations_ = typing.TypedDict('Aggregations_', {
-            'min':'list',
-            'max':'list',
-            'mean':'list',
-    })
     NetdataGraphReportingData = typing.TypedDict('NetdataGraphReportingData', {
             'name':'str',
             'identifier':'typing.Optional[str]',
             'data':'list',
-            'aggregations':'Aggregations_',
-    })
-    ReportingQueryNetdata_ = typing.TypedDict('ReportingQueryNetdata_', {
-            'unit':'str',
-            'page':'int',
-            'aggregate':'bool',
-            'start':'int',
-            'end':'int',
-    })
-    Aggregations__ = typing.TypedDict('Aggregations__', {
-            'min':'list',
-            'max':'list',
-            'mean':'list',
+            'aggregations':'Aggregations',
     })
     NetdataGraphReportingData_ = typing.TypedDict('NetdataGraphReportingData_', {
             'name':'str',
             'identifier':'typing.Optional[str]',
             'data':'list',
-            'aggregations':'Aggregations__',
+            'aggregations':'Aggregations',
     })
     QueryOptions_ = typing.TypedDict('QueryOptions_', {
             'relationships':'bool',
@@ -802,7 +717,7 @@ class Reporting(Namespace):
     @typing.overload
     def netdata_graph(self, 
         name:'str',
-        reporting_query_netdata:'ReportingQueryNetdata_'={},
+        reporting_query_netdata:'ReportingQueryNetdata'={},
     /) -> 'NetdataGraphReportingData_': 
         """
         Get reporting data for `name` graph.
@@ -889,34 +804,17 @@ class Reporting(Namespace):
             'start':'int',
             'end':'int',
     })
-    Aggregations_ = typing.TypedDict('Aggregations_', {
-            'min':'list',
-            'max':'list',
-            'mean':'list',
-    })
     NetdataGraphReportingData = typing.TypedDict('NetdataGraphReportingData', {
             'name':'str',
             'identifier':'typing.Optional[str]',
             'data':'list',
-            'aggregations':'Aggregations_',
-    })
-    ReportingQueryNetdata_ = typing.TypedDict('ReportingQueryNetdata_', {
-            'unit':'str',
-            'page':'int',
-            'aggregate':'bool',
-            'start':'int',
-            'end':'int',
-    })
-    Aggregations__ = typing.TypedDict('Aggregations__', {
-            'min':'list',
-            'max':'list',
-            'mean':'list',
+            'aggregations':'Aggregations',
     })
     NetdataGraphReportingData_ = typing.TypedDict('NetdataGraphReportingData_', {
             'name':'str',
             'identifier':'typing.Optional[str]',
             'data':'list',
-            'aggregations':'Aggregations__',
+            'aggregations':'Aggregations',
     })
     QueryOptions_ = typing.TypedDict('QueryOptions_', {
             'relationships':'bool',
@@ -1048,34 +946,17 @@ class Reporting(Namespace):
             'start':'int',
             'end':'int',
     })
-    Aggregations_ = typing.TypedDict('Aggregations_', {
-            'min':'list',
-            'max':'list',
-            'mean':'list',
-    })
     NetdataGraphReportingData = typing.TypedDict('NetdataGraphReportingData', {
             'name':'str',
             'identifier':'typing.Optional[str]',
             'data':'list',
-            'aggregations':'Aggregations_',
-    })
-    ReportingQueryNetdata_ = typing.TypedDict('ReportingQueryNetdata_', {
-            'unit':'str',
-            'page':'int',
-            'aggregate':'bool',
-            'start':'int',
-            'end':'int',
-    })
-    Aggregations__ = typing.TypedDict('Aggregations__', {
-            'min':'list',
-            'max':'list',
-            'mean':'list',
+            'aggregations':'Aggregations',
     })
     NetdataGraphReportingData_ = typing.TypedDict('NetdataGraphReportingData_', {
             'name':'str',
             'identifier':'typing.Optional[str]',
             'data':'list',
-            'aggregations':'Aggregations__',
+            'aggregations':'Aggregations',
     })
     QueryOptions_ = typing.TypedDict('QueryOptions_', {
             'relationships':'bool',
@@ -1212,34 +1093,17 @@ class Reporting(Namespace):
             'start':'int',
             'end':'int',
     })
-    Aggregations_ = typing.TypedDict('Aggregations_', {
-            'min':'list',
-            'max':'list',
-            'mean':'list',
-    })
     NetdataGraphReportingData = typing.TypedDict('NetdataGraphReportingData', {
             'name':'str',
             'identifier':'typing.Optional[str]',
             'data':'list',
-            'aggregations':'Aggregations_',
-    })
-    ReportingQueryNetdata_ = typing.TypedDict('ReportingQueryNetdata_', {
-            'unit':'str',
-            'page':'int',
-            'aggregate':'bool',
-            'start':'int',
-            'end':'int',
-    })
-    Aggregations__ = typing.TypedDict('Aggregations__', {
-            'min':'list',
-            'max':'list',
-            'mean':'list',
+            'aggregations':'Aggregations',
     })
     NetdataGraphReportingData_ = typing.TypedDict('NetdataGraphReportingData_', {
             'name':'str',
             'identifier':'typing.Optional[str]',
             'data':'list',
-            'aggregations':'Aggregations__',
+            'aggregations':'Aggregations',
     })
     QueryOptions_ = typing.TypedDict('QueryOptions_', {
             'relationships':'bool',

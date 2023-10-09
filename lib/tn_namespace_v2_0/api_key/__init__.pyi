@@ -59,13 +59,9 @@ class Api_key(Namespace):
             'limit':'int',
             'force_sql_filters':'bool',
     })
-    AllowlistItem_ = typing.TypedDict('AllowlistItem_', {
-            'method':'str',
-            'resource':'str',
-    })
     ApiKeyUpdate = typing.TypedDict('ApiKeyUpdate', {
             'name':'str',
-            'allowlist':'list[AllowlistItem_]',
+            'allowlist':'list[AllowlistItem]',
             'reset':'bool',
     })
     @typing.overload
@@ -121,13 +117,9 @@ class Api_key(Namespace):
             'limit':'int',
             'force_sql_filters':'bool',
     })
-    AllowlistItem_ = typing.TypedDict('AllowlistItem_', {
-            'method':'str',
-            'resource':'str',
-    })
     ApiKeyUpdate = typing.TypedDict('ApiKeyUpdate', {
             'name':'str',
-            'allowlist':'list[AllowlistItem_]',
+            'allowlist':'list[AllowlistItem]',
             'reset':'bool',
     })
     @typing.overload
@@ -186,13 +178,9 @@ class Api_key(Namespace):
             'limit':'int',
             'force_sql_filters':'bool',
     })
-    AllowlistItem_ = typing.TypedDict('AllowlistItem_', {
-            'method':'str',
-            'resource':'str',
-    })
     ApiKeyUpdate = typing.TypedDict('ApiKeyUpdate', {
             'name':'str',
-            'allowlist':'list[AllowlistItem_]',
+            'allowlist':'list[AllowlistItem]',
             'reset':'bool',
     })
     @typing.overload
@@ -251,13 +239,9 @@ class Api_key(Namespace):
             'limit':'int',
             'force_sql_filters':'bool',
     })
-    AllowlistItem_ = typing.TypedDict('AllowlistItem_', {
-            'method':'str',
-            'resource':'str',
-    })
     ApiKeyUpdate = typing.TypedDict('ApiKeyUpdate', {
             'name':'str',
-            'allowlist':'list[AllowlistItem_]',
+            'allowlist':'list[AllowlistItem]',
             'reset':'bool',
     })
     @typing.overload
@@ -318,13 +302,9 @@ class Api_key(Namespace):
             'limit':'int',
             'force_sql_filters':'bool',
     })
-    AllowlistItem_ = typing.TypedDict('AllowlistItem_', {
-            'method':'str',
-            'resource':'str',
-    })
     ApiKeyUpdate = typing.TypedDict('ApiKeyUpdate', {
             'name':'str',
-            'allowlist':'list[AllowlistItem_]',
+            'allowlist':'list[AllowlistItem]',
             'reset':'bool',
     })
 

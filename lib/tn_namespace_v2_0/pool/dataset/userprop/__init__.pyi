@@ -68,14 +68,6 @@ class PoolDatasetUserprop(Namespace):
             'id':'str',
             'properties':'dict[str]',
     })
-    PoolDatasetUserpropEntry_ = typing.TypedDict('PoolDatasetUserpropEntry_', {
-            'id':'str',
-            'properties':'dict[str]',
-    })
-    PoolDatasetUserpropEntry__ = typing.TypedDict('PoolDatasetUserpropEntry__', {
-            'id':'str',
-            'properties':'dict[str]',
-    })
     DatasetUserPropUpdate = typing.TypedDict('DatasetUserPropUpdate', {
             'name':'str',
             'value':'str',
@@ -148,14 +140,6 @@ class PoolDatasetUserprop(Namespace):
             'force_sql_filters':'bool',
     })
     PoolDatasetUserpropEntry = typing.TypedDict('PoolDatasetUserpropEntry', {
-            'id':'str',
-            'properties':'dict[str]',
-    })
-    PoolDatasetUserpropEntry_ = typing.TypedDict('PoolDatasetUserpropEntry_', {
-            'id':'str',
-            'properties':'dict[str]',
-    })
-    PoolDatasetUserpropEntry__ = typing.TypedDict('PoolDatasetUserpropEntry__', {
             'id':'str',
             'properties':'dict[str]',
     })
@@ -234,14 +218,6 @@ class PoolDatasetUserprop(Namespace):
             'id':'str',
             'properties':'dict[str]',
     })
-    PoolDatasetUserpropEntry_ = typing.TypedDict('PoolDatasetUserpropEntry_', {
-            'id':'str',
-            'properties':'dict[str]',
-    })
-    PoolDatasetUserpropEntry__ = typing.TypedDict('PoolDatasetUserpropEntry__', {
-            'id':'str',
-            'properties':'dict[str]',
-    })
     DatasetUserPropUpdate = typing.TypedDict('DatasetUserPropUpdate', {
             'name':'str',
             'value':'str',
@@ -254,7 +230,7 @@ class PoolDatasetUserprop(Namespace):
     def query(self, 
         query_filters:'list[list]'=[],
         query_options:'QueryOptions'={},
-    /) -> 'typing.Union[list[PoolDatasetUserpropEntry], ForwardRef(PoolDatasetUserpropEntry_), int, ForwardRef(PoolDatasetUserpropEntry__)]': 
+    /) -> 'typing.Union[list[PoolDatasetUserpropEntry], ForwardRef(PoolDatasetUserpropEntry), int]': 
         """
         Query all user properties for ZFS datasets.
 
@@ -266,7 +242,7 @@ class PoolDatasetUserprop(Namespace):
             query-options
         Returns
         -------
-        typing.Union[list[PoolDatasetUserpropEntry], ForwardRef(PoolDatasetUserpropEntry_), int, ForwardRef(PoolDatasetUserpropEntry__)]:
+        typing.Union[list[PoolDatasetUserpropEntry], ForwardRef(PoolDatasetUserpropEntry), int]:
             
         """
         ...
@@ -314,14 +290,6 @@ class PoolDatasetUserprop(Namespace):
             'force_sql_filters':'bool',
     })
     PoolDatasetUserpropEntry = typing.TypedDict('PoolDatasetUserpropEntry', {
-            'id':'str',
-            'properties':'dict[str]',
-    })
-    PoolDatasetUserpropEntry_ = typing.TypedDict('PoolDatasetUserpropEntry_', {
-            'id':'str',
-            'properties':'dict[str]',
-    })
-    PoolDatasetUserpropEntry__ = typing.TypedDict('PoolDatasetUserpropEntry__', {
             'id':'str',
             'properties':'dict[str]',
     })
@@ -397,14 +365,6 @@ class PoolDatasetUserprop(Namespace):
             'force_sql_filters':'bool',
     })
     PoolDatasetUserpropEntry = typing.TypedDict('PoolDatasetUserpropEntry', {
-            'id':'str',
-            'properties':'dict[str]',
-    })
-    PoolDatasetUserpropEntry_ = typing.TypedDict('PoolDatasetUserpropEntry_', {
-            'id':'str',
-            'properties':'dict[str]',
-    })
-    PoolDatasetUserpropEntry__ = typing.TypedDict('PoolDatasetUserpropEntry__', {
             'id':'str',
             'properties':'dict[str]',
     })

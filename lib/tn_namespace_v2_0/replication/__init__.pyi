@@ -142,27 +142,6 @@ class Replication(Namespace):
             'name':'str',
             'target_dataset':'str',
     })
-    RestrictSchedule_ = typing.TypedDict('RestrictSchedule_', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-            'begin':'str',
-            'end':'str',
-    })
-    Schedule__ = typing.TypedDict('Schedule__', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
-    Lifetime_ = typing.TypedDict('Lifetime_', {
-            'schedule':'Schedule__',
-            'lifetime_value':'int',
-            'lifetime_unit':'str',
-    })
     ReplicationRunOnetime = typing.TypedDict('ReplicationRunOnetime', {
             'direction':'str',
             'transport':'str',
@@ -190,14 +169,14 @@ class Replication(Namespace):
             'naming_schema':'list[str]',
             'also_include_naming_schema':'list[str]',
             'name_regex':'typing.Optional[str]',
-            'restrict_schedule':'RestrictSchedule_',
+            'restrict_schedule':'RestrictSchedule',
             'allow_from_scratch':'bool',
             'readonly':'str',
             'hold_pending_snapshots':'bool',
             'retention_policy':'str',
             'lifetime_value':'typing.Optional[int]',
             'lifetime_unit':'typing.Optional[str]',
-            'lifetimes':'list[Lifetime_]',
+            'lifetimes':'list[Lifetime]',
             'compression':'typing.Optional[str]',
             'speed_limit':'typing.Optional[int]',
             'large_block':'bool',
@@ -207,36 +186,6 @@ class Replication(Namespace):
             'logging_level':'typing.Optional[str]',
             'exclude_mountpoint_property':'bool',
             'only_from_scratch':'bool',
-    })
-    Schedule___ = typing.TypedDict('Schedule___', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-            'begin':'str',
-            'end':'str',
-    })
-    RestrictSchedule__ = typing.TypedDict('RestrictSchedule__', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-            'begin':'str',
-            'end':'str',
-    })
-    Schedule____ = typing.TypedDict('Schedule____', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
-    Lifetime__ = typing.TypedDict('Lifetime__', {
-            'schedule':'Schedule____',
-            'lifetime_value':'int',
-            'lifetime_unit':'str',
     })
     ReplicationUpdate = typing.TypedDict('ReplicationUpdate', {
             'name':'str',
@@ -267,8 +216,8 @@ class Replication(Namespace):
             'also_include_naming_schema':'list[str]',
             'name_regex':'typing.Optional[str]',
             'auto':'bool',
-            'schedule':'Schedule___',
-            'restrict_schedule':'RestrictSchedule__',
+            'schedule':'Schedule',
+            'restrict_schedule':'RestrictSchedule',
             'only_matching_schedule':'bool',
             'allow_from_scratch':'bool',
             'readonly':'str',
@@ -276,7 +225,7 @@ class Replication(Namespace):
             'retention_policy':'str',
             'lifetime_value':'typing.Optional[int]',
             'lifetime_unit':'typing.Optional[str]',
-            'lifetimes':'list[Lifetime__]',
+            'lifetimes':'list[Lifetime]',
             'compression':'typing.Optional[str]',
             'speed_limit':'typing.Optional[int]',
             'large_block':'bool',
@@ -472,27 +421,6 @@ class Replication(Namespace):
             'name':'str',
             'target_dataset':'str',
     })
-    RestrictSchedule_ = typing.TypedDict('RestrictSchedule_', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-            'begin':'str',
-            'end':'str',
-    })
-    Schedule__ = typing.TypedDict('Schedule__', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
-    Lifetime_ = typing.TypedDict('Lifetime_', {
-            'schedule':'Schedule__',
-            'lifetime_value':'int',
-            'lifetime_unit':'str',
-    })
     ReplicationRunOnetime = typing.TypedDict('ReplicationRunOnetime', {
             'direction':'str',
             'transport':'str',
@@ -520,14 +448,14 @@ class Replication(Namespace):
             'naming_schema':'list[str]',
             'also_include_naming_schema':'list[str]',
             'name_regex':'typing.Optional[str]',
-            'restrict_schedule':'RestrictSchedule_',
+            'restrict_schedule':'RestrictSchedule',
             'allow_from_scratch':'bool',
             'readonly':'str',
             'hold_pending_snapshots':'bool',
             'retention_policy':'str',
             'lifetime_value':'typing.Optional[int]',
             'lifetime_unit':'typing.Optional[str]',
-            'lifetimes':'list[Lifetime_]',
+            'lifetimes':'list[Lifetime]',
             'compression':'typing.Optional[str]',
             'speed_limit':'typing.Optional[int]',
             'large_block':'bool',
@@ -537,36 +465,6 @@ class Replication(Namespace):
             'logging_level':'typing.Optional[str]',
             'exclude_mountpoint_property':'bool',
             'only_from_scratch':'bool',
-    })
-    Schedule___ = typing.TypedDict('Schedule___', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-            'begin':'str',
-            'end':'str',
-    })
-    RestrictSchedule__ = typing.TypedDict('RestrictSchedule__', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-            'begin':'str',
-            'end':'str',
-    })
-    Schedule____ = typing.TypedDict('Schedule____', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
-    Lifetime__ = typing.TypedDict('Lifetime__', {
-            'schedule':'Schedule____',
-            'lifetime_value':'int',
-            'lifetime_unit':'str',
     })
     ReplicationUpdate = typing.TypedDict('ReplicationUpdate', {
             'name':'str',
@@ -597,8 +495,8 @@ class Replication(Namespace):
             'also_include_naming_schema':'list[str]',
             'name_regex':'typing.Optional[str]',
             'auto':'bool',
-            'schedule':'Schedule___',
-            'restrict_schedule':'RestrictSchedule__',
+            'schedule':'Schedule',
+            'restrict_schedule':'RestrictSchedule',
             'only_matching_schedule':'bool',
             'allow_from_scratch':'bool',
             'readonly':'str',
@@ -606,7 +504,7 @@ class Replication(Namespace):
             'retention_policy':'str',
             'lifetime_value':'typing.Optional[int]',
             'lifetime_unit':'typing.Optional[str]',
-            'lifetimes':'list[Lifetime__]',
+            'lifetimes':'list[Lifetime]',
             'compression':'typing.Optional[str]',
             'speed_limit':'typing.Optional[int]',
             'large_block':'bool',
@@ -760,27 +658,6 @@ class Replication(Namespace):
             'name':'str',
             'target_dataset':'str',
     })
-    RestrictSchedule_ = typing.TypedDict('RestrictSchedule_', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-            'begin':'str',
-            'end':'str',
-    })
-    Schedule__ = typing.TypedDict('Schedule__', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
-    Lifetime_ = typing.TypedDict('Lifetime_', {
-            'schedule':'Schedule__',
-            'lifetime_value':'int',
-            'lifetime_unit':'str',
-    })
     ReplicationRunOnetime = typing.TypedDict('ReplicationRunOnetime', {
             'direction':'str',
             'transport':'str',
@@ -808,14 +685,14 @@ class Replication(Namespace):
             'naming_schema':'list[str]',
             'also_include_naming_schema':'list[str]',
             'name_regex':'typing.Optional[str]',
-            'restrict_schedule':'RestrictSchedule_',
+            'restrict_schedule':'RestrictSchedule',
             'allow_from_scratch':'bool',
             'readonly':'str',
             'hold_pending_snapshots':'bool',
             'retention_policy':'str',
             'lifetime_value':'typing.Optional[int]',
             'lifetime_unit':'typing.Optional[str]',
-            'lifetimes':'list[Lifetime_]',
+            'lifetimes':'list[Lifetime]',
             'compression':'typing.Optional[str]',
             'speed_limit':'typing.Optional[int]',
             'large_block':'bool',
@@ -825,36 +702,6 @@ class Replication(Namespace):
             'logging_level':'typing.Optional[str]',
             'exclude_mountpoint_property':'bool',
             'only_from_scratch':'bool',
-    })
-    Schedule___ = typing.TypedDict('Schedule___', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-            'begin':'str',
-            'end':'str',
-    })
-    RestrictSchedule__ = typing.TypedDict('RestrictSchedule__', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-            'begin':'str',
-            'end':'str',
-    })
-    Schedule____ = typing.TypedDict('Schedule____', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
-    Lifetime__ = typing.TypedDict('Lifetime__', {
-            'schedule':'Schedule____',
-            'lifetime_value':'int',
-            'lifetime_unit':'str',
     })
     ReplicationUpdate = typing.TypedDict('ReplicationUpdate', {
             'name':'str',
@@ -885,8 +732,8 @@ class Replication(Namespace):
             'also_include_naming_schema':'list[str]',
             'name_regex':'typing.Optional[str]',
             'auto':'bool',
-            'schedule':'Schedule___',
-            'restrict_schedule':'RestrictSchedule__',
+            'schedule':'Schedule',
+            'restrict_schedule':'RestrictSchedule',
             'only_matching_schedule':'bool',
             'allow_from_scratch':'bool',
             'readonly':'str',
@@ -894,7 +741,7 @@ class Replication(Namespace):
             'retention_policy':'str',
             'lifetime_value':'typing.Optional[int]',
             'lifetime_unit':'typing.Optional[str]',
-            'lifetimes':'list[Lifetime__]',
+            'lifetimes':'list[Lifetime]',
             'compression':'typing.Optional[str]',
             'speed_limit':'typing.Optional[int]',
             'large_block':'bool',
@@ -1042,27 +889,6 @@ class Replication(Namespace):
             'name':'str',
             'target_dataset':'str',
     })
-    RestrictSchedule_ = typing.TypedDict('RestrictSchedule_', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-            'begin':'str',
-            'end':'str',
-    })
-    Schedule__ = typing.TypedDict('Schedule__', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
-    Lifetime_ = typing.TypedDict('Lifetime_', {
-            'schedule':'Schedule__',
-            'lifetime_value':'int',
-            'lifetime_unit':'str',
-    })
     ReplicationRunOnetime = typing.TypedDict('ReplicationRunOnetime', {
             'direction':'str',
             'transport':'str',
@@ -1090,14 +916,14 @@ class Replication(Namespace):
             'naming_schema':'list[str]',
             'also_include_naming_schema':'list[str]',
             'name_regex':'typing.Optional[str]',
-            'restrict_schedule':'RestrictSchedule_',
+            'restrict_schedule':'RestrictSchedule',
             'allow_from_scratch':'bool',
             'readonly':'str',
             'hold_pending_snapshots':'bool',
             'retention_policy':'str',
             'lifetime_value':'typing.Optional[int]',
             'lifetime_unit':'typing.Optional[str]',
-            'lifetimes':'list[Lifetime_]',
+            'lifetimes':'list[Lifetime]',
             'compression':'typing.Optional[str]',
             'speed_limit':'typing.Optional[int]',
             'large_block':'bool',
@@ -1107,36 +933,6 @@ class Replication(Namespace):
             'logging_level':'typing.Optional[str]',
             'exclude_mountpoint_property':'bool',
             'only_from_scratch':'bool',
-    })
-    Schedule___ = typing.TypedDict('Schedule___', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-            'begin':'str',
-            'end':'str',
-    })
-    RestrictSchedule__ = typing.TypedDict('RestrictSchedule__', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-            'begin':'str',
-            'end':'str',
-    })
-    Schedule____ = typing.TypedDict('Schedule____', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
-    Lifetime__ = typing.TypedDict('Lifetime__', {
-            'schedule':'Schedule____',
-            'lifetime_value':'int',
-            'lifetime_unit':'str',
     })
     ReplicationUpdate = typing.TypedDict('ReplicationUpdate', {
             'name':'str',
@@ -1167,8 +963,8 @@ class Replication(Namespace):
             'also_include_naming_schema':'list[str]',
             'name_regex':'typing.Optional[str]',
             'auto':'bool',
-            'schedule':'Schedule___',
-            'restrict_schedule':'RestrictSchedule__',
+            'schedule':'Schedule',
+            'restrict_schedule':'RestrictSchedule',
             'only_matching_schedule':'bool',
             'allow_from_scratch':'bool',
             'readonly':'str',
@@ -1176,7 +972,7 @@ class Replication(Namespace):
             'retention_policy':'str',
             'lifetime_value':'typing.Optional[int]',
             'lifetime_unit':'typing.Optional[str]',
-            'lifetimes':'list[Lifetime__]',
+            'lifetimes':'list[Lifetime]',
             'compression':'typing.Optional[str]',
             'speed_limit':'typing.Optional[int]',
             'large_block':'bool',
@@ -1327,27 +1123,6 @@ class Replication(Namespace):
             'name':'str',
             'target_dataset':'str',
     })
-    RestrictSchedule_ = typing.TypedDict('RestrictSchedule_', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-            'begin':'str',
-            'end':'str',
-    })
-    Schedule__ = typing.TypedDict('Schedule__', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
-    Lifetime_ = typing.TypedDict('Lifetime_', {
-            'schedule':'Schedule__',
-            'lifetime_value':'int',
-            'lifetime_unit':'str',
-    })
     ReplicationRunOnetime = typing.TypedDict('ReplicationRunOnetime', {
             'direction':'str',
             'transport':'str',
@@ -1375,14 +1150,14 @@ class Replication(Namespace):
             'naming_schema':'list[str]',
             'also_include_naming_schema':'list[str]',
             'name_regex':'typing.Optional[str]',
-            'restrict_schedule':'RestrictSchedule_',
+            'restrict_schedule':'RestrictSchedule',
             'allow_from_scratch':'bool',
             'readonly':'str',
             'hold_pending_snapshots':'bool',
             'retention_policy':'str',
             'lifetime_value':'typing.Optional[int]',
             'lifetime_unit':'typing.Optional[str]',
-            'lifetimes':'list[Lifetime_]',
+            'lifetimes':'list[Lifetime]',
             'compression':'typing.Optional[str]',
             'speed_limit':'typing.Optional[int]',
             'large_block':'bool',
@@ -1392,36 +1167,6 @@ class Replication(Namespace):
             'logging_level':'typing.Optional[str]',
             'exclude_mountpoint_property':'bool',
             'only_from_scratch':'bool',
-    })
-    Schedule___ = typing.TypedDict('Schedule___', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-            'begin':'str',
-            'end':'str',
-    })
-    RestrictSchedule__ = typing.TypedDict('RestrictSchedule__', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-            'begin':'str',
-            'end':'str',
-    })
-    Schedule____ = typing.TypedDict('Schedule____', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
-    Lifetime__ = typing.TypedDict('Lifetime__', {
-            'schedule':'Schedule____',
-            'lifetime_value':'int',
-            'lifetime_unit':'str',
     })
     ReplicationUpdate = typing.TypedDict('ReplicationUpdate', {
             'name':'str',
@@ -1452,8 +1197,8 @@ class Replication(Namespace):
             'also_include_naming_schema':'list[str]',
             'name_regex':'typing.Optional[str]',
             'auto':'bool',
-            'schedule':'Schedule___',
-            'restrict_schedule':'RestrictSchedule__',
+            'schedule':'Schedule',
+            'restrict_schedule':'RestrictSchedule',
             'only_matching_schedule':'bool',
             'allow_from_scratch':'bool',
             'readonly':'str',
@@ -1461,7 +1206,7 @@ class Replication(Namespace):
             'retention_policy':'str',
             'lifetime_value':'typing.Optional[int]',
             'lifetime_unit':'typing.Optional[str]',
-            'lifetimes':'list[Lifetime__]',
+            'lifetimes':'list[Lifetime]',
             'compression':'typing.Optional[str]',
             'speed_limit':'typing.Optional[int]',
             'large_block':'bool',
@@ -1614,27 +1359,6 @@ class Replication(Namespace):
             'name':'str',
             'target_dataset':'str',
     })
-    RestrictSchedule_ = typing.TypedDict('RestrictSchedule_', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-            'begin':'str',
-            'end':'str',
-    })
-    Schedule__ = typing.TypedDict('Schedule__', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
-    Lifetime_ = typing.TypedDict('Lifetime_', {
-            'schedule':'Schedule__',
-            'lifetime_value':'int',
-            'lifetime_unit':'str',
-    })
     ReplicationRunOnetime = typing.TypedDict('ReplicationRunOnetime', {
             'direction':'str',
             'transport':'str',
@@ -1662,14 +1386,14 @@ class Replication(Namespace):
             'naming_schema':'list[str]',
             'also_include_naming_schema':'list[str]',
             'name_regex':'typing.Optional[str]',
-            'restrict_schedule':'RestrictSchedule_',
+            'restrict_schedule':'RestrictSchedule',
             'allow_from_scratch':'bool',
             'readonly':'str',
             'hold_pending_snapshots':'bool',
             'retention_policy':'str',
             'lifetime_value':'typing.Optional[int]',
             'lifetime_unit':'typing.Optional[str]',
-            'lifetimes':'list[Lifetime_]',
+            'lifetimes':'list[Lifetime]',
             'compression':'typing.Optional[str]',
             'speed_limit':'typing.Optional[int]',
             'large_block':'bool',
@@ -1679,36 +1403,6 @@ class Replication(Namespace):
             'logging_level':'typing.Optional[str]',
             'exclude_mountpoint_property':'bool',
             'only_from_scratch':'bool',
-    })
-    Schedule___ = typing.TypedDict('Schedule___', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-            'begin':'str',
-            'end':'str',
-    })
-    RestrictSchedule__ = typing.TypedDict('RestrictSchedule__', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-            'begin':'str',
-            'end':'str',
-    })
-    Schedule____ = typing.TypedDict('Schedule____', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
-    Lifetime__ = typing.TypedDict('Lifetime__', {
-            'schedule':'Schedule____',
-            'lifetime_value':'int',
-            'lifetime_unit':'str',
     })
     ReplicationUpdate = typing.TypedDict('ReplicationUpdate', {
             'name':'str',
@@ -1739,8 +1433,8 @@ class Replication(Namespace):
             'also_include_naming_schema':'list[str]',
             'name_regex':'typing.Optional[str]',
             'auto':'bool',
-            'schedule':'Schedule___',
-            'restrict_schedule':'RestrictSchedule__',
+            'schedule':'Schedule',
+            'restrict_schedule':'RestrictSchedule',
             'only_matching_schedule':'bool',
             'allow_from_scratch':'bool',
             'readonly':'str',
@@ -1748,7 +1442,7 @@ class Replication(Namespace):
             'retention_policy':'str',
             'lifetime_value':'typing.Optional[int]',
             'lifetime_unit':'typing.Optional[str]',
-            'lifetimes':'list[Lifetime__]',
+            'lifetimes':'list[Lifetime]',
             'compression':'typing.Optional[str]',
             'speed_limit':'typing.Optional[int]',
             'large_block':'bool',
@@ -1893,27 +1587,6 @@ class Replication(Namespace):
             'name':'str',
             'target_dataset':'str',
     })
-    RestrictSchedule_ = typing.TypedDict('RestrictSchedule_', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-            'begin':'str',
-            'end':'str',
-    })
-    Schedule__ = typing.TypedDict('Schedule__', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
-    Lifetime_ = typing.TypedDict('Lifetime_', {
-            'schedule':'Schedule__',
-            'lifetime_value':'int',
-            'lifetime_unit':'str',
-    })
     ReplicationRunOnetime = typing.TypedDict('ReplicationRunOnetime', {
             'direction':'str',
             'transport':'str',
@@ -1941,14 +1614,14 @@ class Replication(Namespace):
             'naming_schema':'list[str]',
             'also_include_naming_schema':'list[str]',
             'name_regex':'typing.Optional[str]',
-            'restrict_schedule':'RestrictSchedule_',
+            'restrict_schedule':'RestrictSchedule',
             'allow_from_scratch':'bool',
             'readonly':'str',
             'hold_pending_snapshots':'bool',
             'retention_policy':'str',
             'lifetime_value':'typing.Optional[int]',
             'lifetime_unit':'typing.Optional[str]',
-            'lifetimes':'list[Lifetime_]',
+            'lifetimes':'list[Lifetime]',
             'compression':'typing.Optional[str]',
             'speed_limit':'typing.Optional[int]',
             'large_block':'bool',
@@ -1958,36 +1631,6 @@ class Replication(Namespace):
             'logging_level':'typing.Optional[str]',
             'exclude_mountpoint_property':'bool',
             'only_from_scratch':'bool',
-    })
-    Schedule___ = typing.TypedDict('Schedule___', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-            'begin':'str',
-            'end':'str',
-    })
-    RestrictSchedule__ = typing.TypedDict('RestrictSchedule__', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-            'begin':'str',
-            'end':'str',
-    })
-    Schedule____ = typing.TypedDict('Schedule____', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
-    Lifetime__ = typing.TypedDict('Lifetime__', {
-            'schedule':'Schedule____',
-            'lifetime_value':'int',
-            'lifetime_unit':'str',
     })
     ReplicationUpdate = typing.TypedDict('ReplicationUpdate', {
             'name':'str',
@@ -2018,8 +1661,8 @@ class Replication(Namespace):
             'also_include_naming_schema':'list[str]',
             'name_regex':'typing.Optional[str]',
             'auto':'bool',
-            'schedule':'Schedule___',
-            'restrict_schedule':'RestrictSchedule__',
+            'schedule':'Schedule',
+            'restrict_schedule':'RestrictSchedule',
             'only_matching_schedule':'bool',
             'allow_from_scratch':'bool',
             'readonly':'str',
@@ -2027,7 +1670,7 @@ class Replication(Namespace):
             'retention_policy':'str',
             'lifetime_value':'typing.Optional[int]',
             'lifetime_unit':'typing.Optional[str]',
-            'lifetimes':'list[Lifetime__]',
+            'lifetimes':'list[Lifetime]',
             'compression':'typing.Optional[str]',
             'speed_limit':'typing.Optional[int]',
             'large_block':'bool',
@@ -2178,27 +1821,6 @@ class Replication(Namespace):
             'name':'str',
             'target_dataset':'str',
     })
-    RestrictSchedule_ = typing.TypedDict('RestrictSchedule_', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-            'begin':'str',
-            'end':'str',
-    })
-    Schedule__ = typing.TypedDict('Schedule__', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
-    Lifetime_ = typing.TypedDict('Lifetime_', {
-            'schedule':'Schedule__',
-            'lifetime_value':'int',
-            'lifetime_unit':'str',
-    })
     ReplicationRunOnetime = typing.TypedDict('ReplicationRunOnetime', {
             'direction':'str',
             'transport':'str',
@@ -2226,14 +1848,14 @@ class Replication(Namespace):
             'naming_schema':'list[str]',
             'also_include_naming_schema':'list[str]',
             'name_regex':'typing.Optional[str]',
-            'restrict_schedule':'RestrictSchedule_',
+            'restrict_schedule':'RestrictSchedule',
             'allow_from_scratch':'bool',
             'readonly':'str',
             'hold_pending_snapshots':'bool',
             'retention_policy':'str',
             'lifetime_value':'typing.Optional[int]',
             'lifetime_unit':'typing.Optional[str]',
-            'lifetimes':'list[Lifetime_]',
+            'lifetimes':'list[Lifetime]',
             'compression':'typing.Optional[str]',
             'speed_limit':'typing.Optional[int]',
             'large_block':'bool',
@@ -2243,36 +1865,6 @@ class Replication(Namespace):
             'logging_level':'typing.Optional[str]',
             'exclude_mountpoint_property':'bool',
             'only_from_scratch':'bool',
-    })
-    Schedule___ = typing.TypedDict('Schedule___', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-            'begin':'str',
-            'end':'str',
-    })
-    RestrictSchedule__ = typing.TypedDict('RestrictSchedule__', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-            'begin':'str',
-            'end':'str',
-    })
-    Schedule____ = typing.TypedDict('Schedule____', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
-    Lifetime__ = typing.TypedDict('Lifetime__', {
-            'schedule':'Schedule____',
-            'lifetime_value':'int',
-            'lifetime_unit':'str',
     })
     ReplicationUpdate = typing.TypedDict('ReplicationUpdate', {
             'name':'str',
@@ -2303,8 +1895,8 @@ class Replication(Namespace):
             'also_include_naming_schema':'list[str]',
             'name_regex':'typing.Optional[str]',
             'auto':'bool',
-            'schedule':'Schedule___',
-            'restrict_schedule':'RestrictSchedule__',
+            'schedule':'Schedule',
+            'restrict_schedule':'RestrictSchedule',
             'only_matching_schedule':'bool',
             'allow_from_scratch':'bool',
             'readonly':'str',
@@ -2312,7 +1904,7 @@ class Replication(Namespace):
             'retention_policy':'str',
             'lifetime_value':'typing.Optional[int]',
             'lifetime_unit':'typing.Optional[str]',
-            'lifetimes':'list[Lifetime__]',
+            'lifetimes':'list[Lifetime]',
             'compression':'typing.Optional[str]',
             'speed_limit':'typing.Optional[int]',
             'large_block':'bool',
@@ -2461,27 +2053,6 @@ class Replication(Namespace):
             'name':'str',
             'target_dataset':'str',
     })
-    RestrictSchedule_ = typing.TypedDict('RestrictSchedule_', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-            'begin':'str',
-            'end':'str',
-    })
-    Schedule__ = typing.TypedDict('Schedule__', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
-    Lifetime_ = typing.TypedDict('Lifetime_', {
-            'schedule':'Schedule__',
-            'lifetime_value':'int',
-            'lifetime_unit':'str',
-    })
     ReplicationRunOnetime = typing.TypedDict('ReplicationRunOnetime', {
             'direction':'str',
             'transport':'str',
@@ -2509,14 +2080,14 @@ class Replication(Namespace):
             'naming_schema':'list[str]',
             'also_include_naming_schema':'list[str]',
             'name_regex':'typing.Optional[str]',
-            'restrict_schedule':'RestrictSchedule_',
+            'restrict_schedule':'RestrictSchedule',
             'allow_from_scratch':'bool',
             'readonly':'str',
             'hold_pending_snapshots':'bool',
             'retention_policy':'str',
             'lifetime_value':'typing.Optional[int]',
             'lifetime_unit':'typing.Optional[str]',
-            'lifetimes':'list[Lifetime_]',
+            'lifetimes':'list[Lifetime]',
             'compression':'typing.Optional[str]',
             'speed_limit':'typing.Optional[int]',
             'large_block':'bool',
@@ -2526,36 +2097,6 @@ class Replication(Namespace):
             'logging_level':'typing.Optional[str]',
             'exclude_mountpoint_property':'bool',
             'only_from_scratch':'bool',
-    })
-    Schedule___ = typing.TypedDict('Schedule___', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-            'begin':'str',
-            'end':'str',
-    })
-    RestrictSchedule__ = typing.TypedDict('RestrictSchedule__', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-            'begin':'str',
-            'end':'str',
-    })
-    Schedule____ = typing.TypedDict('Schedule____', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
-    Lifetime__ = typing.TypedDict('Lifetime__', {
-            'schedule':'Schedule____',
-            'lifetime_value':'int',
-            'lifetime_unit':'str',
     })
     ReplicationUpdate = typing.TypedDict('ReplicationUpdate', {
             'name':'str',
@@ -2586,8 +2127,8 @@ class Replication(Namespace):
             'also_include_naming_schema':'list[str]',
             'name_regex':'typing.Optional[str]',
             'auto':'bool',
-            'schedule':'Schedule___',
-            'restrict_schedule':'RestrictSchedule__',
+            'schedule':'Schedule',
+            'restrict_schedule':'RestrictSchedule',
             'only_matching_schedule':'bool',
             'allow_from_scratch':'bool',
             'readonly':'str',
@@ -2595,7 +2136,7 @@ class Replication(Namespace):
             'retention_policy':'str',
             'lifetime_value':'typing.Optional[int]',
             'lifetime_unit':'typing.Optional[str]',
-            'lifetimes':'list[Lifetime__]',
+            'lifetimes':'list[Lifetime]',
             'compression':'typing.Optional[str]',
             'speed_limit':'typing.Optional[int]',
             'large_block':'bool',
@@ -2741,27 +2282,6 @@ class Replication(Namespace):
             'name':'str',
             'target_dataset':'str',
     })
-    RestrictSchedule_ = typing.TypedDict('RestrictSchedule_', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-            'begin':'str',
-            'end':'str',
-    })
-    Schedule__ = typing.TypedDict('Schedule__', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
-    Lifetime_ = typing.TypedDict('Lifetime_', {
-            'schedule':'Schedule__',
-            'lifetime_value':'int',
-            'lifetime_unit':'str',
-    })
     ReplicationRunOnetime = typing.TypedDict('ReplicationRunOnetime', {
             'direction':'str',
             'transport':'str',
@@ -2789,14 +2309,14 @@ class Replication(Namespace):
             'naming_schema':'list[str]',
             'also_include_naming_schema':'list[str]',
             'name_regex':'typing.Optional[str]',
-            'restrict_schedule':'RestrictSchedule_',
+            'restrict_schedule':'RestrictSchedule',
             'allow_from_scratch':'bool',
             'readonly':'str',
             'hold_pending_snapshots':'bool',
             'retention_policy':'str',
             'lifetime_value':'typing.Optional[int]',
             'lifetime_unit':'typing.Optional[str]',
-            'lifetimes':'list[Lifetime_]',
+            'lifetimes':'list[Lifetime]',
             'compression':'typing.Optional[str]',
             'speed_limit':'typing.Optional[int]',
             'large_block':'bool',
@@ -2806,36 +2326,6 @@ class Replication(Namespace):
             'logging_level':'typing.Optional[str]',
             'exclude_mountpoint_property':'bool',
             'only_from_scratch':'bool',
-    })
-    Schedule___ = typing.TypedDict('Schedule___', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-            'begin':'str',
-            'end':'str',
-    })
-    RestrictSchedule__ = typing.TypedDict('RestrictSchedule__', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-            'begin':'str',
-            'end':'str',
-    })
-    Schedule____ = typing.TypedDict('Schedule____', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
-    Lifetime__ = typing.TypedDict('Lifetime__', {
-            'schedule':'Schedule____',
-            'lifetime_value':'int',
-            'lifetime_unit':'str',
     })
     ReplicationUpdate = typing.TypedDict('ReplicationUpdate', {
             'name':'str',
@@ -2866,8 +2356,8 @@ class Replication(Namespace):
             'also_include_naming_schema':'list[str]',
             'name_regex':'typing.Optional[str]',
             'auto':'bool',
-            'schedule':'Schedule___',
-            'restrict_schedule':'RestrictSchedule__',
+            'schedule':'Schedule',
+            'restrict_schedule':'RestrictSchedule',
             'only_matching_schedule':'bool',
             'allow_from_scratch':'bool',
             'readonly':'str',
@@ -2875,7 +2365,7 @@ class Replication(Namespace):
             'retention_policy':'str',
             'lifetime_value':'typing.Optional[int]',
             'lifetime_unit':'typing.Optional[str]',
-            'lifetimes':'list[Lifetime__]',
+            'lifetimes':'list[Lifetime]',
             'compression':'typing.Optional[str]',
             'speed_limit':'typing.Optional[int]',
             'large_block':'bool',
@@ -3023,27 +2513,6 @@ class Replication(Namespace):
             'name':'str',
             'target_dataset':'str',
     })
-    RestrictSchedule_ = typing.TypedDict('RestrictSchedule_', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-            'begin':'str',
-            'end':'str',
-    })
-    Schedule__ = typing.TypedDict('Schedule__', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
-    Lifetime_ = typing.TypedDict('Lifetime_', {
-            'schedule':'Schedule__',
-            'lifetime_value':'int',
-            'lifetime_unit':'str',
-    })
     ReplicationRunOnetime = typing.TypedDict('ReplicationRunOnetime', {
             'direction':'str',
             'transport':'str',
@@ -3071,14 +2540,14 @@ class Replication(Namespace):
             'naming_schema':'list[str]',
             'also_include_naming_schema':'list[str]',
             'name_regex':'typing.Optional[str]',
-            'restrict_schedule':'RestrictSchedule_',
+            'restrict_schedule':'RestrictSchedule',
             'allow_from_scratch':'bool',
             'readonly':'str',
             'hold_pending_snapshots':'bool',
             'retention_policy':'str',
             'lifetime_value':'typing.Optional[int]',
             'lifetime_unit':'typing.Optional[str]',
-            'lifetimes':'list[Lifetime_]',
+            'lifetimes':'list[Lifetime]',
             'compression':'typing.Optional[str]',
             'speed_limit':'typing.Optional[int]',
             'large_block':'bool',
@@ -3088,36 +2557,6 @@ class Replication(Namespace):
             'logging_level':'typing.Optional[str]',
             'exclude_mountpoint_property':'bool',
             'only_from_scratch':'bool',
-    })
-    Schedule___ = typing.TypedDict('Schedule___', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-            'begin':'str',
-            'end':'str',
-    })
-    RestrictSchedule__ = typing.TypedDict('RestrictSchedule__', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-            'begin':'str',
-            'end':'str',
-    })
-    Schedule____ = typing.TypedDict('Schedule____', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
-    Lifetime__ = typing.TypedDict('Lifetime__', {
-            'schedule':'Schedule____',
-            'lifetime_value':'int',
-            'lifetime_unit':'str',
     })
     ReplicationUpdate = typing.TypedDict('ReplicationUpdate', {
             'name':'str',
@@ -3148,8 +2587,8 @@ class Replication(Namespace):
             'also_include_naming_schema':'list[str]',
             'name_regex':'typing.Optional[str]',
             'auto':'bool',
-            'schedule':'Schedule___',
-            'restrict_schedule':'RestrictSchedule__',
+            'schedule':'Schedule',
+            'restrict_schedule':'RestrictSchedule',
             'only_matching_schedule':'bool',
             'allow_from_scratch':'bool',
             'readonly':'str',
@@ -3157,7 +2596,7 @@ class Replication(Namespace):
             'retention_policy':'str',
             'lifetime_value':'typing.Optional[int]',
             'lifetime_unit':'typing.Optional[str]',
-            'lifetimes':'list[Lifetime__]',
+            'lifetimes':'list[Lifetime]',
             'compression':'typing.Optional[str]',
             'speed_limit':'typing.Optional[int]',
             'large_block':'bool',
@@ -3328,27 +2767,6 @@ class Replication(Namespace):
             'name':'str',
             'target_dataset':'str',
     })
-    RestrictSchedule_ = typing.TypedDict('RestrictSchedule_', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-            'begin':'str',
-            'end':'str',
-    })
-    Schedule__ = typing.TypedDict('Schedule__', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
-    Lifetime_ = typing.TypedDict('Lifetime_', {
-            'schedule':'Schedule__',
-            'lifetime_value':'int',
-            'lifetime_unit':'str',
-    })
     ReplicationRunOnetime = typing.TypedDict('ReplicationRunOnetime', {
             'direction':'str',
             'transport':'str',
@@ -3376,14 +2794,14 @@ class Replication(Namespace):
             'naming_schema':'list[str]',
             'also_include_naming_schema':'list[str]',
             'name_regex':'typing.Optional[str]',
-            'restrict_schedule':'RestrictSchedule_',
+            'restrict_schedule':'RestrictSchedule',
             'allow_from_scratch':'bool',
             'readonly':'str',
             'hold_pending_snapshots':'bool',
             'retention_policy':'str',
             'lifetime_value':'typing.Optional[int]',
             'lifetime_unit':'typing.Optional[str]',
-            'lifetimes':'list[Lifetime_]',
+            'lifetimes':'list[Lifetime]',
             'compression':'typing.Optional[str]',
             'speed_limit':'typing.Optional[int]',
             'large_block':'bool',
@@ -3393,36 +2811,6 @@ class Replication(Namespace):
             'logging_level':'typing.Optional[str]',
             'exclude_mountpoint_property':'bool',
             'only_from_scratch':'bool',
-    })
-    Schedule___ = typing.TypedDict('Schedule___', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-            'begin':'str',
-            'end':'str',
-    })
-    RestrictSchedule__ = typing.TypedDict('RestrictSchedule__', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-            'begin':'str',
-            'end':'str',
-    })
-    Schedule____ = typing.TypedDict('Schedule____', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
-    Lifetime__ = typing.TypedDict('Lifetime__', {
-            'schedule':'Schedule____',
-            'lifetime_value':'int',
-            'lifetime_unit':'str',
     })
     ReplicationUpdate = typing.TypedDict('ReplicationUpdate', {
             'name':'str',
@@ -3453,8 +2841,8 @@ class Replication(Namespace):
             'also_include_naming_schema':'list[str]',
             'name_regex':'typing.Optional[str]',
             'auto':'bool',
-            'schedule':'Schedule___',
-            'restrict_schedule':'RestrictSchedule__',
+            'schedule':'Schedule',
+            'restrict_schedule':'RestrictSchedule',
             'only_matching_schedule':'bool',
             'allow_from_scratch':'bool',
             'readonly':'str',
@@ -3462,7 +2850,7 @@ class Replication(Namespace):
             'retention_policy':'str',
             'lifetime_value':'typing.Optional[int]',
             'lifetime_unit':'typing.Optional[str]',
-            'lifetimes':'list[Lifetime__]',
+            'lifetimes':'list[Lifetime]',
             'compression':'typing.Optional[str]',
             'speed_limit':'typing.Optional[int]',
             'large_block':'bool',
@@ -3615,27 +3003,6 @@ class Replication(Namespace):
             'name':'str',
             'target_dataset':'str',
     })
-    RestrictSchedule_ = typing.TypedDict('RestrictSchedule_', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-            'begin':'str',
-            'end':'str',
-    })
-    Schedule__ = typing.TypedDict('Schedule__', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
-    Lifetime_ = typing.TypedDict('Lifetime_', {
-            'schedule':'Schedule__',
-            'lifetime_value':'int',
-            'lifetime_unit':'str',
-    })
     ReplicationRunOnetime = typing.TypedDict('ReplicationRunOnetime', {
             'direction':'str',
             'transport':'str',
@@ -3663,14 +3030,14 @@ class Replication(Namespace):
             'naming_schema':'list[str]',
             'also_include_naming_schema':'list[str]',
             'name_regex':'typing.Optional[str]',
-            'restrict_schedule':'RestrictSchedule_',
+            'restrict_schedule':'RestrictSchedule',
             'allow_from_scratch':'bool',
             'readonly':'str',
             'hold_pending_snapshots':'bool',
             'retention_policy':'str',
             'lifetime_value':'typing.Optional[int]',
             'lifetime_unit':'typing.Optional[str]',
-            'lifetimes':'list[Lifetime_]',
+            'lifetimes':'list[Lifetime]',
             'compression':'typing.Optional[str]',
             'speed_limit':'typing.Optional[int]',
             'large_block':'bool',
@@ -3680,36 +3047,6 @@ class Replication(Namespace):
             'logging_level':'typing.Optional[str]',
             'exclude_mountpoint_property':'bool',
             'only_from_scratch':'bool',
-    })
-    Schedule___ = typing.TypedDict('Schedule___', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-            'begin':'str',
-            'end':'str',
-    })
-    RestrictSchedule__ = typing.TypedDict('RestrictSchedule__', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-            'begin':'str',
-            'end':'str',
-    })
-    Schedule____ = typing.TypedDict('Schedule____', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
-    Lifetime__ = typing.TypedDict('Lifetime__', {
-            'schedule':'Schedule____',
-            'lifetime_value':'int',
-            'lifetime_unit':'str',
     })
     ReplicationUpdate = typing.TypedDict('ReplicationUpdate', {
             'name':'str',
@@ -3740,8 +3077,8 @@ class Replication(Namespace):
             'also_include_naming_schema':'list[str]',
             'name_regex':'typing.Optional[str]',
             'auto':'bool',
-            'schedule':'Schedule___',
-            'restrict_schedule':'RestrictSchedule__',
+            'schedule':'Schedule',
+            'restrict_schedule':'RestrictSchedule',
             'only_matching_schedule':'bool',
             'allow_from_scratch':'bool',
             'readonly':'str',
@@ -3749,7 +3086,7 @@ class Replication(Namespace):
             'retention_policy':'str',
             'lifetime_value':'typing.Optional[int]',
             'lifetime_unit':'typing.Optional[str]',
-            'lifetimes':'list[Lifetime__]',
+            'lifetimes':'list[Lifetime]',
             'compression':'typing.Optional[str]',
             'speed_limit':'typing.Optional[int]',
             'large_block':'bool',

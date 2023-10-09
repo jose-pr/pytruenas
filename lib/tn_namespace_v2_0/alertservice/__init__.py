@@ -62,31 +62,6 @@ class Alertservice(Namespace):
             'id':'int',
             'type__title':'str',
     })
-    AlertserviceEntry_ = typing.TypedDict('AlertserviceEntry_', {
-            'name':'str',
-            'type':'str',
-            'attributes':'dict[str]',
-            'level':'str',
-            'enabled':'bool',
-            'id':'int',
-            'type__title':'str',
-    })
-    AlertserviceEntry__ = typing.TypedDict('AlertserviceEntry__', {
-            'name':'str',
-            'type':'str',
-            'attributes':'dict[str]',
-            'level':'str',
-            'enabled':'bool',
-            'id':'int',
-            'type__title':'str',
-    })
-    AlertServiceCreate_ = typing.TypedDict('AlertServiceCreate_', {
-            'name':'str',
-            'type':'str',
-            'attributes':'dict[str]',
-            'level':'str',
-            'enabled':'bool',
-    })
     AlertServiceUpdate = typing.TypedDict('AlertServiceUpdate', {
             'name':'str',
             'type':'str',

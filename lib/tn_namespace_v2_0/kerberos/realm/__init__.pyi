@@ -78,20 +78,6 @@ class KerberosRealm(Namespace):
             'kpasswd_server':'list',
             'id':'int',
     })
-    KerberosRealmEntry_ = typing.TypedDict('KerberosRealmEntry_', {
-            'realm':'str',
-            'kdc':'list',
-            'admin_server':'list',
-            'kpasswd_server':'list',
-            'id':'int',
-    })
-    KerberosRealmEntry__ = typing.TypedDict('KerberosRealmEntry__', {
-            'realm':'str',
-            'kdc':'list',
-            'admin_server':'list',
-            'kpasswd_server':'list',
-            'id':'int',
-    })
     KerberosRealmUpdate = typing.TypedDict('KerberosRealmUpdate', {
             'realm':'str',
             'kdc':'list',
@@ -164,20 +150,6 @@ class KerberosRealm(Namespace):
             'force_sql_filters':'bool',
     })
     KerberosRealmEntry = typing.TypedDict('KerberosRealmEntry', {
-            'realm':'str',
-            'kdc':'list',
-            'admin_server':'list',
-            'kpasswd_server':'list',
-            'id':'int',
-    })
-    KerberosRealmEntry_ = typing.TypedDict('KerberosRealmEntry_', {
-            'realm':'str',
-            'kdc':'list',
-            'admin_server':'list',
-            'kpasswd_server':'list',
-            'id':'int',
-    })
-    KerberosRealmEntry__ = typing.TypedDict('KerberosRealmEntry__', {
             'realm':'str',
             'kdc':'list',
             'admin_server':'list',
@@ -265,20 +237,6 @@ class KerberosRealm(Namespace):
             'kpasswd_server':'list',
             'id':'int',
     })
-    KerberosRealmEntry_ = typing.TypedDict('KerberosRealmEntry_', {
-            'realm':'str',
-            'kdc':'list',
-            'admin_server':'list',
-            'kpasswd_server':'list',
-            'id':'int',
-    })
-    KerberosRealmEntry__ = typing.TypedDict('KerberosRealmEntry__', {
-            'realm':'str',
-            'kdc':'list',
-            'admin_server':'list',
-            'kpasswd_server':'list',
-            'id':'int',
-    })
     KerberosRealmUpdate = typing.TypedDict('KerberosRealmUpdate', {
             'realm':'str',
             'kdc':'list',
@@ -296,7 +254,7 @@ class KerberosRealm(Namespace):
     def query(self, 
         query_filters:'list[list]'=[],
         query_options:'QueryOptions'={},
-    /) -> 'typing.Union[list[KerberosRealmEntry], ForwardRef(KerberosRealmEntry_), int, ForwardRef(KerberosRealmEntry__)]': 
+    /) -> 'typing.Union[list[KerberosRealmEntry], ForwardRef(KerberosRealmEntry), int]': 
         """
         
 
@@ -308,7 +266,7 @@ class KerberosRealm(Namespace):
             query-options
         Returns
         -------
-        typing.Union[list[KerberosRealmEntry], ForwardRef(KerberosRealmEntry_), int, ForwardRef(KerberosRealmEntry__)]:
+        typing.Union[list[KerberosRealmEntry], ForwardRef(KerberosRealmEntry), int]:
             
         """
         ...
@@ -354,20 +312,6 @@ class KerberosRealm(Namespace):
             'force_sql_filters':'bool',
     })
     KerberosRealmEntry = typing.TypedDict('KerberosRealmEntry', {
-            'realm':'str',
-            'kdc':'list',
-            'admin_server':'list',
-            'kpasswd_server':'list',
-            'id':'int',
-    })
-    KerberosRealmEntry_ = typing.TypedDict('KerberosRealmEntry_', {
-            'realm':'str',
-            'kdc':'list',
-            'admin_server':'list',
-            'kpasswd_server':'list',
-            'id':'int',
-    })
-    KerberosRealmEntry__ = typing.TypedDict('KerberosRealmEntry__', {
             'realm':'str',
             'kdc':'list',
             'admin_server':'list',
@@ -451,20 +395,6 @@ class KerberosRealm(Namespace):
             'force_sql_filters':'bool',
     })
     KerberosRealmEntry = typing.TypedDict('KerberosRealmEntry', {
-            'realm':'str',
-            'kdc':'list',
-            'admin_server':'list',
-            'kpasswd_server':'list',
-            'id':'int',
-    })
-    KerberosRealmEntry_ = typing.TypedDict('KerberosRealmEntry_', {
-            'realm':'str',
-            'kdc':'list',
-            'admin_server':'list',
-            'kpasswd_server':'list',
-            'id':'int',
-    })
-    KerberosRealmEntry__ = typing.TypedDict('KerberosRealmEntry__', {
             'realm':'str',
             'kdc':'list',
             'admin_server':'list',

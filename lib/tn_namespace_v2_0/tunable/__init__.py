@@ -59,24 +59,6 @@ class Tunable(Namespace):
             'update_initramfs':'bool',
             'id':'int',
     })
-    TunableEntry_ = typing.TypedDict('TunableEntry_', {
-            'type':'str',
-            'var':'str',
-            'value':'str',
-            'comment':'str',
-            'enabled':'bool',
-            'update_initramfs':'bool',
-            'id':'int',
-    })
-    TunableEntry__ = typing.TypedDict('TunableEntry__', {
-            'type':'str',
-            'var':'str',
-            'value':'str',
-            'comment':'str',
-            'enabled':'bool',
-            'update_initramfs':'bool',
-            'id':'int',
-    })
     TunableTypeChoices = typing.TypedDict('TunableTypeChoices', {
             'SYSCTL':'str',
             'UDEV':'str',

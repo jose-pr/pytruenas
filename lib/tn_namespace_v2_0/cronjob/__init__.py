@@ -21,18 +21,11 @@ class Cronjob(Namespace):
             'description':'str',
             'user':'str',
     })
-    Schedule_ = typing.TypedDict('Schedule_', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
     CronjobCreateReturns = typing.TypedDict('CronjobCreateReturns', {
             'enabled':'bool',
             'stderr':'bool',
             'stdout':'bool',
-            'schedule':'Schedule_',
+            'schedule':'Schedule',
             'command':'str',
             'description':'str',
             'user':'str',
@@ -66,85 +59,30 @@ class Cronjob(Namespace):
             'limit':'int',
             'force_sql_filters':'bool',
     })
-    Schedule__ = typing.TypedDict('Schedule__', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
     CronJobEntry = typing.TypedDict('CronJobEntry', {
             'enabled':'bool',
             'stderr':'bool',
             'stdout':'bool',
-            'schedule':'Schedule__',
+            'schedule':'Schedule',
             'command':'str',
             'description':'str',
             'user':'str',
             'id':'int',
-    })
-    Schedule___ = typing.TypedDict('Schedule___', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
-    CronJobEntry_ = typing.TypedDict('CronJobEntry_', {
-            'enabled':'bool',
-            'stderr':'bool',
-            'stdout':'bool',
-            'schedule':'Schedule___',
-            'command':'str',
-            'description':'str',
-            'user':'str',
-            'id':'int',
-    })
-    Schedule____ = typing.TypedDict('Schedule____', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
-    CronJobEntry__ = typing.TypedDict('CronJobEntry__', {
-            'enabled':'bool',
-            'stderr':'bool',
-            'stdout':'bool',
-            'schedule':'Schedule____',
-            'command':'str',
-            'description':'str',
-            'user':'str',
-            'id':'int',
-    })
-    Schedule_____ = typing.TypedDict('Schedule_____', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
     })
     CronjobUpdate = typing.TypedDict('CronjobUpdate', {
             'enabled':'bool',
             'stderr':'bool',
             'stdout':'bool',
-            'schedule':'Schedule_____',
+            'schedule':'Schedule',
             'command':'str',
             'description':'str',
             'user':'str',
-    })
-    Schedule______ = typing.TypedDict('Schedule______', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
     })
     CronjobUpdateReturns = typing.TypedDict('CronjobUpdateReturns', {
             'enabled':'bool',
             'stderr':'bool',
             'stdout':'bool',
-            'schedule':'Schedule______',
+            'schedule':'Schedule',
             'command':'str',
             'description':'str',
             'user':'str',
