@@ -18,6 +18,10 @@ class Kerberos(Namespace):
             kerberos_entry
         """
         ...
+    KerberosSettingsUpdate = typing.TypedDict('KerberosSettingsUpdate', {
+            'appdefaults_aux':'str',
+            'libdefaults_aux':'str',
+    })
     @typing.overload
     def update(self, 
         kerberos_settings_update:'KerberosSettingsUpdate'={},
@@ -37,8 +41,8 @@ class Kerberos(Namespace):
             kerberos_update_returns
         """
         ...
+    KerberosSettingsUpdate = typing.TypedDict('KerberosSettingsUpdate', {
+            'appdefaults_aux':'str',
+            'libdefaults_aux':'str',
+    })
 
-class KerberosSettingsUpdate(typing.TypedDict):
-        appdefaults_aux:'str'
-        libdefaults_aux:'str'
-        ...

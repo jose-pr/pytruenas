@@ -52,8 +52,7 @@ try:
 except:
     # Will fail when using api keys
     ...
-sessions = auth.sessions()
-
+sessions:list[Auth.Session] = auth.sessions()
 token = auth.generate_token(10)
 
 print(token)

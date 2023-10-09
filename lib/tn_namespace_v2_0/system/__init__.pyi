@@ -20,6 +20,34 @@ class System(Namespace):
             system_boot_identifier
         """
         ...
+    SystemInfo = typing.TypedDict('SystemInfo', {
+            'version':'str',
+            'buildtime':'str',
+            'hostname':'str',
+            'physmem':'int',
+            'model':'str',
+            'cores':'int',
+            'physical_cores':'int',
+            'loadavg':'list',
+            'uptime':'str',
+            'uptime_seconds':'float',
+            'system_serial':'typing.Optional[str]',
+            'system_product':'typing.Optional[str]',
+            'system_product_version':'typing.Optional[str]',
+            'license':'dict[str]',
+            'boottime':'str',
+            'datetime':'str',
+            'birthday':'typing.Optional[str]',
+            'timezone':'str',
+            'system_manufacturer':'typing.Optional[str]',
+            'ecc_memory':'bool',
+    })
+    SystemReboot = typing.TypedDict('SystemReboot', {
+            'delay':'int',
+    })
+    SystemShutdown = typing.TypedDict('SystemShutdown', {
+            'delay':'int',
+    })
     @typing.overload
     def build_time(self, 
     /) -> 'str': 
@@ -34,6 +62,34 @@ class System(Namespace):
             system_build_time
         """
         ...
+    SystemInfo = typing.TypedDict('SystemInfo', {
+            'version':'str',
+            'buildtime':'str',
+            'hostname':'str',
+            'physmem':'int',
+            'model':'str',
+            'cores':'int',
+            'physical_cores':'int',
+            'loadavg':'list',
+            'uptime':'str',
+            'uptime_seconds':'float',
+            'system_serial':'typing.Optional[str]',
+            'system_product':'typing.Optional[str]',
+            'system_product_version':'typing.Optional[str]',
+            'license':'dict[str]',
+            'boottime':'str',
+            'datetime':'str',
+            'birthday':'typing.Optional[str]',
+            'timezone':'str',
+            'system_manufacturer':'typing.Optional[str]',
+            'ecc_memory':'bool',
+    })
+    SystemReboot = typing.TypedDict('SystemReboot', {
+            'delay':'int',
+    })
+    SystemShutdown = typing.TypedDict('SystemShutdown', {
+            'delay':'int',
+    })
     @typing.overload
     def debug(self, 
     /) -> None: 
@@ -46,6 +102,34 @@ class System(Namespace):
         -------
         """
         ...
+    SystemInfo = typing.TypedDict('SystemInfo', {
+            'version':'str',
+            'buildtime':'str',
+            'hostname':'str',
+            'physmem':'int',
+            'model':'str',
+            'cores':'int',
+            'physical_cores':'int',
+            'loadavg':'list',
+            'uptime':'str',
+            'uptime_seconds':'float',
+            'system_serial':'typing.Optional[str]',
+            'system_product':'typing.Optional[str]',
+            'system_product_version':'typing.Optional[str]',
+            'license':'dict[str]',
+            'boottime':'str',
+            'datetime':'str',
+            'birthday':'typing.Optional[str]',
+            'timezone':'str',
+            'system_manufacturer':'typing.Optional[str]',
+            'ecc_memory':'bool',
+    })
+    SystemReboot = typing.TypedDict('SystemReboot', {
+            'delay':'int',
+    })
+    SystemShutdown = typing.TypedDict('SystemShutdown', {
+            'delay':'int',
+    })
     @typing.overload
     def environment(self, 
     /) -> 'str': 
@@ -62,6 +146,34 @@ class System(Namespace):
             product_running_environment
         """
         ...
+    SystemInfo = typing.TypedDict('SystemInfo', {
+            'version':'str',
+            'buildtime':'str',
+            'hostname':'str',
+            'physmem':'int',
+            'model':'str',
+            'cores':'int',
+            'physical_cores':'int',
+            'loadavg':'list',
+            'uptime':'str',
+            'uptime_seconds':'float',
+            'system_serial':'typing.Optional[str]',
+            'system_product':'typing.Optional[str]',
+            'system_product_version':'typing.Optional[str]',
+            'license':'dict[str]',
+            'boottime':'str',
+            'datetime':'str',
+            'birthday':'typing.Optional[str]',
+            'timezone':'str',
+            'system_manufacturer':'typing.Optional[str]',
+            'ecc_memory':'bool',
+    })
+    SystemReboot = typing.TypedDict('SystemReboot', {
+            'delay':'int',
+    })
+    SystemShutdown = typing.TypedDict('SystemShutdown', {
+            'delay':'int',
+    })
     @typing.overload
     def feature_enabled(self, 
         feature:'str',
@@ -79,6 +191,34 @@ class System(Namespace):
             feature_enabled
         """
         ...
+    SystemInfo = typing.TypedDict('SystemInfo', {
+            'version':'str',
+            'buildtime':'str',
+            'hostname':'str',
+            'physmem':'int',
+            'model':'str',
+            'cores':'int',
+            'physical_cores':'int',
+            'loadavg':'list',
+            'uptime':'str',
+            'uptime_seconds':'float',
+            'system_serial':'typing.Optional[str]',
+            'system_product':'typing.Optional[str]',
+            'system_product_version':'typing.Optional[str]',
+            'license':'dict[str]',
+            'boottime':'str',
+            'datetime':'str',
+            'birthday':'typing.Optional[str]',
+            'timezone':'str',
+            'system_manufacturer':'typing.Optional[str]',
+            'ecc_memory':'bool',
+    })
+    SystemReboot = typing.TypedDict('SystemReboot', {
+            'delay':'int',
+    })
+    SystemShutdown = typing.TypedDict('SystemShutdown', {
+            'delay':'int',
+    })
     @typing.overload
     def host_id(self, 
     /) -> 'str': 
@@ -97,6 +237,34 @@ class System(Namespace):
             system_host_identifier
         """
         ...
+    SystemInfo = typing.TypedDict('SystemInfo', {
+            'version':'str',
+            'buildtime':'str',
+            'hostname':'str',
+            'physmem':'int',
+            'model':'str',
+            'cores':'int',
+            'physical_cores':'int',
+            'loadavg':'list',
+            'uptime':'str',
+            'uptime_seconds':'float',
+            'system_serial':'typing.Optional[str]',
+            'system_product':'typing.Optional[str]',
+            'system_product_version':'typing.Optional[str]',
+            'license':'dict[str]',
+            'boottime':'str',
+            'datetime':'str',
+            'birthday':'typing.Optional[str]',
+            'timezone':'str',
+            'system_manufacturer':'typing.Optional[str]',
+            'ecc_memory':'bool',
+    })
+    SystemReboot = typing.TypedDict('SystemReboot', {
+            'delay':'int',
+    })
+    SystemShutdown = typing.TypedDict('SystemShutdown', {
+            'delay':'int',
+    })
     @typing.overload
     def info(self, 
     /) -> 'SystemInfo': 
@@ -111,6 +279,34 @@ class System(Namespace):
             system_info
         """
         ...
+    SystemInfo = typing.TypedDict('SystemInfo', {
+            'version':'str',
+            'buildtime':'str',
+            'hostname':'str',
+            'physmem':'int',
+            'model':'str',
+            'cores':'int',
+            'physical_cores':'int',
+            'loadavg':'list',
+            'uptime':'str',
+            'uptime_seconds':'float',
+            'system_serial':'typing.Optional[str]',
+            'system_product':'typing.Optional[str]',
+            'system_product_version':'typing.Optional[str]',
+            'license':'dict[str]',
+            'boottime':'str',
+            'datetime':'str',
+            'birthday':'typing.Optional[str]',
+            'timezone':'str',
+            'system_manufacturer':'typing.Optional[str]',
+            'ecc_memory':'bool',
+    })
+    SystemReboot = typing.TypedDict('SystemReboot', {
+            'delay':'int',
+    })
+    SystemShutdown = typing.TypedDict('SystemShutdown', {
+            'delay':'int',
+    })
     @typing.overload
     def is_freenas(self, 
     /) -> 'bool': 
@@ -127,6 +323,34 @@ class System(Namespace):
             system_is_truenas_core
         """
         ...
+    SystemInfo = typing.TypedDict('SystemInfo', {
+            'version':'str',
+            'buildtime':'str',
+            'hostname':'str',
+            'physmem':'int',
+            'model':'str',
+            'cores':'int',
+            'physical_cores':'int',
+            'loadavg':'list',
+            'uptime':'str',
+            'uptime_seconds':'float',
+            'system_serial':'typing.Optional[str]',
+            'system_product':'typing.Optional[str]',
+            'system_product_version':'typing.Optional[str]',
+            'license':'dict[str]',
+            'boottime':'str',
+            'datetime':'str',
+            'birthday':'typing.Optional[str]',
+            'timezone':'str',
+            'system_manufacturer':'typing.Optional[str]',
+            'ecc_memory':'bool',
+    })
+    SystemReboot = typing.TypedDict('SystemReboot', {
+            'delay':'int',
+    })
+    SystemShutdown = typing.TypedDict('SystemShutdown', {
+            'delay':'int',
+    })
     @typing.overload
     def is_stable(self, 
     /) -> 'str': 
@@ -141,6 +365,34 @@ class System(Namespace):
             is_stable
         """
         ...
+    SystemInfo = typing.TypedDict('SystemInfo', {
+            'version':'str',
+            'buildtime':'str',
+            'hostname':'str',
+            'physmem':'int',
+            'model':'str',
+            'cores':'int',
+            'physical_cores':'int',
+            'loadavg':'list',
+            'uptime':'str',
+            'uptime_seconds':'float',
+            'system_serial':'typing.Optional[str]',
+            'system_product':'typing.Optional[str]',
+            'system_product_version':'typing.Optional[str]',
+            'license':'dict[str]',
+            'boottime':'str',
+            'datetime':'str',
+            'birthday':'typing.Optional[str]',
+            'timezone':'str',
+            'system_manufacturer':'typing.Optional[str]',
+            'ecc_memory':'bool',
+    })
+    SystemReboot = typing.TypedDict('SystemReboot', {
+            'delay':'int',
+    })
+    SystemShutdown = typing.TypedDict('SystemShutdown', {
+            'delay':'int',
+    })
     @typing.overload
     def license_update(self, 
         license:'str',
@@ -156,6 +408,34 @@ class System(Namespace):
         -------
         """
         ...
+    SystemInfo = typing.TypedDict('SystemInfo', {
+            'version':'str',
+            'buildtime':'str',
+            'hostname':'str',
+            'physmem':'int',
+            'model':'str',
+            'cores':'int',
+            'physical_cores':'int',
+            'loadavg':'list',
+            'uptime':'str',
+            'uptime_seconds':'float',
+            'system_serial':'typing.Optional[str]',
+            'system_product':'typing.Optional[str]',
+            'system_product_version':'typing.Optional[str]',
+            'license':'dict[str]',
+            'boottime':'str',
+            'datetime':'str',
+            'birthday':'typing.Optional[str]',
+            'timezone':'str',
+            'system_manufacturer':'typing.Optional[str]',
+            'ecc_memory':'bool',
+    })
+    SystemReboot = typing.TypedDict('SystemReboot', {
+            'delay':'int',
+    })
+    SystemShutdown = typing.TypedDict('SystemShutdown', {
+            'delay':'int',
+    })
     @typing.overload
     def product_name(self, 
     /) -> 'str': 
@@ -170,6 +450,34 @@ class System(Namespace):
             product_name
         """
         ...
+    SystemInfo = typing.TypedDict('SystemInfo', {
+            'version':'str',
+            'buildtime':'str',
+            'hostname':'str',
+            'physmem':'int',
+            'model':'str',
+            'cores':'int',
+            'physical_cores':'int',
+            'loadavg':'list',
+            'uptime':'str',
+            'uptime_seconds':'float',
+            'system_serial':'typing.Optional[str]',
+            'system_product':'typing.Optional[str]',
+            'system_product_version':'typing.Optional[str]',
+            'license':'dict[str]',
+            'boottime':'str',
+            'datetime':'str',
+            'birthday':'typing.Optional[str]',
+            'timezone':'str',
+            'system_manufacturer':'typing.Optional[str]',
+            'ecc_memory':'bool',
+    })
+    SystemReboot = typing.TypedDict('SystemReboot', {
+            'delay':'int',
+    })
+    SystemShutdown = typing.TypedDict('SystemShutdown', {
+            'delay':'int',
+    })
     @typing.overload
     def product_type(self, 
     /) -> 'str': 
@@ -187,6 +495,34 @@ class System(Namespace):
             product_type
         """
         ...
+    SystemInfo = typing.TypedDict('SystemInfo', {
+            'version':'str',
+            'buildtime':'str',
+            'hostname':'str',
+            'physmem':'int',
+            'model':'str',
+            'cores':'int',
+            'physical_cores':'int',
+            'loadavg':'list',
+            'uptime':'str',
+            'uptime_seconds':'float',
+            'system_serial':'typing.Optional[str]',
+            'system_product':'typing.Optional[str]',
+            'system_product_version':'typing.Optional[str]',
+            'license':'dict[str]',
+            'boottime':'str',
+            'datetime':'str',
+            'birthday':'typing.Optional[str]',
+            'timezone':'str',
+            'system_manufacturer':'typing.Optional[str]',
+            'ecc_memory':'bool',
+    })
+    SystemReboot = typing.TypedDict('SystemReboot', {
+            'delay':'int',
+    })
+    SystemShutdown = typing.TypedDict('SystemShutdown', {
+            'delay':'int',
+    })
     @typing.overload
     def ready(self, 
     /) -> 'bool': 
@@ -201,6 +537,34 @@ class System(Namespace):
             system_ready
         """
         ...
+    SystemInfo = typing.TypedDict('SystemInfo', {
+            'version':'str',
+            'buildtime':'str',
+            'hostname':'str',
+            'physmem':'int',
+            'model':'str',
+            'cores':'int',
+            'physical_cores':'int',
+            'loadavg':'list',
+            'uptime':'str',
+            'uptime_seconds':'float',
+            'system_serial':'typing.Optional[str]',
+            'system_product':'typing.Optional[str]',
+            'system_product_version':'typing.Optional[str]',
+            'license':'dict[str]',
+            'boottime':'str',
+            'datetime':'str',
+            'birthday':'typing.Optional[str]',
+            'timezone':'str',
+            'system_manufacturer':'typing.Optional[str]',
+            'ecc_memory':'bool',
+    })
+    SystemReboot = typing.TypedDict('SystemReboot', {
+            'delay':'int',
+    })
+    SystemShutdown = typing.TypedDict('SystemShutdown', {
+            'delay':'int',
+    })
     @typing.overload
     def reboot(self, 
         system_reboot:'SystemReboot'={},
@@ -218,10 +582,38 @@ class System(Namespace):
         -------
         """
         ...
+    SystemInfo = typing.TypedDict('SystemInfo', {
+            'version':'str',
+            'buildtime':'str',
+            'hostname':'str',
+            'physmem':'int',
+            'model':'str',
+            'cores':'int',
+            'physical_cores':'int',
+            'loadavg':'list',
+            'uptime':'str',
+            'uptime_seconds':'float',
+            'system_serial':'typing.Optional[str]',
+            'system_product':'typing.Optional[str]',
+            'system_product_version':'typing.Optional[str]',
+            'license':'dict[str]',
+            'boottime':'str',
+            'datetime':'str',
+            'birthday':'typing.Optional[str]',
+            'timezone':'str',
+            'system_manufacturer':'typing.Optional[str]',
+            'ecc_memory':'bool',
+    })
+    SystemReboot = typing.TypedDict('SystemReboot', {
+            'delay':'int',
+    })
+    SystemShutdown = typing.TypedDict('SystemShutdown', {
+            'delay':'int',
+    })
     @typing.overload
     def release_notes_url(self, 
         version_str:'str'=None,
-    /) -> 'str|None': 
+    /) -> 'typing.Optional[str]': 
         """
         Returns the release notes URL for a version of SCALE.
         
@@ -236,12 +628,38 @@ class System(Namespace):
             `version_str` str: represents a version to check against
         Returns
         -------
-        str:
-            truenas_release_notes_url
-        None:
+        typing.Optional[str]:
             truenas_release_notes_url
         """
         ...
+    SystemInfo = typing.TypedDict('SystemInfo', {
+            'version':'str',
+            'buildtime':'str',
+            'hostname':'str',
+            'physmem':'int',
+            'model':'str',
+            'cores':'int',
+            'physical_cores':'int',
+            'loadavg':'list',
+            'uptime':'str',
+            'uptime_seconds':'float',
+            'system_serial':'typing.Optional[str]',
+            'system_product':'typing.Optional[str]',
+            'system_product_version':'typing.Optional[str]',
+            'license':'dict[str]',
+            'boottime':'str',
+            'datetime':'str',
+            'birthday':'typing.Optional[str]',
+            'timezone':'str',
+            'system_manufacturer':'typing.Optional[str]',
+            'ecc_memory':'bool',
+    })
+    SystemReboot = typing.TypedDict('SystemReboot', {
+            'delay':'int',
+    })
+    SystemShutdown = typing.TypedDict('SystemShutdown', {
+            'delay':'int',
+    })
     @typing.overload
     def shutdown(self, 
         system_shutdown:'SystemShutdown'={},
@@ -259,6 +677,34 @@ class System(Namespace):
         -------
         """
         ...
+    SystemInfo = typing.TypedDict('SystemInfo', {
+            'version':'str',
+            'buildtime':'str',
+            'hostname':'str',
+            'physmem':'int',
+            'model':'str',
+            'cores':'int',
+            'physical_cores':'int',
+            'loadavg':'list',
+            'uptime':'str',
+            'uptime_seconds':'float',
+            'system_serial':'typing.Optional[str]',
+            'system_product':'typing.Optional[str]',
+            'system_product_version':'typing.Optional[str]',
+            'license':'dict[str]',
+            'boottime':'str',
+            'datetime':'str',
+            'birthday':'typing.Optional[str]',
+            'timezone':'str',
+            'system_manufacturer':'typing.Optional[str]',
+            'ecc_memory':'bool',
+    })
+    SystemReboot = typing.TypedDict('SystemReboot', {
+            'delay':'int',
+    })
+    SystemShutdown = typing.TypedDict('SystemShutdown', {
+            'delay':'int',
+    })
     @typing.overload
     def state(self, 
     /) -> 'str': 
@@ -276,6 +722,34 @@ class System(Namespace):
             system_state
         """
         ...
+    SystemInfo = typing.TypedDict('SystemInfo', {
+            'version':'str',
+            'buildtime':'str',
+            'hostname':'str',
+            'physmem':'int',
+            'model':'str',
+            'cores':'int',
+            'physical_cores':'int',
+            'loadavg':'list',
+            'uptime':'str',
+            'uptime_seconds':'float',
+            'system_serial':'typing.Optional[str]',
+            'system_product':'typing.Optional[str]',
+            'system_product_version':'typing.Optional[str]',
+            'license':'dict[str]',
+            'boottime':'str',
+            'datetime':'str',
+            'birthday':'typing.Optional[str]',
+            'timezone':'str',
+            'system_manufacturer':'typing.Optional[str]',
+            'ecc_memory':'bool',
+    })
+    SystemReboot = typing.TypedDict('SystemReboot', {
+            'delay':'int',
+    })
+    SystemShutdown = typing.TypedDict('SystemShutdown', {
+            'delay':'int',
+    })
     @typing.overload
     def version(self, 
     /) -> 'str': 
@@ -290,6 +764,34 @@ class System(Namespace):
             truenas_version
         """
         ...
+    SystemInfo = typing.TypedDict('SystemInfo', {
+            'version':'str',
+            'buildtime':'str',
+            'hostname':'str',
+            'physmem':'int',
+            'model':'str',
+            'cores':'int',
+            'physical_cores':'int',
+            'loadavg':'list',
+            'uptime':'str',
+            'uptime_seconds':'float',
+            'system_serial':'typing.Optional[str]',
+            'system_product':'typing.Optional[str]',
+            'system_product_version':'typing.Optional[str]',
+            'license':'dict[str]',
+            'boottime':'str',
+            'datetime':'str',
+            'birthday':'typing.Optional[str]',
+            'timezone':'str',
+            'system_manufacturer':'typing.Optional[str]',
+            'ecc_memory':'bool',
+    })
+    SystemReboot = typing.TypedDict('SystemReboot', {
+            'delay':'int',
+    })
+    SystemShutdown = typing.TypedDict('SystemShutdown', {
+            'delay':'int',
+    })
     @typing.overload
     def version_short(self, 
     /) -> 'str': 
@@ -304,32 +806,32 @@ class System(Namespace):
             truenas_version_shortname
         """
         ...
+    SystemInfo = typing.TypedDict('SystemInfo', {
+            'version':'str',
+            'buildtime':'str',
+            'hostname':'str',
+            'physmem':'int',
+            'model':'str',
+            'cores':'int',
+            'physical_cores':'int',
+            'loadavg':'list',
+            'uptime':'str',
+            'uptime_seconds':'float',
+            'system_serial':'typing.Optional[str]',
+            'system_product':'typing.Optional[str]',
+            'system_product_version':'typing.Optional[str]',
+            'license':'dict[str]',
+            'boottime':'str',
+            'datetime':'str',
+            'birthday':'typing.Optional[str]',
+            'timezone':'str',
+            'system_manufacturer':'typing.Optional[str]',
+            'ecc_memory':'bool',
+    })
+    SystemReboot = typing.TypedDict('SystemReboot', {
+            'delay':'int',
+    })
+    SystemShutdown = typing.TypedDict('SystemShutdown', {
+            'delay':'int',
+    })
 
-class SystemInfo(typing.TypedDict):
-        version:'str'
-        buildtime:'str'
-        hostname:'str'
-        physmem:'int'
-        model:'str'
-        cores:'int'
-        physical_cores:'int'
-        loadavg:'list'
-        uptime:'str'
-        uptime_seconds:'float'
-        system_serial:'typing.Optional[str]'
-        system_product:'typing.Optional[str]'
-        system_product_version:'typing.Optional[str]'
-        license:'dict[str]'
-        boottime:'str'
-        datetime:'str'
-        birthday:'typing.Optional[str]'
-        timezone:'str'
-        system_manufacturer:'typing.Optional[str]'
-        ecc_memory:'bool'
-        ...
-class SystemReboot(typing.TypedDict):
-        delay:'int'
-        ...
-class SystemShutdown(typing.TypedDict):
-        delay:'int'
-        ...

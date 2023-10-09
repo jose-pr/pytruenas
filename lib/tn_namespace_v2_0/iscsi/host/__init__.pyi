@@ -25,6 +25,46 @@ class IscsiHost(Namespace):
             iscsi_host_create_returns
         """
         ...
+    IscsiHostCreate = typing.TypedDict('IscsiHostCreate', {
+            'ip':'str',
+            'description':'str',
+            'iqns':'list[str]',
+            'added_automatically':'bool',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    IscsiHostUpdate = typing.TypedDict('IscsiHostUpdate', {
+            'ip':'str',
+            'description':'str',
+            'iqns':'list[str]',
+            'added_automatically':'bool',
+    })
     @typing.overload
     def delete(self, 
         id:'int',
@@ -42,6 +82,46 @@ class IscsiHost(Namespace):
             Will return `true` if `id` is deleted successfully
         """
         ...
+    IscsiHostCreate = typing.TypedDict('IscsiHostCreate', {
+            'ip':'str',
+            'description':'str',
+            'iqns':'list[str]',
+            'added_automatically':'bool',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    IscsiHostUpdate = typing.TypedDict('IscsiHostUpdate', {
+            'ip':'str',
+            'description':'str',
+            'iqns':'list[str]',
+            'added_automatically':'bool',
+    })
     @typing.overload
     def get_initiators(self, 
         id:'int',
@@ -57,9 +137,49 @@ class IscsiHost(Namespace):
         -------
         """
         ...
+    IscsiHostCreate = typing.TypedDict('IscsiHostCreate', {
+            'ip':'str',
+            'description':'str',
+            'iqns':'list[str]',
+            'added_automatically':'bool',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    IscsiHostUpdate = typing.TypedDict('IscsiHostUpdate', {
+            'ip':'str',
+            'description':'str',
+            'iqns':'list[str]',
+            'added_automatically':'bool',
+    })
     @typing.overload
     def get_instance(self, 
-        id:'str|int|bool|dict[str]|list',
+        id:'typing.Union[str, int, bool, dict[str], list]',
         query_options_get_instance:'QueryOptionsGetInstance'={},
     /) -> None: 
         """
@@ -77,6 +197,46 @@ class IscsiHost(Namespace):
         -------
         """
         ...
+    IscsiHostCreate = typing.TypedDict('IscsiHostCreate', {
+            'ip':'str',
+            'description':'str',
+            'iqns':'list[str]',
+            'added_automatically':'bool',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    IscsiHostUpdate = typing.TypedDict('IscsiHostUpdate', {
+            'ip':'str',
+            'description':'str',
+            'iqns':'list[str]',
+            'added_automatically':'bool',
+    })
     @typing.overload
     def get_targets(self, 
         id:'int',
@@ -92,11 +252,51 @@ class IscsiHost(Namespace):
         -------
         """
         ...
+    IscsiHostCreate = typing.TypedDict('IscsiHostCreate', {
+            'ip':'str',
+            'description':'str',
+            'iqns':'list[str]',
+            'added_automatically':'bool',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    IscsiHostUpdate = typing.TypedDict('IscsiHostUpdate', {
+            'ip':'str',
+            'description':'str',
+            'iqns':'list[str]',
+            'added_automatically':'bool',
+    })
     @typing.overload
     def query(self, 
         query_filters:'list[list]'=[],
         query_options:'QueryOptions'={},
-    /) -> 'list[dict[str]]|dict[str]|int|dict[str]': 
+    /) -> 'typing.Union[list[dict[str]], dict[str], int]': 
         """
         
 
@@ -108,16 +308,50 @@ class IscsiHost(Namespace):
             query-options
         Returns
         -------
-        list[dict[str]]:
-            
-        dict[str]:
-            
-        int:
-            
-        dict[str]:
+        typing.Union[list[dict[str]], dict[str], int]:
             
         """
         ...
+    IscsiHostCreate = typing.TypedDict('IscsiHostCreate', {
+            'ip':'str',
+            'description':'str',
+            'iqns':'list[str]',
+            'added_automatically':'bool',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    IscsiHostUpdate = typing.TypedDict('IscsiHostUpdate', {
+            'ip':'str',
+            'description':'str',
+            'iqns':'list[str]',
+            'added_automatically':'bool',
+    })
     @typing.overload
     def set_initiators(self, 
         id:'int',
@@ -140,6 +374,46 @@ class IscsiHost(Namespace):
         -------
         """
         ...
+    IscsiHostCreate = typing.TypedDict('IscsiHostCreate', {
+            'ip':'str',
+            'description':'str',
+            'iqns':'list[str]',
+            'added_automatically':'bool',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    IscsiHostUpdate = typing.TypedDict('IscsiHostUpdate', {
+            'ip':'str',
+            'description':'str',
+            'iqns':'list[str]',
+            'added_automatically':'bool',
+    })
     @typing.overload
     def set_targets(self, 
         id:'int',
@@ -158,6 +432,46 @@ class IscsiHost(Namespace):
         -------
         """
         ...
+    IscsiHostCreate = typing.TypedDict('IscsiHostCreate', {
+            'ip':'str',
+            'description':'str',
+            'iqns':'list[str]',
+            'added_automatically':'bool',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    IscsiHostUpdate = typing.TypedDict('IscsiHostUpdate', {
+            'ip':'str',
+            'description':'str',
+            'iqns':'list[str]',
+            'added_automatically':'bool',
+    })
     @typing.overload
     def update(self, 
         id:'int',
@@ -179,44 +493,44 @@ class IscsiHost(Namespace):
             iscsi_host_update_returns
         """
         ...
+    IscsiHostCreate = typing.TypedDict('IscsiHostCreate', {
+            'ip':'str',
+            'description':'str',
+            'iqns':'list[str]',
+            'added_automatically':'bool',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    IscsiHostUpdate = typing.TypedDict('IscsiHostUpdate', {
+            'ip':'str',
+            'description':'str',
+            'iqns':'list[str]',
+            'added_automatically':'bool',
+    })
 
-class IscsiHostCreate(typing.TypedDict):
-        ip:'str'
-        description:'str'
-        iqns:'list[str]'
-        added_automatically:'bool'
-        ...
-class QueryOptionsGetInstance(typing.TypedDict):
-        relationships:'bool'
-        extend:'typing.Optional[str]'
-        extend_context:'typing.Optional[str]'
-        prefix:'typing.Optional[str]'
-        extra:'dict[str]'
-        order_by:'list'
-        select:'list'
-        count:'bool'
-        get:'bool'
-        offset:'int'
-        limit:'int'
-        force_sql_filters:'bool'
-        ...
-class QueryOptions(typing.TypedDict):
-        relationships:'bool'
-        extend:'typing.Optional[str]'
-        extend_context:'typing.Optional[str]'
-        prefix:'typing.Optional[str]'
-        extra:'dict[str]'
-        order_by:'list'
-        select:'list'
-        count:'bool'
-        get:'bool'
-        offset:'int'
-        limit:'int'
-        force_sql_filters:'bool'
-        ...
-class IscsiHostUpdate(typing.TypedDict):
-        ip:'str'
-        description:'str'
-        iqns:'list[str]'
-        added_automatically:'bool'
-        ...

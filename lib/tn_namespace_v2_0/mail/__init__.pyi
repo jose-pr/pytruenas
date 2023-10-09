@@ -18,6 +18,85 @@ class Mail(Namespace):
             mail_entry
         """
         ...
+    Oauth = typing.TypedDict('Oauth', {
+            'client_id':'str',
+            'client_secret':'str',
+            'refresh_token':'str',
+    })
+    MailEntry = typing.TypedDict('MailEntry', {
+            'fromemail':'str',
+            'fromname':'str',
+            'outgoingserver':'str',
+            'port':'int',
+            'security':'str',
+            'smtp':'bool',
+            'user':'typing.Optional[str]',
+            'pass':'typing.Optional[str]',
+            'oauth':'Oauth',
+            'id':'int',
+    })
+    MailMessage = typing.TypedDict('MailMessage', {
+            'subject':'str',
+            'text':'str',
+            'html':'typing.Optional[str]',
+            'to':'list[str]',
+            'cc':'list[str]',
+            'interval':'typing.Optional[int]',
+            'channel':'typing.Optional[str]',
+            'timeout':'int',
+            'attachments':'bool',
+            'queue':'bool',
+            'extra_headers':'dict[str]',
+    })
+    Oauth_ = typing.TypedDict('Oauth_', {
+            'client_id':'str',
+            'client_secret':'str',
+            'refresh_token':'str',
+    })
+    MailUpdate = typing.TypedDict('MailUpdate', {
+            'fromemail':'str',
+            'fromname':'str',
+            'outgoingserver':'str',
+            'port':'int',
+            'security':'str',
+            'smtp':'bool',
+            'user':'typing.Optional[str]',
+            'pass':'typing.Optional[str]',
+            'oauth':'Oauth_',
+    })
+    Oauth__ = typing.TypedDict('Oauth__', {
+            'client_id':'str',
+            'client_secret':'str',
+            'refresh_token':'str',
+    })
+    MailUpdate_ = typing.TypedDict('MailUpdate_', {
+            'fromemail':'str',
+            'fromname':'str',
+            'outgoingserver':'str',
+            'port':'int',
+            'security':'str',
+            'smtp':'bool',
+            'user':'typing.Optional[str]',
+            'pass':'typing.Optional[str]',
+            'oauth':'Oauth__',
+    })
+    Oauth___ = typing.TypedDict('Oauth___', {
+            'client_id':'str',
+            'client_secret':'str',
+            'refresh_token':'str',
+    })
+    MailUpdateReturns = typing.TypedDict('MailUpdateReturns', {
+            'fromemail':'str',
+            'fromname':'str',
+            'outgoingserver':'str',
+            'port':'int',
+            'security':'str',
+            'smtp':'bool',
+            'user':'typing.Optional[str]',
+            'pass':'typing.Optional[str]',
+            'oauth':'Oauth___',
+            'id':'int',
+    })
     @typing.overload
     def send(self, 
         mail_message:'MailMessage'={},
@@ -68,6 +147,85 @@ class Mail(Namespace):
             successfully_sent
         """
         ...
+    Oauth = typing.TypedDict('Oauth', {
+            'client_id':'str',
+            'client_secret':'str',
+            'refresh_token':'str',
+    })
+    MailEntry = typing.TypedDict('MailEntry', {
+            'fromemail':'str',
+            'fromname':'str',
+            'outgoingserver':'str',
+            'port':'int',
+            'security':'str',
+            'smtp':'bool',
+            'user':'typing.Optional[str]',
+            'pass':'typing.Optional[str]',
+            'oauth':'Oauth',
+            'id':'int',
+    })
+    MailMessage = typing.TypedDict('MailMessage', {
+            'subject':'str',
+            'text':'str',
+            'html':'typing.Optional[str]',
+            'to':'list[str]',
+            'cc':'list[str]',
+            'interval':'typing.Optional[int]',
+            'channel':'typing.Optional[str]',
+            'timeout':'int',
+            'attachments':'bool',
+            'queue':'bool',
+            'extra_headers':'dict[str]',
+    })
+    Oauth_ = typing.TypedDict('Oauth_', {
+            'client_id':'str',
+            'client_secret':'str',
+            'refresh_token':'str',
+    })
+    MailUpdate = typing.TypedDict('MailUpdate', {
+            'fromemail':'str',
+            'fromname':'str',
+            'outgoingserver':'str',
+            'port':'int',
+            'security':'str',
+            'smtp':'bool',
+            'user':'typing.Optional[str]',
+            'pass':'typing.Optional[str]',
+            'oauth':'Oauth_',
+    })
+    Oauth__ = typing.TypedDict('Oauth__', {
+            'client_id':'str',
+            'client_secret':'str',
+            'refresh_token':'str',
+    })
+    MailUpdate_ = typing.TypedDict('MailUpdate_', {
+            'fromemail':'str',
+            'fromname':'str',
+            'outgoingserver':'str',
+            'port':'int',
+            'security':'str',
+            'smtp':'bool',
+            'user':'typing.Optional[str]',
+            'pass':'typing.Optional[str]',
+            'oauth':'Oauth__',
+    })
+    Oauth___ = typing.TypedDict('Oauth___', {
+            'client_id':'str',
+            'client_secret':'str',
+            'refresh_token':'str',
+    })
+    MailUpdateReturns = typing.TypedDict('MailUpdateReturns', {
+            'fromemail':'str',
+            'fromname':'str',
+            'outgoingserver':'str',
+            'port':'int',
+            'security':'str',
+            'smtp':'bool',
+            'user':'typing.Optional[str]',
+            'pass':'typing.Optional[str]',
+            'oauth':'Oauth___',
+            'id':'int',
+    })
     @typing.overload
     def update(self, 
         mail_update:'MailUpdate_'={},
@@ -94,73 +252,83 @@ class Mail(Namespace):
             mail_update_returns
         """
         ...
+    Oauth = typing.TypedDict('Oauth', {
+            'client_id':'str',
+            'client_secret':'str',
+            'refresh_token':'str',
+    })
+    MailEntry = typing.TypedDict('MailEntry', {
+            'fromemail':'str',
+            'fromname':'str',
+            'outgoingserver':'str',
+            'port':'int',
+            'security':'str',
+            'smtp':'bool',
+            'user':'typing.Optional[str]',
+            'pass':'typing.Optional[str]',
+            'oauth':'Oauth',
+            'id':'int',
+    })
+    MailMessage = typing.TypedDict('MailMessage', {
+            'subject':'str',
+            'text':'str',
+            'html':'typing.Optional[str]',
+            'to':'list[str]',
+            'cc':'list[str]',
+            'interval':'typing.Optional[int]',
+            'channel':'typing.Optional[str]',
+            'timeout':'int',
+            'attachments':'bool',
+            'queue':'bool',
+            'extra_headers':'dict[str]',
+    })
+    Oauth_ = typing.TypedDict('Oauth_', {
+            'client_id':'str',
+            'client_secret':'str',
+            'refresh_token':'str',
+    })
+    MailUpdate = typing.TypedDict('MailUpdate', {
+            'fromemail':'str',
+            'fromname':'str',
+            'outgoingserver':'str',
+            'port':'int',
+            'security':'str',
+            'smtp':'bool',
+            'user':'typing.Optional[str]',
+            'pass':'typing.Optional[str]',
+            'oauth':'Oauth_',
+    })
+    Oauth__ = typing.TypedDict('Oauth__', {
+            'client_id':'str',
+            'client_secret':'str',
+            'refresh_token':'str',
+    })
+    MailUpdate_ = typing.TypedDict('MailUpdate_', {
+            'fromemail':'str',
+            'fromname':'str',
+            'outgoingserver':'str',
+            'port':'int',
+            'security':'str',
+            'smtp':'bool',
+            'user':'typing.Optional[str]',
+            'pass':'typing.Optional[str]',
+            'oauth':'Oauth__',
+    })
+    Oauth___ = typing.TypedDict('Oauth___', {
+            'client_id':'str',
+            'client_secret':'str',
+            'refresh_token':'str',
+    })
+    MailUpdateReturns = typing.TypedDict('MailUpdateReturns', {
+            'fromemail':'str',
+            'fromname':'str',
+            'outgoingserver':'str',
+            'port':'int',
+            'security':'str',
+            'smtp':'bool',
+            'user':'typing.Optional[str]',
+            'pass':'typing.Optional[str]',
+            'oauth':'Oauth___',
+            'id':'int',
+    })
 
-class MailEntry(typing.TypedDict):
-        fromemail:'str'
-        fromname:'str'
-        outgoingserver:'str'
-        port:'int'
-        security:'str'
-        smtp:'bool'
-        user:'typing.Optional[str]'
-        pass:'typing.Optional[str]'
-        oauth:'Oauth'
-        id:'int'
-        ...
-class Oauth(typing.TypedDict):
-        client_id:'str'
-        client_secret:'str'
-        refresh_token:'str'
-        ...
-class MailMessage(typing.TypedDict):
-        subject:'str'
-        text:'str'
-        html:'typing.Optional[str]'
-        to:'list[str]'
-        cc:'list[str]'
-        interval:'typing.Optional[int]'
-        channel:'typing.Optional[str]'
-        timeout:'int'
-        attachments:'bool'
-        queue:'bool'
-        extra_headers:'dict[str]'
-        ...
-class MailUpdate(typing.TypedDict):
-        fromemail:'str'
-        fromname:'str'
-        outgoingserver:'str'
-        port:'int'
-        security:'str'
-        smtp:'bool'
-        user:'typing.Optional[str]'
-        pass:'typing.Optional[str]'
-        oauth:'Oauth'
-        ...
-class Oauth_(typing.TypedDict):
-        client_id:'str'
-        client_secret:'str'
-        refresh_token:'str'
-        ...
-class MailUpdate_(typing.TypedDict):
-        fromemail:'str'
-        fromname:'str'
-        outgoingserver:'str'
-        port:'int'
-        security:'str'
-        smtp:'bool'
-        user:'typing.Optional[str]'
-        pass:'typing.Optional[str]'
-        oauth:'Oauth'
-        ...
-class MailUpdateReturns(typing.TypedDict):
-        fromemail:'str'
-        fromname:'str'
-        outgoingserver:'str'
-        port:'int'
-        security:'str'
-        smtp:'bool'
-        user:'typing.Optional[str]'
-        pass:'typing.Optional[str]'
-        oauth:'Oauth'
-        id:'int'
-        ...

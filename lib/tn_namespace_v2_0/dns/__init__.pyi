@@ -8,7 +8,7 @@ class Dns(Namespace):
     def query(self, 
         query_filters:'list[list]'=[],
         query_options:'QueryOptions'={},
-    /) -> 'int|Nameserver|list[Nameserver]': 
+    /) -> 'typing.Union[int, ForwardRef(Nameserver), list[Nameserver_]]': 
         """
         Query Name Servers with `query-filters` and `query-options`.
 
@@ -20,29 +20,28 @@ class Dns(Namespace):
             query-options
         Returns
         -------
-        int:
-            
-        Nameserver:
-            
-        list[Nameserver]:
+        typing.Union[int, ForwardRef(Nameserver), list[Nameserver_]]:
             
         """
         ...
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Nameserver = typing.TypedDict('Nameserver', {
+            'nameserver':'str',
+    })
+    Nameserver_ = typing.TypedDict('Nameserver_', {
+            'nameserver':'str',
+    })
 
-class QueryOptions(typing.TypedDict):
-        relationships:'bool'
-        extend:'typing.Optional[str]'
-        extend_context:'typing.Optional[str]'
-        prefix:'typing.Optional[str]'
-        extra:'dict[str]'
-        order_by:'list'
-        select:'list'
-        count:'bool'
-        get:'bool'
-        offset:'int'
-        limit:'int'
-        force_sql_filters:'bool'
-        ...
-class Nameserver(typing.TypedDict):
-        nameserver:'str'
-        ...

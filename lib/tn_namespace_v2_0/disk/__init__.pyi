@@ -6,7 +6,7 @@ class Disk(Namespace):
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload
     def get_instance(self, 
-        id:'str|int|bool|dict[str]|list',
+        id:'typing.Union[str, int, bool, dict[str], list]',
         query_options_get_instance:'QueryOptionsGetInstance'={},
     /) -> None: 
         """
@@ -24,6 +24,248 @@ class Disk(Namespace):
         -------
         """
         ...
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Enclosure = typing.TypedDict('Enclosure', {
+            'number':'int',
+            'slot':'int',
+    })
+    DiskEntry = typing.TypedDict('DiskEntry', {
+            'identifier':'str',
+            'name':'str',
+            'subsystem':'str',
+            'number':'int',
+            'serial':'str',
+            'lunid':'typing.Optional[str]',
+            'size':'int',
+            'description':'str',
+            'transfermode':'str',
+            'hddstandby':'str',
+            'togglesmart':'bool',
+            'advpowermgmt':'str',
+            'smartoptions':'str',
+            'expiretime':'typing.Optional[str]',
+            'critical':'typing.Optional[int]',
+            'difference':'typing.Optional[int]',
+            'informational':'typing.Optional[int]',
+            'model':'typing.Optional[str]',
+            'rotationrate':'typing.Optional[int]',
+            'type':'typing.Optional[str]',
+            'zfs_guid':'typing.Optional[str]',
+            'bus':'str',
+            'devname':'str',
+            'enclosure':'Enclosure',
+            'pool':'typing.Optional[str]',
+            'passwd':'str',
+            'kmip_uid':'typing.Optional[str]',
+            'supports_smart':'typing.Optional[bool]',
+    })
+    Enclosure_ = typing.TypedDict('Enclosure_', {
+            'number':'int',
+            'slot':'int',
+    })
+    DiskEntry_ = typing.TypedDict('DiskEntry_', {
+            'identifier':'str',
+            'name':'str',
+            'subsystem':'str',
+            'number':'int',
+            'serial':'str',
+            'lunid':'typing.Optional[str]',
+            'size':'int',
+            'description':'str',
+            'transfermode':'str',
+            'hddstandby':'str',
+            'togglesmart':'bool',
+            'advpowermgmt':'str',
+            'smartoptions':'str',
+            'expiretime':'typing.Optional[str]',
+            'critical':'typing.Optional[int]',
+            'difference':'typing.Optional[int]',
+            'informational':'typing.Optional[int]',
+            'model':'typing.Optional[str]',
+            'rotationrate':'typing.Optional[int]',
+            'type':'typing.Optional[str]',
+            'zfs_guid':'typing.Optional[str]',
+            'bus':'str',
+            'devname':'str',
+            'enclosure':'Enclosure_',
+            'pool':'typing.Optional[str]',
+            'passwd':'str',
+            'kmip_uid':'typing.Optional[str]',
+            'supports_smart':'typing.Optional[bool]',
+    })
+    Enclosure__ = typing.TypedDict('Enclosure__', {
+            'number':'int',
+            'slot':'int',
+    })
+    DiskEntry__ = typing.TypedDict('DiskEntry__', {
+            'identifier':'str',
+            'name':'str',
+            'subsystem':'str',
+            'number':'int',
+            'serial':'str',
+            'lunid':'typing.Optional[str]',
+            'size':'int',
+            'description':'str',
+            'transfermode':'str',
+            'hddstandby':'str',
+            'togglesmart':'bool',
+            'advpowermgmt':'str',
+            'smartoptions':'str',
+            'expiretime':'typing.Optional[str]',
+            'critical':'typing.Optional[int]',
+            'difference':'typing.Optional[int]',
+            'informational':'typing.Optional[int]',
+            'model':'typing.Optional[str]',
+            'rotationrate':'typing.Optional[int]',
+            'type':'typing.Optional[str]',
+            'zfs_guid':'typing.Optional[str]',
+            'bus':'str',
+            'devname':'str',
+            'enclosure':'Enclosure__',
+            'pool':'typing.Optional[str]',
+            'passwd':'str',
+            'kmip_uid':'typing.Optional[str]',
+            'supports_smart':'typing.Optional[bool]',
+    })
+    Object = typing.TypedDict('Object', {
+            'name':'str',
+            'size':'int',
+    })
+    Flags = typing.TypedDict('Flags', {
+            'value':'int',
+            'string':'str',
+            'prefailure':'bool',
+            'updated_online':'bool',
+            'performance':'bool',
+            'error_rate':'bool',
+            'event_count':'bool',
+            'auto_keep':'bool',
+    })
+    Raw = typing.TypedDict('Raw', {
+            'value':'int',
+            'string':'str',
+    })
+    SmartAttribute = typing.TypedDict('SmartAttribute', {
+            'id':'int',
+            'value':'int',
+            'worst':'int',
+            'thresh':'int',
+            'name':'str',
+            'when_failed':'str',
+            'flags':'Flags',
+            'raw':'Raw',
+    })
+    Options = typing.TypedDict('Options', {
+            'cache':'typing.Optional[int]',
+            'powermode':'str',
+    })
+    Alert = typing.TypedDict('Alert', {
+            'uuid':'str',
+            'source':'str',
+            'klass':'str',
+            'args':'typing.Union[str, int, bool, dict[str], list]',
+            'node':'str',
+            'key':'str',
+            'datetime':'str',
+            'last_occurrence':'str',
+            'dismissed':'bool',
+            'mail':'typing.Union[str, int, bool, dict[str], list]',
+            'text':'str',
+            'id':'str',
+            'level':'str',
+            'formatted':'typing.Optional[str]',
+            'one_shot':'bool',
+    })
+    Options_ = typing.TypedDict('Options_', {
+            'cache':'typing.Optional[int]',
+            'only_cached':'bool',
+            'powermode':'str',
+    })
+    Enclosure___ = typing.TypedDict('Enclosure___', {
+            'number':'int',
+            'slot':'int',
+    })
+    DiskUpdate = typing.TypedDict('DiskUpdate', {
+            'number':'int',
+            'lunid':'typing.Optional[str]',
+            'description':'str',
+            'hddstandby':'str',
+            'togglesmart':'bool',
+            'advpowermgmt':'str',
+            'smartoptions':'str',
+            'critical':'typing.Optional[int]',
+            'difference':'typing.Optional[int]',
+            'informational':'typing.Optional[int]',
+            'bus':'str',
+            'enclosure':'Enclosure___',
+            'pool':'typing.Optional[str]',
+            'passwd':'str',
+            'supports_smart':'typing.Optional[bool]',
+    })
+    Enclosure____ = typing.TypedDict('Enclosure____', {
+            'number':'int',
+            'slot':'int',
+    })
+    DiskUpdateReturns = typing.TypedDict('DiskUpdateReturns', {
+            'identifier':'str',
+            'name':'str',
+            'subsystem':'str',
+            'number':'int',
+            'serial':'str',
+            'lunid':'typing.Optional[str]',
+            'size':'int',
+            'description':'str',
+            'transfermode':'str',
+            'hddstandby':'str',
+            'togglesmart':'bool',
+            'advpowermgmt':'str',
+            'smartoptions':'str',
+            'expiretime':'typing.Optional[str]',
+            'critical':'typing.Optional[int]',
+            'difference':'typing.Optional[int]',
+            'informational':'typing.Optional[int]',
+            'model':'typing.Optional[str]',
+            'rotationrate':'typing.Optional[int]',
+            'type':'typing.Optional[str]',
+            'zfs_guid':'typing.Optional[str]',
+            'bus':'str',
+            'devname':'str',
+            'enclosure':'Enclosure____',
+            'pool':'typing.Optional[str]',
+            'passwd':'str',
+            'kmip_uid':'typing.Optional[str]',
+            'supports_smart':'typing.Optional[bool]',
+    })
+    SwapRemovalOptions = typing.TypedDict('SwapRemovalOptions', {
+            'configure_swap':'bool',
+    })
     @typing.overload
     def get_unused(self, 
         join_partitions:'bool'=False,
@@ -43,11 +285,253 @@ class Disk(Namespace):
         -------
         """
         ...
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Enclosure = typing.TypedDict('Enclosure', {
+            'number':'int',
+            'slot':'int',
+    })
+    DiskEntry = typing.TypedDict('DiskEntry', {
+            'identifier':'str',
+            'name':'str',
+            'subsystem':'str',
+            'number':'int',
+            'serial':'str',
+            'lunid':'typing.Optional[str]',
+            'size':'int',
+            'description':'str',
+            'transfermode':'str',
+            'hddstandby':'str',
+            'togglesmart':'bool',
+            'advpowermgmt':'str',
+            'smartoptions':'str',
+            'expiretime':'typing.Optional[str]',
+            'critical':'typing.Optional[int]',
+            'difference':'typing.Optional[int]',
+            'informational':'typing.Optional[int]',
+            'model':'typing.Optional[str]',
+            'rotationrate':'typing.Optional[int]',
+            'type':'typing.Optional[str]',
+            'zfs_guid':'typing.Optional[str]',
+            'bus':'str',
+            'devname':'str',
+            'enclosure':'Enclosure',
+            'pool':'typing.Optional[str]',
+            'passwd':'str',
+            'kmip_uid':'typing.Optional[str]',
+            'supports_smart':'typing.Optional[bool]',
+    })
+    Enclosure_ = typing.TypedDict('Enclosure_', {
+            'number':'int',
+            'slot':'int',
+    })
+    DiskEntry_ = typing.TypedDict('DiskEntry_', {
+            'identifier':'str',
+            'name':'str',
+            'subsystem':'str',
+            'number':'int',
+            'serial':'str',
+            'lunid':'typing.Optional[str]',
+            'size':'int',
+            'description':'str',
+            'transfermode':'str',
+            'hddstandby':'str',
+            'togglesmart':'bool',
+            'advpowermgmt':'str',
+            'smartoptions':'str',
+            'expiretime':'typing.Optional[str]',
+            'critical':'typing.Optional[int]',
+            'difference':'typing.Optional[int]',
+            'informational':'typing.Optional[int]',
+            'model':'typing.Optional[str]',
+            'rotationrate':'typing.Optional[int]',
+            'type':'typing.Optional[str]',
+            'zfs_guid':'typing.Optional[str]',
+            'bus':'str',
+            'devname':'str',
+            'enclosure':'Enclosure_',
+            'pool':'typing.Optional[str]',
+            'passwd':'str',
+            'kmip_uid':'typing.Optional[str]',
+            'supports_smart':'typing.Optional[bool]',
+    })
+    Enclosure__ = typing.TypedDict('Enclosure__', {
+            'number':'int',
+            'slot':'int',
+    })
+    DiskEntry__ = typing.TypedDict('DiskEntry__', {
+            'identifier':'str',
+            'name':'str',
+            'subsystem':'str',
+            'number':'int',
+            'serial':'str',
+            'lunid':'typing.Optional[str]',
+            'size':'int',
+            'description':'str',
+            'transfermode':'str',
+            'hddstandby':'str',
+            'togglesmart':'bool',
+            'advpowermgmt':'str',
+            'smartoptions':'str',
+            'expiretime':'typing.Optional[str]',
+            'critical':'typing.Optional[int]',
+            'difference':'typing.Optional[int]',
+            'informational':'typing.Optional[int]',
+            'model':'typing.Optional[str]',
+            'rotationrate':'typing.Optional[int]',
+            'type':'typing.Optional[str]',
+            'zfs_guid':'typing.Optional[str]',
+            'bus':'str',
+            'devname':'str',
+            'enclosure':'Enclosure__',
+            'pool':'typing.Optional[str]',
+            'passwd':'str',
+            'kmip_uid':'typing.Optional[str]',
+            'supports_smart':'typing.Optional[bool]',
+    })
+    Object = typing.TypedDict('Object', {
+            'name':'str',
+            'size':'int',
+    })
+    Flags = typing.TypedDict('Flags', {
+            'value':'int',
+            'string':'str',
+            'prefailure':'bool',
+            'updated_online':'bool',
+            'performance':'bool',
+            'error_rate':'bool',
+            'event_count':'bool',
+            'auto_keep':'bool',
+    })
+    Raw = typing.TypedDict('Raw', {
+            'value':'int',
+            'string':'str',
+    })
+    SmartAttribute = typing.TypedDict('SmartAttribute', {
+            'id':'int',
+            'value':'int',
+            'worst':'int',
+            'thresh':'int',
+            'name':'str',
+            'when_failed':'str',
+            'flags':'Flags',
+            'raw':'Raw',
+    })
+    Options = typing.TypedDict('Options', {
+            'cache':'typing.Optional[int]',
+            'powermode':'str',
+    })
+    Alert = typing.TypedDict('Alert', {
+            'uuid':'str',
+            'source':'str',
+            'klass':'str',
+            'args':'typing.Union[str, int, bool, dict[str], list]',
+            'node':'str',
+            'key':'str',
+            'datetime':'str',
+            'last_occurrence':'str',
+            'dismissed':'bool',
+            'mail':'typing.Union[str, int, bool, dict[str], list]',
+            'text':'str',
+            'id':'str',
+            'level':'str',
+            'formatted':'typing.Optional[str]',
+            'one_shot':'bool',
+    })
+    Options_ = typing.TypedDict('Options_', {
+            'cache':'typing.Optional[int]',
+            'only_cached':'bool',
+            'powermode':'str',
+    })
+    Enclosure___ = typing.TypedDict('Enclosure___', {
+            'number':'int',
+            'slot':'int',
+    })
+    DiskUpdate = typing.TypedDict('DiskUpdate', {
+            'number':'int',
+            'lunid':'typing.Optional[str]',
+            'description':'str',
+            'hddstandby':'str',
+            'togglesmart':'bool',
+            'advpowermgmt':'str',
+            'smartoptions':'str',
+            'critical':'typing.Optional[int]',
+            'difference':'typing.Optional[int]',
+            'informational':'typing.Optional[int]',
+            'bus':'str',
+            'enclosure':'Enclosure___',
+            'pool':'typing.Optional[str]',
+            'passwd':'str',
+            'supports_smart':'typing.Optional[bool]',
+    })
+    Enclosure____ = typing.TypedDict('Enclosure____', {
+            'number':'int',
+            'slot':'int',
+    })
+    DiskUpdateReturns = typing.TypedDict('DiskUpdateReturns', {
+            'identifier':'str',
+            'name':'str',
+            'subsystem':'str',
+            'number':'int',
+            'serial':'str',
+            'lunid':'typing.Optional[str]',
+            'size':'int',
+            'description':'str',
+            'transfermode':'str',
+            'hddstandby':'str',
+            'togglesmart':'bool',
+            'advpowermgmt':'str',
+            'smartoptions':'str',
+            'expiretime':'typing.Optional[str]',
+            'critical':'typing.Optional[int]',
+            'difference':'typing.Optional[int]',
+            'informational':'typing.Optional[int]',
+            'model':'typing.Optional[str]',
+            'rotationrate':'typing.Optional[int]',
+            'type':'typing.Optional[str]',
+            'zfs_guid':'typing.Optional[str]',
+            'bus':'str',
+            'devname':'str',
+            'enclosure':'Enclosure____',
+            'pool':'typing.Optional[str]',
+            'passwd':'str',
+            'kmip_uid':'typing.Optional[str]',
+            'supports_smart':'typing.Optional[bool]',
+    })
+    SwapRemovalOptions = typing.TypedDict('SwapRemovalOptions', {
+            'configure_swap':'bool',
+    })
     @typing.overload
     def query(self, 
         query_filters:'list[list]'=[],
         query_options:'QueryOptions'={},
-    /) -> 'list[DiskEntry]|DiskEntry|int|DiskEntry': 
+    /) -> 'typing.Union[list[DiskEntry], ForwardRef(DiskEntry_), int, ForwardRef(DiskEntry__)]': 
         """
         Query disks.
         
@@ -67,16 +551,252 @@ class Disk(Namespace):
             query-options
         Returns
         -------
-        list[DiskEntry]:
-            
-        DiskEntry:
-            
-        int:
-            
-        DiskEntry:
+        typing.Union[list[DiskEntry], ForwardRef(DiskEntry_), int, ForwardRef(DiskEntry__)]:
             
         """
         ...
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Enclosure = typing.TypedDict('Enclosure', {
+            'number':'int',
+            'slot':'int',
+    })
+    DiskEntry = typing.TypedDict('DiskEntry', {
+            'identifier':'str',
+            'name':'str',
+            'subsystem':'str',
+            'number':'int',
+            'serial':'str',
+            'lunid':'typing.Optional[str]',
+            'size':'int',
+            'description':'str',
+            'transfermode':'str',
+            'hddstandby':'str',
+            'togglesmart':'bool',
+            'advpowermgmt':'str',
+            'smartoptions':'str',
+            'expiretime':'typing.Optional[str]',
+            'critical':'typing.Optional[int]',
+            'difference':'typing.Optional[int]',
+            'informational':'typing.Optional[int]',
+            'model':'typing.Optional[str]',
+            'rotationrate':'typing.Optional[int]',
+            'type':'typing.Optional[str]',
+            'zfs_guid':'typing.Optional[str]',
+            'bus':'str',
+            'devname':'str',
+            'enclosure':'Enclosure',
+            'pool':'typing.Optional[str]',
+            'passwd':'str',
+            'kmip_uid':'typing.Optional[str]',
+            'supports_smart':'typing.Optional[bool]',
+    })
+    Enclosure_ = typing.TypedDict('Enclosure_', {
+            'number':'int',
+            'slot':'int',
+    })
+    DiskEntry_ = typing.TypedDict('DiskEntry_', {
+            'identifier':'str',
+            'name':'str',
+            'subsystem':'str',
+            'number':'int',
+            'serial':'str',
+            'lunid':'typing.Optional[str]',
+            'size':'int',
+            'description':'str',
+            'transfermode':'str',
+            'hddstandby':'str',
+            'togglesmart':'bool',
+            'advpowermgmt':'str',
+            'smartoptions':'str',
+            'expiretime':'typing.Optional[str]',
+            'critical':'typing.Optional[int]',
+            'difference':'typing.Optional[int]',
+            'informational':'typing.Optional[int]',
+            'model':'typing.Optional[str]',
+            'rotationrate':'typing.Optional[int]',
+            'type':'typing.Optional[str]',
+            'zfs_guid':'typing.Optional[str]',
+            'bus':'str',
+            'devname':'str',
+            'enclosure':'Enclosure_',
+            'pool':'typing.Optional[str]',
+            'passwd':'str',
+            'kmip_uid':'typing.Optional[str]',
+            'supports_smart':'typing.Optional[bool]',
+    })
+    Enclosure__ = typing.TypedDict('Enclosure__', {
+            'number':'int',
+            'slot':'int',
+    })
+    DiskEntry__ = typing.TypedDict('DiskEntry__', {
+            'identifier':'str',
+            'name':'str',
+            'subsystem':'str',
+            'number':'int',
+            'serial':'str',
+            'lunid':'typing.Optional[str]',
+            'size':'int',
+            'description':'str',
+            'transfermode':'str',
+            'hddstandby':'str',
+            'togglesmart':'bool',
+            'advpowermgmt':'str',
+            'smartoptions':'str',
+            'expiretime':'typing.Optional[str]',
+            'critical':'typing.Optional[int]',
+            'difference':'typing.Optional[int]',
+            'informational':'typing.Optional[int]',
+            'model':'typing.Optional[str]',
+            'rotationrate':'typing.Optional[int]',
+            'type':'typing.Optional[str]',
+            'zfs_guid':'typing.Optional[str]',
+            'bus':'str',
+            'devname':'str',
+            'enclosure':'Enclosure__',
+            'pool':'typing.Optional[str]',
+            'passwd':'str',
+            'kmip_uid':'typing.Optional[str]',
+            'supports_smart':'typing.Optional[bool]',
+    })
+    Object = typing.TypedDict('Object', {
+            'name':'str',
+            'size':'int',
+    })
+    Flags = typing.TypedDict('Flags', {
+            'value':'int',
+            'string':'str',
+            'prefailure':'bool',
+            'updated_online':'bool',
+            'performance':'bool',
+            'error_rate':'bool',
+            'event_count':'bool',
+            'auto_keep':'bool',
+    })
+    Raw = typing.TypedDict('Raw', {
+            'value':'int',
+            'string':'str',
+    })
+    SmartAttribute = typing.TypedDict('SmartAttribute', {
+            'id':'int',
+            'value':'int',
+            'worst':'int',
+            'thresh':'int',
+            'name':'str',
+            'when_failed':'str',
+            'flags':'Flags',
+            'raw':'Raw',
+    })
+    Options = typing.TypedDict('Options', {
+            'cache':'typing.Optional[int]',
+            'powermode':'str',
+    })
+    Alert = typing.TypedDict('Alert', {
+            'uuid':'str',
+            'source':'str',
+            'klass':'str',
+            'args':'typing.Union[str, int, bool, dict[str], list]',
+            'node':'str',
+            'key':'str',
+            'datetime':'str',
+            'last_occurrence':'str',
+            'dismissed':'bool',
+            'mail':'typing.Union[str, int, bool, dict[str], list]',
+            'text':'str',
+            'id':'str',
+            'level':'str',
+            'formatted':'typing.Optional[str]',
+            'one_shot':'bool',
+    })
+    Options_ = typing.TypedDict('Options_', {
+            'cache':'typing.Optional[int]',
+            'only_cached':'bool',
+            'powermode':'str',
+    })
+    Enclosure___ = typing.TypedDict('Enclosure___', {
+            'number':'int',
+            'slot':'int',
+    })
+    DiskUpdate = typing.TypedDict('DiskUpdate', {
+            'number':'int',
+            'lunid':'typing.Optional[str]',
+            'description':'str',
+            'hddstandby':'str',
+            'togglesmart':'bool',
+            'advpowermgmt':'str',
+            'smartoptions':'str',
+            'critical':'typing.Optional[int]',
+            'difference':'typing.Optional[int]',
+            'informational':'typing.Optional[int]',
+            'bus':'str',
+            'enclosure':'Enclosure___',
+            'pool':'typing.Optional[str]',
+            'passwd':'str',
+            'supports_smart':'typing.Optional[bool]',
+    })
+    Enclosure____ = typing.TypedDict('Enclosure____', {
+            'number':'int',
+            'slot':'int',
+    })
+    DiskUpdateReturns = typing.TypedDict('DiskUpdateReturns', {
+            'identifier':'str',
+            'name':'str',
+            'subsystem':'str',
+            'number':'int',
+            'serial':'str',
+            'lunid':'typing.Optional[str]',
+            'size':'int',
+            'description':'str',
+            'transfermode':'str',
+            'hddstandby':'str',
+            'togglesmart':'bool',
+            'advpowermgmt':'str',
+            'smartoptions':'str',
+            'expiretime':'typing.Optional[str]',
+            'critical':'typing.Optional[int]',
+            'difference':'typing.Optional[int]',
+            'informational':'typing.Optional[int]',
+            'model':'typing.Optional[str]',
+            'rotationrate':'typing.Optional[int]',
+            'type':'typing.Optional[str]',
+            'zfs_guid':'typing.Optional[str]',
+            'bus':'str',
+            'devname':'str',
+            'enclosure':'Enclosure____',
+            'pool':'typing.Optional[str]',
+            'passwd':'str',
+            'kmip_uid':'typing.Optional[str]',
+            'supports_smart':'typing.Optional[bool]',
+    })
+    SwapRemovalOptions = typing.TypedDict('SwapRemovalOptions', {
+            'configure_swap':'bool',
+    })
     @typing.overload
     def resize(self, 
         disks:'list[Object]',
@@ -114,6 +834,248 @@ class Disk(Namespace):
         -------
         """
         ...
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Enclosure = typing.TypedDict('Enclosure', {
+            'number':'int',
+            'slot':'int',
+    })
+    DiskEntry = typing.TypedDict('DiskEntry', {
+            'identifier':'str',
+            'name':'str',
+            'subsystem':'str',
+            'number':'int',
+            'serial':'str',
+            'lunid':'typing.Optional[str]',
+            'size':'int',
+            'description':'str',
+            'transfermode':'str',
+            'hddstandby':'str',
+            'togglesmart':'bool',
+            'advpowermgmt':'str',
+            'smartoptions':'str',
+            'expiretime':'typing.Optional[str]',
+            'critical':'typing.Optional[int]',
+            'difference':'typing.Optional[int]',
+            'informational':'typing.Optional[int]',
+            'model':'typing.Optional[str]',
+            'rotationrate':'typing.Optional[int]',
+            'type':'typing.Optional[str]',
+            'zfs_guid':'typing.Optional[str]',
+            'bus':'str',
+            'devname':'str',
+            'enclosure':'Enclosure',
+            'pool':'typing.Optional[str]',
+            'passwd':'str',
+            'kmip_uid':'typing.Optional[str]',
+            'supports_smart':'typing.Optional[bool]',
+    })
+    Enclosure_ = typing.TypedDict('Enclosure_', {
+            'number':'int',
+            'slot':'int',
+    })
+    DiskEntry_ = typing.TypedDict('DiskEntry_', {
+            'identifier':'str',
+            'name':'str',
+            'subsystem':'str',
+            'number':'int',
+            'serial':'str',
+            'lunid':'typing.Optional[str]',
+            'size':'int',
+            'description':'str',
+            'transfermode':'str',
+            'hddstandby':'str',
+            'togglesmart':'bool',
+            'advpowermgmt':'str',
+            'smartoptions':'str',
+            'expiretime':'typing.Optional[str]',
+            'critical':'typing.Optional[int]',
+            'difference':'typing.Optional[int]',
+            'informational':'typing.Optional[int]',
+            'model':'typing.Optional[str]',
+            'rotationrate':'typing.Optional[int]',
+            'type':'typing.Optional[str]',
+            'zfs_guid':'typing.Optional[str]',
+            'bus':'str',
+            'devname':'str',
+            'enclosure':'Enclosure_',
+            'pool':'typing.Optional[str]',
+            'passwd':'str',
+            'kmip_uid':'typing.Optional[str]',
+            'supports_smart':'typing.Optional[bool]',
+    })
+    Enclosure__ = typing.TypedDict('Enclosure__', {
+            'number':'int',
+            'slot':'int',
+    })
+    DiskEntry__ = typing.TypedDict('DiskEntry__', {
+            'identifier':'str',
+            'name':'str',
+            'subsystem':'str',
+            'number':'int',
+            'serial':'str',
+            'lunid':'typing.Optional[str]',
+            'size':'int',
+            'description':'str',
+            'transfermode':'str',
+            'hddstandby':'str',
+            'togglesmart':'bool',
+            'advpowermgmt':'str',
+            'smartoptions':'str',
+            'expiretime':'typing.Optional[str]',
+            'critical':'typing.Optional[int]',
+            'difference':'typing.Optional[int]',
+            'informational':'typing.Optional[int]',
+            'model':'typing.Optional[str]',
+            'rotationrate':'typing.Optional[int]',
+            'type':'typing.Optional[str]',
+            'zfs_guid':'typing.Optional[str]',
+            'bus':'str',
+            'devname':'str',
+            'enclosure':'Enclosure__',
+            'pool':'typing.Optional[str]',
+            'passwd':'str',
+            'kmip_uid':'typing.Optional[str]',
+            'supports_smart':'typing.Optional[bool]',
+    })
+    Object = typing.TypedDict('Object', {
+            'name':'str',
+            'size':'int',
+    })
+    Flags = typing.TypedDict('Flags', {
+            'value':'int',
+            'string':'str',
+            'prefailure':'bool',
+            'updated_online':'bool',
+            'performance':'bool',
+            'error_rate':'bool',
+            'event_count':'bool',
+            'auto_keep':'bool',
+    })
+    Raw = typing.TypedDict('Raw', {
+            'value':'int',
+            'string':'str',
+    })
+    SmartAttribute = typing.TypedDict('SmartAttribute', {
+            'id':'int',
+            'value':'int',
+            'worst':'int',
+            'thresh':'int',
+            'name':'str',
+            'when_failed':'str',
+            'flags':'Flags',
+            'raw':'Raw',
+    })
+    Options = typing.TypedDict('Options', {
+            'cache':'typing.Optional[int]',
+            'powermode':'str',
+    })
+    Alert = typing.TypedDict('Alert', {
+            'uuid':'str',
+            'source':'str',
+            'klass':'str',
+            'args':'typing.Union[str, int, bool, dict[str], list]',
+            'node':'str',
+            'key':'str',
+            'datetime':'str',
+            'last_occurrence':'str',
+            'dismissed':'bool',
+            'mail':'typing.Union[str, int, bool, dict[str], list]',
+            'text':'str',
+            'id':'str',
+            'level':'str',
+            'formatted':'typing.Optional[str]',
+            'one_shot':'bool',
+    })
+    Options_ = typing.TypedDict('Options_', {
+            'cache':'typing.Optional[int]',
+            'only_cached':'bool',
+            'powermode':'str',
+    })
+    Enclosure___ = typing.TypedDict('Enclosure___', {
+            'number':'int',
+            'slot':'int',
+    })
+    DiskUpdate = typing.TypedDict('DiskUpdate', {
+            'number':'int',
+            'lunid':'typing.Optional[str]',
+            'description':'str',
+            'hddstandby':'str',
+            'togglesmart':'bool',
+            'advpowermgmt':'str',
+            'smartoptions':'str',
+            'critical':'typing.Optional[int]',
+            'difference':'typing.Optional[int]',
+            'informational':'typing.Optional[int]',
+            'bus':'str',
+            'enclosure':'Enclosure___',
+            'pool':'typing.Optional[str]',
+            'passwd':'str',
+            'supports_smart':'typing.Optional[bool]',
+    })
+    Enclosure____ = typing.TypedDict('Enclosure____', {
+            'number':'int',
+            'slot':'int',
+    })
+    DiskUpdateReturns = typing.TypedDict('DiskUpdateReturns', {
+            'identifier':'str',
+            'name':'str',
+            'subsystem':'str',
+            'number':'int',
+            'serial':'str',
+            'lunid':'typing.Optional[str]',
+            'size':'int',
+            'description':'str',
+            'transfermode':'str',
+            'hddstandby':'str',
+            'togglesmart':'bool',
+            'advpowermgmt':'str',
+            'smartoptions':'str',
+            'expiretime':'typing.Optional[str]',
+            'critical':'typing.Optional[int]',
+            'difference':'typing.Optional[int]',
+            'informational':'typing.Optional[int]',
+            'model':'typing.Optional[str]',
+            'rotationrate':'typing.Optional[int]',
+            'type':'typing.Optional[str]',
+            'zfs_guid':'typing.Optional[str]',
+            'bus':'str',
+            'devname':'str',
+            'enclosure':'Enclosure____',
+            'pool':'typing.Optional[str]',
+            'passwd':'str',
+            'kmip_uid':'typing.Optional[str]',
+            'supports_smart':'typing.Optional[bool]',
+    })
+    SwapRemovalOptions = typing.TypedDict('SwapRemovalOptions', {
+            'configure_swap':'bool',
+    })
     @typing.overload
     def retaste(self, 
         disks:'list[str]'=None,
@@ -129,6 +1091,248 @@ class Disk(Namespace):
         -------
         """
         ...
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Enclosure = typing.TypedDict('Enclosure', {
+            'number':'int',
+            'slot':'int',
+    })
+    DiskEntry = typing.TypedDict('DiskEntry', {
+            'identifier':'str',
+            'name':'str',
+            'subsystem':'str',
+            'number':'int',
+            'serial':'str',
+            'lunid':'typing.Optional[str]',
+            'size':'int',
+            'description':'str',
+            'transfermode':'str',
+            'hddstandby':'str',
+            'togglesmart':'bool',
+            'advpowermgmt':'str',
+            'smartoptions':'str',
+            'expiretime':'typing.Optional[str]',
+            'critical':'typing.Optional[int]',
+            'difference':'typing.Optional[int]',
+            'informational':'typing.Optional[int]',
+            'model':'typing.Optional[str]',
+            'rotationrate':'typing.Optional[int]',
+            'type':'typing.Optional[str]',
+            'zfs_guid':'typing.Optional[str]',
+            'bus':'str',
+            'devname':'str',
+            'enclosure':'Enclosure',
+            'pool':'typing.Optional[str]',
+            'passwd':'str',
+            'kmip_uid':'typing.Optional[str]',
+            'supports_smart':'typing.Optional[bool]',
+    })
+    Enclosure_ = typing.TypedDict('Enclosure_', {
+            'number':'int',
+            'slot':'int',
+    })
+    DiskEntry_ = typing.TypedDict('DiskEntry_', {
+            'identifier':'str',
+            'name':'str',
+            'subsystem':'str',
+            'number':'int',
+            'serial':'str',
+            'lunid':'typing.Optional[str]',
+            'size':'int',
+            'description':'str',
+            'transfermode':'str',
+            'hddstandby':'str',
+            'togglesmart':'bool',
+            'advpowermgmt':'str',
+            'smartoptions':'str',
+            'expiretime':'typing.Optional[str]',
+            'critical':'typing.Optional[int]',
+            'difference':'typing.Optional[int]',
+            'informational':'typing.Optional[int]',
+            'model':'typing.Optional[str]',
+            'rotationrate':'typing.Optional[int]',
+            'type':'typing.Optional[str]',
+            'zfs_guid':'typing.Optional[str]',
+            'bus':'str',
+            'devname':'str',
+            'enclosure':'Enclosure_',
+            'pool':'typing.Optional[str]',
+            'passwd':'str',
+            'kmip_uid':'typing.Optional[str]',
+            'supports_smart':'typing.Optional[bool]',
+    })
+    Enclosure__ = typing.TypedDict('Enclosure__', {
+            'number':'int',
+            'slot':'int',
+    })
+    DiskEntry__ = typing.TypedDict('DiskEntry__', {
+            'identifier':'str',
+            'name':'str',
+            'subsystem':'str',
+            'number':'int',
+            'serial':'str',
+            'lunid':'typing.Optional[str]',
+            'size':'int',
+            'description':'str',
+            'transfermode':'str',
+            'hddstandby':'str',
+            'togglesmart':'bool',
+            'advpowermgmt':'str',
+            'smartoptions':'str',
+            'expiretime':'typing.Optional[str]',
+            'critical':'typing.Optional[int]',
+            'difference':'typing.Optional[int]',
+            'informational':'typing.Optional[int]',
+            'model':'typing.Optional[str]',
+            'rotationrate':'typing.Optional[int]',
+            'type':'typing.Optional[str]',
+            'zfs_guid':'typing.Optional[str]',
+            'bus':'str',
+            'devname':'str',
+            'enclosure':'Enclosure__',
+            'pool':'typing.Optional[str]',
+            'passwd':'str',
+            'kmip_uid':'typing.Optional[str]',
+            'supports_smart':'typing.Optional[bool]',
+    })
+    Object = typing.TypedDict('Object', {
+            'name':'str',
+            'size':'int',
+    })
+    Flags = typing.TypedDict('Flags', {
+            'value':'int',
+            'string':'str',
+            'prefailure':'bool',
+            'updated_online':'bool',
+            'performance':'bool',
+            'error_rate':'bool',
+            'event_count':'bool',
+            'auto_keep':'bool',
+    })
+    Raw = typing.TypedDict('Raw', {
+            'value':'int',
+            'string':'str',
+    })
+    SmartAttribute = typing.TypedDict('SmartAttribute', {
+            'id':'int',
+            'value':'int',
+            'worst':'int',
+            'thresh':'int',
+            'name':'str',
+            'when_failed':'str',
+            'flags':'Flags',
+            'raw':'Raw',
+    })
+    Options = typing.TypedDict('Options', {
+            'cache':'typing.Optional[int]',
+            'powermode':'str',
+    })
+    Alert = typing.TypedDict('Alert', {
+            'uuid':'str',
+            'source':'str',
+            'klass':'str',
+            'args':'typing.Union[str, int, bool, dict[str], list]',
+            'node':'str',
+            'key':'str',
+            'datetime':'str',
+            'last_occurrence':'str',
+            'dismissed':'bool',
+            'mail':'typing.Union[str, int, bool, dict[str], list]',
+            'text':'str',
+            'id':'str',
+            'level':'str',
+            'formatted':'typing.Optional[str]',
+            'one_shot':'bool',
+    })
+    Options_ = typing.TypedDict('Options_', {
+            'cache':'typing.Optional[int]',
+            'only_cached':'bool',
+            'powermode':'str',
+    })
+    Enclosure___ = typing.TypedDict('Enclosure___', {
+            'number':'int',
+            'slot':'int',
+    })
+    DiskUpdate = typing.TypedDict('DiskUpdate', {
+            'number':'int',
+            'lunid':'typing.Optional[str]',
+            'description':'str',
+            'hddstandby':'str',
+            'togglesmart':'bool',
+            'advpowermgmt':'str',
+            'smartoptions':'str',
+            'critical':'typing.Optional[int]',
+            'difference':'typing.Optional[int]',
+            'informational':'typing.Optional[int]',
+            'bus':'str',
+            'enclosure':'Enclosure___',
+            'pool':'typing.Optional[str]',
+            'passwd':'str',
+            'supports_smart':'typing.Optional[bool]',
+    })
+    Enclosure____ = typing.TypedDict('Enclosure____', {
+            'number':'int',
+            'slot':'int',
+    })
+    DiskUpdateReturns = typing.TypedDict('DiskUpdateReturns', {
+            'identifier':'str',
+            'name':'str',
+            'subsystem':'str',
+            'number':'int',
+            'serial':'str',
+            'lunid':'typing.Optional[str]',
+            'size':'int',
+            'description':'str',
+            'transfermode':'str',
+            'hddstandby':'str',
+            'togglesmart':'bool',
+            'advpowermgmt':'str',
+            'smartoptions':'str',
+            'expiretime':'typing.Optional[str]',
+            'critical':'typing.Optional[int]',
+            'difference':'typing.Optional[int]',
+            'informational':'typing.Optional[int]',
+            'model':'typing.Optional[str]',
+            'rotationrate':'typing.Optional[int]',
+            'type':'typing.Optional[str]',
+            'zfs_guid':'typing.Optional[str]',
+            'bus':'str',
+            'devname':'str',
+            'enclosure':'Enclosure____',
+            'pool':'typing.Optional[str]',
+            'passwd':'str',
+            'kmip_uid':'typing.Optional[str]',
+            'supports_smart':'typing.Optional[bool]',
+    })
+    SwapRemovalOptions = typing.TypedDict('SwapRemovalOptions', {
+            'configure_swap':'bool',
+    })
     @typing.overload
     def smart_attributes(self, 
         name:'str',
@@ -146,11 +1350,253 @@ class Disk(Namespace):
             smart_attributes
         """
         ...
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Enclosure = typing.TypedDict('Enclosure', {
+            'number':'int',
+            'slot':'int',
+    })
+    DiskEntry = typing.TypedDict('DiskEntry', {
+            'identifier':'str',
+            'name':'str',
+            'subsystem':'str',
+            'number':'int',
+            'serial':'str',
+            'lunid':'typing.Optional[str]',
+            'size':'int',
+            'description':'str',
+            'transfermode':'str',
+            'hddstandby':'str',
+            'togglesmart':'bool',
+            'advpowermgmt':'str',
+            'smartoptions':'str',
+            'expiretime':'typing.Optional[str]',
+            'critical':'typing.Optional[int]',
+            'difference':'typing.Optional[int]',
+            'informational':'typing.Optional[int]',
+            'model':'typing.Optional[str]',
+            'rotationrate':'typing.Optional[int]',
+            'type':'typing.Optional[str]',
+            'zfs_guid':'typing.Optional[str]',
+            'bus':'str',
+            'devname':'str',
+            'enclosure':'Enclosure',
+            'pool':'typing.Optional[str]',
+            'passwd':'str',
+            'kmip_uid':'typing.Optional[str]',
+            'supports_smart':'typing.Optional[bool]',
+    })
+    Enclosure_ = typing.TypedDict('Enclosure_', {
+            'number':'int',
+            'slot':'int',
+    })
+    DiskEntry_ = typing.TypedDict('DiskEntry_', {
+            'identifier':'str',
+            'name':'str',
+            'subsystem':'str',
+            'number':'int',
+            'serial':'str',
+            'lunid':'typing.Optional[str]',
+            'size':'int',
+            'description':'str',
+            'transfermode':'str',
+            'hddstandby':'str',
+            'togglesmart':'bool',
+            'advpowermgmt':'str',
+            'smartoptions':'str',
+            'expiretime':'typing.Optional[str]',
+            'critical':'typing.Optional[int]',
+            'difference':'typing.Optional[int]',
+            'informational':'typing.Optional[int]',
+            'model':'typing.Optional[str]',
+            'rotationrate':'typing.Optional[int]',
+            'type':'typing.Optional[str]',
+            'zfs_guid':'typing.Optional[str]',
+            'bus':'str',
+            'devname':'str',
+            'enclosure':'Enclosure_',
+            'pool':'typing.Optional[str]',
+            'passwd':'str',
+            'kmip_uid':'typing.Optional[str]',
+            'supports_smart':'typing.Optional[bool]',
+    })
+    Enclosure__ = typing.TypedDict('Enclosure__', {
+            'number':'int',
+            'slot':'int',
+    })
+    DiskEntry__ = typing.TypedDict('DiskEntry__', {
+            'identifier':'str',
+            'name':'str',
+            'subsystem':'str',
+            'number':'int',
+            'serial':'str',
+            'lunid':'typing.Optional[str]',
+            'size':'int',
+            'description':'str',
+            'transfermode':'str',
+            'hddstandby':'str',
+            'togglesmart':'bool',
+            'advpowermgmt':'str',
+            'smartoptions':'str',
+            'expiretime':'typing.Optional[str]',
+            'critical':'typing.Optional[int]',
+            'difference':'typing.Optional[int]',
+            'informational':'typing.Optional[int]',
+            'model':'typing.Optional[str]',
+            'rotationrate':'typing.Optional[int]',
+            'type':'typing.Optional[str]',
+            'zfs_guid':'typing.Optional[str]',
+            'bus':'str',
+            'devname':'str',
+            'enclosure':'Enclosure__',
+            'pool':'typing.Optional[str]',
+            'passwd':'str',
+            'kmip_uid':'typing.Optional[str]',
+            'supports_smart':'typing.Optional[bool]',
+    })
+    Object = typing.TypedDict('Object', {
+            'name':'str',
+            'size':'int',
+    })
+    Flags = typing.TypedDict('Flags', {
+            'value':'int',
+            'string':'str',
+            'prefailure':'bool',
+            'updated_online':'bool',
+            'performance':'bool',
+            'error_rate':'bool',
+            'event_count':'bool',
+            'auto_keep':'bool',
+    })
+    Raw = typing.TypedDict('Raw', {
+            'value':'int',
+            'string':'str',
+    })
+    SmartAttribute = typing.TypedDict('SmartAttribute', {
+            'id':'int',
+            'value':'int',
+            'worst':'int',
+            'thresh':'int',
+            'name':'str',
+            'when_failed':'str',
+            'flags':'Flags',
+            'raw':'Raw',
+    })
+    Options = typing.TypedDict('Options', {
+            'cache':'typing.Optional[int]',
+            'powermode':'str',
+    })
+    Alert = typing.TypedDict('Alert', {
+            'uuid':'str',
+            'source':'str',
+            'klass':'str',
+            'args':'typing.Union[str, int, bool, dict[str], list]',
+            'node':'str',
+            'key':'str',
+            'datetime':'str',
+            'last_occurrence':'str',
+            'dismissed':'bool',
+            'mail':'typing.Union[str, int, bool, dict[str], list]',
+            'text':'str',
+            'id':'str',
+            'level':'str',
+            'formatted':'typing.Optional[str]',
+            'one_shot':'bool',
+    })
+    Options_ = typing.TypedDict('Options_', {
+            'cache':'typing.Optional[int]',
+            'only_cached':'bool',
+            'powermode':'str',
+    })
+    Enclosure___ = typing.TypedDict('Enclosure___', {
+            'number':'int',
+            'slot':'int',
+    })
+    DiskUpdate = typing.TypedDict('DiskUpdate', {
+            'number':'int',
+            'lunid':'typing.Optional[str]',
+            'description':'str',
+            'hddstandby':'str',
+            'togglesmart':'bool',
+            'advpowermgmt':'str',
+            'smartoptions':'str',
+            'critical':'typing.Optional[int]',
+            'difference':'typing.Optional[int]',
+            'informational':'typing.Optional[int]',
+            'bus':'str',
+            'enclosure':'Enclosure___',
+            'pool':'typing.Optional[str]',
+            'passwd':'str',
+            'supports_smart':'typing.Optional[bool]',
+    })
+    Enclosure____ = typing.TypedDict('Enclosure____', {
+            'number':'int',
+            'slot':'int',
+    })
+    DiskUpdateReturns = typing.TypedDict('DiskUpdateReturns', {
+            'identifier':'str',
+            'name':'str',
+            'subsystem':'str',
+            'number':'int',
+            'serial':'str',
+            'lunid':'typing.Optional[str]',
+            'size':'int',
+            'description':'str',
+            'transfermode':'str',
+            'hddstandby':'str',
+            'togglesmart':'bool',
+            'advpowermgmt':'str',
+            'smartoptions':'str',
+            'expiretime':'typing.Optional[str]',
+            'critical':'typing.Optional[int]',
+            'difference':'typing.Optional[int]',
+            'informational':'typing.Optional[int]',
+            'model':'typing.Optional[str]',
+            'rotationrate':'typing.Optional[int]',
+            'type':'typing.Optional[str]',
+            'zfs_guid':'typing.Optional[str]',
+            'bus':'str',
+            'devname':'str',
+            'enclosure':'Enclosure____',
+            'pool':'typing.Optional[str]',
+            'passwd':'str',
+            'kmip_uid':'typing.Optional[str]',
+            'supports_smart':'typing.Optional[bool]',
+    })
+    SwapRemovalOptions = typing.TypedDict('SwapRemovalOptions', {
+            'configure_swap':'bool',
+    })
     @typing.overload
     def temperature(self, 
         name:'str',
         options:'Options'={},
-    /) -> 'int|None': 
+    /) -> 'typing.Optional[int]': 
         """
         Returns temperature for device `name` using specified S.M.A.R.T. `powermode`. If `cache` is not null
         then the last cached within `cache` seconds value is used.
@@ -163,12 +1609,252 @@ class Disk(Namespace):
             options
         Returns
         -------
-        int:
-            temperature
-        None:
+        typing.Optional[int]:
             temperature
         """
         ...
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Enclosure = typing.TypedDict('Enclosure', {
+            'number':'int',
+            'slot':'int',
+    })
+    DiskEntry = typing.TypedDict('DiskEntry', {
+            'identifier':'str',
+            'name':'str',
+            'subsystem':'str',
+            'number':'int',
+            'serial':'str',
+            'lunid':'typing.Optional[str]',
+            'size':'int',
+            'description':'str',
+            'transfermode':'str',
+            'hddstandby':'str',
+            'togglesmart':'bool',
+            'advpowermgmt':'str',
+            'smartoptions':'str',
+            'expiretime':'typing.Optional[str]',
+            'critical':'typing.Optional[int]',
+            'difference':'typing.Optional[int]',
+            'informational':'typing.Optional[int]',
+            'model':'typing.Optional[str]',
+            'rotationrate':'typing.Optional[int]',
+            'type':'typing.Optional[str]',
+            'zfs_guid':'typing.Optional[str]',
+            'bus':'str',
+            'devname':'str',
+            'enclosure':'Enclosure',
+            'pool':'typing.Optional[str]',
+            'passwd':'str',
+            'kmip_uid':'typing.Optional[str]',
+            'supports_smart':'typing.Optional[bool]',
+    })
+    Enclosure_ = typing.TypedDict('Enclosure_', {
+            'number':'int',
+            'slot':'int',
+    })
+    DiskEntry_ = typing.TypedDict('DiskEntry_', {
+            'identifier':'str',
+            'name':'str',
+            'subsystem':'str',
+            'number':'int',
+            'serial':'str',
+            'lunid':'typing.Optional[str]',
+            'size':'int',
+            'description':'str',
+            'transfermode':'str',
+            'hddstandby':'str',
+            'togglesmart':'bool',
+            'advpowermgmt':'str',
+            'smartoptions':'str',
+            'expiretime':'typing.Optional[str]',
+            'critical':'typing.Optional[int]',
+            'difference':'typing.Optional[int]',
+            'informational':'typing.Optional[int]',
+            'model':'typing.Optional[str]',
+            'rotationrate':'typing.Optional[int]',
+            'type':'typing.Optional[str]',
+            'zfs_guid':'typing.Optional[str]',
+            'bus':'str',
+            'devname':'str',
+            'enclosure':'Enclosure_',
+            'pool':'typing.Optional[str]',
+            'passwd':'str',
+            'kmip_uid':'typing.Optional[str]',
+            'supports_smart':'typing.Optional[bool]',
+    })
+    Enclosure__ = typing.TypedDict('Enclosure__', {
+            'number':'int',
+            'slot':'int',
+    })
+    DiskEntry__ = typing.TypedDict('DiskEntry__', {
+            'identifier':'str',
+            'name':'str',
+            'subsystem':'str',
+            'number':'int',
+            'serial':'str',
+            'lunid':'typing.Optional[str]',
+            'size':'int',
+            'description':'str',
+            'transfermode':'str',
+            'hddstandby':'str',
+            'togglesmart':'bool',
+            'advpowermgmt':'str',
+            'smartoptions':'str',
+            'expiretime':'typing.Optional[str]',
+            'critical':'typing.Optional[int]',
+            'difference':'typing.Optional[int]',
+            'informational':'typing.Optional[int]',
+            'model':'typing.Optional[str]',
+            'rotationrate':'typing.Optional[int]',
+            'type':'typing.Optional[str]',
+            'zfs_guid':'typing.Optional[str]',
+            'bus':'str',
+            'devname':'str',
+            'enclosure':'Enclosure__',
+            'pool':'typing.Optional[str]',
+            'passwd':'str',
+            'kmip_uid':'typing.Optional[str]',
+            'supports_smart':'typing.Optional[bool]',
+    })
+    Object = typing.TypedDict('Object', {
+            'name':'str',
+            'size':'int',
+    })
+    Flags = typing.TypedDict('Flags', {
+            'value':'int',
+            'string':'str',
+            'prefailure':'bool',
+            'updated_online':'bool',
+            'performance':'bool',
+            'error_rate':'bool',
+            'event_count':'bool',
+            'auto_keep':'bool',
+    })
+    Raw = typing.TypedDict('Raw', {
+            'value':'int',
+            'string':'str',
+    })
+    SmartAttribute = typing.TypedDict('SmartAttribute', {
+            'id':'int',
+            'value':'int',
+            'worst':'int',
+            'thresh':'int',
+            'name':'str',
+            'when_failed':'str',
+            'flags':'Flags',
+            'raw':'Raw',
+    })
+    Options = typing.TypedDict('Options', {
+            'cache':'typing.Optional[int]',
+            'powermode':'str',
+    })
+    Alert = typing.TypedDict('Alert', {
+            'uuid':'str',
+            'source':'str',
+            'klass':'str',
+            'args':'typing.Union[str, int, bool, dict[str], list]',
+            'node':'str',
+            'key':'str',
+            'datetime':'str',
+            'last_occurrence':'str',
+            'dismissed':'bool',
+            'mail':'typing.Union[str, int, bool, dict[str], list]',
+            'text':'str',
+            'id':'str',
+            'level':'str',
+            'formatted':'typing.Optional[str]',
+            'one_shot':'bool',
+    })
+    Options_ = typing.TypedDict('Options_', {
+            'cache':'typing.Optional[int]',
+            'only_cached':'bool',
+            'powermode':'str',
+    })
+    Enclosure___ = typing.TypedDict('Enclosure___', {
+            'number':'int',
+            'slot':'int',
+    })
+    DiskUpdate = typing.TypedDict('DiskUpdate', {
+            'number':'int',
+            'lunid':'typing.Optional[str]',
+            'description':'str',
+            'hddstandby':'str',
+            'togglesmart':'bool',
+            'advpowermgmt':'str',
+            'smartoptions':'str',
+            'critical':'typing.Optional[int]',
+            'difference':'typing.Optional[int]',
+            'informational':'typing.Optional[int]',
+            'bus':'str',
+            'enclosure':'Enclosure___',
+            'pool':'typing.Optional[str]',
+            'passwd':'str',
+            'supports_smart':'typing.Optional[bool]',
+    })
+    Enclosure____ = typing.TypedDict('Enclosure____', {
+            'number':'int',
+            'slot':'int',
+    })
+    DiskUpdateReturns = typing.TypedDict('DiskUpdateReturns', {
+            'identifier':'str',
+            'name':'str',
+            'subsystem':'str',
+            'number':'int',
+            'serial':'str',
+            'lunid':'typing.Optional[str]',
+            'size':'int',
+            'description':'str',
+            'transfermode':'str',
+            'hddstandby':'str',
+            'togglesmart':'bool',
+            'advpowermgmt':'str',
+            'smartoptions':'str',
+            'expiretime':'typing.Optional[str]',
+            'critical':'typing.Optional[int]',
+            'difference':'typing.Optional[int]',
+            'informational':'typing.Optional[int]',
+            'model':'typing.Optional[str]',
+            'rotationrate':'typing.Optional[int]',
+            'type':'typing.Optional[str]',
+            'zfs_guid':'typing.Optional[str]',
+            'bus':'str',
+            'devname':'str',
+            'enclosure':'Enclosure____',
+            'pool':'typing.Optional[str]',
+            'passwd':'str',
+            'kmip_uid':'typing.Optional[str]',
+            'supports_smart':'typing.Optional[bool]',
+    })
+    SwapRemovalOptions = typing.TypedDict('SwapRemovalOptions', {
+            'configure_swap':'bool',
+    })
     @typing.overload
     def temperature_agg(self, 
         names:'list[str]'=[],
@@ -189,6 +1875,248 @@ class Disk(Namespace):
             temperatures
         """
         ...
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Enclosure = typing.TypedDict('Enclosure', {
+            'number':'int',
+            'slot':'int',
+    })
+    DiskEntry = typing.TypedDict('DiskEntry', {
+            'identifier':'str',
+            'name':'str',
+            'subsystem':'str',
+            'number':'int',
+            'serial':'str',
+            'lunid':'typing.Optional[str]',
+            'size':'int',
+            'description':'str',
+            'transfermode':'str',
+            'hddstandby':'str',
+            'togglesmart':'bool',
+            'advpowermgmt':'str',
+            'smartoptions':'str',
+            'expiretime':'typing.Optional[str]',
+            'critical':'typing.Optional[int]',
+            'difference':'typing.Optional[int]',
+            'informational':'typing.Optional[int]',
+            'model':'typing.Optional[str]',
+            'rotationrate':'typing.Optional[int]',
+            'type':'typing.Optional[str]',
+            'zfs_guid':'typing.Optional[str]',
+            'bus':'str',
+            'devname':'str',
+            'enclosure':'Enclosure',
+            'pool':'typing.Optional[str]',
+            'passwd':'str',
+            'kmip_uid':'typing.Optional[str]',
+            'supports_smart':'typing.Optional[bool]',
+    })
+    Enclosure_ = typing.TypedDict('Enclosure_', {
+            'number':'int',
+            'slot':'int',
+    })
+    DiskEntry_ = typing.TypedDict('DiskEntry_', {
+            'identifier':'str',
+            'name':'str',
+            'subsystem':'str',
+            'number':'int',
+            'serial':'str',
+            'lunid':'typing.Optional[str]',
+            'size':'int',
+            'description':'str',
+            'transfermode':'str',
+            'hddstandby':'str',
+            'togglesmart':'bool',
+            'advpowermgmt':'str',
+            'smartoptions':'str',
+            'expiretime':'typing.Optional[str]',
+            'critical':'typing.Optional[int]',
+            'difference':'typing.Optional[int]',
+            'informational':'typing.Optional[int]',
+            'model':'typing.Optional[str]',
+            'rotationrate':'typing.Optional[int]',
+            'type':'typing.Optional[str]',
+            'zfs_guid':'typing.Optional[str]',
+            'bus':'str',
+            'devname':'str',
+            'enclosure':'Enclosure_',
+            'pool':'typing.Optional[str]',
+            'passwd':'str',
+            'kmip_uid':'typing.Optional[str]',
+            'supports_smart':'typing.Optional[bool]',
+    })
+    Enclosure__ = typing.TypedDict('Enclosure__', {
+            'number':'int',
+            'slot':'int',
+    })
+    DiskEntry__ = typing.TypedDict('DiskEntry__', {
+            'identifier':'str',
+            'name':'str',
+            'subsystem':'str',
+            'number':'int',
+            'serial':'str',
+            'lunid':'typing.Optional[str]',
+            'size':'int',
+            'description':'str',
+            'transfermode':'str',
+            'hddstandby':'str',
+            'togglesmart':'bool',
+            'advpowermgmt':'str',
+            'smartoptions':'str',
+            'expiretime':'typing.Optional[str]',
+            'critical':'typing.Optional[int]',
+            'difference':'typing.Optional[int]',
+            'informational':'typing.Optional[int]',
+            'model':'typing.Optional[str]',
+            'rotationrate':'typing.Optional[int]',
+            'type':'typing.Optional[str]',
+            'zfs_guid':'typing.Optional[str]',
+            'bus':'str',
+            'devname':'str',
+            'enclosure':'Enclosure__',
+            'pool':'typing.Optional[str]',
+            'passwd':'str',
+            'kmip_uid':'typing.Optional[str]',
+            'supports_smart':'typing.Optional[bool]',
+    })
+    Object = typing.TypedDict('Object', {
+            'name':'str',
+            'size':'int',
+    })
+    Flags = typing.TypedDict('Flags', {
+            'value':'int',
+            'string':'str',
+            'prefailure':'bool',
+            'updated_online':'bool',
+            'performance':'bool',
+            'error_rate':'bool',
+            'event_count':'bool',
+            'auto_keep':'bool',
+    })
+    Raw = typing.TypedDict('Raw', {
+            'value':'int',
+            'string':'str',
+    })
+    SmartAttribute = typing.TypedDict('SmartAttribute', {
+            'id':'int',
+            'value':'int',
+            'worst':'int',
+            'thresh':'int',
+            'name':'str',
+            'when_failed':'str',
+            'flags':'Flags',
+            'raw':'Raw',
+    })
+    Options = typing.TypedDict('Options', {
+            'cache':'typing.Optional[int]',
+            'powermode':'str',
+    })
+    Alert = typing.TypedDict('Alert', {
+            'uuid':'str',
+            'source':'str',
+            'klass':'str',
+            'args':'typing.Union[str, int, bool, dict[str], list]',
+            'node':'str',
+            'key':'str',
+            'datetime':'str',
+            'last_occurrence':'str',
+            'dismissed':'bool',
+            'mail':'typing.Union[str, int, bool, dict[str], list]',
+            'text':'str',
+            'id':'str',
+            'level':'str',
+            'formatted':'typing.Optional[str]',
+            'one_shot':'bool',
+    })
+    Options_ = typing.TypedDict('Options_', {
+            'cache':'typing.Optional[int]',
+            'only_cached':'bool',
+            'powermode':'str',
+    })
+    Enclosure___ = typing.TypedDict('Enclosure___', {
+            'number':'int',
+            'slot':'int',
+    })
+    DiskUpdate = typing.TypedDict('DiskUpdate', {
+            'number':'int',
+            'lunid':'typing.Optional[str]',
+            'description':'str',
+            'hddstandby':'str',
+            'togglesmart':'bool',
+            'advpowermgmt':'str',
+            'smartoptions':'str',
+            'critical':'typing.Optional[int]',
+            'difference':'typing.Optional[int]',
+            'informational':'typing.Optional[int]',
+            'bus':'str',
+            'enclosure':'Enclosure___',
+            'pool':'typing.Optional[str]',
+            'passwd':'str',
+            'supports_smart':'typing.Optional[bool]',
+    })
+    Enclosure____ = typing.TypedDict('Enclosure____', {
+            'number':'int',
+            'slot':'int',
+    })
+    DiskUpdateReturns = typing.TypedDict('DiskUpdateReturns', {
+            'identifier':'str',
+            'name':'str',
+            'subsystem':'str',
+            'number':'int',
+            'serial':'str',
+            'lunid':'typing.Optional[str]',
+            'size':'int',
+            'description':'str',
+            'transfermode':'str',
+            'hddstandby':'str',
+            'togglesmart':'bool',
+            'advpowermgmt':'str',
+            'smartoptions':'str',
+            'expiretime':'typing.Optional[str]',
+            'critical':'typing.Optional[int]',
+            'difference':'typing.Optional[int]',
+            'informational':'typing.Optional[int]',
+            'model':'typing.Optional[str]',
+            'rotationrate':'typing.Optional[int]',
+            'type':'typing.Optional[str]',
+            'zfs_guid':'typing.Optional[str]',
+            'bus':'str',
+            'devname':'str',
+            'enclosure':'Enclosure____',
+            'pool':'typing.Optional[str]',
+            'passwd':'str',
+            'kmip_uid':'typing.Optional[str]',
+            'supports_smart':'typing.Optional[bool]',
+    })
+    SwapRemovalOptions = typing.TypedDict('SwapRemovalOptions', {
+            'configure_swap':'bool',
+    })
     @typing.overload
     def temperature_alerts(self, 
         names:'list[str]'=[],
@@ -206,6 +2134,248 @@ class Disk(Namespace):
             alert
         """
         ...
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Enclosure = typing.TypedDict('Enclosure', {
+            'number':'int',
+            'slot':'int',
+    })
+    DiskEntry = typing.TypedDict('DiskEntry', {
+            'identifier':'str',
+            'name':'str',
+            'subsystem':'str',
+            'number':'int',
+            'serial':'str',
+            'lunid':'typing.Optional[str]',
+            'size':'int',
+            'description':'str',
+            'transfermode':'str',
+            'hddstandby':'str',
+            'togglesmart':'bool',
+            'advpowermgmt':'str',
+            'smartoptions':'str',
+            'expiretime':'typing.Optional[str]',
+            'critical':'typing.Optional[int]',
+            'difference':'typing.Optional[int]',
+            'informational':'typing.Optional[int]',
+            'model':'typing.Optional[str]',
+            'rotationrate':'typing.Optional[int]',
+            'type':'typing.Optional[str]',
+            'zfs_guid':'typing.Optional[str]',
+            'bus':'str',
+            'devname':'str',
+            'enclosure':'Enclosure',
+            'pool':'typing.Optional[str]',
+            'passwd':'str',
+            'kmip_uid':'typing.Optional[str]',
+            'supports_smart':'typing.Optional[bool]',
+    })
+    Enclosure_ = typing.TypedDict('Enclosure_', {
+            'number':'int',
+            'slot':'int',
+    })
+    DiskEntry_ = typing.TypedDict('DiskEntry_', {
+            'identifier':'str',
+            'name':'str',
+            'subsystem':'str',
+            'number':'int',
+            'serial':'str',
+            'lunid':'typing.Optional[str]',
+            'size':'int',
+            'description':'str',
+            'transfermode':'str',
+            'hddstandby':'str',
+            'togglesmart':'bool',
+            'advpowermgmt':'str',
+            'smartoptions':'str',
+            'expiretime':'typing.Optional[str]',
+            'critical':'typing.Optional[int]',
+            'difference':'typing.Optional[int]',
+            'informational':'typing.Optional[int]',
+            'model':'typing.Optional[str]',
+            'rotationrate':'typing.Optional[int]',
+            'type':'typing.Optional[str]',
+            'zfs_guid':'typing.Optional[str]',
+            'bus':'str',
+            'devname':'str',
+            'enclosure':'Enclosure_',
+            'pool':'typing.Optional[str]',
+            'passwd':'str',
+            'kmip_uid':'typing.Optional[str]',
+            'supports_smart':'typing.Optional[bool]',
+    })
+    Enclosure__ = typing.TypedDict('Enclosure__', {
+            'number':'int',
+            'slot':'int',
+    })
+    DiskEntry__ = typing.TypedDict('DiskEntry__', {
+            'identifier':'str',
+            'name':'str',
+            'subsystem':'str',
+            'number':'int',
+            'serial':'str',
+            'lunid':'typing.Optional[str]',
+            'size':'int',
+            'description':'str',
+            'transfermode':'str',
+            'hddstandby':'str',
+            'togglesmart':'bool',
+            'advpowermgmt':'str',
+            'smartoptions':'str',
+            'expiretime':'typing.Optional[str]',
+            'critical':'typing.Optional[int]',
+            'difference':'typing.Optional[int]',
+            'informational':'typing.Optional[int]',
+            'model':'typing.Optional[str]',
+            'rotationrate':'typing.Optional[int]',
+            'type':'typing.Optional[str]',
+            'zfs_guid':'typing.Optional[str]',
+            'bus':'str',
+            'devname':'str',
+            'enclosure':'Enclosure__',
+            'pool':'typing.Optional[str]',
+            'passwd':'str',
+            'kmip_uid':'typing.Optional[str]',
+            'supports_smart':'typing.Optional[bool]',
+    })
+    Object = typing.TypedDict('Object', {
+            'name':'str',
+            'size':'int',
+    })
+    Flags = typing.TypedDict('Flags', {
+            'value':'int',
+            'string':'str',
+            'prefailure':'bool',
+            'updated_online':'bool',
+            'performance':'bool',
+            'error_rate':'bool',
+            'event_count':'bool',
+            'auto_keep':'bool',
+    })
+    Raw = typing.TypedDict('Raw', {
+            'value':'int',
+            'string':'str',
+    })
+    SmartAttribute = typing.TypedDict('SmartAttribute', {
+            'id':'int',
+            'value':'int',
+            'worst':'int',
+            'thresh':'int',
+            'name':'str',
+            'when_failed':'str',
+            'flags':'Flags',
+            'raw':'Raw',
+    })
+    Options = typing.TypedDict('Options', {
+            'cache':'typing.Optional[int]',
+            'powermode':'str',
+    })
+    Alert = typing.TypedDict('Alert', {
+            'uuid':'str',
+            'source':'str',
+            'klass':'str',
+            'args':'typing.Union[str, int, bool, dict[str], list]',
+            'node':'str',
+            'key':'str',
+            'datetime':'str',
+            'last_occurrence':'str',
+            'dismissed':'bool',
+            'mail':'typing.Union[str, int, bool, dict[str], list]',
+            'text':'str',
+            'id':'str',
+            'level':'str',
+            'formatted':'typing.Optional[str]',
+            'one_shot':'bool',
+    })
+    Options_ = typing.TypedDict('Options_', {
+            'cache':'typing.Optional[int]',
+            'only_cached':'bool',
+            'powermode':'str',
+    })
+    Enclosure___ = typing.TypedDict('Enclosure___', {
+            'number':'int',
+            'slot':'int',
+    })
+    DiskUpdate = typing.TypedDict('DiskUpdate', {
+            'number':'int',
+            'lunid':'typing.Optional[str]',
+            'description':'str',
+            'hddstandby':'str',
+            'togglesmart':'bool',
+            'advpowermgmt':'str',
+            'smartoptions':'str',
+            'critical':'typing.Optional[int]',
+            'difference':'typing.Optional[int]',
+            'informational':'typing.Optional[int]',
+            'bus':'str',
+            'enclosure':'Enclosure___',
+            'pool':'typing.Optional[str]',
+            'passwd':'str',
+            'supports_smart':'typing.Optional[bool]',
+    })
+    Enclosure____ = typing.TypedDict('Enclosure____', {
+            'number':'int',
+            'slot':'int',
+    })
+    DiskUpdateReturns = typing.TypedDict('DiskUpdateReturns', {
+            'identifier':'str',
+            'name':'str',
+            'subsystem':'str',
+            'number':'int',
+            'serial':'str',
+            'lunid':'typing.Optional[str]',
+            'size':'int',
+            'description':'str',
+            'transfermode':'str',
+            'hddstandby':'str',
+            'togglesmart':'bool',
+            'advpowermgmt':'str',
+            'smartoptions':'str',
+            'expiretime':'typing.Optional[str]',
+            'critical':'typing.Optional[int]',
+            'difference':'typing.Optional[int]',
+            'informational':'typing.Optional[int]',
+            'model':'typing.Optional[str]',
+            'rotationrate':'typing.Optional[int]',
+            'type':'typing.Optional[str]',
+            'zfs_guid':'typing.Optional[str]',
+            'bus':'str',
+            'devname':'str',
+            'enclosure':'Enclosure____',
+            'pool':'typing.Optional[str]',
+            'passwd':'str',
+            'kmip_uid':'typing.Optional[str]',
+            'supports_smart':'typing.Optional[bool]',
+    })
+    SwapRemovalOptions = typing.TypedDict('SwapRemovalOptions', {
+            'configure_swap':'bool',
+    })
     @typing.overload
     def temperatures(self, 
         names:'list[str]'=[],
@@ -228,6 +2398,248 @@ class Disk(Namespace):
             disks_temperatures
         """
         ...
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Enclosure = typing.TypedDict('Enclosure', {
+            'number':'int',
+            'slot':'int',
+    })
+    DiskEntry = typing.TypedDict('DiskEntry', {
+            'identifier':'str',
+            'name':'str',
+            'subsystem':'str',
+            'number':'int',
+            'serial':'str',
+            'lunid':'typing.Optional[str]',
+            'size':'int',
+            'description':'str',
+            'transfermode':'str',
+            'hddstandby':'str',
+            'togglesmart':'bool',
+            'advpowermgmt':'str',
+            'smartoptions':'str',
+            'expiretime':'typing.Optional[str]',
+            'critical':'typing.Optional[int]',
+            'difference':'typing.Optional[int]',
+            'informational':'typing.Optional[int]',
+            'model':'typing.Optional[str]',
+            'rotationrate':'typing.Optional[int]',
+            'type':'typing.Optional[str]',
+            'zfs_guid':'typing.Optional[str]',
+            'bus':'str',
+            'devname':'str',
+            'enclosure':'Enclosure',
+            'pool':'typing.Optional[str]',
+            'passwd':'str',
+            'kmip_uid':'typing.Optional[str]',
+            'supports_smart':'typing.Optional[bool]',
+    })
+    Enclosure_ = typing.TypedDict('Enclosure_', {
+            'number':'int',
+            'slot':'int',
+    })
+    DiskEntry_ = typing.TypedDict('DiskEntry_', {
+            'identifier':'str',
+            'name':'str',
+            'subsystem':'str',
+            'number':'int',
+            'serial':'str',
+            'lunid':'typing.Optional[str]',
+            'size':'int',
+            'description':'str',
+            'transfermode':'str',
+            'hddstandby':'str',
+            'togglesmart':'bool',
+            'advpowermgmt':'str',
+            'smartoptions':'str',
+            'expiretime':'typing.Optional[str]',
+            'critical':'typing.Optional[int]',
+            'difference':'typing.Optional[int]',
+            'informational':'typing.Optional[int]',
+            'model':'typing.Optional[str]',
+            'rotationrate':'typing.Optional[int]',
+            'type':'typing.Optional[str]',
+            'zfs_guid':'typing.Optional[str]',
+            'bus':'str',
+            'devname':'str',
+            'enclosure':'Enclosure_',
+            'pool':'typing.Optional[str]',
+            'passwd':'str',
+            'kmip_uid':'typing.Optional[str]',
+            'supports_smart':'typing.Optional[bool]',
+    })
+    Enclosure__ = typing.TypedDict('Enclosure__', {
+            'number':'int',
+            'slot':'int',
+    })
+    DiskEntry__ = typing.TypedDict('DiskEntry__', {
+            'identifier':'str',
+            'name':'str',
+            'subsystem':'str',
+            'number':'int',
+            'serial':'str',
+            'lunid':'typing.Optional[str]',
+            'size':'int',
+            'description':'str',
+            'transfermode':'str',
+            'hddstandby':'str',
+            'togglesmart':'bool',
+            'advpowermgmt':'str',
+            'smartoptions':'str',
+            'expiretime':'typing.Optional[str]',
+            'critical':'typing.Optional[int]',
+            'difference':'typing.Optional[int]',
+            'informational':'typing.Optional[int]',
+            'model':'typing.Optional[str]',
+            'rotationrate':'typing.Optional[int]',
+            'type':'typing.Optional[str]',
+            'zfs_guid':'typing.Optional[str]',
+            'bus':'str',
+            'devname':'str',
+            'enclosure':'Enclosure__',
+            'pool':'typing.Optional[str]',
+            'passwd':'str',
+            'kmip_uid':'typing.Optional[str]',
+            'supports_smart':'typing.Optional[bool]',
+    })
+    Object = typing.TypedDict('Object', {
+            'name':'str',
+            'size':'int',
+    })
+    Flags = typing.TypedDict('Flags', {
+            'value':'int',
+            'string':'str',
+            'prefailure':'bool',
+            'updated_online':'bool',
+            'performance':'bool',
+            'error_rate':'bool',
+            'event_count':'bool',
+            'auto_keep':'bool',
+    })
+    Raw = typing.TypedDict('Raw', {
+            'value':'int',
+            'string':'str',
+    })
+    SmartAttribute = typing.TypedDict('SmartAttribute', {
+            'id':'int',
+            'value':'int',
+            'worst':'int',
+            'thresh':'int',
+            'name':'str',
+            'when_failed':'str',
+            'flags':'Flags',
+            'raw':'Raw',
+    })
+    Options = typing.TypedDict('Options', {
+            'cache':'typing.Optional[int]',
+            'powermode':'str',
+    })
+    Alert = typing.TypedDict('Alert', {
+            'uuid':'str',
+            'source':'str',
+            'klass':'str',
+            'args':'typing.Union[str, int, bool, dict[str], list]',
+            'node':'str',
+            'key':'str',
+            'datetime':'str',
+            'last_occurrence':'str',
+            'dismissed':'bool',
+            'mail':'typing.Union[str, int, bool, dict[str], list]',
+            'text':'str',
+            'id':'str',
+            'level':'str',
+            'formatted':'typing.Optional[str]',
+            'one_shot':'bool',
+    })
+    Options_ = typing.TypedDict('Options_', {
+            'cache':'typing.Optional[int]',
+            'only_cached':'bool',
+            'powermode':'str',
+    })
+    Enclosure___ = typing.TypedDict('Enclosure___', {
+            'number':'int',
+            'slot':'int',
+    })
+    DiskUpdate = typing.TypedDict('DiskUpdate', {
+            'number':'int',
+            'lunid':'typing.Optional[str]',
+            'description':'str',
+            'hddstandby':'str',
+            'togglesmart':'bool',
+            'advpowermgmt':'str',
+            'smartoptions':'str',
+            'critical':'typing.Optional[int]',
+            'difference':'typing.Optional[int]',
+            'informational':'typing.Optional[int]',
+            'bus':'str',
+            'enclosure':'Enclosure___',
+            'pool':'typing.Optional[str]',
+            'passwd':'str',
+            'supports_smart':'typing.Optional[bool]',
+    })
+    Enclosure____ = typing.TypedDict('Enclosure____', {
+            'number':'int',
+            'slot':'int',
+    })
+    DiskUpdateReturns = typing.TypedDict('DiskUpdateReturns', {
+            'identifier':'str',
+            'name':'str',
+            'subsystem':'str',
+            'number':'int',
+            'serial':'str',
+            'lunid':'typing.Optional[str]',
+            'size':'int',
+            'description':'str',
+            'transfermode':'str',
+            'hddstandby':'str',
+            'togglesmart':'bool',
+            'advpowermgmt':'str',
+            'smartoptions':'str',
+            'expiretime':'typing.Optional[str]',
+            'critical':'typing.Optional[int]',
+            'difference':'typing.Optional[int]',
+            'informational':'typing.Optional[int]',
+            'model':'typing.Optional[str]',
+            'rotationrate':'typing.Optional[int]',
+            'type':'typing.Optional[str]',
+            'zfs_guid':'typing.Optional[str]',
+            'bus':'str',
+            'devname':'str',
+            'enclosure':'Enclosure____',
+            'pool':'typing.Optional[str]',
+            'passwd':'str',
+            'kmip_uid':'typing.Optional[str]',
+            'supports_smart':'typing.Optional[bool]',
+    })
+    SwapRemovalOptions = typing.TypedDict('SwapRemovalOptions', {
+            'configure_swap':'bool',
+    })
     @typing.overload
     def update(self, 
         id:'str',
@@ -261,6 +2673,248 @@ class Disk(Namespace):
             disk_update_returns
         """
         ...
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Enclosure = typing.TypedDict('Enclosure', {
+            'number':'int',
+            'slot':'int',
+    })
+    DiskEntry = typing.TypedDict('DiskEntry', {
+            'identifier':'str',
+            'name':'str',
+            'subsystem':'str',
+            'number':'int',
+            'serial':'str',
+            'lunid':'typing.Optional[str]',
+            'size':'int',
+            'description':'str',
+            'transfermode':'str',
+            'hddstandby':'str',
+            'togglesmart':'bool',
+            'advpowermgmt':'str',
+            'smartoptions':'str',
+            'expiretime':'typing.Optional[str]',
+            'critical':'typing.Optional[int]',
+            'difference':'typing.Optional[int]',
+            'informational':'typing.Optional[int]',
+            'model':'typing.Optional[str]',
+            'rotationrate':'typing.Optional[int]',
+            'type':'typing.Optional[str]',
+            'zfs_guid':'typing.Optional[str]',
+            'bus':'str',
+            'devname':'str',
+            'enclosure':'Enclosure',
+            'pool':'typing.Optional[str]',
+            'passwd':'str',
+            'kmip_uid':'typing.Optional[str]',
+            'supports_smart':'typing.Optional[bool]',
+    })
+    Enclosure_ = typing.TypedDict('Enclosure_', {
+            'number':'int',
+            'slot':'int',
+    })
+    DiskEntry_ = typing.TypedDict('DiskEntry_', {
+            'identifier':'str',
+            'name':'str',
+            'subsystem':'str',
+            'number':'int',
+            'serial':'str',
+            'lunid':'typing.Optional[str]',
+            'size':'int',
+            'description':'str',
+            'transfermode':'str',
+            'hddstandby':'str',
+            'togglesmart':'bool',
+            'advpowermgmt':'str',
+            'smartoptions':'str',
+            'expiretime':'typing.Optional[str]',
+            'critical':'typing.Optional[int]',
+            'difference':'typing.Optional[int]',
+            'informational':'typing.Optional[int]',
+            'model':'typing.Optional[str]',
+            'rotationrate':'typing.Optional[int]',
+            'type':'typing.Optional[str]',
+            'zfs_guid':'typing.Optional[str]',
+            'bus':'str',
+            'devname':'str',
+            'enclosure':'Enclosure_',
+            'pool':'typing.Optional[str]',
+            'passwd':'str',
+            'kmip_uid':'typing.Optional[str]',
+            'supports_smart':'typing.Optional[bool]',
+    })
+    Enclosure__ = typing.TypedDict('Enclosure__', {
+            'number':'int',
+            'slot':'int',
+    })
+    DiskEntry__ = typing.TypedDict('DiskEntry__', {
+            'identifier':'str',
+            'name':'str',
+            'subsystem':'str',
+            'number':'int',
+            'serial':'str',
+            'lunid':'typing.Optional[str]',
+            'size':'int',
+            'description':'str',
+            'transfermode':'str',
+            'hddstandby':'str',
+            'togglesmart':'bool',
+            'advpowermgmt':'str',
+            'smartoptions':'str',
+            'expiretime':'typing.Optional[str]',
+            'critical':'typing.Optional[int]',
+            'difference':'typing.Optional[int]',
+            'informational':'typing.Optional[int]',
+            'model':'typing.Optional[str]',
+            'rotationrate':'typing.Optional[int]',
+            'type':'typing.Optional[str]',
+            'zfs_guid':'typing.Optional[str]',
+            'bus':'str',
+            'devname':'str',
+            'enclosure':'Enclosure__',
+            'pool':'typing.Optional[str]',
+            'passwd':'str',
+            'kmip_uid':'typing.Optional[str]',
+            'supports_smart':'typing.Optional[bool]',
+    })
+    Object = typing.TypedDict('Object', {
+            'name':'str',
+            'size':'int',
+    })
+    Flags = typing.TypedDict('Flags', {
+            'value':'int',
+            'string':'str',
+            'prefailure':'bool',
+            'updated_online':'bool',
+            'performance':'bool',
+            'error_rate':'bool',
+            'event_count':'bool',
+            'auto_keep':'bool',
+    })
+    Raw = typing.TypedDict('Raw', {
+            'value':'int',
+            'string':'str',
+    })
+    SmartAttribute = typing.TypedDict('SmartAttribute', {
+            'id':'int',
+            'value':'int',
+            'worst':'int',
+            'thresh':'int',
+            'name':'str',
+            'when_failed':'str',
+            'flags':'Flags',
+            'raw':'Raw',
+    })
+    Options = typing.TypedDict('Options', {
+            'cache':'typing.Optional[int]',
+            'powermode':'str',
+    })
+    Alert = typing.TypedDict('Alert', {
+            'uuid':'str',
+            'source':'str',
+            'klass':'str',
+            'args':'typing.Union[str, int, bool, dict[str], list]',
+            'node':'str',
+            'key':'str',
+            'datetime':'str',
+            'last_occurrence':'str',
+            'dismissed':'bool',
+            'mail':'typing.Union[str, int, bool, dict[str], list]',
+            'text':'str',
+            'id':'str',
+            'level':'str',
+            'formatted':'typing.Optional[str]',
+            'one_shot':'bool',
+    })
+    Options_ = typing.TypedDict('Options_', {
+            'cache':'typing.Optional[int]',
+            'only_cached':'bool',
+            'powermode':'str',
+    })
+    Enclosure___ = typing.TypedDict('Enclosure___', {
+            'number':'int',
+            'slot':'int',
+    })
+    DiskUpdate = typing.TypedDict('DiskUpdate', {
+            'number':'int',
+            'lunid':'typing.Optional[str]',
+            'description':'str',
+            'hddstandby':'str',
+            'togglesmart':'bool',
+            'advpowermgmt':'str',
+            'smartoptions':'str',
+            'critical':'typing.Optional[int]',
+            'difference':'typing.Optional[int]',
+            'informational':'typing.Optional[int]',
+            'bus':'str',
+            'enclosure':'Enclosure___',
+            'pool':'typing.Optional[str]',
+            'passwd':'str',
+            'supports_smart':'typing.Optional[bool]',
+    })
+    Enclosure____ = typing.TypedDict('Enclosure____', {
+            'number':'int',
+            'slot':'int',
+    })
+    DiskUpdateReturns = typing.TypedDict('DiskUpdateReturns', {
+            'identifier':'str',
+            'name':'str',
+            'subsystem':'str',
+            'number':'int',
+            'serial':'str',
+            'lunid':'typing.Optional[str]',
+            'size':'int',
+            'description':'str',
+            'transfermode':'str',
+            'hddstandby':'str',
+            'togglesmart':'bool',
+            'advpowermgmt':'str',
+            'smartoptions':'str',
+            'expiretime':'typing.Optional[str]',
+            'critical':'typing.Optional[int]',
+            'difference':'typing.Optional[int]',
+            'informational':'typing.Optional[int]',
+            'model':'typing.Optional[str]',
+            'rotationrate':'typing.Optional[int]',
+            'type':'typing.Optional[str]',
+            'zfs_guid':'typing.Optional[str]',
+            'bus':'str',
+            'devname':'str',
+            'enclosure':'Enclosure____',
+            'pool':'typing.Optional[str]',
+            'passwd':'str',
+            'kmip_uid':'typing.Optional[str]',
+            'supports_smart':'typing.Optional[bool]',
+    })
+    SwapRemovalOptions = typing.TypedDict('SwapRemovalOptions', {
+            'configure_swap':'bool',
+    })
     @typing.overload
     def wipe(self, 
         dev:'str',
@@ -289,170 +2943,246 @@ class Disk(Namespace):
         -------
         """
         ...
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Enclosure = typing.TypedDict('Enclosure', {
+            'number':'int',
+            'slot':'int',
+    })
+    DiskEntry = typing.TypedDict('DiskEntry', {
+            'identifier':'str',
+            'name':'str',
+            'subsystem':'str',
+            'number':'int',
+            'serial':'str',
+            'lunid':'typing.Optional[str]',
+            'size':'int',
+            'description':'str',
+            'transfermode':'str',
+            'hddstandby':'str',
+            'togglesmart':'bool',
+            'advpowermgmt':'str',
+            'smartoptions':'str',
+            'expiretime':'typing.Optional[str]',
+            'critical':'typing.Optional[int]',
+            'difference':'typing.Optional[int]',
+            'informational':'typing.Optional[int]',
+            'model':'typing.Optional[str]',
+            'rotationrate':'typing.Optional[int]',
+            'type':'typing.Optional[str]',
+            'zfs_guid':'typing.Optional[str]',
+            'bus':'str',
+            'devname':'str',
+            'enclosure':'Enclosure',
+            'pool':'typing.Optional[str]',
+            'passwd':'str',
+            'kmip_uid':'typing.Optional[str]',
+            'supports_smart':'typing.Optional[bool]',
+    })
+    Enclosure_ = typing.TypedDict('Enclosure_', {
+            'number':'int',
+            'slot':'int',
+    })
+    DiskEntry_ = typing.TypedDict('DiskEntry_', {
+            'identifier':'str',
+            'name':'str',
+            'subsystem':'str',
+            'number':'int',
+            'serial':'str',
+            'lunid':'typing.Optional[str]',
+            'size':'int',
+            'description':'str',
+            'transfermode':'str',
+            'hddstandby':'str',
+            'togglesmart':'bool',
+            'advpowermgmt':'str',
+            'smartoptions':'str',
+            'expiretime':'typing.Optional[str]',
+            'critical':'typing.Optional[int]',
+            'difference':'typing.Optional[int]',
+            'informational':'typing.Optional[int]',
+            'model':'typing.Optional[str]',
+            'rotationrate':'typing.Optional[int]',
+            'type':'typing.Optional[str]',
+            'zfs_guid':'typing.Optional[str]',
+            'bus':'str',
+            'devname':'str',
+            'enclosure':'Enclosure_',
+            'pool':'typing.Optional[str]',
+            'passwd':'str',
+            'kmip_uid':'typing.Optional[str]',
+            'supports_smart':'typing.Optional[bool]',
+    })
+    Enclosure__ = typing.TypedDict('Enclosure__', {
+            'number':'int',
+            'slot':'int',
+    })
+    DiskEntry__ = typing.TypedDict('DiskEntry__', {
+            'identifier':'str',
+            'name':'str',
+            'subsystem':'str',
+            'number':'int',
+            'serial':'str',
+            'lunid':'typing.Optional[str]',
+            'size':'int',
+            'description':'str',
+            'transfermode':'str',
+            'hddstandby':'str',
+            'togglesmart':'bool',
+            'advpowermgmt':'str',
+            'smartoptions':'str',
+            'expiretime':'typing.Optional[str]',
+            'critical':'typing.Optional[int]',
+            'difference':'typing.Optional[int]',
+            'informational':'typing.Optional[int]',
+            'model':'typing.Optional[str]',
+            'rotationrate':'typing.Optional[int]',
+            'type':'typing.Optional[str]',
+            'zfs_guid':'typing.Optional[str]',
+            'bus':'str',
+            'devname':'str',
+            'enclosure':'Enclosure__',
+            'pool':'typing.Optional[str]',
+            'passwd':'str',
+            'kmip_uid':'typing.Optional[str]',
+            'supports_smart':'typing.Optional[bool]',
+    })
+    Object = typing.TypedDict('Object', {
+            'name':'str',
+            'size':'int',
+    })
+    Flags = typing.TypedDict('Flags', {
+            'value':'int',
+            'string':'str',
+            'prefailure':'bool',
+            'updated_online':'bool',
+            'performance':'bool',
+            'error_rate':'bool',
+            'event_count':'bool',
+            'auto_keep':'bool',
+    })
+    Raw = typing.TypedDict('Raw', {
+            'value':'int',
+            'string':'str',
+    })
+    SmartAttribute = typing.TypedDict('SmartAttribute', {
+            'id':'int',
+            'value':'int',
+            'worst':'int',
+            'thresh':'int',
+            'name':'str',
+            'when_failed':'str',
+            'flags':'Flags',
+            'raw':'Raw',
+    })
+    Options = typing.TypedDict('Options', {
+            'cache':'typing.Optional[int]',
+            'powermode':'str',
+    })
+    Alert = typing.TypedDict('Alert', {
+            'uuid':'str',
+            'source':'str',
+            'klass':'str',
+            'args':'typing.Union[str, int, bool, dict[str], list]',
+            'node':'str',
+            'key':'str',
+            'datetime':'str',
+            'last_occurrence':'str',
+            'dismissed':'bool',
+            'mail':'typing.Union[str, int, bool, dict[str], list]',
+            'text':'str',
+            'id':'str',
+            'level':'str',
+            'formatted':'typing.Optional[str]',
+            'one_shot':'bool',
+    })
+    Options_ = typing.TypedDict('Options_', {
+            'cache':'typing.Optional[int]',
+            'only_cached':'bool',
+            'powermode':'str',
+    })
+    Enclosure___ = typing.TypedDict('Enclosure___', {
+            'number':'int',
+            'slot':'int',
+    })
+    DiskUpdate = typing.TypedDict('DiskUpdate', {
+            'number':'int',
+            'lunid':'typing.Optional[str]',
+            'description':'str',
+            'hddstandby':'str',
+            'togglesmart':'bool',
+            'advpowermgmt':'str',
+            'smartoptions':'str',
+            'critical':'typing.Optional[int]',
+            'difference':'typing.Optional[int]',
+            'informational':'typing.Optional[int]',
+            'bus':'str',
+            'enclosure':'Enclosure___',
+            'pool':'typing.Optional[str]',
+            'passwd':'str',
+            'supports_smart':'typing.Optional[bool]',
+    })
+    Enclosure____ = typing.TypedDict('Enclosure____', {
+            'number':'int',
+            'slot':'int',
+    })
+    DiskUpdateReturns = typing.TypedDict('DiskUpdateReturns', {
+            'identifier':'str',
+            'name':'str',
+            'subsystem':'str',
+            'number':'int',
+            'serial':'str',
+            'lunid':'typing.Optional[str]',
+            'size':'int',
+            'description':'str',
+            'transfermode':'str',
+            'hddstandby':'str',
+            'togglesmart':'bool',
+            'advpowermgmt':'str',
+            'smartoptions':'str',
+            'expiretime':'typing.Optional[str]',
+            'critical':'typing.Optional[int]',
+            'difference':'typing.Optional[int]',
+            'informational':'typing.Optional[int]',
+            'model':'typing.Optional[str]',
+            'rotationrate':'typing.Optional[int]',
+            'type':'typing.Optional[str]',
+            'zfs_guid':'typing.Optional[str]',
+            'bus':'str',
+            'devname':'str',
+            'enclosure':'Enclosure____',
+            'pool':'typing.Optional[str]',
+            'passwd':'str',
+            'kmip_uid':'typing.Optional[str]',
+            'supports_smart':'typing.Optional[bool]',
+    })
+    SwapRemovalOptions = typing.TypedDict('SwapRemovalOptions', {
+            'configure_swap':'bool',
+    })
 
-class QueryOptionsGetInstance(typing.TypedDict):
-        relationships:'bool'
-        extend:'typing.Optional[str]'
-        extend_context:'typing.Optional[str]'
-        prefix:'typing.Optional[str]'
-        extra:'dict[str]'
-        order_by:'list'
-        select:'list'
-        count:'bool'
-        get:'bool'
-        offset:'int'
-        limit:'int'
-        force_sql_filters:'bool'
-        ...
-class QueryOptions(typing.TypedDict):
-        relationships:'bool'
-        extend:'typing.Optional[str]'
-        extend_context:'typing.Optional[str]'
-        prefix:'typing.Optional[str]'
-        extra:'dict[str]'
-        order_by:'list'
-        select:'list'
-        count:'bool'
-        get:'bool'
-        offset:'int'
-        limit:'int'
-        force_sql_filters:'bool'
-        ...
-class DiskEntry(typing.TypedDict):
-        identifier:'str'
-        name:'str'
-        subsystem:'str'
-        number:'int'
-        serial:'str'
-        lunid:'typing.Optional[str]'
-        size:'int'
-        description:'str'
-        transfermode:'str'
-        hddstandby:'str'
-        togglesmart:'bool'
-        advpowermgmt:'str'
-        smartoptions:'str'
-        expiretime:'typing.Optional[str]'
-        critical:'typing.Optional[int]'
-        difference:'typing.Optional[int]'
-        informational:'typing.Optional[int]'
-        model:'typing.Optional[str]'
-        rotationrate:'typing.Optional[int]'
-        type:'typing.Optional[str]'
-        zfs_guid:'typing.Optional[str]'
-        bus:'str'
-        devname:'str'
-        enclosure:'Enclosure'
-        pool:'typing.Optional[str]'
-        passwd:'str'
-        kmip_uid:'typing.Optional[str]'
-        supports_smart:'typing.Optional[bool]'
-        ...
-class Enclosure(typing.TypedDict):
-        number:'int'
-        slot:'int'
-        ...
-class Object(typing.TypedDict):
-        name:'str'
-        size:'int'
-        ...
-class SmartAttribute(typing.TypedDict):
-        id:'int'
-        value:'int'
-        worst:'int'
-        thresh:'int'
-        name:'str'
-        when_failed:'str'
-        flags:'Flags'
-        raw:'Raw'
-        ...
-class Flags(typing.TypedDict):
-        value:'int'
-        string:'str'
-        prefailure:'bool'
-        updated_online:'bool'
-        performance:'bool'
-        error_rate:'bool'
-        event_count:'bool'
-        auto_keep:'bool'
-        ...
-class Raw(typing.TypedDict):
-        value:'int'
-        string:'str'
-        ...
-class Options(typing.TypedDict):
-        cache:'typing.Optional[int]'
-        powermode:'str'
-        ...
-class Alert(typing.TypedDict):
-        uuid:'str'
-        source:'str'
-        klass:'str'
-        args:'typing.Union[str, int, bool, dict[str], list]'
-        node:'str'
-        key:'str'
-        datetime:'str'
-        last_occurrence:'str'
-        dismissed:'bool'
-        mail:'typing.Union[str, int, bool, dict[str], list]'
-        text:'str'
-        id:'str'
-        level:'str'
-        formatted:'typing.Optional[str]'
-        one_shot:'bool'
-        ...
-class Options_(typing.TypedDict):
-        cache:'typing.Optional[int]'
-        only_cached:'bool'
-        powermode:'str'
-        ...
-class DiskUpdate(typing.TypedDict):
-        number:'int'
-        lunid:'typing.Optional[str]'
-        description:'str'
-        hddstandby:'str'
-        togglesmart:'bool'
-        advpowermgmt:'str'
-        smartoptions:'str'
-        critical:'typing.Optional[int]'
-        difference:'typing.Optional[int]'
-        informational:'typing.Optional[int]'
-        bus:'str'
-        enclosure:'Enclosure'
-        pool:'typing.Optional[str]'
-        passwd:'str'
-        supports_smart:'typing.Optional[bool]'
-        ...
-class DiskUpdateReturns(typing.TypedDict):
-        identifier:'str'
-        name:'str'
-        subsystem:'str'
-        number:'int'
-        serial:'str'
-        lunid:'typing.Optional[str]'
-        size:'int'
-        description:'str'
-        transfermode:'str'
-        hddstandby:'str'
-        togglesmart:'bool'
-        advpowermgmt:'str'
-        smartoptions:'str'
-        expiretime:'typing.Optional[str]'
-        critical:'typing.Optional[int]'
-        difference:'typing.Optional[int]'
-        informational:'typing.Optional[int]'
-        model:'typing.Optional[str]'
-        rotationrate:'typing.Optional[int]'
-        type:'typing.Optional[str]'
-        zfs_guid:'typing.Optional[str]'
-        bus:'str'
-        devname:'str'
-        enclosure:'Enclosure'
-        pool:'typing.Optional[str]'
-        passwd:'str'
-        kmip_uid:'typing.Optional[str]'
-        supports_smart:'typing.Optional[bool]'
-        ...
-class SwapRemovalOptions(typing.TypedDict):
-        configure_swap:'bool'
-        ...

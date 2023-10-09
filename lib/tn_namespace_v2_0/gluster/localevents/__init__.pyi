@@ -37,6 +37,10 @@ class GlusterLocalevents(Namespace):
         -------
         """
         ...
+    AddSecret = typing.TypedDict('AddSecret', {
+            'secret':'str',
+            'force':'bool',
+    })
     @typing.overload
     def get_set_jwt_secret(self, 
     /) -> 'str': 
@@ -61,8 +65,8 @@ class GlusterLocalevents(Namespace):
             get_set_jwt_secret
         """
         ...
+    AddSecret = typing.TypedDict('AddSecret', {
+            'secret':'str',
+            'force':'bool',
+    })
 
-class AddSecret(typing.TypedDict):
-        secret:'str'
-        force:'bool'
-        ...

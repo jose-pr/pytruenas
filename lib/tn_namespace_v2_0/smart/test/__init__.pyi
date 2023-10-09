@@ -27,6 +27,190 @@ class SmartTest(Namespace):
             smart_test_create_returns
         """
         ...
+    Schedule = typing.TypedDict('Schedule', {
+            'hour':'str',
+            'dom':'str',
+            'month':'str',
+            'dow':'str',
+    })
+    SmartTaskCreate = typing.TypedDict('SmartTaskCreate', {
+            'schedule':'Schedule',
+            'desc':'str',
+            'all_disks':'bool',
+            'disks':'list[str]',
+            'type':'str',
+    })
+    Schedule_ = typing.TypedDict('Schedule_', {
+            'hour':'str',
+            'dom':'str',
+            'month':'str',
+            'dow':'str',
+    })
+    SmartTestCreateReturns = typing.TypedDict('SmartTestCreateReturns', {
+            'schedule':'Schedule_',
+            'desc':'str',
+            'all_disks':'bool',
+            'disks':'list[str]',
+            'type':'str',
+            'id':'int',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    DiskRun = typing.TypedDict('DiskRun', {
+            'identifier':'str',
+            'mode':'str',
+            'type':'str',
+    })
+    SmartManualTestDiskResponse = typing.TypedDict('SmartManualTestDiskResponse', {
+            'disk':'str',
+            'identifier':'str',
+            'error':'typing.Optional[str]',
+            'expected_result_time':'str',
+            'job':'int',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Schedule__ = typing.TypedDict('Schedule__', {
+            'hour':'str',
+            'dom':'str',
+            'month':'str',
+            'dow':'str',
+    })
+    SmartTaskEntry = typing.TypedDict('SmartTaskEntry', {
+            'schedule':'Schedule__',
+            'desc':'str',
+            'all_disks':'bool',
+            'disks':'list[str]',
+            'type':'str',
+            'id':'int',
+    })
+    Schedule___ = typing.TypedDict('Schedule___', {
+            'hour':'str',
+            'dom':'str',
+            'month':'str',
+            'dow':'str',
+    })
+    SmartTaskEntry_ = typing.TypedDict('SmartTaskEntry_', {
+            'schedule':'Schedule___',
+            'desc':'str',
+            'all_disks':'bool',
+            'disks':'list[str]',
+            'type':'str',
+            'id':'int',
+    })
+    Schedule____ = typing.TypedDict('Schedule____', {
+            'hour':'str',
+            'dom':'str',
+            'month':'str',
+            'dow':'str',
+    })
+    SmartTaskEntry__ = typing.TypedDict('SmartTaskEntry__', {
+            'schedule':'Schedule____',
+            'desc':'str',
+            'all_disks':'bool',
+            'disks':'list[str]',
+            'type':'str',
+            'id':'int',
+    })
+    QueryOptions_ = typing.TypedDict('QueryOptions_', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    TestResult = typing.TypedDict('TestResult', {
+            'num':'int',
+            'description':'str',
+            'status':'str',
+            'status_verbose':'str',
+            'remaining':'float',
+            'lifetime':'int',
+            'lba_of_first_error':'typing.Optional[str]',
+    })
+    CurrentTest = typing.TypedDict('CurrentTest', {
+            'progress':'int',
+    })
+    DiskSmartTestResult = typing.TypedDict('DiskSmartTestResult', {
+            'disk':'str',
+            'tests':'list[TestResult]',
+            'current_test':'CurrentTest',
+    })
+    TestResult_ = typing.TypedDict('TestResult_', {
+            'num':'int',
+            'description':'str',
+            'status':'str',
+            'status_verbose':'str',
+            'remaining':'float',
+            'lifetime':'int',
+            'lba_of_first_error':'typing.Optional[str]',
+    })
+    CurrentTest_ = typing.TypedDict('CurrentTest_', {
+            'progress':'int',
+    })
+    DiskSmartTestResult_ = typing.TypedDict('DiskSmartTestResult_', {
+            'disk':'str',
+            'tests':'list[TestResult_]',
+            'current_test':'CurrentTest_',
+    })
+    Schedule_____ = typing.TypedDict('Schedule_____', {
+            'hour':'str',
+            'dom':'str',
+            'month':'str',
+            'dow':'str',
+    })
+    SmartTestUpdate = typing.TypedDict('SmartTestUpdate', {
+            'schedule':'Schedule_____',
+            'desc':'str',
+            'all_disks':'bool',
+            'disks':'list[str]',
+            'type':'str',
+    })
+    Schedule______ = typing.TypedDict('Schedule______', {
+            'hour':'str',
+            'dom':'str',
+            'month':'str',
+            'dow':'str',
+    })
+    SmartTestUpdateReturns = typing.TypedDict('SmartTestUpdateReturns', {
+            'schedule':'Schedule______',
+            'desc':'str',
+            'all_disks':'bool',
+            'disks':'list[str]',
+            'type':'str',
+            'id':'int',
+    })
     @typing.overload
     def delete(self, 
         id:'int',
@@ -44,6 +228,190 @@ class SmartTest(Namespace):
             Will return `true` if `id` is deleted successfully
         """
         ...
+    Schedule = typing.TypedDict('Schedule', {
+            'hour':'str',
+            'dom':'str',
+            'month':'str',
+            'dow':'str',
+    })
+    SmartTaskCreate = typing.TypedDict('SmartTaskCreate', {
+            'schedule':'Schedule',
+            'desc':'str',
+            'all_disks':'bool',
+            'disks':'list[str]',
+            'type':'str',
+    })
+    Schedule_ = typing.TypedDict('Schedule_', {
+            'hour':'str',
+            'dom':'str',
+            'month':'str',
+            'dow':'str',
+    })
+    SmartTestCreateReturns = typing.TypedDict('SmartTestCreateReturns', {
+            'schedule':'Schedule_',
+            'desc':'str',
+            'all_disks':'bool',
+            'disks':'list[str]',
+            'type':'str',
+            'id':'int',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    DiskRun = typing.TypedDict('DiskRun', {
+            'identifier':'str',
+            'mode':'str',
+            'type':'str',
+    })
+    SmartManualTestDiskResponse = typing.TypedDict('SmartManualTestDiskResponse', {
+            'disk':'str',
+            'identifier':'str',
+            'error':'typing.Optional[str]',
+            'expected_result_time':'str',
+            'job':'int',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Schedule__ = typing.TypedDict('Schedule__', {
+            'hour':'str',
+            'dom':'str',
+            'month':'str',
+            'dow':'str',
+    })
+    SmartTaskEntry = typing.TypedDict('SmartTaskEntry', {
+            'schedule':'Schedule__',
+            'desc':'str',
+            'all_disks':'bool',
+            'disks':'list[str]',
+            'type':'str',
+            'id':'int',
+    })
+    Schedule___ = typing.TypedDict('Schedule___', {
+            'hour':'str',
+            'dom':'str',
+            'month':'str',
+            'dow':'str',
+    })
+    SmartTaskEntry_ = typing.TypedDict('SmartTaskEntry_', {
+            'schedule':'Schedule___',
+            'desc':'str',
+            'all_disks':'bool',
+            'disks':'list[str]',
+            'type':'str',
+            'id':'int',
+    })
+    Schedule____ = typing.TypedDict('Schedule____', {
+            'hour':'str',
+            'dom':'str',
+            'month':'str',
+            'dow':'str',
+    })
+    SmartTaskEntry__ = typing.TypedDict('SmartTaskEntry__', {
+            'schedule':'Schedule____',
+            'desc':'str',
+            'all_disks':'bool',
+            'disks':'list[str]',
+            'type':'str',
+            'id':'int',
+    })
+    QueryOptions_ = typing.TypedDict('QueryOptions_', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    TestResult = typing.TypedDict('TestResult', {
+            'num':'int',
+            'description':'str',
+            'status':'str',
+            'status_verbose':'str',
+            'remaining':'float',
+            'lifetime':'int',
+            'lba_of_first_error':'typing.Optional[str]',
+    })
+    CurrentTest = typing.TypedDict('CurrentTest', {
+            'progress':'int',
+    })
+    DiskSmartTestResult = typing.TypedDict('DiskSmartTestResult', {
+            'disk':'str',
+            'tests':'list[TestResult]',
+            'current_test':'CurrentTest',
+    })
+    TestResult_ = typing.TypedDict('TestResult_', {
+            'num':'int',
+            'description':'str',
+            'status':'str',
+            'status_verbose':'str',
+            'remaining':'float',
+            'lifetime':'int',
+            'lba_of_first_error':'typing.Optional[str]',
+    })
+    CurrentTest_ = typing.TypedDict('CurrentTest_', {
+            'progress':'int',
+    })
+    DiskSmartTestResult_ = typing.TypedDict('DiskSmartTestResult_', {
+            'disk':'str',
+            'tests':'list[TestResult_]',
+            'current_test':'CurrentTest_',
+    })
+    Schedule_____ = typing.TypedDict('Schedule_____', {
+            'hour':'str',
+            'dom':'str',
+            'month':'str',
+            'dow':'str',
+    })
+    SmartTestUpdate = typing.TypedDict('SmartTestUpdate', {
+            'schedule':'Schedule_____',
+            'desc':'str',
+            'all_disks':'bool',
+            'disks':'list[str]',
+            'type':'str',
+    })
+    Schedule______ = typing.TypedDict('Schedule______', {
+            'hour':'str',
+            'dom':'str',
+            'month':'str',
+            'dow':'str',
+    })
+    SmartTestUpdateReturns = typing.TypedDict('SmartTestUpdateReturns', {
+            'schedule':'Schedule______',
+            'desc':'str',
+            'all_disks':'bool',
+            'disks':'list[str]',
+            'type':'str',
+            'id':'int',
+    })
     @typing.overload
     def disk_choices(self, 
         full_disk:'bool'=False,
@@ -61,9 +429,193 @@ class SmartTest(Namespace):
         -------
         """
         ...
+    Schedule = typing.TypedDict('Schedule', {
+            'hour':'str',
+            'dom':'str',
+            'month':'str',
+            'dow':'str',
+    })
+    SmartTaskCreate = typing.TypedDict('SmartTaskCreate', {
+            'schedule':'Schedule',
+            'desc':'str',
+            'all_disks':'bool',
+            'disks':'list[str]',
+            'type':'str',
+    })
+    Schedule_ = typing.TypedDict('Schedule_', {
+            'hour':'str',
+            'dom':'str',
+            'month':'str',
+            'dow':'str',
+    })
+    SmartTestCreateReturns = typing.TypedDict('SmartTestCreateReturns', {
+            'schedule':'Schedule_',
+            'desc':'str',
+            'all_disks':'bool',
+            'disks':'list[str]',
+            'type':'str',
+            'id':'int',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    DiskRun = typing.TypedDict('DiskRun', {
+            'identifier':'str',
+            'mode':'str',
+            'type':'str',
+    })
+    SmartManualTestDiskResponse = typing.TypedDict('SmartManualTestDiskResponse', {
+            'disk':'str',
+            'identifier':'str',
+            'error':'typing.Optional[str]',
+            'expected_result_time':'str',
+            'job':'int',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Schedule__ = typing.TypedDict('Schedule__', {
+            'hour':'str',
+            'dom':'str',
+            'month':'str',
+            'dow':'str',
+    })
+    SmartTaskEntry = typing.TypedDict('SmartTaskEntry', {
+            'schedule':'Schedule__',
+            'desc':'str',
+            'all_disks':'bool',
+            'disks':'list[str]',
+            'type':'str',
+            'id':'int',
+    })
+    Schedule___ = typing.TypedDict('Schedule___', {
+            'hour':'str',
+            'dom':'str',
+            'month':'str',
+            'dow':'str',
+    })
+    SmartTaskEntry_ = typing.TypedDict('SmartTaskEntry_', {
+            'schedule':'Schedule___',
+            'desc':'str',
+            'all_disks':'bool',
+            'disks':'list[str]',
+            'type':'str',
+            'id':'int',
+    })
+    Schedule____ = typing.TypedDict('Schedule____', {
+            'hour':'str',
+            'dom':'str',
+            'month':'str',
+            'dow':'str',
+    })
+    SmartTaskEntry__ = typing.TypedDict('SmartTaskEntry__', {
+            'schedule':'Schedule____',
+            'desc':'str',
+            'all_disks':'bool',
+            'disks':'list[str]',
+            'type':'str',
+            'id':'int',
+    })
+    QueryOptions_ = typing.TypedDict('QueryOptions_', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    TestResult = typing.TypedDict('TestResult', {
+            'num':'int',
+            'description':'str',
+            'status':'str',
+            'status_verbose':'str',
+            'remaining':'float',
+            'lifetime':'int',
+            'lba_of_first_error':'typing.Optional[str]',
+    })
+    CurrentTest = typing.TypedDict('CurrentTest', {
+            'progress':'int',
+    })
+    DiskSmartTestResult = typing.TypedDict('DiskSmartTestResult', {
+            'disk':'str',
+            'tests':'list[TestResult]',
+            'current_test':'CurrentTest',
+    })
+    TestResult_ = typing.TypedDict('TestResult_', {
+            'num':'int',
+            'description':'str',
+            'status':'str',
+            'status_verbose':'str',
+            'remaining':'float',
+            'lifetime':'int',
+            'lba_of_first_error':'typing.Optional[str]',
+    })
+    CurrentTest_ = typing.TypedDict('CurrentTest_', {
+            'progress':'int',
+    })
+    DiskSmartTestResult_ = typing.TypedDict('DiskSmartTestResult_', {
+            'disk':'str',
+            'tests':'list[TestResult_]',
+            'current_test':'CurrentTest_',
+    })
+    Schedule_____ = typing.TypedDict('Schedule_____', {
+            'hour':'str',
+            'dom':'str',
+            'month':'str',
+            'dow':'str',
+    })
+    SmartTestUpdate = typing.TypedDict('SmartTestUpdate', {
+            'schedule':'Schedule_____',
+            'desc':'str',
+            'all_disks':'bool',
+            'disks':'list[str]',
+            'type':'str',
+    })
+    Schedule______ = typing.TypedDict('Schedule______', {
+            'hour':'str',
+            'dom':'str',
+            'month':'str',
+            'dow':'str',
+    })
+    SmartTestUpdateReturns = typing.TypedDict('SmartTestUpdateReturns', {
+            'schedule':'Schedule______',
+            'desc':'str',
+            'all_disks':'bool',
+            'disks':'list[str]',
+            'type':'str',
+            'id':'int',
+    })
     @typing.overload
     def get_instance(self, 
-        id:'str|int|bool|dict[str]|list',
+        id:'typing.Union[str, int, bool, dict[str], list]',
         query_options_get_instance:'QueryOptionsGetInstance'={},
     /) -> None: 
         """
@@ -81,6 +633,190 @@ class SmartTest(Namespace):
         -------
         """
         ...
+    Schedule = typing.TypedDict('Schedule', {
+            'hour':'str',
+            'dom':'str',
+            'month':'str',
+            'dow':'str',
+    })
+    SmartTaskCreate = typing.TypedDict('SmartTaskCreate', {
+            'schedule':'Schedule',
+            'desc':'str',
+            'all_disks':'bool',
+            'disks':'list[str]',
+            'type':'str',
+    })
+    Schedule_ = typing.TypedDict('Schedule_', {
+            'hour':'str',
+            'dom':'str',
+            'month':'str',
+            'dow':'str',
+    })
+    SmartTestCreateReturns = typing.TypedDict('SmartTestCreateReturns', {
+            'schedule':'Schedule_',
+            'desc':'str',
+            'all_disks':'bool',
+            'disks':'list[str]',
+            'type':'str',
+            'id':'int',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    DiskRun = typing.TypedDict('DiskRun', {
+            'identifier':'str',
+            'mode':'str',
+            'type':'str',
+    })
+    SmartManualTestDiskResponse = typing.TypedDict('SmartManualTestDiskResponse', {
+            'disk':'str',
+            'identifier':'str',
+            'error':'typing.Optional[str]',
+            'expected_result_time':'str',
+            'job':'int',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Schedule__ = typing.TypedDict('Schedule__', {
+            'hour':'str',
+            'dom':'str',
+            'month':'str',
+            'dow':'str',
+    })
+    SmartTaskEntry = typing.TypedDict('SmartTaskEntry', {
+            'schedule':'Schedule__',
+            'desc':'str',
+            'all_disks':'bool',
+            'disks':'list[str]',
+            'type':'str',
+            'id':'int',
+    })
+    Schedule___ = typing.TypedDict('Schedule___', {
+            'hour':'str',
+            'dom':'str',
+            'month':'str',
+            'dow':'str',
+    })
+    SmartTaskEntry_ = typing.TypedDict('SmartTaskEntry_', {
+            'schedule':'Schedule___',
+            'desc':'str',
+            'all_disks':'bool',
+            'disks':'list[str]',
+            'type':'str',
+            'id':'int',
+    })
+    Schedule____ = typing.TypedDict('Schedule____', {
+            'hour':'str',
+            'dom':'str',
+            'month':'str',
+            'dow':'str',
+    })
+    SmartTaskEntry__ = typing.TypedDict('SmartTaskEntry__', {
+            'schedule':'Schedule____',
+            'desc':'str',
+            'all_disks':'bool',
+            'disks':'list[str]',
+            'type':'str',
+            'id':'int',
+    })
+    QueryOptions_ = typing.TypedDict('QueryOptions_', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    TestResult = typing.TypedDict('TestResult', {
+            'num':'int',
+            'description':'str',
+            'status':'str',
+            'status_verbose':'str',
+            'remaining':'float',
+            'lifetime':'int',
+            'lba_of_first_error':'typing.Optional[str]',
+    })
+    CurrentTest = typing.TypedDict('CurrentTest', {
+            'progress':'int',
+    })
+    DiskSmartTestResult = typing.TypedDict('DiskSmartTestResult', {
+            'disk':'str',
+            'tests':'list[TestResult]',
+            'current_test':'CurrentTest',
+    })
+    TestResult_ = typing.TypedDict('TestResult_', {
+            'num':'int',
+            'description':'str',
+            'status':'str',
+            'status_verbose':'str',
+            'remaining':'float',
+            'lifetime':'int',
+            'lba_of_first_error':'typing.Optional[str]',
+    })
+    CurrentTest_ = typing.TypedDict('CurrentTest_', {
+            'progress':'int',
+    })
+    DiskSmartTestResult_ = typing.TypedDict('DiskSmartTestResult_', {
+            'disk':'str',
+            'tests':'list[TestResult_]',
+            'current_test':'CurrentTest_',
+    })
+    Schedule_____ = typing.TypedDict('Schedule_____', {
+            'hour':'str',
+            'dom':'str',
+            'month':'str',
+            'dow':'str',
+    })
+    SmartTestUpdate = typing.TypedDict('SmartTestUpdate', {
+            'schedule':'Schedule_____',
+            'desc':'str',
+            'all_disks':'bool',
+            'disks':'list[str]',
+            'type':'str',
+    })
+    Schedule______ = typing.TypedDict('Schedule______', {
+            'hour':'str',
+            'dom':'str',
+            'month':'str',
+            'dow':'str',
+    })
+    SmartTestUpdateReturns = typing.TypedDict('SmartTestUpdateReturns', {
+            'schedule':'Schedule______',
+            'desc':'str',
+            'all_disks':'bool',
+            'disks':'list[str]',
+            'type':'str',
+            'id':'int',
+    })
     @typing.overload
     def manual_test(self, 
         disks:'list[DiskRun]'=[],
@@ -100,11 +836,195 @@ class SmartTest(Namespace):
             smart_manual_test
         """
         ...
+    Schedule = typing.TypedDict('Schedule', {
+            'hour':'str',
+            'dom':'str',
+            'month':'str',
+            'dow':'str',
+    })
+    SmartTaskCreate = typing.TypedDict('SmartTaskCreate', {
+            'schedule':'Schedule',
+            'desc':'str',
+            'all_disks':'bool',
+            'disks':'list[str]',
+            'type':'str',
+    })
+    Schedule_ = typing.TypedDict('Schedule_', {
+            'hour':'str',
+            'dom':'str',
+            'month':'str',
+            'dow':'str',
+    })
+    SmartTestCreateReturns = typing.TypedDict('SmartTestCreateReturns', {
+            'schedule':'Schedule_',
+            'desc':'str',
+            'all_disks':'bool',
+            'disks':'list[str]',
+            'type':'str',
+            'id':'int',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    DiskRun = typing.TypedDict('DiskRun', {
+            'identifier':'str',
+            'mode':'str',
+            'type':'str',
+    })
+    SmartManualTestDiskResponse = typing.TypedDict('SmartManualTestDiskResponse', {
+            'disk':'str',
+            'identifier':'str',
+            'error':'typing.Optional[str]',
+            'expected_result_time':'str',
+            'job':'int',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Schedule__ = typing.TypedDict('Schedule__', {
+            'hour':'str',
+            'dom':'str',
+            'month':'str',
+            'dow':'str',
+    })
+    SmartTaskEntry = typing.TypedDict('SmartTaskEntry', {
+            'schedule':'Schedule__',
+            'desc':'str',
+            'all_disks':'bool',
+            'disks':'list[str]',
+            'type':'str',
+            'id':'int',
+    })
+    Schedule___ = typing.TypedDict('Schedule___', {
+            'hour':'str',
+            'dom':'str',
+            'month':'str',
+            'dow':'str',
+    })
+    SmartTaskEntry_ = typing.TypedDict('SmartTaskEntry_', {
+            'schedule':'Schedule___',
+            'desc':'str',
+            'all_disks':'bool',
+            'disks':'list[str]',
+            'type':'str',
+            'id':'int',
+    })
+    Schedule____ = typing.TypedDict('Schedule____', {
+            'hour':'str',
+            'dom':'str',
+            'month':'str',
+            'dow':'str',
+    })
+    SmartTaskEntry__ = typing.TypedDict('SmartTaskEntry__', {
+            'schedule':'Schedule____',
+            'desc':'str',
+            'all_disks':'bool',
+            'disks':'list[str]',
+            'type':'str',
+            'id':'int',
+    })
+    QueryOptions_ = typing.TypedDict('QueryOptions_', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    TestResult = typing.TypedDict('TestResult', {
+            'num':'int',
+            'description':'str',
+            'status':'str',
+            'status_verbose':'str',
+            'remaining':'float',
+            'lifetime':'int',
+            'lba_of_first_error':'typing.Optional[str]',
+    })
+    CurrentTest = typing.TypedDict('CurrentTest', {
+            'progress':'int',
+    })
+    DiskSmartTestResult = typing.TypedDict('DiskSmartTestResult', {
+            'disk':'str',
+            'tests':'list[TestResult]',
+            'current_test':'CurrentTest',
+    })
+    TestResult_ = typing.TypedDict('TestResult_', {
+            'num':'int',
+            'description':'str',
+            'status':'str',
+            'status_verbose':'str',
+            'remaining':'float',
+            'lifetime':'int',
+            'lba_of_first_error':'typing.Optional[str]',
+    })
+    CurrentTest_ = typing.TypedDict('CurrentTest_', {
+            'progress':'int',
+    })
+    DiskSmartTestResult_ = typing.TypedDict('DiskSmartTestResult_', {
+            'disk':'str',
+            'tests':'list[TestResult_]',
+            'current_test':'CurrentTest_',
+    })
+    Schedule_____ = typing.TypedDict('Schedule_____', {
+            'hour':'str',
+            'dom':'str',
+            'month':'str',
+            'dow':'str',
+    })
+    SmartTestUpdate = typing.TypedDict('SmartTestUpdate', {
+            'schedule':'Schedule_____',
+            'desc':'str',
+            'all_disks':'bool',
+            'disks':'list[str]',
+            'type':'str',
+    })
+    Schedule______ = typing.TypedDict('Schedule______', {
+            'hour':'str',
+            'dom':'str',
+            'month':'str',
+            'dow':'str',
+    })
+    SmartTestUpdateReturns = typing.TypedDict('SmartTestUpdateReturns', {
+            'schedule':'Schedule______',
+            'desc':'str',
+            'all_disks':'bool',
+            'disks':'list[str]',
+            'type':'str',
+            'id':'int',
+    })
     @typing.overload
     def query(self, 
         query_filters:'list[list]'=[],
         query_options:'QueryOptions'={},
-    /) -> 'list[SmartTaskEntry]|SmartTaskEntry|int|SmartTaskEntry': 
+    /) -> 'typing.Union[list[SmartTaskEntry], ForwardRef(SmartTaskEntry_), int, ForwardRef(SmartTaskEntry__)]': 
         """
         
 
@@ -116,16 +1036,194 @@ class SmartTest(Namespace):
             query-options
         Returns
         -------
-        list[SmartTaskEntry]:
-            
-        SmartTaskEntry:
-            
-        int:
-            
-        SmartTaskEntry:
+        typing.Union[list[SmartTaskEntry], ForwardRef(SmartTaskEntry_), int, ForwardRef(SmartTaskEntry__)]:
             
         """
         ...
+    Schedule = typing.TypedDict('Schedule', {
+            'hour':'str',
+            'dom':'str',
+            'month':'str',
+            'dow':'str',
+    })
+    SmartTaskCreate = typing.TypedDict('SmartTaskCreate', {
+            'schedule':'Schedule',
+            'desc':'str',
+            'all_disks':'bool',
+            'disks':'list[str]',
+            'type':'str',
+    })
+    Schedule_ = typing.TypedDict('Schedule_', {
+            'hour':'str',
+            'dom':'str',
+            'month':'str',
+            'dow':'str',
+    })
+    SmartTestCreateReturns = typing.TypedDict('SmartTestCreateReturns', {
+            'schedule':'Schedule_',
+            'desc':'str',
+            'all_disks':'bool',
+            'disks':'list[str]',
+            'type':'str',
+            'id':'int',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    DiskRun = typing.TypedDict('DiskRun', {
+            'identifier':'str',
+            'mode':'str',
+            'type':'str',
+    })
+    SmartManualTestDiskResponse = typing.TypedDict('SmartManualTestDiskResponse', {
+            'disk':'str',
+            'identifier':'str',
+            'error':'typing.Optional[str]',
+            'expected_result_time':'str',
+            'job':'int',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Schedule__ = typing.TypedDict('Schedule__', {
+            'hour':'str',
+            'dom':'str',
+            'month':'str',
+            'dow':'str',
+    })
+    SmartTaskEntry = typing.TypedDict('SmartTaskEntry', {
+            'schedule':'Schedule__',
+            'desc':'str',
+            'all_disks':'bool',
+            'disks':'list[str]',
+            'type':'str',
+            'id':'int',
+    })
+    Schedule___ = typing.TypedDict('Schedule___', {
+            'hour':'str',
+            'dom':'str',
+            'month':'str',
+            'dow':'str',
+    })
+    SmartTaskEntry_ = typing.TypedDict('SmartTaskEntry_', {
+            'schedule':'Schedule___',
+            'desc':'str',
+            'all_disks':'bool',
+            'disks':'list[str]',
+            'type':'str',
+            'id':'int',
+    })
+    Schedule____ = typing.TypedDict('Schedule____', {
+            'hour':'str',
+            'dom':'str',
+            'month':'str',
+            'dow':'str',
+    })
+    SmartTaskEntry__ = typing.TypedDict('SmartTaskEntry__', {
+            'schedule':'Schedule____',
+            'desc':'str',
+            'all_disks':'bool',
+            'disks':'list[str]',
+            'type':'str',
+            'id':'int',
+    })
+    QueryOptions_ = typing.TypedDict('QueryOptions_', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    TestResult = typing.TypedDict('TestResult', {
+            'num':'int',
+            'description':'str',
+            'status':'str',
+            'status_verbose':'str',
+            'remaining':'float',
+            'lifetime':'int',
+            'lba_of_first_error':'typing.Optional[str]',
+    })
+    CurrentTest = typing.TypedDict('CurrentTest', {
+            'progress':'int',
+    })
+    DiskSmartTestResult = typing.TypedDict('DiskSmartTestResult', {
+            'disk':'str',
+            'tests':'list[TestResult]',
+            'current_test':'CurrentTest',
+    })
+    TestResult_ = typing.TypedDict('TestResult_', {
+            'num':'int',
+            'description':'str',
+            'status':'str',
+            'status_verbose':'str',
+            'remaining':'float',
+            'lifetime':'int',
+            'lba_of_first_error':'typing.Optional[str]',
+    })
+    CurrentTest_ = typing.TypedDict('CurrentTest_', {
+            'progress':'int',
+    })
+    DiskSmartTestResult_ = typing.TypedDict('DiskSmartTestResult_', {
+            'disk':'str',
+            'tests':'list[TestResult_]',
+            'current_test':'CurrentTest_',
+    })
+    Schedule_____ = typing.TypedDict('Schedule_____', {
+            'hour':'str',
+            'dom':'str',
+            'month':'str',
+            'dow':'str',
+    })
+    SmartTestUpdate = typing.TypedDict('SmartTestUpdate', {
+            'schedule':'Schedule_____',
+            'desc':'str',
+            'all_disks':'bool',
+            'disks':'list[str]',
+            'type':'str',
+    })
+    Schedule______ = typing.TypedDict('Schedule______', {
+            'hour':'str',
+            'dom':'str',
+            'month':'str',
+            'dow':'str',
+    })
+    SmartTestUpdateReturns = typing.TypedDict('SmartTestUpdateReturns', {
+            'schedule':'Schedule______',
+            'desc':'str',
+            'all_disks':'bool',
+            'disks':'list[str]',
+            'type':'str',
+            'id':'int',
+    })
     @typing.overload
     def query_for_disk(self, 
         disk:'str',
@@ -141,11 +1239,195 @@ class SmartTest(Namespace):
         -------
         """
         ...
+    Schedule = typing.TypedDict('Schedule', {
+            'hour':'str',
+            'dom':'str',
+            'month':'str',
+            'dow':'str',
+    })
+    SmartTaskCreate = typing.TypedDict('SmartTaskCreate', {
+            'schedule':'Schedule',
+            'desc':'str',
+            'all_disks':'bool',
+            'disks':'list[str]',
+            'type':'str',
+    })
+    Schedule_ = typing.TypedDict('Schedule_', {
+            'hour':'str',
+            'dom':'str',
+            'month':'str',
+            'dow':'str',
+    })
+    SmartTestCreateReturns = typing.TypedDict('SmartTestCreateReturns', {
+            'schedule':'Schedule_',
+            'desc':'str',
+            'all_disks':'bool',
+            'disks':'list[str]',
+            'type':'str',
+            'id':'int',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    DiskRun = typing.TypedDict('DiskRun', {
+            'identifier':'str',
+            'mode':'str',
+            'type':'str',
+    })
+    SmartManualTestDiskResponse = typing.TypedDict('SmartManualTestDiskResponse', {
+            'disk':'str',
+            'identifier':'str',
+            'error':'typing.Optional[str]',
+            'expected_result_time':'str',
+            'job':'int',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Schedule__ = typing.TypedDict('Schedule__', {
+            'hour':'str',
+            'dom':'str',
+            'month':'str',
+            'dow':'str',
+    })
+    SmartTaskEntry = typing.TypedDict('SmartTaskEntry', {
+            'schedule':'Schedule__',
+            'desc':'str',
+            'all_disks':'bool',
+            'disks':'list[str]',
+            'type':'str',
+            'id':'int',
+    })
+    Schedule___ = typing.TypedDict('Schedule___', {
+            'hour':'str',
+            'dom':'str',
+            'month':'str',
+            'dow':'str',
+    })
+    SmartTaskEntry_ = typing.TypedDict('SmartTaskEntry_', {
+            'schedule':'Schedule___',
+            'desc':'str',
+            'all_disks':'bool',
+            'disks':'list[str]',
+            'type':'str',
+            'id':'int',
+    })
+    Schedule____ = typing.TypedDict('Schedule____', {
+            'hour':'str',
+            'dom':'str',
+            'month':'str',
+            'dow':'str',
+    })
+    SmartTaskEntry__ = typing.TypedDict('SmartTaskEntry__', {
+            'schedule':'Schedule____',
+            'desc':'str',
+            'all_disks':'bool',
+            'disks':'list[str]',
+            'type':'str',
+            'id':'int',
+    })
+    QueryOptions_ = typing.TypedDict('QueryOptions_', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    TestResult = typing.TypedDict('TestResult', {
+            'num':'int',
+            'description':'str',
+            'status':'str',
+            'status_verbose':'str',
+            'remaining':'float',
+            'lifetime':'int',
+            'lba_of_first_error':'typing.Optional[str]',
+    })
+    CurrentTest = typing.TypedDict('CurrentTest', {
+            'progress':'int',
+    })
+    DiskSmartTestResult = typing.TypedDict('DiskSmartTestResult', {
+            'disk':'str',
+            'tests':'list[TestResult]',
+            'current_test':'CurrentTest',
+    })
+    TestResult_ = typing.TypedDict('TestResult_', {
+            'num':'int',
+            'description':'str',
+            'status':'str',
+            'status_verbose':'str',
+            'remaining':'float',
+            'lifetime':'int',
+            'lba_of_first_error':'typing.Optional[str]',
+    })
+    CurrentTest_ = typing.TypedDict('CurrentTest_', {
+            'progress':'int',
+    })
+    DiskSmartTestResult_ = typing.TypedDict('DiskSmartTestResult_', {
+            'disk':'str',
+            'tests':'list[TestResult_]',
+            'current_test':'CurrentTest_',
+    })
+    Schedule_____ = typing.TypedDict('Schedule_____', {
+            'hour':'str',
+            'dom':'str',
+            'month':'str',
+            'dow':'str',
+    })
+    SmartTestUpdate = typing.TypedDict('SmartTestUpdate', {
+            'schedule':'Schedule_____',
+            'desc':'str',
+            'all_disks':'bool',
+            'disks':'list[str]',
+            'type':'str',
+    })
+    Schedule______ = typing.TypedDict('Schedule______', {
+            'hour':'str',
+            'dom':'str',
+            'month':'str',
+            'dow':'str',
+    })
+    SmartTestUpdateReturns = typing.TypedDict('SmartTestUpdateReturns', {
+            'schedule':'Schedule______',
+            'desc':'str',
+            'all_disks':'bool',
+            'disks':'list[str]',
+            'type':'str',
+            'id':'int',
+    })
     @typing.overload
     def results(self, 
         query_filters:'list[list]'=[],
-        query_options:'QueryOptions'={},
-    /) -> 'int|DiskSmartTestResult|list[DiskSmartTestResult]': 
+        query_options:'QueryOptions_'={},
+    /) -> 'typing.Union[int, ForwardRef(DiskSmartTestResult), list[DiskSmartTestResult_]]': 
         """
         Get disk(s) S.M.A.R.T. test(s) results.
         
@@ -159,14 +1441,194 @@ class SmartTest(Namespace):
             query-options
         Returns
         -------
-        int:
-            
-        DiskSmartTestResult:
-            
-        list[DiskSmartTestResult]:
+        typing.Union[int, ForwardRef(DiskSmartTestResult), list[DiskSmartTestResult_]]:
             
         """
         ...
+    Schedule = typing.TypedDict('Schedule', {
+            'hour':'str',
+            'dom':'str',
+            'month':'str',
+            'dow':'str',
+    })
+    SmartTaskCreate = typing.TypedDict('SmartTaskCreate', {
+            'schedule':'Schedule',
+            'desc':'str',
+            'all_disks':'bool',
+            'disks':'list[str]',
+            'type':'str',
+    })
+    Schedule_ = typing.TypedDict('Schedule_', {
+            'hour':'str',
+            'dom':'str',
+            'month':'str',
+            'dow':'str',
+    })
+    SmartTestCreateReturns = typing.TypedDict('SmartTestCreateReturns', {
+            'schedule':'Schedule_',
+            'desc':'str',
+            'all_disks':'bool',
+            'disks':'list[str]',
+            'type':'str',
+            'id':'int',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    DiskRun = typing.TypedDict('DiskRun', {
+            'identifier':'str',
+            'mode':'str',
+            'type':'str',
+    })
+    SmartManualTestDiskResponse = typing.TypedDict('SmartManualTestDiskResponse', {
+            'disk':'str',
+            'identifier':'str',
+            'error':'typing.Optional[str]',
+            'expected_result_time':'str',
+            'job':'int',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Schedule__ = typing.TypedDict('Schedule__', {
+            'hour':'str',
+            'dom':'str',
+            'month':'str',
+            'dow':'str',
+    })
+    SmartTaskEntry = typing.TypedDict('SmartTaskEntry', {
+            'schedule':'Schedule__',
+            'desc':'str',
+            'all_disks':'bool',
+            'disks':'list[str]',
+            'type':'str',
+            'id':'int',
+    })
+    Schedule___ = typing.TypedDict('Schedule___', {
+            'hour':'str',
+            'dom':'str',
+            'month':'str',
+            'dow':'str',
+    })
+    SmartTaskEntry_ = typing.TypedDict('SmartTaskEntry_', {
+            'schedule':'Schedule___',
+            'desc':'str',
+            'all_disks':'bool',
+            'disks':'list[str]',
+            'type':'str',
+            'id':'int',
+    })
+    Schedule____ = typing.TypedDict('Schedule____', {
+            'hour':'str',
+            'dom':'str',
+            'month':'str',
+            'dow':'str',
+    })
+    SmartTaskEntry__ = typing.TypedDict('SmartTaskEntry__', {
+            'schedule':'Schedule____',
+            'desc':'str',
+            'all_disks':'bool',
+            'disks':'list[str]',
+            'type':'str',
+            'id':'int',
+    })
+    QueryOptions_ = typing.TypedDict('QueryOptions_', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    TestResult = typing.TypedDict('TestResult', {
+            'num':'int',
+            'description':'str',
+            'status':'str',
+            'status_verbose':'str',
+            'remaining':'float',
+            'lifetime':'int',
+            'lba_of_first_error':'typing.Optional[str]',
+    })
+    CurrentTest = typing.TypedDict('CurrentTest', {
+            'progress':'int',
+    })
+    DiskSmartTestResult = typing.TypedDict('DiskSmartTestResult', {
+            'disk':'str',
+            'tests':'list[TestResult]',
+            'current_test':'CurrentTest',
+    })
+    TestResult_ = typing.TypedDict('TestResult_', {
+            'num':'int',
+            'description':'str',
+            'status':'str',
+            'status_verbose':'str',
+            'remaining':'float',
+            'lifetime':'int',
+            'lba_of_first_error':'typing.Optional[str]',
+    })
+    CurrentTest_ = typing.TypedDict('CurrentTest_', {
+            'progress':'int',
+    })
+    DiskSmartTestResult_ = typing.TypedDict('DiskSmartTestResult_', {
+            'disk':'str',
+            'tests':'list[TestResult_]',
+            'current_test':'CurrentTest_',
+    })
+    Schedule_____ = typing.TypedDict('Schedule_____', {
+            'hour':'str',
+            'dom':'str',
+            'month':'str',
+            'dow':'str',
+    })
+    SmartTestUpdate = typing.TypedDict('SmartTestUpdate', {
+            'schedule':'Schedule_____',
+            'desc':'str',
+            'all_disks':'bool',
+            'disks':'list[str]',
+            'type':'str',
+    })
+    Schedule______ = typing.TypedDict('Schedule______', {
+            'hour':'str',
+            'dom':'str',
+            'month':'str',
+            'dow':'str',
+    })
+    SmartTestUpdateReturns = typing.TypedDict('SmartTestUpdateReturns', {
+            'schedule':'Schedule______',
+            'desc':'str',
+            'all_disks':'bool',
+            'disks':'list[str]',
+            'type':'str',
+            'id':'int',
+    })
     @typing.overload
     def update(self, 
         id:'int',
@@ -188,105 +1650,188 @@ class SmartTest(Namespace):
             smart_test_update_returns
         """
         ...
+    Schedule = typing.TypedDict('Schedule', {
+            'hour':'str',
+            'dom':'str',
+            'month':'str',
+            'dow':'str',
+    })
+    SmartTaskCreate = typing.TypedDict('SmartTaskCreate', {
+            'schedule':'Schedule',
+            'desc':'str',
+            'all_disks':'bool',
+            'disks':'list[str]',
+            'type':'str',
+    })
+    Schedule_ = typing.TypedDict('Schedule_', {
+            'hour':'str',
+            'dom':'str',
+            'month':'str',
+            'dow':'str',
+    })
+    SmartTestCreateReturns = typing.TypedDict('SmartTestCreateReturns', {
+            'schedule':'Schedule_',
+            'desc':'str',
+            'all_disks':'bool',
+            'disks':'list[str]',
+            'type':'str',
+            'id':'int',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    DiskRun = typing.TypedDict('DiskRun', {
+            'identifier':'str',
+            'mode':'str',
+            'type':'str',
+    })
+    SmartManualTestDiskResponse = typing.TypedDict('SmartManualTestDiskResponse', {
+            'disk':'str',
+            'identifier':'str',
+            'error':'typing.Optional[str]',
+            'expected_result_time':'str',
+            'job':'int',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Schedule__ = typing.TypedDict('Schedule__', {
+            'hour':'str',
+            'dom':'str',
+            'month':'str',
+            'dow':'str',
+    })
+    SmartTaskEntry = typing.TypedDict('SmartTaskEntry', {
+            'schedule':'Schedule__',
+            'desc':'str',
+            'all_disks':'bool',
+            'disks':'list[str]',
+            'type':'str',
+            'id':'int',
+    })
+    Schedule___ = typing.TypedDict('Schedule___', {
+            'hour':'str',
+            'dom':'str',
+            'month':'str',
+            'dow':'str',
+    })
+    SmartTaskEntry_ = typing.TypedDict('SmartTaskEntry_', {
+            'schedule':'Schedule___',
+            'desc':'str',
+            'all_disks':'bool',
+            'disks':'list[str]',
+            'type':'str',
+            'id':'int',
+    })
+    Schedule____ = typing.TypedDict('Schedule____', {
+            'hour':'str',
+            'dom':'str',
+            'month':'str',
+            'dow':'str',
+    })
+    SmartTaskEntry__ = typing.TypedDict('SmartTaskEntry__', {
+            'schedule':'Schedule____',
+            'desc':'str',
+            'all_disks':'bool',
+            'disks':'list[str]',
+            'type':'str',
+            'id':'int',
+    })
+    QueryOptions_ = typing.TypedDict('QueryOptions_', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    TestResult = typing.TypedDict('TestResult', {
+            'num':'int',
+            'description':'str',
+            'status':'str',
+            'status_verbose':'str',
+            'remaining':'float',
+            'lifetime':'int',
+            'lba_of_first_error':'typing.Optional[str]',
+    })
+    CurrentTest = typing.TypedDict('CurrentTest', {
+            'progress':'int',
+    })
+    DiskSmartTestResult = typing.TypedDict('DiskSmartTestResult', {
+            'disk':'str',
+            'tests':'list[TestResult]',
+            'current_test':'CurrentTest',
+    })
+    TestResult_ = typing.TypedDict('TestResult_', {
+            'num':'int',
+            'description':'str',
+            'status':'str',
+            'status_verbose':'str',
+            'remaining':'float',
+            'lifetime':'int',
+            'lba_of_first_error':'typing.Optional[str]',
+    })
+    CurrentTest_ = typing.TypedDict('CurrentTest_', {
+            'progress':'int',
+    })
+    DiskSmartTestResult_ = typing.TypedDict('DiskSmartTestResult_', {
+            'disk':'str',
+            'tests':'list[TestResult_]',
+            'current_test':'CurrentTest_',
+    })
+    Schedule_____ = typing.TypedDict('Schedule_____', {
+            'hour':'str',
+            'dom':'str',
+            'month':'str',
+            'dow':'str',
+    })
+    SmartTestUpdate = typing.TypedDict('SmartTestUpdate', {
+            'schedule':'Schedule_____',
+            'desc':'str',
+            'all_disks':'bool',
+            'disks':'list[str]',
+            'type':'str',
+    })
+    Schedule______ = typing.TypedDict('Schedule______', {
+            'hour':'str',
+            'dom':'str',
+            'month':'str',
+            'dow':'str',
+    })
+    SmartTestUpdateReturns = typing.TypedDict('SmartTestUpdateReturns', {
+            'schedule':'Schedule______',
+            'desc':'str',
+            'all_disks':'bool',
+            'disks':'list[str]',
+            'type':'str',
+            'id':'int',
+    })
 
-class SmartTaskCreate(typing.TypedDict):
-        schedule:'Schedule'
-        desc:'str'
-        all_disks:'bool'
-        disks:'list[str]'
-        type:'str'
-        ...
-class Schedule(typing.TypedDict):
-        hour:'str'
-        dom:'str'
-        month:'str'
-        dow:'str'
-        ...
-class SmartTestCreateReturns(typing.TypedDict):
-        schedule:'Schedule'
-        desc:'str'
-        all_disks:'bool'
-        disks:'list[str]'
-        type:'str'
-        id:'int'
-        ...
-class QueryOptionsGetInstance(typing.TypedDict):
-        relationships:'bool'
-        extend:'typing.Optional[str]'
-        extend_context:'typing.Optional[str]'
-        prefix:'typing.Optional[str]'
-        extra:'dict[str]'
-        order_by:'list'
-        select:'list'
-        count:'bool'
-        get:'bool'
-        offset:'int'
-        limit:'int'
-        force_sql_filters:'bool'
-        ...
-class DiskRun(typing.TypedDict):
-        identifier:'str'
-        mode:'str'
-        type:'str'
-        ...
-class SmartManualTestDiskResponse(typing.TypedDict):
-        disk:'str'
-        identifier:'str'
-        error:'typing.Optional[str]'
-        expected_result_time:'str'
-        job:'int'
-        ...
-class QueryOptions(typing.TypedDict):
-        relationships:'bool'
-        extend:'typing.Optional[str]'
-        extend_context:'typing.Optional[str]'
-        prefix:'typing.Optional[str]'
-        extra:'dict[str]'
-        order_by:'list'
-        select:'list'
-        count:'bool'
-        get:'bool'
-        offset:'int'
-        limit:'int'
-        force_sql_filters:'bool'
-        ...
-class SmartTaskEntry(typing.TypedDict):
-        schedule:'Schedule'
-        desc:'str'
-        all_disks:'bool'
-        disks:'list[str]'
-        type:'str'
-        id:'int'
-        ...
-class DiskSmartTestResult(typing.TypedDict):
-        disk:'str'
-        tests:'list[TestResult]'
-        current_test:'CurrentTest'
-        ...
-class TestResult(typing.TypedDict):
-        num:'int'
-        description:'str'
-        status:'str'
-        status_verbose:'str'
-        remaining:'float'
-        lifetime:'int'
-        lba_of_first_error:'typing.Optional[str]'
-        ...
-class CurrentTest(typing.TypedDict):
-        progress:'int'
-        ...
-class SmartTestUpdate(typing.TypedDict):
-        schedule:'Schedule'
-        desc:'str'
-        all_disks:'bool'
-        disks:'list[str]'
-        type:'str'
-        ...
-class SmartTestUpdateReturns(typing.TypedDict):
-        schedule:'Schedule'
-        desc:'str'
-        all_disks:'bool'
-        disks:'list[str]'
-        type:'str'
-        id:'int'
-        ...

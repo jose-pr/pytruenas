@@ -19,6 +19,93 @@ class Cloud_backup(Namespace):
         -------
         """
         ...
+    Schedule = typing.TypedDict('Schedule', {
+            'minute':'str',
+            'hour':'str',
+            'dom':'str',
+            'month':'str',
+            'dow':'str',
+    })
+    CloudSyncBwlimit = typing.TypedDict('CloudSyncBwlimit', {
+            'time':'str',
+            'bandwidth':'typing.Optional[int]',
+    })
+    CloudBackupCreate = typing.TypedDict('CloudBackupCreate', {
+            'description':'str',
+            'path':'str',
+            'credentials':'int',
+            'attributes':'dict[str]',
+            'schedule':'Schedule',
+            'pre_script':'str',
+            'post_script':'str',
+            'snapshot':'bool',
+            'bwlimit':'list[CloudSyncBwlimit]',
+            'include':'list[str]',
+            'exclude':'list[str]',
+            'transfers':'typing.Optional[int]',
+            'args':'str',
+            'enabled':'bool',
+            'password':'str',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    CloudBackupSyncOptions = typing.TypedDict('CloudBackupSyncOptions', {
+            'dry_run':'bool',
+    })
+    Schedule_ = typing.TypedDict('Schedule_', {
+            'minute':'str',
+            'hour':'str',
+            'dom':'str',
+            'month':'str',
+            'dow':'str',
+    })
+    CloudSyncBwlimit_ = typing.TypedDict('CloudSyncBwlimit_', {
+            'time':'str',
+            'bandwidth':'typing.Optional[int]',
+    })
+    CloudBackupUpdate = typing.TypedDict('CloudBackupUpdate', {
+            'description':'str',
+            'path':'str',
+            'credentials':'int',
+            'attributes':'dict[str]',
+            'schedule':'Schedule_',
+            'pre_script':'str',
+            'post_script':'str',
+            'snapshot':'bool',
+            'bwlimit':'list[CloudSyncBwlimit_]',
+            'include':'list[str]',
+            'exclude':'list[str]',
+            'transfers':'typing.Optional[int]',
+            'args':'str',
+            'enabled':'bool',
+            'password':'str',
+    })
     @typing.overload
     def create(self, 
         cloud_backup_create:'CloudBackupCreate'={},
@@ -36,6 +123,93 @@ class Cloud_backup(Namespace):
             cloud_backup_create_returns
         """
         ...
+    Schedule = typing.TypedDict('Schedule', {
+            'minute':'str',
+            'hour':'str',
+            'dom':'str',
+            'month':'str',
+            'dow':'str',
+    })
+    CloudSyncBwlimit = typing.TypedDict('CloudSyncBwlimit', {
+            'time':'str',
+            'bandwidth':'typing.Optional[int]',
+    })
+    CloudBackupCreate = typing.TypedDict('CloudBackupCreate', {
+            'description':'str',
+            'path':'str',
+            'credentials':'int',
+            'attributes':'dict[str]',
+            'schedule':'Schedule',
+            'pre_script':'str',
+            'post_script':'str',
+            'snapshot':'bool',
+            'bwlimit':'list[CloudSyncBwlimit]',
+            'include':'list[str]',
+            'exclude':'list[str]',
+            'transfers':'typing.Optional[int]',
+            'args':'str',
+            'enabled':'bool',
+            'password':'str',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    CloudBackupSyncOptions = typing.TypedDict('CloudBackupSyncOptions', {
+            'dry_run':'bool',
+    })
+    Schedule_ = typing.TypedDict('Schedule_', {
+            'minute':'str',
+            'hour':'str',
+            'dom':'str',
+            'month':'str',
+            'dow':'str',
+    })
+    CloudSyncBwlimit_ = typing.TypedDict('CloudSyncBwlimit_', {
+            'time':'str',
+            'bandwidth':'typing.Optional[int]',
+    })
+    CloudBackupUpdate = typing.TypedDict('CloudBackupUpdate', {
+            'description':'str',
+            'path':'str',
+            'credentials':'int',
+            'attributes':'dict[str]',
+            'schedule':'Schedule_',
+            'pre_script':'str',
+            'post_script':'str',
+            'snapshot':'bool',
+            'bwlimit':'list[CloudSyncBwlimit_]',
+            'include':'list[str]',
+            'exclude':'list[str]',
+            'transfers':'typing.Optional[int]',
+            'args':'str',
+            'enabled':'bool',
+            'password':'str',
+    })
     @typing.overload
     def delete(self, 
         id:'int',
@@ -53,9 +227,96 @@ class Cloud_backup(Namespace):
             Will return `true` if `id` is deleted successfully
         """
         ...
+    Schedule = typing.TypedDict('Schedule', {
+            'minute':'str',
+            'hour':'str',
+            'dom':'str',
+            'month':'str',
+            'dow':'str',
+    })
+    CloudSyncBwlimit = typing.TypedDict('CloudSyncBwlimit', {
+            'time':'str',
+            'bandwidth':'typing.Optional[int]',
+    })
+    CloudBackupCreate = typing.TypedDict('CloudBackupCreate', {
+            'description':'str',
+            'path':'str',
+            'credentials':'int',
+            'attributes':'dict[str]',
+            'schedule':'Schedule',
+            'pre_script':'str',
+            'post_script':'str',
+            'snapshot':'bool',
+            'bwlimit':'list[CloudSyncBwlimit]',
+            'include':'list[str]',
+            'exclude':'list[str]',
+            'transfers':'typing.Optional[int]',
+            'args':'str',
+            'enabled':'bool',
+            'password':'str',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    CloudBackupSyncOptions = typing.TypedDict('CloudBackupSyncOptions', {
+            'dry_run':'bool',
+    })
+    Schedule_ = typing.TypedDict('Schedule_', {
+            'minute':'str',
+            'hour':'str',
+            'dom':'str',
+            'month':'str',
+            'dow':'str',
+    })
+    CloudSyncBwlimit_ = typing.TypedDict('CloudSyncBwlimit_', {
+            'time':'str',
+            'bandwidth':'typing.Optional[int]',
+    })
+    CloudBackupUpdate = typing.TypedDict('CloudBackupUpdate', {
+            'description':'str',
+            'path':'str',
+            'credentials':'int',
+            'attributes':'dict[str]',
+            'schedule':'Schedule_',
+            'pre_script':'str',
+            'post_script':'str',
+            'snapshot':'bool',
+            'bwlimit':'list[CloudSyncBwlimit_]',
+            'include':'list[str]',
+            'exclude':'list[str]',
+            'transfers':'typing.Optional[int]',
+            'args':'str',
+            'enabled':'bool',
+            'password':'str',
+    })
     @typing.overload
     def get_instance(self, 
-        id:'str|int|bool|dict[str]|list',
+        id:'typing.Union[str, int, bool, dict[str], list]',
         query_options_get_instance:'QueryOptionsGetInstance'={},
     /) -> None: 
         """
@@ -73,6 +334,93 @@ class Cloud_backup(Namespace):
         -------
         """
         ...
+    Schedule = typing.TypedDict('Schedule', {
+            'minute':'str',
+            'hour':'str',
+            'dom':'str',
+            'month':'str',
+            'dow':'str',
+    })
+    CloudSyncBwlimit = typing.TypedDict('CloudSyncBwlimit', {
+            'time':'str',
+            'bandwidth':'typing.Optional[int]',
+    })
+    CloudBackupCreate = typing.TypedDict('CloudBackupCreate', {
+            'description':'str',
+            'path':'str',
+            'credentials':'int',
+            'attributes':'dict[str]',
+            'schedule':'Schedule',
+            'pre_script':'str',
+            'post_script':'str',
+            'snapshot':'bool',
+            'bwlimit':'list[CloudSyncBwlimit]',
+            'include':'list[str]',
+            'exclude':'list[str]',
+            'transfers':'typing.Optional[int]',
+            'args':'str',
+            'enabled':'bool',
+            'password':'str',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    CloudBackupSyncOptions = typing.TypedDict('CloudBackupSyncOptions', {
+            'dry_run':'bool',
+    })
+    Schedule_ = typing.TypedDict('Schedule_', {
+            'minute':'str',
+            'hour':'str',
+            'dom':'str',
+            'month':'str',
+            'dow':'str',
+    })
+    CloudSyncBwlimit_ = typing.TypedDict('CloudSyncBwlimit_', {
+            'time':'str',
+            'bandwidth':'typing.Optional[int]',
+    })
+    CloudBackupUpdate = typing.TypedDict('CloudBackupUpdate', {
+            'description':'str',
+            'path':'str',
+            'credentials':'int',
+            'attributes':'dict[str]',
+            'schedule':'Schedule_',
+            'pre_script':'str',
+            'post_script':'str',
+            'snapshot':'bool',
+            'bwlimit':'list[CloudSyncBwlimit_]',
+            'include':'list[str]',
+            'exclude':'list[str]',
+            'transfers':'typing.Optional[int]',
+            'args':'str',
+            'enabled':'bool',
+            'password':'str',
+    })
     @typing.overload
     def init(self, 
         id:'int',
@@ -88,11 +436,98 @@ class Cloud_backup(Namespace):
         -------
         """
         ...
+    Schedule = typing.TypedDict('Schedule', {
+            'minute':'str',
+            'hour':'str',
+            'dom':'str',
+            'month':'str',
+            'dow':'str',
+    })
+    CloudSyncBwlimit = typing.TypedDict('CloudSyncBwlimit', {
+            'time':'str',
+            'bandwidth':'typing.Optional[int]',
+    })
+    CloudBackupCreate = typing.TypedDict('CloudBackupCreate', {
+            'description':'str',
+            'path':'str',
+            'credentials':'int',
+            'attributes':'dict[str]',
+            'schedule':'Schedule',
+            'pre_script':'str',
+            'post_script':'str',
+            'snapshot':'bool',
+            'bwlimit':'list[CloudSyncBwlimit]',
+            'include':'list[str]',
+            'exclude':'list[str]',
+            'transfers':'typing.Optional[int]',
+            'args':'str',
+            'enabled':'bool',
+            'password':'str',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    CloudBackupSyncOptions = typing.TypedDict('CloudBackupSyncOptions', {
+            'dry_run':'bool',
+    })
+    Schedule_ = typing.TypedDict('Schedule_', {
+            'minute':'str',
+            'hour':'str',
+            'dom':'str',
+            'month':'str',
+            'dow':'str',
+    })
+    CloudSyncBwlimit_ = typing.TypedDict('CloudSyncBwlimit_', {
+            'time':'str',
+            'bandwidth':'typing.Optional[int]',
+    })
+    CloudBackupUpdate = typing.TypedDict('CloudBackupUpdate', {
+            'description':'str',
+            'path':'str',
+            'credentials':'int',
+            'attributes':'dict[str]',
+            'schedule':'Schedule_',
+            'pre_script':'str',
+            'post_script':'str',
+            'snapshot':'bool',
+            'bwlimit':'list[CloudSyncBwlimit_]',
+            'include':'list[str]',
+            'exclude':'list[str]',
+            'transfers':'typing.Optional[int]',
+            'args':'str',
+            'enabled':'bool',
+            'password':'str',
+    })
     @typing.overload
     def query(self, 
         query_filters:'list[list]'=[],
         query_options:'QueryOptions'={},
-    /) -> 'list[dict[str]]|dict[str]|int|dict[str]': 
+    /) -> 'typing.Union[list[dict[str]], dict[str], int]': 
         """
         
 
@@ -104,16 +539,97 @@ class Cloud_backup(Namespace):
             query-options
         Returns
         -------
-        list[dict[str]]:
-            
-        dict[str]:
-            
-        int:
-            
-        dict[str]:
+        typing.Union[list[dict[str]], dict[str], int]:
             
         """
         ...
+    Schedule = typing.TypedDict('Schedule', {
+            'minute':'str',
+            'hour':'str',
+            'dom':'str',
+            'month':'str',
+            'dow':'str',
+    })
+    CloudSyncBwlimit = typing.TypedDict('CloudSyncBwlimit', {
+            'time':'str',
+            'bandwidth':'typing.Optional[int]',
+    })
+    CloudBackupCreate = typing.TypedDict('CloudBackupCreate', {
+            'description':'str',
+            'path':'str',
+            'credentials':'int',
+            'attributes':'dict[str]',
+            'schedule':'Schedule',
+            'pre_script':'str',
+            'post_script':'str',
+            'snapshot':'bool',
+            'bwlimit':'list[CloudSyncBwlimit]',
+            'include':'list[str]',
+            'exclude':'list[str]',
+            'transfers':'typing.Optional[int]',
+            'args':'str',
+            'enabled':'bool',
+            'password':'str',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    CloudBackupSyncOptions = typing.TypedDict('CloudBackupSyncOptions', {
+            'dry_run':'bool',
+    })
+    Schedule_ = typing.TypedDict('Schedule_', {
+            'minute':'str',
+            'hour':'str',
+            'dom':'str',
+            'month':'str',
+            'dow':'str',
+    })
+    CloudSyncBwlimit_ = typing.TypedDict('CloudSyncBwlimit_', {
+            'time':'str',
+            'bandwidth':'typing.Optional[int]',
+    })
+    CloudBackupUpdate = typing.TypedDict('CloudBackupUpdate', {
+            'description':'str',
+            'path':'str',
+            'credentials':'int',
+            'attributes':'dict[str]',
+            'schedule':'Schedule_',
+            'pre_script':'str',
+            'post_script':'str',
+            'snapshot':'bool',
+            'bwlimit':'list[CloudSyncBwlimit_]',
+            'include':'list[str]',
+            'exclude':'list[str]',
+            'transfers':'typing.Optional[int]',
+            'args':'str',
+            'enabled':'bool',
+            'password':'str',
+    })
     @typing.overload
     def sync(self, 
         id:'int',
@@ -132,6 +648,93 @@ class Cloud_backup(Namespace):
         -------
         """
         ...
+    Schedule = typing.TypedDict('Schedule', {
+            'minute':'str',
+            'hour':'str',
+            'dom':'str',
+            'month':'str',
+            'dow':'str',
+    })
+    CloudSyncBwlimit = typing.TypedDict('CloudSyncBwlimit', {
+            'time':'str',
+            'bandwidth':'typing.Optional[int]',
+    })
+    CloudBackupCreate = typing.TypedDict('CloudBackupCreate', {
+            'description':'str',
+            'path':'str',
+            'credentials':'int',
+            'attributes':'dict[str]',
+            'schedule':'Schedule',
+            'pre_script':'str',
+            'post_script':'str',
+            'snapshot':'bool',
+            'bwlimit':'list[CloudSyncBwlimit]',
+            'include':'list[str]',
+            'exclude':'list[str]',
+            'transfers':'typing.Optional[int]',
+            'args':'str',
+            'enabled':'bool',
+            'password':'str',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    CloudBackupSyncOptions = typing.TypedDict('CloudBackupSyncOptions', {
+            'dry_run':'bool',
+    })
+    Schedule_ = typing.TypedDict('Schedule_', {
+            'minute':'str',
+            'hour':'str',
+            'dom':'str',
+            'month':'str',
+            'dow':'str',
+    })
+    CloudSyncBwlimit_ = typing.TypedDict('CloudSyncBwlimit_', {
+            'time':'str',
+            'bandwidth':'typing.Optional[int]',
+    })
+    CloudBackupUpdate = typing.TypedDict('CloudBackupUpdate', {
+            'description':'str',
+            'path':'str',
+            'credentials':'int',
+            'attributes':'dict[str]',
+            'schedule':'Schedule_',
+            'pre_script':'str',
+            'post_script':'str',
+            'snapshot':'bool',
+            'bwlimit':'list[CloudSyncBwlimit_]',
+            'include':'list[str]',
+            'exclude':'list[str]',
+            'transfers':'typing.Optional[int]',
+            'args':'str',
+            'enabled':'bool',
+            'password':'str',
+    })
     @typing.overload
     def update(self, 
         id:'int',
@@ -152,80 +755,91 @@ class Cloud_backup(Namespace):
             cloud_backup_update_returns
         """
         ...
+    Schedule = typing.TypedDict('Schedule', {
+            'minute':'str',
+            'hour':'str',
+            'dom':'str',
+            'month':'str',
+            'dow':'str',
+    })
+    CloudSyncBwlimit = typing.TypedDict('CloudSyncBwlimit', {
+            'time':'str',
+            'bandwidth':'typing.Optional[int]',
+    })
+    CloudBackupCreate = typing.TypedDict('CloudBackupCreate', {
+            'description':'str',
+            'path':'str',
+            'credentials':'int',
+            'attributes':'dict[str]',
+            'schedule':'Schedule',
+            'pre_script':'str',
+            'post_script':'str',
+            'snapshot':'bool',
+            'bwlimit':'list[CloudSyncBwlimit]',
+            'include':'list[str]',
+            'exclude':'list[str]',
+            'transfers':'typing.Optional[int]',
+            'args':'str',
+            'enabled':'bool',
+            'password':'str',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    CloudBackupSyncOptions = typing.TypedDict('CloudBackupSyncOptions', {
+            'dry_run':'bool',
+    })
+    Schedule_ = typing.TypedDict('Schedule_', {
+            'minute':'str',
+            'hour':'str',
+            'dom':'str',
+            'month':'str',
+            'dow':'str',
+    })
+    CloudSyncBwlimit_ = typing.TypedDict('CloudSyncBwlimit_', {
+            'time':'str',
+            'bandwidth':'typing.Optional[int]',
+    })
+    CloudBackupUpdate = typing.TypedDict('CloudBackupUpdate', {
+            'description':'str',
+            'path':'str',
+            'credentials':'int',
+            'attributes':'dict[str]',
+            'schedule':'Schedule_',
+            'pre_script':'str',
+            'post_script':'str',
+            'snapshot':'bool',
+            'bwlimit':'list[CloudSyncBwlimit_]',
+            'include':'list[str]',
+            'exclude':'list[str]',
+            'transfers':'typing.Optional[int]',
+            'args':'str',
+            'enabled':'bool',
+            'password':'str',
+    })
 
-class CloudBackupCreate(typing.TypedDict):
-        description:'str'
-        path:'str'
-        credentials:'int'
-        attributes:'dict[str]'
-        schedule:'Schedule'
-        pre_script:'str'
-        post_script:'str'
-        snapshot:'bool'
-        bwlimit:'list[CloudSyncBwlimit]'
-        include:'list[str]'
-        exclude:'list[str]'
-        transfers:'typing.Optional[int]'
-        args:'str'
-        enabled:'bool'
-        password:'str'
-        ...
-class Schedule(typing.TypedDict):
-        minute:'str'
-        hour:'str'
-        dom:'str'
-        month:'str'
-        dow:'str'
-        ...
-class CloudSyncBwlimit(typing.TypedDict):
-        time:'str'
-        bandwidth:'typing.Optional[int]'
-        ...
-class QueryOptionsGetInstance(typing.TypedDict):
-        relationships:'bool'
-        extend:'typing.Optional[str]'
-        extend_context:'typing.Optional[str]'
-        prefix:'typing.Optional[str]'
-        extra:'dict[str]'
-        order_by:'list'
-        select:'list'
-        count:'bool'
-        get:'bool'
-        offset:'int'
-        limit:'int'
-        force_sql_filters:'bool'
-        ...
-class QueryOptions(typing.TypedDict):
-        relationships:'bool'
-        extend:'typing.Optional[str]'
-        extend_context:'typing.Optional[str]'
-        prefix:'typing.Optional[str]'
-        extra:'dict[str]'
-        order_by:'list'
-        select:'list'
-        count:'bool'
-        get:'bool'
-        offset:'int'
-        limit:'int'
-        force_sql_filters:'bool'
-        ...
-class CloudBackupSyncOptions(typing.TypedDict):
-        dry_run:'bool'
-        ...
-class CloudBackupUpdate(typing.TypedDict):
-        description:'str'
-        path:'str'
-        credentials:'int'
-        attributes:'dict[str]'
-        schedule:'Schedule'
-        pre_script:'str'
-        post_script:'str'
-        snapshot:'bool'
-        bwlimit:'list[CloudSyncBwlimit]'
-        include:'list[str]'
-        exclude:'list[str]'
-        transfers:'typing.Optional[int]'
-        args:'str'
-        enabled:'bool'
-        password:'str'
-        ...

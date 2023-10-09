@@ -18,6 +18,35 @@ class Truecommand(Namespace):
             truecommand_entry
         """
         ...
+    TruecommandEntry = typing.TypedDict('TruecommandEntry', {
+            'id':'int',
+            'api_key':'typing.Optional[str]',
+            'status':'str',
+            'status_reason':'str',
+            'remote_url':'typing.Optional[str]',
+            'remote_ip_address':'typing.Optional[str]',
+            'enabled':'bool',
+    })
+    TruecommandConnected = typing.TypedDict('TruecommandConnected', {
+            'connected':'bool',
+            'truecommand_ip':'typing.Optional[str]',
+            'truecommand_url':'typing.Optional[str]',
+            'status':'str',
+            'status_reason':'str',
+    })
+    TruecommandUpdate = typing.TypedDict('TruecommandUpdate', {
+            'enabled':'bool',
+            'api_key':'typing.Optional[str]',
+    })
+    TruecommandUpdateReturns = typing.TypedDict('TruecommandUpdateReturns', {
+            'id':'int',
+            'api_key':'typing.Optional[str]',
+            'status':'str',
+            'status_reason':'str',
+            'remote_url':'typing.Optional[str]',
+            'remote_ip_address':'typing.Optional[str]',
+            'enabled':'bool',
+    })
     @typing.overload
     def connected(self, 
     /) -> 'TruecommandConnected': 
@@ -33,6 +62,35 @@ class Truecommand(Namespace):
             truecommand_connected
         """
         ...
+    TruecommandEntry = typing.TypedDict('TruecommandEntry', {
+            'id':'int',
+            'api_key':'typing.Optional[str]',
+            'status':'str',
+            'status_reason':'str',
+            'remote_url':'typing.Optional[str]',
+            'remote_ip_address':'typing.Optional[str]',
+            'enabled':'bool',
+    })
+    TruecommandConnected = typing.TypedDict('TruecommandConnected', {
+            'connected':'bool',
+            'truecommand_ip':'typing.Optional[str]',
+            'truecommand_url':'typing.Optional[str]',
+            'status':'str',
+            'status_reason':'str',
+    })
+    TruecommandUpdate = typing.TypedDict('TruecommandUpdate', {
+            'enabled':'bool',
+            'api_key':'typing.Optional[str]',
+    })
+    TruecommandUpdateReturns = typing.TypedDict('TruecommandUpdateReturns', {
+            'id':'int',
+            'api_key':'typing.Optional[str]',
+            'status':'str',
+            'status_reason':'str',
+            'remote_url':'typing.Optional[str]',
+            'remote_ip_address':'typing.Optional[str]',
+            'enabled':'bool',
+    })
     @typing.overload
     def update(self, 
         truecommand_update:'TruecommandUpdate'={},
@@ -52,33 +110,33 @@ class Truecommand(Namespace):
             truecommand_update_returns
         """
         ...
+    TruecommandEntry = typing.TypedDict('TruecommandEntry', {
+            'id':'int',
+            'api_key':'typing.Optional[str]',
+            'status':'str',
+            'status_reason':'str',
+            'remote_url':'typing.Optional[str]',
+            'remote_ip_address':'typing.Optional[str]',
+            'enabled':'bool',
+    })
+    TruecommandConnected = typing.TypedDict('TruecommandConnected', {
+            'connected':'bool',
+            'truecommand_ip':'typing.Optional[str]',
+            'truecommand_url':'typing.Optional[str]',
+            'status':'str',
+            'status_reason':'str',
+    })
+    TruecommandUpdate = typing.TypedDict('TruecommandUpdate', {
+            'enabled':'bool',
+            'api_key':'typing.Optional[str]',
+    })
+    TruecommandUpdateReturns = typing.TypedDict('TruecommandUpdateReturns', {
+            'id':'int',
+            'api_key':'typing.Optional[str]',
+            'status':'str',
+            'status_reason':'str',
+            'remote_url':'typing.Optional[str]',
+            'remote_ip_address':'typing.Optional[str]',
+            'enabled':'bool',
+    })
 
-class TruecommandEntry(typing.TypedDict):
-        id:'int'
-        api_key:'typing.Optional[str]'
-        status:'str'
-        status_reason:'str'
-        remote_url:'typing.Optional[str]'
-        remote_ip_address:'typing.Optional[str]'
-        enabled:'bool'
-        ...
-class TruecommandConnected(typing.TypedDict):
-        connected:'bool'
-        truecommand_ip:'typing.Optional[str]'
-        truecommand_url:'typing.Optional[str]'
-        status:'str'
-        status_reason:'str'
-        ...
-class TruecommandUpdate(typing.TypedDict):
-        enabled:'bool'
-        api_key:'typing.Optional[str]'
-        ...
-class TruecommandUpdateReturns(typing.TypedDict):
-        id:'int'
-        api_key:'typing.Optional[str]'
-        status:'str'
-        status_reason:'str'
-        remote_url:'typing.Optional[str]'
-        remote_ip_address:'typing.Optional[str]'
-        enabled:'bool'
-        ...

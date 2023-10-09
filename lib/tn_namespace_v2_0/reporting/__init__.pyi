@@ -16,6 +16,145 @@ class Reporting(Namespace):
         -------
         """
         ...
+    ReportingEntry = typing.TypedDict('ReportingEntry', {
+            'graphite':'str',
+            'graphite_separateinstances':'bool',
+            'graph_age':'int',
+            'graph_points':'int',
+            'id':'int',
+    })
+    Graph = typing.TypedDict('Graph', {
+            'name':'str',
+            'identifier':'typing.Optional[str]',
+    })
+    ReportingQuery = typing.TypedDict('ReportingQuery', {
+            'unit':'str',
+            'page':'int',
+            'start':'str',
+            'end':'str',
+            'aggregate':'bool',
+    })
+    Aggregations = typing.TypedDict('Aggregations', {
+            'min':'list',
+            'max':'list',
+            'mean':'list',
+    })
+    GraphReportingData = typing.TypedDict('GraphReportingData', {
+            'name':'str',
+            'identifier':'typing.Optional[str]',
+            'data':'list',
+            'aggregations':'Aggregations',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Graph_ = typing.TypedDict('Graph_', {
+            'name':'str',
+            'title':'str',
+            'vertical_label':'str',
+            'identifiers':'typing.Optional[list[str]]',
+            'stacked':'bool',
+            'stacked_show_total':'bool',
+    })
+    Graph__ = typing.TypedDict('Graph__', {
+            'name':'str',
+            'title':'str',
+            'vertical_label':'str',
+            'identifiers':'typing.Optional[list[str]]',
+            'stacked':'bool',
+            'stacked_show_total':'bool',
+    })
+    Graph___ = typing.TypedDict('Graph___', {
+            'name':'str',
+            'identifier':'typing.Optional[str]',
+    })
+    ReportingQueryNetdata = typing.TypedDict('ReportingQueryNetdata', {
+            'unit':'str',
+            'page':'int',
+            'aggregate':'bool',
+            'start':'int',
+            'end':'int',
+    })
+    Aggregations_ = typing.TypedDict('Aggregations_', {
+            'min':'list',
+            'max':'list',
+            'mean':'list',
+    })
+    NetdataGraphReportingData = typing.TypedDict('NetdataGraphReportingData', {
+            'name':'str',
+            'identifier':'typing.Optional[str]',
+            'data':'list',
+            'aggregations':'Aggregations_',
+    })
+    ReportingQueryNetdata_ = typing.TypedDict('ReportingQueryNetdata_', {
+            'unit':'str',
+            'page':'int',
+            'aggregate':'bool',
+            'start':'int',
+            'end':'int',
+    })
+    Aggregations__ = typing.TypedDict('Aggregations__', {
+            'min':'list',
+            'max':'list',
+            'mean':'list',
+    })
+    NetdataGraphReportingData_ = typing.TypedDict('NetdataGraphReportingData_', {
+            'name':'str',
+            'identifier':'typing.Optional[str]',
+            'data':'list',
+            'aggregations':'Aggregations__',
+    })
+    QueryOptions_ = typing.TypedDict('QueryOptions_', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Graph____ = typing.TypedDict('Graph____', {
+            'name':'str',
+            'title':'str',
+            'vertical_label':'str',
+            'identifiers':'typing.Optional[list[str]]',
+    })
+    Graph_____ = typing.TypedDict('Graph_____', {
+            'name':'str',
+            'title':'str',
+            'vertical_label':'str',
+            'identifiers':'typing.Optional[list[str]]',
+    })
+    ReportingUpdate = typing.TypedDict('ReportingUpdate', {
+            'graphite':'str',
+            'graphite_separateinstances':'bool',
+            'graph_age':'int',
+            'graph_points':'int',
+            'confirm_rrd_destroy':'bool',
+    })
+    ReportingUpdateReturns = typing.TypedDict('ReportingUpdateReturns', {
+            'graphite':'str',
+            'graphite_separateinstances':'bool',
+            'graph_age':'int',
+            'graph_points':'int',
+            'id':'int',
+    })
     @typing.overload
     def config(self, 
     /) -> 'ReportingEntry': 
@@ -30,6 +169,145 @@ class Reporting(Namespace):
             reporting_entry
         """
         ...
+    ReportingEntry = typing.TypedDict('ReportingEntry', {
+            'graphite':'str',
+            'graphite_separateinstances':'bool',
+            'graph_age':'int',
+            'graph_points':'int',
+            'id':'int',
+    })
+    Graph = typing.TypedDict('Graph', {
+            'name':'str',
+            'identifier':'typing.Optional[str]',
+    })
+    ReportingQuery = typing.TypedDict('ReportingQuery', {
+            'unit':'str',
+            'page':'int',
+            'start':'str',
+            'end':'str',
+            'aggregate':'bool',
+    })
+    Aggregations = typing.TypedDict('Aggregations', {
+            'min':'list',
+            'max':'list',
+            'mean':'list',
+    })
+    GraphReportingData = typing.TypedDict('GraphReportingData', {
+            'name':'str',
+            'identifier':'typing.Optional[str]',
+            'data':'list',
+            'aggregations':'Aggregations',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Graph_ = typing.TypedDict('Graph_', {
+            'name':'str',
+            'title':'str',
+            'vertical_label':'str',
+            'identifiers':'typing.Optional[list[str]]',
+            'stacked':'bool',
+            'stacked_show_total':'bool',
+    })
+    Graph__ = typing.TypedDict('Graph__', {
+            'name':'str',
+            'title':'str',
+            'vertical_label':'str',
+            'identifiers':'typing.Optional[list[str]]',
+            'stacked':'bool',
+            'stacked_show_total':'bool',
+    })
+    Graph___ = typing.TypedDict('Graph___', {
+            'name':'str',
+            'identifier':'typing.Optional[str]',
+    })
+    ReportingQueryNetdata = typing.TypedDict('ReportingQueryNetdata', {
+            'unit':'str',
+            'page':'int',
+            'aggregate':'bool',
+            'start':'int',
+            'end':'int',
+    })
+    Aggregations_ = typing.TypedDict('Aggregations_', {
+            'min':'list',
+            'max':'list',
+            'mean':'list',
+    })
+    NetdataGraphReportingData = typing.TypedDict('NetdataGraphReportingData', {
+            'name':'str',
+            'identifier':'typing.Optional[str]',
+            'data':'list',
+            'aggregations':'Aggregations_',
+    })
+    ReportingQueryNetdata_ = typing.TypedDict('ReportingQueryNetdata_', {
+            'unit':'str',
+            'page':'int',
+            'aggregate':'bool',
+            'start':'int',
+            'end':'int',
+    })
+    Aggregations__ = typing.TypedDict('Aggregations__', {
+            'min':'list',
+            'max':'list',
+            'mean':'list',
+    })
+    NetdataGraphReportingData_ = typing.TypedDict('NetdataGraphReportingData_', {
+            'name':'str',
+            'identifier':'typing.Optional[str]',
+            'data':'list',
+            'aggregations':'Aggregations__',
+    })
+    QueryOptions_ = typing.TypedDict('QueryOptions_', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Graph____ = typing.TypedDict('Graph____', {
+            'name':'str',
+            'title':'str',
+            'vertical_label':'str',
+            'identifiers':'typing.Optional[list[str]]',
+    })
+    Graph_____ = typing.TypedDict('Graph_____', {
+            'name':'str',
+            'title':'str',
+            'vertical_label':'str',
+            'identifiers':'typing.Optional[list[str]]',
+    })
+    ReportingUpdate = typing.TypedDict('ReportingUpdate', {
+            'graphite':'str',
+            'graphite_separateinstances':'bool',
+            'graph_age':'int',
+            'graph_points':'int',
+            'confirm_rrd_destroy':'bool',
+    })
+    ReportingUpdateReturns = typing.TypedDict('ReportingUpdateReturns', {
+            'graphite':'str',
+            'graphite_separateinstances':'bool',
+            'graph_age':'int',
+            'graph_points':'int',
+            'id':'int',
+    })
     @typing.overload
     def get_data(self, 
         graphs:'list[Graph]'=[],
@@ -57,11 +335,150 @@ class Reporting(Namespace):
             reporting_data
         """
         ...
+    ReportingEntry = typing.TypedDict('ReportingEntry', {
+            'graphite':'str',
+            'graphite_separateinstances':'bool',
+            'graph_age':'int',
+            'graph_points':'int',
+            'id':'int',
+    })
+    Graph = typing.TypedDict('Graph', {
+            'name':'str',
+            'identifier':'typing.Optional[str]',
+    })
+    ReportingQuery = typing.TypedDict('ReportingQuery', {
+            'unit':'str',
+            'page':'int',
+            'start':'str',
+            'end':'str',
+            'aggregate':'bool',
+    })
+    Aggregations = typing.TypedDict('Aggregations', {
+            'min':'list',
+            'max':'list',
+            'mean':'list',
+    })
+    GraphReportingData = typing.TypedDict('GraphReportingData', {
+            'name':'str',
+            'identifier':'typing.Optional[str]',
+            'data':'list',
+            'aggregations':'Aggregations',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Graph_ = typing.TypedDict('Graph_', {
+            'name':'str',
+            'title':'str',
+            'vertical_label':'str',
+            'identifiers':'typing.Optional[list[str]]',
+            'stacked':'bool',
+            'stacked_show_total':'bool',
+    })
+    Graph__ = typing.TypedDict('Graph__', {
+            'name':'str',
+            'title':'str',
+            'vertical_label':'str',
+            'identifiers':'typing.Optional[list[str]]',
+            'stacked':'bool',
+            'stacked_show_total':'bool',
+    })
+    Graph___ = typing.TypedDict('Graph___', {
+            'name':'str',
+            'identifier':'typing.Optional[str]',
+    })
+    ReportingQueryNetdata = typing.TypedDict('ReportingQueryNetdata', {
+            'unit':'str',
+            'page':'int',
+            'aggregate':'bool',
+            'start':'int',
+            'end':'int',
+    })
+    Aggregations_ = typing.TypedDict('Aggregations_', {
+            'min':'list',
+            'max':'list',
+            'mean':'list',
+    })
+    NetdataGraphReportingData = typing.TypedDict('NetdataGraphReportingData', {
+            'name':'str',
+            'identifier':'typing.Optional[str]',
+            'data':'list',
+            'aggregations':'Aggregations_',
+    })
+    ReportingQueryNetdata_ = typing.TypedDict('ReportingQueryNetdata_', {
+            'unit':'str',
+            'page':'int',
+            'aggregate':'bool',
+            'start':'int',
+            'end':'int',
+    })
+    Aggregations__ = typing.TypedDict('Aggregations__', {
+            'min':'list',
+            'max':'list',
+            'mean':'list',
+    })
+    NetdataGraphReportingData_ = typing.TypedDict('NetdataGraphReportingData_', {
+            'name':'str',
+            'identifier':'typing.Optional[str]',
+            'data':'list',
+            'aggregations':'Aggregations__',
+    })
+    QueryOptions_ = typing.TypedDict('QueryOptions_', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Graph____ = typing.TypedDict('Graph____', {
+            'name':'str',
+            'title':'str',
+            'vertical_label':'str',
+            'identifiers':'typing.Optional[list[str]]',
+    })
+    Graph_____ = typing.TypedDict('Graph_____', {
+            'name':'str',
+            'title':'str',
+            'vertical_label':'str',
+            'identifiers':'typing.Optional[list[str]]',
+    })
+    ReportingUpdate = typing.TypedDict('ReportingUpdate', {
+            'graphite':'str',
+            'graphite_separateinstances':'bool',
+            'graph_age':'int',
+            'graph_points':'int',
+            'confirm_rrd_destroy':'bool',
+    })
+    ReportingUpdateReturns = typing.TypedDict('ReportingUpdateReturns', {
+            'graphite':'str',
+            'graphite_separateinstances':'bool',
+            'graph_age':'int',
+            'graph_points':'int',
+            'id':'int',
+    })
     @typing.overload
     def graphs(self, 
         query_filters:'list[list]'=[],
         query_options:'QueryOptions'={},
-    /) -> 'int|Graph_|list[Graph_]': 
+    /) -> 'typing.Union[int, ForwardRef(Graph_), list[Graph__]]': 
         """
         
 
@@ -73,17 +490,152 @@ class Reporting(Namespace):
             query-options
         Returns
         -------
-        int:
-            
-        Graph_:
-            
-        list[Graph_]:
+        typing.Union[int, ForwardRef(Graph_), list[Graph__]]:
             
         """
         ...
+    ReportingEntry = typing.TypedDict('ReportingEntry', {
+            'graphite':'str',
+            'graphite_separateinstances':'bool',
+            'graph_age':'int',
+            'graph_points':'int',
+            'id':'int',
+    })
+    Graph = typing.TypedDict('Graph', {
+            'name':'str',
+            'identifier':'typing.Optional[str]',
+    })
+    ReportingQuery = typing.TypedDict('ReportingQuery', {
+            'unit':'str',
+            'page':'int',
+            'start':'str',
+            'end':'str',
+            'aggregate':'bool',
+    })
+    Aggregations = typing.TypedDict('Aggregations', {
+            'min':'list',
+            'max':'list',
+            'mean':'list',
+    })
+    GraphReportingData = typing.TypedDict('GraphReportingData', {
+            'name':'str',
+            'identifier':'typing.Optional[str]',
+            'data':'list',
+            'aggregations':'Aggregations',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Graph_ = typing.TypedDict('Graph_', {
+            'name':'str',
+            'title':'str',
+            'vertical_label':'str',
+            'identifiers':'typing.Optional[list[str]]',
+            'stacked':'bool',
+            'stacked_show_total':'bool',
+    })
+    Graph__ = typing.TypedDict('Graph__', {
+            'name':'str',
+            'title':'str',
+            'vertical_label':'str',
+            'identifiers':'typing.Optional[list[str]]',
+            'stacked':'bool',
+            'stacked_show_total':'bool',
+    })
+    Graph___ = typing.TypedDict('Graph___', {
+            'name':'str',
+            'identifier':'typing.Optional[str]',
+    })
+    ReportingQueryNetdata = typing.TypedDict('ReportingQueryNetdata', {
+            'unit':'str',
+            'page':'int',
+            'aggregate':'bool',
+            'start':'int',
+            'end':'int',
+    })
+    Aggregations_ = typing.TypedDict('Aggregations_', {
+            'min':'list',
+            'max':'list',
+            'mean':'list',
+    })
+    NetdataGraphReportingData = typing.TypedDict('NetdataGraphReportingData', {
+            'name':'str',
+            'identifier':'typing.Optional[str]',
+            'data':'list',
+            'aggregations':'Aggregations_',
+    })
+    ReportingQueryNetdata_ = typing.TypedDict('ReportingQueryNetdata_', {
+            'unit':'str',
+            'page':'int',
+            'aggregate':'bool',
+            'start':'int',
+            'end':'int',
+    })
+    Aggregations__ = typing.TypedDict('Aggregations__', {
+            'min':'list',
+            'max':'list',
+            'mean':'list',
+    })
+    NetdataGraphReportingData_ = typing.TypedDict('NetdataGraphReportingData_', {
+            'name':'str',
+            'identifier':'typing.Optional[str]',
+            'data':'list',
+            'aggregations':'Aggregations__',
+    })
+    QueryOptions_ = typing.TypedDict('QueryOptions_', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Graph____ = typing.TypedDict('Graph____', {
+            'name':'str',
+            'title':'str',
+            'vertical_label':'str',
+            'identifiers':'typing.Optional[list[str]]',
+    })
+    Graph_____ = typing.TypedDict('Graph_____', {
+            'name':'str',
+            'title':'str',
+            'vertical_label':'str',
+            'identifiers':'typing.Optional[list[str]]',
+    })
+    ReportingUpdate = typing.TypedDict('ReportingUpdate', {
+            'graphite':'str',
+            'graphite_separateinstances':'bool',
+            'graph_age':'int',
+            'graph_points':'int',
+            'confirm_rrd_destroy':'bool',
+    })
+    ReportingUpdateReturns = typing.TypedDict('ReportingUpdateReturns', {
+            'graphite':'str',
+            'graphite_separateinstances':'bool',
+            'graph_age':'int',
+            'graph_points':'int',
+            'id':'int',
+    })
     @typing.overload
     def netdata_get_data(self, 
-        graphs:'list[Graph__]'=[],
+        graphs:'list[Graph___]'=[],
         reporting_query_netdata:'ReportingQueryNetdata'={},
     /) -> 'list[NetdataGraphReportingData]': 
         """
@@ -108,11 +660,150 @@ class Reporting(Namespace):
             reporting_data
         """
         ...
+    ReportingEntry = typing.TypedDict('ReportingEntry', {
+            'graphite':'str',
+            'graphite_separateinstances':'bool',
+            'graph_age':'int',
+            'graph_points':'int',
+            'id':'int',
+    })
+    Graph = typing.TypedDict('Graph', {
+            'name':'str',
+            'identifier':'typing.Optional[str]',
+    })
+    ReportingQuery = typing.TypedDict('ReportingQuery', {
+            'unit':'str',
+            'page':'int',
+            'start':'str',
+            'end':'str',
+            'aggregate':'bool',
+    })
+    Aggregations = typing.TypedDict('Aggregations', {
+            'min':'list',
+            'max':'list',
+            'mean':'list',
+    })
+    GraphReportingData = typing.TypedDict('GraphReportingData', {
+            'name':'str',
+            'identifier':'typing.Optional[str]',
+            'data':'list',
+            'aggregations':'Aggregations',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Graph_ = typing.TypedDict('Graph_', {
+            'name':'str',
+            'title':'str',
+            'vertical_label':'str',
+            'identifiers':'typing.Optional[list[str]]',
+            'stacked':'bool',
+            'stacked_show_total':'bool',
+    })
+    Graph__ = typing.TypedDict('Graph__', {
+            'name':'str',
+            'title':'str',
+            'vertical_label':'str',
+            'identifiers':'typing.Optional[list[str]]',
+            'stacked':'bool',
+            'stacked_show_total':'bool',
+    })
+    Graph___ = typing.TypedDict('Graph___', {
+            'name':'str',
+            'identifier':'typing.Optional[str]',
+    })
+    ReportingQueryNetdata = typing.TypedDict('ReportingQueryNetdata', {
+            'unit':'str',
+            'page':'int',
+            'aggregate':'bool',
+            'start':'int',
+            'end':'int',
+    })
+    Aggregations_ = typing.TypedDict('Aggregations_', {
+            'min':'list',
+            'max':'list',
+            'mean':'list',
+    })
+    NetdataGraphReportingData = typing.TypedDict('NetdataGraphReportingData', {
+            'name':'str',
+            'identifier':'typing.Optional[str]',
+            'data':'list',
+            'aggregations':'Aggregations_',
+    })
+    ReportingQueryNetdata_ = typing.TypedDict('ReportingQueryNetdata_', {
+            'unit':'str',
+            'page':'int',
+            'aggregate':'bool',
+            'start':'int',
+            'end':'int',
+    })
+    Aggregations__ = typing.TypedDict('Aggregations__', {
+            'min':'list',
+            'max':'list',
+            'mean':'list',
+    })
+    NetdataGraphReportingData_ = typing.TypedDict('NetdataGraphReportingData_', {
+            'name':'str',
+            'identifier':'typing.Optional[str]',
+            'data':'list',
+            'aggregations':'Aggregations__',
+    })
+    QueryOptions_ = typing.TypedDict('QueryOptions_', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Graph____ = typing.TypedDict('Graph____', {
+            'name':'str',
+            'title':'str',
+            'vertical_label':'str',
+            'identifiers':'typing.Optional[list[str]]',
+    })
+    Graph_____ = typing.TypedDict('Graph_____', {
+            'name':'str',
+            'title':'str',
+            'vertical_label':'str',
+            'identifiers':'typing.Optional[list[str]]',
+    })
+    ReportingUpdate = typing.TypedDict('ReportingUpdate', {
+            'graphite':'str',
+            'graphite_separateinstances':'bool',
+            'graph_age':'int',
+            'graph_points':'int',
+            'confirm_rrd_destroy':'bool',
+    })
+    ReportingUpdateReturns = typing.TypedDict('ReportingUpdateReturns', {
+            'graphite':'str',
+            'graphite_separateinstances':'bool',
+            'graph_age':'int',
+            'graph_points':'int',
+            'id':'int',
+    })
     @typing.overload
     def netdata_graph(self, 
         name:'str',
         reporting_query_netdata:'ReportingQueryNetdata_'={},
-    /) -> 'NetdataGraphReportingData': 
+    /) -> 'NetdataGraphReportingData_': 
         """
         Get reporting data for `name` graph.
 
@@ -124,15 +815,154 @@ class Reporting(Namespace):
             reporting_query_netdata
         Returns
         -------
-        NetdataGraphReportingData:
+        NetdataGraphReportingData_:
             netdata_graph_reporting_data
         """
         ...
+    ReportingEntry = typing.TypedDict('ReportingEntry', {
+            'graphite':'str',
+            'graphite_separateinstances':'bool',
+            'graph_age':'int',
+            'graph_points':'int',
+            'id':'int',
+    })
+    Graph = typing.TypedDict('Graph', {
+            'name':'str',
+            'identifier':'typing.Optional[str]',
+    })
+    ReportingQuery = typing.TypedDict('ReportingQuery', {
+            'unit':'str',
+            'page':'int',
+            'start':'str',
+            'end':'str',
+            'aggregate':'bool',
+    })
+    Aggregations = typing.TypedDict('Aggregations', {
+            'min':'list',
+            'max':'list',
+            'mean':'list',
+    })
+    GraphReportingData = typing.TypedDict('GraphReportingData', {
+            'name':'str',
+            'identifier':'typing.Optional[str]',
+            'data':'list',
+            'aggregations':'Aggregations',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Graph_ = typing.TypedDict('Graph_', {
+            'name':'str',
+            'title':'str',
+            'vertical_label':'str',
+            'identifiers':'typing.Optional[list[str]]',
+            'stacked':'bool',
+            'stacked_show_total':'bool',
+    })
+    Graph__ = typing.TypedDict('Graph__', {
+            'name':'str',
+            'title':'str',
+            'vertical_label':'str',
+            'identifiers':'typing.Optional[list[str]]',
+            'stacked':'bool',
+            'stacked_show_total':'bool',
+    })
+    Graph___ = typing.TypedDict('Graph___', {
+            'name':'str',
+            'identifier':'typing.Optional[str]',
+    })
+    ReportingQueryNetdata = typing.TypedDict('ReportingQueryNetdata', {
+            'unit':'str',
+            'page':'int',
+            'aggregate':'bool',
+            'start':'int',
+            'end':'int',
+    })
+    Aggregations_ = typing.TypedDict('Aggregations_', {
+            'min':'list',
+            'max':'list',
+            'mean':'list',
+    })
+    NetdataGraphReportingData = typing.TypedDict('NetdataGraphReportingData', {
+            'name':'str',
+            'identifier':'typing.Optional[str]',
+            'data':'list',
+            'aggregations':'Aggregations_',
+    })
+    ReportingQueryNetdata_ = typing.TypedDict('ReportingQueryNetdata_', {
+            'unit':'str',
+            'page':'int',
+            'aggregate':'bool',
+            'start':'int',
+            'end':'int',
+    })
+    Aggregations__ = typing.TypedDict('Aggregations__', {
+            'min':'list',
+            'max':'list',
+            'mean':'list',
+    })
+    NetdataGraphReportingData_ = typing.TypedDict('NetdataGraphReportingData_', {
+            'name':'str',
+            'identifier':'typing.Optional[str]',
+            'data':'list',
+            'aggregations':'Aggregations__',
+    })
+    QueryOptions_ = typing.TypedDict('QueryOptions_', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Graph____ = typing.TypedDict('Graph____', {
+            'name':'str',
+            'title':'str',
+            'vertical_label':'str',
+            'identifiers':'typing.Optional[list[str]]',
+    })
+    Graph_____ = typing.TypedDict('Graph_____', {
+            'name':'str',
+            'title':'str',
+            'vertical_label':'str',
+            'identifiers':'typing.Optional[list[str]]',
+    })
+    ReportingUpdate = typing.TypedDict('ReportingUpdate', {
+            'graphite':'str',
+            'graphite_separateinstances':'bool',
+            'graph_age':'int',
+            'graph_points':'int',
+            'confirm_rrd_destroy':'bool',
+    })
+    ReportingUpdateReturns = typing.TypedDict('ReportingUpdateReturns', {
+            'graphite':'str',
+            'graphite_separateinstances':'bool',
+            'graph_age':'int',
+            'graph_points':'int',
+            'id':'int',
+    })
     @typing.overload
     def netdata_graphs(self, 
         query_filters:'list[list]'=[],
-        query_options:'QueryOptions'={},
-    /) -> 'int|Graph___|list[Graph___]': 
+        query_options:'QueryOptions_'={},
+    /) -> 'typing.Union[int, ForwardRef(Graph____), list[Graph_____]]': 
         """
         Get reporting netdata graphs.
 
@@ -144,14 +974,149 @@ class Reporting(Namespace):
             query-options
         Returns
         -------
-        int:
-            
-        Graph___:
-            
-        list[Graph___]:
+        typing.Union[int, ForwardRef(Graph____), list[Graph_____]]:
             
         """
         ...
+    ReportingEntry = typing.TypedDict('ReportingEntry', {
+            'graphite':'str',
+            'graphite_separateinstances':'bool',
+            'graph_age':'int',
+            'graph_points':'int',
+            'id':'int',
+    })
+    Graph = typing.TypedDict('Graph', {
+            'name':'str',
+            'identifier':'typing.Optional[str]',
+    })
+    ReportingQuery = typing.TypedDict('ReportingQuery', {
+            'unit':'str',
+            'page':'int',
+            'start':'str',
+            'end':'str',
+            'aggregate':'bool',
+    })
+    Aggregations = typing.TypedDict('Aggregations', {
+            'min':'list',
+            'max':'list',
+            'mean':'list',
+    })
+    GraphReportingData = typing.TypedDict('GraphReportingData', {
+            'name':'str',
+            'identifier':'typing.Optional[str]',
+            'data':'list',
+            'aggregations':'Aggregations',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Graph_ = typing.TypedDict('Graph_', {
+            'name':'str',
+            'title':'str',
+            'vertical_label':'str',
+            'identifiers':'typing.Optional[list[str]]',
+            'stacked':'bool',
+            'stacked_show_total':'bool',
+    })
+    Graph__ = typing.TypedDict('Graph__', {
+            'name':'str',
+            'title':'str',
+            'vertical_label':'str',
+            'identifiers':'typing.Optional[list[str]]',
+            'stacked':'bool',
+            'stacked_show_total':'bool',
+    })
+    Graph___ = typing.TypedDict('Graph___', {
+            'name':'str',
+            'identifier':'typing.Optional[str]',
+    })
+    ReportingQueryNetdata = typing.TypedDict('ReportingQueryNetdata', {
+            'unit':'str',
+            'page':'int',
+            'aggregate':'bool',
+            'start':'int',
+            'end':'int',
+    })
+    Aggregations_ = typing.TypedDict('Aggregations_', {
+            'min':'list',
+            'max':'list',
+            'mean':'list',
+    })
+    NetdataGraphReportingData = typing.TypedDict('NetdataGraphReportingData', {
+            'name':'str',
+            'identifier':'typing.Optional[str]',
+            'data':'list',
+            'aggregations':'Aggregations_',
+    })
+    ReportingQueryNetdata_ = typing.TypedDict('ReportingQueryNetdata_', {
+            'unit':'str',
+            'page':'int',
+            'aggregate':'bool',
+            'start':'int',
+            'end':'int',
+    })
+    Aggregations__ = typing.TypedDict('Aggregations__', {
+            'min':'list',
+            'max':'list',
+            'mean':'list',
+    })
+    NetdataGraphReportingData_ = typing.TypedDict('NetdataGraphReportingData_', {
+            'name':'str',
+            'identifier':'typing.Optional[str]',
+            'data':'list',
+            'aggregations':'Aggregations__',
+    })
+    QueryOptions_ = typing.TypedDict('QueryOptions_', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Graph____ = typing.TypedDict('Graph____', {
+            'name':'str',
+            'title':'str',
+            'vertical_label':'str',
+            'identifiers':'typing.Optional[list[str]]',
+    })
+    Graph_____ = typing.TypedDict('Graph_____', {
+            'name':'str',
+            'title':'str',
+            'vertical_label':'str',
+            'identifiers':'typing.Optional[list[str]]',
+    })
+    ReportingUpdate = typing.TypedDict('ReportingUpdate', {
+            'graphite':'str',
+            'graphite_separateinstances':'bool',
+            'graph_age':'int',
+            'graph_points':'int',
+            'confirm_rrd_destroy':'bool',
+    })
+    ReportingUpdateReturns = typing.TypedDict('ReportingUpdateReturns', {
+            'graphite':'str',
+            'graphite_separateinstances':'bool',
+            'graph_age':'int',
+            'graph_points':'int',
+            'id':'int',
+    })
     @typing.overload
     def update(self, 
         reporting_update:'ReportingUpdate'={},
@@ -177,99 +1142,143 @@ class Reporting(Namespace):
             reporting_update_returns
         """
         ...
+    ReportingEntry = typing.TypedDict('ReportingEntry', {
+            'graphite':'str',
+            'graphite_separateinstances':'bool',
+            'graph_age':'int',
+            'graph_points':'int',
+            'id':'int',
+    })
+    Graph = typing.TypedDict('Graph', {
+            'name':'str',
+            'identifier':'typing.Optional[str]',
+    })
+    ReportingQuery = typing.TypedDict('ReportingQuery', {
+            'unit':'str',
+            'page':'int',
+            'start':'str',
+            'end':'str',
+            'aggregate':'bool',
+    })
+    Aggregations = typing.TypedDict('Aggregations', {
+            'min':'list',
+            'max':'list',
+            'mean':'list',
+    })
+    GraphReportingData = typing.TypedDict('GraphReportingData', {
+            'name':'str',
+            'identifier':'typing.Optional[str]',
+            'data':'list',
+            'aggregations':'Aggregations',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Graph_ = typing.TypedDict('Graph_', {
+            'name':'str',
+            'title':'str',
+            'vertical_label':'str',
+            'identifiers':'typing.Optional[list[str]]',
+            'stacked':'bool',
+            'stacked_show_total':'bool',
+    })
+    Graph__ = typing.TypedDict('Graph__', {
+            'name':'str',
+            'title':'str',
+            'vertical_label':'str',
+            'identifiers':'typing.Optional[list[str]]',
+            'stacked':'bool',
+            'stacked_show_total':'bool',
+    })
+    Graph___ = typing.TypedDict('Graph___', {
+            'name':'str',
+            'identifier':'typing.Optional[str]',
+    })
+    ReportingQueryNetdata = typing.TypedDict('ReportingQueryNetdata', {
+            'unit':'str',
+            'page':'int',
+            'aggregate':'bool',
+            'start':'int',
+            'end':'int',
+    })
+    Aggregations_ = typing.TypedDict('Aggregations_', {
+            'min':'list',
+            'max':'list',
+            'mean':'list',
+    })
+    NetdataGraphReportingData = typing.TypedDict('NetdataGraphReportingData', {
+            'name':'str',
+            'identifier':'typing.Optional[str]',
+            'data':'list',
+            'aggregations':'Aggregations_',
+    })
+    ReportingQueryNetdata_ = typing.TypedDict('ReportingQueryNetdata_', {
+            'unit':'str',
+            'page':'int',
+            'aggregate':'bool',
+            'start':'int',
+            'end':'int',
+    })
+    Aggregations__ = typing.TypedDict('Aggregations__', {
+            'min':'list',
+            'max':'list',
+            'mean':'list',
+    })
+    NetdataGraphReportingData_ = typing.TypedDict('NetdataGraphReportingData_', {
+            'name':'str',
+            'identifier':'typing.Optional[str]',
+            'data':'list',
+            'aggregations':'Aggregations__',
+    })
+    QueryOptions_ = typing.TypedDict('QueryOptions_', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Graph____ = typing.TypedDict('Graph____', {
+            'name':'str',
+            'title':'str',
+            'vertical_label':'str',
+            'identifiers':'typing.Optional[list[str]]',
+    })
+    Graph_____ = typing.TypedDict('Graph_____', {
+            'name':'str',
+            'title':'str',
+            'vertical_label':'str',
+            'identifiers':'typing.Optional[list[str]]',
+    })
+    ReportingUpdate = typing.TypedDict('ReportingUpdate', {
+            'graphite':'str',
+            'graphite_separateinstances':'bool',
+            'graph_age':'int',
+            'graph_points':'int',
+            'confirm_rrd_destroy':'bool',
+    })
+    ReportingUpdateReturns = typing.TypedDict('ReportingUpdateReturns', {
+            'graphite':'str',
+            'graphite_separateinstances':'bool',
+            'graph_age':'int',
+            'graph_points':'int',
+            'id':'int',
+    })
 
-class ReportingEntry(typing.TypedDict):
-        graphite:'str'
-        graphite_separateinstances:'bool'
-        graph_age:'int'
-        graph_points:'int'
-        id:'int'
-        ...
-class Graph(typing.TypedDict):
-        name:'str'
-        identifier:'typing.Optional[str]'
-        ...
-class ReportingQuery(typing.TypedDict):
-        unit:'str'
-        page:'int'
-        start:'str'
-        end:'str'
-        aggregate:'bool'
-        ...
-class GraphReportingData(typing.TypedDict):
-        name:'str'
-        identifier:'typing.Optional[str]'
-        data:'list'
-        aggregations:'Aggregations'
-        ...
-class Aggregations(typing.TypedDict):
-        min:'list'
-        max:'list'
-        mean:'list'
-        ...
-class QueryOptions(typing.TypedDict):
-        relationships:'bool'
-        extend:'typing.Optional[str]'
-        extend_context:'typing.Optional[str]'
-        prefix:'typing.Optional[str]'
-        extra:'dict[str]'
-        order_by:'list'
-        select:'list'
-        count:'bool'
-        get:'bool'
-        offset:'int'
-        limit:'int'
-        force_sql_filters:'bool'
-        ...
-class Graph_(typing.TypedDict):
-        name:'str'
-        title:'str'
-        vertical_label:'str'
-        identifiers:'typing.Optional[list[str]]'
-        stacked:'bool'
-        stacked_show_total:'bool'
-        ...
-class Graph__(typing.TypedDict):
-        name:'str'
-        identifier:'typing.Optional[str]'
-        ...
-class ReportingQueryNetdata(typing.TypedDict):
-        unit:'str'
-        page:'int'
-        aggregate:'bool'
-        start:'int'
-        end:'int'
-        ...
-class NetdataGraphReportingData(typing.TypedDict):
-        name:'str'
-        identifier:'typing.Optional[str]'
-        data:'list'
-        aggregations:'Aggregations'
-        ...
-class ReportingQueryNetdata_(typing.TypedDict):
-        unit:'str'
-        page:'int'
-        aggregate:'bool'
-        start:'int'
-        end:'int'
-        ...
-class Graph___(typing.TypedDict):
-        name:'str'
-        title:'str'
-        vertical_label:'str'
-        identifiers:'typing.Optional[list[str]]'
-        ...
-class ReportingUpdate(typing.TypedDict):
-        graphite:'str'
-        graphite_separateinstances:'bool'
-        graph_age:'int'
-        graph_points:'int'
-        confirm_rrd_destroy:'bool'
-        ...
-class ReportingUpdateReturns(typing.TypedDict):
-        graphite:'str'
-        graphite_separateinstances:'bool'
-        graph_age:'int'
-        graph_points:'int'
-        id:'int'
-        ...

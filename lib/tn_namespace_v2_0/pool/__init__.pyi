@@ -24,6 +24,357 @@ class Pool(Namespace):
         -------
         """
         ...
+    PoolAttach = typing.TypedDict('PoolAttach', {
+            'target_vdev':'str',
+            'new_disk':'str',
+            'allow_duplicate_serials':'bool',
+    })
+    Attachment = typing.TypedDict('Attachment', {
+            'type':'str',
+            'service':'typing.Optional[str]',
+            'attachments':'list[str]',
+    })
+    EncryptionOptions = typing.TypedDict('EncryptionOptions', {
+            'generate_key':'bool',
+            'pbkdf2iters':'int',
+            'algorithm':'str',
+            'passphrase':'typing.Optional[str]',
+            'key':'typing.Optional[str]',
+    })
+    Datavdevs = typing.TypedDict('Datavdevs', {
+            'type':'str',
+            'disks':'list[str]',
+            'draid_data_disks':'int',
+            'draid_spare_disks':'int',
+    })
+    Specialvdevs = typing.TypedDict('Specialvdevs', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Dedupvdevs = typing.TypedDict('Dedupvdevs', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Cachevdevs = typing.TypedDict('Cachevdevs', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Logvdevs = typing.TypedDict('Logvdevs', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Topology = typing.TypedDict('Topology', {
+            'data':'list[Datavdevs]',
+            'special':'list[Specialvdevs]',
+            'dedup':'list[Dedupvdevs]',
+            'cache':'list[Cachevdevs]',
+            'log':'list[Logvdevs]',
+            'spares':'list[str]',
+    })
+    PoolCreate = typing.TypedDict('PoolCreate', {
+            'name':'str',
+            'encryption':'bool',
+            'deduplication':'typing.Optional[str]',
+            'checksum':'typing.Optional[str]',
+            'encryption_options':'EncryptionOptions',
+            'topology':'Topology',
+            'allow_duplicate_serials':'bool',
+    })
+    Topology_ = typing.TypedDict('Topology_', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolCreateReturns = typing.TypedDict('PoolCreateReturns', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology_',
+    })
+    Options = typing.TypedDict('Options', {
+            'label':'str',
+    })
+    Options_ = typing.TypedDict('Options_', {
+            'cascade':'bool',
+            'restart_services':'bool',
+            'destroy':'bool',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Topology__ = typing.TypedDict('Topology__', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolEntry = typing.TypedDict('PoolEntry', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology__',
+    })
+    PoolInfo = typing.TypedDict('PoolInfo', {
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'hostname':'str',
+    })
+    PoolImport = typing.TypedDict('PoolImport', {
+            'guid':'str',
+            'name':'str',
+            'enable_attachments':'bool',
+    })
+    Options__ = typing.TypedDict('Options__', {
+            'label':'str',
+    })
+    Options___ = typing.TypedDict('Options___', {
+            'label':'str',
+    })
+    Process = typing.TypedDict('Process', {
+            'pid':'int',
+            'name':'str',
+            'service':'str',
+            'cmdline':'str',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Topology___ = typing.TypedDict('Topology___', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolEntry_ = typing.TypedDict('PoolEntry_', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology___',
+    })
+    Topology____ = typing.TypedDict('Topology____', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolEntry__ = typing.TypedDict('PoolEntry__', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology____',
+    })
+    Topology_____ = typing.TypedDict('Topology_____', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolEntry___ = typing.TypedDict('PoolEntry___', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology_____',
+    })
+    Options____ = typing.TypedDict('Options____', {
+            'label':'str',
+    })
+    Options_____ = typing.TypedDict('Options_____', {
+            'label':'str',
+            'disk':'str',
+            'force':'bool',
+            'preserve_settings':'bool',
+    })
+    Datavdevs_ = typing.TypedDict('Datavdevs_', {
+            'type':'str',
+            'disks':'list[str]',
+            'draid_data_disks':'int',
+            'draid_spare_disks':'int',
+    })
+    Specialvdevs_ = typing.TypedDict('Specialvdevs_', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Dedupvdevs_ = typing.TypedDict('Dedupvdevs_', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Cachevdevs_ = typing.TypedDict('Cachevdevs_', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Logvdevs_ = typing.TypedDict('Logvdevs_', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Topology______ = typing.TypedDict('Topology______', {
+            'data':'list[Datavdevs_]',
+            'special':'list[Specialvdevs_]',
+            'dedup':'list[Dedupvdevs_]',
+            'cache':'list[Cachevdevs_]',
+            'log':'list[Logvdevs_]',
+            'spares':'list[str]',
+    })
+    PoolUpdate = typing.TypedDict('PoolUpdate', {
+            'topology':'Topology______',
+            'allow_duplicate_serials':'bool',
+            'autotrim':'str',
+    })
+    Topology_______ = typing.TypedDict('Topology_______', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolUpdateReturns = typing.TypedDict('PoolUpdateReturns', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology_______',
+    })
     @typing.overload
     def attachments(self, 
         id:'int',
@@ -44,6 +395,357 @@ class Pool(Namespace):
             attachments
         """
         ...
+    PoolAttach = typing.TypedDict('PoolAttach', {
+            'target_vdev':'str',
+            'new_disk':'str',
+            'allow_duplicate_serials':'bool',
+    })
+    Attachment = typing.TypedDict('Attachment', {
+            'type':'str',
+            'service':'typing.Optional[str]',
+            'attachments':'list[str]',
+    })
+    EncryptionOptions = typing.TypedDict('EncryptionOptions', {
+            'generate_key':'bool',
+            'pbkdf2iters':'int',
+            'algorithm':'str',
+            'passphrase':'typing.Optional[str]',
+            'key':'typing.Optional[str]',
+    })
+    Datavdevs = typing.TypedDict('Datavdevs', {
+            'type':'str',
+            'disks':'list[str]',
+            'draid_data_disks':'int',
+            'draid_spare_disks':'int',
+    })
+    Specialvdevs = typing.TypedDict('Specialvdevs', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Dedupvdevs = typing.TypedDict('Dedupvdevs', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Cachevdevs = typing.TypedDict('Cachevdevs', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Logvdevs = typing.TypedDict('Logvdevs', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Topology = typing.TypedDict('Topology', {
+            'data':'list[Datavdevs]',
+            'special':'list[Specialvdevs]',
+            'dedup':'list[Dedupvdevs]',
+            'cache':'list[Cachevdevs]',
+            'log':'list[Logvdevs]',
+            'spares':'list[str]',
+    })
+    PoolCreate = typing.TypedDict('PoolCreate', {
+            'name':'str',
+            'encryption':'bool',
+            'deduplication':'typing.Optional[str]',
+            'checksum':'typing.Optional[str]',
+            'encryption_options':'EncryptionOptions',
+            'topology':'Topology',
+            'allow_duplicate_serials':'bool',
+    })
+    Topology_ = typing.TypedDict('Topology_', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolCreateReturns = typing.TypedDict('PoolCreateReturns', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology_',
+    })
+    Options = typing.TypedDict('Options', {
+            'label':'str',
+    })
+    Options_ = typing.TypedDict('Options_', {
+            'cascade':'bool',
+            'restart_services':'bool',
+            'destroy':'bool',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Topology__ = typing.TypedDict('Topology__', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolEntry = typing.TypedDict('PoolEntry', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology__',
+    })
+    PoolInfo = typing.TypedDict('PoolInfo', {
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'hostname':'str',
+    })
+    PoolImport = typing.TypedDict('PoolImport', {
+            'guid':'str',
+            'name':'str',
+            'enable_attachments':'bool',
+    })
+    Options__ = typing.TypedDict('Options__', {
+            'label':'str',
+    })
+    Options___ = typing.TypedDict('Options___', {
+            'label':'str',
+    })
+    Process = typing.TypedDict('Process', {
+            'pid':'int',
+            'name':'str',
+            'service':'str',
+            'cmdline':'str',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Topology___ = typing.TypedDict('Topology___', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolEntry_ = typing.TypedDict('PoolEntry_', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology___',
+    })
+    Topology____ = typing.TypedDict('Topology____', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolEntry__ = typing.TypedDict('PoolEntry__', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology____',
+    })
+    Topology_____ = typing.TypedDict('Topology_____', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolEntry___ = typing.TypedDict('PoolEntry___', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology_____',
+    })
+    Options____ = typing.TypedDict('Options____', {
+            'label':'str',
+    })
+    Options_____ = typing.TypedDict('Options_____', {
+            'label':'str',
+            'disk':'str',
+            'force':'bool',
+            'preserve_settings':'bool',
+    })
+    Datavdevs_ = typing.TypedDict('Datavdevs_', {
+            'type':'str',
+            'disks':'list[str]',
+            'draid_data_disks':'int',
+            'draid_spare_disks':'int',
+    })
+    Specialvdevs_ = typing.TypedDict('Specialvdevs_', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Dedupvdevs_ = typing.TypedDict('Dedupvdevs_', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Cachevdevs_ = typing.TypedDict('Cachevdevs_', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Logvdevs_ = typing.TypedDict('Logvdevs_', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Topology______ = typing.TypedDict('Topology______', {
+            'data':'list[Datavdevs_]',
+            'special':'list[Specialvdevs_]',
+            'dedup':'list[Dedupvdevs_]',
+            'cache':'list[Cachevdevs_]',
+            'log':'list[Logvdevs_]',
+            'spares':'list[str]',
+    })
+    PoolUpdate = typing.TypedDict('PoolUpdate', {
+            'topology':'Topology______',
+            'allow_duplicate_serials':'bool',
+            'autotrim':'str',
+    })
+    Topology_______ = typing.TypedDict('Topology_______', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolUpdateReturns = typing.TypedDict('PoolUpdateReturns', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology_______',
+    })
     @typing.overload
     def create(self, 
         pool_create:'PoolCreate'={},
@@ -96,6 +798,357 @@ class Pool(Namespace):
             pool_create_returns
         """
         ...
+    PoolAttach = typing.TypedDict('PoolAttach', {
+            'target_vdev':'str',
+            'new_disk':'str',
+            'allow_duplicate_serials':'bool',
+    })
+    Attachment = typing.TypedDict('Attachment', {
+            'type':'str',
+            'service':'typing.Optional[str]',
+            'attachments':'list[str]',
+    })
+    EncryptionOptions = typing.TypedDict('EncryptionOptions', {
+            'generate_key':'bool',
+            'pbkdf2iters':'int',
+            'algorithm':'str',
+            'passphrase':'typing.Optional[str]',
+            'key':'typing.Optional[str]',
+    })
+    Datavdevs = typing.TypedDict('Datavdevs', {
+            'type':'str',
+            'disks':'list[str]',
+            'draid_data_disks':'int',
+            'draid_spare_disks':'int',
+    })
+    Specialvdevs = typing.TypedDict('Specialvdevs', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Dedupvdevs = typing.TypedDict('Dedupvdevs', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Cachevdevs = typing.TypedDict('Cachevdevs', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Logvdevs = typing.TypedDict('Logvdevs', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Topology = typing.TypedDict('Topology', {
+            'data':'list[Datavdevs]',
+            'special':'list[Specialvdevs]',
+            'dedup':'list[Dedupvdevs]',
+            'cache':'list[Cachevdevs]',
+            'log':'list[Logvdevs]',
+            'spares':'list[str]',
+    })
+    PoolCreate = typing.TypedDict('PoolCreate', {
+            'name':'str',
+            'encryption':'bool',
+            'deduplication':'typing.Optional[str]',
+            'checksum':'typing.Optional[str]',
+            'encryption_options':'EncryptionOptions',
+            'topology':'Topology',
+            'allow_duplicate_serials':'bool',
+    })
+    Topology_ = typing.TypedDict('Topology_', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolCreateReturns = typing.TypedDict('PoolCreateReturns', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology_',
+    })
+    Options = typing.TypedDict('Options', {
+            'label':'str',
+    })
+    Options_ = typing.TypedDict('Options_', {
+            'cascade':'bool',
+            'restart_services':'bool',
+            'destroy':'bool',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Topology__ = typing.TypedDict('Topology__', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolEntry = typing.TypedDict('PoolEntry', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology__',
+    })
+    PoolInfo = typing.TypedDict('PoolInfo', {
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'hostname':'str',
+    })
+    PoolImport = typing.TypedDict('PoolImport', {
+            'guid':'str',
+            'name':'str',
+            'enable_attachments':'bool',
+    })
+    Options__ = typing.TypedDict('Options__', {
+            'label':'str',
+    })
+    Options___ = typing.TypedDict('Options___', {
+            'label':'str',
+    })
+    Process = typing.TypedDict('Process', {
+            'pid':'int',
+            'name':'str',
+            'service':'str',
+            'cmdline':'str',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Topology___ = typing.TypedDict('Topology___', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolEntry_ = typing.TypedDict('PoolEntry_', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology___',
+    })
+    Topology____ = typing.TypedDict('Topology____', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolEntry__ = typing.TypedDict('PoolEntry__', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology____',
+    })
+    Topology_____ = typing.TypedDict('Topology_____', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolEntry___ = typing.TypedDict('PoolEntry___', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology_____',
+    })
+    Options____ = typing.TypedDict('Options____', {
+            'label':'str',
+    })
+    Options_____ = typing.TypedDict('Options_____', {
+            'label':'str',
+            'disk':'str',
+            'force':'bool',
+            'preserve_settings':'bool',
+    })
+    Datavdevs_ = typing.TypedDict('Datavdevs_', {
+            'type':'str',
+            'disks':'list[str]',
+            'draid_data_disks':'int',
+            'draid_spare_disks':'int',
+    })
+    Specialvdevs_ = typing.TypedDict('Specialvdevs_', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Dedupvdevs_ = typing.TypedDict('Dedupvdevs_', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Cachevdevs_ = typing.TypedDict('Cachevdevs_', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Logvdevs_ = typing.TypedDict('Logvdevs_', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Topology______ = typing.TypedDict('Topology______', {
+            'data':'list[Datavdevs_]',
+            'special':'list[Specialvdevs_]',
+            'dedup':'list[Dedupvdevs_]',
+            'cache':'list[Cachevdevs_]',
+            'log':'list[Logvdevs_]',
+            'spares':'list[str]',
+    })
+    PoolUpdate = typing.TypedDict('PoolUpdate', {
+            'topology':'Topology______',
+            'allow_duplicate_serials':'bool',
+            'autotrim':'str',
+    })
+    Topology_______ = typing.TypedDict('Topology_______', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolUpdateReturns = typing.TypedDict('PoolUpdateReturns', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology_______',
+    })
     @typing.overload
     def detach(self, 
         id:'int',
@@ -118,6 +1171,357 @@ class Pool(Namespace):
             detached
         """
         ...
+    PoolAttach = typing.TypedDict('PoolAttach', {
+            'target_vdev':'str',
+            'new_disk':'str',
+            'allow_duplicate_serials':'bool',
+    })
+    Attachment = typing.TypedDict('Attachment', {
+            'type':'str',
+            'service':'typing.Optional[str]',
+            'attachments':'list[str]',
+    })
+    EncryptionOptions = typing.TypedDict('EncryptionOptions', {
+            'generate_key':'bool',
+            'pbkdf2iters':'int',
+            'algorithm':'str',
+            'passphrase':'typing.Optional[str]',
+            'key':'typing.Optional[str]',
+    })
+    Datavdevs = typing.TypedDict('Datavdevs', {
+            'type':'str',
+            'disks':'list[str]',
+            'draid_data_disks':'int',
+            'draid_spare_disks':'int',
+    })
+    Specialvdevs = typing.TypedDict('Specialvdevs', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Dedupvdevs = typing.TypedDict('Dedupvdevs', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Cachevdevs = typing.TypedDict('Cachevdevs', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Logvdevs = typing.TypedDict('Logvdevs', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Topology = typing.TypedDict('Topology', {
+            'data':'list[Datavdevs]',
+            'special':'list[Specialvdevs]',
+            'dedup':'list[Dedupvdevs]',
+            'cache':'list[Cachevdevs]',
+            'log':'list[Logvdevs]',
+            'spares':'list[str]',
+    })
+    PoolCreate = typing.TypedDict('PoolCreate', {
+            'name':'str',
+            'encryption':'bool',
+            'deduplication':'typing.Optional[str]',
+            'checksum':'typing.Optional[str]',
+            'encryption_options':'EncryptionOptions',
+            'topology':'Topology',
+            'allow_duplicate_serials':'bool',
+    })
+    Topology_ = typing.TypedDict('Topology_', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolCreateReturns = typing.TypedDict('PoolCreateReturns', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology_',
+    })
+    Options = typing.TypedDict('Options', {
+            'label':'str',
+    })
+    Options_ = typing.TypedDict('Options_', {
+            'cascade':'bool',
+            'restart_services':'bool',
+            'destroy':'bool',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Topology__ = typing.TypedDict('Topology__', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolEntry = typing.TypedDict('PoolEntry', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology__',
+    })
+    PoolInfo = typing.TypedDict('PoolInfo', {
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'hostname':'str',
+    })
+    PoolImport = typing.TypedDict('PoolImport', {
+            'guid':'str',
+            'name':'str',
+            'enable_attachments':'bool',
+    })
+    Options__ = typing.TypedDict('Options__', {
+            'label':'str',
+    })
+    Options___ = typing.TypedDict('Options___', {
+            'label':'str',
+    })
+    Process = typing.TypedDict('Process', {
+            'pid':'int',
+            'name':'str',
+            'service':'str',
+            'cmdline':'str',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Topology___ = typing.TypedDict('Topology___', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolEntry_ = typing.TypedDict('PoolEntry_', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology___',
+    })
+    Topology____ = typing.TypedDict('Topology____', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolEntry__ = typing.TypedDict('PoolEntry__', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology____',
+    })
+    Topology_____ = typing.TypedDict('Topology_____', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolEntry___ = typing.TypedDict('PoolEntry___', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology_____',
+    })
+    Options____ = typing.TypedDict('Options____', {
+            'label':'str',
+    })
+    Options_____ = typing.TypedDict('Options_____', {
+            'label':'str',
+            'disk':'str',
+            'force':'bool',
+            'preserve_settings':'bool',
+    })
+    Datavdevs_ = typing.TypedDict('Datavdevs_', {
+            'type':'str',
+            'disks':'list[str]',
+            'draid_data_disks':'int',
+            'draid_spare_disks':'int',
+    })
+    Specialvdevs_ = typing.TypedDict('Specialvdevs_', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Dedupvdevs_ = typing.TypedDict('Dedupvdevs_', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Cachevdevs_ = typing.TypedDict('Cachevdevs_', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Logvdevs_ = typing.TypedDict('Logvdevs_', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Topology______ = typing.TypedDict('Topology______', {
+            'data':'list[Datavdevs_]',
+            'special':'list[Specialvdevs_]',
+            'dedup':'list[Dedupvdevs_]',
+            'cache':'list[Cachevdevs_]',
+            'log':'list[Logvdevs_]',
+            'spares':'list[str]',
+    })
+    PoolUpdate = typing.TypedDict('PoolUpdate', {
+            'topology':'Topology______',
+            'allow_duplicate_serials':'bool',
+            'autotrim':'str',
+    })
+    Topology_______ = typing.TypedDict('Topology_______', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolUpdateReturns = typing.TypedDict('PoolUpdateReturns', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology_______',
+    })
     @typing.overload
     def expand(self, 
         id:'int',
@@ -133,6 +1537,357 @@ class Pool(Namespace):
         -------
         """
         ...
+    PoolAttach = typing.TypedDict('PoolAttach', {
+            'target_vdev':'str',
+            'new_disk':'str',
+            'allow_duplicate_serials':'bool',
+    })
+    Attachment = typing.TypedDict('Attachment', {
+            'type':'str',
+            'service':'typing.Optional[str]',
+            'attachments':'list[str]',
+    })
+    EncryptionOptions = typing.TypedDict('EncryptionOptions', {
+            'generate_key':'bool',
+            'pbkdf2iters':'int',
+            'algorithm':'str',
+            'passphrase':'typing.Optional[str]',
+            'key':'typing.Optional[str]',
+    })
+    Datavdevs = typing.TypedDict('Datavdevs', {
+            'type':'str',
+            'disks':'list[str]',
+            'draid_data_disks':'int',
+            'draid_spare_disks':'int',
+    })
+    Specialvdevs = typing.TypedDict('Specialvdevs', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Dedupvdevs = typing.TypedDict('Dedupvdevs', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Cachevdevs = typing.TypedDict('Cachevdevs', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Logvdevs = typing.TypedDict('Logvdevs', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Topology = typing.TypedDict('Topology', {
+            'data':'list[Datavdevs]',
+            'special':'list[Specialvdevs]',
+            'dedup':'list[Dedupvdevs]',
+            'cache':'list[Cachevdevs]',
+            'log':'list[Logvdevs]',
+            'spares':'list[str]',
+    })
+    PoolCreate = typing.TypedDict('PoolCreate', {
+            'name':'str',
+            'encryption':'bool',
+            'deduplication':'typing.Optional[str]',
+            'checksum':'typing.Optional[str]',
+            'encryption_options':'EncryptionOptions',
+            'topology':'Topology',
+            'allow_duplicate_serials':'bool',
+    })
+    Topology_ = typing.TypedDict('Topology_', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolCreateReturns = typing.TypedDict('PoolCreateReturns', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology_',
+    })
+    Options = typing.TypedDict('Options', {
+            'label':'str',
+    })
+    Options_ = typing.TypedDict('Options_', {
+            'cascade':'bool',
+            'restart_services':'bool',
+            'destroy':'bool',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Topology__ = typing.TypedDict('Topology__', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolEntry = typing.TypedDict('PoolEntry', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology__',
+    })
+    PoolInfo = typing.TypedDict('PoolInfo', {
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'hostname':'str',
+    })
+    PoolImport = typing.TypedDict('PoolImport', {
+            'guid':'str',
+            'name':'str',
+            'enable_attachments':'bool',
+    })
+    Options__ = typing.TypedDict('Options__', {
+            'label':'str',
+    })
+    Options___ = typing.TypedDict('Options___', {
+            'label':'str',
+    })
+    Process = typing.TypedDict('Process', {
+            'pid':'int',
+            'name':'str',
+            'service':'str',
+            'cmdline':'str',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Topology___ = typing.TypedDict('Topology___', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolEntry_ = typing.TypedDict('PoolEntry_', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology___',
+    })
+    Topology____ = typing.TypedDict('Topology____', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolEntry__ = typing.TypedDict('PoolEntry__', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology____',
+    })
+    Topology_____ = typing.TypedDict('Topology_____', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolEntry___ = typing.TypedDict('PoolEntry___', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology_____',
+    })
+    Options____ = typing.TypedDict('Options____', {
+            'label':'str',
+    })
+    Options_____ = typing.TypedDict('Options_____', {
+            'label':'str',
+            'disk':'str',
+            'force':'bool',
+            'preserve_settings':'bool',
+    })
+    Datavdevs_ = typing.TypedDict('Datavdevs_', {
+            'type':'str',
+            'disks':'list[str]',
+            'draid_data_disks':'int',
+            'draid_spare_disks':'int',
+    })
+    Specialvdevs_ = typing.TypedDict('Specialvdevs_', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Dedupvdevs_ = typing.TypedDict('Dedupvdevs_', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Cachevdevs_ = typing.TypedDict('Cachevdevs_', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Logvdevs_ = typing.TypedDict('Logvdevs_', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Topology______ = typing.TypedDict('Topology______', {
+            'data':'list[Datavdevs_]',
+            'special':'list[Specialvdevs_]',
+            'dedup':'list[Dedupvdevs_]',
+            'cache':'list[Cachevdevs_]',
+            'log':'list[Logvdevs_]',
+            'spares':'list[str]',
+    })
+    PoolUpdate = typing.TypedDict('PoolUpdate', {
+            'topology':'Topology______',
+            'allow_duplicate_serials':'bool',
+            'autotrim':'str',
+    })
+    Topology_______ = typing.TypedDict('Topology_______', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolUpdateReturns = typing.TypedDict('PoolUpdateReturns', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology_______',
+    })
     @typing.overload
     def export(self, 
         id:'int',
@@ -155,6 +1910,357 @@ class Pool(Namespace):
         -------
         """
         ...
+    PoolAttach = typing.TypedDict('PoolAttach', {
+            'target_vdev':'str',
+            'new_disk':'str',
+            'allow_duplicate_serials':'bool',
+    })
+    Attachment = typing.TypedDict('Attachment', {
+            'type':'str',
+            'service':'typing.Optional[str]',
+            'attachments':'list[str]',
+    })
+    EncryptionOptions = typing.TypedDict('EncryptionOptions', {
+            'generate_key':'bool',
+            'pbkdf2iters':'int',
+            'algorithm':'str',
+            'passphrase':'typing.Optional[str]',
+            'key':'typing.Optional[str]',
+    })
+    Datavdevs = typing.TypedDict('Datavdevs', {
+            'type':'str',
+            'disks':'list[str]',
+            'draid_data_disks':'int',
+            'draid_spare_disks':'int',
+    })
+    Specialvdevs = typing.TypedDict('Specialvdevs', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Dedupvdevs = typing.TypedDict('Dedupvdevs', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Cachevdevs = typing.TypedDict('Cachevdevs', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Logvdevs = typing.TypedDict('Logvdevs', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Topology = typing.TypedDict('Topology', {
+            'data':'list[Datavdevs]',
+            'special':'list[Specialvdevs]',
+            'dedup':'list[Dedupvdevs]',
+            'cache':'list[Cachevdevs]',
+            'log':'list[Logvdevs]',
+            'spares':'list[str]',
+    })
+    PoolCreate = typing.TypedDict('PoolCreate', {
+            'name':'str',
+            'encryption':'bool',
+            'deduplication':'typing.Optional[str]',
+            'checksum':'typing.Optional[str]',
+            'encryption_options':'EncryptionOptions',
+            'topology':'Topology',
+            'allow_duplicate_serials':'bool',
+    })
+    Topology_ = typing.TypedDict('Topology_', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolCreateReturns = typing.TypedDict('PoolCreateReturns', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology_',
+    })
+    Options = typing.TypedDict('Options', {
+            'label':'str',
+    })
+    Options_ = typing.TypedDict('Options_', {
+            'cascade':'bool',
+            'restart_services':'bool',
+            'destroy':'bool',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Topology__ = typing.TypedDict('Topology__', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolEntry = typing.TypedDict('PoolEntry', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology__',
+    })
+    PoolInfo = typing.TypedDict('PoolInfo', {
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'hostname':'str',
+    })
+    PoolImport = typing.TypedDict('PoolImport', {
+            'guid':'str',
+            'name':'str',
+            'enable_attachments':'bool',
+    })
+    Options__ = typing.TypedDict('Options__', {
+            'label':'str',
+    })
+    Options___ = typing.TypedDict('Options___', {
+            'label':'str',
+    })
+    Process = typing.TypedDict('Process', {
+            'pid':'int',
+            'name':'str',
+            'service':'str',
+            'cmdline':'str',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Topology___ = typing.TypedDict('Topology___', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolEntry_ = typing.TypedDict('PoolEntry_', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology___',
+    })
+    Topology____ = typing.TypedDict('Topology____', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolEntry__ = typing.TypedDict('PoolEntry__', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology____',
+    })
+    Topology_____ = typing.TypedDict('Topology_____', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolEntry___ = typing.TypedDict('PoolEntry___', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology_____',
+    })
+    Options____ = typing.TypedDict('Options____', {
+            'label':'str',
+    })
+    Options_____ = typing.TypedDict('Options_____', {
+            'label':'str',
+            'disk':'str',
+            'force':'bool',
+            'preserve_settings':'bool',
+    })
+    Datavdevs_ = typing.TypedDict('Datavdevs_', {
+            'type':'str',
+            'disks':'list[str]',
+            'draid_data_disks':'int',
+            'draid_spare_disks':'int',
+    })
+    Specialvdevs_ = typing.TypedDict('Specialvdevs_', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Dedupvdevs_ = typing.TypedDict('Dedupvdevs_', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Cachevdevs_ = typing.TypedDict('Cachevdevs_', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Logvdevs_ = typing.TypedDict('Logvdevs_', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Topology______ = typing.TypedDict('Topology______', {
+            'data':'list[Datavdevs_]',
+            'special':'list[Specialvdevs_]',
+            'dedup':'list[Dedupvdevs_]',
+            'cache':'list[Cachevdevs_]',
+            'log':'list[Logvdevs_]',
+            'spares':'list[str]',
+    })
+    PoolUpdate = typing.TypedDict('PoolUpdate', {
+            'topology':'Topology______',
+            'allow_duplicate_serials':'bool',
+            'autotrim':'str',
+    })
+    Topology_______ = typing.TypedDict('Topology_______', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolUpdateReturns = typing.TypedDict('PoolUpdateReturns', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology_______',
+    })
     @typing.overload
     def filesystem_choices(self, 
         types:'list[str]'=["FILESYSTEM", "VOLUME"],
@@ -175,9 +2281,360 @@ class Pool(Namespace):
             filesystem_choices
         """
         ...
+    PoolAttach = typing.TypedDict('PoolAttach', {
+            'target_vdev':'str',
+            'new_disk':'str',
+            'allow_duplicate_serials':'bool',
+    })
+    Attachment = typing.TypedDict('Attachment', {
+            'type':'str',
+            'service':'typing.Optional[str]',
+            'attachments':'list[str]',
+    })
+    EncryptionOptions = typing.TypedDict('EncryptionOptions', {
+            'generate_key':'bool',
+            'pbkdf2iters':'int',
+            'algorithm':'str',
+            'passphrase':'typing.Optional[str]',
+            'key':'typing.Optional[str]',
+    })
+    Datavdevs = typing.TypedDict('Datavdevs', {
+            'type':'str',
+            'disks':'list[str]',
+            'draid_data_disks':'int',
+            'draid_spare_disks':'int',
+    })
+    Specialvdevs = typing.TypedDict('Specialvdevs', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Dedupvdevs = typing.TypedDict('Dedupvdevs', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Cachevdevs = typing.TypedDict('Cachevdevs', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Logvdevs = typing.TypedDict('Logvdevs', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Topology = typing.TypedDict('Topology', {
+            'data':'list[Datavdevs]',
+            'special':'list[Specialvdevs]',
+            'dedup':'list[Dedupvdevs]',
+            'cache':'list[Cachevdevs]',
+            'log':'list[Logvdevs]',
+            'spares':'list[str]',
+    })
+    PoolCreate = typing.TypedDict('PoolCreate', {
+            'name':'str',
+            'encryption':'bool',
+            'deduplication':'typing.Optional[str]',
+            'checksum':'typing.Optional[str]',
+            'encryption_options':'EncryptionOptions',
+            'topology':'Topology',
+            'allow_duplicate_serials':'bool',
+    })
+    Topology_ = typing.TypedDict('Topology_', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolCreateReturns = typing.TypedDict('PoolCreateReturns', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology_',
+    })
+    Options = typing.TypedDict('Options', {
+            'label':'str',
+    })
+    Options_ = typing.TypedDict('Options_', {
+            'cascade':'bool',
+            'restart_services':'bool',
+            'destroy':'bool',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Topology__ = typing.TypedDict('Topology__', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolEntry = typing.TypedDict('PoolEntry', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology__',
+    })
+    PoolInfo = typing.TypedDict('PoolInfo', {
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'hostname':'str',
+    })
+    PoolImport = typing.TypedDict('PoolImport', {
+            'guid':'str',
+            'name':'str',
+            'enable_attachments':'bool',
+    })
+    Options__ = typing.TypedDict('Options__', {
+            'label':'str',
+    })
+    Options___ = typing.TypedDict('Options___', {
+            'label':'str',
+    })
+    Process = typing.TypedDict('Process', {
+            'pid':'int',
+            'name':'str',
+            'service':'str',
+            'cmdline':'str',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Topology___ = typing.TypedDict('Topology___', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolEntry_ = typing.TypedDict('PoolEntry_', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology___',
+    })
+    Topology____ = typing.TypedDict('Topology____', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolEntry__ = typing.TypedDict('PoolEntry__', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology____',
+    })
+    Topology_____ = typing.TypedDict('Topology_____', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolEntry___ = typing.TypedDict('PoolEntry___', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology_____',
+    })
+    Options____ = typing.TypedDict('Options____', {
+            'label':'str',
+    })
+    Options_____ = typing.TypedDict('Options_____', {
+            'label':'str',
+            'disk':'str',
+            'force':'bool',
+            'preserve_settings':'bool',
+    })
+    Datavdevs_ = typing.TypedDict('Datavdevs_', {
+            'type':'str',
+            'disks':'list[str]',
+            'draid_data_disks':'int',
+            'draid_spare_disks':'int',
+    })
+    Specialvdevs_ = typing.TypedDict('Specialvdevs_', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Dedupvdevs_ = typing.TypedDict('Dedupvdevs_', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Cachevdevs_ = typing.TypedDict('Cachevdevs_', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Logvdevs_ = typing.TypedDict('Logvdevs_', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Topology______ = typing.TypedDict('Topology______', {
+            'data':'list[Datavdevs_]',
+            'special':'list[Specialvdevs_]',
+            'dedup':'list[Dedupvdevs_]',
+            'cache':'list[Cachevdevs_]',
+            'log':'list[Logvdevs_]',
+            'spares':'list[str]',
+    })
+    PoolUpdate = typing.TypedDict('PoolUpdate', {
+            'topology':'Topology______',
+            'allow_duplicate_serials':'bool',
+            'autotrim':'str',
+    })
+    Topology_______ = typing.TypedDict('Topology_______', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolUpdateReturns = typing.TypedDict('PoolUpdateReturns', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology_______',
+    })
     @typing.overload
     def get_disks(self, 
-        id:'int|None'=None,
+        id:'typing.Optional[int]'=None,
     /) -> 'list[str]': 
         """
         Get all disks in use by pools.
@@ -193,9 +2650,360 @@ class Pool(Namespace):
             pool_disks
         """
         ...
+    PoolAttach = typing.TypedDict('PoolAttach', {
+            'target_vdev':'str',
+            'new_disk':'str',
+            'allow_duplicate_serials':'bool',
+    })
+    Attachment = typing.TypedDict('Attachment', {
+            'type':'str',
+            'service':'typing.Optional[str]',
+            'attachments':'list[str]',
+    })
+    EncryptionOptions = typing.TypedDict('EncryptionOptions', {
+            'generate_key':'bool',
+            'pbkdf2iters':'int',
+            'algorithm':'str',
+            'passphrase':'typing.Optional[str]',
+            'key':'typing.Optional[str]',
+    })
+    Datavdevs = typing.TypedDict('Datavdevs', {
+            'type':'str',
+            'disks':'list[str]',
+            'draid_data_disks':'int',
+            'draid_spare_disks':'int',
+    })
+    Specialvdevs = typing.TypedDict('Specialvdevs', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Dedupvdevs = typing.TypedDict('Dedupvdevs', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Cachevdevs = typing.TypedDict('Cachevdevs', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Logvdevs = typing.TypedDict('Logvdevs', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Topology = typing.TypedDict('Topology', {
+            'data':'list[Datavdevs]',
+            'special':'list[Specialvdevs]',
+            'dedup':'list[Dedupvdevs]',
+            'cache':'list[Cachevdevs]',
+            'log':'list[Logvdevs]',
+            'spares':'list[str]',
+    })
+    PoolCreate = typing.TypedDict('PoolCreate', {
+            'name':'str',
+            'encryption':'bool',
+            'deduplication':'typing.Optional[str]',
+            'checksum':'typing.Optional[str]',
+            'encryption_options':'EncryptionOptions',
+            'topology':'Topology',
+            'allow_duplicate_serials':'bool',
+    })
+    Topology_ = typing.TypedDict('Topology_', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolCreateReturns = typing.TypedDict('PoolCreateReturns', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology_',
+    })
+    Options = typing.TypedDict('Options', {
+            'label':'str',
+    })
+    Options_ = typing.TypedDict('Options_', {
+            'cascade':'bool',
+            'restart_services':'bool',
+            'destroy':'bool',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Topology__ = typing.TypedDict('Topology__', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolEntry = typing.TypedDict('PoolEntry', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology__',
+    })
+    PoolInfo = typing.TypedDict('PoolInfo', {
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'hostname':'str',
+    })
+    PoolImport = typing.TypedDict('PoolImport', {
+            'guid':'str',
+            'name':'str',
+            'enable_attachments':'bool',
+    })
+    Options__ = typing.TypedDict('Options__', {
+            'label':'str',
+    })
+    Options___ = typing.TypedDict('Options___', {
+            'label':'str',
+    })
+    Process = typing.TypedDict('Process', {
+            'pid':'int',
+            'name':'str',
+            'service':'str',
+            'cmdline':'str',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Topology___ = typing.TypedDict('Topology___', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolEntry_ = typing.TypedDict('PoolEntry_', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology___',
+    })
+    Topology____ = typing.TypedDict('Topology____', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolEntry__ = typing.TypedDict('PoolEntry__', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology____',
+    })
+    Topology_____ = typing.TypedDict('Topology_____', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolEntry___ = typing.TypedDict('PoolEntry___', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology_____',
+    })
+    Options____ = typing.TypedDict('Options____', {
+            'label':'str',
+    })
+    Options_____ = typing.TypedDict('Options_____', {
+            'label':'str',
+            'disk':'str',
+            'force':'bool',
+            'preserve_settings':'bool',
+    })
+    Datavdevs_ = typing.TypedDict('Datavdevs_', {
+            'type':'str',
+            'disks':'list[str]',
+            'draid_data_disks':'int',
+            'draid_spare_disks':'int',
+    })
+    Specialvdevs_ = typing.TypedDict('Specialvdevs_', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Dedupvdevs_ = typing.TypedDict('Dedupvdevs_', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Cachevdevs_ = typing.TypedDict('Cachevdevs_', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Logvdevs_ = typing.TypedDict('Logvdevs_', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Topology______ = typing.TypedDict('Topology______', {
+            'data':'list[Datavdevs_]',
+            'special':'list[Specialvdevs_]',
+            'dedup':'list[Dedupvdevs_]',
+            'cache':'list[Cachevdevs_]',
+            'log':'list[Logvdevs_]',
+            'spares':'list[str]',
+    })
+    PoolUpdate = typing.TypedDict('PoolUpdate', {
+            'topology':'Topology______',
+            'allow_duplicate_serials':'bool',
+            'autotrim':'str',
+    })
+    Topology_______ = typing.TypedDict('Topology_______', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolUpdateReturns = typing.TypedDict('PoolUpdateReturns', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology_______',
+    })
     @typing.overload
     def get_instance(self, 
-        id:'str|int|bool|dict[str]|list',
+        id:'typing.Union[str, int, bool, dict[str], list]',
         query_options_get_instance:'QueryOptionsGetInstance'={},
     /) -> None: 
         """
@@ -213,6 +3021,357 @@ class Pool(Namespace):
         -------
         """
         ...
+    PoolAttach = typing.TypedDict('PoolAttach', {
+            'target_vdev':'str',
+            'new_disk':'str',
+            'allow_duplicate_serials':'bool',
+    })
+    Attachment = typing.TypedDict('Attachment', {
+            'type':'str',
+            'service':'typing.Optional[str]',
+            'attachments':'list[str]',
+    })
+    EncryptionOptions = typing.TypedDict('EncryptionOptions', {
+            'generate_key':'bool',
+            'pbkdf2iters':'int',
+            'algorithm':'str',
+            'passphrase':'typing.Optional[str]',
+            'key':'typing.Optional[str]',
+    })
+    Datavdevs = typing.TypedDict('Datavdevs', {
+            'type':'str',
+            'disks':'list[str]',
+            'draid_data_disks':'int',
+            'draid_spare_disks':'int',
+    })
+    Specialvdevs = typing.TypedDict('Specialvdevs', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Dedupvdevs = typing.TypedDict('Dedupvdevs', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Cachevdevs = typing.TypedDict('Cachevdevs', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Logvdevs = typing.TypedDict('Logvdevs', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Topology = typing.TypedDict('Topology', {
+            'data':'list[Datavdevs]',
+            'special':'list[Specialvdevs]',
+            'dedup':'list[Dedupvdevs]',
+            'cache':'list[Cachevdevs]',
+            'log':'list[Logvdevs]',
+            'spares':'list[str]',
+    })
+    PoolCreate = typing.TypedDict('PoolCreate', {
+            'name':'str',
+            'encryption':'bool',
+            'deduplication':'typing.Optional[str]',
+            'checksum':'typing.Optional[str]',
+            'encryption_options':'EncryptionOptions',
+            'topology':'Topology',
+            'allow_duplicate_serials':'bool',
+    })
+    Topology_ = typing.TypedDict('Topology_', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolCreateReturns = typing.TypedDict('PoolCreateReturns', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology_',
+    })
+    Options = typing.TypedDict('Options', {
+            'label':'str',
+    })
+    Options_ = typing.TypedDict('Options_', {
+            'cascade':'bool',
+            'restart_services':'bool',
+            'destroy':'bool',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Topology__ = typing.TypedDict('Topology__', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolEntry = typing.TypedDict('PoolEntry', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology__',
+    })
+    PoolInfo = typing.TypedDict('PoolInfo', {
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'hostname':'str',
+    })
+    PoolImport = typing.TypedDict('PoolImport', {
+            'guid':'str',
+            'name':'str',
+            'enable_attachments':'bool',
+    })
+    Options__ = typing.TypedDict('Options__', {
+            'label':'str',
+    })
+    Options___ = typing.TypedDict('Options___', {
+            'label':'str',
+    })
+    Process = typing.TypedDict('Process', {
+            'pid':'int',
+            'name':'str',
+            'service':'str',
+            'cmdline':'str',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Topology___ = typing.TypedDict('Topology___', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolEntry_ = typing.TypedDict('PoolEntry_', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology___',
+    })
+    Topology____ = typing.TypedDict('Topology____', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolEntry__ = typing.TypedDict('PoolEntry__', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology____',
+    })
+    Topology_____ = typing.TypedDict('Topology_____', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolEntry___ = typing.TypedDict('PoolEntry___', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology_____',
+    })
+    Options____ = typing.TypedDict('Options____', {
+            'label':'str',
+    })
+    Options_____ = typing.TypedDict('Options_____', {
+            'label':'str',
+            'disk':'str',
+            'force':'bool',
+            'preserve_settings':'bool',
+    })
+    Datavdevs_ = typing.TypedDict('Datavdevs_', {
+            'type':'str',
+            'disks':'list[str]',
+            'draid_data_disks':'int',
+            'draid_spare_disks':'int',
+    })
+    Specialvdevs_ = typing.TypedDict('Specialvdevs_', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Dedupvdevs_ = typing.TypedDict('Dedupvdevs_', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Cachevdevs_ = typing.TypedDict('Cachevdevs_', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Logvdevs_ = typing.TypedDict('Logvdevs_', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Topology______ = typing.TypedDict('Topology______', {
+            'data':'list[Datavdevs_]',
+            'special':'list[Specialvdevs_]',
+            'dedup':'list[Dedupvdevs_]',
+            'cache':'list[Cachevdevs_]',
+            'log':'list[Logvdevs_]',
+            'spares':'list[str]',
+    })
+    PoolUpdate = typing.TypedDict('PoolUpdate', {
+            'topology':'Topology______',
+            'allow_duplicate_serials':'bool',
+            'autotrim':'str',
+    })
+    Topology_______ = typing.TypedDict('Topology_______', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolUpdateReturns = typing.TypedDict('PoolUpdateReturns', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology_______',
+    })
     @typing.overload
     def get_instance_by_name(self, 
         name:'str',
@@ -230,6 +3389,357 @@ class Pool(Namespace):
             pool_entry
         """
         ...
+    PoolAttach = typing.TypedDict('PoolAttach', {
+            'target_vdev':'str',
+            'new_disk':'str',
+            'allow_duplicate_serials':'bool',
+    })
+    Attachment = typing.TypedDict('Attachment', {
+            'type':'str',
+            'service':'typing.Optional[str]',
+            'attachments':'list[str]',
+    })
+    EncryptionOptions = typing.TypedDict('EncryptionOptions', {
+            'generate_key':'bool',
+            'pbkdf2iters':'int',
+            'algorithm':'str',
+            'passphrase':'typing.Optional[str]',
+            'key':'typing.Optional[str]',
+    })
+    Datavdevs = typing.TypedDict('Datavdevs', {
+            'type':'str',
+            'disks':'list[str]',
+            'draid_data_disks':'int',
+            'draid_spare_disks':'int',
+    })
+    Specialvdevs = typing.TypedDict('Specialvdevs', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Dedupvdevs = typing.TypedDict('Dedupvdevs', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Cachevdevs = typing.TypedDict('Cachevdevs', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Logvdevs = typing.TypedDict('Logvdevs', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Topology = typing.TypedDict('Topology', {
+            'data':'list[Datavdevs]',
+            'special':'list[Specialvdevs]',
+            'dedup':'list[Dedupvdevs]',
+            'cache':'list[Cachevdevs]',
+            'log':'list[Logvdevs]',
+            'spares':'list[str]',
+    })
+    PoolCreate = typing.TypedDict('PoolCreate', {
+            'name':'str',
+            'encryption':'bool',
+            'deduplication':'typing.Optional[str]',
+            'checksum':'typing.Optional[str]',
+            'encryption_options':'EncryptionOptions',
+            'topology':'Topology',
+            'allow_duplicate_serials':'bool',
+    })
+    Topology_ = typing.TypedDict('Topology_', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolCreateReturns = typing.TypedDict('PoolCreateReturns', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology_',
+    })
+    Options = typing.TypedDict('Options', {
+            'label':'str',
+    })
+    Options_ = typing.TypedDict('Options_', {
+            'cascade':'bool',
+            'restart_services':'bool',
+            'destroy':'bool',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Topology__ = typing.TypedDict('Topology__', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolEntry = typing.TypedDict('PoolEntry', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology__',
+    })
+    PoolInfo = typing.TypedDict('PoolInfo', {
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'hostname':'str',
+    })
+    PoolImport = typing.TypedDict('PoolImport', {
+            'guid':'str',
+            'name':'str',
+            'enable_attachments':'bool',
+    })
+    Options__ = typing.TypedDict('Options__', {
+            'label':'str',
+    })
+    Options___ = typing.TypedDict('Options___', {
+            'label':'str',
+    })
+    Process = typing.TypedDict('Process', {
+            'pid':'int',
+            'name':'str',
+            'service':'str',
+            'cmdline':'str',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Topology___ = typing.TypedDict('Topology___', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolEntry_ = typing.TypedDict('PoolEntry_', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology___',
+    })
+    Topology____ = typing.TypedDict('Topology____', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolEntry__ = typing.TypedDict('PoolEntry__', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology____',
+    })
+    Topology_____ = typing.TypedDict('Topology_____', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolEntry___ = typing.TypedDict('PoolEntry___', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology_____',
+    })
+    Options____ = typing.TypedDict('Options____', {
+            'label':'str',
+    })
+    Options_____ = typing.TypedDict('Options_____', {
+            'label':'str',
+            'disk':'str',
+            'force':'bool',
+            'preserve_settings':'bool',
+    })
+    Datavdevs_ = typing.TypedDict('Datavdevs_', {
+            'type':'str',
+            'disks':'list[str]',
+            'draid_data_disks':'int',
+            'draid_spare_disks':'int',
+    })
+    Specialvdevs_ = typing.TypedDict('Specialvdevs_', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Dedupvdevs_ = typing.TypedDict('Dedupvdevs_', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Cachevdevs_ = typing.TypedDict('Cachevdevs_', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Logvdevs_ = typing.TypedDict('Logvdevs_', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Topology______ = typing.TypedDict('Topology______', {
+            'data':'list[Datavdevs_]',
+            'special':'list[Specialvdevs_]',
+            'dedup':'list[Dedupvdevs_]',
+            'cache':'list[Cachevdevs_]',
+            'log':'list[Logvdevs_]',
+            'spares':'list[str]',
+    })
+    PoolUpdate = typing.TypedDict('PoolUpdate', {
+            'topology':'Topology______',
+            'allow_duplicate_serials':'bool',
+            'autotrim':'str',
+    })
+    Topology_______ = typing.TypedDict('Topology_______', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolUpdateReturns = typing.TypedDict('PoolUpdateReturns', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology_______',
+    })
     @typing.overload
     def import_find(self, 
     /) -> 'list[PoolInfo]': 
@@ -246,6 +3756,357 @@ class Pool(Namespace):
             Pools Available For Import
         """
         ...
+    PoolAttach = typing.TypedDict('PoolAttach', {
+            'target_vdev':'str',
+            'new_disk':'str',
+            'allow_duplicate_serials':'bool',
+    })
+    Attachment = typing.TypedDict('Attachment', {
+            'type':'str',
+            'service':'typing.Optional[str]',
+            'attachments':'list[str]',
+    })
+    EncryptionOptions = typing.TypedDict('EncryptionOptions', {
+            'generate_key':'bool',
+            'pbkdf2iters':'int',
+            'algorithm':'str',
+            'passphrase':'typing.Optional[str]',
+            'key':'typing.Optional[str]',
+    })
+    Datavdevs = typing.TypedDict('Datavdevs', {
+            'type':'str',
+            'disks':'list[str]',
+            'draid_data_disks':'int',
+            'draid_spare_disks':'int',
+    })
+    Specialvdevs = typing.TypedDict('Specialvdevs', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Dedupvdevs = typing.TypedDict('Dedupvdevs', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Cachevdevs = typing.TypedDict('Cachevdevs', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Logvdevs = typing.TypedDict('Logvdevs', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Topology = typing.TypedDict('Topology', {
+            'data':'list[Datavdevs]',
+            'special':'list[Specialvdevs]',
+            'dedup':'list[Dedupvdevs]',
+            'cache':'list[Cachevdevs]',
+            'log':'list[Logvdevs]',
+            'spares':'list[str]',
+    })
+    PoolCreate = typing.TypedDict('PoolCreate', {
+            'name':'str',
+            'encryption':'bool',
+            'deduplication':'typing.Optional[str]',
+            'checksum':'typing.Optional[str]',
+            'encryption_options':'EncryptionOptions',
+            'topology':'Topology',
+            'allow_duplicate_serials':'bool',
+    })
+    Topology_ = typing.TypedDict('Topology_', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolCreateReturns = typing.TypedDict('PoolCreateReturns', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology_',
+    })
+    Options = typing.TypedDict('Options', {
+            'label':'str',
+    })
+    Options_ = typing.TypedDict('Options_', {
+            'cascade':'bool',
+            'restart_services':'bool',
+            'destroy':'bool',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Topology__ = typing.TypedDict('Topology__', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolEntry = typing.TypedDict('PoolEntry', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology__',
+    })
+    PoolInfo = typing.TypedDict('PoolInfo', {
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'hostname':'str',
+    })
+    PoolImport = typing.TypedDict('PoolImport', {
+            'guid':'str',
+            'name':'str',
+            'enable_attachments':'bool',
+    })
+    Options__ = typing.TypedDict('Options__', {
+            'label':'str',
+    })
+    Options___ = typing.TypedDict('Options___', {
+            'label':'str',
+    })
+    Process = typing.TypedDict('Process', {
+            'pid':'int',
+            'name':'str',
+            'service':'str',
+            'cmdline':'str',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Topology___ = typing.TypedDict('Topology___', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolEntry_ = typing.TypedDict('PoolEntry_', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology___',
+    })
+    Topology____ = typing.TypedDict('Topology____', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolEntry__ = typing.TypedDict('PoolEntry__', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology____',
+    })
+    Topology_____ = typing.TypedDict('Topology_____', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolEntry___ = typing.TypedDict('PoolEntry___', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology_____',
+    })
+    Options____ = typing.TypedDict('Options____', {
+            'label':'str',
+    })
+    Options_____ = typing.TypedDict('Options_____', {
+            'label':'str',
+            'disk':'str',
+            'force':'bool',
+            'preserve_settings':'bool',
+    })
+    Datavdevs_ = typing.TypedDict('Datavdevs_', {
+            'type':'str',
+            'disks':'list[str]',
+            'draid_data_disks':'int',
+            'draid_spare_disks':'int',
+    })
+    Specialvdevs_ = typing.TypedDict('Specialvdevs_', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Dedupvdevs_ = typing.TypedDict('Dedupvdevs_', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Cachevdevs_ = typing.TypedDict('Cachevdevs_', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Logvdevs_ = typing.TypedDict('Logvdevs_', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Topology______ = typing.TypedDict('Topology______', {
+            'data':'list[Datavdevs_]',
+            'special':'list[Specialvdevs_]',
+            'dedup':'list[Dedupvdevs_]',
+            'cache':'list[Cachevdevs_]',
+            'log':'list[Logvdevs_]',
+            'spares':'list[str]',
+    })
+    PoolUpdate = typing.TypedDict('PoolUpdate', {
+            'topology':'Topology______',
+            'allow_duplicate_serials':'bool',
+            'autotrim':'str',
+    })
+    Topology_______ = typing.TypedDict('Topology_______', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolUpdateReturns = typing.TypedDict('PoolUpdateReturns', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology_______',
+    })
     @typing.overload
     def import_pool(self, 
         pool_import:'PoolImport'={},
@@ -271,6 +4132,357 @@ class Pool(Namespace):
             successful_import
         """
         ...
+    PoolAttach = typing.TypedDict('PoolAttach', {
+            'target_vdev':'str',
+            'new_disk':'str',
+            'allow_duplicate_serials':'bool',
+    })
+    Attachment = typing.TypedDict('Attachment', {
+            'type':'str',
+            'service':'typing.Optional[str]',
+            'attachments':'list[str]',
+    })
+    EncryptionOptions = typing.TypedDict('EncryptionOptions', {
+            'generate_key':'bool',
+            'pbkdf2iters':'int',
+            'algorithm':'str',
+            'passphrase':'typing.Optional[str]',
+            'key':'typing.Optional[str]',
+    })
+    Datavdevs = typing.TypedDict('Datavdevs', {
+            'type':'str',
+            'disks':'list[str]',
+            'draid_data_disks':'int',
+            'draid_spare_disks':'int',
+    })
+    Specialvdevs = typing.TypedDict('Specialvdevs', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Dedupvdevs = typing.TypedDict('Dedupvdevs', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Cachevdevs = typing.TypedDict('Cachevdevs', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Logvdevs = typing.TypedDict('Logvdevs', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Topology = typing.TypedDict('Topology', {
+            'data':'list[Datavdevs]',
+            'special':'list[Specialvdevs]',
+            'dedup':'list[Dedupvdevs]',
+            'cache':'list[Cachevdevs]',
+            'log':'list[Logvdevs]',
+            'spares':'list[str]',
+    })
+    PoolCreate = typing.TypedDict('PoolCreate', {
+            'name':'str',
+            'encryption':'bool',
+            'deduplication':'typing.Optional[str]',
+            'checksum':'typing.Optional[str]',
+            'encryption_options':'EncryptionOptions',
+            'topology':'Topology',
+            'allow_duplicate_serials':'bool',
+    })
+    Topology_ = typing.TypedDict('Topology_', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolCreateReturns = typing.TypedDict('PoolCreateReturns', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology_',
+    })
+    Options = typing.TypedDict('Options', {
+            'label':'str',
+    })
+    Options_ = typing.TypedDict('Options_', {
+            'cascade':'bool',
+            'restart_services':'bool',
+            'destroy':'bool',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Topology__ = typing.TypedDict('Topology__', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolEntry = typing.TypedDict('PoolEntry', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology__',
+    })
+    PoolInfo = typing.TypedDict('PoolInfo', {
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'hostname':'str',
+    })
+    PoolImport = typing.TypedDict('PoolImport', {
+            'guid':'str',
+            'name':'str',
+            'enable_attachments':'bool',
+    })
+    Options__ = typing.TypedDict('Options__', {
+            'label':'str',
+    })
+    Options___ = typing.TypedDict('Options___', {
+            'label':'str',
+    })
+    Process = typing.TypedDict('Process', {
+            'pid':'int',
+            'name':'str',
+            'service':'str',
+            'cmdline':'str',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Topology___ = typing.TypedDict('Topology___', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolEntry_ = typing.TypedDict('PoolEntry_', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology___',
+    })
+    Topology____ = typing.TypedDict('Topology____', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolEntry__ = typing.TypedDict('PoolEntry__', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology____',
+    })
+    Topology_____ = typing.TypedDict('Topology_____', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolEntry___ = typing.TypedDict('PoolEntry___', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology_____',
+    })
+    Options____ = typing.TypedDict('Options____', {
+            'label':'str',
+    })
+    Options_____ = typing.TypedDict('Options_____', {
+            'label':'str',
+            'disk':'str',
+            'force':'bool',
+            'preserve_settings':'bool',
+    })
+    Datavdevs_ = typing.TypedDict('Datavdevs_', {
+            'type':'str',
+            'disks':'list[str]',
+            'draid_data_disks':'int',
+            'draid_spare_disks':'int',
+    })
+    Specialvdevs_ = typing.TypedDict('Specialvdevs_', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Dedupvdevs_ = typing.TypedDict('Dedupvdevs_', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Cachevdevs_ = typing.TypedDict('Cachevdevs_', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Logvdevs_ = typing.TypedDict('Logvdevs_', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Topology______ = typing.TypedDict('Topology______', {
+            'data':'list[Datavdevs_]',
+            'special':'list[Specialvdevs_]',
+            'dedup':'list[Dedupvdevs_]',
+            'cache':'list[Cachevdevs_]',
+            'log':'list[Logvdevs_]',
+            'spares':'list[str]',
+    })
+    PoolUpdate = typing.TypedDict('PoolUpdate', {
+            'topology':'Topology______',
+            'allow_duplicate_serials':'bool',
+            'autotrim':'str',
+    })
+    Topology_______ = typing.TypedDict('Topology_______', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolUpdateReturns = typing.TypedDict('PoolUpdateReturns', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology_______',
+    })
     @typing.overload
     def is_upgraded(self, 
         id:'int',
@@ -290,10 +4502,361 @@ class Pool(Namespace):
             pool_is_upgraded
         """
         ...
+    PoolAttach = typing.TypedDict('PoolAttach', {
+            'target_vdev':'str',
+            'new_disk':'str',
+            'allow_duplicate_serials':'bool',
+    })
+    Attachment = typing.TypedDict('Attachment', {
+            'type':'str',
+            'service':'typing.Optional[str]',
+            'attachments':'list[str]',
+    })
+    EncryptionOptions = typing.TypedDict('EncryptionOptions', {
+            'generate_key':'bool',
+            'pbkdf2iters':'int',
+            'algorithm':'str',
+            'passphrase':'typing.Optional[str]',
+            'key':'typing.Optional[str]',
+    })
+    Datavdevs = typing.TypedDict('Datavdevs', {
+            'type':'str',
+            'disks':'list[str]',
+            'draid_data_disks':'int',
+            'draid_spare_disks':'int',
+    })
+    Specialvdevs = typing.TypedDict('Specialvdevs', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Dedupvdevs = typing.TypedDict('Dedupvdevs', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Cachevdevs = typing.TypedDict('Cachevdevs', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Logvdevs = typing.TypedDict('Logvdevs', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Topology = typing.TypedDict('Topology', {
+            'data':'list[Datavdevs]',
+            'special':'list[Specialvdevs]',
+            'dedup':'list[Dedupvdevs]',
+            'cache':'list[Cachevdevs]',
+            'log':'list[Logvdevs]',
+            'spares':'list[str]',
+    })
+    PoolCreate = typing.TypedDict('PoolCreate', {
+            'name':'str',
+            'encryption':'bool',
+            'deduplication':'typing.Optional[str]',
+            'checksum':'typing.Optional[str]',
+            'encryption_options':'EncryptionOptions',
+            'topology':'Topology',
+            'allow_duplicate_serials':'bool',
+    })
+    Topology_ = typing.TypedDict('Topology_', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolCreateReturns = typing.TypedDict('PoolCreateReturns', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology_',
+    })
+    Options = typing.TypedDict('Options', {
+            'label':'str',
+    })
+    Options_ = typing.TypedDict('Options_', {
+            'cascade':'bool',
+            'restart_services':'bool',
+            'destroy':'bool',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Topology__ = typing.TypedDict('Topology__', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolEntry = typing.TypedDict('PoolEntry', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology__',
+    })
+    PoolInfo = typing.TypedDict('PoolInfo', {
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'hostname':'str',
+    })
+    PoolImport = typing.TypedDict('PoolImport', {
+            'guid':'str',
+            'name':'str',
+            'enable_attachments':'bool',
+    })
+    Options__ = typing.TypedDict('Options__', {
+            'label':'str',
+    })
+    Options___ = typing.TypedDict('Options___', {
+            'label':'str',
+    })
+    Process = typing.TypedDict('Process', {
+            'pid':'int',
+            'name':'str',
+            'service':'str',
+            'cmdline':'str',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Topology___ = typing.TypedDict('Topology___', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolEntry_ = typing.TypedDict('PoolEntry_', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology___',
+    })
+    Topology____ = typing.TypedDict('Topology____', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolEntry__ = typing.TypedDict('PoolEntry__', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology____',
+    })
+    Topology_____ = typing.TypedDict('Topology_____', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolEntry___ = typing.TypedDict('PoolEntry___', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology_____',
+    })
+    Options____ = typing.TypedDict('Options____', {
+            'label':'str',
+    })
+    Options_____ = typing.TypedDict('Options_____', {
+            'label':'str',
+            'disk':'str',
+            'force':'bool',
+            'preserve_settings':'bool',
+    })
+    Datavdevs_ = typing.TypedDict('Datavdevs_', {
+            'type':'str',
+            'disks':'list[str]',
+            'draid_data_disks':'int',
+            'draid_spare_disks':'int',
+    })
+    Specialvdevs_ = typing.TypedDict('Specialvdevs_', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Dedupvdevs_ = typing.TypedDict('Dedupvdevs_', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Cachevdevs_ = typing.TypedDict('Cachevdevs_', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Logvdevs_ = typing.TypedDict('Logvdevs_', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Topology______ = typing.TypedDict('Topology______', {
+            'data':'list[Datavdevs_]',
+            'special':'list[Specialvdevs_]',
+            'dedup':'list[Dedupvdevs_]',
+            'cache':'list[Cachevdevs_]',
+            'log':'list[Logvdevs_]',
+            'spares':'list[str]',
+    })
+    PoolUpdate = typing.TypedDict('PoolUpdate', {
+            'topology':'Topology______',
+            'allow_duplicate_serials':'bool',
+            'autotrim':'str',
+    })
+    Topology_______ = typing.TypedDict('Topology_______', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolUpdateReturns = typing.TypedDict('PoolUpdateReturns', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology_______',
+    })
     @typing.overload
     def offline(self, 
         id:'int',
-        options:'Options'={},
+        options:'Options__'={},
     /) -> 'bool': 
         """
         Offline a disk from pool of id `id`.
@@ -312,10 +4875,361 @@ class Pool(Namespace):
             offline_successful
         """
         ...
+    PoolAttach = typing.TypedDict('PoolAttach', {
+            'target_vdev':'str',
+            'new_disk':'str',
+            'allow_duplicate_serials':'bool',
+    })
+    Attachment = typing.TypedDict('Attachment', {
+            'type':'str',
+            'service':'typing.Optional[str]',
+            'attachments':'list[str]',
+    })
+    EncryptionOptions = typing.TypedDict('EncryptionOptions', {
+            'generate_key':'bool',
+            'pbkdf2iters':'int',
+            'algorithm':'str',
+            'passphrase':'typing.Optional[str]',
+            'key':'typing.Optional[str]',
+    })
+    Datavdevs = typing.TypedDict('Datavdevs', {
+            'type':'str',
+            'disks':'list[str]',
+            'draid_data_disks':'int',
+            'draid_spare_disks':'int',
+    })
+    Specialvdevs = typing.TypedDict('Specialvdevs', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Dedupvdevs = typing.TypedDict('Dedupvdevs', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Cachevdevs = typing.TypedDict('Cachevdevs', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Logvdevs = typing.TypedDict('Logvdevs', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Topology = typing.TypedDict('Topology', {
+            'data':'list[Datavdevs]',
+            'special':'list[Specialvdevs]',
+            'dedup':'list[Dedupvdevs]',
+            'cache':'list[Cachevdevs]',
+            'log':'list[Logvdevs]',
+            'spares':'list[str]',
+    })
+    PoolCreate = typing.TypedDict('PoolCreate', {
+            'name':'str',
+            'encryption':'bool',
+            'deduplication':'typing.Optional[str]',
+            'checksum':'typing.Optional[str]',
+            'encryption_options':'EncryptionOptions',
+            'topology':'Topology',
+            'allow_duplicate_serials':'bool',
+    })
+    Topology_ = typing.TypedDict('Topology_', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolCreateReturns = typing.TypedDict('PoolCreateReturns', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology_',
+    })
+    Options = typing.TypedDict('Options', {
+            'label':'str',
+    })
+    Options_ = typing.TypedDict('Options_', {
+            'cascade':'bool',
+            'restart_services':'bool',
+            'destroy':'bool',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Topology__ = typing.TypedDict('Topology__', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolEntry = typing.TypedDict('PoolEntry', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology__',
+    })
+    PoolInfo = typing.TypedDict('PoolInfo', {
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'hostname':'str',
+    })
+    PoolImport = typing.TypedDict('PoolImport', {
+            'guid':'str',
+            'name':'str',
+            'enable_attachments':'bool',
+    })
+    Options__ = typing.TypedDict('Options__', {
+            'label':'str',
+    })
+    Options___ = typing.TypedDict('Options___', {
+            'label':'str',
+    })
+    Process = typing.TypedDict('Process', {
+            'pid':'int',
+            'name':'str',
+            'service':'str',
+            'cmdline':'str',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Topology___ = typing.TypedDict('Topology___', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolEntry_ = typing.TypedDict('PoolEntry_', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology___',
+    })
+    Topology____ = typing.TypedDict('Topology____', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolEntry__ = typing.TypedDict('PoolEntry__', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology____',
+    })
+    Topology_____ = typing.TypedDict('Topology_____', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolEntry___ = typing.TypedDict('PoolEntry___', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology_____',
+    })
+    Options____ = typing.TypedDict('Options____', {
+            'label':'str',
+    })
+    Options_____ = typing.TypedDict('Options_____', {
+            'label':'str',
+            'disk':'str',
+            'force':'bool',
+            'preserve_settings':'bool',
+    })
+    Datavdevs_ = typing.TypedDict('Datavdevs_', {
+            'type':'str',
+            'disks':'list[str]',
+            'draid_data_disks':'int',
+            'draid_spare_disks':'int',
+    })
+    Specialvdevs_ = typing.TypedDict('Specialvdevs_', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Dedupvdevs_ = typing.TypedDict('Dedupvdevs_', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Cachevdevs_ = typing.TypedDict('Cachevdevs_', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Logvdevs_ = typing.TypedDict('Logvdevs_', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Topology______ = typing.TypedDict('Topology______', {
+            'data':'list[Datavdevs_]',
+            'special':'list[Specialvdevs_]',
+            'dedup':'list[Dedupvdevs_]',
+            'cache':'list[Cachevdevs_]',
+            'log':'list[Logvdevs_]',
+            'spares':'list[str]',
+    })
+    PoolUpdate = typing.TypedDict('PoolUpdate', {
+            'topology':'Topology______',
+            'allow_duplicate_serials':'bool',
+            'autotrim':'str',
+    })
+    Topology_______ = typing.TypedDict('Topology_______', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolUpdateReturns = typing.TypedDict('PoolUpdateReturns', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology_______',
+    })
     @typing.overload
     def online(self, 
         id:'int',
-        options:'Options'={},
+        options:'Options___'={},
     /) -> 'bool': 
         """
         Online a disk from pool of id `id`.
@@ -334,6 +5248,357 @@ class Pool(Namespace):
             online_successful
         """
         ...
+    PoolAttach = typing.TypedDict('PoolAttach', {
+            'target_vdev':'str',
+            'new_disk':'str',
+            'allow_duplicate_serials':'bool',
+    })
+    Attachment = typing.TypedDict('Attachment', {
+            'type':'str',
+            'service':'typing.Optional[str]',
+            'attachments':'list[str]',
+    })
+    EncryptionOptions = typing.TypedDict('EncryptionOptions', {
+            'generate_key':'bool',
+            'pbkdf2iters':'int',
+            'algorithm':'str',
+            'passphrase':'typing.Optional[str]',
+            'key':'typing.Optional[str]',
+    })
+    Datavdevs = typing.TypedDict('Datavdevs', {
+            'type':'str',
+            'disks':'list[str]',
+            'draid_data_disks':'int',
+            'draid_spare_disks':'int',
+    })
+    Specialvdevs = typing.TypedDict('Specialvdevs', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Dedupvdevs = typing.TypedDict('Dedupvdevs', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Cachevdevs = typing.TypedDict('Cachevdevs', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Logvdevs = typing.TypedDict('Logvdevs', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Topology = typing.TypedDict('Topology', {
+            'data':'list[Datavdevs]',
+            'special':'list[Specialvdevs]',
+            'dedup':'list[Dedupvdevs]',
+            'cache':'list[Cachevdevs]',
+            'log':'list[Logvdevs]',
+            'spares':'list[str]',
+    })
+    PoolCreate = typing.TypedDict('PoolCreate', {
+            'name':'str',
+            'encryption':'bool',
+            'deduplication':'typing.Optional[str]',
+            'checksum':'typing.Optional[str]',
+            'encryption_options':'EncryptionOptions',
+            'topology':'Topology',
+            'allow_duplicate_serials':'bool',
+    })
+    Topology_ = typing.TypedDict('Topology_', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolCreateReturns = typing.TypedDict('PoolCreateReturns', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology_',
+    })
+    Options = typing.TypedDict('Options', {
+            'label':'str',
+    })
+    Options_ = typing.TypedDict('Options_', {
+            'cascade':'bool',
+            'restart_services':'bool',
+            'destroy':'bool',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Topology__ = typing.TypedDict('Topology__', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolEntry = typing.TypedDict('PoolEntry', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology__',
+    })
+    PoolInfo = typing.TypedDict('PoolInfo', {
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'hostname':'str',
+    })
+    PoolImport = typing.TypedDict('PoolImport', {
+            'guid':'str',
+            'name':'str',
+            'enable_attachments':'bool',
+    })
+    Options__ = typing.TypedDict('Options__', {
+            'label':'str',
+    })
+    Options___ = typing.TypedDict('Options___', {
+            'label':'str',
+    })
+    Process = typing.TypedDict('Process', {
+            'pid':'int',
+            'name':'str',
+            'service':'str',
+            'cmdline':'str',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Topology___ = typing.TypedDict('Topology___', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolEntry_ = typing.TypedDict('PoolEntry_', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology___',
+    })
+    Topology____ = typing.TypedDict('Topology____', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolEntry__ = typing.TypedDict('PoolEntry__', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology____',
+    })
+    Topology_____ = typing.TypedDict('Topology_____', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolEntry___ = typing.TypedDict('PoolEntry___', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology_____',
+    })
+    Options____ = typing.TypedDict('Options____', {
+            'label':'str',
+    })
+    Options_____ = typing.TypedDict('Options_____', {
+            'label':'str',
+            'disk':'str',
+            'force':'bool',
+            'preserve_settings':'bool',
+    })
+    Datavdevs_ = typing.TypedDict('Datavdevs_', {
+            'type':'str',
+            'disks':'list[str]',
+            'draid_data_disks':'int',
+            'draid_spare_disks':'int',
+    })
+    Specialvdevs_ = typing.TypedDict('Specialvdevs_', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Dedupvdevs_ = typing.TypedDict('Dedupvdevs_', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Cachevdevs_ = typing.TypedDict('Cachevdevs_', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Logvdevs_ = typing.TypedDict('Logvdevs_', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Topology______ = typing.TypedDict('Topology______', {
+            'data':'list[Datavdevs_]',
+            'special':'list[Specialvdevs_]',
+            'dedup':'list[Dedupvdevs_]',
+            'cache':'list[Cachevdevs_]',
+            'log':'list[Logvdevs_]',
+            'spares':'list[str]',
+    })
+    PoolUpdate = typing.TypedDict('PoolUpdate', {
+            'topology':'Topology______',
+            'allow_duplicate_serials':'bool',
+            'autotrim':'str',
+    })
+    Topology_______ = typing.TypedDict('Topology_______', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolUpdateReturns = typing.TypedDict('PoolUpdateReturns', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology_______',
+    })
     @typing.overload
     def processes(self, 
         id:'int',
@@ -351,11 +5616,362 @@ class Pool(Namespace):
             processes
         """
         ...
+    PoolAttach = typing.TypedDict('PoolAttach', {
+            'target_vdev':'str',
+            'new_disk':'str',
+            'allow_duplicate_serials':'bool',
+    })
+    Attachment = typing.TypedDict('Attachment', {
+            'type':'str',
+            'service':'typing.Optional[str]',
+            'attachments':'list[str]',
+    })
+    EncryptionOptions = typing.TypedDict('EncryptionOptions', {
+            'generate_key':'bool',
+            'pbkdf2iters':'int',
+            'algorithm':'str',
+            'passphrase':'typing.Optional[str]',
+            'key':'typing.Optional[str]',
+    })
+    Datavdevs = typing.TypedDict('Datavdevs', {
+            'type':'str',
+            'disks':'list[str]',
+            'draid_data_disks':'int',
+            'draid_spare_disks':'int',
+    })
+    Specialvdevs = typing.TypedDict('Specialvdevs', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Dedupvdevs = typing.TypedDict('Dedupvdevs', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Cachevdevs = typing.TypedDict('Cachevdevs', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Logvdevs = typing.TypedDict('Logvdevs', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Topology = typing.TypedDict('Topology', {
+            'data':'list[Datavdevs]',
+            'special':'list[Specialvdevs]',
+            'dedup':'list[Dedupvdevs]',
+            'cache':'list[Cachevdevs]',
+            'log':'list[Logvdevs]',
+            'spares':'list[str]',
+    })
+    PoolCreate = typing.TypedDict('PoolCreate', {
+            'name':'str',
+            'encryption':'bool',
+            'deduplication':'typing.Optional[str]',
+            'checksum':'typing.Optional[str]',
+            'encryption_options':'EncryptionOptions',
+            'topology':'Topology',
+            'allow_duplicate_serials':'bool',
+    })
+    Topology_ = typing.TypedDict('Topology_', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolCreateReturns = typing.TypedDict('PoolCreateReturns', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology_',
+    })
+    Options = typing.TypedDict('Options', {
+            'label':'str',
+    })
+    Options_ = typing.TypedDict('Options_', {
+            'cascade':'bool',
+            'restart_services':'bool',
+            'destroy':'bool',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Topology__ = typing.TypedDict('Topology__', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolEntry = typing.TypedDict('PoolEntry', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology__',
+    })
+    PoolInfo = typing.TypedDict('PoolInfo', {
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'hostname':'str',
+    })
+    PoolImport = typing.TypedDict('PoolImport', {
+            'guid':'str',
+            'name':'str',
+            'enable_attachments':'bool',
+    })
+    Options__ = typing.TypedDict('Options__', {
+            'label':'str',
+    })
+    Options___ = typing.TypedDict('Options___', {
+            'label':'str',
+    })
+    Process = typing.TypedDict('Process', {
+            'pid':'int',
+            'name':'str',
+            'service':'str',
+            'cmdline':'str',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Topology___ = typing.TypedDict('Topology___', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolEntry_ = typing.TypedDict('PoolEntry_', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology___',
+    })
+    Topology____ = typing.TypedDict('Topology____', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolEntry__ = typing.TypedDict('PoolEntry__', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology____',
+    })
+    Topology_____ = typing.TypedDict('Topology_____', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolEntry___ = typing.TypedDict('PoolEntry___', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology_____',
+    })
+    Options____ = typing.TypedDict('Options____', {
+            'label':'str',
+    })
+    Options_____ = typing.TypedDict('Options_____', {
+            'label':'str',
+            'disk':'str',
+            'force':'bool',
+            'preserve_settings':'bool',
+    })
+    Datavdevs_ = typing.TypedDict('Datavdevs_', {
+            'type':'str',
+            'disks':'list[str]',
+            'draid_data_disks':'int',
+            'draid_spare_disks':'int',
+    })
+    Specialvdevs_ = typing.TypedDict('Specialvdevs_', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Dedupvdevs_ = typing.TypedDict('Dedupvdevs_', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Cachevdevs_ = typing.TypedDict('Cachevdevs_', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Logvdevs_ = typing.TypedDict('Logvdevs_', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Topology______ = typing.TypedDict('Topology______', {
+            'data':'list[Datavdevs_]',
+            'special':'list[Specialvdevs_]',
+            'dedup':'list[Dedupvdevs_]',
+            'cache':'list[Cachevdevs_]',
+            'log':'list[Logvdevs_]',
+            'spares':'list[str]',
+    })
+    PoolUpdate = typing.TypedDict('PoolUpdate', {
+            'topology':'Topology______',
+            'allow_duplicate_serials':'bool',
+            'autotrim':'str',
+    })
+    Topology_______ = typing.TypedDict('Topology_______', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolUpdateReturns = typing.TypedDict('PoolUpdateReturns', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology_______',
+    })
     @typing.overload
     def query(self, 
         query_filters:'list[list]'=[],
         query_options:'QueryOptions'={},
-    /) -> 'list[PoolEntry]|PoolEntry|int|PoolEntry': 
+    /) -> 'typing.Union[list[PoolEntry_], ForwardRef(PoolEntry__), int, ForwardRef(PoolEntry___)]': 
         """
         
 
@@ -367,20 +5983,365 @@ class Pool(Namespace):
             query-options
         Returns
         -------
-        list[PoolEntry]:
-            
-        PoolEntry:
-            
-        int:
-            
-        PoolEntry:
+        typing.Union[list[PoolEntry_], ForwardRef(PoolEntry__), int, ForwardRef(PoolEntry___)]:
             
         """
         ...
+    PoolAttach = typing.TypedDict('PoolAttach', {
+            'target_vdev':'str',
+            'new_disk':'str',
+            'allow_duplicate_serials':'bool',
+    })
+    Attachment = typing.TypedDict('Attachment', {
+            'type':'str',
+            'service':'typing.Optional[str]',
+            'attachments':'list[str]',
+    })
+    EncryptionOptions = typing.TypedDict('EncryptionOptions', {
+            'generate_key':'bool',
+            'pbkdf2iters':'int',
+            'algorithm':'str',
+            'passphrase':'typing.Optional[str]',
+            'key':'typing.Optional[str]',
+    })
+    Datavdevs = typing.TypedDict('Datavdevs', {
+            'type':'str',
+            'disks':'list[str]',
+            'draid_data_disks':'int',
+            'draid_spare_disks':'int',
+    })
+    Specialvdevs = typing.TypedDict('Specialvdevs', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Dedupvdevs = typing.TypedDict('Dedupvdevs', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Cachevdevs = typing.TypedDict('Cachevdevs', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Logvdevs = typing.TypedDict('Logvdevs', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Topology = typing.TypedDict('Topology', {
+            'data':'list[Datavdevs]',
+            'special':'list[Specialvdevs]',
+            'dedup':'list[Dedupvdevs]',
+            'cache':'list[Cachevdevs]',
+            'log':'list[Logvdevs]',
+            'spares':'list[str]',
+    })
+    PoolCreate = typing.TypedDict('PoolCreate', {
+            'name':'str',
+            'encryption':'bool',
+            'deduplication':'typing.Optional[str]',
+            'checksum':'typing.Optional[str]',
+            'encryption_options':'EncryptionOptions',
+            'topology':'Topology',
+            'allow_duplicate_serials':'bool',
+    })
+    Topology_ = typing.TypedDict('Topology_', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolCreateReturns = typing.TypedDict('PoolCreateReturns', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology_',
+    })
+    Options = typing.TypedDict('Options', {
+            'label':'str',
+    })
+    Options_ = typing.TypedDict('Options_', {
+            'cascade':'bool',
+            'restart_services':'bool',
+            'destroy':'bool',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Topology__ = typing.TypedDict('Topology__', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolEntry = typing.TypedDict('PoolEntry', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology__',
+    })
+    PoolInfo = typing.TypedDict('PoolInfo', {
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'hostname':'str',
+    })
+    PoolImport = typing.TypedDict('PoolImport', {
+            'guid':'str',
+            'name':'str',
+            'enable_attachments':'bool',
+    })
+    Options__ = typing.TypedDict('Options__', {
+            'label':'str',
+    })
+    Options___ = typing.TypedDict('Options___', {
+            'label':'str',
+    })
+    Process = typing.TypedDict('Process', {
+            'pid':'int',
+            'name':'str',
+            'service':'str',
+            'cmdline':'str',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Topology___ = typing.TypedDict('Topology___', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolEntry_ = typing.TypedDict('PoolEntry_', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology___',
+    })
+    Topology____ = typing.TypedDict('Topology____', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolEntry__ = typing.TypedDict('PoolEntry__', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology____',
+    })
+    Topology_____ = typing.TypedDict('Topology_____', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolEntry___ = typing.TypedDict('PoolEntry___', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology_____',
+    })
+    Options____ = typing.TypedDict('Options____', {
+            'label':'str',
+    })
+    Options_____ = typing.TypedDict('Options_____', {
+            'label':'str',
+            'disk':'str',
+            'force':'bool',
+            'preserve_settings':'bool',
+    })
+    Datavdevs_ = typing.TypedDict('Datavdevs_', {
+            'type':'str',
+            'disks':'list[str]',
+            'draid_data_disks':'int',
+            'draid_spare_disks':'int',
+    })
+    Specialvdevs_ = typing.TypedDict('Specialvdevs_', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Dedupvdevs_ = typing.TypedDict('Dedupvdevs_', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Cachevdevs_ = typing.TypedDict('Cachevdevs_', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Logvdevs_ = typing.TypedDict('Logvdevs_', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Topology______ = typing.TypedDict('Topology______', {
+            'data':'list[Datavdevs_]',
+            'special':'list[Specialvdevs_]',
+            'dedup':'list[Dedupvdevs_]',
+            'cache':'list[Cachevdevs_]',
+            'log':'list[Logvdevs_]',
+            'spares':'list[str]',
+    })
+    PoolUpdate = typing.TypedDict('PoolUpdate', {
+            'topology':'Topology______',
+            'allow_duplicate_serials':'bool',
+            'autotrim':'str',
+    })
+    Topology_______ = typing.TypedDict('Topology_______', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolUpdateReturns = typing.TypedDict('PoolUpdateReturns', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology_______',
+    })
     @typing.overload
     def remove(self, 
         id:'int',
-        options:'Options'={},
+        options:'Options____'={},
     /) -> None: 
         """
         Remove a disk from pool of id `id`.
@@ -403,10 +6364,361 @@ class Pool(Namespace):
         -------
         """
         ...
+    PoolAttach = typing.TypedDict('PoolAttach', {
+            'target_vdev':'str',
+            'new_disk':'str',
+            'allow_duplicate_serials':'bool',
+    })
+    Attachment = typing.TypedDict('Attachment', {
+            'type':'str',
+            'service':'typing.Optional[str]',
+            'attachments':'list[str]',
+    })
+    EncryptionOptions = typing.TypedDict('EncryptionOptions', {
+            'generate_key':'bool',
+            'pbkdf2iters':'int',
+            'algorithm':'str',
+            'passphrase':'typing.Optional[str]',
+            'key':'typing.Optional[str]',
+    })
+    Datavdevs = typing.TypedDict('Datavdevs', {
+            'type':'str',
+            'disks':'list[str]',
+            'draid_data_disks':'int',
+            'draid_spare_disks':'int',
+    })
+    Specialvdevs = typing.TypedDict('Specialvdevs', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Dedupvdevs = typing.TypedDict('Dedupvdevs', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Cachevdevs = typing.TypedDict('Cachevdevs', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Logvdevs = typing.TypedDict('Logvdevs', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Topology = typing.TypedDict('Topology', {
+            'data':'list[Datavdevs]',
+            'special':'list[Specialvdevs]',
+            'dedup':'list[Dedupvdevs]',
+            'cache':'list[Cachevdevs]',
+            'log':'list[Logvdevs]',
+            'spares':'list[str]',
+    })
+    PoolCreate = typing.TypedDict('PoolCreate', {
+            'name':'str',
+            'encryption':'bool',
+            'deduplication':'typing.Optional[str]',
+            'checksum':'typing.Optional[str]',
+            'encryption_options':'EncryptionOptions',
+            'topology':'Topology',
+            'allow_duplicate_serials':'bool',
+    })
+    Topology_ = typing.TypedDict('Topology_', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolCreateReturns = typing.TypedDict('PoolCreateReturns', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology_',
+    })
+    Options = typing.TypedDict('Options', {
+            'label':'str',
+    })
+    Options_ = typing.TypedDict('Options_', {
+            'cascade':'bool',
+            'restart_services':'bool',
+            'destroy':'bool',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Topology__ = typing.TypedDict('Topology__', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolEntry = typing.TypedDict('PoolEntry', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology__',
+    })
+    PoolInfo = typing.TypedDict('PoolInfo', {
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'hostname':'str',
+    })
+    PoolImport = typing.TypedDict('PoolImport', {
+            'guid':'str',
+            'name':'str',
+            'enable_attachments':'bool',
+    })
+    Options__ = typing.TypedDict('Options__', {
+            'label':'str',
+    })
+    Options___ = typing.TypedDict('Options___', {
+            'label':'str',
+    })
+    Process = typing.TypedDict('Process', {
+            'pid':'int',
+            'name':'str',
+            'service':'str',
+            'cmdline':'str',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Topology___ = typing.TypedDict('Topology___', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolEntry_ = typing.TypedDict('PoolEntry_', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology___',
+    })
+    Topology____ = typing.TypedDict('Topology____', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolEntry__ = typing.TypedDict('PoolEntry__', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology____',
+    })
+    Topology_____ = typing.TypedDict('Topology_____', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolEntry___ = typing.TypedDict('PoolEntry___', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology_____',
+    })
+    Options____ = typing.TypedDict('Options____', {
+            'label':'str',
+    })
+    Options_____ = typing.TypedDict('Options_____', {
+            'label':'str',
+            'disk':'str',
+            'force':'bool',
+            'preserve_settings':'bool',
+    })
+    Datavdevs_ = typing.TypedDict('Datavdevs_', {
+            'type':'str',
+            'disks':'list[str]',
+            'draid_data_disks':'int',
+            'draid_spare_disks':'int',
+    })
+    Specialvdevs_ = typing.TypedDict('Specialvdevs_', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Dedupvdevs_ = typing.TypedDict('Dedupvdevs_', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Cachevdevs_ = typing.TypedDict('Cachevdevs_', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Logvdevs_ = typing.TypedDict('Logvdevs_', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Topology______ = typing.TypedDict('Topology______', {
+            'data':'list[Datavdevs_]',
+            'special':'list[Specialvdevs_]',
+            'dedup':'list[Dedupvdevs_]',
+            'cache':'list[Cachevdevs_]',
+            'log':'list[Logvdevs_]',
+            'spares':'list[str]',
+    })
+    PoolUpdate = typing.TypedDict('PoolUpdate', {
+            'topology':'Topology______',
+            'allow_duplicate_serials':'bool',
+            'autotrim':'str',
+    })
+    Topology_______ = typing.TypedDict('Topology_______', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolUpdateReturns = typing.TypedDict('PoolUpdateReturns', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology_______',
+    })
     @typing.overload
     def replace(self, 
         id:'int',
-        options:'Options__'={},
+        options:'Options_____'={},
     /) -> 'bool': 
         """
         Replace a disk on a pool.
@@ -428,6 +6740,357 @@ class Pool(Namespace):
             replaced_successfully
         """
         ...
+    PoolAttach = typing.TypedDict('PoolAttach', {
+            'target_vdev':'str',
+            'new_disk':'str',
+            'allow_duplicate_serials':'bool',
+    })
+    Attachment = typing.TypedDict('Attachment', {
+            'type':'str',
+            'service':'typing.Optional[str]',
+            'attachments':'list[str]',
+    })
+    EncryptionOptions = typing.TypedDict('EncryptionOptions', {
+            'generate_key':'bool',
+            'pbkdf2iters':'int',
+            'algorithm':'str',
+            'passphrase':'typing.Optional[str]',
+            'key':'typing.Optional[str]',
+    })
+    Datavdevs = typing.TypedDict('Datavdevs', {
+            'type':'str',
+            'disks':'list[str]',
+            'draid_data_disks':'int',
+            'draid_spare_disks':'int',
+    })
+    Specialvdevs = typing.TypedDict('Specialvdevs', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Dedupvdevs = typing.TypedDict('Dedupvdevs', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Cachevdevs = typing.TypedDict('Cachevdevs', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Logvdevs = typing.TypedDict('Logvdevs', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Topology = typing.TypedDict('Topology', {
+            'data':'list[Datavdevs]',
+            'special':'list[Specialvdevs]',
+            'dedup':'list[Dedupvdevs]',
+            'cache':'list[Cachevdevs]',
+            'log':'list[Logvdevs]',
+            'spares':'list[str]',
+    })
+    PoolCreate = typing.TypedDict('PoolCreate', {
+            'name':'str',
+            'encryption':'bool',
+            'deduplication':'typing.Optional[str]',
+            'checksum':'typing.Optional[str]',
+            'encryption_options':'EncryptionOptions',
+            'topology':'Topology',
+            'allow_duplicate_serials':'bool',
+    })
+    Topology_ = typing.TypedDict('Topology_', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolCreateReturns = typing.TypedDict('PoolCreateReturns', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology_',
+    })
+    Options = typing.TypedDict('Options', {
+            'label':'str',
+    })
+    Options_ = typing.TypedDict('Options_', {
+            'cascade':'bool',
+            'restart_services':'bool',
+            'destroy':'bool',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Topology__ = typing.TypedDict('Topology__', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolEntry = typing.TypedDict('PoolEntry', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology__',
+    })
+    PoolInfo = typing.TypedDict('PoolInfo', {
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'hostname':'str',
+    })
+    PoolImport = typing.TypedDict('PoolImport', {
+            'guid':'str',
+            'name':'str',
+            'enable_attachments':'bool',
+    })
+    Options__ = typing.TypedDict('Options__', {
+            'label':'str',
+    })
+    Options___ = typing.TypedDict('Options___', {
+            'label':'str',
+    })
+    Process = typing.TypedDict('Process', {
+            'pid':'int',
+            'name':'str',
+            'service':'str',
+            'cmdline':'str',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Topology___ = typing.TypedDict('Topology___', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolEntry_ = typing.TypedDict('PoolEntry_', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology___',
+    })
+    Topology____ = typing.TypedDict('Topology____', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolEntry__ = typing.TypedDict('PoolEntry__', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology____',
+    })
+    Topology_____ = typing.TypedDict('Topology_____', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolEntry___ = typing.TypedDict('PoolEntry___', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology_____',
+    })
+    Options____ = typing.TypedDict('Options____', {
+            'label':'str',
+    })
+    Options_____ = typing.TypedDict('Options_____', {
+            'label':'str',
+            'disk':'str',
+            'force':'bool',
+            'preserve_settings':'bool',
+    })
+    Datavdevs_ = typing.TypedDict('Datavdevs_', {
+            'type':'str',
+            'disks':'list[str]',
+            'draid_data_disks':'int',
+            'draid_spare_disks':'int',
+    })
+    Specialvdevs_ = typing.TypedDict('Specialvdevs_', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Dedupvdevs_ = typing.TypedDict('Dedupvdevs_', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Cachevdevs_ = typing.TypedDict('Cachevdevs_', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Logvdevs_ = typing.TypedDict('Logvdevs_', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Topology______ = typing.TypedDict('Topology______', {
+            'data':'list[Datavdevs_]',
+            'special':'list[Specialvdevs_]',
+            'dedup':'list[Dedupvdevs_]',
+            'cache':'list[Cachevdevs_]',
+            'log':'list[Logvdevs_]',
+            'spares':'list[str]',
+    })
+    PoolUpdate = typing.TypedDict('PoolUpdate', {
+            'topology':'Topology______',
+            'allow_duplicate_serials':'bool',
+            'autotrim':'str',
+    })
+    Topology_______ = typing.TypedDict('Topology_______', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolUpdateReturns = typing.TypedDict('PoolUpdateReturns', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology_______',
+    })
     @typing.overload
     def scrub(self, 
         id:'int',
@@ -448,6 +7111,357 @@ class Pool(Namespace):
         -------
         """
         ...
+    PoolAttach = typing.TypedDict('PoolAttach', {
+            'target_vdev':'str',
+            'new_disk':'str',
+            'allow_duplicate_serials':'bool',
+    })
+    Attachment = typing.TypedDict('Attachment', {
+            'type':'str',
+            'service':'typing.Optional[str]',
+            'attachments':'list[str]',
+    })
+    EncryptionOptions = typing.TypedDict('EncryptionOptions', {
+            'generate_key':'bool',
+            'pbkdf2iters':'int',
+            'algorithm':'str',
+            'passphrase':'typing.Optional[str]',
+            'key':'typing.Optional[str]',
+    })
+    Datavdevs = typing.TypedDict('Datavdevs', {
+            'type':'str',
+            'disks':'list[str]',
+            'draid_data_disks':'int',
+            'draid_spare_disks':'int',
+    })
+    Specialvdevs = typing.TypedDict('Specialvdevs', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Dedupvdevs = typing.TypedDict('Dedupvdevs', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Cachevdevs = typing.TypedDict('Cachevdevs', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Logvdevs = typing.TypedDict('Logvdevs', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Topology = typing.TypedDict('Topology', {
+            'data':'list[Datavdevs]',
+            'special':'list[Specialvdevs]',
+            'dedup':'list[Dedupvdevs]',
+            'cache':'list[Cachevdevs]',
+            'log':'list[Logvdevs]',
+            'spares':'list[str]',
+    })
+    PoolCreate = typing.TypedDict('PoolCreate', {
+            'name':'str',
+            'encryption':'bool',
+            'deduplication':'typing.Optional[str]',
+            'checksum':'typing.Optional[str]',
+            'encryption_options':'EncryptionOptions',
+            'topology':'Topology',
+            'allow_duplicate_serials':'bool',
+    })
+    Topology_ = typing.TypedDict('Topology_', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolCreateReturns = typing.TypedDict('PoolCreateReturns', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology_',
+    })
+    Options = typing.TypedDict('Options', {
+            'label':'str',
+    })
+    Options_ = typing.TypedDict('Options_', {
+            'cascade':'bool',
+            'restart_services':'bool',
+            'destroy':'bool',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Topology__ = typing.TypedDict('Topology__', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolEntry = typing.TypedDict('PoolEntry', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology__',
+    })
+    PoolInfo = typing.TypedDict('PoolInfo', {
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'hostname':'str',
+    })
+    PoolImport = typing.TypedDict('PoolImport', {
+            'guid':'str',
+            'name':'str',
+            'enable_attachments':'bool',
+    })
+    Options__ = typing.TypedDict('Options__', {
+            'label':'str',
+    })
+    Options___ = typing.TypedDict('Options___', {
+            'label':'str',
+    })
+    Process = typing.TypedDict('Process', {
+            'pid':'int',
+            'name':'str',
+            'service':'str',
+            'cmdline':'str',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Topology___ = typing.TypedDict('Topology___', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolEntry_ = typing.TypedDict('PoolEntry_', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology___',
+    })
+    Topology____ = typing.TypedDict('Topology____', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolEntry__ = typing.TypedDict('PoolEntry__', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology____',
+    })
+    Topology_____ = typing.TypedDict('Topology_____', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolEntry___ = typing.TypedDict('PoolEntry___', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology_____',
+    })
+    Options____ = typing.TypedDict('Options____', {
+            'label':'str',
+    })
+    Options_____ = typing.TypedDict('Options_____', {
+            'label':'str',
+            'disk':'str',
+            'force':'bool',
+            'preserve_settings':'bool',
+    })
+    Datavdevs_ = typing.TypedDict('Datavdevs_', {
+            'type':'str',
+            'disks':'list[str]',
+            'draid_data_disks':'int',
+            'draid_spare_disks':'int',
+    })
+    Specialvdevs_ = typing.TypedDict('Specialvdevs_', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Dedupvdevs_ = typing.TypedDict('Dedupvdevs_', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Cachevdevs_ = typing.TypedDict('Cachevdevs_', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Logvdevs_ = typing.TypedDict('Logvdevs_', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Topology______ = typing.TypedDict('Topology______', {
+            'data':'list[Datavdevs_]',
+            'special':'list[Specialvdevs_]',
+            'dedup':'list[Dedupvdevs_]',
+            'cache':'list[Cachevdevs_]',
+            'log':'list[Logvdevs_]',
+            'spares':'list[str]',
+    })
+    PoolUpdate = typing.TypedDict('PoolUpdate', {
+            'topology':'Topology______',
+            'allow_duplicate_serials':'bool',
+            'autotrim':'str',
+    })
+    Topology_______ = typing.TypedDict('Topology_______', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolUpdateReturns = typing.TypedDict('PoolUpdateReturns', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology_______',
+    })
     @typing.overload
     def update(self, 
         id:'int',
@@ -470,6 +7484,357 @@ class Pool(Namespace):
             pool_update_returns
         """
         ...
+    PoolAttach = typing.TypedDict('PoolAttach', {
+            'target_vdev':'str',
+            'new_disk':'str',
+            'allow_duplicate_serials':'bool',
+    })
+    Attachment = typing.TypedDict('Attachment', {
+            'type':'str',
+            'service':'typing.Optional[str]',
+            'attachments':'list[str]',
+    })
+    EncryptionOptions = typing.TypedDict('EncryptionOptions', {
+            'generate_key':'bool',
+            'pbkdf2iters':'int',
+            'algorithm':'str',
+            'passphrase':'typing.Optional[str]',
+            'key':'typing.Optional[str]',
+    })
+    Datavdevs = typing.TypedDict('Datavdevs', {
+            'type':'str',
+            'disks':'list[str]',
+            'draid_data_disks':'int',
+            'draid_spare_disks':'int',
+    })
+    Specialvdevs = typing.TypedDict('Specialvdevs', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Dedupvdevs = typing.TypedDict('Dedupvdevs', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Cachevdevs = typing.TypedDict('Cachevdevs', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Logvdevs = typing.TypedDict('Logvdevs', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Topology = typing.TypedDict('Topology', {
+            'data':'list[Datavdevs]',
+            'special':'list[Specialvdevs]',
+            'dedup':'list[Dedupvdevs]',
+            'cache':'list[Cachevdevs]',
+            'log':'list[Logvdevs]',
+            'spares':'list[str]',
+    })
+    PoolCreate = typing.TypedDict('PoolCreate', {
+            'name':'str',
+            'encryption':'bool',
+            'deduplication':'typing.Optional[str]',
+            'checksum':'typing.Optional[str]',
+            'encryption_options':'EncryptionOptions',
+            'topology':'Topology',
+            'allow_duplicate_serials':'bool',
+    })
+    Topology_ = typing.TypedDict('Topology_', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolCreateReturns = typing.TypedDict('PoolCreateReturns', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology_',
+    })
+    Options = typing.TypedDict('Options', {
+            'label':'str',
+    })
+    Options_ = typing.TypedDict('Options_', {
+            'cascade':'bool',
+            'restart_services':'bool',
+            'destroy':'bool',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Topology__ = typing.TypedDict('Topology__', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolEntry = typing.TypedDict('PoolEntry', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology__',
+    })
+    PoolInfo = typing.TypedDict('PoolInfo', {
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'hostname':'str',
+    })
+    PoolImport = typing.TypedDict('PoolImport', {
+            'guid':'str',
+            'name':'str',
+            'enable_attachments':'bool',
+    })
+    Options__ = typing.TypedDict('Options__', {
+            'label':'str',
+    })
+    Options___ = typing.TypedDict('Options___', {
+            'label':'str',
+    })
+    Process = typing.TypedDict('Process', {
+            'pid':'int',
+            'name':'str',
+            'service':'str',
+            'cmdline':'str',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Topology___ = typing.TypedDict('Topology___', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolEntry_ = typing.TypedDict('PoolEntry_', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology___',
+    })
+    Topology____ = typing.TypedDict('Topology____', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolEntry__ = typing.TypedDict('PoolEntry__', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology____',
+    })
+    Topology_____ = typing.TypedDict('Topology_____', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolEntry___ = typing.TypedDict('PoolEntry___', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology_____',
+    })
+    Options____ = typing.TypedDict('Options____', {
+            'label':'str',
+    })
+    Options_____ = typing.TypedDict('Options_____', {
+            'label':'str',
+            'disk':'str',
+            'force':'bool',
+            'preserve_settings':'bool',
+    })
+    Datavdevs_ = typing.TypedDict('Datavdevs_', {
+            'type':'str',
+            'disks':'list[str]',
+            'draid_data_disks':'int',
+            'draid_spare_disks':'int',
+    })
+    Specialvdevs_ = typing.TypedDict('Specialvdevs_', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Dedupvdevs_ = typing.TypedDict('Dedupvdevs_', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Cachevdevs_ = typing.TypedDict('Cachevdevs_', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Logvdevs_ = typing.TypedDict('Logvdevs_', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Topology______ = typing.TypedDict('Topology______', {
+            'data':'list[Datavdevs_]',
+            'special':'list[Specialvdevs_]',
+            'dedup':'list[Dedupvdevs_]',
+            'cache':'list[Cachevdevs_]',
+            'log':'list[Logvdevs_]',
+            'spares':'list[str]',
+    })
+    PoolUpdate = typing.TypedDict('PoolUpdate', {
+            'topology':'Topology______',
+            'allow_duplicate_serials':'bool',
+            'autotrim':'str',
+    })
+    Topology_______ = typing.TypedDict('Topology_______', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolUpdateReturns = typing.TypedDict('PoolUpdateReturns', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology_______',
+    })
     @typing.overload
     def upgrade(self, 
         id:'int',
@@ -487,6 +7852,357 @@ class Pool(Namespace):
             upgraded
         """
         ...
+    PoolAttach = typing.TypedDict('PoolAttach', {
+            'target_vdev':'str',
+            'new_disk':'str',
+            'allow_duplicate_serials':'bool',
+    })
+    Attachment = typing.TypedDict('Attachment', {
+            'type':'str',
+            'service':'typing.Optional[str]',
+            'attachments':'list[str]',
+    })
+    EncryptionOptions = typing.TypedDict('EncryptionOptions', {
+            'generate_key':'bool',
+            'pbkdf2iters':'int',
+            'algorithm':'str',
+            'passphrase':'typing.Optional[str]',
+            'key':'typing.Optional[str]',
+    })
+    Datavdevs = typing.TypedDict('Datavdevs', {
+            'type':'str',
+            'disks':'list[str]',
+            'draid_data_disks':'int',
+            'draid_spare_disks':'int',
+    })
+    Specialvdevs = typing.TypedDict('Specialvdevs', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Dedupvdevs = typing.TypedDict('Dedupvdevs', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Cachevdevs = typing.TypedDict('Cachevdevs', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Logvdevs = typing.TypedDict('Logvdevs', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Topology = typing.TypedDict('Topology', {
+            'data':'list[Datavdevs]',
+            'special':'list[Specialvdevs]',
+            'dedup':'list[Dedupvdevs]',
+            'cache':'list[Cachevdevs]',
+            'log':'list[Logvdevs]',
+            'spares':'list[str]',
+    })
+    PoolCreate = typing.TypedDict('PoolCreate', {
+            'name':'str',
+            'encryption':'bool',
+            'deduplication':'typing.Optional[str]',
+            'checksum':'typing.Optional[str]',
+            'encryption_options':'EncryptionOptions',
+            'topology':'Topology',
+            'allow_duplicate_serials':'bool',
+    })
+    Topology_ = typing.TypedDict('Topology_', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolCreateReturns = typing.TypedDict('PoolCreateReturns', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology_',
+    })
+    Options = typing.TypedDict('Options', {
+            'label':'str',
+    })
+    Options_ = typing.TypedDict('Options_', {
+            'cascade':'bool',
+            'restart_services':'bool',
+            'destroy':'bool',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Topology__ = typing.TypedDict('Topology__', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolEntry = typing.TypedDict('PoolEntry', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology__',
+    })
+    PoolInfo = typing.TypedDict('PoolInfo', {
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'hostname':'str',
+    })
+    PoolImport = typing.TypedDict('PoolImport', {
+            'guid':'str',
+            'name':'str',
+            'enable_attachments':'bool',
+    })
+    Options__ = typing.TypedDict('Options__', {
+            'label':'str',
+    })
+    Options___ = typing.TypedDict('Options___', {
+            'label':'str',
+    })
+    Process = typing.TypedDict('Process', {
+            'pid':'int',
+            'name':'str',
+            'service':'str',
+            'cmdline':'str',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Topology___ = typing.TypedDict('Topology___', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolEntry_ = typing.TypedDict('PoolEntry_', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology___',
+    })
+    Topology____ = typing.TypedDict('Topology____', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolEntry__ = typing.TypedDict('PoolEntry__', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology____',
+    })
+    Topology_____ = typing.TypedDict('Topology_____', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolEntry___ = typing.TypedDict('PoolEntry___', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology_____',
+    })
+    Options____ = typing.TypedDict('Options____', {
+            'label':'str',
+    })
+    Options_____ = typing.TypedDict('Options_____', {
+            'label':'str',
+            'disk':'str',
+            'force':'bool',
+            'preserve_settings':'bool',
+    })
+    Datavdevs_ = typing.TypedDict('Datavdevs_', {
+            'type':'str',
+            'disks':'list[str]',
+            'draid_data_disks':'int',
+            'draid_spare_disks':'int',
+    })
+    Specialvdevs_ = typing.TypedDict('Specialvdevs_', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Dedupvdevs_ = typing.TypedDict('Dedupvdevs_', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Cachevdevs_ = typing.TypedDict('Cachevdevs_', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Logvdevs_ = typing.TypedDict('Logvdevs_', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Topology______ = typing.TypedDict('Topology______', {
+            'data':'list[Datavdevs_]',
+            'special':'list[Specialvdevs_]',
+            'dedup':'list[Dedupvdevs_]',
+            'cache':'list[Cachevdevs_]',
+            'log':'list[Logvdevs_]',
+            'spares':'list[str]',
+    })
+    PoolUpdate = typing.TypedDict('PoolUpdate', {
+            'topology':'Topology______',
+            'allow_duplicate_serials':'bool',
+            'autotrim':'str',
+    })
+    Topology_______ = typing.TypedDict('Topology_______', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolUpdateReturns = typing.TypedDict('PoolUpdateReturns', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology_______',
+    })
     @typing.overload
     def validate_name(self, 
         pool_name:'str',
@@ -502,204 +8218,355 @@ class Pool(Namespace):
         -------
         """
         ...
+    PoolAttach = typing.TypedDict('PoolAttach', {
+            'target_vdev':'str',
+            'new_disk':'str',
+            'allow_duplicate_serials':'bool',
+    })
+    Attachment = typing.TypedDict('Attachment', {
+            'type':'str',
+            'service':'typing.Optional[str]',
+            'attachments':'list[str]',
+    })
+    EncryptionOptions = typing.TypedDict('EncryptionOptions', {
+            'generate_key':'bool',
+            'pbkdf2iters':'int',
+            'algorithm':'str',
+            'passphrase':'typing.Optional[str]',
+            'key':'typing.Optional[str]',
+    })
+    Datavdevs = typing.TypedDict('Datavdevs', {
+            'type':'str',
+            'disks':'list[str]',
+            'draid_data_disks':'int',
+            'draid_spare_disks':'int',
+    })
+    Specialvdevs = typing.TypedDict('Specialvdevs', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Dedupvdevs = typing.TypedDict('Dedupvdevs', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Cachevdevs = typing.TypedDict('Cachevdevs', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Logvdevs = typing.TypedDict('Logvdevs', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Topology = typing.TypedDict('Topology', {
+            'data':'list[Datavdevs]',
+            'special':'list[Specialvdevs]',
+            'dedup':'list[Dedupvdevs]',
+            'cache':'list[Cachevdevs]',
+            'log':'list[Logvdevs]',
+            'spares':'list[str]',
+    })
+    PoolCreate = typing.TypedDict('PoolCreate', {
+            'name':'str',
+            'encryption':'bool',
+            'deduplication':'typing.Optional[str]',
+            'checksum':'typing.Optional[str]',
+            'encryption_options':'EncryptionOptions',
+            'topology':'Topology',
+            'allow_duplicate_serials':'bool',
+    })
+    Topology_ = typing.TypedDict('Topology_', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolCreateReturns = typing.TypedDict('PoolCreateReturns', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology_',
+    })
+    Options = typing.TypedDict('Options', {
+            'label':'str',
+    })
+    Options_ = typing.TypedDict('Options_', {
+            'cascade':'bool',
+            'restart_services':'bool',
+            'destroy':'bool',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Topology__ = typing.TypedDict('Topology__', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolEntry = typing.TypedDict('PoolEntry', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology__',
+    })
+    PoolInfo = typing.TypedDict('PoolInfo', {
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'hostname':'str',
+    })
+    PoolImport = typing.TypedDict('PoolImport', {
+            'guid':'str',
+            'name':'str',
+            'enable_attachments':'bool',
+    })
+    Options__ = typing.TypedDict('Options__', {
+            'label':'str',
+    })
+    Options___ = typing.TypedDict('Options___', {
+            'label':'str',
+    })
+    Process = typing.TypedDict('Process', {
+            'pid':'int',
+            'name':'str',
+            'service':'str',
+            'cmdline':'str',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Topology___ = typing.TypedDict('Topology___', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolEntry_ = typing.TypedDict('PoolEntry_', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology___',
+    })
+    Topology____ = typing.TypedDict('Topology____', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolEntry__ = typing.TypedDict('PoolEntry__', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology____',
+    })
+    Topology_____ = typing.TypedDict('Topology_____', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolEntry___ = typing.TypedDict('PoolEntry___', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology_____',
+    })
+    Options____ = typing.TypedDict('Options____', {
+            'label':'str',
+    })
+    Options_____ = typing.TypedDict('Options_____', {
+            'label':'str',
+            'disk':'str',
+            'force':'bool',
+            'preserve_settings':'bool',
+    })
+    Datavdevs_ = typing.TypedDict('Datavdevs_', {
+            'type':'str',
+            'disks':'list[str]',
+            'draid_data_disks':'int',
+            'draid_spare_disks':'int',
+    })
+    Specialvdevs_ = typing.TypedDict('Specialvdevs_', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Dedupvdevs_ = typing.TypedDict('Dedupvdevs_', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Cachevdevs_ = typing.TypedDict('Cachevdevs_', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Logvdevs_ = typing.TypedDict('Logvdevs_', {
+            'type':'str',
+            'disks':'list[str]',
+    })
+    Topology______ = typing.TypedDict('Topology______', {
+            'data':'list[Datavdevs_]',
+            'special':'list[Specialvdevs_]',
+            'dedup':'list[Dedupvdevs_]',
+            'cache':'list[Cachevdevs_]',
+            'log':'list[Logvdevs_]',
+            'spares':'list[str]',
+    })
+    PoolUpdate = typing.TypedDict('PoolUpdate', {
+            'topology':'Topology______',
+            'allow_duplicate_serials':'bool',
+            'autotrim':'str',
+    })
+    Topology_______ = typing.TypedDict('Topology_______', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    PoolUpdateReturns = typing.TypedDict('PoolUpdateReturns', {
+            'id':'int',
+            'name':'str',
+            'guid':'str',
+            'status':'str',
+            'path':'str',
+            'scan':'dict[str]',
+            'is_upgraded':'bool',
+            'healthy':'bool',
+            'warning':'bool',
+            'status_code':'typing.Optional[str]',
+            'status_detail':'typing.Optional[str]',
+            'size':'typing.Optional[int]',
+            'allocated':'typing.Optional[int]',
+            'free':'typing.Optional[int]',
+            'freeing':'typing.Optional[int]',
+            'fragmentation':'typing.Optional[str]',
+            'size_str':'typing.Optional[str]',
+            'allocated_str':'typing.Optional[str]',
+            'free_str':'typing.Optional[str]',
+            'freeing_str':'typing.Optional[str]',
+            'autotrim':'dict[str]',
+            'topology':'Topology_______',
+    })
 
-class PoolAttach(typing.TypedDict):
-        target_vdev:'str'
-        new_disk:'str'
-        allow_duplicate_serials:'bool'
-        ...
-class Attachment(typing.TypedDict):
-        type:'str'
-        service:'typing.Optional[str]'
-        attachments:'list[str]'
-        ...
-class PoolCreate(typing.TypedDict):
-        name:'str'
-        encryption:'bool'
-        deduplication:'typing.Optional[str]'
-        checksum:'typing.Optional[str]'
-        encryption_options:'EncryptionOptions'
-        topology:'Topology'
-        allow_duplicate_serials:'bool'
-        ...
-class EncryptionOptions(typing.TypedDict):
-        generate_key:'bool'
-        pbkdf2iters:'int'
-        algorithm:'str'
-        passphrase:'typing.Optional[str]'
-        key:'typing.Optional[str]'
-        ...
-class Topology(typing.TypedDict):
-        data:'list[Datavdevs]'
-        special:'list[Specialvdevs]'
-        dedup:'list[Dedupvdevs]'
-        cache:'list[Cachevdevs]'
-        log:'list[Logvdevs]'
-        spares:'list[str]'
-        ...
-class Datavdevs(typing.TypedDict):
-        type:'str'
-        disks:'list[str]'
-        draid_data_disks:'int'
-        draid_spare_disks:'int'
-        ...
-class Specialvdevs(typing.TypedDict):
-        type:'str'
-        disks:'list[str]'
-        ...
-class Dedupvdevs(typing.TypedDict):
-        type:'str'
-        disks:'list[str]'
-        ...
-class Cachevdevs(typing.TypedDict):
-        type:'str'
-        disks:'list[str]'
-        ...
-class Logvdevs(typing.TypedDict):
-        type:'str'
-        disks:'list[str]'
-        ...
-class PoolCreateReturns(typing.TypedDict):
-        id:'int'
-        name:'str'
-        guid:'str'
-        status:'str'
-        path:'str'
-        scan:'dict[str]'
-        is_upgraded:'bool'
-        healthy:'bool'
-        warning:'bool'
-        status_code:'typing.Optional[str]'
-        status_detail:'typing.Optional[str]'
-        size:'typing.Optional[int]'
-        allocated:'typing.Optional[int]'
-        free:'typing.Optional[int]'
-        freeing:'typing.Optional[int]'
-        fragmentation:'typing.Optional[str]'
-        size_str:'typing.Optional[str]'
-        allocated_str:'typing.Optional[str]'
-        free_str:'typing.Optional[str]'
-        freeing_str:'typing.Optional[str]'
-        autotrim:'dict[str]'
-        topology:'Topology'
-        ...
-class Topology_(typing.TypedDict):
-        data:'list'
-        log:'list'
-        cache:'list'
-        spare:'list'
-        special:'list'
-        dedup:'list'
-        ...
-class Options(typing.TypedDict):
-        label:'str'
-        ...
-class Options_(typing.TypedDict):
-        cascade:'bool'
-        restart_services:'bool'
-        destroy:'bool'
-        ...
-class QueryOptionsGetInstance(typing.TypedDict):
-        relationships:'bool'
-        extend:'typing.Optional[str]'
-        extend_context:'typing.Optional[str]'
-        prefix:'typing.Optional[str]'
-        extra:'dict[str]'
-        order_by:'list'
-        select:'list'
-        count:'bool'
-        get:'bool'
-        offset:'int'
-        limit:'int'
-        force_sql_filters:'bool'
-        ...
-class PoolEntry(typing.TypedDict):
-        id:'int'
-        name:'str'
-        guid:'str'
-        status:'str'
-        path:'str'
-        scan:'dict[str]'
-        is_upgraded:'bool'
-        healthy:'bool'
-        warning:'bool'
-        status_code:'typing.Optional[str]'
-        status_detail:'typing.Optional[str]'
-        size:'typing.Optional[int]'
-        allocated:'typing.Optional[int]'
-        free:'typing.Optional[int]'
-        freeing:'typing.Optional[int]'
-        fragmentation:'typing.Optional[str]'
-        size_str:'typing.Optional[str]'
-        allocated_str:'typing.Optional[str]'
-        free_str:'typing.Optional[str]'
-        freeing_str:'typing.Optional[str]'
-        autotrim:'dict[str]'
-        topology:'Topology'
-        ...
-class PoolInfo(typing.TypedDict):
-        name:'str'
-        guid:'str'
-        status:'str'
-        hostname:'str'
-        ...
-class PoolImport(typing.TypedDict):
-        guid:'str'
-        name:'str'
-        enable_attachments:'bool'
-        ...
-class Process(typing.TypedDict):
-        pid:'int'
-        name:'str'
-        service:'str'
-        cmdline:'str'
-        ...
-class QueryOptions(typing.TypedDict):
-        relationships:'bool'
-        extend:'typing.Optional[str]'
-        extend_context:'typing.Optional[str]'
-        prefix:'typing.Optional[str]'
-        extra:'dict[str]'
-        order_by:'list'
-        select:'list'
-        count:'bool'
-        get:'bool'
-        offset:'int'
-        limit:'int'
-        force_sql_filters:'bool'
-        ...
-class Options__(typing.TypedDict):
-        label:'str'
-        disk:'str'
-        force:'bool'
-        preserve_settings:'bool'
-        ...
-class PoolUpdate(typing.TypedDict):
-        topology:'Topology'
-        allow_duplicate_serials:'bool'
-        autotrim:'str'
-        ...
-class PoolUpdateReturns(typing.TypedDict):
-        id:'int'
-        name:'str'
-        guid:'str'
-        status:'str'
-        path:'str'
-        scan:'dict[str]'
-        is_upgraded:'bool'
-        healthy:'bool'
-        warning:'bool'
-        status_code:'typing.Optional[str]'
-        status_detail:'typing.Optional[str]'
-        size:'typing.Optional[int]'
-        allocated:'typing.Optional[int]'
-        free:'typing.Optional[int]'
-        freeing:'typing.Optional[int]'
-        fragmentation:'typing.Optional[str]'
-        size_str:'typing.Optional[str]'
-        allocated_str:'typing.Optional[str]'
-        free_str:'typing.Optional[str]'
-        freeing_str:'typing.Optional[str]'
-        autotrim:'dict[str]'
-        topology:'Topology'
-        ...

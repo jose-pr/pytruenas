@@ -25,6 +25,24 @@ class Update(Namespace):
         -------
         """
         ...
+    UpdateCheckAvailable = typing.TypedDict('UpdateCheckAvailable', {
+            'train':'str',
+    })
+    Updatefile = typing.TypedDict('Updatefile', {
+            'resume':'bool',
+            'destination':'typing.Optional[str]',
+    })
+    Options = typing.TypedDict('Options', {
+            'dataset_name':'typing.Optional[str]',
+            'resume':'bool',
+            'cleanup':'bool',
+    })
+    Update = typing.TypedDict('Update', {
+            'dataset_name':'typing.Optional[str]',
+            'resume':'bool',
+            'train':'typing.Optional[str]',
+            'reboot':'bool',
+    })
     @typing.overload
     def download(self, 
     /) -> None: 
@@ -37,6 +55,24 @@ class Update(Namespace):
         -------
         """
         ...
+    UpdateCheckAvailable = typing.TypedDict('UpdateCheckAvailable', {
+            'train':'str',
+    })
+    Updatefile = typing.TypedDict('Updatefile', {
+            'resume':'bool',
+            'destination':'typing.Optional[str]',
+    })
+    Options = typing.TypedDict('Options', {
+            'dataset_name':'typing.Optional[str]',
+            'resume':'bool',
+            'cleanup':'bool',
+    })
+    Update = typing.TypedDict('Update', {
+            'dataset_name':'typing.Optional[str]',
+            'resume':'bool',
+            'train':'typing.Optional[str]',
+            'reboot':'bool',
+    })
     @typing.overload
     def file(self, 
         updatefile:'Updatefile'={},
@@ -58,6 +94,24 @@ class Update(Namespace):
         -------
         """
         ...
+    UpdateCheckAvailable = typing.TypedDict('UpdateCheckAvailable', {
+            'train':'str',
+    })
+    Updatefile = typing.TypedDict('Updatefile', {
+            'resume':'bool',
+            'destination':'typing.Optional[str]',
+    })
+    Options = typing.TypedDict('Options', {
+            'dataset_name':'typing.Optional[str]',
+            'resume':'bool',
+            'cleanup':'bool',
+    })
+    Update = typing.TypedDict('Update', {
+            'dataset_name':'typing.Optional[str]',
+            'resume':'bool',
+            'train':'typing.Optional[str]',
+            'reboot':'bool',
+    })
     @typing.overload
     def get_auto_download(self, 
     /) -> None: 
@@ -70,9 +124,27 @@ class Update(Namespace):
         -------
         """
         ...
+    UpdateCheckAvailable = typing.TypedDict('UpdateCheckAvailable', {
+            'train':'str',
+    })
+    Updatefile = typing.TypedDict('Updatefile', {
+            'resume':'bool',
+            'destination':'typing.Optional[str]',
+    })
+    Options = typing.TypedDict('Options', {
+            'dataset_name':'typing.Optional[str]',
+            'resume':'bool',
+            'cleanup':'bool',
+    })
+    Update = typing.TypedDict('Update', {
+            'dataset_name':'typing.Optional[str]',
+            'resume':'bool',
+            'train':'typing.Optional[str]',
+            'reboot':'bool',
+    })
     @typing.overload
     def get_pending(self, 
-        path:'str|None'=None,
+        path:'typing.Optional[str]'=None,
     /) -> None: 
         """
         Gets a list of packages already downloaded and ready to be applied.
@@ -91,6 +163,24 @@ class Update(Namespace):
         -------
         """
         ...
+    UpdateCheckAvailable = typing.TypedDict('UpdateCheckAvailable', {
+            'train':'str',
+    })
+    Updatefile = typing.TypedDict('Updatefile', {
+            'resume':'bool',
+            'destination':'typing.Optional[str]',
+    })
+    Options = typing.TypedDict('Options', {
+            'dataset_name':'typing.Optional[str]',
+            'resume':'bool',
+            'cleanup':'bool',
+    })
+    Update = typing.TypedDict('Update', {
+            'dataset_name':'typing.Optional[str]',
+            'resume':'bool',
+            'train':'typing.Optional[str]',
+            'reboot':'bool',
+    })
     @typing.overload
     def get_trains(self, 
     /) -> None: 
@@ -104,6 +194,24 @@ class Update(Namespace):
         -------
         """
         ...
+    UpdateCheckAvailable = typing.TypedDict('UpdateCheckAvailable', {
+            'train':'str',
+    })
+    Updatefile = typing.TypedDict('Updatefile', {
+            'resume':'bool',
+            'destination':'typing.Optional[str]',
+    })
+    Options = typing.TypedDict('Options', {
+            'dataset_name':'typing.Optional[str]',
+            'resume':'bool',
+            'cleanup':'bool',
+    })
+    Update = typing.TypedDict('Update', {
+            'dataset_name':'typing.Optional[str]',
+            'resume':'bool',
+            'train':'typing.Optional[str]',
+            'reboot':'bool',
+    })
     @typing.overload
     def manual(self, 
         path:'str',
@@ -130,6 +238,24 @@ class Update(Namespace):
         -------
         """
         ...
+    UpdateCheckAvailable = typing.TypedDict('UpdateCheckAvailable', {
+            'train':'str',
+    })
+    Updatefile = typing.TypedDict('Updatefile', {
+            'resume':'bool',
+            'destination':'typing.Optional[str]',
+    })
+    Options = typing.TypedDict('Options', {
+            'dataset_name':'typing.Optional[str]',
+            'resume':'bool',
+            'cleanup':'bool',
+    })
+    Update = typing.TypedDict('Update', {
+            'dataset_name':'typing.Optional[str]',
+            'resume':'bool',
+            'train':'typing.Optional[str]',
+            'reboot':'bool',
+    })
     @typing.overload
     def set_auto_download(self, 
         autocheck:'bool',
@@ -145,6 +271,24 @@ class Update(Namespace):
         -------
         """
         ...
+    UpdateCheckAvailable = typing.TypedDict('UpdateCheckAvailable', {
+            'train':'str',
+    })
+    Updatefile = typing.TypedDict('Updatefile', {
+            'resume':'bool',
+            'destination':'typing.Optional[str]',
+    })
+    Options = typing.TypedDict('Options', {
+            'dataset_name':'typing.Optional[str]',
+            'resume':'bool',
+            'cleanup':'bool',
+    })
+    Update = typing.TypedDict('Update', {
+            'dataset_name':'typing.Optional[str]',
+            'resume':'bool',
+            'train':'typing.Optional[str]',
+            'reboot':'bool',
+    })
     @typing.overload
     def set_train(self, 
         train:'str',
@@ -160,6 +304,24 @@ class Update(Namespace):
         -------
         """
         ...
+    UpdateCheckAvailable = typing.TypedDict('UpdateCheckAvailable', {
+            'train':'str',
+    })
+    Updatefile = typing.TypedDict('Updatefile', {
+            'resume':'bool',
+            'destination':'typing.Optional[str]',
+    })
+    Options = typing.TypedDict('Options', {
+            'dataset_name':'typing.Optional[str]',
+            'resume':'bool',
+            'cleanup':'bool',
+    })
+    Update = typing.TypedDict('Update', {
+            'dataset_name':'typing.Optional[str]',
+            'resume':'bool',
+            'train':'typing.Optional[str]',
+            'reboot':'bool',
+    })
     @typing.overload
     def update(self, 
         update:'Update'={},
@@ -179,22 +341,22 @@ class Update(Namespace):
         -------
         """
         ...
+    UpdateCheckAvailable = typing.TypedDict('UpdateCheckAvailable', {
+            'train':'str',
+    })
+    Updatefile = typing.TypedDict('Updatefile', {
+            'resume':'bool',
+            'destination':'typing.Optional[str]',
+    })
+    Options = typing.TypedDict('Options', {
+            'dataset_name':'typing.Optional[str]',
+            'resume':'bool',
+            'cleanup':'bool',
+    })
+    Update = typing.TypedDict('Update', {
+            'dataset_name':'typing.Optional[str]',
+            'resume':'bool',
+            'train':'typing.Optional[str]',
+            'reboot':'bool',
+    })
 
-class UpdateCheckAvailable(typing.TypedDict):
-        train:'str'
-        ...
-class Updatefile(typing.TypedDict):
-        resume:'bool'
-        destination:'typing.Optional[str]'
-        ...
-class Options(typing.TypedDict):
-        dataset_name:'typing.Optional[str]'
-        resume:'bool'
-        cleanup:'bool'
-        ...
-class Update(typing.TypedDict):
-        dataset_name:'typing.Optional[str]'
-        resume:'bool'
-        train:'typing.Optional[str]'
-        reboot:'bool'
-        ...

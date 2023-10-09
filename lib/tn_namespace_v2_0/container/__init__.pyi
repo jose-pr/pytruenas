@@ -18,6 +18,23 @@ class Container(Namespace):
             container_entry
         """
         ...
+    ContainerEntry = typing.TypedDict('ContainerEntry', {
+            'enable_image_updates':'bool',
+            'id':'int',
+    })
+    PruneOptions = typing.TypedDict('PruneOptions', {
+            'remove_unused_images':'bool',
+    })
+    PrunedResources = typing.TypedDict('PrunedResources', {
+            'images':'dict[str]',
+    })
+    ContainerUpdate = typing.TypedDict('ContainerUpdate', {
+            'enable_image_updates':'bool',
+    })
+    ContainerUpdateReturns = typing.TypedDict('ContainerUpdateReturns', {
+            'enable_image_updates':'bool',
+            'id':'int',
+    })
     @typing.overload
     def prune(self, 
         prune_options:'PruneOptions'={},
@@ -55,6 +72,23 @@ class Container(Namespace):
             ```
         """
         ...
+    ContainerEntry = typing.TypedDict('ContainerEntry', {
+            'enable_image_updates':'bool',
+            'id':'int',
+    })
+    PruneOptions = typing.TypedDict('PruneOptions', {
+            'remove_unused_images':'bool',
+    })
+    PrunedResources = typing.TypedDict('PrunedResources', {
+            'images':'dict[str]',
+    })
+    ContainerUpdate = typing.TypedDict('ContainerUpdate', {
+            'enable_image_updates':'bool',
+    })
+    ContainerUpdateReturns = typing.TypedDict('ContainerUpdateReturns', {
+            'enable_image_updates':'bool',
+            'id':'int',
+    })
     @typing.overload
     def update(self, 
         container_update:'ContainerUpdate'={},
@@ -77,21 +111,21 @@ class Container(Namespace):
             container_update_returns
         """
         ...
+    ContainerEntry = typing.TypedDict('ContainerEntry', {
+            'enable_image_updates':'bool',
+            'id':'int',
+    })
+    PruneOptions = typing.TypedDict('PruneOptions', {
+            'remove_unused_images':'bool',
+    })
+    PrunedResources = typing.TypedDict('PrunedResources', {
+            'images':'dict[str]',
+    })
+    ContainerUpdate = typing.TypedDict('ContainerUpdate', {
+            'enable_image_updates':'bool',
+    })
+    ContainerUpdateReturns = typing.TypedDict('ContainerUpdateReturns', {
+            'enable_image_updates':'bool',
+            'id':'int',
+    })
 
-class ContainerEntry(typing.TypedDict):
-        enable_image_updates:'bool'
-        id:'int'
-        ...
-class PruneOptions(typing.TypedDict):
-        remove_unused_images:'bool'
-        ...
-class PrunedResources(typing.TypedDict):
-        images:'dict[str]'
-        ...
-class ContainerUpdate(typing.TypedDict):
-        enable_image_updates:'bool'
-        ...
-class ContainerUpdateReturns(typing.TypedDict):
-        enable_image_updates:'bool'
-        id:'int'
-        ...

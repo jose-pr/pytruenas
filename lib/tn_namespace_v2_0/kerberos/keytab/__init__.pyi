@@ -25,6 +25,83 @@ class KerberosKeytab(Namespace):
             kerberos_keytab_create_returns
         """
         ...
+    KerberosKeytabCreate = typing.TypedDict('KerberosKeytabCreate', {
+            'file':'str',
+            'name':'str',
+    })
+    KerberosKeytabCreateReturns = typing.TypedDict('KerberosKeytabCreateReturns', {
+            'file':'str',
+            'name':'str',
+            'id':'int',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    KerberosKeytabEntry = typing.TypedDict('KerberosKeytabEntry', {
+            'file':'str',
+            'name':'str',
+            'id':'int',
+    })
+    KerberosKeytabEntry_ = typing.TypedDict('KerberosKeytabEntry_', {
+            'file':'str',
+            'name':'str',
+            'id':'int',
+    })
+    KerberosKeytabEntry__ = typing.TypedDict('KerberosKeytabEntry__', {
+            'file':'str',
+            'name':'str',
+            'id':'int',
+    })
+    KeytabEntry = typing.TypedDict('KeytabEntry', {
+            'slot':'int',
+            'kvno':'int',
+            'principal':'str',
+            'etype':'str',
+            'etype_deprecated':'bool',
+            'date':'str',
+    })
+    KerberosKeytabUpdate = typing.TypedDict('KerberosKeytabUpdate', {
+            'file':'str',
+            'name':'str',
+    })
+    KerberosKeytabUpdateReturns = typing.TypedDict('KerberosKeytabUpdateReturns', {
+            'file':'str',
+            'name':'str',
+            'id':'int',
+    })
+    KeytabData = typing.TypedDict('KeytabData', {
+            'name':'str',
+    })
+    KerberosKeytabEntry___ = typing.TypedDict('KerberosKeytabEntry___', {
+            'file':'str',
+            'name':'str',
+            'id':'int',
+    })
     @typing.overload
     def delete(self, 
         id:'int',
@@ -43,9 +120,86 @@ class KerberosKeytab(Namespace):
             Will return `true` if `id` is deleted successfully
         """
         ...
+    KerberosKeytabCreate = typing.TypedDict('KerberosKeytabCreate', {
+            'file':'str',
+            'name':'str',
+    })
+    KerberosKeytabCreateReturns = typing.TypedDict('KerberosKeytabCreateReturns', {
+            'file':'str',
+            'name':'str',
+            'id':'int',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    KerberosKeytabEntry = typing.TypedDict('KerberosKeytabEntry', {
+            'file':'str',
+            'name':'str',
+            'id':'int',
+    })
+    KerberosKeytabEntry_ = typing.TypedDict('KerberosKeytabEntry_', {
+            'file':'str',
+            'name':'str',
+            'id':'int',
+    })
+    KerberosKeytabEntry__ = typing.TypedDict('KerberosKeytabEntry__', {
+            'file':'str',
+            'name':'str',
+            'id':'int',
+    })
+    KeytabEntry = typing.TypedDict('KeytabEntry', {
+            'slot':'int',
+            'kvno':'int',
+            'principal':'str',
+            'etype':'str',
+            'etype_deprecated':'bool',
+            'date':'str',
+    })
+    KerberosKeytabUpdate = typing.TypedDict('KerberosKeytabUpdate', {
+            'file':'str',
+            'name':'str',
+    })
+    KerberosKeytabUpdateReturns = typing.TypedDict('KerberosKeytabUpdateReturns', {
+            'file':'str',
+            'name':'str',
+            'id':'int',
+    })
+    KeytabData = typing.TypedDict('KeytabData', {
+            'name':'str',
+    })
+    KerberosKeytabEntry___ = typing.TypedDict('KerberosKeytabEntry___', {
+            'file':'str',
+            'name':'str',
+            'id':'int',
+    })
     @typing.overload
     def get_instance(self, 
-        id:'str|int|bool|dict[str]|list',
+        id:'typing.Union[str, int, bool, dict[str], list]',
         query_options_get_instance:'QueryOptionsGetInstance'={},
     /) -> None: 
         """
@@ -63,11 +217,88 @@ class KerberosKeytab(Namespace):
         -------
         """
         ...
+    KerberosKeytabCreate = typing.TypedDict('KerberosKeytabCreate', {
+            'file':'str',
+            'name':'str',
+    })
+    KerberosKeytabCreateReturns = typing.TypedDict('KerberosKeytabCreateReturns', {
+            'file':'str',
+            'name':'str',
+            'id':'int',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    KerberosKeytabEntry = typing.TypedDict('KerberosKeytabEntry', {
+            'file':'str',
+            'name':'str',
+            'id':'int',
+    })
+    KerberosKeytabEntry_ = typing.TypedDict('KerberosKeytabEntry_', {
+            'file':'str',
+            'name':'str',
+            'id':'int',
+    })
+    KerberosKeytabEntry__ = typing.TypedDict('KerberosKeytabEntry__', {
+            'file':'str',
+            'name':'str',
+            'id':'int',
+    })
+    KeytabEntry = typing.TypedDict('KeytabEntry', {
+            'slot':'int',
+            'kvno':'int',
+            'principal':'str',
+            'etype':'str',
+            'etype_deprecated':'bool',
+            'date':'str',
+    })
+    KerberosKeytabUpdate = typing.TypedDict('KerberosKeytabUpdate', {
+            'file':'str',
+            'name':'str',
+    })
+    KerberosKeytabUpdateReturns = typing.TypedDict('KerberosKeytabUpdateReturns', {
+            'file':'str',
+            'name':'str',
+            'id':'int',
+    })
+    KeytabData = typing.TypedDict('KeytabData', {
+            'name':'str',
+    })
+    KerberosKeytabEntry___ = typing.TypedDict('KerberosKeytabEntry___', {
+            'file':'str',
+            'name':'str',
+            'id':'int',
+    })
     @typing.overload
     def query(self, 
         query_filters:'list[list]'=[],
         query_options:'QueryOptions'={},
-    /) -> 'list[KerberosKeytabEntry]|KerberosKeytabEntry|int|KerberosKeytabEntry': 
+    /) -> 'typing.Union[list[KerberosKeytabEntry], ForwardRef(KerberosKeytabEntry_), int, ForwardRef(KerberosKeytabEntry__)]': 
         """
         
 
@@ -79,16 +310,87 @@ class KerberosKeytab(Namespace):
             query-options
         Returns
         -------
-        list[KerberosKeytabEntry]:
-            
-        KerberosKeytabEntry:
-            
-        int:
-            
-        KerberosKeytabEntry:
+        typing.Union[list[KerberosKeytabEntry], ForwardRef(KerberosKeytabEntry_), int, ForwardRef(KerberosKeytabEntry__)]:
             
         """
         ...
+    KerberosKeytabCreate = typing.TypedDict('KerberosKeytabCreate', {
+            'file':'str',
+            'name':'str',
+    })
+    KerberosKeytabCreateReturns = typing.TypedDict('KerberosKeytabCreateReturns', {
+            'file':'str',
+            'name':'str',
+            'id':'int',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    KerberosKeytabEntry = typing.TypedDict('KerberosKeytabEntry', {
+            'file':'str',
+            'name':'str',
+            'id':'int',
+    })
+    KerberosKeytabEntry_ = typing.TypedDict('KerberosKeytabEntry_', {
+            'file':'str',
+            'name':'str',
+            'id':'int',
+    })
+    KerberosKeytabEntry__ = typing.TypedDict('KerberosKeytabEntry__', {
+            'file':'str',
+            'name':'str',
+            'id':'int',
+    })
+    KeytabEntry = typing.TypedDict('KeytabEntry', {
+            'slot':'int',
+            'kvno':'int',
+            'principal':'str',
+            'etype':'str',
+            'etype_deprecated':'bool',
+            'date':'str',
+    })
+    KerberosKeytabUpdate = typing.TypedDict('KerberosKeytabUpdate', {
+            'file':'str',
+            'name':'str',
+    })
+    KerberosKeytabUpdateReturns = typing.TypedDict('KerberosKeytabUpdateReturns', {
+            'file':'str',
+            'name':'str',
+            'id':'int',
+    })
+    KeytabData = typing.TypedDict('KeytabData', {
+            'name':'str',
+    })
+    KerberosKeytabEntry___ = typing.TypedDict('KerberosKeytabEntry___', {
+            'file':'str',
+            'name':'str',
+            'id':'int',
+    })
     @typing.overload
     def system_keytab_list(self, 
     /) -> 'list[KeytabEntry]': 
@@ -103,6 +405,83 @@ class KerberosKeytab(Namespace):
             system-keytab
         """
         ...
+    KerberosKeytabCreate = typing.TypedDict('KerberosKeytabCreate', {
+            'file':'str',
+            'name':'str',
+    })
+    KerberosKeytabCreateReturns = typing.TypedDict('KerberosKeytabCreateReturns', {
+            'file':'str',
+            'name':'str',
+            'id':'int',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    KerberosKeytabEntry = typing.TypedDict('KerberosKeytabEntry', {
+            'file':'str',
+            'name':'str',
+            'id':'int',
+    })
+    KerberosKeytabEntry_ = typing.TypedDict('KerberosKeytabEntry_', {
+            'file':'str',
+            'name':'str',
+            'id':'int',
+    })
+    KerberosKeytabEntry__ = typing.TypedDict('KerberosKeytabEntry__', {
+            'file':'str',
+            'name':'str',
+            'id':'int',
+    })
+    KeytabEntry = typing.TypedDict('KeytabEntry', {
+            'slot':'int',
+            'kvno':'int',
+            'principal':'str',
+            'etype':'str',
+            'etype_deprecated':'bool',
+            'date':'str',
+    })
+    KerberosKeytabUpdate = typing.TypedDict('KerberosKeytabUpdate', {
+            'file':'str',
+            'name':'str',
+    })
+    KerberosKeytabUpdateReturns = typing.TypedDict('KerberosKeytabUpdateReturns', {
+            'file':'str',
+            'name':'str',
+            'id':'int',
+    })
+    KeytabData = typing.TypedDict('KeytabData', {
+            'name':'str',
+    })
+    KerberosKeytabEntry___ = typing.TypedDict('KerberosKeytabEntry___', {
+            'file':'str',
+            'name':'str',
+            'id':'int',
+    })
     @typing.overload
     def update(self, 
         id:'int',
@@ -123,10 +502,87 @@ class KerberosKeytab(Namespace):
             kerberos_keytab_update_returns
         """
         ...
+    KerberosKeytabCreate = typing.TypedDict('KerberosKeytabCreate', {
+            'file':'str',
+            'name':'str',
+    })
+    KerberosKeytabCreateReturns = typing.TypedDict('KerberosKeytabCreateReturns', {
+            'file':'str',
+            'name':'str',
+            'id':'int',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    KerberosKeytabEntry = typing.TypedDict('KerberosKeytabEntry', {
+            'file':'str',
+            'name':'str',
+            'id':'int',
+    })
+    KerberosKeytabEntry_ = typing.TypedDict('KerberosKeytabEntry_', {
+            'file':'str',
+            'name':'str',
+            'id':'int',
+    })
+    KerberosKeytabEntry__ = typing.TypedDict('KerberosKeytabEntry__', {
+            'file':'str',
+            'name':'str',
+            'id':'int',
+    })
+    KeytabEntry = typing.TypedDict('KeytabEntry', {
+            'slot':'int',
+            'kvno':'int',
+            'principal':'str',
+            'etype':'str',
+            'etype_deprecated':'bool',
+            'date':'str',
+    })
+    KerberosKeytabUpdate = typing.TypedDict('KerberosKeytabUpdate', {
+            'file':'str',
+            'name':'str',
+    })
+    KerberosKeytabUpdateReturns = typing.TypedDict('KerberosKeytabUpdateReturns', {
+            'file':'str',
+            'name':'str',
+            'id':'int',
+    })
+    KeytabData = typing.TypedDict('KeytabData', {
+            'name':'str',
+    })
+    KerberosKeytabEntry___ = typing.TypedDict('KerberosKeytabEntry___', {
+            'file':'str',
+            'name':'str',
+            'id':'int',
+    })
     @typing.overload
     def upload_keytab(self, 
         keytab_data:'KeytabData'={},
-    /) -> 'KerberosKeytabEntry': 
+    /) -> 'KerberosKeytabEntry___': 
         """
         Upload a keytab file. This method expects the keytab file to be uploaded using
         the /_upload/ endpoint.
@@ -137,70 +593,85 @@ class KerberosKeytab(Namespace):
             keytab_data
         Returns
         -------
-        KerberosKeytabEntry:
+        KerberosKeytabEntry___:
             kerberos_keytab_entry
         """
         ...
+    KerberosKeytabCreate = typing.TypedDict('KerberosKeytabCreate', {
+            'file':'str',
+            'name':'str',
+    })
+    KerberosKeytabCreateReturns = typing.TypedDict('KerberosKeytabCreateReturns', {
+            'file':'str',
+            'name':'str',
+            'id':'int',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    KerberosKeytabEntry = typing.TypedDict('KerberosKeytabEntry', {
+            'file':'str',
+            'name':'str',
+            'id':'int',
+    })
+    KerberosKeytabEntry_ = typing.TypedDict('KerberosKeytabEntry_', {
+            'file':'str',
+            'name':'str',
+            'id':'int',
+    })
+    KerberosKeytabEntry__ = typing.TypedDict('KerberosKeytabEntry__', {
+            'file':'str',
+            'name':'str',
+            'id':'int',
+    })
+    KeytabEntry = typing.TypedDict('KeytabEntry', {
+            'slot':'int',
+            'kvno':'int',
+            'principal':'str',
+            'etype':'str',
+            'etype_deprecated':'bool',
+            'date':'str',
+    })
+    KerberosKeytabUpdate = typing.TypedDict('KerberosKeytabUpdate', {
+            'file':'str',
+            'name':'str',
+    })
+    KerberosKeytabUpdateReturns = typing.TypedDict('KerberosKeytabUpdateReturns', {
+            'file':'str',
+            'name':'str',
+            'id':'int',
+    })
+    KeytabData = typing.TypedDict('KeytabData', {
+            'name':'str',
+    })
+    KerberosKeytabEntry___ = typing.TypedDict('KerberosKeytabEntry___', {
+            'file':'str',
+            'name':'str',
+            'id':'int',
+    })
 
-class KerberosKeytabCreate(typing.TypedDict):
-        file:'str'
-        name:'str'
-        ...
-class KerberosKeytabCreateReturns(typing.TypedDict):
-        file:'str'
-        name:'str'
-        id:'int'
-        ...
-class QueryOptionsGetInstance(typing.TypedDict):
-        relationships:'bool'
-        extend:'typing.Optional[str]'
-        extend_context:'typing.Optional[str]'
-        prefix:'typing.Optional[str]'
-        extra:'dict[str]'
-        order_by:'list'
-        select:'list'
-        count:'bool'
-        get:'bool'
-        offset:'int'
-        limit:'int'
-        force_sql_filters:'bool'
-        ...
-class QueryOptions(typing.TypedDict):
-        relationships:'bool'
-        extend:'typing.Optional[str]'
-        extend_context:'typing.Optional[str]'
-        prefix:'typing.Optional[str]'
-        extra:'dict[str]'
-        order_by:'list'
-        select:'list'
-        count:'bool'
-        get:'bool'
-        offset:'int'
-        limit:'int'
-        force_sql_filters:'bool'
-        ...
-class KerberosKeytabEntry(typing.TypedDict):
-        file:'str'
-        name:'str'
-        id:'int'
-        ...
-class KeytabEntry(typing.TypedDict):
-        slot:'int'
-        kvno:'int'
-        principal:'str'
-        etype:'str'
-        etype_deprecated:'bool'
-        date:'str'
-        ...
-class KerberosKeytabUpdate(typing.TypedDict):
-        file:'str'
-        name:'str'
-        ...
-class KerberosKeytabUpdateReturns(typing.TypedDict):
-        file:'str'
-        name:'str'
-        id:'int'
-        ...
-class KeytabData(typing.TypedDict):
-        name:'str'
-        ...

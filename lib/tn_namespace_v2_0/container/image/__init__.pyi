@@ -19,6 +19,94 @@ class ContainerImage(Namespace):
         -------
         """
         ...
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Authentication = typing.TypedDict('Authentication', {
+            'username':'str',
+            'password':'str',
+    })
+    ImagePull = typing.TypedDict('ImagePull', {
+            'authentication':'Authentication',
+            'from_image':'str',
+            'tag':'typing.Optional[str]',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    ParsedRepoTag = typing.TypedDict('ParsedRepoTag', {
+            'image':'str',
+            'tag':'str',
+            'registry':'str',
+            'complete_tag':'str',
+    })
+    ContainerImageEntry = typing.TypedDict('ContainerImageEntry', {
+            'id':'str',
+            'repo_tags':'list[str]',
+            'repo_digests':'list[str]',
+            'size':'int',
+            'dangling':'bool',
+            'update_available':'bool',
+            'system_image':'bool',
+            'parsed_repo_tags':'list[ParsedRepoTag]',
+            'complete_tags':'list[str]',
+    })
+    ParsedRepoTag_ = typing.TypedDict('ParsedRepoTag_', {
+            'image':'str',
+            'tag':'str',
+            'registry':'str',
+            'complete_tag':'str',
+    })
+    ContainerImageEntry_ = typing.TypedDict('ContainerImageEntry_', {
+            'id':'str',
+            'repo_tags':'list[str]',
+            'repo_digests':'list[str]',
+            'size':'int',
+            'dangling':'bool',
+            'update_available':'bool',
+            'system_image':'bool',
+            'parsed_repo_tags':'list[ParsedRepoTag_]',
+            'complete_tags':'list[str]',
+    })
+    ParsedRepoTag__ = typing.TypedDict('ParsedRepoTag__', {
+            'image':'str',
+            'tag':'str',
+            'registry':'str',
+            'complete_tag':'str',
+    })
+    ContainerImageEntry__ = typing.TypedDict('ContainerImageEntry__', {
+            'id':'str',
+            'repo_tags':'list[str]',
+            'repo_digests':'list[str]',
+            'size':'int',
+            'dangling':'bool',
+            'update_available':'bool',
+            'system_image':'bool',
+            'parsed_repo_tags':'list[ParsedRepoTag__]',
+            'complete_tags':'list[str]',
+    })
     @typing.overload
     def get_chart_releases_consuming_image(self, 
         image_tags:'list[str]'=[],
@@ -36,9 +124,97 @@ class ContainerImage(Namespace):
             get_chart_releases_consuming_image
         """
         ...
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Authentication = typing.TypedDict('Authentication', {
+            'username':'str',
+            'password':'str',
+    })
+    ImagePull = typing.TypedDict('ImagePull', {
+            'authentication':'Authentication',
+            'from_image':'str',
+            'tag':'typing.Optional[str]',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    ParsedRepoTag = typing.TypedDict('ParsedRepoTag', {
+            'image':'str',
+            'tag':'str',
+            'registry':'str',
+            'complete_tag':'str',
+    })
+    ContainerImageEntry = typing.TypedDict('ContainerImageEntry', {
+            'id':'str',
+            'repo_tags':'list[str]',
+            'repo_digests':'list[str]',
+            'size':'int',
+            'dangling':'bool',
+            'update_available':'bool',
+            'system_image':'bool',
+            'parsed_repo_tags':'list[ParsedRepoTag]',
+            'complete_tags':'list[str]',
+    })
+    ParsedRepoTag_ = typing.TypedDict('ParsedRepoTag_', {
+            'image':'str',
+            'tag':'str',
+            'registry':'str',
+            'complete_tag':'str',
+    })
+    ContainerImageEntry_ = typing.TypedDict('ContainerImageEntry_', {
+            'id':'str',
+            'repo_tags':'list[str]',
+            'repo_digests':'list[str]',
+            'size':'int',
+            'dangling':'bool',
+            'update_available':'bool',
+            'system_image':'bool',
+            'parsed_repo_tags':'list[ParsedRepoTag_]',
+            'complete_tags':'list[str]',
+    })
+    ParsedRepoTag__ = typing.TypedDict('ParsedRepoTag__', {
+            'image':'str',
+            'tag':'str',
+            'registry':'str',
+            'complete_tag':'str',
+    })
+    ContainerImageEntry__ = typing.TypedDict('ContainerImageEntry__', {
+            'id':'str',
+            'repo_tags':'list[str]',
+            'repo_digests':'list[str]',
+            'size':'int',
+            'dangling':'bool',
+            'update_available':'bool',
+            'system_image':'bool',
+            'parsed_repo_tags':'list[ParsedRepoTag__]',
+            'complete_tags':'list[str]',
+    })
     @typing.overload
     def get_instance(self, 
-        id:'str|int|bool|dict[str]|list',
+        id:'typing.Union[str, int, bool, dict[str], list]',
         query_options_get_instance:'QueryOptionsGetInstance'={},
     /) -> None: 
         """
@@ -56,6 +232,94 @@ class ContainerImage(Namespace):
         -------
         """
         ...
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Authentication = typing.TypedDict('Authentication', {
+            'username':'str',
+            'password':'str',
+    })
+    ImagePull = typing.TypedDict('ImagePull', {
+            'authentication':'Authentication',
+            'from_image':'str',
+            'tag':'typing.Optional[str]',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    ParsedRepoTag = typing.TypedDict('ParsedRepoTag', {
+            'image':'str',
+            'tag':'str',
+            'registry':'str',
+            'complete_tag':'str',
+    })
+    ContainerImageEntry = typing.TypedDict('ContainerImageEntry', {
+            'id':'str',
+            'repo_tags':'list[str]',
+            'repo_digests':'list[str]',
+            'size':'int',
+            'dangling':'bool',
+            'update_available':'bool',
+            'system_image':'bool',
+            'parsed_repo_tags':'list[ParsedRepoTag]',
+            'complete_tags':'list[str]',
+    })
+    ParsedRepoTag_ = typing.TypedDict('ParsedRepoTag_', {
+            'image':'str',
+            'tag':'str',
+            'registry':'str',
+            'complete_tag':'str',
+    })
+    ContainerImageEntry_ = typing.TypedDict('ContainerImageEntry_', {
+            'id':'str',
+            'repo_tags':'list[str]',
+            'repo_digests':'list[str]',
+            'size':'int',
+            'dangling':'bool',
+            'update_available':'bool',
+            'system_image':'bool',
+            'parsed_repo_tags':'list[ParsedRepoTag_]',
+            'complete_tags':'list[str]',
+    })
+    ParsedRepoTag__ = typing.TypedDict('ParsedRepoTag__', {
+            'image':'str',
+            'tag':'str',
+            'registry':'str',
+            'complete_tag':'str',
+    })
+    ContainerImageEntry__ = typing.TypedDict('ContainerImageEntry__', {
+            'id':'str',
+            'repo_tags':'list[str]',
+            'repo_digests':'list[str]',
+            'size':'int',
+            'dangling':'bool',
+            'update_available':'bool',
+            'system_image':'bool',
+            'parsed_repo_tags':'list[ParsedRepoTag__]',
+            'complete_tags':'list[str]',
+    })
     @typing.overload
     def pull(self, 
         image_pull:'ImagePull'={},
@@ -77,11 +341,99 @@ class ContainerImage(Namespace):
         -------
         """
         ...
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Authentication = typing.TypedDict('Authentication', {
+            'username':'str',
+            'password':'str',
+    })
+    ImagePull = typing.TypedDict('ImagePull', {
+            'authentication':'Authentication',
+            'from_image':'str',
+            'tag':'typing.Optional[str]',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    ParsedRepoTag = typing.TypedDict('ParsedRepoTag', {
+            'image':'str',
+            'tag':'str',
+            'registry':'str',
+            'complete_tag':'str',
+    })
+    ContainerImageEntry = typing.TypedDict('ContainerImageEntry', {
+            'id':'str',
+            'repo_tags':'list[str]',
+            'repo_digests':'list[str]',
+            'size':'int',
+            'dangling':'bool',
+            'update_available':'bool',
+            'system_image':'bool',
+            'parsed_repo_tags':'list[ParsedRepoTag]',
+            'complete_tags':'list[str]',
+    })
+    ParsedRepoTag_ = typing.TypedDict('ParsedRepoTag_', {
+            'image':'str',
+            'tag':'str',
+            'registry':'str',
+            'complete_tag':'str',
+    })
+    ContainerImageEntry_ = typing.TypedDict('ContainerImageEntry_', {
+            'id':'str',
+            'repo_tags':'list[str]',
+            'repo_digests':'list[str]',
+            'size':'int',
+            'dangling':'bool',
+            'update_available':'bool',
+            'system_image':'bool',
+            'parsed_repo_tags':'list[ParsedRepoTag_]',
+            'complete_tags':'list[str]',
+    })
+    ParsedRepoTag__ = typing.TypedDict('ParsedRepoTag__', {
+            'image':'str',
+            'tag':'str',
+            'registry':'str',
+            'complete_tag':'str',
+    })
+    ContainerImageEntry__ = typing.TypedDict('ContainerImageEntry__', {
+            'id':'str',
+            'repo_tags':'list[str]',
+            'repo_digests':'list[str]',
+            'size':'int',
+            'dangling':'bool',
+            'update_available':'bool',
+            'system_image':'bool',
+            'parsed_repo_tags':'list[ParsedRepoTag__]',
+            'complete_tags':'list[str]',
+    })
     @typing.overload
     def query(self, 
         query_filters:'list[list]'=[],
         query_options:'QueryOptions'={},
-    /) -> 'list[ContainerImageEntry]|ContainerImageEntry|int|ContainerImageEntry': 
+    /) -> 'typing.Union[list[ContainerImageEntry], ForwardRef(ContainerImageEntry_), int, ForwardRef(ContainerImageEntry__)]': 
         """
         Retrieve container images present in the system.
         
@@ -96,68 +448,96 @@ class ContainerImage(Namespace):
             query-options
         Returns
         -------
-        list[ContainerImageEntry]:
-            
-        ContainerImageEntry:
-            
-        int:
-            
-        ContainerImageEntry:
+        typing.Union[list[ContainerImageEntry], ForwardRef(ContainerImageEntry_), int, ForwardRef(ContainerImageEntry__)]:
             
         """
         ...
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Authentication = typing.TypedDict('Authentication', {
+            'username':'str',
+            'password':'str',
+    })
+    ImagePull = typing.TypedDict('ImagePull', {
+            'authentication':'Authentication',
+            'from_image':'str',
+            'tag':'typing.Optional[str]',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    ParsedRepoTag = typing.TypedDict('ParsedRepoTag', {
+            'image':'str',
+            'tag':'str',
+            'registry':'str',
+            'complete_tag':'str',
+    })
+    ContainerImageEntry = typing.TypedDict('ContainerImageEntry', {
+            'id':'str',
+            'repo_tags':'list[str]',
+            'repo_digests':'list[str]',
+            'size':'int',
+            'dangling':'bool',
+            'update_available':'bool',
+            'system_image':'bool',
+            'parsed_repo_tags':'list[ParsedRepoTag]',
+            'complete_tags':'list[str]',
+    })
+    ParsedRepoTag_ = typing.TypedDict('ParsedRepoTag_', {
+            'image':'str',
+            'tag':'str',
+            'registry':'str',
+            'complete_tag':'str',
+    })
+    ContainerImageEntry_ = typing.TypedDict('ContainerImageEntry_', {
+            'id':'str',
+            'repo_tags':'list[str]',
+            'repo_digests':'list[str]',
+            'size':'int',
+            'dangling':'bool',
+            'update_available':'bool',
+            'system_image':'bool',
+            'parsed_repo_tags':'list[ParsedRepoTag_]',
+            'complete_tags':'list[str]',
+    })
+    ParsedRepoTag__ = typing.TypedDict('ParsedRepoTag__', {
+            'image':'str',
+            'tag':'str',
+            'registry':'str',
+            'complete_tag':'str',
+    })
+    ContainerImageEntry__ = typing.TypedDict('ContainerImageEntry__', {
+            'id':'str',
+            'repo_tags':'list[str]',
+            'repo_digests':'list[str]',
+            'size':'int',
+            'dangling':'bool',
+            'update_available':'bool',
+            'system_image':'bool',
+            'parsed_repo_tags':'list[ParsedRepoTag__]',
+            'complete_tags':'list[str]',
+    })
 
-class QueryOptionsGetInstance(typing.TypedDict):
-        relationships:'bool'
-        extend:'typing.Optional[str]'
-        extend_context:'typing.Optional[str]'
-        prefix:'typing.Optional[str]'
-        extra:'dict[str]'
-        order_by:'list'
-        select:'list'
-        count:'bool'
-        get:'bool'
-        offset:'int'
-        limit:'int'
-        force_sql_filters:'bool'
-        ...
-class ImagePull(typing.TypedDict):
-        authentication:'Authentication'
-        from_image:'str'
-        tag:'typing.Optional[str]'
-        ...
-class Authentication(typing.TypedDict):
-        username:'str'
-        password:'str'
-        ...
-class QueryOptions(typing.TypedDict):
-        relationships:'bool'
-        extend:'typing.Optional[str]'
-        extend_context:'typing.Optional[str]'
-        prefix:'typing.Optional[str]'
-        extra:'dict[str]'
-        order_by:'list'
-        select:'list'
-        count:'bool'
-        get:'bool'
-        offset:'int'
-        limit:'int'
-        force_sql_filters:'bool'
-        ...
-class ContainerImageEntry(typing.TypedDict):
-        id:'str'
-        repo_tags:'list[str]'
-        repo_digests:'list[str]'
-        size:'int'
-        dangling:'bool'
-        update_available:'bool'
-        system_image:'bool'
-        parsed_repo_tags:'list[ParsedRepoTag]'
-        complete_tags:'list[str]'
-        ...
-class ParsedRepoTag(typing.TypedDict):
-        image:'str'
-        tag:'str'
-        registry:'str'
-        complete_tag:'str'
-        ...

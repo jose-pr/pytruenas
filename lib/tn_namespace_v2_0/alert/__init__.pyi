@@ -19,6 +19,34 @@ class Alert(Namespace):
         -------
         """
         ...
+    Alert = typing.TypedDict('Alert', {
+            'uuid':'str',
+            'source':'str',
+            'klass':'str',
+            'args':'typing.Union[str, int, bool, dict[str], list]',
+            'node':'str',
+            'key':'str',
+            'datetime':'str',
+            'last_occurrence':'str',
+            'dismissed':'bool',
+            'mail':'typing.Union[str, int, bool, dict[str], list]',
+            'text':'str',
+            'id':'str',
+            'level':'str',
+            'formatted':'typing.Optional[str]',
+            'one_shot':'bool',
+    })
+    CategoryClass = typing.TypedDict('CategoryClass', {
+            'id':'str',
+            'title':'str',
+            'level':'str',
+            'proactive_support':'bool',
+    })
+    Category = typing.TypedDict('Category', {
+            'id':'str',
+            'title':'str',
+            'classes':'list[CategoryClass]',
+    })
     @typing.overload
     def list(self, 
     /) -> 'list[Alert]': 
@@ -33,6 +61,34 @@ class Alert(Namespace):
             alerts
         """
         ...
+    Alert = typing.TypedDict('Alert', {
+            'uuid':'str',
+            'source':'str',
+            'klass':'str',
+            'args':'typing.Union[str, int, bool, dict[str], list]',
+            'node':'str',
+            'key':'str',
+            'datetime':'str',
+            'last_occurrence':'str',
+            'dismissed':'bool',
+            'mail':'typing.Union[str, int, bool, dict[str], list]',
+            'text':'str',
+            'id':'str',
+            'level':'str',
+            'formatted':'typing.Optional[str]',
+            'one_shot':'bool',
+    })
+    CategoryClass = typing.TypedDict('CategoryClass', {
+            'id':'str',
+            'title':'str',
+            'level':'str',
+            'proactive_support':'bool',
+    })
+    Category = typing.TypedDict('Category', {
+            'id':'str',
+            'title':'str',
+            'classes':'list[CategoryClass]',
+    })
     @typing.overload
     def list_categories(self, 
     /) -> 'list[Category]': 
@@ -47,6 +103,34 @@ class Alert(Namespace):
             categories
         """
         ...
+    Alert = typing.TypedDict('Alert', {
+            'uuid':'str',
+            'source':'str',
+            'klass':'str',
+            'args':'typing.Union[str, int, bool, dict[str], list]',
+            'node':'str',
+            'key':'str',
+            'datetime':'str',
+            'last_occurrence':'str',
+            'dismissed':'bool',
+            'mail':'typing.Union[str, int, bool, dict[str], list]',
+            'text':'str',
+            'id':'str',
+            'level':'str',
+            'formatted':'typing.Optional[str]',
+            'one_shot':'bool',
+    })
+    CategoryClass = typing.TypedDict('CategoryClass', {
+            'id':'str',
+            'title':'str',
+            'level':'str',
+            'proactive_support':'bool',
+    })
+    Category = typing.TypedDict('Category', {
+            'id':'str',
+            'title':'str',
+            'classes':'list[CategoryClass]',
+    })
     @typing.overload
     def list_policies(self, 
     /) -> 'list[str]': 
@@ -61,6 +145,34 @@ class Alert(Namespace):
             alert_policies
         """
         ...
+    Alert = typing.TypedDict('Alert', {
+            'uuid':'str',
+            'source':'str',
+            'klass':'str',
+            'args':'typing.Union[str, int, bool, dict[str], list]',
+            'node':'str',
+            'key':'str',
+            'datetime':'str',
+            'last_occurrence':'str',
+            'dismissed':'bool',
+            'mail':'typing.Union[str, int, bool, dict[str], list]',
+            'text':'str',
+            'id':'str',
+            'level':'str',
+            'formatted':'typing.Optional[str]',
+            'one_shot':'bool',
+    })
+    CategoryClass = typing.TypedDict('CategoryClass', {
+            'id':'str',
+            'title':'str',
+            'level':'str',
+            'proactive_support':'bool',
+    })
+    Category = typing.TypedDict('Category', {
+            'id':'str',
+            'title':'str',
+            'classes':'list[CategoryClass]',
+    })
     @typing.overload
     def restore(self, 
         uuid:'str',
@@ -76,32 +188,32 @@ class Alert(Namespace):
         -------
         """
         ...
+    Alert = typing.TypedDict('Alert', {
+            'uuid':'str',
+            'source':'str',
+            'klass':'str',
+            'args':'typing.Union[str, int, bool, dict[str], list]',
+            'node':'str',
+            'key':'str',
+            'datetime':'str',
+            'last_occurrence':'str',
+            'dismissed':'bool',
+            'mail':'typing.Union[str, int, bool, dict[str], list]',
+            'text':'str',
+            'id':'str',
+            'level':'str',
+            'formatted':'typing.Optional[str]',
+            'one_shot':'bool',
+    })
+    CategoryClass = typing.TypedDict('CategoryClass', {
+            'id':'str',
+            'title':'str',
+            'level':'str',
+            'proactive_support':'bool',
+    })
+    Category = typing.TypedDict('Category', {
+            'id':'str',
+            'title':'str',
+            'classes':'list[CategoryClass]',
+    })
 
-class Alert(typing.TypedDict):
-        uuid:'str'
-        source:'str'
-        klass:'str'
-        args:'typing.Union[str, int, bool, dict[str], list]'
-        node:'str'
-        key:'str'
-        datetime:'str'
-        last_occurrence:'str'
-        dismissed:'bool'
-        mail:'typing.Union[str, int, bool, dict[str], list]'
-        text:'str'
-        id:'str'
-        level:'str'
-        formatted:'typing.Optional[str]'
-        one_shot:'bool'
-        ...
-class Category(typing.TypedDict):
-        id:'str'
-        title:'str'
-        classes:'list[CategoryClass]'
-        ...
-class CategoryClass(typing.TypedDict):
-        id:'str'
-        title:'str'
-        level:'str'
-        proactive_support:'bool'
-        ...

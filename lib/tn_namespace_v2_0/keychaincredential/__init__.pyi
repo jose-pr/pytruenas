@@ -39,6 +39,135 @@ class Keychaincredential(Namespace):
             keychaincredential_create_returns
         """
         ...
+    KeychainCredentialCreate = typing.TypedDict('KeychainCredentialCreate', {
+            'name':'str',
+            'type':'str',
+            'attributes':'dict[str]',
+    })
+    KeychaincredentialCreateReturns = typing.TypedDict('KeychaincredentialCreateReturns', {
+            'name':'str',
+            'type':'str',
+            'attributes':'dict[str]',
+            'id':'int',
+    })
+    Options = typing.TypedDict('Options', {
+            'cascade':'bool',
+    })
+    SshKeyPair = typing.TypedDict('SshKeyPair', {
+            'private_key':'str',
+            'public_key':'str',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    KeychainCredentialEntry = typing.TypedDict('KeychainCredentialEntry', {
+            'name':'str',
+            'type':'str',
+            'attributes':'dict[str]',
+            'id':'int',
+    })
+    KeychainCredentialEntry_ = typing.TypedDict('KeychainCredentialEntry_', {
+            'name':'str',
+            'type':'str',
+            'attributes':'dict[str]',
+            'id':'int',
+    })
+    KeychainCredentialEntry__ = typing.TypedDict('KeychainCredentialEntry__', {
+            'name':'str',
+            'type':'str',
+            'attributes':'dict[str]',
+            'id':'int',
+    })
+    KeychainRemoteSshHostKeyScan = typing.TypedDict('KeychainRemoteSshHostKeyScan', {
+            'host':'str',
+            'port':'str',
+            'connect_timeout':'int',
+    })
+    KeychainRemoteSshSemiautomaticSetup = typing.TypedDict('KeychainRemoteSshSemiautomaticSetup', {
+            'name':'str',
+            'url':'str',
+            'token':'str',
+            'admin_username':'str',
+            'password':'str',
+            'otp_token':'str',
+            'username':'str',
+            'private_key':'int',
+            'connect_timeout':'int',
+            'sudo':'bool',
+    })
+    KeychainCredentialEntry___ = typing.TypedDict('KeychainCredentialEntry___', {
+            'name':'str',
+            'type':'str',
+            'attributes':'dict[str]',
+            'id':'int',
+    })
+    PrivateKey = typing.TypedDict('PrivateKey', {
+            'generate_key':'bool',
+            'existing_key_id':'int',
+            'name':'str',
+    })
+    SemiAutomaticSetup = typing.TypedDict('SemiAutomaticSetup', {
+            'url':'str',
+            'token':'str',
+            'admin_username':'str',
+            'password':'str',
+            'otp_token':'str',
+            'username':'str',
+            'connect_timeout':'int',
+            'sudo':'bool',
+    })
+    SetupSshConnection = typing.TypedDict('SetupSshConnection', {
+            'private_key':'PrivateKey',
+            'connection_name':'str',
+            'setup_type':'str',
+            'semi_automatic_setup':'SemiAutomaticSetup',
+            'manual_setup':'dict[str]',
+    })
+    KeychainCredentialEntry____ = typing.TypedDict('KeychainCredentialEntry____', {
+            'name':'str',
+            'type':'str',
+            'attributes':'dict[str]',
+            'id':'int',
+    })
+    KeychainCredentialUpdate = typing.TypedDict('KeychainCredentialUpdate', {
+            'name':'str',
+            'attributes':'dict[str]',
+    })
+    KeychaincredentialUpdateReturns = typing.TypedDict('KeychaincredentialUpdateReturns', {
+            'name':'str',
+            'type':'str',
+            'attributes':'dict[str]',
+            'id':'int',
+    })
+    CredentialResult = typing.TypedDict('CredentialResult', {
+            'title':'str',
+            'unbind_method':'str',
+    })
     @typing.overload
     def delete(self, 
         id:'int',
@@ -57,6 +186,135 @@ class Keychaincredential(Namespace):
         -------
         """
         ...
+    KeychainCredentialCreate = typing.TypedDict('KeychainCredentialCreate', {
+            'name':'str',
+            'type':'str',
+            'attributes':'dict[str]',
+    })
+    KeychaincredentialCreateReturns = typing.TypedDict('KeychaincredentialCreateReturns', {
+            'name':'str',
+            'type':'str',
+            'attributes':'dict[str]',
+            'id':'int',
+    })
+    Options = typing.TypedDict('Options', {
+            'cascade':'bool',
+    })
+    SshKeyPair = typing.TypedDict('SshKeyPair', {
+            'private_key':'str',
+            'public_key':'str',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    KeychainCredentialEntry = typing.TypedDict('KeychainCredentialEntry', {
+            'name':'str',
+            'type':'str',
+            'attributes':'dict[str]',
+            'id':'int',
+    })
+    KeychainCredentialEntry_ = typing.TypedDict('KeychainCredentialEntry_', {
+            'name':'str',
+            'type':'str',
+            'attributes':'dict[str]',
+            'id':'int',
+    })
+    KeychainCredentialEntry__ = typing.TypedDict('KeychainCredentialEntry__', {
+            'name':'str',
+            'type':'str',
+            'attributes':'dict[str]',
+            'id':'int',
+    })
+    KeychainRemoteSshHostKeyScan = typing.TypedDict('KeychainRemoteSshHostKeyScan', {
+            'host':'str',
+            'port':'str',
+            'connect_timeout':'int',
+    })
+    KeychainRemoteSshSemiautomaticSetup = typing.TypedDict('KeychainRemoteSshSemiautomaticSetup', {
+            'name':'str',
+            'url':'str',
+            'token':'str',
+            'admin_username':'str',
+            'password':'str',
+            'otp_token':'str',
+            'username':'str',
+            'private_key':'int',
+            'connect_timeout':'int',
+            'sudo':'bool',
+    })
+    KeychainCredentialEntry___ = typing.TypedDict('KeychainCredentialEntry___', {
+            'name':'str',
+            'type':'str',
+            'attributes':'dict[str]',
+            'id':'int',
+    })
+    PrivateKey = typing.TypedDict('PrivateKey', {
+            'generate_key':'bool',
+            'existing_key_id':'int',
+            'name':'str',
+    })
+    SemiAutomaticSetup = typing.TypedDict('SemiAutomaticSetup', {
+            'url':'str',
+            'token':'str',
+            'admin_username':'str',
+            'password':'str',
+            'otp_token':'str',
+            'username':'str',
+            'connect_timeout':'int',
+            'sudo':'bool',
+    })
+    SetupSshConnection = typing.TypedDict('SetupSshConnection', {
+            'private_key':'PrivateKey',
+            'connection_name':'str',
+            'setup_type':'str',
+            'semi_automatic_setup':'SemiAutomaticSetup',
+            'manual_setup':'dict[str]',
+    })
+    KeychainCredentialEntry____ = typing.TypedDict('KeychainCredentialEntry____', {
+            'name':'str',
+            'type':'str',
+            'attributes':'dict[str]',
+            'id':'int',
+    })
+    KeychainCredentialUpdate = typing.TypedDict('KeychainCredentialUpdate', {
+            'name':'str',
+            'attributes':'dict[str]',
+    })
+    KeychaincredentialUpdateReturns = typing.TypedDict('KeychaincredentialUpdateReturns', {
+            'name':'str',
+            'type':'str',
+            'attributes':'dict[str]',
+            'id':'int',
+    })
+    CredentialResult = typing.TypedDict('CredentialResult', {
+            'title':'str',
+            'unbind_method':'str',
+    })
     @typing.overload
     def generate_ssh_key_pair(self, 
     /) -> 'SshKeyPair': 
@@ -73,9 +331,138 @@ class Keychaincredential(Namespace):
             ssh_key_pair
         """
         ...
+    KeychainCredentialCreate = typing.TypedDict('KeychainCredentialCreate', {
+            'name':'str',
+            'type':'str',
+            'attributes':'dict[str]',
+    })
+    KeychaincredentialCreateReturns = typing.TypedDict('KeychaincredentialCreateReturns', {
+            'name':'str',
+            'type':'str',
+            'attributes':'dict[str]',
+            'id':'int',
+    })
+    Options = typing.TypedDict('Options', {
+            'cascade':'bool',
+    })
+    SshKeyPair = typing.TypedDict('SshKeyPair', {
+            'private_key':'str',
+            'public_key':'str',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    KeychainCredentialEntry = typing.TypedDict('KeychainCredentialEntry', {
+            'name':'str',
+            'type':'str',
+            'attributes':'dict[str]',
+            'id':'int',
+    })
+    KeychainCredentialEntry_ = typing.TypedDict('KeychainCredentialEntry_', {
+            'name':'str',
+            'type':'str',
+            'attributes':'dict[str]',
+            'id':'int',
+    })
+    KeychainCredentialEntry__ = typing.TypedDict('KeychainCredentialEntry__', {
+            'name':'str',
+            'type':'str',
+            'attributes':'dict[str]',
+            'id':'int',
+    })
+    KeychainRemoteSshHostKeyScan = typing.TypedDict('KeychainRemoteSshHostKeyScan', {
+            'host':'str',
+            'port':'str',
+            'connect_timeout':'int',
+    })
+    KeychainRemoteSshSemiautomaticSetup = typing.TypedDict('KeychainRemoteSshSemiautomaticSetup', {
+            'name':'str',
+            'url':'str',
+            'token':'str',
+            'admin_username':'str',
+            'password':'str',
+            'otp_token':'str',
+            'username':'str',
+            'private_key':'int',
+            'connect_timeout':'int',
+            'sudo':'bool',
+    })
+    KeychainCredentialEntry___ = typing.TypedDict('KeychainCredentialEntry___', {
+            'name':'str',
+            'type':'str',
+            'attributes':'dict[str]',
+            'id':'int',
+    })
+    PrivateKey = typing.TypedDict('PrivateKey', {
+            'generate_key':'bool',
+            'existing_key_id':'int',
+            'name':'str',
+    })
+    SemiAutomaticSetup = typing.TypedDict('SemiAutomaticSetup', {
+            'url':'str',
+            'token':'str',
+            'admin_username':'str',
+            'password':'str',
+            'otp_token':'str',
+            'username':'str',
+            'connect_timeout':'int',
+            'sudo':'bool',
+    })
+    SetupSshConnection = typing.TypedDict('SetupSshConnection', {
+            'private_key':'PrivateKey',
+            'connection_name':'str',
+            'setup_type':'str',
+            'semi_automatic_setup':'SemiAutomaticSetup',
+            'manual_setup':'dict[str]',
+    })
+    KeychainCredentialEntry____ = typing.TypedDict('KeychainCredentialEntry____', {
+            'name':'str',
+            'type':'str',
+            'attributes':'dict[str]',
+            'id':'int',
+    })
+    KeychainCredentialUpdate = typing.TypedDict('KeychainCredentialUpdate', {
+            'name':'str',
+            'attributes':'dict[str]',
+    })
+    KeychaincredentialUpdateReturns = typing.TypedDict('KeychaincredentialUpdateReturns', {
+            'name':'str',
+            'type':'str',
+            'attributes':'dict[str]',
+            'id':'int',
+    })
+    CredentialResult = typing.TypedDict('CredentialResult', {
+            'title':'str',
+            'unbind_method':'str',
+    })
     @typing.overload
     def get_instance(self, 
-        id:'str|int|bool|dict[str]|list',
+        id:'typing.Union[str, int, bool, dict[str], list]',
         query_options_get_instance:'QueryOptionsGetInstance'={},
     /) -> None: 
         """
@@ -93,11 +480,140 @@ class Keychaincredential(Namespace):
         -------
         """
         ...
+    KeychainCredentialCreate = typing.TypedDict('KeychainCredentialCreate', {
+            'name':'str',
+            'type':'str',
+            'attributes':'dict[str]',
+    })
+    KeychaincredentialCreateReturns = typing.TypedDict('KeychaincredentialCreateReturns', {
+            'name':'str',
+            'type':'str',
+            'attributes':'dict[str]',
+            'id':'int',
+    })
+    Options = typing.TypedDict('Options', {
+            'cascade':'bool',
+    })
+    SshKeyPair = typing.TypedDict('SshKeyPair', {
+            'private_key':'str',
+            'public_key':'str',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    KeychainCredentialEntry = typing.TypedDict('KeychainCredentialEntry', {
+            'name':'str',
+            'type':'str',
+            'attributes':'dict[str]',
+            'id':'int',
+    })
+    KeychainCredentialEntry_ = typing.TypedDict('KeychainCredentialEntry_', {
+            'name':'str',
+            'type':'str',
+            'attributes':'dict[str]',
+            'id':'int',
+    })
+    KeychainCredentialEntry__ = typing.TypedDict('KeychainCredentialEntry__', {
+            'name':'str',
+            'type':'str',
+            'attributes':'dict[str]',
+            'id':'int',
+    })
+    KeychainRemoteSshHostKeyScan = typing.TypedDict('KeychainRemoteSshHostKeyScan', {
+            'host':'str',
+            'port':'str',
+            'connect_timeout':'int',
+    })
+    KeychainRemoteSshSemiautomaticSetup = typing.TypedDict('KeychainRemoteSshSemiautomaticSetup', {
+            'name':'str',
+            'url':'str',
+            'token':'str',
+            'admin_username':'str',
+            'password':'str',
+            'otp_token':'str',
+            'username':'str',
+            'private_key':'int',
+            'connect_timeout':'int',
+            'sudo':'bool',
+    })
+    KeychainCredentialEntry___ = typing.TypedDict('KeychainCredentialEntry___', {
+            'name':'str',
+            'type':'str',
+            'attributes':'dict[str]',
+            'id':'int',
+    })
+    PrivateKey = typing.TypedDict('PrivateKey', {
+            'generate_key':'bool',
+            'existing_key_id':'int',
+            'name':'str',
+    })
+    SemiAutomaticSetup = typing.TypedDict('SemiAutomaticSetup', {
+            'url':'str',
+            'token':'str',
+            'admin_username':'str',
+            'password':'str',
+            'otp_token':'str',
+            'username':'str',
+            'connect_timeout':'int',
+            'sudo':'bool',
+    })
+    SetupSshConnection = typing.TypedDict('SetupSshConnection', {
+            'private_key':'PrivateKey',
+            'connection_name':'str',
+            'setup_type':'str',
+            'semi_automatic_setup':'SemiAutomaticSetup',
+            'manual_setup':'dict[str]',
+    })
+    KeychainCredentialEntry____ = typing.TypedDict('KeychainCredentialEntry____', {
+            'name':'str',
+            'type':'str',
+            'attributes':'dict[str]',
+            'id':'int',
+    })
+    KeychainCredentialUpdate = typing.TypedDict('KeychainCredentialUpdate', {
+            'name':'str',
+            'attributes':'dict[str]',
+    })
+    KeychaincredentialUpdateReturns = typing.TypedDict('KeychaincredentialUpdateReturns', {
+            'name':'str',
+            'type':'str',
+            'attributes':'dict[str]',
+            'id':'int',
+    })
+    CredentialResult = typing.TypedDict('CredentialResult', {
+            'title':'str',
+            'unbind_method':'str',
+    })
     @typing.overload
     def query(self, 
         query_filters:'list[list]'=[],
         query_options:'QueryOptions'={},
-    /) -> 'list[KeychainCredentialEntry]|KeychainCredentialEntry|int|KeychainCredentialEntry': 
+    /) -> 'typing.Union[list[KeychainCredentialEntry], ForwardRef(KeychainCredentialEntry_), int, ForwardRef(KeychainCredentialEntry__)]': 
         """
         
 
@@ -109,16 +625,139 @@ class Keychaincredential(Namespace):
             query-options
         Returns
         -------
-        list[KeychainCredentialEntry]:
-            
-        KeychainCredentialEntry:
-            
-        int:
-            
-        KeychainCredentialEntry:
+        typing.Union[list[KeychainCredentialEntry], ForwardRef(KeychainCredentialEntry_), int, ForwardRef(KeychainCredentialEntry__)]:
             
         """
         ...
+    KeychainCredentialCreate = typing.TypedDict('KeychainCredentialCreate', {
+            'name':'str',
+            'type':'str',
+            'attributes':'dict[str]',
+    })
+    KeychaincredentialCreateReturns = typing.TypedDict('KeychaincredentialCreateReturns', {
+            'name':'str',
+            'type':'str',
+            'attributes':'dict[str]',
+            'id':'int',
+    })
+    Options = typing.TypedDict('Options', {
+            'cascade':'bool',
+    })
+    SshKeyPair = typing.TypedDict('SshKeyPair', {
+            'private_key':'str',
+            'public_key':'str',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    KeychainCredentialEntry = typing.TypedDict('KeychainCredentialEntry', {
+            'name':'str',
+            'type':'str',
+            'attributes':'dict[str]',
+            'id':'int',
+    })
+    KeychainCredentialEntry_ = typing.TypedDict('KeychainCredentialEntry_', {
+            'name':'str',
+            'type':'str',
+            'attributes':'dict[str]',
+            'id':'int',
+    })
+    KeychainCredentialEntry__ = typing.TypedDict('KeychainCredentialEntry__', {
+            'name':'str',
+            'type':'str',
+            'attributes':'dict[str]',
+            'id':'int',
+    })
+    KeychainRemoteSshHostKeyScan = typing.TypedDict('KeychainRemoteSshHostKeyScan', {
+            'host':'str',
+            'port':'str',
+            'connect_timeout':'int',
+    })
+    KeychainRemoteSshSemiautomaticSetup = typing.TypedDict('KeychainRemoteSshSemiautomaticSetup', {
+            'name':'str',
+            'url':'str',
+            'token':'str',
+            'admin_username':'str',
+            'password':'str',
+            'otp_token':'str',
+            'username':'str',
+            'private_key':'int',
+            'connect_timeout':'int',
+            'sudo':'bool',
+    })
+    KeychainCredentialEntry___ = typing.TypedDict('KeychainCredentialEntry___', {
+            'name':'str',
+            'type':'str',
+            'attributes':'dict[str]',
+            'id':'int',
+    })
+    PrivateKey = typing.TypedDict('PrivateKey', {
+            'generate_key':'bool',
+            'existing_key_id':'int',
+            'name':'str',
+    })
+    SemiAutomaticSetup = typing.TypedDict('SemiAutomaticSetup', {
+            'url':'str',
+            'token':'str',
+            'admin_username':'str',
+            'password':'str',
+            'otp_token':'str',
+            'username':'str',
+            'connect_timeout':'int',
+            'sudo':'bool',
+    })
+    SetupSshConnection = typing.TypedDict('SetupSshConnection', {
+            'private_key':'PrivateKey',
+            'connection_name':'str',
+            'setup_type':'str',
+            'semi_automatic_setup':'SemiAutomaticSetup',
+            'manual_setup':'dict[str]',
+    })
+    KeychainCredentialEntry____ = typing.TypedDict('KeychainCredentialEntry____', {
+            'name':'str',
+            'type':'str',
+            'attributes':'dict[str]',
+            'id':'int',
+    })
+    KeychainCredentialUpdate = typing.TypedDict('KeychainCredentialUpdate', {
+            'name':'str',
+            'attributes':'dict[str]',
+    })
+    KeychaincredentialUpdateReturns = typing.TypedDict('KeychaincredentialUpdateReturns', {
+            'name':'str',
+            'type':'str',
+            'attributes':'dict[str]',
+            'id':'int',
+    })
+    CredentialResult = typing.TypedDict('CredentialResult', {
+            'title':'str',
+            'unbind_method':'str',
+    })
     @typing.overload
     def remote_ssh_host_key_scan(self, 
         keychain_remote_ssh_host_key_scan:'KeychainRemoteSshHostKeyScan'={},
@@ -138,10 +777,139 @@ class Keychaincredential(Namespace):
             remove_ssh_host_key
         """
         ...
+    KeychainCredentialCreate = typing.TypedDict('KeychainCredentialCreate', {
+            'name':'str',
+            'type':'str',
+            'attributes':'dict[str]',
+    })
+    KeychaincredentialCreateReturns = typing.TypedDict('KeychaincredentialCreateReturns', {
+            'name':'str',
+            'type':'str',
+            'attributes':'dict[str]',
+            'id':'int',
+    })
+    Options = typing.TypedDict('Options', {
+            'cascade':'bool',
+    })
+    SshKeyPair = typing.TypedDict('SshKeyPair', {
+            'private_key':'str',
+            'public_key':'str',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    KeychainCredentialEntry = typing.TypedDict('KeychainCredentialEntry', {
+            'name':'str',
+            'type':'str',
+            'attributes':'dict[str]',
+            'id':'int',
+    })
+    KeychainCredentialEntry_ = typing.TypedDict('KeychainCredentialEntry_', {
+            'name':'str',
+            'type':'str',
+            'attributes':'dict[str]',
+            'id':'int',
+    })
+    KeychainCredentialEntry__ = typing.TypedDict('KeychainCredentialEntry__', {
+            'name':'str',
+            'type':'str',
+            'attributes':'dict[str]',
+            'id':'int',
+    })
+    KeychainRemoteSshHostKeyScan = typing.TypedDict('KeychainRemoteSshHostKeyScan', {
+            'host':'str',
+            'port':'str',
+            'connect_timeout':'int',
+    })
+    KeychainRemoteSshSemiautomaticSetup = typing.TypedDict('KeychainRemoteSshSemiautomaticSetup', {
+            'name':'str',
+            'url':'str',
+            'token':'str',
+            'admin_username':'str',
+            'password':'str',
+            'otp_token':'str',
+            'username':'str',
+            'private_key':'int',
+            'connect_timeout':'int',
+            'sudo':'bool',
+    })
+    KeychainCredentialEntry___ = typing.TypedDict('KeychainCredentialEntry___', {
+            'name':'str',
+            'type':'str',
+            'attributes':'dict[str]',
+            'id':'int',
+    })
+    PrivateKey = typing.TypedDict('PrivateKey', {
+            'generate_key':'bool',
+            'existing_key_id':'int',
+            'name':'str',
+    })
+    SemiAutomaticSetup = typing.TypedDict('SemiAutomaticSetup', {
+            'url':'str',
+            'token':'str',
+            'admin_username':'str',
+            'password':'str',
+            'otp_token':'str',
+            'username':'str',
+            'connect_timeout':'int',
+            'sudo':'bool',
+    })
+    SetupSshConnection = typing.TypedDict('SetupSshConnection', {
+            'private_key':'PrivateKey',
+            'connection_name':'str',
+            'setup_type':'str',
+            'semi_automatic_setup':'SemiAutomaticSetup',
+            'manual_setup':'dict[str]',
+    })
+    KeychainCredentialEntry____ = typing.TypedDict('KeychainCredentialEntry____', {
+            'name':'str',
+            'type':'str',
+            'attributes':'dict[str]',
+            'id':'int',
+    })
+    KeychainCredentialUpdate = typing.TypedDict('KeychainCredentialUpdate', {
+            'name':'str',
+            'attributes':'dict[str]',
+    })
+    KeychaincredentialUpdateReturns = typing.TypedDict('KeychaincredentialUpdateReturns', {
+            'name':'str',
+            'type':'str',
+            'attributes':'dict[str]',
+            'id':'int',
+    })
+    CredentialResult = typing.TypedDict('CredentialResult', {
+            'title':'str',
+            'unbind_method':'str',
+    })
     @typing.overload
     def remote_ssh_semiautomatic_setup(self, 
         keychain_remote_ssh_semiautomatic_setup:'KeychainRemoteSshSemiautomaticSetup'={},
-    /) -> 'KeychainCredentialEntry_': 
+    /) -> 'KeychainCredentialEntry___': 
         """
         Perform semi-automatic SSH connection setup with other FreeNAS machine
         
@@ -156,14 +924,143 @@ class Keychaincredential(Namespace):
             keychain_remote_ssh_semiautomatic_setup
         Returns
         -------
-        KeychainCredentialEntry_:
+        KeychainCredentialEntry___:
             keychain_credential_entry
         """
         ...
+    KeychainCredentialCreate = typing.TypedDict('KeychainCredentialCreate', {
+            'name':'str',
+            'type':'str',
+            'attributes':'dict[str]',
+    })
+    KeychaincredentialCreateReturns = typing.TypedDict('KeychaincredentialCreateReturns', {
+            'name':'str',
+            'type':'str',
+            'attributes':'dict[str]',
+            'id':'int',
+    })
+    Options = typing.TypedDict('Options', {
+            'cascade':'bool',
+    })
+    SshKeyPair = typing.TypedDict('SshKeyPair', {
+            'private_key':'str',
+            'public_key':'str',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    KeychainCredentialEntry = typing.TypedDict('KeychainCredentialEntry', {
+            'name':'str',
+            'type':'str',
+            'attributes':'dict[str]',
+            'id':'int',
+    })
+    KeychainCredentialEntry_ = typing.TypedDict('KeychainCredentialEntry_', {
+            'name':'str',
+            'type':'str',
+            'attributes':'dict[str]',
+            'id':'int',
+    })
+    KeychainCredentialEntry__ = typing.TypedDict('KeychainCredentialEntry__', {
+            'name':'str',
+            'type':'str',
+            'attributes':'dict[str]',
+            'id':'int',
+    })
+    KeychainRemoteSshHostKeyScan = typing.TypedDict('KeychainRemoteSshHostKeyScan', {
+            'host':'str',
+            'port':'str',
+            'connect_timeout':'int',
+    })
+    KeychainRemoteSshSemiautomaticSetup = typing.TypedDict('KeychainRemoteSshSemiautomaticSetup', {
+            'name':'str',
+            'url':'str',
+            'token':'str',
+            'admin_username':'str',
+            'password':'str',
+            'otp_token':'str',
+            'username':'str',
+            'private_key':'int',
+            'connect_timeout':'int',
+            'sudo':'bool',
+    })
+    KeychainCredentialEntry___ = typing.TypedDict('KeychainCredentialEntry___', {
+            'name':'str',
+            'type':'str',
+            'attributes':'dict[str]',
+            'id':'int',
+    })
+    PrivateKey = typing.TypedDict('PrivateKey', {
+            'generate_key':'bool',
+            'existing_key_id':'int',
+            'name':'str',
+    })
+    SemiAutomaticSetup = typing.TypedDict('SemiAutomaticSetup', {
+            'url':'str',
+            'token':'str',
+            'admin_username':'str',
+            'password':'str',
+            'otp_token':'str',
+            'username':'str',
+            'connect_timeout':'int',
+            'sudo':'bool',
+    })
+    SetupSshConnection = typing.TypedDict('SetupSshConnection', {
+            'private_key':'PrivateKey',
+            'connection_name':'str',
+            'setup_type':'str',
+            'semi_automatic_setup':'SemiAutomaticSetup',
+            'manual_setup':'dict[str]',
+    })
+    KeychainCredentialEntry____ = typing.TypedDict('KeychainCredentialEntry____', {
+            'name':'str',
+            'type':'str',
+            'attributes':'dict[str]',
+            'id':'int',
+    })
+    KeychainCredentialUpdate = typing.TypedDict('KeychainCredentialUpdate', {
+            'name':'str',
+            'attributes':'dict[str]',
+    })
+    KeychaincredentialUpdateReturns = typing.TypedDict('KeychaincredentialUpdateReturns', {
+            'name':'str',
+            'type':'str',
+            'attributes':'dict[str]',
+            'id':'int',
+    })
+    CredentialResult = typing.TypedDict('CredentialResult', {
+            'title':'str',
+            'unbind_method':'str',
+    })
     @typing.overload
     def setup_ssh_connection(self, 
         setup_ssh_connection:'SetupSshConnection'={},
-    /) -> 'KeychainCredentialEntry': 
+    /) -> 'KeychainCredentialEntry____': 
         """
         Creates a SSH Connection performing the following steps:
         
@@ -179,10 +1076,139 @@ class Keychaincredential(Namespace):
             setup_ssh_connection
         Returns
         -------
-        KeychainCredentialEntry:
+        KeychainCredentialEntry____:
             keychain_credential_entry
         """
         ...
+    KeychainCredentialCreate = typing.TypedDict('KeychainCredentialCreate', {
+            'name':'str',
+            'type':'str',
+            'attributes':'dict[str]',
+    })
+    KeychaincredentialCreateReturns = typing.TypedDict('KeychaincredentialCreateReturns', {
+            'name':'str',
+            'type':'str',
+            'attributes':'dict[str]',
+            'id':'int',
+    })
+    Options = typing.TypedDict('Options', {
+            'cascade':'bool',
+    })
+    SshKeyPair = typing.TypedDict('SshKeyPair', {
+            'private_key':'str',
+            'public_key':'str',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    KeychainCredentialEntry = typing.TypedDict('KeychainCredentialEntry', {
+            'name':'str',
+            'type':'str',
+            'attributes':'dict[str]',
+            'id':'int',
+    })
+    KeychainCredentialEntry_ = typing.TypedDict('KeychainCredentialEntry_', {
+            'name':'str',
+            'type':'str',
+            'attributes':'dict[str]',
+            'id':'int',
+    })
+    KeychainCredentialEntry__ = typing.TypedDict('KeychainCredentialEntry__', {
+            'name':'str',
+            'type':'str',
+            'attributes':'dict[str]',
+            'id':'int',
+    })
+    KeychainRemoteSshHostKeyScan = typing.TypedDict('KeychainRemoteSshHostKeyScan', {
+            'host':'str',
+            'port':'str',
+            'connect_timeout':'int',
+    })
+    KeychainRemoteSshSemiautomaticSetup = typing.TypedDict('KeychainRemoteSshSemiautomaticSetup', {
+            'name':'str',
+            'url':'str',
+            'token':'str',
+            'admin_username':'str',
+            'password':'str',
+            'otp_token':'str',
+            'username':'str',
+            'private_key':'int',
+            'connect_timeout':'int',
+            'sudo':'bool',
+    })
+    KeychainCredentialEntry___ = typing.TypedDict('KeychainCredentialEntry___', {
+            'name':'str',
+            'type':'str',
+            'attributes':'dict[str]',
+            'id':'int',
+    })
+    PrivateKey = typing.TypedDict('PrivateKey', {
+            'generate_key':'bool',
+            'existing_key_id':'int',
+            'name':'str',
+    })
+    SemiAutomaticSetup = typing.TypedDict('SemiAutomaticSetup', {
+            'url':'str',
+            'token':'str',
+            'admin_username':'str',
+            'password':'str',
+            'otp_token':'str',
+            'username':'str',
+            'connect_timeout':'int',
+            'sudo':'bool',
+    })
+    SetupSshConnection = typing.TypedDict('SetupSshConnection', {
+            'private_key':'PrivateKey',
+            'connection_name':'str',
+            'setup_type':'str',
+            'semi_automatic_setup':'SemiAutomaticSetup',
+            'manual_setup':'dict[str]',
+    })
+    KeychainCredentialEntry____ = typing.TypedDict('KeychainCredentialEntry____', {
+            'name':'str',
+            'type':'str',
+            'attributes':'dict[str]',
+            'id':'int',
+    })
+    KeychainCredentialUpdate = typing.TypedDict('KeychainCredentialUpdate', {
+            'name':'str',
+            'attributes':'dict[str]',
+    })
+    KeychaincredentialUpdateReturns = typing.TypedDict('KeychaincredentialUpdateReturns', {
+            'name':'str',
+            'type':'str',
+            'attributes':'dict[str]',
+            'id':'int',
+    })
+    CredentialResult = typing.TypedDict('CredentialResult', {
+            'title':'str',
+            'unbind_method':'str',
+    })
     @typing.overload
     def update(self, 
         id:'int',
@@ -209,6 +1235,135 @@ class Keychaincredential(Namespace):
             keychaincredential_update_returns
         """
         ...
+    KeychainCredentialCreate = typing.TypedDict('KeychainCredentialCreate', {
+            'name':'str',
+            'type':'str',
+            'attributes':'dict[str]',
+    })
+    KeychaincredentialCreateReturns = typing.TypedDict('KeychaincredentialCreateReturns', {
+            'name':'str',
+            'type':'str',
+            'attributes':'dict[str]',
+            'id':'int',
+    })
+    Options = typing.TypedDict('Options', {
+            'cascade':'bool',
+    })
+    SshKeyPair = typing.TypedDict('SshKeyPair', {
+            'private_key':'str',
+            'public_key':'str',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    KeychainCredentialEntry = typing.TypedDict('KeychainCredentialEntry', {
+            'name':'str',
+            'type':'str',
+            'attributes':'dict[str]',
+            'id':'int',
+    })
+    KeychainCredentialEntry_ = typing.TypedDict('KeychainCredentialEntry_', {
+            'name':'str',
+            'type':'str',
+            'attributes':'dict[str]',
+            'id':'int',
+    })
+    KeychainCredentialEntry__ = typing.TypedDict('KeychainCredentialEntry__', {
+            'name':'str',
+            'type':'str',
+            'attributes':'dict[str]',
+            'id':'int',
+    })
+    KeychainRemoteSshHostKeyScan = typing.TypedDict('KeychainRemoteSshHostKeyScan', {
+            'host':'str',
+            'port':'str',
+            'connect_timeout':'int',
+    })
+    KeychainRemoteSshSemiautomaticSetup = typing.TypedDict('KeychainRemoteSshSemiautomaticSetup', {
+            'name':'str',
+            'url':'str',
+            'token':'str',
+            'admin_username':'str',
+            'password':'str',
+            'otp_token':'str',
+            'username':'str',
+            'private_key':'int',
+            'connect_timeout':'int',
+            'sudo':'bool',
+    })
+    KeychainCredentialEntry___ = typing.TypedDict('KeychainCredentialEntry___', {
+            'name':'str',
+            'type':'str',
+            'attributes':'dict[str]',
+            'id':'int',
+    })
+    PrivateKey = typing.TypedDict('PrivateKey', {
+            'generate_key':'bool',
+            'existing_key_id':'int',
+            'name':'str',
+    })
+    SemiAutomaticSetup = typing.TypedDict('SemiAutomaticSetup', {
+            'url':'str',
+            'token':'str',
+            'admin_username':'str',
+            'password':'str',
+            'otp_token':'str',
+            'username':'str',
+            'connect_timeout':'int',
+            'sudo':'bool',
+    })
+    SetupSshConnection = typing.TypedDict('SetupSshConnection', {
+            'private_key':'PrivateKey',
+            'connection_name':'str',
+            'setup_type':'str',
+            'semi_automatic_setup':'SemiAutomaticSetup',
+            'manual_setup':'dict[str]',
+    })
+    KeychainCredentialEntry____ = typing.TypedDict('KeychainCredentialEntry____', {
+            'name':'str',
+            'type':'str',
+            'attributes':'dict[str]',
+            'id':'int',
+    })
+    KeychainCredentialUpdate = typing.TypedDict('KeychainCredentialUpdate', {
+            'name':'str',
+            'attributes':'dict[str]',
+    })
+    KeychaincredentialUpdateReturns = typing.TypedDict('KeychaincredentialUpdateReturns', {
+            'name':'str',
+            'type':'str',
+            'attributes':'dict[str]',
+            'id':'int',
+    })
+    CredentialResult = typing.TypedDict('CredentialResult', {
+            'title':'str',
+            'unbind_method':'str',
+    })
     @typing.overload
     def used_by(self, 
         id:'int',
@@ -226,115 +1381,133 @@ class Keychaincredential(Namespace):
             credential_results
         """
         ...
+    KeychainCredentialCreate = typing.TypedDict('KeychainCredentialCreate', {
+            'name':'str',
+            'type':'str',
+            'attributes':'dict[str]',
+    })
+    KeychaincredentialCreateReturns = typing.TypedDict('KeychaincredentialCreateReturns', {
+            'name':'str',
+            'type':'str',
+            'attributes':'dict[str]',
+            'id':'int',
+    })
+    Options = typing.TypedDict('Options', {
+            'cascade':'bool',
+    })
+    SshKeyPair = typing.TypedDict('SshKeyPair', {
+            'private_key':'str',
+            'public_key':'str',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    KeychainCredentialEntry = typing.TypedDict('KeychainCredentialEntry', {
+            'name':'str',
+            'type':'str',
+            'attributes':'dict[str]',
+            'id':'int',
+    })
+    KeychainCredentialEntry_ = typing.TypedDict('KeychainCredentialEntry_', {
+            'name':'str',
+            'type':'str',
+            'attributes':'dict[str]',
+            'id':'int',
+    })
+    KeychainCredentialEntry__ = typing.TypedDict('KeychainCredentialEntry__', {
+            'name':'str',
+            'type':'str',
+            'attributes':'dict[str]',
+            'id':'int',
+    })
+    KeychainRemoteSshHostKeyScan = typing.TypedDict('KeychainRemoteSshHostKeyScan', {
+            'host':'str',
+            'port':'str',
+            'connect_timeout':'int',
+    })
+    KeychainRemoteSshSemiautomaticSetup = typing.TypedDict('KeychainRemoteSshSemiautomaticSetup', {
+            'name':'str',
+            'url':'str',
+            'token':'str',
+            'admin_username':'str',
+            'password':'str',
+            'otp_token':'str',
+            'username':'str',
+            'private_key':'int',
+            'connect_timeout':'int',
+            'sudo':'bool',
+    })
+    KeychainCredentialEntry___ = typing.TypedDict('KeychainCredentialEntry___', {
+            'name':'str',
+            'type':'str',
+            'attributes':'dict[str]',
+            'id':'int',
+    })
+    PrivateKey = typing.TypedDict('PrivateKey', {
+            'generate_key':'bool',
+            'existing_key_id':'int',
+            'name':'str',
+    })
+    SemiAutomaticSetup = typing.TypedDict('SemiAutomaticSetup', {
+            'url':'str',
+            'token':'str',
+            'admin_username':'str',
+            'password':'str',
+            'otp_token':'str',
+            'username':'str',
+            'connect_timeout':'int',
+            'sudo':'bool',
+    })
+    SetupSshConnection = typing.TypedDict('SetupSshConnection', {
+            'private_key':'PrivateKey',
+            'connection_name':'str',
+            'setup_type':'str',
+            'semi_automatic_setup':'SemiAutomaticSetup',
+            'manual_setup':'dict[str]',
+    })
+    KeychainCredentialEntry____ = typing.TypedDict('KeychainCredentialEntry____', {
+            'name':'str',
+            'type':'str',
+            'attributes':'dict[str]',
+            'id':'int',
+    })
+    KeychainCredentialUpdate = typing.TypedDict('KeychainCredentialUpdate', {
+            'name':'str',
+            'attributes':'dict[str]',
+    })
+    KeychaincredentialUpdateReturns = typing.TypedDict('KeychaincredentialUpdateReturns', {
+            'name':'str',
+            'type':'str',
+            'attributes':'dict[str]',
+            'id':'int',
+    })
+    CredentialResult = typing.TypedDict('CredentialResult', {
+            'title':'str',
+            'unbind_method':'str',
+    })
 
-class KeychainCredentialCreate(typing.TypedDict):
-        name:'str'
-        type:'str'
-        attributes:'dict[str]'
-        ...
-class KeychaincredentialCreateReturns(typing.TypedDict):
-        name:'str'
-        type:'str'
-        attributes:'dict[str]'
-        id:'int'
-        ...
-class Options(typing.TypedDict):
-        cascade:'bool'
-        ...
-class SshKeyPair(typing.TypedDict):
-        private_key:'str'
-        public_key:'str'
-        ...
-class QueryOptionsGetInstance(typing.TypedDict):
-        relationships:'bool'
-        extend:'typing.Optional[str]'
-        extend_context:'typing.Optional[str]'
-        prefix:'typing.Optional[str]'
-        extra:'dict[str]'
-        order_by:'list'
-        select:'list'
-        count:'bool'
-        get:'bool'
-        offset:'int'
-        limit:'int'
-        force_sql_filters:'bool'
-        ...
-class QueryOptions(typing.TypedDict):
-        relationships:'bool'
-        extend:'typing.Optional[str]'
-        extend_context:'typing.Optional[str]'
-        prefix:'typing.Optional[str]'
-        extra:'dict[str]'
-        order_by:'list'
-        select:'list'
-        count:'bool'
-        get:'bool'
-        offset:'int'
-        limit:'int'
-        force_sql_filters:'bool'
-        ...
-class KeychainCredentialEntry(typing.TypedDict):
-        name:'str'
-        type:'str'
-        attributes:'dict[str]'
-        id:'int'
-        ...
-class KeychainRemoteSshHostKeyScan(typing.TypedDict):
-        host:'str'
-        port:'str'
-        connect_timeout:'int'
-        ...
-class KeychainRemoteSshSemiautomaticSetup(typing.TypedDict):
-        name:'str'
-        url:'str'
-        token:'str'
-        admin_username:'str'
-        password:'str'
-        otp_token:'str'
-        username:'str'
-        private_key:'int'
-        connect_timeout:'int'
-        sudo:'bool'
-        ...
-class KeychainCredentialEntry_(typing.TypedDict):
-        name:'str'
-        type:'str'
-        attributes:'dict[str]'
-        id:'int'
-        ...
-class SetupSshConnection(typing.TypedDict):
-        private_key:'PrivateKey'
-        connection_name:'str'
-        setup_type:'str'
-        semi_automatic_setup:'SemiAutomaticSetup'
-        manual_setup:'dict[str]'
-        ...
-class PrivateKey(typing.TypedDict):
-        generate_key:'bool'
-        existing_key_id:'int'
-        name:'str'
-        ...
-class SemiAutomaticSetup(typing.TypedDict):
-        url:'str'
-        token:'str'
-        admin_username:'str'
-        password:'str'
-        otp_token:'str'
-        username:'str'
-        connect_timeout:'int'
-        sudo:'bool'
-        ...
-class KeychainCredentialUpdate(typing.TypedDict):
-        name:'str'
-        attributes:'dict[str]'
-        ...
-class KeychaincredentialUpdateReturns(typing.TypedDict):
-        name:'str'
-        type:'str'
-        attributes:'dict[str]'
-        id:'int'
-        ...
-class CredentialResult(typing.TypedDict):
-        title:'str'
-        unbind_method:'str'
-        ...

@@ -21,6 +21,83 @@ class Bootenv(Namespace):
             successfully_activated
         """
         ...
+    BootenvCreate = typing.TypedDict('BootenvCreate', {
+            'name':'str',
+            'source':'str',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    BootenvEntry = typing.TypedDict('BootenvEntry', {
+            'id':'str',
+            'realname':'str',
+            'name':'str',
+            'active':'str',
+            'activated':'bool',
+            'can_activate':'bool',
+            'mountpoint':'str',
+            'space':'str',
+            'created':'str',
+            'keep':'bool',
+            'rawspace':'int',
+    })
+    BootenvEntry_ = typing.TypedDict('BootenvEntry_', {
+            'id':'str',
+            'realname':'str',
+            'name':'str',
+            'active':'str',
+            'activated':'bool',
+            'can_activate':'bool',
+            'mountpoint':'str',
+            'space':'str',
+            'created':'str',
+            'keep':'bool',
+            'rawspace':'int',
+    })
+    BootenvEntry__ = typing.TypedDict('BootenvEntry__', {
+            'id':'str',
+            'realname':'str',
+            'name':'str',
+            'active':'str',
+            'activated':'bool',
+            'can_activate':'bool',
+            'mountpoint':'str',
+            'space':'str',
+            'created':'str',
+            'keep':'bool',
+            'rawspace':'int',
+    })
+    Attributes = typing.TypedDict('Attributes', {
+            'keep':'bool',
+    })
+    BootenvUpdate = typing.TypedDict('BootenvUpdate', {
+            'name':'str',
+    })
     @typing.overload
     def create(self, 
         bootenv_create:'BootenvCreate'={},
@@ -43,6 +120,83 @@ class Bootenv(Namespace):
             bootenv_name
         """
         ...
+    BootenvCreate = typing.TypedDict('BootenvCreate', {
+            'name':'str',
+            'source':'str',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    BootenvEntry = typing.TypedDict('BootenvEntry', {
+            'id':'str',
+            'realname':'str',
+            'name':'str',
+            'active':'str',
+            'activated':'bool',
+            'can_activate':'bool',
+            'mountpoint':'str',
+            'space':'str',
+            'created':'str',
+            'keep':'bool',
+            'rawspace':'int',
+    })
+    BootenvEntry_ = typing.TypedDict('BootenvEntry_', {
+            'id':'str',
+            'realname':'str',
+            'name':'str',
+            'active':'str',
+            'activated':'bool',
+            'can_activate':'bool',
+            'mountpoint':'str',
+            'space':'str',
+            'created':'str',
+            'keep':'bool',
+            'rawspace':'int',
+    })
+    BootenvEntry__ = typing.TypedDict('BootenvEntry__', {
+            'id':'str',
+            'realname':'str',
+            'name':'str',
+            'active':'str',
+            'activated':'bool',
+            'can_activate':'bool',
+            'mountpoint':'str',
+            'space':'str',
+            'created':'str',
+            'keep':'bool',
+            'rawspace':'int',
+    })
+    Attributes = typing.TypedDict('Attributes', {
+            'keep':'bool',
+    })
+    BootenvUpdate = typing.TypedDict('BootenvUpdate', {
+            'name':'str',
+    })
     @typing.overload
     def delete(self, 
         id:'str',
@@ -60,9 +214,86 @@ class Bootenv(Namespace):
             Will return `true` if `id` is deleted successfully
         """
         ...
+    BootenvCreate = typing.TypedDict('BootenvCreate', {
+            'name':'str',
+            'source':'str',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    BootenvEntry = typing.TypedDict('BootenvEntry', {
+            'id':'str',
+            'realname':'str',
+            'name':'str',
+            'active':'str',
+            'activated':'bool',
+            'can_activate':'bool',
+            'mountpoint':'str',
+            'space':'str',
+            'created':'str',
+            'keep':'bool',
+            'rawspace':'int',
+    })
+    BootenvEntry_ = typing.TypedDict('BootenvEntry_', {
+            'id':'str',
+            'realname':'str',
+            'name':'str',
+            'active':'str',
+            'activated':'bool',
+            'can_activate':'bool',
+            'mountpoint':'str',
+            'space':'str',
+            'created':'str',
+            'keep':'bool',
+            'rawspace':'int',
+    })
+    BootenvEntry__ = typing.TypedDict('BootenvEntry__', {
+            'id':'str',
+            'realname':'str',
+            'name':'str',
+            'active':'str',
+            'activated':'bool',
+            'can_activate':'bool',
+            'mountpoint':'str',
+            'space':'str',
+            'created':'str',
+            'keep':'bool',
+            'rawspace':'int',
+    })
+    Attributes = typing.TypedDict('Attributes', {
+            'keep':'bool',
+    })
+    BootenvUpdate = typing.TypedDict('BootenvUpdate', {
+            'name':'str',
+    })
     @typing.overload
     def get_instance(self, 
-        id:'str|int|bool|dict[str]|list',
+        id:'typing.Union[str, int, bool, dict[str], list]',
         query_options_get_instance:'QueryOptionsGetInstance'={},
     /) -> None: 
         """
@@ -80,11 +311,88 @@ class Bootenv(Namespace):
         -------
         """
         ...
+    BootenvCreate = typing.TypedDict('BootenvCreate', {
+            'name':'str',
+            'source':'str',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    BootenvEntry = typing.TypedDict('BootenvEntry', {
+            'id':'str',
+            'realname':'str',
+            'name':'str',
+            'active':'str',
+            'activated':'bool',
+            'can_activate':'bool',
+            'mountpoint':'str',
+            'space':'str',
+            'created':'str',
+            'keep':'bool',
+            'rawspace':'int',
+    })
+    BootenvEntry_ = typing.TypedDict('BootenvEntry_', {
+            'id':'str',
+            'realname':'str',
+            'name':'str',
+            'active':'str',
+            'activated':'bool',
+            'can_activate':'bool',
+            'mountpoint':'str',
+            'space':'str',
+            'created':'str',
+            'keep':'bool',
+            'rawspace':'int',
+    })
+    BootenvEntry__ = typing.TypedDict('BootenvEntry__', {
+            'id':'str',
+            'realname':'str',
+            'name':'str',
+            'active':'str',
+            'activated':'bool',
+            'can_activate':'bool',
+            'mountpoint':'str',
+            'space':'str',
+            'created':'str',
+            'keep':'bool',
+            'rawspace':'int',
+    })
+    Attributes = typing.TypedDict('Attributes', {
+            'keep':'bool',
+    })
+    BootenvUpdate = typing.TypedDict('BootenvUpdate', {
+            'name':'str',
+    })
     @typing.overload
     def query(self, 
         query_filters:'list[list]'=[],
         query_options:'QueryOptions'={},
-    /) -> 'list[BootenvEntry]|BootenvEntry|int|BootenvEntry': 
+    /) -> 'typing.Union[list[BootenvEntry], ForwardRef(BootenvEntry_), int, ForwardRef(BootenvEntry__)]': 
         """
         Query all Boot Environments with `query-filters` and `query-options`.
 
@@ -96,16 +404,87 @@ class Bootenv(Namespace):
             query-options
         Returns
         -------
-        list[BootenvEntry]:
-            
-        BootenvEntry:
-            
-        int:
-            
-        BootenvEntry:
+        typing.Union[list[BootenvEntry], ForwardRef(BootenvEntry_), int, ForwardRef(BootenvEntry__)]:
             
         """
         ...
+    BootenvCreate = typing.TypedDict('BootenvCreate', {
+            'name':'str',
+            'source':'str',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    BootenvEntry = typing.TypedDict('BootenvEntry', {
+            'id':'str',
+            'realname':'str',
+            'name':'str',
+            'active':'str',
+            'activated':'bool',
+            'can_activate':'bool',
+            'mountpoint':'str',
+            'space':'str',
+            'created':'str',
+            'keep':'bool',
+            'rawspace':'int',
+    })
+    BootenvEntry_ = typing.TypedDict('BootenvEntry_', {
+            'id':'str',
+            'realname':'str',
+            'name':'str',
+            'active':'str',
+            'activated':'bool',
+            'can_activate':'bool',
+            'mountpoint':'str',
+            'space':'str',
+            'created':'str',
+            'keep':'bool',
+            'rawspace':'int',
+    })
+    BootenvEntry__ = typing.TypedDict('BootenvEntry__', {
+            'id':'str',
+            'realname':'str',
+            'name':'str',
+            'active':'str',
+            'activated':'bool',
+            'can_activate':'bool',
+            'mountpoint':'str',
+            'space':'str',
+            'created':'str',
+            'keep':'bool',
+            'rawspace':'int',
+    })
+    Attributes = typing.TypedDict('Attributes', {
+            'keep':'bool',
+    })
+    BootenvUpdate = typing.TypedDict('BootenvUpdate', {
+            'name':'str',
+    })
     @typing.overload
     def set_attribute(self, 
         id:'str',
@@ -128,6 +507,83 @@ class Bootenv(Namespace):
             successfully_set_attribute
         """
         ...
+    BootenvCreate = typing.TypedDict('BootenvCreate', {
+            'name':'str',
+            'source':'str',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    BootenvEntry = typing.TypedDict('BootenvEntry', {
+            'id':'str',
+            'realname':'str',
+            'name':'str',
+            'active':'str',
+            'activated':'bool',
+            'can_activate':'bool',
+            'mountpoint':'str',
+            'space':'str',
+            'created':'str',
+            'keep':'bool',
+            'rawspace':'int',
+    })
+    BootenvEntry_ = typing.TypedDict('BootenvEntry_', {
+            'id':'str',
+            'realname':'str',
+            'name':'str',
+            'active':'str',
+            'activated':'bool',
+            'can_activate':'bool',
+            'mountpoint':'str',
+            'space':'str',
+            'created':'str',
+            'keep':'bool',
+            'rawspace':'int',
+    })
+    BootenvEntry__ = typing.TypedDict('BootenvEntry__', {
+            'id':'str',
+            'realname':'str',
+            'name':'str',
+            'active':'str',
+            'activated':'bool',
+            'can_activate':'bool',
+            'mountpoint':'str',
+            'space':'str',
+            'created':'str',
+            'keep':'bool',
+            'rawspace':'int',
+    })
+    Attributes = typing.TypedDict('Attributes', {
+            'keep':'bool',
+    })
+    BootenvUpdate = typing.TypedDict('BootenvUpdate', {
+            'name':'str',
+    })
     @typing.overload
     def update(self, 
         id:'str',
@@ -149,55 +605,81 @@ class Bootenv(Namespace):
             bootenv_name
         """
         ...
+    BootenvCreate = typing.TypedDict('BootenvCreate', {
+            'name':'str',
+            'source':'str',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    BootenvEntry = typing.TypedDict('BootenvEntry', {
+            'id':'str',
+            'realname':'str',
+            'name':'str',
+            'active':'str',
+            'activated':'bool',
+            'can_activate':'bool',
+            'mountpoint':'str',
+            'space':'str',
+            'created':'str',
+            'keep':'bool',
+            'rawspace':'int',
+    })
+    BootenvEntry_ = typing.TypedDict('BootenvEntry_', {
+            'id':'str',
+            'realname':'str',
+            'name':'str',
+            'active':'str',
+            'activated':'bool',
+            'can_activate':'bool',
+            'mountpoint':'str',
+            'space':'str',
+            'created':'str',
+            'keep':'bool',
+            'rawspace':'int',
+    })
+    BootenvEntry__ = typing.TypedDict('BootenvEntry__', {
+            'id':'str',
+            'realname':'str',
+            'name':'str',
+            'active':'str',
+            'activated':'bool',
+            'can_activate':'bool',
+            'mountpoint':'str',
+            'space':'str',
+            'created':'str',
+            'keep':'bool',
+            'rawspace':'int',
+    })
+    Attributes = typing.TypedDict('Attributes', {
+            'keep':'bool',
+    })
+    BootenvUpdate = typing.TypedDict('BootenvUpdate', {
+            'name':'str',
+    })
 
-class BootenvCreate(typing.TypedDict):
-        name:'str'
-        source:'str'
-        ...
-class QueryOptionsGetInstance(typing.TypedDict):
-        relationships:'bool'
-        extend:'typing.Optional[str]'
-        extend_context:'typing.Optional[str]'
-        prefix:'typing.Optional[str]'
-        extra:'dict[str]'
-        order_by:'list'
-        select:'list'
-        count:'bool'
-        get:'bool'
-        offset:'int'
-        limit:'int'
-        force_sql_filters:'bool'
-        ...
-class QueryOptions(typing.TypedDict):
-        relationships:'bool'
-        extend:'typing.Optional[str]'
-        extend_context:'typing.Optional[str]'
-        prefix:'typing.Optional[str]'
-        extra:'dict[str]'
-        order_by:'list'
-        select:'list'
-        count:'bool'
-        get:'bool'
-        offset:'int'
-        limit:'int'
-        force_sql_filters:'bool'
-        ...
-class BootenvEntry(typing.TypedDict):
-        id:'str'
-        realname:'str'
-        name:'str'
-        active:'str'
-        activated:'bool'
-        can_activate:'bool'
-        mountpoint:'str'
-        space:'str'
-        created:'str'
-        keep:'bool'
-        rawspace:'int'
-        ...
-class Attributes(typing.TypedDict):
-        keep:'bool'
-        ...
-class BootenvUpdate(typing.TypedDict):
-        name:'str'
-        ...

@@ -20,9 +20,9 @@ class NetworkGeneral(Namespace):
             network_summary
         """
         ...
+    NetworkSummary = typing.TypedDict('NetworkSummary', {
+            'ips':'dict[str]',
+            'default_routes':'list[str]',
+            'nameservers':'list[str]',
+    })
 
-class NetworkSummary(typing.TypedDict):
-        ips:'dict[str]'
-        default_routes:'list[str]'
-        nameservers:'list[str]'
-        ...

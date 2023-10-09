@@ -6,7 +6,7 @@ class Service(Namespace):
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload
     def get_instance(self, 
-        id:'str|int|bool|dict[str]|list',
+        id:'typing.Union[str, int, bool, dict[str], list]',
         query_options_get_instance:'QueryOptionsGetInstance'={},
     /) -> None: 
         """
@@ -24,11 +24,79 @@ class Service(Namespace):
         -------
         """
         ...
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    ServiceEntry = typing.TypedDict('ServiceEntry', {
+            'id':'int',
+            'service':'str',
+            'enable':'bool',
+            'state':'str',
+            'pids':'list[int]',
+    })
+    ServiceEntry_ = typing.TypedDict('ServiceEntry_', {
+            'id':'int',
+            'service':'str',
+            'enable':'bool',
+            'state':'str',
+            'pids':'list[int]',
+    })
+    ServiceEntry__ = typing.TypedDict('ServiceEntry__', {
+            'id':'int',
+            'service':'str',
+            'enable':'bool',
+            'state':'str',
+            'pids':'list[int]',
+    })
+    ServiceControl = typing.TypedDict('ServiceControl', {
+            'ha_propagate':'bool',
+            'silent':'bool',
+    })
+    ServiceControl_ = typing.TypedDict('ServiceControl_', {
+            'ha_propagate':'bool',
+            'silent':'bool',
+    })
+    ServiceControl__ = typing.TypedDict('ServiceControl__', {
+            'ha_propagate':'bool',
+            'silent':'bool',
+    })
+    ServiceControl___ = typing.TypedDict('ServiceControl___', {
+            'ha_propagate':'bool',
+            'silent':'bool',
+    })
+    ServiceUpdate = typing.TypedDict('ServiceUpdate', {
+            'enable':'bool',
+    })
     @typing.overload
     def query(self, 
         query_filters:'list[list]'=[],
         query_options:'QueryOptions'={},
-    /) -> 'list[ServiceEntry]|ServiceEntry|int|ServiceEntry': 
+    /) -> 'typing.Union[list[ServiceEntry], ForwardRef(ServiceEntry_), int, ForwardRef(ServiceEntry__)]': 
         """
         Query all system services with `query-filters` and `query-options`.
         
@@ -44,16 +112,78 @@ class Service(Namespace):
             query-options
         Returns
         -------
-        list[ServiceEntry]:
-            
-        ServiceEntry:
-            
-        int:
-            
-        ServiceEntry:
+        typing.Union[list[ServiceEntry], ForwardRef(ServiceEntry_), int, ForwardRef(ServiceEntry__)]:
             
         """
         ...
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    ServiceEntry = typing.TypedDict('ServiceEntry', {
+            'id':'int',
+            'service':'str',
+            'enable':'bool',
+            'state':'str',
+            'pids':'list[int]',
+    })
+    ServiceEntry_ = typing.TypedDict('ServiceEntry_', {
+            'id':'int',
+            'service':'str',
+            'enable':'bool',
+            'state':'str',
+            'pids':'list[int]',
+    })
+    ServiceEntry__ = typing.TypedDict('ServiceEntry__', {
+            'id':'int',
+            'service':'str',
+            'enable':'bool',
+            'state':'str',
+            'pids':'list[int]',
+    })
+    ServiceControl = typing.TypedDict('ServiceControl', {
+            'ha_propagate':'bool',
+            'silent':'bool',
+    })
+    ServiceControl_ = typing.TypedDict('ServiceControl_', {
+            'ha_propagate':'bool',
+            'silent':'bool',
+    })
+    ServiceControl__ = typing.TypedDict('ServiceControl__', {
+            'ha_propagate':'bool',
+            'silent':'bool',
+    })
+    ServiceControl___ = typing.TypedDict('ServiceControl___', {
+            'ha_propagate':'bool',
+            'silent':'bool',
+    })
+    ServiceUpdate = typing.TypedDict('ServiceUpdate', {
+            'enable':'bool',
+    })
     @typing.overload
     def reload(self, 
         service:'str',
@@ -74,10 +204,78 @@ class Service(Namespace):
             service_reloaded
         """
         ...
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    ServiceEntry = typing.TypedDict('ServiceEntry', {
+            'id':'int',
+            'service':'str',
+            'enable':'bool',
+            'state':'str',
+            'pids':'list[int]',
+    })
+    ServiceEntry_ = typing.TypedDict('ServiceEntry_', {
+            'id':'int',
+            'service':'str',
+            'enable':'bool',
+            'state':'str',
+            'pids':'list[int]',
+    })
+    ServiceEntry__ = typing.TypedDict('ServiceEntry__', {
+            'id':'int',
+            'service':'str',
+            'enable':'bool',
+            'state':'str',
+            'pids':'list[int]',
+    })
+    ServiceControl = typing.TypedDict('ServiceControl', {
+            'ha_propagate':'bool',
+            'silent':'bool',
+    })
+    ServiceControl_ = typing.TypedDict('ServiceControl_', {
+            'ha_propagate':'bool',
+            'silent':'bool',
+    })
+    ServiceControl__ = typing.TypedDict('ServiceControl__', {
+            'ha_propagate':'bool',
+            'silent':'bool',
+    })
+    ServiceControl___ = typing.TypedDict('ServiceControl___', {
+            'ha_propagate':'bool',
+            'silent':'bool',
+    })
+    ServiceUpdate = typing.TypedDict('ServiceUpdate', {
+            'enable':'bool',
+    })
     @typing.overload
     def restart(self, 
         service:'str',
-        service_control:'ServiceControl'={},
+        service_control:'ServiceControl_'={},
     /) -> 'bool': 
         """
         Restart the service specified by `service`.
@@ -94,10 +292,78 @@ class Service(Namespace):
             service_restarted
         """
         ...
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    ServiceEntry = typing.TypedDict('ServiceEntry', {
+            'id':'int',
+            'service':'str',
+            'enable':'bool',
+            'state':'str',
+            'pids':'list[int]',
+    })
+    ServiceEntry_ = typing.TypedDict('ServiceEntry_', {
+            'id':'int',
+            'service':'str',
+            'enable':'bool',
+            'state':'str',
+            'pids':'list[int]',
+    })
+    ServiceEntry__ = typing.TypedDict('ServiceEntry__', {
+            'id':'int',
+            'service':'str',
+            'enable':'bool',
+            'state':'str',
+            'pids':'list[int]',
+    })
+    ServiceControl = typing.TypedDict('ServiceControl', {
+            'ha_propagate':'bool',
+            'silent':'bool',
+    })
+    ServiceControl_ = typing.TypedDict('ServiceControl_', {
+            'ha_propagate':'bool',
+            'silent':'bool',
+    })
+    ServiceControl__ = typing.TypedDict('ServiceControl__', {
+            'ha_propagate':'bool',
+            'silent':'bool',
+    })
+    ServiceControl___ = typing.TypedDict('ServiceControl___', {
+            'ha_propagate':'bool',
+            'silent':'bool',
+    })
+    ServiceUpdate = typing.TypedDict('ServiceUpdate', {
+            'enable':'bool',
+    })
     @typing.overload
     def start(self, 
         service:'str',
-        service_control:'ServiceControl'={},
+        service_control:'ServiceControl__'={},
     /) -> 'bool': 
         """
         Start the service specified by `service`.
@@ -117,6 +383,74 @@ class Service(Namespace):
             started_service
         """
         ...
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    ServiceEntry = typing.TypedDict('ServiceEntry', {
+            'id':'int',
+            'service':'str',
+            'enable':'bool',
+            'state':'str',
+            'pids':'list[int]',
+    })
+    ServiceEntry_ = typing.TypedDict('ServiceEntry_', {
+            'id':'int',
+            'service':'str',
+            'enable':'bool',
+            'state':'str',
+            'pids':'list[int]',
+    })
+    ServiceEntry__ = typing.TypedDict('ServiceEntry__', {
+            'id':'int',
+            'service':'str',
+            'enable':'bool',
+            'state':'str',
+            'pids':'list[int]',
+    })
+    ServiceControl = typing.TypedDict('ServiceControl', {
+            'ha_propagate':'bool',
+            'silent':'bool',
+    })
+    ServiceControl_ = typing.TypedDict('ServiceControl_', {
+            'ha_propagate':'bool',
+            'silent':'bool',
+    })
+    ServiceControl__ = typing.TypedDict('ServiceControl__', {
+            'ha_propagate':'bool',
+            'silent':'bool',
+    })
+    ServiceControl___ = typing.TypedDict('ServiceControl___', {
+            'ha_propagate':'bool',
+            'silent':'bool',
+    })
+    ServiceUpdate = typing.TypedDict('ServiceUpdate', {
+            'enable':'bool',
+    })
     @typing.overload
     def started(self, 
         service:'str',
@@ -134,6 +468,74 @@ class Service(Namespace):
             Will return `true` if service is running
         """
         ...
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    ServiceEntry = typing.TypedDict('ServiceEntry', {
+            'id':'int',
+            'service':'str',
+            'enable':'bool',
+            'state':'str',
+            'pids':'list[int]',
+    })
+    ServiceEntry_ = typing.TypedDict('ServiceEntry_', {
+            'id':'int',
+            'service':'str',
+            'enable':'bool',
+            'state':'str',
+            'pids':'list[int]',
+    })
+    ServiceEntry__ = typing.TypedDict('ServiceEntry__', {
+            'id':'int',
+            'service':'str',
+            'enable':'bool',
+            'state':'str',
+            'pids':'list[int]',
+    })
+    ServiceControl = typing.TypedDict('ServiceControl', {
+            'ha_propagate':'bool',
+            'silent':'bool',
+    })
+    ServiceControl_ = typing.TypedDict('ServiceControl_', {
+            'ha_propagate':'bool',
+            'silent':'bool',
+    })
+    ServiceControl__ = typing.TypedDict('ServiceControl__', {
+            'ha_propagate':'bool',
+            'silent':'bool',
+    })
+    ServiceControl___ = typing.TypedDict('ServiceControl___', {
+            'ha_propagate':'bool',
+            'silent':'bool',
+    })
+    ServiceUpdate = typing.TypedDict('ServiceUpdate', {
+            'enable':'bool',
+    })
     @typing.overload
     def started_or_enabled(self, 
         service:'str',
@@ -151,10 +553,78 @@ class Service(Namespace):
             Will return `true` if service is started or enabled to start automatically.
         """
         ...
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    ServiceEntry = typing.TypedDict('ServiceEntry', {
+            'id':'int',
+            'service':'str',
+            'enable':'bool',
+            'state':'str',
+            'pids':'list[int]',
+    })
+    ServiceEntry_ = typing.TypedDict('ServiceEntry_', {
+            'id':'int',
+            'service':'str',
+            'enable':'bool',
+            'state':'str',
+            'pids':'list[int]',
+    })
+    ServiceEntry__ = typing.TypedDict('ServiceEntry__', {
+            'id':'int',
+            'service':'str',
+            'enable':'bool',
+            'state':'str',
+            'pids':'list[int]',
+    })
+    ServiceControl = typing.TypedDict('ServiceControl', {
+            'ha_propagate':'bool',
+            'silent':'bool',
+    })
+    ServiceControl_ = typing.TypedDict('ServiceControl_', {
+            'ha_propagate':'bool',
+            'silent':'bool',
+    })
+    ServiceControl__ = typing.TypedDict('ServiceControl__', {
+            'ha_propagate':'bool',
+            'silent':'bool',
+    })
+    ServiceControl___ = typing.TypedDict('ServiceControl___', {
+            'ha_propagate':'bool',
+            'silent':'bool',
+    })
+    ServiceUpdate = typing.TypedDict('ServiceUpdate', {
+            'enable':'bool',
+    })
     @typing.overload
     def stop(self, 
         service:'str',
-        service_control:'ServiceControl'={},
+        service_control:'ServiceControl___'={},
     /) -> 'bool': 
         """
         Stop the service specified by `service`.
@@ -171,6 +641,74 @@ class Service(Namespace):
             Will return `true` if service successfully stopped
         """
         ...
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    ServiceEntry = typing.TypedDict('ServiceEntry', {
+            'id':'int',
+            'service':'str',
+            'enable':'bool',
+            'state':'str',
+            'pids':'list[int]',
+    })
+    ServiceEntry_ = typing.TypedDict('ServiceEntry_', {
+            'id':'int',
+            'service':'str',
+            'enable':'bool',
+            'state':'str',
+            'pids':'list[int]',
+    })
+    ServiceEntry__ = typing.TypedDict('ServiceEntry__', {
+            'id':'int',
+            'service':'str',
+            'enable':'bool',
+            'state':'str',
+            'pids':'list[int]',
+    })
+    ServiceControl = typing.TypedDict('ServiceControl', {
+            'ha_propagate':'bool',
+            'silent':'bool',
+    })
+    ServiceControl_ = typing.TypedDict('ServiceControl_', {
+            'ha_propagate':'bool',
+            'silent':'bool',
+    })
+    ServiceControl__ = typing.TypedDict('ServiceControl__', {
+            'ha_propagate':'bool',
+            'silent':'bool',
+    })
+    ServiceControl___ = typing.TypedDict('ServiceControl___', {
+            'ha_propagate':'bool',
+            'silent':'bool',
+    })
+    ServiceUpdate = typing.TypedDict('ServiceUpdate', {
+            'enable':'bool',
+    })
     @typing.overload
     def terminate_process(self, 
         pid:'int',
@@ -193,6 +731,74 @@ class Service(Namespace):
             `true` is process has been successfully terminated with `TERM` and `false` if we had to use `KILL`
         """
         ...
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    ServiceEntry = typing.TypedDict('ServiceEntry', {
+            'id':'int',
+            'service':'str',
+            'enable':'bool',
+            'state':'str',
+            'pids':'list[int]',
+    })
+    ServiceEntry_ = typing.TypedDict('ServiceEntry_', {
+            'id':'int',
+            'service':'str',
+            'enable':'bool',
+            'state':'str',
+            'pids':'list[int]',
+    })
+    ServiceEntry__ = typing.TypedDict('ServiceEntry__', {
+            'id':'int',
+            'service':'str',
+            'enable':'bool',
+            'state':'str',
+            'pids':'list[int]',
+    })
+    ServiceControl = typing.TypedDict('ServiceControl', {
+            'ha_propagate':'bool',
+            'silent':'bool',
+    })
+    ServiceControl_ = typing.TypedDict('ServiceControl_', {
+            'ha_propagate':'bool',
+            'silent':'bool',
+    })
+    ServiceControl__ = typing.TypedDict('ServiceControl__', {
+            'ha_propagate':'bool',
+            'silent':'bool',
+    })
+    ServiceControl___ = typing.TypedDict('ServiceControl___', {
+            'ha_propagate':'bool',
+            'silent':'bool',
+    })
+    ServiceUpdate = typing.TypedDict('ServiceUpdate', {
+            'enable':'bool',
+    })
     @typing.overload
     def update(self, 
         id_or_name:'str',
@@ -216,46 +822,72 @@ class Service(Namespace):
             service_primary_key
         """
         ...
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    ServiceEntry = typing.TypedDict('ServiceEntry', {
+            'id':'int',
+            'service':'str',
+            'enable':'bool',
+            'state':'str',
+            'pids':'list[int]',
+    })
+    ServiceEntry_ = typing.TypedDict('ServiceEntry_', {
+            'id':'int',
+            'service':'str',
+            'enable':'bool',
+            'state':'str',
+            'pids':'list[int]',
+    })
+    ServiceEntry__ = typing.TypedDict('ServiceEntry__', {
+            'id':'int',
+            'service':'str',
+            'enable':'bool',
+            'state':'str',
+            'pids':'list[int]',
+    })
+    ServiceControl = typing.TypedDict('ServiceControl', {
+            'ha_propagate':'bool',
+            'silent':'bool',
+    })
+    ServiceControl_ = typing.TypedDict('ServiceControl_', {
+            'ha_propagate':'bool',
+            'silent':'bool',
+    })
+    ServiceControl__ = typing.TypedDict('ServiceControl__', {
+            'ha_propagate':'bool',
+            'silent':'bool',
+    })
+    ServiceControl___ = typing.TypedDict('ServiceControl___', {
+            'ha_propagate':'bool',
+            'silent':'bool',
+    })
+    ServiceUpdate = typing.TypedDict('ServiceUpdate', {
+            'enable':'bool',
+    })
 
-class QueryOptionsGetInstance(typing.TypedDict):
-        relationships:'bool'
-        extend:'typing.Optional[str]'
-        extend_context:'typing.Optional[str]'
-        prefix:'typing.Optional[str]'
-        extra:'dict[str]'
-        order_by:'list'
-        select:'list'
-        count:'bool'
-        get:'bool'
-        offset:'int'
-        limit:'int'
-        force_sql_filters:'bool'
-        ...
-class QueryOptions(typing.TypedDict):
-        relationships:'bool'
-        extend:'typing.Optional[str]'
-        extend_context:'typing.Optional[str]'
-        prefix:'typing.Optional[str]'
-        extra:'dict[str]'
-        order_by:'list'
-        select:'list'
-        count:'bool'
-        get:'bool'
-        offset:'int'
-        limit:'int'
-        force_sql_filters:'bool'
-        ...
-class ServiceEntry(typing.TypedDict):
-        id:'int'
-        service:'str'
-        enable:'bool'
-        state:'str'
-        pids:'list[int]'
-        ...
-class ServiceControl(typing.TypedDict):
-        ha_propagate:'bool'
-        silent:'bool'
-        ...
-class ServiceUpdate(typing.TypedDict):
-        enable:'bool'
-        ...

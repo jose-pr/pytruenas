@@ -26,6 +26,10 @@ class Directoryservices(Namespace):
         -------
         """
         ...
+    DirectoryServicesStates = typing.TypedDict('DirectoryServicesStates', {
+            'activedirectory':'str',
+            'ldap':'str',
+    })
     @typing.overload
     def get_state(self, 
     /) -> 'DirectoryServicesStates': 
@@ -49,8 +53,8 @@ class Directoryservices(Namespace):
             directory_services_states
         """
         ...
+    DirectoryServicesStates = typing.TypedDict('DirectoryServicesStates', {
+            'activedirectory':'str',
+            'ldap':'str',
+    })
 
-class DirectoryServicesStates(typing.TypedDict):
-        activedirectory:'str'
-        ldap:'str'
-        ...

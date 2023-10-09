@@ -25,6 +25,74 @@ class Staticroute(Namespace):
             staticroute_create_returns
         """
         ...
+    StaticrouteCreate = typing.TypedDict('StaticrouteCreate', {
+            'destination':'str',
+            'gateway':'str',
+            'description':'str',
+    })
+    StaticrouteCreateReturns = typing.TypedDict('StaticrouteCreateReturns', {
+            'destination':'str',
+            'gateway':'str',
+            'description':'str',
+            'id':'int',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    StaticrouteEntry = typing.TypedDict('StaticrouteEntry', {
+            'destination':'str',
+            'gateway':'str',
+            'description':'str',
+            'id':'int',
+    })
+    StaticrouteEntry_ = typing.TypedDict('StaticrouteEntry_', {
+            'destination':'str',
+            'gateway':'str',
+            'description':'str',
+            'id':'int',
+    })
+    StaticrouteEntry__ = typing.TypedDict('StaticrouteEntry__', {
+            'destination':'str',
+            'gateway':'str',
+            'description':'str',
+            'id':'int',
+    })
+    StaticrouteUpdate = typing.TypedDict('StaticrouteUpdate', {
+            'destination':'str',
+            'gateway':'str',
+            'description':'str',
+    })
+    StaticrouteUpdateReturns = typing.TypedDict('StaticrouteUpdateReturns', {
+            'destination':'str',
+            'gateway':'str',
+            'description':'str',
+            'id':'int',
+    })
     @typing.overload
     def delete(self, 
         id:'int',
@@ -42,9 +110,77 @@ class Staticroute(Namespace):
             Will return `true` if `id` is deleted successfully
         """
         ...
+    StaticrouteCreate = typing.TypedDict('StaticrouteCreate', {
+            'destination':'str',
+            'gateway':'str',
+            'description':'str',
+    })
+    StaticrouteCreateReturns = typing.TypedDict('StaticrouteCreateReturns', {
+            'destination':'str',
+            'gateway':'str',
+            'description':'str',
+            'id':'int',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    StaticrouteEntry = typing.TypedDict('StaticrouteEntry', {
+            'destination':'str',
+            'gateway':'str',
+            'description':'str',
+            'id':'int',
+    })
+    StaticrouteEntry_ = typing.TypedDict('StaticrouteEntry_', {
+            'destination':'str',
+            'gateway':'str',
+            'description':'str',
+            'id':'int',
+    })
+    StaticrouteEntry__ = typing.TypedDict('StaticrouteEntry__', {
+            'destination':'str',
+            'gateway':'str',
+            'description':'str',
+            'id':'int',
+    })
+    StaticrouteUpdate = typing.TypedDict('StaticrouteUpdate', {
+            'destination':'str',
+            'gateway':'str',
+            'description':'str',
+    })
+    StaticrouteUpdateReturns = typing.TypedDict('StaticrouteUpdateReturns', {
+            'destination':'str',
+            'gateway':'str',
+            'description':'str',
+            'id':'int',
+    })
     @typing.overload
     def get_instance(self, 
-        id:'str|int|bool|dict[str]|list',
+        id:'typing.Union[str, int, bool, dict[str], list]',
         query_options_get_instance:'QueryOptionsGetInstance'={},
     /) -> None: 
         """
@@ -62,11 +198,79 @@ class Staticroute(Namespace):
         -------
         """
         ...
+    StaticrouteCreate = typing.TypedDict('StaticrouteCreate', {
+            'destination':'str',
+            'gateway':'str',
+            'description':'str',
+    })
+    StaticrouteCreateReturns = typing.TypedDict('StaticrouteCreateReturns', {
+            'destination':'str',
+            'gateway':'str',
+            'description':'str',
+            'id':'int',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    StaticrouteEntry = typing.TypedDict('StaticrouteEntry', {
+            'destination':'str',
+            'gateway':'str',
+            'description':'str',
+            'id':'int',
+    })
+    StaticrouteEntry_ = typing.TypedDict('StaticrouteEntry_', {
+            'destination':'str',
+            'gateway':'str',
+            'description':'str',
+            'id':'int',
+    })
+    StaticrouteEntry__ = typing.TypedDict('StaticrouteEntry__', {
+            'destination':'str',
+            'gateway':'str',
+            'description':'str',
+            'id':'int',
+    })
+    StaticrouteUpdate = typing.TypedDict('StaticrouteUpdate', {
+            'destination':'str',
+            'gateway':'str',
+            'description':'str',
+    })
+    StaticrouteUpdateReturns = typing.TypedDict('StaticrouteUpdateReturns', {
+            'destination':'str',
+            'gateway':'str',
+            'description':'str',
+            'id':'int',
+    })
     @typing.overload
     def query(self, 
         query_filters:'list[list]'=[],
         query_options:'QueryOptions'={},
-    /) -> 'list[StaticrouteEntry]|StaticrouteEntry|int|StaticrouteEntry': 
+    /) -> 'typing.Union[list[StaticrouteEntry], ForwardRef(StaticrouteEntry_), int, ForwardRef(StaticrouteEntry__)]': 
         """
         
 
@@ -78,16 +282,78 @@ class Staticroute(Namespace):
             query-options
         Returns
         -------
-        list[StaticrouteEntry]:
-            
-        StaticrouteEntry:
-            
-        int:
-            
-        StaticrouteEntry:
+        typing.Union[list[StaticrouteEntry], ForwardRef(StaticrouteEntry_), int, ForwardRef(StaticrouteEntry__)]:
             
         """
         ...
+    StaticrouteCreate = typing.TypedDict('StaticrouteCreate', {
+            'destination':'str',
+            'gateway':'str',
+            'description':'str',
+    })
+    StaticrouteCreateReturns = typing.TypedDict('StaticrouteCreateReturns', {
+            'destination':'str',
+            'gateway':'str',
+            'description':'str',
+            'id':'int',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    StaticrouteEntry = typing.TypedDict('StaticrouteEntry', {
+            'destination':'str',
+            'gateway':'str',
+            'description':'str',
+            'id':'int',
+    })
+    StaticrouteEntry_ = typing.TypedDict('StaticrouteEntry_', {
+            'destination':'str',
+            'gateway':'str',
+            'description':'str',
+            'id':'int',
+    })
+    StaticrouteEntry__ = typing.TypedDict('StaticrouteEntry__', {
+            'destination':'str',
+            'gateway':'str',
+            'description':'str',
+            'id':'int',
+    })
+    StaticrouteUpdate = typing.TypedDict('StaticrouteUpdate', {
+            'destination':'str',
+            'gateway':'str',
+            'description':'str',
+    })
+    StaticrouteUpdateReturns = typing.TypedDict('StaticrouteUpdateReturns', {
+            'destination':'str',
+            'gateway':'str',
+            'description':'str',
+            'id':'int',
+    })
     @typing.overload
     def update(self, 
         id:'int',
@@ -109,60 +375,72 @@ class Staticroute(Namespace):
             staticroute_update_returns
         """
         ...
+    StaticrouteCreate = typing.TypedDict('StaticrouteCreate', {
+            'destination':'str',
+            'gateway':'str',
+            'description':'str',
+    })
+    StaticrouteCreateReturns = typing.TypedDict('StaticrouteCreateReturns', {
+            'destination':'str',
+            'gateway':'str',
+            'description':'str',
+            'id':'int',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    StaticrouteEntry = typing.TypedDict('StaticrouteEntry', {
+            'destination':'str',
+            'gateway':'str',
+            'description':'str',
+            'id':'int',
+    })
+    StaticrouteEntry_ = typing.TypedDict('StaticrouteEntry_', {
+            'destination':'str',
+            'gateway':'str',
+            'description':'str',
+            'id':'int',
+    })
+    StaticrouteEntry__ = typing.TypedDict('StaticrouteEntry__', {
+            'destination':'str',
+            'gateway':'str',
+            'description':'str',
+            'id':'int',
+    })
+    StaticrouteUpdate = typing.TypedDict('StaticrouteUpdate', {
+            'destination':'str',
+            'gateway':'str',
+            'description':'str',
+    })
+    StaticrouteUpdateReturns = typing.TypedDict('StaticrouteUpdateReturns', {
+            'destination':'str',
+            'gateway':'str',
+            'description':'str',
+            'id':'int',
+    })
 
-class StaticrouteCreate(typing.TypedDict):
-        destination:'str'
-        gateway:'str'
-        description:'str'
-        ...
-class StaticrouteCreateReturns(typing.TypedDict):
-        destination:'str'
-        gateway:'str'
-        description:'str'
-        id:'int'
-        ...
-class QueryOptionsGetInstance(typing.TypedDict):
-        relationships:'bool'
-        extend:'typing.Optional[str]'
-        extend_context:'typing.Optional[str]'
-        prefix:'typing.Optional[str]'
-        extra:'dict[str]'
-        order_by:'list'
-        select:'list'
-        count:'bool'
-        get:'bool'
-        offset:'int'
-        limit:'int'
-        force_sql_filters:'bool'
-        ...
-class QueryOptions(typing.TypedDict):
-        relationships:'bool'
-        extend:'typing.Optional[str]'
-        extend_context:'typing.Optional[str]'
-        prefix:'typing.Optional[str]'
-        extra:'dict[str]'
-        order_by:'list'
-        select:'list'
-        count:'bool'
-        get:'bool'
-        offset:'int'
-        limit:'int'
-        force_sql_filters:'bool'
-        ...
-class StaticrouteEntry(typing.TypedDict):
-        destination:'str'
-        gateway:'str'
-        description:'str'
-        id:'int'
-        ...
-class StaticrouteUpdate(typing.TypedDict):
-        destination:'str'
-        gateway:'str'
-        description:'str'
-        ...
-class StaticrouteUpdateReturns(typing.TypedDict):
-        destination:'str'
-        gateway:'str'
-        description:'str'
-        id:'int'
-        ...

@@ -18,6 +18,63 @@ class CtdbGeneral(Namespace):
             status
         """
         ...
+    CtdbIps = typing.TypedDict('CtdbIps', {
+            'all_nodes':'bool',
+    })
+    CtdbInterfaceInfo = typing.TypedDict('CtdbInterfaceInfo', {
+            'name':'str',
+            'active':'bool',
+            'available':'bool',
+    })
+    CtdbPublicIp = typing.TypedDict('CtdbPublicIp', {
+            'public_ip':'str',
+            'pnn':'int',
+            'interfaces':'list[CtdbInterfaceInfo]',
+    })
+    CtdbNode = typing.TypedDict('CtdbNode', {
+            'pnn':'int',
+            'address':'str',
+            'address_type':'str',
+            'enabled':'bool',
+            'this_node':'bool',
+    })
+    CtdbStatus = typing.TypedDict('CtdbStatus', {
+            'all_nodes':'bool',
+    })
+    Address = typing.TypedDict('Address', {
+            'type':'str',
+            'address':'str',
+    })
+    CtdbNodemapEntry = typing.TypedDict('CtdbNodemapEntry', {
+            'pnn':'int',
+            'address':'Address',
+            'flags':'list[str]',
+            'flags_raw':'int',
+            'partially_online':'bool',
+            'this_node':'bool',
+    })
+    Nodemap = typing.TypedDict('Nodemap', {
+            'node_count':'int',
+            'deleted_node_count':'int',
+            'nodes':'list[CtdbNodemapEntry]',
+    })
+    Object = typing.TypedDict('Object', {
+            'hash':'int',
+            'lmaster':'int',
+    })
+    Vnnmap = typing.TypedDict('Vnnmap', {
+            'size':'int',
+            'generation':'int',
+            'entries':'list[Object]',
+    })
+    CtdbStatus_ = typing.TypedDict('CtdbStatus_', {
+            'nodemap':'Nodemap',
+            'vnnmap':'Vnnmap',
+            'recovery_mode_raw':'int',
+            'recovery_mode_str':'str',
+            'recovery_master':'int',
+            'all_healthy':'bool',
+    })
     @typing.overload
     def ips(self, 
         ctdb_ips:'CtdbIps'={},
@@ -38,6 +95,63 @@ class CtdbGeneral(Namespace):
             ctdb_public_ips
         """
         ...
+    CtdbIps = typing.TypedDict('CtdbIps', {
+            'all_nodes':'bool',
+    })
+    CtdbInterfaceInfo = typing.TypedDict('CtdbInterfaceInfo', {
+            'name':'str',
+            'active':'bool',
+            'available':'bool',
+    })
+    CtdbPublicIp = typing.TypedDict('CtdbPublicIp', {
+            'public_ip':'str',
+            'pnn':'int',
+            'interfaces':'list[CtdbInterfaceInfo]',
+    })
+    CtdbNode = typing.TypedDict('CtdbNode', {
+            'pnn':'int',
+            'address':'str',
+            'address_type':'str',
+            'enabled':'bool',
+            'this_node':'bool',
+    })
+    CtdbStatus = typing.TypedDict('CtdbStatus', {
+            'all_nodes':'bool',
+    })
+    Address = typing.TypedDict('Address', {
+            'type':'str',
+            'address':'str',
+    })
+    CtdbNodemapEntry = typing.TypedDict('CtdbNodemapEntry', {
+            'pnn':'int',
+            'address':'Address',
+            'flags':'list[str]',
+            'flags_raw':'int',
+            'partially_online':'bool',
+            'this_node':'bool',
+    })
+    Nodemap = typing.TypedDict('Nodemap', {
+            'node_count':'int',
+            'deleted_node_count':'int',
+            'nodes':'list[CtdbNodemapEntry]',
+    })
+    Object = typing.TypedDict('Object', {
+            'hash':'int',
+            'lmaster':'int',
+    })
+    Vnnmap = typing.TypedDict('Vnnmap', {
+            'size':'int',
+            'generation':'int',
+            'entries':'list[Object]',
+    })
+    CtdbStatus_ = typing.TypedDict('CtdbStatus_', {
+            'nodemap':'Nodemap',
+            'vnnmap':'Vnnmap',
+            'recovery_mode_raw':'int',
+            'recovery_mode_str':'str',
+            'recovery_master':'int',
+            'all_healthy':'bool',
+    })
     @typing.overload
     def listnodes(self, 
     /) -> 'list[CtdbNode]': 
@@ -52,6 +166,63 @@ class CtdbGeneral(Namespace):
             nodelist
         """
         ...
+    CtdbIps = typing.TypedDict('CtdbIps', {
+            'all_nodes':'bool',
+    })
+    CtdbInterfaceInfo = typing.TypedDict('CtdbInterfaceInfo', {
+            'name':'str',
+            'active':'bool',
+            'available':'bool',
+    })
+    CtdbPublicIp = typing.TypedDict('CtdbPublicIp', {
+            'public_ip':'str',
+            'pnn':'int',
+            'interfaces':'list[CtdbInterfaceInfo]',
+    })
+    CtdbNode = typing.TypedDict('CtdbNode', {
+            'pnn':'int',
+            'address':'str',
+            'address_type':'str',
+            'enabled':'bool',
+            'this_node':'bool',
+    })
+    CtdbStatus = typing.TypedDict('CtdbStatus', {
+            'all_nodes':'bool',
+    })
+    Address = typing.TypedDict('Address', {
+            'type':'str',
+            'address':'str',
+    })
+    CtdbNodemapEntry = typing.TypedDict('CtdbNodemapEntry', {
+            'pnn':'int',
+            'address':'Address',
+            'flags':'list[str]',
+            'flags_raw':'int',
+            'partially_online':'bool',
+            'this_node':'bool',
+    })
+    Nodemap = typing.TypedDict('Nodemap', {
+            'node_count':'int',
+            'deleted_node_count':'int',
+            'nodes':'list[CtdbNodemapEntry]',
+    })
+    Object = typing.TypedDict('Object', {
+            'hash':'int',
+            'lmaster':'int',
+    })
+    Vnnmap = typing.TypedDict('Vnnmap', {
+            'size':'int',
+            'generation':'int',
+            'entries':'list[Object]',
+    })
+    CtdbStatus_ = typing.TypedDict('CtdbStatus_', {
+            'nodemap':'Nodemap',
+            'vnnmap':'Vnnmap',
+            'recovery_mode_raw':'int',
+            'recovery_mode_str':'str',
+            'recovery_master':'int',
+            'all_healthy':'bool',
+    })
     @typing.overload
     def pnn(self, 
     /) -> 'int': 
@@ -67,6 +238,63 @@ class CtdbGeneral(Namespace):
             pnn
         """
         ...
+    CtdbIps = typing.TypedDict('CtdbIps', {
+            'all_nodes':'bool',
+    })
+    CtdbInterfaceInfo = typing.TypedDict('CtdbInterfaceInfo', {
+            'name':'str',
+            'active':'bool',
+            'available':'bool',
+    })
+    CtdbPublicIp = typing.TypedDict('CtdbPublicIp', {
+            'public_ip':'str',
+            'pnn':'int',
+            'interfaces':'list[CtdbInterfaceInfo]',
+    })
+    CtdbNode = typing.TypedDict('CtdbNode', {
+            'pnn':'int',
+            'address':'str',
+            'address_type':'str',
+            'enabled':'bool',
+            'this_node':'bool',
+    })
+    CtdbStatus = typing.TypedDict('CtdbStatus', {
+            'all_nodes':'bool',
+    })
+    Address = typing.TypedDict('Address', {
+            'type':'str',
+            'address':'str',
+    })
+    CtdbNodemapEntry = typing.TypedDict('CtdbNodemapEntry', {
+            'pnn':'int',
+            'address':'Address',
+            'flags':'list[str]',
+            'flags_raw':'int',
+            'partially_online':'bool',
+            'this_node':'bool',
+    })
+    Nodemap = typing.TypedDict('Nodemap', {
+            'node_count':'int',
+            'deleted_node_count':'int',
+            'nodes':'list[CtdbNodemapEntry]',
+    })
+    Object = typing.TypedDict('Object', {
+            'hash':'int',
+            'lmaster':'int',
+    })
+    Vnnmap = typing.TypedDict('Vnnmap', {
+            'size':'int',
+            'generation':'int',
+            'entries':'list[Object]',
+    })
+    CtdbStatus_ = typing.TypedDict('CtdbStatus_', {
+            'nodemap':'Nodemap',
+            'vnnmap':'Vnnmap',
+            'recovery_mode_raw':'int',
+            'recovery_mode_str':'str',
+            'recovery_master':'int',
+            'all_healthy':'bool',
+    })
     @typing.overload
     def recovery_master(self, 
     /) -> 'int': 
@@ -81,6 +309,63 @@ class CtdbGeneral(Namespace):
             recmaster
         """
         ...
+    CtdbIps = typing.TypedDict('CtdbIps', {
+            'all_nodes':'bool',
+    })
+    CtdbInterfaceInfo = typing.TypedDict('CtdbInterfaceInfo', {
+            'name':'str',
+            'active':'bool',
+            'available':'bool',
+    })
+    CtdbPublicIp = typing.TypedDict('CtdbPublicIp', {
+            'public_ip':'str',
+            'pnn':'int',
+            'interfaces':'list[CtdbInterfaceInfo]',
+    })
+    CtdbNode = typing.TypedDict('CtdbNode', {
+            'pnn':'int',
+            'address':'str',
+            'address_type':'str',
+            'enabled':'bool',
+            'this_node':'bool',
+    })
+    CtdbStatus = typing.TypedDict('CtdbStatus', {
+            'all_nodes':'bool',
+    })
+    Address = typing.TypedDict('Address', {
+            'type':'str',
+            'address':'str',
+    })
+    CtdbNodemapEntry = typing.TypedDict('CtdbNodemapEntry', {
+            'pnn':'int',
+            'address':'Address',
+            'flags':'list[str]',
+            'flags_raw':'int',
+            'partially_online':'bool',
+            'this_node':'bool',
+    })
+    Nodemap = typing.TypedDict('Nodemap', {
+            'node_count':'int',
+            'deleted_node_count':'int',
+            'nodes':'list[CtdbNodemapEntry]',
+    })
+    Object = typing.TypedDict('Object', {
+            'hash':'int',
+            'lmaster':'int',
+    })
+    Vnnmap = typing.TypedDict('Vnnmap', {
+            'size':'int',
+            'generation':'int',
+            'entries':'list[Object]',
+    })
+    CtdbStatus_ = typing.TypedDict('CtdbStatus_', {
+            'nodemap':'Nodemap',
+            'vnnmap':'Vnnmap',
+            'recovery_mode_raw':'int',
+            'recovery_mode_str':'str',
+            'recovery_master':'int',
+            'all_healthy':'bool',
+    })
     @typing.overload
     def status(self, 
         ctdb_status:'CtdbStatus'={},
@@ -128,61 +413,61 @@ class CtdbGeneral(Namespace):
             ctdb_status
         """
         ...
+    CtdbIps = typing.TypedDict('CtdbIps', {
+            'all_nodes':'bool',
+    })
+    CtdbInterfaceInfo = typing.TypedDict('CtdbInterfaceInfo', {
+            'name':'str',
+            'active':'bool',
+            'available':'bool',
+    })
+    CtdbPublicIp = typing.TypedDict('CtdbPublicIp', {
+            'public_ip':'str',
+            'pnn':'int',
+            'interfaces':'list[CtdbInterfaceInfo]',
+    })
+    CtdbNode = typing.TypedDict('CtdbNode', {
+            'pnn':'int',
+            'address':'str',
+            'address_type':'str',
+            'enabled':'bool',
+            'this_node':'bool',
+    })
+    CtdbStatus = typing.TypedDict('CtdbStatus', {
+            'all_nodes':'bool',
+    })
+    Address = typing.TypedDict('Address', {
+            'type':'str',
+            'address':'str',
+    })
+    CtdbNodemapEntry = typing.TypedDict('CtdbNodemapEntry', {
+            'pnn':'int',
+            'address':'Address',
+            'flags':'list[str]',
+            'flags_raw':'int',
+            'partially_online':'bool',
+            'this_node':'bool',
+    })
+    Nodemap = typing.TypedDict('Nodemap', {
+            'node_count':'int',
+            'deleted_node_count':'int',
+            'nodes':'list[CtdbNodemapEntry]',
+    })
+    Object = typing.TypedDict('Object', {
+            'hash':'int',
+            'lmaster':'int',
+    })
+    Vnnmap = typing.TypedDict('Vnnmap', {
+            'size':'int',
+            'generation':'int',
+            'entries':'list[Object]',
+    })
+    CtdbStatus_ = typing.TypedDict('CtdbStatus_', {
+            'nodemap':'Nodemap',
+            'vnnmap':'Vnnmap',
+            'recovery_mode_raw':'int',
+            'recovery_mode_str':'str',
+            'recovery_master':'int',
+            'all_healthy':'bool',
+    })
 
-class CtdbIps(typing.TypedDict):
-        all_nodes:'bool'
-        ...
-class CtdbPublicIp(typing.TypedDict):
-        public_ip:'str'
-        pnn:'int'
-        interfaces:'list[CtdbInterfaceInfo]'
-        ...
-class CtdbInterfaceInfo(typing.TypedDict):
-        name:'str'
-        active:'bool'
-        available:'bool'
-        ...
-class CtdbNode(typing.TypedDict):
-        pnn:'int'
-        address:'str'
-        address_type:'str'
-        enabled:'bool'
-        this_node:'bool'
-        ...
-class CtdbStatus(typing.TypedDict):
-        all_nodes:'bool'
-        ...
-class CtdbStatus_(typing.TypedDict):
-        nodemap:'Nodemap'
-        vnnmap:'Vnnmap'
-        recovery_mode_raw:'int'
-        recovery_mode_str:'str'
-        recovery_master:'int'
-        all_healthy:'bool'
-        ...
-class Nodemap(typing.TypedDict):
-        node_count:'int'
-        deleted_node_count:'int'
-        nodes:'list[CtdbNodemapEntry]'
-        ...
-class CtdbNodemapEntry(typing.TypedDict):
-        pnn:'int'
-        address:'Address'
-        flags:'list[str]'
-        flags_raw:'int'
-        partially_online:'bool'
-        this_node:'bool'
-        ...
-class Address(typing.TypedDict):
-        type:'str'
-        address:'str'
-        ...
-class Vnnmap(typing.TypedDict):
-        size:'int'
-        generation:'int'
-        entries:'list[Object]'
-        ...
-class Object(typing.TypedDict):
-        hash:'int'
-        lmaster:'int'
-        ...

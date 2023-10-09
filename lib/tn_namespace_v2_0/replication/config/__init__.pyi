@@ -18,6 +18,9 @@ class ReplicationConfig(Namespace):
             replication_config_entry
         """
         ...
+    ReplicationConfigUpdate = typing.TypedDict('ReplicationConfigUpdate', {
+            'max_parallel_replication_tasks':'typing.Optional[int]',
+    })
     @typing.overload
     def update(self, 
         replication_config_update:'ReplicationConfigUpdate'={},
@@ -35,7 +38,7 @@ class ReplicationConfig(Namespace):
             replication_config_update_returns
         """
         ...
+    ReplicationConfigUpdate = typing.TypedDict('ReplicationConfigUpdate', {
+            'max_parallel_replication_tasks':'typing.Optional[int]',
+    })
 
-class ReplicationConfigUpdate(typing.TypedDict):
-        max_parallel_replication_tasks:'typing.Optional[int]'
-        ...

@@ -8,7 +8,7 @@ class App(Namespace):
     def available(self, 
         query_filters:'list[list]'=[],
         query_options:'QueryOptions'={},
-    /) -> 'int|AvailableApps|list[AvailableApps]': 
+    /) -> 'typing.Union[int, ForwardRef(AvailableApps), list[AvailableApps_]]': 
         """
         Retrieve all available applications from all configured catalogs.
 
@@ -20,14 +20,148 @@ class App(Namespace):
             query-options
         Returns
         -------
-        int:
-            
-        AvailableApps:
-            
-        list[AvailableApps]:
+        typing.Union[int, ForwardRef(AvailableApps), list[AvailableApps_]]:
             
         """
         ...
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    AvailableApps = typing.TypedDict('AvailableApps', {
+            'healthy':'bool',
+            'installed':'bool',
+            'categories':'list',
+            'maintainers':'list',
+            'tags':'list',
+            'screenshots':'list[str]',
+            'sources':'list[str]',
+            'name':'str',
+            'title':'str',
+            'description':'str',
+            'app_readme':'str',
+            'location':'str',
+            'healthy_error':'typing.Optional[str]',
+            'home':'str',
+            'last_update':'str',
+            'latest_version':'str',
+            'latest_app_version':'str',
+            'icon_url':'str',
+            'train':'str',
+            'catalog':'str',
+    })
+    AvailableApps_ = typing.TypedDict('AvailableApps_', {
+            'healthy':'bool',
+            'installed':'bool',
+            'categories':'list',
+            'maintainers':'list',
+            'tags':'list',
+            'screenshots':'list[str]',
+            'sources':'list[str]',
+            'name':'str',
+            'title':'str',
+            'description':'str',
+            'app_readme':'str',
+            'location':'str',
+            'healthy_error':'typing.Optional[str]',
+            'home':'str',
+            'last_update':'str',
+            'latest_version':'str',
+            'latest_app_version':'str',
+            'icon_url':'str',
+            'train':'str',
+            'catalog':'str',
+    })
+    QueryOptions_ = typing.TypedDict('QueryOptions_', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    AvailableApps__ = typing.TypedDict('AvailableApps__', {
+            'healthy':'bool',
+            'installed':'bool',
+            'categories':'list',
+            'maintainers':'list',
+            'tags':'list',
+            'screenshots':'list[str]',
+            'sources':'list[str]',
+            'name':'str',
+            'title':'str',
+            'description':'str',
+            'app_readme':'str',
+            'location':'str',
+            'healthy_error':'typing.Optional[str]',
+            'home':'str',
+            'last_update':'str',
+            'latest_version':'str',
+            'latest_app_version':'str',
+            'icon_url':'str',
+            'train':'str',
+            'catalog':'str',
+    })
+    AvailableApps___ = typing.TypedDict('AvailableApps___', {
+            'healthy':'bool',
+            'installed':'bool',
+            'categories':'list',
+            'maintainers':'list',
+            'tags':'list',
+            'screenshots':'list[str]',
+            'sources':'list[str]',
+            'name':'str',
+            'title':'str',
+            'description':'str',
+            'app_readme':'str',
+            'location':'str',
+            'healthy_error':'typing.Optional[str]',
+            'home':'str',
+            'last_update':'str',
+            'latest_version':'str',
+            'latest_app_version':'str',
+            'icon_url':'str',
+            'train':'str',
+            'catalog':'str',
+    })
+    AvailableApps____ = typing.TypedDict('AvailableApps____', {
+            'healthy':'bool',
+            'installed':'bool',
+            'categories':'list',
+            'maintainers':'list',
+            'tags':'list',
+            'screenshots':'list[str]',
+            'sources':'list[str]',
+            'name':'str',
+            'title':'str',
+            'description':'str',
+            'app_readme':'str',
+            'location':'str',
+            'healthy_error':'typing.Optional[str]',
+            'home':'str',
+            'last_update':'str',
+            'latest_version':'str',
+            'latest_app_version':'str',
+            'icon_url':'str',
+            'train':'str',
+            'catalog':'str',
+    })
     @typing.overload
     def categories(self, 
     /) -> 'list[str]': 
@@ -42,11 +176,149 @@ class App(Namespace):
             categories
         """
         ...
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    AvailableApps = typing.TypedDict('AvailableApps', {
+            'healthy':'bool',
+            'installed':'bool',
+            'categories':'list',
+            'maintainers':'list',
+            'tags':'list',
+            'screenshots':'list[str]',
+            'sources':'list[str]',
+            'name':'str',
+            'title':'str',
+            'description':'str',
+            'app_readme':'str',
+            'location':'str',
+            'healthy_error':'typing.Optional[str]',
+            'home':'str',
+            'last_update':'str',
+            'latest_version':'str',
+            'latest_app_version':'str',
+            'icon_url':'str',
+            'train':'str',
+            'catalog':'str',
+    })
+    AvailableApps_ = typing.TypedDict('AvailableApps_', {
+            'healthy':'bool',
+            'installed':'bool',
+            'categories':'list',
+            'maintainers':'list',
+            'tags':'list',
+            'screenshots':'list[str]',
+            'sources':'list[str]',
+            'name':'str',
+            'title':'str',
+            'description':'str',
+            'app_readme':'str',
+            'location':'str',
+            'healthy_error':'typing.Optional[str]',
+            'home':'str',
+            'last_update':'str',
+            'latest_version':'str',
+            'latest_app_version':'str',
+            'icon_url':'str',
+            'train':'str',
+            'catalog':'str',
+    })
+    QueryOptions_ = typing.TypedDict('QueryOptions_', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    AvailableApps__ = typing.TypedDict('AvailableApps__', {
+            'healthy':'bool',
+            'installed':'bool',
+            'categories':'list',
+            'maintainers':'list',
+            'tags':'list',
+            'screenshots':'list[str]',
+            'sources':'list[str]',
+            'name':'str',
+            'title':'str',
+            'description':'str',
+            'app_readme':'str',
+            'location':'str',
+            'healthy_error':'typing.Optional[str]',
+            'home':'str',
+            'last_update':'str',
+            'latest_version':'str',
+            'latest_app_version':'str',
+            'icon_url':'str',
+            'train':'str',
+            'catalog':'str',
+    })
+    AvailableApps___ = typing.TypedDict('AvailableApps___', {
+            'healthy':'bool',
+            'installed':'bool',
+            'categories':'list',
+            'maintainers':'list',
+            'tags':'list',
+            'screenshots':'list[str]',
+            'sources':'list[str]',
+            'name':'str',
+            'title':'str',
+            'description':'str',
+            'app_readme':'str',
+            'location':'str',
+            'healthy_error':'typing.Optional[str]',
+            'home':'str',
+            'last_update':'str',
+            'latest_version':'str',
+            'latest_app_version':'str',
+            'icon_url':'str',
+            'train':'str',
+            'catalog':'str',
+    })
+    AvailableApps____ = typing.TypedDict('AvailableApps____', {
+            'healthy':'bool',
+            'installed':'bool',
+            'categories':'list',
+            'maintainers':'list',
+            'tags':'list',
+            'screenshots':'list[str]',
+            'sources':'list[str]',
+            'name':'str',
+            'title':'str',
+            'description':'str',
+            'app_readme':'str',
+            'location':'str',
+            'healthy_error':'typing.Optional[str]',
+            'home':'str',
+            'last_update':'str',
+            'latest_version':'str',
+            'latest_app_version':'str',
+            'icon_url':'str',
+            'train':'str',
+            'catalog':'str',
+    })
     @typing.overload
     def latest(self, 
         query_filters:'list[list]'=[],
-        query_options:'QueryOptions'={},
-    /) -> 'int|AvailableApps|list[AvailableApps]': 
+        query_options:'QueryOptions_'={},
+    /) -> 'typing.Union[int, ForwardRef(AvailableApps__), list[AvailableApps___]]': 
         """
         Retrieve latest updated apps.
 
@@ -58,20 +330,154 @@ class App(Namespace):
             query-options
         Returns
         -------
-        int:
-            
-        AvailableApps:
-            
-        list[AvailableApps]:
+        typing.Union[int, ForwardRef(AvailableApps__), list[AvailableApps___]]:
             
         """
         ...
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    AvailableApps = typing.TypedDict('AvailableApps', {
+            'healthy':'bool',
+            'installed':'bool',
+            'categories':'list',
+            'maintainers':'list',
+            'tags':'list',
+            'screenshots':'list[str]',
+            'sources':'list[str]',
+            'name':'str',
+            'title':'str',
+            'description':'str',
+            'app_readme':'str',
+            'location':'str',
+            'healthy_error':'typing.Optional[str]',
+            'home':'str',
+            'last_update':'str',
+            'latest_version':'str',
+            'latest_app_version':'str',
+            'icon_url':'str',
+            'train':'str',
+            'catalog':'str',
+    })
+    AvailableApps_ = typing.TypedDict('AvailableApps_', {
+            'healthy':'bool',
+            'installed':'bool',
+            'categories':'list',
+            'maintainers':'list',
+            'tags':'list',
+            'screenshots':'list[str]',
+            'sources':'list[str]',
+            'name':'str',
+            'title':'str',
+            'description':'str',
+            'app_readme':'str',
+            'location':'str',
+            'healthy_error':'typing.Optional[str]',
+            'home':'str',
+            'last_update':'str',
+            'latest_version':'str',
+            'latest_app_version':'str',
+            'icon_url':'str',
+            'train':'str',
+            'catalog':'str',
+    })
+    QueryOptions_ = typing.TypedDict('QueryOptions_', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    AvailableApps__ = typing.TypedDict('AvailableApps__', {
+            'healthy':'bool',
+            'installed':'bool',
+            'categories':'list',
+            'maintainers':'list',
+            'tags':'list',
+            'screenshots':'list[str]',
+            'sources':'list[str]',
+            'name':'str',
+            'title':'str',
+            'description':'str',
+            'app_readme':'str',
+            'location':'str',
+            'healthy_error':'typing.Optional[str]',
+            'home':'str',
+            'last_update':'str',
+            'latest_version':'str',
+            'latest_app_version':'str',
+            'icon_url':'str',
+            'train':'str',
+            'catalog':'str',
+    })
+    AvailableApps___ = typing.TypedDict('AvailableApps___', {
+            'healthy':'bool',
+            'installed':'bool',
+            'categories':'list',
+            'maintainers':'list',
+            'tags':'list',
+            'screenshots':'list[str]',
+            'sources':'list[str]',
+            'name':'str',
+            'title':'str',
+            'description':'str',
+            'app_readme':'str',
+            'location':'str',
+            'healthy_error':'typing.Optional[str]',
+            'home':'str',
+            'last_update':'str',
+            'latest_version':'str',
+            'latest_app_version':'str',
+            'icon_url':'str',
+            'train':'str',
+            'catalog':'str',
+    })
+    AvailableApps____ = typing.TypedDict('AvailableApps____', {
+            'healthy':'bool',
+            'installed':'bool',
+            'categories':'list',
+            'maintainers':'list',
+            'tags':'list',
+            'screenshots':'list[str]',
+            'sources':'list[str]',
+            'name':'str',
+            'title':'str',
+            'description':'str',
+            'app_readme':'str',
+            'location':'str',
+            'healthy_error':'typing.Optional[str]',
+            'home':'str',
+            'last_update':'str',
+            'latest_version':'str',
+            'latest_app_version':'str',
+            'icon_url':'str',
+            'train':'str',
+            'catalog':'str',
+    })
     @typing.overload
     def similar(self, 
         app_name:'str',
         catalog:'str',
         train:'str',
-    /) -> 'list[AvailableApps]': 
+    /) -> 'list[AvailableApps____]': 
         """
         Retrieve applications which are similar to `app_name`.
 
@@ -85,44 +491,146 @@ class App(Namespace):
             train
         Returns
         -------
-        list[AvailableApps]:
+        list[AvailableApps____]:
             similar
         """
         ...
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    AvailableApps = typing.TypedDict('AvailableApps', {
+            'healthy':'bool',
+            'installed':'bool',
+            'categories':'list',
+            'maintainers':'list',
+            'tags':'list',
+            'screenshots':'list[str]',
+            'sources':'list[str]',
+            'name':'str',
+            'title':'str',
+            'description':'str',
+            'app_readme':'str',
+            'location':'str',
+            'healthy_error':'typing.Optional[str]',
+            'home':'str',
+            'last_update':'str',
+            'latest_version':'str',
+            'latest_app_version':'str',
+            'icon_url':'str',
+            'train':'str',
+            'catalog':'str',
+    })
+    AvailableApps_ = typing.TypedDict('AvailableApps_', {
+            'healthy':'bool',
+            'installed':'bool',
+            'categories':'list',
+            'maintainers':'list',
+            'tags':'list',
+            'screenshots':'list[str]',
+            'sources':'list[str]',
+            'name':'str',
+            'title':'str',
+            'description':'str',
+            'app_readme':'str',
+            'location':'str',
+            'healthy_error':'typing.Optional[str]',
+            'home':'str',
+            'last_update':'str',
+            'latest_version':'str',
+            'latest_app_version':'str',
+            'icon_url':'str',
+            'train':'str',
+            'catalog':'str',
+    })
+    QueryOptions_ = typing.TypedDict('QueryOptions_', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    AvailableApps__ = typing.TypedDict('AvailableApps__', {
+            'healthy':'bool',
+            'installed':'bool',
+            'categories':'list',
+            'maintainers':'list',
+            'tags':'list',
+            'screenshots':'list[str]',
+            'sources':'list[str]',
+            'name':'str',
+            'title':'str',
+            'description':'str',
+            'app_readme':'str',
+            'location':'str',
+            'healthy_error':'typing.Optional[str]',
+            'home':'str',
+            'last_update':'str',
+            'latest_version':'str',
+            'latest_app_version':'str',
+            'icon_url':'str',
+            'train':'str',
+            'catalog':'str',
+    })
+    AvailableApps___ = typing.TypedDict('AvailableApps___', {
+            'healthy':'bool',
+            'installed':'bool',
+            'categories':'list',
+            'maintainers':'list',
+            'tags':'list',
+            'screenshots':'list[str]',
+            'sources':'list[str]',
+            'name':'str',
+            'title':'str',
+            'description':'str',
+            'app_readme':'str',
+            'location':'str',
+            'healthy_error':'typing.Optional[str]',
+            'home':'str',
+            'last_update':'str',
+            'latest_version':'str',
+            'latest_app_version':'str',
+            'icon_url':'str',
+            'train':'str',
+            'catalog':'str',
+    })
+    AvailableApps____ = typing.TypedDict('AvailableApps____', {
+            'healthy':'bool',
+            'installed':'bool',
+            'categories':'list',
+            'maintainers':'list',
+            'tags':'list',
+            'screenshots':'list[str]',
+            'sources':'list[str]',
+            'name':'str',
+            'title':'str',
+            'description':'str',
+            'app_readme':'str',
+            'location':'str',
+            'healthy_error':'typing.Optional[str]',
+            'home':'str',
+            'last_update':'str',
+            'latest_version':'str',
+            'latest_app_version':'str',
+            'icon_url':'str',
+            'train':'str',
+            'catalog':'str',
+    })
 
-class QueryOptions(typing.TypedDict):
-        relationships:'bool'
-        extend:'typing.Optional[str]'
-        extend_context:'typing.Optional[str]'
-        prefix:'typing.Optional[str]'
-        extra:'dict[str]'
-        order_by:'list'
-        select:'list'
-        count:'bool'
-        get:'bool'
-        offset:'int'
-        limit:'int'
-        force_sql_filters:'bool'
-        ...
-class AvailableApps(typing.TypedDict):
-        healthy:'bool'
-        installed:'bool'
-        categories:'list'
-        maintainers:'list'
-        tags:'list'
-        screenshots:'list[str]'
-        sources:'list[str]'
-        name:'str'
-        title:'str'
-        description:'str'
-        app_readme:'str'
-        location:'str'
-        healthy_error:'typing.Optional[str]'
-        home:'str'
-        last_update:'str'
-        latest_version:'str'
-        latest_app_version:'str'
-        icon_url:'str'
-        train:'str'
-        catalog:'str'
-        ...

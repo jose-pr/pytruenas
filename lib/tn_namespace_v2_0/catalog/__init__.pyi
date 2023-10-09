@@ -21,6 +21,175 @@ class Catalog(Namespace):
             catalog_create_returns
         """
         ...
+    CatalogCreate = typing.TypedDict('CatalogCreate', {
+            'label':'str',
+            'repository':'str',
+            'branch':'str',
+            'preferred_trains':'list',
+            'force':'bool',
+    })
+    CachingProgress = typing.TypedDict('CachingProgress', {
+            'description':'typing.Optional[str]',
+            'extra':'typing.Union[str, int, bool, dict[str], list]',
+            'percent':'typing.Optional[float]',
+    })
+    CatalogCreateReturns = typing.TypedDict('CatalogCreateReturns', {
+            'label':'str',
+            'repository':'str',
+            'branch':'str',
+            'location':'str',
+            'id':'str',
+            'preferred_trains':'list',
+            'trains':'dict[str]',
+            'healthy':'bool',
+            'error':'bool',
+            'builtin':'bool',
+            'cached':'bool',
+            'caching_progress':'CachingProgress',
+            'caching_job':'dict[str]',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    ItemVersionDetails = typing.TypedDict('ItemVersionDetails', {
+            'cache':'bool',
+            'catalog':'str',
+            'train':'str',
+    })
+    ItemDetails = typing.TypedDict('ItemDetails', {
+            'name':'str',
+            'categories':'list[str]',
+            'maintainers':'list',
+            'tags':'list',
+            'screenshots':'list[str]',
+            'sources':'list[str]',
+            'app_readme':'typing.Optional[str]',
+            'location':'str',
+            'healthy':'bool',
+            'recommended':'bool',
+            'healthy_error':'typing.Optional[str]',
+            'versions':'dict[str]',
+            'latest_version':'typing.Optional[str]',
+            'latest_app_version':'typing.Optional[str]',
+            'latest_human_version':'typing.Optional[str]',
+            'last_update':'typing.Optional[str]',
+            'icon_url':'typing.Optional[str]',
+            'home':'str',
+    })
+    Options = typing.TypedDict('Options', {
+            'cache':'bool',
+            'cache_only':'bool',
+            'retrieve_all_trains':'bool',
+            'trains':'list[str]',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    CachingProgress_ = typing.TypedDict('CachingProgress_', {
+            'description':'typing.Optional[str]',
+            'extra':'typing.Union[str, int, bool, dict[str], list]',
+            'percent':'typing.Optional[float]',
+    })
+    CatalogEntry = typing.TypedDict('CatalogEntry', {
+            'label':'str',
+            'repository':'str',
+            'branch':'str',
+            'location':'str',
+            'id':'str',
+            'preferred_trains':'list',
+            'trains':'dict[str]',
+            'healthy':'bool',
+            'error':'bool',
+            'builtin':'bool',
+            'cached':'bool',
+            'caching_progress':'CachingProgress_',
+            'caching_job':'dict[str]',
+    })
+    CachingProgress__ = typing.TypedDict('CachingProgress__', {
+            'description':'typing.Optional[str]',
+            'extra':'typing.Union[str, int, bool, dict[str], list]',
+            'percent':'typing.Optional[float]',
+    })
+    CatalogEntry_ = typing.TypedDict('CatalogEntry_', {
+            'label':'str',
+            'repository':'str',
+            'branch':'str',
+            'location':'str',
+            'id':'str',
+            'preferred_trains':'list',
+            'trains':'dict[str]',
+            'healthy':'bool',
+            'error':'bool',
+            'builtin':'bool',
+            'cached':'bool',
+            'caching_progress':'CachingProgress__',
+            'caching_job':'dict[str]',
+    })
+    CachingProgress___ = typing.TypedDict('CachingProgress___', {
+            'description':'typing.Optional[str]',
+            'extra':'typing.Union[str, int, bool, dict[str], list]',
+            'percent':'typing.Optional[float]',
+    })
+    CatalogEntry__ = typing.TypedDict('CatalogEntry__', {
+            'label':'str',
+            'repository':'str',
+            'branch':'str',
+            'location':'str',
+            'id':'str',
+            'preferred_trains':'list',
+            'trains':'dict[str]',
+            'healthy':'bool',
+            'error':'bool',
+            'builtin':'bool',
+            'cached':'bool',
+            'caching_progress':'CachingProgress___',
+            'caching_job':'dict[str]',
+    })
+    CatalogUpdate = typing.TypedDict('CatalogUpdate', {
+            'preferred_trains':'list',
+    })
+    CachingProgress____ = typing.TypedDict('CachingProgress____', {
+            'description':'typing.Optional[str]',
+            'extra':'typing.Union[str, int, bool, dict[str], list]',
+            'percent':'typing.Optional[float]',
+    })
+    CatalogUpdateReturns = typing.TypedDict('CatalogUpdateReturns', {
+            'label':'str',
+            'repository':'str',
+            'branch':'str',
+            'location':'str',
+            'id':'str',
+            'preferred_trains':'list',
+            'trains':'dict[str]',
+            'healthy':'bool',
+            'error':'bool',
+            'builtin':'bool',
+            'cached':'bool',
+            'caching_progress':'CachingProgress____',
+            'caching_job':'dict[str]',
+    })
     @typing.overload
     def delete(self, 
         label:'str',
@@ -38,9 +207,178 @@ class Catalog(Namespace):
             Will return `true` if `id` is deleted successfully
         """
         ...
+    CatalogCreate = typing.TypedDict('CatalogCreate', {
+            'label':'str',
+            'repository':'str',
+            'branch':'str',
+            'preferred_trains':'list',
+            'force':'bool',
+    })
+    CachingProgress = typing.TypedDict('CachingProgress', {
+            'description':'typing.Optional[str]',
+            'extra':'typing.Union[str, int, bool, dict[str], list]',
+            'percent':'typing.Optional[float]',
+    })
+    CatalogCreateReturns = typing.TypedDict('CatalogCreateReturns', {
+            'label':'str',
+            'repository':'str',
+            'branch':'str',
+            'location':'str',
+            'id':'str',
+            'preferred_trains':'list',
+            'trains':'dict[str]',
+            'healthy':'bool',
+            'error':'bool',
+            'builtin':'bool',
+            'cached':'bool',
+            'caching_progress':'CachingProgress',
+            'caching_job':'dict[str]',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    ItemVersionDetails = typing.TypedDict('ItemVersionDetails', {
+            'cache':'bool',
+            'catalog':'str',
+            'train':'str',
+    })
+    ItemDetails = typing.TypedDict('ItemDetails', {
+            'name':'str',
+            'categories':'list[str]',
+            'maintainers':'list',
+            'tags':'list',
+            'screenshots':'list[str]',
+            'sources':'list[str]',
+            'app_readme':'typing.Optional[str]',
+            'location':'str',
+            'healthy':'bool',
+            'recommended':'bool',
+            'healthy_error':'typing.Optional[str]',
+            'versions':'dict[str]',
+            'latest_version':'typing.Optional[str]',
+            'latest_app_version':'typing.Optional[str]',
+            'latest_human_version':'typing.Optional[str]',
+            'last_update':'typing.Optional[str]',
+            'icon_url':'typing.Optional[str]',
+            'home':'str',
+    })
+    Options = typing.TypedDict('Options', {
+            'cache':'bool',
+            'cache_only':'bool',
+            'retrieve_all_trains':'bool',
+            'trains':'list[str]',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    CachingProgress_ = typing.TypedDict('CachingProgress_', {
+            'description':'typing.Optional[str]',
+            'extra':'typing.Union[str, int, bool, dict[str], list]',
+            'percent':'typing.Optional[float]',
+    })
+    CatalogEntry = typing.TypedDict('CatalogEntry', {
+            'label':'str',
+            'repository':'str',
+            'branch':'str',
+            'location':'str',
+            'id':'str',
+            'preferred_trains':'list',
+            'trains':'dict[str]',
+            'healthy':'bool',
+            'error':'bool',
+            'builtin':'bool',
+            'cached':'bool',
+            'caching_progress':'CachingProgress_',
+            'caching_job':'dict[str]',
+    })
+    CachingProgress__ = typing.TypedDict('CachingProgress__', {
+            'description':'typing.Optional[str]',
+            'extra':'typing.Union[str, int, bool, dict[str], list]',
+            'percent':'typing.Optional[float]',
+    })
+    CatalogEntry_ = typing.TypedDict('CatalogEntry_', {
+            'label':'str',
+            'repository':'str',
+            'branch':'str',
+            'location':'str',
+            'id':'str',
+            'preferred_trains':'list',
+            'trains':'dict[str]',
+            'healthy':'bool',
+            'error':'bool',
+            'builtin':'bool',
+            'cached':'bool',
+            'caching_progress':'CachingProgress__',
+            'caching_job':'dict[str]',
+    })
+    CachingProgress___ = typing.TypedDict('CachingProgress___', {
+            'description':'typing.Optional[str]',
+            'extra':'typing.Union[str, int, bool, dict[str], list]',
+            'percent':'typing.Optional[float]',
+    })
+    CatalogEntry__ = typing.TypedDict('CatalogEntry__', {
+            'label':'str',
+            'repository':'str',
+            'branch':'str',
+            'location':'str',
+            'id':'str',
+            'preferred_trains':'list',
+            'trains':'dict[str]',
+            'healthy':'bool',
+            'error':'bool',
+            'builtin':'bool',
+            'cached':'bool',
+            'caching_progress':'CachingProgress___',
+            'caching_job':'dict[str]',
+    })
+    CatalogUpdate = typing.TypedDict('CatalogUpdate', {
+            'preferred_trains':'list',
+    })
+    CachingProgress____ = typing.TypedDict('CachingProgress____', {
+            'description':'typing.Optional[str]',
+            'extra':'typing.Union[str, int, bool, dict[str], list]',
+            'percent':'typing.Optional[float]',
+    })
+    CatalogUpdateReturns = typing.TypedDict('CatalogUpdateReturns', {
+            'label':'str',
+            'repository':'str',
+            'branch':'str',
+            'location':'str',
+            'id':'str',
+            'preferred_trains':'list',
+            'trains':'dict[str]',
+            'healthy':'bool',
+            'error':'bool',
+            'builtin':'bool',
+            'cached':'bool',
+            'caching_progress':'CachingProgress____',
+            'caching_job':'dict[str]',
+    })
     @typing.overload
     def get_instance(self, 
-        id:'str|int|bool|dict[str]|list',
+        id:'typing.Union[str, int, bool, dict[str], list]',
         query_options_get_instance:'QueryOptionsGetInstance'={},
     /) -> None: 
         """
@@ -58,6 +396,175 @@ class Catalog(Namespace):
         -------
         """
         ...
+    CatalogCreate = typing.TypedDict('CatalogCreate', {
+            'label':'str',
+            'repository':'str',
+            'branch':'str',
+            'preferred_trains':'list',
+            'force':'bool',
+    })
+    CachingProgress = typing.TypedDict('CachingProgress', {
+            'description':'typing.Optional[str]',
+            'extra':'typing.Union[str, int, bool, dict[str], list]',
+            'percent':'typing.Optional[float]',
+    })
+    CatalogCreateReturns = typing.TypedDict('CatalogCreateReturns', {
+            'label':'str',
+            'repository':'str',
+            'branch':'str',
+            'location':'str',
+            'id':'str',
+            'preferred_trains':'list',
+            'trains':'dict[str]',
+            'healthy':'bool',
+            'error':'bool',
+            'builtin':'bool',
+            'cached':'bool',
+            'caching_progress':'CachingProgress',
+            'caching_job':'dict[str]',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    ItemVersionDetails = typing.TypedDict('ItemVersionDetails', {
+            'cache':'bool',
+            'catalog':'str',
+            'train':'str',
+    })
+    ItemDetails = typing.TypedDict('ItemDetails', {
+            'name':'str',
+            'categories':'list[str]',
+            'maintainers':'list',
+            'tags':'list',
+            'screenshots':'list[str]',
+            'sources':'list[str]',
+            'app_readme':'typing.Optional[str]',
+            'location':'str',
+            'healthy':'bool',
+            'recommended':'bool',
+            'healthy_error':'typing.Optional[str]',
+            'versions':'dict[str]',
+            'latest_version':'typing.Optional[str]',
+            'latest_app_version':'typing.Optional[str]',
+            'latest_human_version':'typing.Optional[str]',
+            'last_update':'typing.Optional[str]',
+            'icon_url':'typing.Optional[str]',
+            'home':'str',
+    })
+    Options = typing.TypedDict('Options', {
+            'cache':'bool',
+            'cache_only':'bool',
+            'retrieve_all_trains':'bool',
+            'trains':'list[str]',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    CachingProgress_ = typing.TypedDict('CachingProgress_', {
+            'description':'typing.Optional[str]',
+            'extra':'typing.Union[str, int, bool, dict[str], list]',
+            'percent':'typing.Optional[float]',
+    })
+    CatalogEntry = typing.TypedDict('CatalogEntry', {
+            'label':'str',
+            'repository':'str',
+            'branch':'str',
+            'location':'str',
+            'id':'str',
+            'preferred_trains':'list',
+            'trains':'dict[str]',
+            'healthy':'bool',
+            'error':'bool',
+            'builtin':'bool',
+            'cached':'bool',
+            'caching_progress':'CachingProgress_',
+            'caching_job':'dict[str]',
+    })
+    CachingProgress__ = typing.TypedDict('CachingProgress__', {
+            'description':'typing.Optional[str]',
+            'extra':'typing.Union[str, int, bool, dict[str], list]',
+            'percent':'typing.Optional[float]',
+    })
+    CatalogEntry_ = typing.TypedDict('CatalogEntry_', {
+            'label':'str',
+            'repository':'str',
+            'branch':'str',
+            'location':'str',
+            'id':'str',
+            'preferred_trains':'list',
+            'trains':'dict[str]',
+            'healthy':'bool',
+            'error':'bool',
+            'builtin':'bool',
+            'cached':'bool',
+            'caching_progress':'CachingProgress__',
+            'caching_job':'dict[str]',
+    })
+    CachingProgress___ = typing.TypedDict('CachingProgress___', {
+            'description':'typing.Optional[str]',
+            'extra':'typing.Union[str, int, bool, dict[str], list]',
+            'percent':'typing.Optional[float]',
+    })
+    CatalogEntry__ = typing.TypedDict('CatalogEntry__', {
+            'label':'str',
+            'repository':'str',
+            'branch':'str',
+            'location':'str',
+            'id':'str',
+            'preferred_trains':'list',
+            'trains':'dict[str]',
+            'healthy':'bool',
+            'error':'bool',
+            'builtin':'bool',
+            'cached':'bool',
+            'caching_progress':'CachingProgress___',
+            'caching_job':'dict[str]',
+    })
+    CatalogUpdate = typing.TypedDict('CatalogUpdate', {
+            'preferred_trains':'list',
+    })
+    CachingProgress____ = typing.TypedDict('CachingProgress____', {
+            'description':'typing.Optional[str]',
+            'extra':'typing.Union[str, int, bool, dict[str], list]',
+            'percent':'typing.Optional[float]',
+    })
+    CatalogUpdateReturns = typing.TypedDict('CatalogUpdateReturns', {
+            'label':'str',
+            'repository':'str',
+            'branch':'str',
+            'location':'str',
+            'id':'str',
+            'preferred_trains':'list',
+            'trains':'dict[str]',
+            'healthy':'bool',
+            'error':'bool',
+            'builtin':'bool',
+            'cached':'bool',
+            'caching_progress':'CachingProgress____',
+            'caching_job':'dict[str]',
+    })
     @typing.overload
     def get_item_details(self, 
         item_name:'str',
@@ -78,6 +585,175 @@ class Catalog(Namespace):
             item_details
         """
         ...
+    CatalogCreate = typing.TypedDict('CatalogCreate', {
+            'label':'str',
+            'repository':'str',
+            'branch':'str',
+            'preferred_trains':'list',
+            'force':'bool',
+    })
+    CachingProgress = typing.TypedDict('CachingProgress', {
+            'description':'typing.Optional[str]',
+            'extra':'typing.Union[str, int, bool, dict[str], list]',
+            'percent':'typing.Optional[float]',
+    })
+    CatalogCreateReturns = typing.TypedDict('CatalogCreateReturns', {
+            'label':'str',
+            'repository':'str',
+            'branch':'str',
+            'location':'str',
+            'id':'str',
+            'preferred_trains':'list',
+            'trains':'dict[str]',
+            'healthy':'bool',
+            'error':'bool',
+            'builtin':'bool',
+            'cached':'bool',
+            'caching_progress':'CachingProgress',
+            'caching_job':'dict[str]',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    ItemVersionDetails = typing.TypedDict('ItemVersionDetails', {
+            'cache':'bool',
+            'catalog':'str',
+            'train':'str',
+    })
+    ItemDetails = typing.TypedDict('ItemDetails', {
+            'name':'str',
+            'categories':'list[str]',
+            'maintainers':'list',
+            'tags':'list',
+            'screenshots':'list[str]',
+            'sources':'list[str]',
+            'app_readme':'typing.Optional[str]',
+            'location':'str',
+            'healthy':'bool',
+            'recommended':'bool',
+            'healthy_error':'typing.Optional[str]',
+            'versions':'dict[str]',
+            'latest_version':'typing.Optional[str]',
+            'latest_app_version':'typing.Optional[str]',
+            'latest_human_version':'typing.Optional[str]',
+            'last_update':'typing.Optional[str]',
+            'icon_url':'typing.Optional[str]',
+            'home':'str',
+    })
+    Options = typing.TypedDict('Options', {
+            'cache':'bool',
+            'cache_only':'bool',
+            'retrieve_all_trains':'bool',
+            'trains':'list[str]',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    CachingProgress_ = typing.TypedDict('CachingProgress_', {
+            'description':'typing.Optional[str]',
+            'extra':'typing.Union[str, int, bool, dict[str], list]',
+            'percent':'typing.Optional[float]',
+    })
+    CatalogEntry = typing.TypedDict('CatalogEntry', {
+            'label':'str',
+            'repository':'str',
+            'branch':'str',
+            'location':'str',
+            'id':'str',
+            'preferred_trains':'list',
+            'trains':'dict[str]',
+            'healthy':'bool',
+            'error':'bool',
+            'builtin':'bool',
+            'cached':'bool',
+            'caching_progress':'CachingProgress_',
+            'caching_job':'dict[str]',
+    })
+    CachingProgress__ = typing.TypedDict('CachingProgress__', {
+            'description':'typing.Optional[str]',
+            'extra':'typing.Union[str, int, bool, dict[str], list]',
+            'percent':'typing.Optional[float]',
+    })
+    CatalogEntry_ = typing.TypedDict('CatalogEntry_', {
+            'label':'str',
+            'repository':'str',
+            'branch':'str',
+            'location':'str',
+            'id':'str',
+            'preferred_trains':'list',
+            'trains':'dict[str]',
+            'healthy':'bool',
+            'error':'bool',
+            'builtin':'bool',
+            'cached':'bool',
+            'caching_progress':'CachingProgress__',
+            'caching_job':'dict[str]',
+    })
+    CachingProgress___ = typing.TypedDict('CachingProgress___', {
+            'description':'typing.Optional[str]',
+            'extra':'typing.Union[str, int, bool, dict[str], list]',
+            'percent':'typing.Optional[float]',
+    })
+    CatalogEntry__ = typing.TypedDict('CatalogEntry__', {
+            'label':'str',
+            'repository':'str',
+            'branch':'str',
+            'location':'str',
+            'id':'str',
+            'preferred_trains':'list',
+            'trains':'dict[str]',
+            'healthy':'bool',
+            'error':'bool',
+            'builtin':'bool',
+            'cached':'bool',
+            'caching_progress':'CachingProgress___',
+            'caching_job':'dict[str]',
+    })
+    CatalogUpdate = typing.TypedDict('CatalogUpdate', {
+            'preferred_trains':'list',
+    })
+    CachingProgress____ = typing.TypedDict('CachingProgress____', {
+            'description':'typing.Optional[str]',
+            'extra':'typing.Union[str, int, bool, dict[str], list]',
+            'percent':'typing.Optional[float]',
+    })
+    CatalogUpdateReturns = typing.TypedDict('CatalogUpdateReturns', {
+            'label':'str',
+            'repository':'str',
+            'branch':'str',
+            'location':'str',
+            'id':'str',
+            'preferred_trains':'list',
+            'trains':'dict[str]',
+            'healthy':'bool',
+            'error':'bool',
+            'builtin':'bool',
+            'cached':'bool',
+            'caching_progress':'CachingProgress____',
+            'caching_job':'dict[str]',
+    })
     @typing.overload
     def items(self, 
         label:'str',
@@ -146,11 +822,180 @@ class Catalog(Namespace):
             ```
         """
         ...
+    CatalogCreate = typing.TypedDict('CatalogCreate', {
+            'label':'str',
+            'repository':'str',
+            'branch':'str',
+            'preferred_trains':'list',
+            'force':'bool',
+    })
+    CachingProgress = typing.TypedDict('CachingProgress', {
+            'description':'typing.Optional[str]',
+            'extra':'typing.Union[str, int, bool, dict[str], list]',
+            'percent':'typing.Optional[float]',
+    })
+    CatalogCreateReturns = typing.TypedDict('CatalogCreateReturns', {
+            'label':'str',
+            'repository':'str',
+            'branch':'str',
+            'location':'str',
+            'id':'str',
+            'preferred_trains':'list',
+            'trains':'dict[str]',
+            'healthy':'bool',
+            'error':'bool',
+            'builtin':'bool',
+            'cached':'bool',
+            'caching_progress':'CachingProgress',
+            'caching_job':'dict[str]',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    ItemVersionDetails = typing.TypedDict('ItemVersionDetails', {
+            'cache':'bool',
+            'catalog':'str',
+            'train':'str',
+    })
+    ItemDetails = typing.TypedDict('ItemDetails', {
+            'name':'str',
+            'categories':'list[str]',
+            'maintainers':'list',
+            'tags':'list',
+            'screenshots':'list[str]',
+            'sources':'list[str]',
+            'app_readme':'typing.Optional[str]',
+            'location':'str',
+            'healthy':'bool',
+            'recommended':'bool',
+            'healthy_error':'typing.Optional[str]',
+            'versions':'dict[str]',
+            'latest_version':'typing.Optional[str]',
+            'latest_app_version':'typing.Optional[str]',
+            'latest_human_version':'typing.Optional[str]',
+            'last_update':'typing.Optional[str]',
+            'icon_url':'typing.Optional[str]',
+            'home':'str',
+    })
+    Options = typing.TypedDict('Options', {
+            'cache':'bool',
+            'cache_only':'bool',
+            'retrieve_all_trains':'bool',
+            'trains':'list[str]',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    CachingProgress_ = typing.TypedDict('CachingProgress_', {
+            'description':'typing.Optional[str]',
+            'extra':'typing.Union[str, int, bool, dict[str], list]',
+            'percent':'typing.Optional[float]',
+    })
+    CatalogEntry = typing.TypedDict('CatalogEntry', {
+            'label':'str',
+            'repository':'str',
+            'branch':'str',
+            'location':'str',
+            'id':'str',
+            'preferred_trains':'list',
+            'trains':'dict[str]',
+            'healthy':'bool',
+            'error':'bool',
+            'builtin':'bool',
+            'cached':'bool',
+            'caching_progress':'CachingProgress_',
+            'caching_job':'dict[str]',
+    })
+    CachingProgress__ = typing.TypedDict('CachingProgress__', {
+            'description':'typing.Optional[str]',
+            'extra':'typing.Union[str, int, bool, dict[str], list]',
+            'percent':'typing.Optional[float]',
+    })
+    CatalogEntry_ = typing.TypedDict('CatalogEntry_', {
+            'label':'str',
+            'repository':'str',
+            'branch':'str',
+            'location':'str',
+            'id':'str',
+            'preferred_trains':'list',
+            'trains':'dict[str]',
+            'healthy':'bool',
+            'error':'bool',
+            'builtin':'bool',
+            'cached':'bool',
+            'caching_progress':'CachingProgress__',
+            'caching_job':'dict[str]',
+    })
+    CachingProgress___ = typing.TypedDict('CachingProgress___', {
+            'description':'typing.Optional[str]',
+            'extra':'typing.Union[str, int, bool, dict[str], list]',
+            'percent':'typing.Optional[float]',
+    })
+    CatalogEntry__ = typing.TypedDict('CatalogEntry__', {
+            'label':'str',
+            'repository':'str',
+            'branch':'str',
+            'location':'str',
+            'id':'str',
+            'preferred_trains':'list',
+            'trains':'dict[str]',
+            'healthy':'bool',
+            'error':'bool',
+            'builtin':'bool',
+            'cached':'bool',
+            'caching_progress':'CachingProgress___',
+            'caching_job':'dict[str]',
+    })
+    CatalogUpdate = typing.TypedDict('CatalogUpdate', {
+            'preferred_trains':'list',
+    })
+    CachingProgress____ = typing.TypedDict('CachingProgress____', {
+            'description':'typing.Optional[str]',
+            'extra':'typing.Union[str, int, bool, dict[str], list]',
+            'percent':'typing.Optional[float]',
+    })
+    CatalogUpdateReturns = typing.TypedDict('CatalogUpdateReturns', {
+            'label':'str',
+            'repository':'str',
+            'branch':'str',
+            'location':'str',
+            'id':'str',
+            'preferred_trains':'list',
+            'trains':'dict[str]',
+            'healthy':'bool',
+            'error':'bool',
+            'builtin':'bool',
+            'cached':'bool',
+            'caching_progress':'CachingProgress____',
+            'caching_job':'dict[str]',
+    })
     @typing.overload
     def query(self, 
         query_filters:'list[list]'=[],
         query_options:'QueryOptions'={},
-    /) -> 'list[CatalogEntry]|CatalogEntry|int|CatalogEntry': 
+    /) -> 'typing.Union[list[CatalogEntry], ForwardRef(CatalogEntry_), int, ForwardRef(CatalogEntry__)]': 
         """
         
 
@@ -162,16 +1007,179 @@ class Catalog(Namespace):
             query-options
         Returns
         -------
-        list[CatalogEntry]:
-            
-        CatalogEntry:
-            
-        int:
-            
-        CatalogEntry:
+        typing.Union[list[CatalogEntry], ForwardRef(CatalogEntry_), int, ForwardRef(CatalogEntry__)]:
             
         """
         ...
+    CatalogCreate = typing.TypedDict('CatalogCreate', {
+            'label':'str',
+            'repository':'str',
+            'branch':'str',
+            'preferred_trains':'list',
+            'force':'bool',
+    })
+    CachingProgress = typing.TypedDict('CachingProgress', {
+            'description':'typing.Optional[str]',
+            'extra':'typing.Union[str, int, bool, dict[str], list]',
+            'percent':'typing.Optional[float]',
+    })
+    CatalogCreateReturns = typing.TypedDict('CatalogCreateReturns', {
+            'label':'str',
+            'repository':'str',
+            'branch':'str',
+            'location':'str',
+            'id':'str',
+            'preferred_trains':'list',
+            'trains':'dict[str]',
+            'healthy':'bool',
+            'error':'bool',
+            'builtin':'bool',
+            'cached':'bool',
+            'caching_progress':'CachingProgress',
+            'caching_job':'dict[str]',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    ItemVersionDetails = typing.TypedDict('ItemVersionDetails', {
+            'cache':'bool',
+            'catalog':'str',
+            'train':'str',
+    })
+    ItemDetails = typing.TypedDict('ItemDetails', {
+            'name':'str',
+            'categories':'list[str]',
+            'maintainers':'list',
+            'tags':'list',
+            'screenshots':'list[str]',
+            'sources':'list[str]',
+            'app_readme':'typing.Optional[str]',
+            'location':'str',
+            'healthy':'bool',
+            'recommended':'bool',
+            'healthy_error':'typing.Optional[str]',
+            'versions':'dict[str]',
+            'latest_version':'typing.Optional[str]',
+            'latest_app_version':'typing.Optional[str]',
+            'latest_human_version':'typing.Optional[str]',
+            'last_update':'typing.Optional[str]',
+            'icon_url':'typing.Optional[str]',
+            'home':'str',
+    })
+    Options = typing.TypedDict('Options', {
+            'cache':'bool',
+            'cache_only':'bool',
+            'retrieve_all_trains':'bool',
+            'trains':'list[str]',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    CachingProgress_ = typing.TypedDict('CachingProgress_', {
+            'description':'typing.Optional[str]',
+            'extra':'typing.Union[str, int, bool, dict[str], list]',
+            'percent':'typing.Optional[float]',
+    })
+    CatalogEntry = typing.TypedDict('CatalogEntry', {
+            'label':'str',
+            'repository':'str',
+            'branch':'str',
+            'location':'str',
+            'id':'str',
+            'preferred_trains':'list',
+            'trains':'dict[str]',
+            'healthy':'bool',
+            'error':'bool',
+            'builtin':'bool',
+            'cached':'bool',
+            'caching_progress':'CachingProgress_',
+            'caching_job':'dict[str]',
+    })
+    CachingProgress__ = typing.TypedDict('CachingProgress__', {
+            'description':'typing.Optional[str]',
+            'extra':'typing.Union[str, int, bool, dict[str], list]',
+            'percent':'typing.Optional[float]',
+    })
+    CatalogEntry_ = typing.TypedDict('CatalogEntry_', {
+            'label':'str',
+            'repository':'str',
+            'branch':'str',
+            'location':'str',
+            'id':'str',
+            'preferred_trains':'list',
+            'trains':'dict[str]',
+            'healthy':'bool',
+            'error':'bool',
+            'builtin':'bool',
+            'cached':'bool',
+            'caching_progress':'CachingProgress__',
+            'caching_job':'dict[str]',
+    })
+    CachingProgress___ = typing.TypedDict('CachingProgress___', {
+            'description':'typing.Optional[str]',
+            'extra':'typing.Union[str, int, bool, dict[str], list]',
+            'percent':'typing.Optional[float]',
+    })
+    CatalogEntry__ = typing.TypedDict('CatalogEntry__', {
+            'label':'str',
+            'repository':'str',
+            'branch':'str',
+            'location':'str',
+            'id':'str',
+            'preferred_trains':'list',
+            'trains':'dict[str]',
+            'healthy':'bool',
+            'error':'bool',
+            'builtin':'bool',
+            'cached':'bool',
+            'caching_progress':'CachingProgress___',
+            'caching_job':'dict[str]',
+    })
+    CatalogUpdate = typing.TypedDict('CatalogUpdate', {
+            'preferred_trains':'list',
+    })
+    CachingProgress____ = typing.TypedDict('CachingProgress____', {
+            'description':'typing.Optional[str]',
+            'extra':'typing.Union[str, int, bool, dict[str], list]',
+            'percent':'typing.Optional[float]',
+    })
+    CatalogUpdateReturns = typing.TypedDict('CatalogUpdateReturns', {
+            'label':'str',
+            'repository':'str',
+            'branch':'str',
+            'location':'str',
+            'id':'str',
+            'preferred_trains':'list',
+            'trains':'dict[str]',
+            'healthy':'bool',
+            'error':'bool',
+            'builtin':'bool',
+            'cached':'bool',
+            'caching_progress':'CachingProgress____',
+            'caching_job':'dict[str]',
+    })
     @typing.overload
     def sync(self, 
         label:'str',
@@ -187,6 +1195,175 @@ class Catalog(Namespace):
         -------
         """
         ...
+    CatalogCreate = typing.TypedDict('CatalogCreate', {
+            'label':'str',
+            'repository':'str',
+            'branch':'str',
+            'preferred_trains':'list',
+            'force':'bool',
+    })
+    CachingProgress = typing.TypedDict('CachingProgress', {
+            'description':'typing.Optional[str]',
+            'extra':'typing.Union[str, int, bool, dict[str], list]',
+            'percent':'typing.Optional[float]',
+    })
+    CatalogCreateReturns = typing.TypedDict('CatalogCreateReturns', {
+            'label':'str',
+            'repository':'str',
+            'branch':'str',
+            'location':'str',
+            'id':'str',
+            'preferred_trains':'list',
+            'trains':'dict[str]',
+            'healthy':'bool',
+            'error':'bool',
+            'builtin':'bool',
+            'cached':'bool',
+            'caching_progress':'CachingProgress',
+            'caching_job':'dict[str]',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    ItemVersionDetails = typing.TypedDict('ItemVersionDetails', {
+            'cache':'bool',
+            'catalog':'str',
+            'train':'str',
+    })
+    ItemDetails = typing.TypedDict('ItemDetails', {
+            'name':'str',
+            'categories':'list[str]',
+            'maintainers':'list',
+            'tags':'list',
+            'screenshots':'list[str]',
+            'sources':'list[str]',
+            'app_readme':'typing.Optional[str]',
+            'location':'str',
+            'healthy':'bool',
+            'recommended':'bool',
+            'healthy_error':'typing.Optional[str]',
+            'versions':'dict[str]',
+            'latest_version':'typing.Optional[str]',
+            'latest_app_version':'typing.Optional[str]',
+            'latest_human_version':'typing.Optional[str]',
+            'last_update':'typing.Optional[str]',
+            'icon_url':'typing.Optional[str]',
+            'home':'str',
+    })
+    Options = typing.TypedDict('Options', {
+            'cache':'bool',
+            'cache_only':'bool',
+            'retrieve_all_trains':'bool',
+            'trains':'list[str]',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    CachingProgress_ = typing.TypedDict('CachingProgress_', {
+            'description':'typing.Optional[str]',
+            'extra':'typing.Union[str, int, bool, dict[str], list]',
+            'percent':'typing.Optional[float]',
+    })
+    CatalogEntry = typing.TypedDict('CatalogEntry', {
+            'label':'str',
+            'repository':'str',
+            'branch':'str',
+            'location':'str',
+            'id':'str',
+            'preferred_trains':'list',
+            'trains':'dict[str]',
+            'healthy':'bool',
+            'error':'bool',
+            'builtin':'bool',
+            'cached':'bool',
+            'caching_progress':'CachingProgress_',
+            'caching_job':'dict[str]',
+    })
+    CachingProgress__ = typing.TypedDict('CachingProgress__', {
+            'description':'typing.Optional[str]',
+            'extra':'typing.Union[str, int, bool, dict[str], list]',
+            'percent':'typing.Optional[float]',
+    })
+    CatalogEntry_ = typing.TypedDict('CatalogEntry_', {
+            'label':'str',
+            'repository':'str',
+            'branch':'str',
+            'location':'str',
+            'id':'str',
+            'preferred_trains':'list',
+            'trains':'dict[str]',
+            'healthy':'bool',
+            'error':'bool',
+            'builtin':'bool',
+            'cached':'bool',
+            'caching_progress':'CachingProgress__',
+            'caching_job':'dict[str]',
+    })
+    CachingProgress___ = typing.TypedDict('CachingProgress___', {
+            'description':'typing.Optional[str]',
+            'extra':'typing.Union[str, int, bool, dict[str], list]',
+            'percent':'typing.Optional[float]',
+    })
+    CatalogEntry__ = typing.TypedDict('CatalogEntry__', {
+            'label':'str',
+            'repository':'str',
+            'branch':'str',
+            'location':'str',
+            'id':'str',
+            'preferred_trains':'list',
+            'trains':'dict[str]',
+            'healthy':'bool',
+            'error':'bool',
+            'builtin':'bool',
+            'cached':'bool',
+            'caching_progress':'CachingProgress___',
+            'caching_job':'dict[str]',
+    })
+    CatalogUpdate = typing.TypedDict('CatalogUpdate', {
+            'preferred_trains':'list',
+    })
+    CachingProgress____ = typing.TypedDict('CachingProgress____', {
+            'description':'typing.Optional[str]',
+            'extra':'typing.Union[str, int, bool, dict[str], list]',
+            'percent':'typing.Optional[float]',
+    })
+    CatalogUpdateReturns = typing.TypedDict('CatalogUpdateReturns', {
+            'label':'str',
+            'repository':'str',
+            'branch':'str',
+            'location':'str',
+            'id':'str',
+            'preferred_trains':'list',
+            'trains':'dict[str]',
+            'healthy':'bool',
+            'error':'bool',
+            'builtin':'bool',
+            'cached':'bool',
+            'caching_progress':'CachingProgress____',
+            'caching_job':'dict[str]',
+    })
     @typing.overload
     def sync_all(self, 
     /) -> None: 
@@ -199,6 +1376,175 @@ class Catalog(Namespace):
         -------
         """
         ...
+    CatalogCreate = typing.TypedDict('CatalogCreate', {
+            'label':'str',
+            'repository':'str',
+            'branch':'str',
+            'preferred_trains':'list',
+            'force':'bool',
+    })
+    CachingProgress = typing.TypedDict('CachingProgress', {
+            'description':'typing.Optional[str]',
+            'extra':'typing.Union[str, int, bool, dict[str], list]',
+            'percent':'typing.Optional[float]',
+    })
+    CatalogCreateReturns = typing.TypedDict('CatalogCreateReturns', {
+            'label':'str',
+            'repository':'str',
+            'branch':'str',
+            'location':'str',
+            'id':'str',
+            'preferred_trains':'list',
+            'trains':'dict[str]',
+            'healthy':'bool',
+            'error':'bool',
+            'builtin':'bool',
+            'cached':'bool',
+            'caching_progress':'CachingProgress',
+            'caching_job':'dict[str]',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    ItemVersionDetails = typing.TypedDict('ItemVersionDetails', {
+            'cache':'bool',
+            'catalog':'str',
+            'train':'str',
+    })
+    ItemDetails = typing.TypedDict('ItemDetails', {
+            'name':'str',
+            'categories':'list[str]',
+            'maintainers':'list',
+            'tags':'list',
+            'screenshots':'list[str]',
+            'sources':'list[str]',
+            'app_readme':'typing.Optional[str]',
+            'location':'str',
+            'healthy':'bool',
+            'recommended':'bool',
+            'healthy_error':'typing.Optional[str]',
+            'versions':'dict[str]',
+            'latest_version':'typing.Optional[str]',
+            'latest_app_version':'typing.Optional[str]',
+            'latest_human_version':'typing.Optional[str]',
+            'last_update':'typing.Optional[str]',
+            'icon_url':'typing.Optional[str]',
+            'home':'str',
+    })
+    Options = typing.TypedDict('Options', {
+            'cache':'bool',
+            'cache_only':'bool',
+            'retrieve_all_trains':'bool',
+            'trains':'list[str]',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    CachingProgress_ = typing.TypedDict('CachingProgress_', {
+            'description':'typing.Optional[str]',
+            'extra':'typing.Union[str, int, bool, dict[str], list]',
+            'percent':'typing.Optional[float]',
+    })
+    CatalogEntry = typing.TypedDict('CatalogEntry', {
+            'label':'str',
+            'repository':'str',
+            'branch':'str',
+            'location':'str',
+            'id':'str',
+            'preferred_trains':'list',
+            'trains':'dict[str]',
+            'healthy':'bool',
+            'error':'bool',
+            'builtin':'bool',
+            'cached':'bool',
+            'caching_progress':'CachingProgress_',
+            'caching_job':'dict[str]',
+    })
+    CachingProgress__ = typing.TypedDict('CachingProgress__', {
+            'description':'typing.Optional[str]',
+            'extra':'typing.Union[str, int, bool, dict[str], list]',
+            'percent':'typing.Optional[float]',
+    })
+    CatalogEntry_ = typing.TypedDict('CatalogEntry_', {
+            'label':'str',
+            'repository':'str',
+            'branch':'str',
+            'location':'str',
+            'id':'str',
+            'preferred_trains':'list',
+            'trains':'dict[str]',
+            'healthy':'bool',
+            'error':'bool',
+            'builtin':'bool',
+            'cached':'bool',
+            'caching_progress':'CachingProgress__',
+            'caching_job':'dict[str]',
+    })
+    CachingProgress___ = typing.TypedDict('CachingProgress___', {
+            'description':'typing.Optional[str]',
+            'extra':'typing.Union[str, int, bool, dict[str], list]',
+            'percent':'typing.Optional[float]',
+    })
+    CatalogEntry__ = typing.TypedDict('CatalogEntry__', {
+            'label':'str',
+            'repository':'str',
+            'branch':'str',
+            'location':'str',
+            'id':'str',
+            'preferred_trains':'list',
+            'trains':'dict[str]',
+            'healthy':'bool',
+            'error':'bool',
+            'builtin':'bool',
+            'cached':'bool',
+            'caching_progress':'CachingProgress___',
+            'caching_job':'dict[str]',
+    })
+    CatalogUpdate = typing.TypedDict('CatalogUpdate', {
+            'preferred_trains':'list',
+    })
+    CachingProgress____ = typing.TypedDict('CachingProgress____', {
+            'description':'typing.Optional[str]',
+            'extra':'typing.Union[str, int, bool, dict[str], list]',
+            'percent':'typing.Optional[float]',
+    })
+    CatalogUpdateReturns = typing.TypedDict('CatalogUpdateReturns', {
+            'label':'str',
+            'repository':'str',
+            'branch':'str',
+            'location':'str',
+            'id':'str',
+            'preferred_trains':'list',
+            'trains':'dict[str]',
+            'healthy':'bool',
+            'error':'bool',
+            'builtin':'bool',
+            'cached':'bool',
+            'caching_progress':'CachingProgress____',
+            'caching_job':'dict[str]',
+    })
     @typing.overload
     def update(self, 
         id:'str',
@@ -219,6 +1565,175 @@ class Catalog(Namespace):
             catalog_update_returns
         """
         ...
+    CatalogCreate = typing.TypedDict('CatalogCreate', {
+            'label':'str',
+            'repository':'str',
+            'branch':'str',
+            'preferred_trains':'list',
+            'force':'bool',
+    })
+    CachingProgress = typing.TypedDict('CachingProgress', {
+            'description':'typing.Optional[str]',
+            'extra':'typing.Union[str, int, bool, dict[str], list]',
+            'percent':'typing.Optional[float]',
+    })
+    CatalogCreateReturns = typing.TypedDict('CatalogCreateReturns', {
+            'label':'str',
+            'repository':'str',
+            'branch':'str',
+            'location':'str',
+            'id':'str',
+            'preferred_trains':'list',
+            'trains':'dict[str]',
+            'healthy':'bool',
+            'error':'bool',
+            'builtin':'bool',
+            'cached':'bool',
+            'caching_progress':'CachingProgress',
+            'caching_job':'dict[str]',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    ItemVersionDetails = typing.TypedDict('ItemVersionDetails', {
+            'cache':'bool',
+            'catalog':'str',
+            'train':'str',
+    })
+    ItemDetails = typing.TypedDict('ItemDetails', {
+            'name':'str',
+            'categories':'list[str]',
+            'maintainers':'list',
+            'tags':'list',
+            'screenshots':'list[str]',
+            'sources':'list[str]',
+            'app_readme':'typing.Optional[str]',
+            'location':'str',
+            'healthy':'bool',
+            'recommended':'bool',
+            'healthy_error':'typing.Optional[str]',
+            'versions':'dict[str]',
+            'latest_version':'typing.Optional[str]',
+            'latest_app_version':'typing.Optional[str]',
+            'latest_human_version':'typing.Optional[str]',
+            'last_update':'typing.Optional[str]',
+            'icon_url':'typing.Optional[str]',
+            'home':'str',
+    })
+    Options = typing.TypedDict('Options', {
+            'cache':'bool',
+            'cache_only':'bool',
+            'retrieve_all_trains':'bool',
+            'trains':'list[str]',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    CachingProgress_ = typing.TypedDict('CachingProgress_', {
+            'description':'typing.Optional[str]',
+            'extra':'typing.Union[str, int, bool, dict[str], list]',
+            'percent':'typing.Optional[float]',
+    })
+    CatalogEntry = typing.TypedDict('CatalogEntry', {
+            'label':'str',
+            'repository':'str',
+            'branch':'str',
+            'location':'str',
+            'id':'str',
+            'preferred_trains':'list',
+            'trains':'dict[str]',
+            'healthy':'bool',
+            'error':'bool',
+            'builtin':'bool',
+            'cached':'bool',
+            'caching_progress':'CachingProgress_',
+            'caching_job':'dict[str]',
+    })
+    CachingProgress__ = typing.TypedDict('CachingProgress__', {
+            'description':'typing.Optional[str]',
+            'extra':'typing.Union[str, int, bool, dict[str], list]',
+            'percent':'typing.Optional[float]',
+    })
+    CatalogEntry_ = typing.TypedDict('CatalogEntry_', {
+            'label':'str',
+            'repository':'str',
+            'branch':'str',
+            'location':'str',
+            'id':'str',
+            'preferred_trains':'list',
+            'trains':'dict[str]',
+            'healthy':'bool',
+            'error':'bool',
+            'builtin':'bool',
+            'cached':'bool',
+            'caching_progress':'CachingProgress__',
+            'caching_job':'dict[str]',
+    })
+    CachingProgress___ = typing.TypedDict('CachingProgress___', {
+            'description':'typing.Optional[str]',
+            'extra':'typing.Union[str, int, bool, dict[str], list]',
+            'percent':'typing.Optional[float]',
+    })
+    CatalogEntry__ = typing.TypedDict('CatalogEntry__', {
+            'label':'str',
+            'repository':'str',
+            'branch':'str',
+            'location':'str',
+            'id':'str',
+            'preferred_trains':'list',
+            'trains':'dict[str]',
+            'healthy':'bool',
+            'error':'bool',
+            'builtin':'bool',
+            'cached':'bool',
+            'caching_progress':'CachingProgress___',
+            'caching_job':'dict[str]',
+    })
+    CatalogUpdate = typing.TypedDict('CatalogUpdate', {
+            'preferred_trains':'list',
+    })
+    CachingProgress____ = typing.TypedDict('CachingProgress____', {
+            'description':'typing.Optional[str]',
+            'extra':'typing.Union[str, int, bool, dict[str], list]',
+            'percent':'typing.Optional[float]',
+    })
+    CatalogUpdateReturns = typing.TypedDict('CatalogUpdateReturns', {
+            'label':'str',
+            'repository':'str',
+            'branch':'str',
+            'location':'str',
+            'id':'str',
+            'preferred_trains':'list',
+            'trains':'dict[str]',
+            'healthy':'bool',
+            'error':'bool',
+            'builtin':'bool',
+            'cached':'bool',
+            'caching_progress':'CachingProgress____',
+            'caching_job':'dict[str]',
+    })
     @typing.overload
     def validate(self, 
         label:'str',
@@ -237,123 +1752,173 @@ class Catalog(Namespace):
         -------
         """
         ...
+    CatalogCreate = typing.TypedDict('CatalogCreate', {
+            'label':'str',
+            'repository':'str',
+            'branch':'str',
+            'preferred_trains':'list',
+            'force':'bool',
+    })
+    CachingProgress = typing.TypedDict('CachingProgress', {
+            'description':'typing.Optional[str]',
+            'extra':'typing.Union[str, int, bool, dict[str], list]',
+            'percent':'typing.Optional[float]',
+    })
+    CatalogCreateReturns = typing.TypedDict('CatalogCreateReturns', {
+            'label':'str',
+            'repository':'str',
+            'branch':'str',
+            'location':'str',
+            'id':'str',
+            'preferred_trains':'list',
+            'trains':'dict[str]',
+            'healthy':'bool',
+            'error':'bool',
+            'builtin':'bool',
+            'cached':'bool',
+            'caching_progress':'CachingProgress',
+            'caching_job':'dict[str]',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    ItemVersionDetails = typing.TypedDict('ItemVersionDetails', {
+            'cache':'bool',
+            'catalog':'str',
+            'train':'str',
+    })
+    ItemDetails = typing.TypedDict('ItemDetails', {
+            'name':'str',
+            'categories':'list[str]',
+            'maintainers':'list',
+            'tags':'list',
+            'screenshots':'list[str]',
+            'sources':'list[str]',
+            'app_readme':'typing.Optional[str]',
+            'location':'str',
+            'healthy':'bool',
+            'recommended':'bool',
+            'healthy_error':'typing.Optional[str]',
+            'versions':'dict[str]',
+            'latest_version':'typing.Optional[str]',
+            'latest_app_version':'typing.Optional[str]',
+            'latest_human_version':'typing.Optional[str]',
+            'last_update':'typing.Optional[str]',
+            'icon_url':'typing.Optional[str]',
+            'home':'str',
+    })
+    Options = typing.TypedDict('Options', {
+            'cache':'bool',
+            'cache_only':'bool',
+            'retrieve_all_trains':'bool',
+            'trains':'list[str]',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    CachingProgress_ = typing.TypedDict('CachingProgress_', {
+            'description':'typing.Optional[str]',
+            'extra':'typing.Union[str, int, bool, dict[str], list]',
+            'percent':'typing.Optional[float]',
+    })
+    CatalogEntry = typing.TypedDict('CatalogEntry', {
+            'label':'str',
+            'repository':'str',
+            'branch':'str',
+            'location':'str',
+            'id':'str',
+            'preferred_trains':'list',
+            'trains':'dict[str]',
+            'healthy':'bool',
+            'error':'bool',
+            'builtin':'bool',
+            'cached':'bool',
+            'caching_progress':'CachingProgress_',
+            'caching_job':'dict[str]',
+    })
+    CachingProgress__ = typing.TypedDict('CachingProgress__', {
+            'description':'typing.Optional[str]',
+            'extra':'typing.Union[str, int, bool, dict[str], list]',
+            'percent':'typing.Optional[float]',
+    })
+    CatalogEntry_ = typing.TypedDict('CatalogEntry_', {
+            'label':'str',
+            'repository':'str',
+            'branch':'str',
+            'location':'str',
+            'id':'str',
+            'preferred_trains':'list',
+            'trains':'dict[str]',
+            'healthy':'bool',
+            'error':'bool',
+            'builtin':'bool',
+            'cached':'bool',
+            'caching_progress':'CachingProgress__',
+            'caching_job':'dict[str]',
+    })
+    CachingProgress___ = typing.TypedDict('CachingProgress___', {
+            'description':'typing.Optional[str]',
+            'extra':'typing.Union[str, int, bool, dict[str], list]',
+            'percent':'typing.Optional[float]',
+    })
+    CatalogEntry__ = typing.TypedDict('CatalogEntry__', {
+            'label':'str',
+            'repository':'str',
+            'branch':'str',
+            'location':'str',
+            'id':'str',
+            'preferred_trains':'list',
+            'trains':'dict[str]',
+            'healthy':'bool',
+            'error':'bool',
+            'builtin':'bool',
+            'cached':'bool',
+            'caching_progress':'CachingProgress___',
+            'caching_job':'dict[str]',
+    })
+    CatalogUpdate = typing.TypedDict('CatalogUpdate', {
+            'preferred_trains':'list',
+    })
+    CachingProgress____ = typing.TypedDict('CachingProgress____', {
+            'description':'typing.Optional[str]',
+            'extra':'typing.Union[str, int, bool, dict[str], list]',
+            'percent':'typing.Optional[float]',
+    })
+    CatalogUpdateReturns = typing.TypedDict('CatalogUpdateReturns', {
+            'label':'str',
+            'repository':'str',
+            'branch':'str',
+            'location':'str',
+            'id':'str',
+            'preferred_trains':'list',
+            'trains':'dict[str]',
+            'healthy':'bool',
+            'error':'bool',
+            'builtin':'bool',
+            'cached':'bool',
+            'caching_progress':'CachingProgress____',
+            'caching_job':'dict[str]',
+    })
 
-class CatalogCreate(typing.TypedDict):
-        label:'str'
-        repository:'str'
-        branch:'str'
-        preferred_trains:'list'
-        force:'bool'
-        ...
-class CatalogCreateReturns(typing.TypedDict):
-        label:'str'
-        repository:'str'
-        branch:'str'
-        location:'str'
-        id:'str'
-        preferred_trains:'list'
-        trains:'dict[str]'
-        healthy:'bool'
-        error:'bool'
-        builtin:'bool'
-        cached:'bool'
-        caching_progress:'CachingProgress'
-        caching_job:'dict[str]'
-        ...
-class CachingProgress(typing.TypedDict):
-        description:'typing.Optional[str]'
-        extra:'typing.Union[str, int, bool, dict[str], list]'
-        percent:'typing.Optional[float]'
-        ...
-class QueryOptionsGetInstance(typing.TypedDict):
-        relationships:'bool'
-        extend:'typing.Optional[str]'
-        extend_context:'typing.Optional[str]'
-        prefix:'typing.Optional[str]'
-        extra:'dict[str]'
-        order_by:'list'
-        select:'list'
-        count:'bool'
-        get:'bool'
-        offset:'int'
-        limit:'int'
-        force_sql_filters:'bool'
-        ...
-class ItemVersionDetails(typing.TypedDict):
-        cache:'bool'
-        catalog:'str'
-        train:'str'
-        ...
-class ItemDetails(typing.TypedDict):
-        name:'str'
-        categories:'list[str]'
-        maintainers:'list'
-        tags:'list'
-        screenshots:'list[str]'
-        sources:'list[str]'
-        app_readme:'typing.Optional[str]'
-        location:'str'
-        healthy:'bool'
-        recommended:'bool'
-        healthy_error:'typing.Optional[str]'
-        versions:'dict[str]'
-        latest_version:'typing.Optional[str]'
-        latest_app_version:'typing.Optional[str]'
-        latest_human_version:'typing.Optional[str]'
-        last_update:'typing.Optional[str]'
-        icon_url:'typing.Optional[str]'
-        home:'str'
-        ...
-class Options(typing.TypedDict):
-        cache:'bool'
-        cache_only:'bool'
-        retrieve_all_trains:'bool'
-        trains:'list[str]'
-        ...
-class QueryOptions(typing.TypedDict):
-        relationships:'bool'
-        extend:'typing.Optional[str]'
-        extend_context:'typing.Optional[str]'
-        prefix:'typing.Optional[str]'
-        extra:'dict[str]'
-        order_by:'list'
-        select:'list'
-        count:'bool'
-        get:'bool'
-        offset:'int'
-        limit:'int'
-        force_sql_filters:'bool'
-        ...
-class CatalogEntry(typing.TypedDict):
-        label:'str'
-        repository:'str'
-        branch:'str'
-        location:'str'
-        id:'str'
-        preferred_trains:'list'
-        trains:'dict[str]'
-        healthy:'bool'
-        error:'bool'
-        builtin:'bool'
-        cached:'bool'
-        caching_progress:'CachingProgress'
-        caching_job:'dict[str]'
-        ...
-class CatalogUpdate(typing.TypedDict):
-        preferred_trains:'list'
-        ...
-class CatalogUpdateReturns(typing.TypedDict):
-        label:'str'
-        repository:'str'
-        branch:'str'
-        location:'str'
-        id:'str'
-        preferred_trains:'list'
-        trains:'dict[str]'
-        healthy:'bool'
-        error:'bool'
-        builtin:'bool'
-        cached:'bool'
-        caching_progress:'CachingProgress'
-        caching_job:'dict[str]'
-        ...
