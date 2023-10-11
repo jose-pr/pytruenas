@@ -115,19 +115,10 @@ class IscsiTargetextent(
             'lunid':'typing.Optional[int]',
             'extent':'int',
     })
-    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
+    IscsiTargetextentUpdate = typing.TypedDict('IscsiTargetextentUpdate', {
+            'target':'int',
+            'lunid':'int',
+            'extent':'int',
     })
     QueryOptions = typing.TypedDict('QueryOptions', {
             'relationships':'bool',
@@ -143,8 +134,17 @@ class IscsiTargetextent(
             'limit':'int',
             'force_sql_filters':'bool',
     })
-    IscsiTargetextentUpdate = typing.TypedDict('IscsiTargetextentUpdate', {
-            'target':'int',
-            'lunid':'int',
-            'extent':'int',
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
     })

@@ -8,6 +8,9 @@ class Dns(Namespace):
     def __init__(self, client) -> None:
         super().__init__(client, 'dns')
 
+    Nameserver = typing.TypedDict('Nameserver', {
+            'nameserver':'str',
+    })
     QueryOptions = typing.TypedDict('QueryOptions', {
             'relationships':'bool',
             'extend':'typing.Optional[str]',
@@ -21,7 +24,4 @@ class Dns(Namespace):
             'offset':'int',
             'limit':'int',
             'force_sql_filters':'bool',
-    })
-    Nameserver = typing.TypedDict('Nameserver', {
-            'nameserver':'str',
     })

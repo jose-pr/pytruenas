@@ -28,6 +28,9 @@ class Dns(
             
         """
         ...
+    Nameserver = typing.TypedDict('Nameserver', {
+            'nameserver':'str',
+    })
     QueryOptions = typing.TypedDict('QueryOptions', {
             'relationships':'bool',
             'extend':'typing.Optional[str]',
@@ -41,7 +44,4 @@ class Dns(
             'offset':'int',
             'limit':'int',
             'force_sql_filters':'bool',
-    })
-    Nameserver = typing.TypedDict('Nameserver', {
-            'nameserver':'str',
     })

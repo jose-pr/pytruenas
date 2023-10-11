@@ -9,6 +9,13 @@ class IscsiGlobal(ConfigMixin, Namespace):
     def __init__(self, client) -> None:
         super().__init__(client, 'iscsi.global')
 
+    IscsiglobalUpdate = typing.TypedDict('IscsiglobalUpdate', {
+            'basename':'str',
+            'isns_servers':'list[str]',
+            'listen_port':'int',
+            'pool_avail_threshold':'typing.Optional[int]',
+            'alua':'bool',
+    })
     QueryOptions = typing.TypedDict('QueryOptions', {
             'relationships':'bool',
             'extend':'typing.Optional[str]',
@@ -38,11 +45,4 @@ class IscsiGlobal(ConfigMixin, Namespace):
             'immediate_data':'bool',
             'iser':'bool',
             'offload':'bool',
-    })
-    IscsiglobalUpdate = typing.TypedDict('IscsiglobalUpdate', {
-            'basename':'str',
-            'isns_servers':'list[str]',
-            'listen_port':'int',
-            'pool_avail_threshold':'typing.Optional[int]',
-            'alua':'bool',
     })

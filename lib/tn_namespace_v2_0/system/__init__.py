@@ -8,14 +8,14 @@ class System(Namespace):
     def __init__(self, client) -> None:
         super().__init__(client, 'system')
 
-    class ProductRunningEnvironment(str,Enum):
-        DEFAULT = 'DEFAULT'
-        EC2 = 'EC2'
-        ...
     class Feature(str,Enum):
         DEDUP = 'DEDUP'
         FIBRECHANNEL = 'FIBRECHANNEL'
         VM = 'VM'
+        ...
+    class ProductRunningEnvironment(str,Enum):
+        DEFAULT = 'DEFAULT'
+        EC2 = 'EC2'
         ...
     SystemInfo = typing.TypedDict('SystemInfo', {
             'version':'str',

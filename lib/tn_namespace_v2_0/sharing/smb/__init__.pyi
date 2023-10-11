@@ -198,6 +198,69 @@ class SharingSmb(
             sharing_smb_update_returns
         """
         ...
+    Aclentry = typing.TypedDict('Aclentry', {
+            'ae_who_sid':'str',
+            'ae_who_id':'AeWhoId',
+            'ae_perm':'AePerm',
+            'ae_type':'AeType',
+    })
+    class AePerm(str,Enum):
+        FULL = 'FULL'
+        CHANGE = 'CHANGE'
+        READ = 'READ'
+        ...
+    class AeType(str,Enum):
+        ALLOWED = 'ALLOWED'
+        DENIED = 'DENIED'
+        ...
+    AeWhoId = typing.TypedDict('AeWhoId', {
+            'id_type':'IdType',
+            'id':'int',
+    })
+    class IdType(str,Enum):
+        USER = 'USER'
+        GROUP = 'GROUP'
+        BOTH = 'BOTH'
+        ...
+    class Purpose(str,Enum):
+        NOPRESET = 'NO_PRESET'
+        DEFAULTCLUSTERSHARE = 'DEFAULT_CLUSTER_SHARE'
+        DEFAULTSHARE = 'DEFAULT_SHARE'
+        TIMEMACHINE = 'TIMEMACHINE'
+        ENHANCEDTIMEMACHINE = 'ENHANCED_TIMEMACHINE'
+        MULTIPROTOCOLNFS = 'MULTI_PROTOCOL_NFS'
+        PRIVATEDATASETS = 'PRIVATE_DATASETS'
+        READONLY = 'READ_ONLY'
+        WORMDROPBOX = 'WORM_DROPBOX'
+        ...
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
     SharingsmbCreate = typing.TypedDict('SharingsmbCreate', {
             'purpose':'Purpose',
             'path':'str',
@@ -225,76 +288,6 @@ class SharingSmb(
             'cluster_volname':'str',
             'afp':'bool',
     })
-    class Purpose(str,Enum):
-        NOPRESET = 'NO_PRESET'
-        DEFAULTCLUSTERSHARE = 'DEFAULT_CLUSTER_SHARE'
-        DEFAULTSHARE = 'DEFAULT_SHARE'
-        TIMEMACHINE = 'TIMEMACHINE'
-        ENHANCEDTIMEMACHINE = 'ENHANCED_TIMEMACHINE'
-        MULTIPROTOCOLNFS = 'MULTI_PROTOCOL_NFS'
-        PRIVATEDATASETS = 'PRIVATE_DATASETS'
-        READONLY = 'READ_ONLY'
-        WORMDROPBOX = 'WORM_DROPBOX'
-        ...
-    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    SmbGetacl = typing.TypedDict('SmbGetacl', {
-            'share_name':'str',
-    })
-    SmbShareAcl = typing.TypedDict('SmbShareAcl', {
-            'share_name':'str',
-            'share_acl':'list[Aclentry]',
-    })
-    Aclentry = typing.TypedDict('Aclentry', {
-            'ae_who_sid':'str',
-            'ae_who_id':'AeWhoId',
-            'ae_perm':'AePerm',
-            'ae_type':'AeType',
-    })
-    AeWhoId = typing.TypedDict('AeWhoId', {
-            'id_type':'IdType',
-            'id':'int',
-    })
-    class IdType(str,Enum):
-        USER = 'USER'
-        GROUP = 'GROUP'
-        BOTH = 'BOTH'
-        ...
-    class AePerm(str,Enum):
-        FULL = 'FULL'
-        CHANGE = 'CHANGE'
-        READ = 'READ'
-        ...
-    class AeType(str,Enum):
-        ALLOWED = 'ALLOWED'
-        DENIED = 'DENIED'
-        ...
-    QueryOptions = typing.TypedDict('QueryOptions', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
     SharingsmbUpdate = typing.TypedDict('SharingsmbUpdate', {
             'purpose':'Purpose',
             'path':'str',
@@ -321,4 +314,11 @@ class SharingSmb(
             'enabled':'bool',
             'cluster_volname':'str',
             'afp':'bool',
+    })
+    SmbGetacl = typing.TypedDict('SmbGetacl', {
+            'share_name':'str',
+    })
+    SmbShareAcl = typing.TypedDict('SmbShareAcl', {
+            'share_name':'str',
+            'share_acl':'list[Aclentry]',
     })

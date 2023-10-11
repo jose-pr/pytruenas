@@ -8,10 +8,6 @@ class Directoryservices(Namespace):
     def __init__(self, client) -> None:
         super().__init__(client, 'directoryservices')
 
-    DirectoryServicesStates = typing.TypedDict('DirectoryServicesStates', {
-            'activedirectory':'Activedirectory',
-            'ldap':'Ldap',
-    })
     class Activedirectory(str,Enum):
         DISABLED = 'DISABLED'
         FAULTED = 'FAULTED'
@@ -19,6 +15,10 @@ class Directoryservices(Namespace):
         JOINING = 'JOINING'
         HEALTHY = 'HEALTHY'
         ...
+    DirectoryServicesStates = typing.TypedDict('DirectoryServicesStates', {
+            'activedirectory':'Activedirectory',
+            'ldap':'Ldap',
+    })
     class Ldap(str,Enum):
         DISABLED = 'DISABLED'
         FAULTED = 'FAULTED'

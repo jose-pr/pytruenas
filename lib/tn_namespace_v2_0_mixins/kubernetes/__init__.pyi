@@ -224,6 +224,10 @@ class Kubernetes(
             kubernetes_update_returns
         """
         ...
+    Event = typing.TypedDict('Event', {
+            'metadata':'Metadata',
+            'message':'str',
+    })
     KubernetesEntry = typing.TypedDict('KubernetesEntry', {
             'servicelb':'bool',
             'configure_gpus':'bool',
@@ -241,29 +245,6 @@ class Kubernetes(
             'dataset':'typing.Optional[str]',
             'id':'int',
     })
-    Event = typing.TypedDict('Event', {
-            'metadata':'Metadata',
-            'message':'str',
-    })
-    Metadata = typing.TypedDict('Metadata', {
-            'name':'str',
-    })
-    Options = typing.TypedDict('Options', {
-            'wait_for_csi':'bool',
-    })
-    Status = typing.TypedDict('Status', {
-            'status':'Status_',
-            'description':'str',
-    })
-    class Status_(str,Enum):
-        PENDING = 'PENDING'
-        RUNNING = 'RUNNING'
-        INITIALIZING = 'INITIALIZING'
-        STOPPING = 'STOPPING'
-        STOPPED = 'STOPPED'
-        UNCONFIGURED = 'UNCONFIGURED'
-        FAILED = 'FAILED'
-        ...
     KubernetesUpdate = typing.TypedDict('KubernetesUpdate', {
             'servicelb':'bool',
             'configure_gpus':'bool',
@@ -282,9 +263,6 @@ class Kubernetes(
             'force':'bool',
             'migration_options':'MigrationOptions',
     })
-    MigrationOptions = typing.TypedDict('MigrationOptions', {
-            'passphrase':'str',
-    })
     KubernetesUpdateReturns = typing.TypedDict('KubernetesUpdateReturns', {
             'servicelb':'bool',
             'configure_gpus':'bool',
@@ -302,3 +280,25 @@ class Kubernetes(
             'dataset':'typing.Optional[str]',
             'id':'int',
     })
+    Metadata = typing.TypedDict('Metadata', {
+            'name':'str',
+    })
+    MigrationOptions = typing.TypedDict('MigrationOptions', {
+            'passphrase':'str',
+    })
+    Options = typing.TypedDict('Options', {
+            'wait_for_csi':'bool',
+    })
+    Status = typing.TypedDict('Status', {
+            'status':'Status_',
+            'description':'str',
+    })
+    class Status_(str,Enum):
+        PENDING = 'PENDING'
+        RUNNING = 'RUNNING'
+        INITIALIZING = 'INITIALIZING'
+        STOPPING = 'STOPPING'
+        STOPPED = 'STOPPED'
+        UNCONFIGURED = 'UNCONFIGURED'
+        FAILED = 'FAILED'
+        ...

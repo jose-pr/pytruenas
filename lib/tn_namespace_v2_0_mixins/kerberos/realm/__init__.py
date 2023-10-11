@@ -22,34 +22,6 @@ class KerberosRealm(TableExtMixin, Namespace):
             'kpasswd_server':'list',
             'id':'int',
     })
-    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    QueryOptions = typing.TypedDict('QueryOptions', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
     KerberosRealmEntry = typing.TypedDict('KerberosRealmEntry', {
             'realm':'str',
             'kdc':'list',
@@ -69,4 +41,32 @@ class KerberosRealm(TableExtMixin, Namespace):
             'admin_server':'list',
             'kpasswd_server':'list',
             'id':'int',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
     })

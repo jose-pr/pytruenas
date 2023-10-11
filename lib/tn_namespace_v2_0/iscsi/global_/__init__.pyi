@@ -84,6 +84,13 @@ class IscsiGlobal(
             iscsi_global_update_returns
         """
         ...
+    IscsiglobalUpdate = typing.TypedDict('IscsiglobalUpdate', {
+            'basename':'str',
+            'isns_servers':'list[str]',
+            'listen_port':'int',
+            'pool_avail_threshold':'typing.Optional[int]',
+            'alua':'bool',
+    })
     QueryOptions = typing.TypedDict('QueryOptions', {
             'relationships':'bool',
             'extend':'typing.Optional[str]',
@@ -113,11 +120,4 @@ class IscsiGlobal(
             'immediate_data':'bool',
             'iser':'bool',
             'offload':'bool',
-    })
-    IscsiglobalUpdate = typing.TypedDict('IscsiglobalUpdate', {
-            'basename':'str',
-            'isns_servers':'list[str]',
-            'listen_port':'int',
-            'pool_avail_threshold':'typing.Optional[int]',
-            'alua':'bool',
     })

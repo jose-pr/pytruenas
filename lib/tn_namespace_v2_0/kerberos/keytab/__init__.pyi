@@ -148,19 +148,30 @@ class KerberosKeytab(
             'name':'str',
             'id':'int',
     })
-    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
+    KerberosKeytabEntry = typing.TypedDict('KerberosKeytabEntry', {
+            'file':'str',
+            'name':'str',
+            'id':'int',
+    })
+    KerberosKeytabUpdate = typing.TypedDict('KerberosKeytabUpdate', {
+            'file':'str',
+            'name':'str',
+    })
+    KerberosKeytabUpdateReturns = typing.TypedDict('KerberosKeytabUpdateReturns', {
+            'file':'str',
+            'name':'str',
+            'id':'int',
+    })
+    KeytabData = typing.TypedDict('KeytabData', {
+            'name':'str',
+    })
+    KeytabEntry = typing.TypedDict('KeytabEntry', {
+            'slot':'int',
+            'kvno':'int',
+            'principal':'str',
+            'etype':'str',
+            'etype_deprecated':'bool',
+            'date':'str',
     })
     QueryOptions = typing.TypedDict('QueryOptions', {
             'relationships':'bool',
@@ -176,28 +187,17 @@ class KerberosKeytab(
             'limit':'int',
             'force_sql_filters':'bool',
     })
-    KerberosKeytabEntry = typing.TypedDict('KerberosKeytabEntry', {
-            'file':'str',
-            'name':'str',
-            'id':'int',
-    })
-    KeytabEntry = typing.TypedDict('KeytabEntry', {
-            'slot':'int',
-            'kvno':'int',
-            'principal':'str',
-            'etype':'str',
-            'etype_deprecated':'bool',
-            'date':'str',
-    })
-    KerberosKeytabUpdate = typing.TypedDict('KerberosKeytabUpdate', {
-            'file':'str',
-            'name':'str',
-    })
-    KerberosKeytabUpdateReturns = typing.TypedDict('KerberosKeytabUpdateReturns', {
-            'file':'str',
-            'name':'str',
-            'id':'int',
-    })
-    KeytabData = typing.TypedDict('KeytabData', {
-            'name':'str',
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
     })

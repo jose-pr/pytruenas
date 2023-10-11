@@ -163,18 +163,6 @@ class Support(
             'filename':'str',
             'token':'str',
     })
-    SupportEntry = typing.TypedDict('SupportEntry', {
-            'enabled':'typing.Optional[bool]',
-            'name':'str',
-            'title':'str',
-            'email':'str',
-            'phone':'str',
-            'secondary_name':'str',
-            'secondary_title':'str',
-            'secondary_email':'str',
-            'secondary_phone':'str',
-            'id':'int',
-    })
     NewTicket = typing.TypedDict('NewTicket', {
             'title':'str',
             'body':'str',
@@ -189,14 +177,22 @@ class Support(
             'email':'str',
             'cc':'list[str]',
     })
-    class Type(str,Enum):
-        BUG = 'BUG'
-        FEATURE = 'FEATURE'
-        ...
     NewTicketResponse = typing.TypedDict('NewTicketResponse', {
             'ticket':'typing.Optional[int]',
             'url':'typing.Optional[str]',
             'has_debug':'bool',
+    })
+    SupportEntry = typing.TypedDict('SupportEntry', {
+            'enabled':'typing.Optional[bool]',
+            'name':'str',
+            'title':'str',
+            'email':'str',
+            'phone':'str',
+            'secondary_name':'str',
+            'secondary_title':'str',
+            'secondary_email':'str',
+            'secondary_phone':'str',
+            'id':'int',
     })
     SupportUpdate = typing.TypedDict('SupportUpdate', {
             'enabled':'typing.Optional[bool]',
@@ -221,3 +217,7 @@ class Support(
             'secondary_phone':'str',
             'id':'int',
     })
+    class Type(str,Enum):
+        BUG = 'BUG'
+        FEATURE = 'FEATURE'
+        ...

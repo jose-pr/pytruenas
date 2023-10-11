@@ -21,16 +21,6 @@ class Mail(ConfigMixin, Namespace):
             'oauth':'Oauth',
             'id':'int',
     })
-    class Security(str,Enum):
-        PLAIN = 'PLAIN'
-        SSL = 'SSL'
-        TLS = 'TLS'
-        ...
-    Oauth = typing.TypedDict('Oauth', {
-            'client_id':'str',
-            'client_secret':'str',
-            'refresh_token':'str',
-    })
     MailMessage = typing.TypedDict('MailMessage', {
             'subject':'str',
             'text':'str',
@@ -55,11 +45,6 @@ class Mail(ConfigMixin, Namespace):
             'pass':'typing.Optional[str]',
             'oauth':'Oauth_',
     })
-    Oauth_ = typing.TypedDict('Oauth_', {
-            'client_id':'str',
-            'client_secret':'str',
-            'refresh_token':'str',
-    })
     MailUpdateReturns = typing.TypedDict('MailUpdateReturns', {
             'fromemail':'str',
             'fromname':'str',
@@ -72,3 +57,18 @@ class Mail(ConfigMixin, Namespace):
             'oauth':'Oauth',
             'id':'int',
     })
+    Oauth = typing.TypedDict('Oauth', {
+            'client_id':'str',
+            'client_secret':'str',
+            'refresh_token':'str',
+    })
+    Oauth_ = typing.TypedDict('Oauth_', {
+            'client_id':'str',
+            'client_secret':'str',
+            'refresh_token':'str',
+    })
+    class Security(str,Enum):
+        PLAIN = 'PLAIN'
+        SSL = 'SSL'
+        TLS = 'TLS'
+        ...

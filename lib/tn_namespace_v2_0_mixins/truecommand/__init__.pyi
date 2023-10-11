@@ -58,15 +58,6 @@ class Truecommand(
             truecommand_update_returns
         """
         ...
-    TruecommandEntry = typing.TypedDict('TruecommandEntry', {
-            'id':'int',
-            'api_key':'typing.Optional[str]',
-            'status':'Status',
-            'status_reason':'StatusReason',
-            'remote_url':'typing.Optional[str]',
-            'remote_ip_address':'typing.Optional[str]',
-            'enabled':'bool',
-    })
     class Status(str,Enum):
         CONNECTED = 'CONNECTED'
         CONNECTING = 'CONNECTING'
@@ -85,6 +76,15 @@ class Truecommand(
             'truecommand_url':'typing.Optional[str]',
             'status':'str',
             'status_reason':'str',
+    })
+    TruecommandEntry = typing.TypedDict('TruecommandEntry', {
+            'id':'int',
+            'api_key':'typing.Optional[str]',
+            'status':'Status',
+            'status_reason':'StatusReason',
+            'remote_url':'typing.Optional[str]',
+            'remote_ip_address':'typing.Optional[str]',
+            'enabled':'bool',
     })
     TruecommandUpdate = typing.TypedDict('TruecommandUpdate', {
             'enabled':'bool',

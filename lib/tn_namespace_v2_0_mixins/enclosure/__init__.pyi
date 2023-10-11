@@ -91,7 +91,10 @@ class Enclosure(
             enclosure_update_returns
         """
         ...
-    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+    EnclosureUpdate = typing.TypedDict('EnclosureUpdate', {
+            'label':'str',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
             'relationships':'bool',
             'extend':'typing.Optional[str]',
             'extend_context':'typing.Optional[str]',
@@ -105,7 +108,7 @@ class Enclosure(
             'limit':'int',
             'force_sql_filters':'bool',
     })
-    QueryOptions = typing.TypedDict('QueryOptions', {
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
             'relationships':'bool',
             'extend':'typing.Optional[str]',
             'extend_context':'typing.Optional[str]',
@@ -124,6 +127,3 @@ class Enclosure(
         FAULT = 'FAULT'
         IDENTIFY = 'IDENTIFY'
         ...
-    EnclosureUpdate = typing.TypedDict('EnclosureUpdate', {
-            'label':'str',
-    })

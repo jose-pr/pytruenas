@@ -8,15 +8,71 @@ class Pool(Namespace):
     def __init__(self, client) -> None:
         super().__init__(client, 'pool')
 
-    PoolAttach = typing.TypedDict('PoolAttach', {
-            'target_vdev':'str',
-            'new_disk':'str',
-            'allow_duplicate_serials':'bool',
-    })
+    class Action(str,Enum):
+        START = 'START'
+        STOP = 'STOP'
+        PAUSE = 'PAUSE'
+        ...
+    class Algorithm(str,Enum):
+        AES128CCM = 'AES-128-CCM'
+        AES192CCM = 'AES-192-CCM'
+        AES256CCM = 'AES-256-CCM'
+        AES128GCM = 'AES-128-GCM'
+        AES192GCM = 'AES-192-GCM'
+        AES256GCM = 'AES-256-GCM'
+        ...
     Attachment = typing.TypedDict('Attachment', {
             'type':'str',
             'service':'typing.Optional[str]',
             'attachments':'list[str]',
+    })
+    class Autotrim(str,Enum):
+        ON = 'ON'
+        OFF = 'OFF'
+        ...
+    Cachevdevs = typing.TypedDict('Cachevdevs', {
+            'type':'Type__',
+            'disks':'list[str]',
+    })
+    Datavdevs = typing.TypedDict('Datavdevs', {
+            'type':'Type',
+            'disks':'list[str]',
+            'draid_data_disks':'int',
+            'draid_spare_disks':'int',
+    })
+    Dedupvdevs = typing.TypedDict('Dedupvdevs', {
+            'type':'Type_',
+            'disks':'list[str]',
+    })
+    EncryptionOptions = typing.TypedDict('EncryptionOptions', {
+            'generate_key':'bool',
+            'pbkdf2iters':'int',
+            'algorithm':'Algorithm',
+            'passphrase':'typing.Optional[str]',
+            'key':'typing.Optional[str]',
+    })
+    Logvdevs = typing.TypedDict('Logvdevs', {
+            'type':'Type___',
+            'disks':'list[str]',
+    })
+    Options = typing.TypedDict('Options', {
+            'label':'str',
+    })
+    Options_ = typing.TypedDict('Options_', {
+            'cascade':'bool',
+            'restart_services':'bool',
+            'destroy':'bool',
+    })
+    Options__ = typing.TypedDict('Options__', {
+            'label':'str',
+            'disk':'str',
+            'force':'bool',
+            'preserve_settings':'bool',
+    })
+    PoolAttach = typing.TypedDict('PoolAttach', {
+            'target_vdev':'str',
+            'new_disk':'str',
+            'allow_duplicate_serials':'bool',
     })
     PoolCreate = typing.TypedDict('PoolCreate', {
             'name':'str',
@@ -27,72 +83,6 @@ class Pool(Namespace):
             'topology':'Topology',
             'allow_duplicate_serials':'bool',
     })
-    EncryptionOptions = typing.TypedDict('EncryptionOptions', {
-            'generate_key':'bool',
-            'pbkdf2iters':'int',
-            'algorithm':'Algorithm',
-            'passphrase':'typing.Optional[str]',
-            'key':'typing.Optional[str]',
-    })
-    class Algorithm(str,Enum):
-        AES128CCM = 'AES-128-CCM'
-        AES192CCM = 'AES-192-CCM'
-        AES256CCM = 'AES-256-CCM'
-        AES128GCM = 'AES-128-GCM'
-        AES192GCM = 'AES-192-GCM'
-        AES256GCM = 'AES-256-GCM'
-        ...
-    Topology = typing.TypedDict('Topology', {
-            'data':'list[Datavdevs]',
-            'special':'list[Specialvdevs]',
-            'dedup':'list[Dedupvdevs]',
-            'cache':'list[Cachevdevs]',
-            'log':'list[Logvdevs]',
-            'spares':'list[str]',
-    })
-    Datavdevs = typing.TypedDict('Datavdevs', {
-            'type':'Type',
-            'disks':'list[str]',
-            'draid_data_disks':'int',
-            'draid_spare_disks':'int',
-    })
-    class Type(str,Enum):
-        DRAID1 = 'DRAID1'
-        DRAID2 = 'DRAID2'
-        DRAID3 = 'DRAID3'
-        RAIDZ1 = 'RAIDZ1'
-        RAIDZ2 = 'RAIDZ2'
-        RAIDZ3 = 'RAIDZ3'
-        MIRROR = 'MIRROR'
-        STRIPE = 'STRIPE'
-        ...
-    Specialvdevs = typing.TypedDict('Specialvdevs', {
-            'type':'Type_',
-            'disks':'list[str]',
-    })
-    class Type_(str,Enum):
-        MIRROR = 'MIRROR'
-        STRIPE = 'STRIPE'
-        ...
-    Dedupvdevs = typing.TypedDict('Dedupvdevs', {
-            'type':'Type_',
-            'disks':'list[str]',
-    })
-    Cachevdevs = typing.TypedDict('Cachevdevs', {
-            'type':'Type__',
-            'disks':'list[str]',
-    })
-    class Type__(str,Enum):
-        STRIPE = 'STRIPE'
-        ...
-    Logvdevs = typing.TypedDict('Logvdevs', {
-            'type':'Type___',
-            'disks':'list[str]',
-    })
-    class Type___(str,Enum):
-        STRIPE = 'STRIPE'
-        MIRROR = 'MIRROR'
-        ...
     PoolCreateReturns = typing.TypedDict('PoolCreateReturns', {
             'id':'int',
             'name':'str',
@@ -116,40 +106,6 @@ class Pool(Namespace):
             'freeing_str':'typing.Optional[str]',
             'autotrim':'dict[str]',
             'topology':'Topology_',
-    })
-    Topology_ = typing.TypedDict('Topology_', {
-            'data':'list',
-            'log':'list',
-            'cache':'list',
-            'spare':'list',
-            'special':'list',
-            'dedup':'list',
-    })
-    Options = typing.TypedDict('Options', {
-            'label':'str',
-    })
-    Options_ = typing.TypedDict('Options_', {
-            'cascade':'bool',
-            'restart_services':'bool',
-            'destroy':'bool',
-    })
-    class Type____(str,Enum):
-        FILESYSTEM = 'FILESYSTEM'
-        VOLUME = 'VOLUME'
-        ...
-    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
     })
     PoolEntry = typing.TypedDict('PoolEntry', {
             'id':'int',
@@ -175,57 +131,22 @@ class Pool(Namespace):
             'autotrim':'dict[str]',
             'topology':'Topology_',
     })
+    PoolImport = typing.TypedDict('PoolImport', {
+            'guid':'str',
+            'name':'str',
+            'enable_attachments':'bool',
+    })
     PoolInfo = typing.TypedDict('PoolInfo', {
             'name':'str',
             'guid':'str',
             'status':'str',
             'hostname':'str',
     })
-    PoolImport = typing.TypedDict('PoolImport', {
-            'guid':'str',
-            'name':'str',
-            'enable_attachments':'bool',
-    })
-    Process = typing.TypedDict('Process', {
-            'pid':'int',
-            'name':'str',
-            'service':'str',
-            'cmdline':'str',
-    })
-    QueryOptions = typing.TypedDict('QueryOptions', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    Options__ = typing.TypedDict('Options__', {
-            'label':'str',
-            'disk':'str',
-            'force':'bool',
-            'preserve_settings':'bool',
-    })
-    class Action(str,Enum):
-        START = 'START'
-        STOP = 'STOP'
-        PAUSE = 'PAUSE'
-        ...
     PoolUpdate = typing.TypedDict('PoolUpdate', {
             'topology':'Topology',
             'allow_duplicate_serials':'bool',
             'autotrim':'Autotrim',
     })
-    class Autotrim(str,Enum):
-        ON = 'ON'
-        OFF = 'OFF'
-        ...
     PoolUpdateReturns = typing.TypedDict('PoolUpdateReturns', {
             'id':'int',
             'name':'str',
@@ -250,3 +171,82 @@ class Pool(Namespace):
             'autotrim':'dict[str]',
             'topology':'Topology_',
     })
+    Process = typing.TypedDict('Process', {
+            'pid':'int',
+            'name':'str',
+            'service':'str',
+            'cmdline':'str',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    Specialvdevs = typing.TypedDict('Specialvdevs', {
+            'type':'Type_',
+            'disks':'list[str]',
+    })
+    Topology = typing.TypedDict('Topology', {
+            'data':'list[Datavdevs]',
+            'special':'list[Specialvdevs]',
+            'dedup':'list[Dedupvdevs]',
+            'cache':'list[Cachevdevs]',
+            'log':'list[Logvdevs]',
+            'spares':'list[str]',
+    })
+    Topology_ = typing.TypedDict('Topology_', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
+    })
+    class Type(str,Enum):
+        DRAID1 = 'DRAID1'
+        DRAID2 = 'DRAID2'
+        DRAID3 = 'DRAID3'
+        RAIDZ1 = 'RAIDZ1'
+        RAIDZ2 = 'RAIDZ2'
+        RAIDZ3 = 'RAIDZ3'
+        MIRROR = 'MIRROR'
+        STRIPE = 'STRIPE'
+        ...
+    class Type_(str,Enum):
+        MIRROR = 'MIRROR'
+        STRIPE = 'STRIPE'
+        ...
+    class Type__(str,Enum):
+        STRIPE = 'STRIPE'
+        ...
+    class Type___(str,Enum):
+        STRIPE = 'STRIPE'
+        MIRROR = 'MIRROR'
+        ...
+    class Type____(str,Enum):
+        FILESYSTEM = 'FILESYSTEM'
+        VOLUME = 'VOLUME'
+        ...

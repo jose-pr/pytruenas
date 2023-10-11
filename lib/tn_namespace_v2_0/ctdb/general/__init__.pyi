@@ -132,18 +132,21 @@ class CtdbGeneral(
             ctdb_status
         """
         ...
-    CtdbIps = typing.TypedDict('CtdbIps', {
-            'all_nodes':'bool',
+    Address = typing.TypedDict('Address', {
+            'type':'Type',
+            'address':'str',
     })
-    CtdbPublicIp = typing.TypedDict('CtdbPublicIp', {
-            'public_ip':'str',
-            'pnn':'int',
-            'interfaces':'list[CtdbInterfaceInfo]',
-    })
+    class AddressType(str,Enum):
+        INET = 'INET'
+        INET6 = 'INET6'
+        ...
     CtdbInterfaceInfo = typing.TypedDict('CtdbInterfaceInfo', {
             'name':'str',
             'active':'bool',
             'available':'bool',
+    })
+    CtdbIps = typing.TypedDict('CtdbIps', {
+            'all_nodes':'bool',
     })
     CtdbNode = typing.TypedDict('CtdbNode', {
             'pnn':'int',
@@ -152,13 +155,31 @@ class CtdbGeneral(
             'enabled':'bool',
             'this_node':'bool',
     })
-    class AddressType(str,Enum):
-        INET = 'INET'
-        INET6 = 'INET6'
-        ...
+    CtdbNodemapEntry = typing.TypedDict('CtdbNodemapEntry', {
+            'pnn':'int',
+            'address':'Address',
+            'flags':'list[CtdbStatusFlag]',
+            'flags_raw':'int',
+            'partially_online':'bool',
+            'this_node':'bool',
+    })
+    CtdbPublicIp = typing.TypedDict('CtdbPublicIp', {
+            'public_ip':'str',
+            'pnn':'int',
+            'interfaces':'list[CtdbInterfaceInfo]',
+    })
     CtdbStatus = typing.TypedDict('CtdbStatus', {
             'all_nodes':'bool',
     })
+    class CtdbStatusFlag(str,Enum):
+        DISCONNECTED = 'DISCONNECTED'
+        UNHEALTHY = 'UNHEALTHY'
+        INACTIVE = 'INACTIVE'
+        DISABLED = 'DISABLED'
+        STOPPED = 'STOPPED'
+        DELETED = 'DELETED'
+        BANNED = 'BANNED'
+        ...
     CtdbStatus_ = typing.TypedDict('CtdbStatus_', {
             'nodemap':'Nodemap',
             'vnnmap':'Vnnmap',
@@ -172,41 +193,20 @@ class CtdbGeneral(
             'deleted_node_count':'int',
             'nodes':'list[CtdbNodemapEntry]',
     })
-    CtdbNodemapEntry = typing.TypedDict('CtdbNodemapEntry', {
-            'pnn':'int',
-            'address':'Address',
-            'flags':'list[CtdbStatusFlag]',
-            'flags_raw':'int',
-            'partially_online':'bool',
-            'this_node':'bool',
-    })
-    Address = typing.TypedDict('Address', {
-            'type':'Type',
-            'address':'str',
+    class RecoveryModeStr(str,Enum):
+        NORMAL = 'NORMAL'
+        RECOVERY = 'RECOVERY'
+        ...
+    StatusProperties = typing.TypedDict('StatusProperties', {
+            'hash':'int',
+            'lmaster':'int',
     })
     class Type(str,Enum):
         INET = 'INET'
         INET6 = 'INET6'
-        ...
-    class CtdbStatusFlag(str,Enum):
-        DISCONNECTED = 'DISCONNECTED'
-        UNHEALTHY = 'UNHEALTHY'
-        INACTIVE = 'INACTIVE'
-        DISABLED = 'DISABLED'
-        STOPPED = 'STOPPED'
-        DELETED = 'DELETED'
-        BANNED = 'BANNED'
         ...
     Vnnmap = typing.TypedDict('Vnnmap', {
             'size':'int',
             'generation':'int',
             'entries':'list[StatusProperties]',
     })
-    StatusProperties = typing.TypedDict('StatusProperties', {
-            'hash':'int',
-            'lmaster':'int',
-    })
-    class RecoveryModeStr(str,Enum):
-        NORMAL = 'NORMAL'
-        RECOVERY = 'RECOVERY'
-        ...

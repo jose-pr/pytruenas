@@ -183,13 +183,6 @@ class Update(
         -------
         """
         ...
-    UpdateCheckAvailable = typing.TypedDict('UpdateCheckAvailable', {
-            'train':'str',
-    })
-    Updatefile = typing.TypedDict('Updatefile', {
-            'resume':'bool',
-            'destination':'typing.Optional[str]',
-    })
     Options = typing.TypedDict('Options', {
             'dataset_name':'typing.Optional[str]',
             'resume':'bool',
@@ -200,4 +193,11 @@ class Update(
             'resume':'bool',
             'train':'typing.Optional[str]',
             'reboot':'bool',
+    })
+    UpdateCheckAvailable = typing.TypedDict('UpdateCheckAvailable', {
+            'train':'str',
+    })
+    Updatefile = typing.TypedDict('Updatefile', {
+            'resume':'bool',
+            'destination':'typing.Optional[str]',
     })

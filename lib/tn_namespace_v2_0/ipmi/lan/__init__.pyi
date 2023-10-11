@@ -89,19 +89,13 @@ class IpmiLan(
             ipmi_lan_update_returns
         """
         ...
-    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
+    IpmiUpdate = typing.TypedDict('IpmiUpdate', {
+            'ipaddress':'str',
+            'netmask':'str',
+            'gateway':'str',
+            'password':'str',
+            'dhcp':'bool',
+            'vlan':'typing.Optional[int]',
     })
     QueryOptions = typing.TypedDict('QueryOptions', {
             'relationships':'bool',
@@ -117,11 +111,17 @@ class IpmiLan(
             'limit':'int',
             'force_sql_filters':'bool',
     })
-    IpmiUpdate = typing.TypedDict('IpmiUpdate', {
-            'ipaddress':'str',
-            'netmask':'str',
-            'gateway':'str',
-            'password':'str',
-            'dhcp':'bool',
-            'vlan':'typing.Optional[int]',
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
     })

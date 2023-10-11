@@ -219,33 +219,6 @@ class Activedirectory(
             activedirectory_update_returns
         """
         ...
-    DomainInfo = typing.TypedDict('DomainInfo', {
-            'LDAP server':'str',
-            'LDAP server name':'str',
-            'Realm':'str',
-            'Bind Path':'str',
-            'LDAP port':'int',
-            'Server time':'int',
-            'KDC server':'str',
-            'Server time offset':'int',
-            'Last machine account password change':'int',
-    })
-    class DirectoryserviceState(str,Enum):
-        DISABLED = 'DISABLED'
-        FAULTED = 'FAULTED'
-        LEAVING = 'LEAVING'
-        JOINING = 'JOINING'
-        HEALTHY = 'HEALTHY'
-        ...
-    KerberosUsernamePassword = typing.TypedDict('KerberosUsernamePassword', {
-            'username':'str',
-            'password':'str',
-    })
-    class NssInfoAd(str,Enum):
-        SFU = 'SFU'
-        SFU20 = 'SFU20'
-        RFC2307 = 'RFC2307'
-        ...
     ActivedirectoryUpdate = typing.TypedDict('ActivedirectoryUpdate', {
             'domainname':'str',
             'bindname':'str',
@@ -268,3 +241,30 @@ class Activedirectory(
             'netbiosalias':'list',
             'enable':'bool',
     })
+    class DirectoryserviceState(str,Enum):
+        DISABLED = 'DISABLED'
+        FAULTED = 'FAULTED'
+        LEAVING = 'LEAVING'
+        JOINING = 'JOINING'
+        HEALTHY = 'HEALTHY'
+        ...
+    DomainInfo = typing.TypedDict('DomainInfo', {
+            'LDAP server':'str',
+            'LDAP server name':'str',
+            'Realm':'str',
+            'Bind Path':'str',
+            'LDAP port':'int',
+            'Server time':'int',
+            'KDC server':'str',
+            'Server time offset':'int',
+            'Last machine account password change':'int',
+    })
+    KerberosUsernamePassword = typing.TypedDict('KerberosUsernamePassword', {
+            'username':'str',
+            'password':'str',
+    })
+    class NssInfoAd(str,Enum):
+        SFU = 'SFU'
+        SFU20 = 'SFU20'
+        RFC2307 = 'RFC2307'
+        ...

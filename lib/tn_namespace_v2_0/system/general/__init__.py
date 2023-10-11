@@ -8,6 +8,32 @@ class SystemGeneral(Namespace):
     def __init__(self, client) -> None:
         super().__init__(client, 'system.general')
 
+    GeneralSettings = typing.TypedDict('GeneralSettings', {
+            'ui_httpsport':'int',
+            'ui_httpsredirect':'bool',
+            'ui_httpsprotocols':'list[Protocol]',
+            'ui_port':'int',
+            'ui_address':'list[str]',
+            'ui_v6address':'list[str]',
+            'ui_allowlist':'list[str]',
+            'ui_consolemsg':'bool',
+            'ui_x_frame_options':'UiXFrameOptions',
+            'kbdmap':'str',
+            'language':'str',
+            'timezone':'str',
+            'usage_collection':'typing.Optional[bool]',
+            'birthday':'str',
+            'ds_auth':'bool',
+            'ui_certificate':'typing.Optional[int]',
+            'rollback_timeout':'typing.Optional[int]',
+            'ui_restart_delay':'typing.Optional[int]',
+    })
+    class Protocol(str,Enum):
+        TLSv1 = 'TLSv1'
+        TLSv11 = 'TLSv1.1'
+        TLSv12 = 'TLSv1.2'
+        TLSv13 = 'TLSv1.3'
+        ...
     SystemGeneralEntry = typing.TypedDict('SystemGeneralEntry', {
             'ui_certificate':'UiCertificate',
             'ui_httpsport':'int',
@@ -29,6 +55,39 @@ class SystemGeneral(Namespace):
             'ds_auth':'bool',
             'id':'int',
     })
+    SystemGeneralUpdateReturns = typing.TypedDict('SystemGeneralUpdateReturns', {
+            'ui_certificate':'UiCertificate',
+            'ui_httpsport':'int',
+            'ui_httpsredirect':'bool',
+            'ui_httpsprotocols':'list[Protocol]',
+            'ui_port':'int',
+            'ui_address':'list[str]',
+            'ui_v6address':'list[str]',
+            'ui_allowlist':'list[str]',
+            'ui_consolemsg':'bool',
+            'ui_x_frame_options':'UiXFrameOptions',
+            'kbdmap':'str',
+            'language':'str',
+            'timezone':'str',
+            'usage_collection':'typing.Optional[bool]',
+            'birthday':'str',
+            'wizardshown':'bool',
+            'usage_collection_is_set':'bool',
+            'ds_auth':'bool',
+            'id':'int',
+    })
+    class TLSv1(str,Enum):
+        TLSv1 = 'TLSv1'
+        ...
+    class TLSv11(str,Enum):
+        TLSv11 = 'TLSv1.1'
+        ...
+    class TLSv12(str,Enum):
+        TLSv12 = 'TLSv1.2'
+        ...
+    class TLSv13(str,Enum):
+        TLSv13 = 'TLSv1.3'
+        ...
     UiCertificate = typing.TypedDict('UiCertificate', {
             'id':'int',
             'type':'int',
@@ -84,73 +143,14 @@ class SystemGeneral(Namespace):
             'crl_path':'str',
             'signed_certificates':'int',
     })
-    class Protocol(str,Enum):
-        TLSv1 = 'TLSv1'
-        TLSv11 = 'TLSv1.1'
-        TLSv12 = 'TLSv1.2'
-        TLSv13 = 'TLSv1.3'
-        ...
-    class UiXFrameOptions(str,Enum):
-        SAMEORIGIN = 'SAMEORIGIN'
-        DENY = 'DENY'
-        ALLOWALL = 'ALLOW_ALL'
-        ...
     UiHttpsProtocols = typing.TypedDict('UiHttpsProtocols', {
             'TLSv1':'TLSv1',
             'TLSv1.1':'TLSv11',
             'TLSv1.2':'TLSv12',
             'TLSv1.3':'TLSv13',
     })
-    class TLSv1(str,Enum):
-        TLSv1 = 'TLSv1'
+    class UiXFrameOptions(str,Enum):
+        SAMEORIGIN = 'SAMEORIGIN'
+        DENY = 'DENY'
+        ALLOWALL = 'ALLOW_ALL'
         ...
-    class TLSv11(str,Enum):
-        TLSv11 = 'TLSv1.1'
-        ...
-    class TLSv12(str,Enum):
-        TLSv12 = 'TLSv1.2'
-        ...
-    class TLSv13(str,Enum):
-        TLSv13 = 'TLSv1.3'
-        ...
-    GeneralSettings = typing.TypedDict('GeneralSettings', {
-            'ui_httpsport':'int',
-            'ui_httpsredirect':'bool',
-            'ui_httpsprotocols':'list[Protocol]',
-            'ui_port':'int',
-            'ui_address':'list[str]',
-            'ui_v6address':'list[str]',
-            'ui_allowlist':'list[str]',
-            'ui_consolemsg':'bool',
-            'ui_x_frame_options':'UiXFrameOptions',
-            'kbdmap':'str',
-            'language':'str',
-            'timezone':'str',
-            'usage_collection':'typing.Optional[bool]',
-            'birthday':'str',
-            'ds_auth':'bool',
-            'ui_certificate':'typing.Optional[int]',
-            'rollback_timeout':'typing.Optional[int]',
-            'ui_restart_delay':'typing.Optional[int]',
-    })
-    SystemGeneralUpdateReturns = typing.TypedDict('SystemGeneralUpdateReturns', {
-            'ui_certificate':'UiCertificate',
-            'ui_httpsport':'int',
-            'ui_httpsredirect':'bool',
-            'ui_httpsprotocols':'list[Protocol]',
-            'ui_port':'int',
-            'ui_address':'list[str]',
-            'ui_v6address':'list[str]',
-            'ui_allowlist':'list[str]',
-            'ui_consolemsg':'bool',
-            'ui_x_frame_options':'UiXFrameOptions',
-            'kbdmap':'str',
-            'language':'str',
-            'timezone':'str',
-            'usage_collection':'typing.Optional[bool]',
-            'birthday':'str',
-            'wizardshown':'bool',
-            'usage_collection_is_set':'bool',
-            'ds_auth':'bool',
-            'id':'int',
-    })

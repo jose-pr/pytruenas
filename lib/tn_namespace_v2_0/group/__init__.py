@@ -8,6 +8,10 @@ class Group(Namespace):
     def __init__(self, client) -> None:
         super().__init__(client, 'group')
 
+    GetGroupObj = typing.TypedDict('GetGroupObj', {
+            'groupname':'str',
+            'gid':'int',
+    })
     GroupCreate = typing.TypedDict('GroupCreate', {
             'gid':'int',
             'name':'str',
@@ -16,46 +20,6 @@ class Group(Namespace):
             'sudo_commands_nopasswd':'list[str]',
             'allow_duplicate_gid':'bool',
             'users':'list[int]',
-    })
-    Options = typing.TypedDict('Options', {
-            'delete_users':'bool',
-    })
-    GetGroupObj = typing.TypedDict('GetGroupObj', {
-            'groupname':'str',
-            'gid':'int',
-    })
-    GroupInfo = typing.TypedDict('GroupInfo', {
-            'gr_name':'str',
-            'gr_gid':'int',
-            'gr_mem':'list',
-    })
-    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    QueryOptions = typing.TypedDict('QueryOptions', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
     })
     GroupEntry = typing.TypedDict('GroupEntry', {
             'gid':'int',
@@ -72,6 +36,11 @@ class Group(Namespace):
             'nt_name':'typing.Optional[str]',
             'sid':'typing.Optional[str]',
     })
+    GroupInfo = typing.TypedDict('GroupInfo', {
+            'gr_name':'str',
+            'gr_gid':'int',
+            'gr_mem':'list',
+    })
     GroupUpdate = typing.TypedDict('GroupUpdate', {
             'gid':'int',
             'name':'str',
@@ -80,4 +49,35 @@ class Group(Namespace):
             'sudo_commands_nopasswd':'list[str]',
             'allow_duplicate_gid':'bool',
             'users':'list[int]',
+    })
+    Options = typing.TypedDict('Options', {
+            'delete_users':'bool',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
     })

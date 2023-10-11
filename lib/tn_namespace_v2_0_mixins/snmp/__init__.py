@@ -25,11 +25,6 @@ class Snmp(ConfigMixin, Namespace):
             'zilstat':'bool',
             'id':'int',
     })
-    class V3Authtype(str,Enum):
-        _ = ''
-        MD5 = 'MD5'
-        SHA = 'SHA'
-        ...
     SnmpUpdate = typing.TypedDict('SnmpUpdate', {
             'location':'str',
             'contact':'str',
@@ -61,3 +56,8 @@ class Snmp(ConfigMixin, Namespace):
             'zilstat':'bool',
             'id':'int',
     })
+    class V3Authtype(str,Enum):
+        _ = ''
+        MD5 = 'MD5'
+        SHA = 'SHA'
+        ...

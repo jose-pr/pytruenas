@@ -134,24 +134,11 @@ class FilesystemAcltemplate(
             'query-options':'QueryOptions',
             'format-options':'FormatOptions',
     })
-    QueryOptions = typing.TypedDict('QueryOptions', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    FormatOptions = typing.TypedDict('FormatOptions', {
-            'canonicalize':'bool',
-            'ensure_builtins':'bool',
-            'resolve_names':'bool',
+    AcltemplateCreate = typing.TypedDict('AcltemplateCreate', {
+            'name':'str',
+            'acltype':'Acltype',
+            'comment':'str',
+            'acl':'typing.Union[list[Nfs4Ace], list[Posix1eAce]]',
     })
     AcltemplateEntry = typing.TypedDict('AcltemplateEntry', {
             'name':'str',
@@ -161,10 +148,55 @@ class FilesystemAcltemplate(
             'id':'int',
             'builtin':'bool',
     })
+    AcltemplateUpdate = typing.TypedDict('AcltemplateUpdate', {
+            'name':'str',
+            'acltype':'Acltype',
+            'comment':'str',
+            'acl':'typing.Union[list[Nfs4Ace], list[Posix1eAce]]',
+    })
     class Acltype(str,Enum):
         NFS4 = 'NFS4'
         POSIX1E = 'POSIX1E'
         ...
+    class BASIC(str,Enum):
+        FULLCONTROL = 'FULL_CONTROL'
+        MODIFY = 'MODIFY'
+        READ = 'READ'
+        TRAVERSE = 'TRAVERSE'
+        ...
+    class BASIC_(str,Enum):
+        INHERIT = 'INHERIT'
+        NOINHERIT = 'NOINHERIT'
+        ...
+    FilesystemAcltemplateCreateReturns = typing.TypedDict('FilesystemAcltemplateCreateReturns', {
+            'name':'str',
+            'acltype':'Acltype',
+            'comment':'str',
+            'acl':'typing.Union[list[Nfs4Ace], list[Posix1eAce]]',
+            'id':'int',
+            'builtin':'bool',
+    })
+    FilesystemAcltemplateUpdateReturns = typing.TypedDict('FilesystemAcltemplateUpdateReturns', {
+            'name':'str',
+            'acltype':'Acltype',
+            'comment':'str',
+            'acl':'typing.Union[list[Nfs4Ace], list[Posix1eAce]]',
+            'id':'int',
+            'builtin':'bool',
+    })
+    Flags = typing.TypedDict('Flags', {
+            'FILE_INHERIT':'bool',
+            'DIRECTORY_INHERIT':'bool',
+            'NO_PROPAGATE_INHERIT':'bool',
+            'INHERIT_ONLY':'bool',
+            'INHERITED':'bool',
+            'BASIC':'BASIC_',
+    })
+    FormatOptions = typing.TypedDict('FormatOptions', {
+            'canonicalize':'bool',
+            'ensure_builtins':'bool',
+            'resolve_names':'bool',
+    })
     Nfs4Ace = typing.TypedDict('Nfs4Ace', {
             'tag':'Tag',
             'id':'typing.Optional[int]',
@@ -172,17 +204,6 @@ class FilesystemAcltemplate(
             'perms':'Perms',
             'flags':'Flags',
     })
-    class Tag(str,Enum):
-        Owner = 'owner@'
-        Group = 'group@'
-        Everyone = 'everyone@'
-        USER = 'USER'
-        GROUP = 'GROUP'
-        ...
-    class Type(str,Enum):
-        ALLOW = 'ALLOW'
-        DENY = 'DENY'
-        ...
     Perms = typing.TypedDict('Perms', {
             'READ_DATA':'bool',
             'WRITE_DATA':'bool',
@@ -200,56 +221,30 @@ class FilesystemAcltemplate(
             'SYNCHRONIZE':'bool',
             'BASIC':'BASIC',
     })
-    class BASIC(str,Enum):
-        FULLCONTROL = 'FULL_CONTROL'
-        MODIFY = 'MODIFY'
-        READ = 'READ'
-        TRAVERSE = 'TRAVERSE'
-        ...
-    Flags = typing.TypedDict('Flags', {
-            'FILE_INHERIT':'bool',
-            'DIRECTORY_INHERIT':'bool',
-            'NO_PROPAGATE_INHERIT':'bool',
-            'INHERIT_ONLY':'bool',
-            'INHERITED':'bool',
-            'BASIC':'BASIC_',
+    Perms_ = typing.TypedDict('Perms_', {
+            'READ':'bool',
+            'WRITE':'bool',
+            'EXECUTE':'bool',
     })
-    class BASIC_(str,Enum):
-        INHERIT = 'INHERIT'
-        NOINHERIT = 'NOINHERIT'
-        ...
     Posix1eAce = typing.TypedDict('Posix1eAce', {
             'default':'bool',
             'tag':'Tag_',
             'id':'int',
             'perms':'Perms_',
     })
-    class Tag_(str,Enum):
-        USEROBJ = 'USER_OBJ'
-        GROUPOBJ = 'GROUP_OBJ'
-        USER = 'USER'
-        GROUP = 'GROUP'
-        OTHER = 'OTHER'
-        MASK = 'MASK'
-        ...
-    Perms_ = typing.TypedDict('Perms_', {
-            'READ':'bool',
-            'WRITE':'bool',
-            'EXECUTE':'bool',
-    })
-    AcltemplateCreate = typing.TypedDict('AcltemplateCreate', {
-            'name':'str',
-            'acltype':'Acltype',
-            'comment':'str',
-            'acl':'typing.Union[list[Nfs4Ace], list[Posix1eAce]]',
-    })
-    FilesystemAcltemplateCreateReturns = typing.TypedDict('FilesystemAcltemplateCreateReturns', {
-            'name':'str',
-            'acltype':'Acltype',
-            'comment':'str',
-            'acl':'typing.Union[list[Nfs4Ace], list[Posix1eAce]]',
-            'id':'int',
-            'builtin':'bool',
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
     })
     QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
             'relationships':'bool',
@@ -265,17 +260,22 @@ class FilesystemAcltemplate(
             'limit':'int',
             'force_sql_filters':'bool',
     })
-    AcltemplateUpdate = typing.TypedDict('AcltemplateUpdate', {
-            'name':'str',
-            'acltype':'Acltype',
-            'comment':'str',
-            'acl':'typing.Union[list[Nfs4Ace], list[Posix1eAce]]',
-    })
-    FilesystemAcltemplateUpdateReturns = typing.TypedDict('FilesystemAcltemplateUpdateReturns', {
-            'name':'str',
-            'acltype':'Acltype',
-            'comment':'str',
-            'acl':'typing.Union[list[Nfs4Ace], list[Posix1eAce]]',
-            'id':'int',
-            'builtin':'bool',
-    })
+    class Tag(str,Enum):
+        Owner = 'owner@'
+        Group = 'group@'
+        Everyone = 'everyone@'
+        USER = 'USER'
+        GROUP = 'GROUP'
+        ...
+    class Tag_(str,Enum):
+        USEROBJ = 'USER_OBJ'
+        GROUPOBJ = 'GROUP_OBJ'
+        USER = 'USER'
+        GROUP = 'GROUP'
+        OTHER = 'OTHER'
+        MASK = 'MASK'
+        ...
+    class Type(str,Enum):
+        ALLOW = 'ALLOW'
+        DENY = 'DENY'
+        ...

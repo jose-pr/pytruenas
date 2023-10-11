@@ -9,7 +9,7 @@ class ClusterAccountsUser(TableExtMixin, Namespace):
     def __init__(self, client) -> None:
         super().__init__(client, 'cluster.accounts.user')
 
-    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+    QueryOptions = typing.TypedDict('QueryOptions', {
             'relationships':'bool',
             'extend':'typing.Optional[str]',
             'extend_context':'typing.Optional[str]',
@@ -23,7 +23,7 @@ class ClusterAccountsUser(TableExtMixin, Namespace):
             'limit':'int',
             'force_sql_filters':'bool',
     })
-    QueryOptions = typing.TypedDict('QueryOptions', {
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
             'relationships':'bool',
             'extend':'typing.Optional[str]',
             'extend_context':'typing.Optional[str]',
