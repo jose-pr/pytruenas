@@ -227,6 +227,8 @@ class Enum(Type):
         return self.options == other.options
 
     def _python(self):
+        if len(self.options) == 1:
+            return _ty.Literal[json.dumps(self.options[0])] #type:ignore
         return self.name
 
     def _required_types(self):

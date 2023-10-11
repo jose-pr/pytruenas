@@ -17,8 +17,8 @@ class Vm(Namespace):
         UEFICSM = 'UEFI_CSM'
         ...
     BootloaderOptions = typing.TypedDict('BootloaderOptions', {
-            'UEFI':'UEFI',
-            'UEFI_CSM':'UEFICSM',
+            'UEFI':'typing.Literal["UEFI"]',
+            'UEFI_CSM':'typing.Literal["Legacy BIOS"]',
     })
     CpuFlags = typing.TypedDict('CpuFlags', {
             'intel_vmx':'bool',
@@ -98,16 +98,16 @@ class Vm(Namespace):
             'force_sql_filters':'bool',
     })
     ResolutionChoices = typing.TypedDict('ResolutionChoices', {
-            '1920x1200':'_1920x1200',
-            '1920x1080':'_1920x1080',
-            '1600x1200':'_1600x1200',
-            '1600x900':'_1600x900',
-            '1400x1050':'_1400x1050',
-            '1280x1024':'_1280x1024',
-            '1280x720':'_1280x720',
-            '1024x768':'_1024x768',
-            '800x600':'_800x600',
-            '640x480':'_640x480',
+            '1920x1200':'typing.Literal["1920x1200"]',
+            '1920x1080':'typing.Literal["1920x1080"]',
+            '1600x1200':'typing.Literal["1600x1200"]',
+            '1600x900':'typing.Literal["1600x900"]',
+            '1400x1050':'typing.Literal["1400x1050"]',
+            '1280x1024':'typing.Literal["1280x1024"]',
+            '1280x720':'typing.Literal["1280x720"]',
+            '1024x768':'typing.Literal["1024x768"]',
+            '800x600':'typing.Literal["800x600"]',
+            '640x480':'typing.Literal["640x480"]',
     })
     Status = typing.TypedDict('Status', {
             'state':'str',
@@ -117,12 +117,6 @@ class Vm(Namespace):
     class Time(str,Enum):
         LOCAL = 'LOCAL'
         UTC = 'UTC'
-        ...
-    class UEFI(str,Enum):
-        UEFI = 'UEFI'
-        ...
-    class UEFICSM(str,Enum):
-        LegacyBIOS = 'Legacy BIOS'
         ...
     VirtualizationDetails = typing.TypedDict('VirtualizationDetails', {
             'supported':'bool',
@@ -299,33 +293,3 @@ class Vm(Namespace):
             'PRD':'int',
             'RPRD':'int',
     })
-    class _1024x768(str,Enum):
-        _1024x768 = '1024x768'
-        ...
-    class _1280x1024(str,Enum):
-        _1280x1024 = '1280x1024'
-        ...
-    class _1280x720(str,Enum):
-        _1280x720 = '1280x720'
-        ...
-    class _1400x1050(str,Enum):
-        _1400x1050 = '1400x1050'
-        ...
-    class _1600x1200(str,Enum):
-        _1600x1200 = '1600x1200'
-        ...
-    class _1600x900(str,Enum):
-        _1600x900 = '1600x900'
-        ...
-    class _1920x1080(str,Enum):
-        _1920x1080 = '1920x1080'
-        ...
-    class _1920x1200(str,Enum):
-        _1920x1200 = '1920x1200'
-        ...
-    class _640x480(str,Enum):
-        _640x480 = '640x480'
-        ...
-    class _800x600(str,Enum):
-        _800x600 = '800x600'
-        ...

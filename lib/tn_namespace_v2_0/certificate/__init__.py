@@ -8,9 +8,6 @@ class Certificate(Namespace):
     def __init__(self, client) -> None:
         super().__init__(client, 'certificate')
 
-    class ANYEXTENDEDKEYUSAGE(str,Enum):
-        ANYEXTENDEDKEYUSAGE = 'ANY_EXTENDED_KEY_USAGE'
-        ...
     AuthorityKeyIdentifier = typing.TypedDict('AuthorityKeyIdentifier', {
             'authority_cert_issuer':'bool',
             'enabled':'bool',
@@ -22,15 +19,6 @@ class Certificate(Namespace):
             'path_length':'typing.Optional[int]',
             'extension_critical':'bool',
     })
-    class CERTIFICATETRANSPARENCY(str,Enum):
-        CERTIFICATETRANSPARENCY = 'CERTIFICATE_TRANSPARENCY'
-        ...
-    class CLIENTAUTH(str,Enum):
-        CLIENTAUTH = 'CLIENT_AUTH'
-        ...
-    class CODESIGNING(str,Enum):
-        CODESIGNING = 'CODE_SIGNING'
-        ...
     CertExtensions = typing.TypedDict('CertExtensions', {
             'BasicConstraints':'BasicConstraints',
             'AuthorityKeyIdentifier':'AuthorityKeyIdentifier',
@@ -258,12 +246,6 @@ class Certificate(Namespace):
         SHA384 = 'SHA384'
         SHA512 = 'SHA512'
         ...
-    class EC(str,Enum):
-        EC = 'EC'
-        ...
-    class EMAILPROTECTION(str,Enum):
-        EMAILPROTECTION = 'EMAIL_PROTECTION'
-        ...
     class EcCurve(str,Enum):
         SECP256R1 = 'SECP256R1'
         SECP384R1 = 'SECP384R1'
@@ -271,38 +253,29 @@ class Certificate(Namespace):
         Ed25519 = 'ed25519'
         ...
     EcCurveChoices = typing.TypedDict('EcCurveChoices', {
-            'SECP256R1':'SECP256R1',
-            'SECP384R1':'SECP384R1',
-            'SECP521R1':'SECP521R1',
-            'ed25519':'Ed25519',
+            'SECP256R1':'typing.Literal["SECP256R1"]',
+            'SECP384R1':'typing.Literal["SECP384R1"]',
+            'SECP521R1':'typing.Literal["SECP521R1"]',
+            'ed25519':'typing.Literal["ed25519"]',
     })
-    class Ed25519(str,Enum):
-        Ed25519 = 'ed25519'
-        ...
     ExtendedKeyUsage = typing.TypedDict('ExtendedKeyUsage', {
             'usages':'list[Usage]',
             'enabled':'bool',
             'extension_critical':'bool',
     })
     ExtendedKeyUsageChoices = typing.TypedDict('ExtendedKeyUsageChoices', {
-            'ANY_EXTENDED_KEY_USAGE':'ANYEXTENDEDKEYUSAGE',
-            'CERTIFICATE_TRANSPARENCY':'CERTIFICATETRANSPARENCY',
-            'CLIENT_AUTH':'CLIENTAUTH',
-            'CODE_SIGNING':'CODESIGNING',
-            'EMAIL_PROTECTION':'EMAILPROTECTION',
-            'IPSEC_IKE':'IPSECIKE',
-            'KERBEROS_PKINIT_KDC':'KERBEROSPKINITKDC',
-            'OCSP_SIGNING':'OCSPSIGNING',
-            'SERVER_AUTH':'SERVERAUTH',
-            'SMARTCARD_LOGON':'SMARTCARDLOGON',
-            'TIME_STAMPING':'TIMESTAMPING',
+            'ANY_EXTENDED_KEY_USAGE':'typing.Literal["ANY_EXTENDED_KEY_USAGE"]',
+            'CERTIFICATE_TRANSPARENCY':'typing.Literal["CERTIFICATE_TRANSPARENCY"]',
+            'CLIENT_AUTH':'typing.Literal["CLIENT_AUTH"]',
+            'CODE_SIGNING':'typing.Literal["CODE_SIGNING"]',
+            'EMAIL_PROTECTION':'typing.Literal["EMAIL_PROTECTION"]',
+            'IPSEC_IKE':'typing.Literal["IPSEC_IKE"]',
+            'KERBEROS_PKINIT_KDC':'typing.Literal["KERBEROS_PKINIT_KDC"]',
+            'OCSP_SIGNING':'typing.Literal["OCSP_SIGNING"]',
+            'SERVER_AUTH':'typing.Literal["SERVER_AUTH"]',
+            'SMARTCARD_LOGON':'typing.Literal["SMARTCARD_LOGON"]',
+            'TIME_STAMPING':'typing.Literal["TIME_STAMPING"]',
     })
-    class IPSECIKE(str,Enum):
-        IPSECIKE = 'IPSEC_IKE'
-        ...
-    class KERBEROSPKINITKDC(str,Enum):
-        KERBEROSPKINITKDC = 'KERBEROS_PKINIT_KDC'
-        ...
     class KeyType(str,Enum):
         RSA = 'RSA'
         EC = 'EC'
@@ -320,12 +293,9 @@ class Certificate(Namespace):
             'decipher_only':'bool',
             'extension_critical':'bool',
     })
-    class OCSPSIGNING(str,Enum):
-        OCSPSIGNING = 'OCSP_SIGNING'
-        ...
     PrivateKeyTypeChoices = typing.TypedDict('PrivateKeyTypeChoices', {
-            'RSA':'RSA',
-            'EC':'EC',
+            'RSA':'typing.Literal["RSA"]',
+            'EC':'typing.Literal["EC"]',
     })
     QueryOptions = typing.TypedDict('QueryOptions', {
             'relationships':'bool',
@@ -355,27 +325,6 @@ class Certificate(Namespace):
             'limit':'int',
             'force_sql_filters':'bool',
     })
-    class RSA(str,Enum):
-        RSA = 'RSA'
-        ...
-    class SECP256R1(str,Enum):
-        SECP256R1 = 'SECP256R1'
-        ...
-    class SECP384R1(str,Enum):
-        SECP384R1 = 'SECP384R1'
-        ...
-    class SECP521R1(str,Enum):
-        SECP521R1 = 'SECP521R1'
-        ...
-    class SERVERAUTH(str,Enum):
-        SERVERAUTH = 'SERVER_AUTH'
-        ...
-    class SMARTCARDLOGON(str,Enum):
-        SMARTCARDLOGON = 'SMARTCARD_LOGON'
-        ...
-    class TIMESTAMPING(str,Enum):
-        TIMESTAMPING = 'TIME_STAMPING'
-        ...
     class Usage(str,Enum):
         ANYEXTENDEDKEYUSAGE = 'ANY_EXTENDED_KEY_USAGE'
         CERTIFICATETRANSPARENCY = 'CERTIFICATE_TRANSPARENCY'

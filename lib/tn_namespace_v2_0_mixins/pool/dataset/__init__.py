@@ -9,24 +9,6 @@ class PoolDataset(TableExtMixin, Namespace):
     def __init__(self, client) -> None:
         super().__init__(client, 'pool.dataset')
 
-    class AES128CCM(str,Enum):
-        AES128CCM = 'AES-128-CCM'
-        ...
-    class AES128GCM(str,Enum):
-        AES128GCM = 'AES-128-GCM'
-        ...
-    class AES192CCM(str,Enum):
-        AES192CCM = 'AES-192-CCM'
-        ...
-    class AES192GCM(str,Enum):
-        AES192GCM = 'AES-192-GCM'
-        ...
-    class AES256CCM(str,Enum):
-        AES256CCM = 'AES-256-CCM'
-        ...
-    class AES256GCM(str,Enum):
-        AES256GCM = 'AES-256-GCM'
-        ...
     class Aclmode(str,Enum):
         PASSTHROUGH = 'PASSTHROUGH'
         RESTRICTED = 'RESTRICTED'
@@ -126,13 +108,13 @@ class PoolDataset(TableExtMixin, Namespace):
         INHERIT = 'INHERIT'
         ...
     ChecksumChoices = typing.TypedDict('ChecksumChoices', {
-            'ON':'ON',
-            'FLETCHER2':'FLETCHER2',
-            'FLETCHER4':'FLETCHER4',
-            'SHA256':'SHA256',
-            'SHA512':'SHA512',
-            'SKEIN':'SKEIN',
-            'EDONR':'EDONR',
+            'ON':'typing.Literal["ON"]',
+            'FLETCHER2':'typing.Literal["FLETCHER2"]',
+            'FLETCHER4':'typing.Literal["FLETCHER4"]',
+            'SHA256':'typing.Literal["SHA256"]',
+            'SHA512':'typing.Literal["SHA512"]',
+            'SKEIN':'typing.Literal["SKEIN"]',
+            'EDONR':'typing.Literal["EDONR"]',
     })
     Checksum_ = typing.TypedDict('Checksum_', {
             'parsed':'typing.Union[str, int, bool, dict[str], list]',
@@ -141,9 +123,6 @@ class PoolDataset(TableExtMixin, Namespace):
             'source':'typing.Optional[str]',
             'source_info':'typing.Union[str, int, bool, dict[str], list]',
     })
-    class Choices(str,Enum):
-        INHERIT = 'INHERIT'
-        ...
     Comments = typing.TypedDict('Comments', {
             'parsed':'typing.Union[str, int, bool, dict[str], list]',
             'rawvalue':'typing.Optional[str]',
@@ -204,55 +183,55 @@ class PoolDataset(TableExtMixin, Namespace):
         INHERIT = 'INHERIT'
         ...
     CompressionChoices = typing.TypedDict('CompressionChoices', {
-            'OFF':'OFF',
-            'LZ4':'LZ4',
-            'GZIP':'GZIP',
-            'GZIP-1':'GZIP1',
-            'GZIP-9':'GZIP9',
-            'ZSTD':'ZSTD',
-            'ZSTD-FAST':'ZSTDFAST',
-            'ZLE':'ZLE',
-            'LZJB':'LZJB',
-            'ZSTD-1':'ZSTD1',
-            'ZSTD-2':'ZSTD2',
-            'ZSTD-3':'ZSTD3',
-            'ZSTD-4':'ZSTD4',
-            'ZSTD-5':'ZSTD5',
-            'ZSTD-6':'ZSTD6',
-            'ZSTD-7':'ZSTD7',
-            'ZSTD-8':'ZSTD8',
-            'ZSTD-9':'ZSTD9',
-            'ZSTD-10':'ZSTD10',
-            'ZSTD-11':'ZSTD11',
-            'ZSTD-12':'ZSTD12',
-            'ZSTD-13':'ZSTD13',
-            'ZSTD-14':'ZSTD14',
-            'ZSTD-15':'ZSTD15',
-            'ZSTD-16':'ZSTD16',
-            'ZSTD-17':'ZSTD17',
-            'ZSTD-18':'ZSTD18',
-            'ZSTD-19':'ZSTD19',
-            'ZSTD-FAST-1':'ZSTDFAST1',
-            'ZSTD-FAST-2':'ZSTDFAST2',
-            'ZSTD-FAST-3':'ZSTDFAST3',
-            'ZSTD-FAST-4':'ZSTDFAST4',
-            'ZSTD-FAST-5':'ZSTDFAST5',
-            'ZSTD-FAST-6':'ZSTDFAST6',
-            'ZSTD-FAST-7':'ZSTDFAST7',
-            'ZSTD-FAST-8':'ZSTDFAST8',
-            'ZSTD-FAST-9':'ZSTDFAST9',
-            'ZSTD-FAST-10':'ZSTDFAST10',
-            'ZSTD-FAST-20':'ZSTDFAST20',
-            'ZSTD-FAST-30':'ZSTDFAST30',
-            'ZSTD-FAST-40':'ZSTDFAST40',
-            'ZSTD-FAST-50':'ZSTDFAST50',
-            'ZSTD-FAST-60':'ZSTDFAST60',
-            'ZSTD-FAST-70':'ZSTDFAST70',
-            'ZSTD-FAST-80':'ZSTDFAST80',
-            'ZSTD-FAST-90':'ZSTDFAST90',
-            'ZSTD-FAST-100':'ZSTDFAST100',
-            'ZSTD-FAST-500':'ZSTDFAST500',
-            'ZSTD-FAST-1000':'ZSTDFAST1000',
+            'OFF':'typing.Literal["OFF"]',
+            'LZ4':'typing.Literal["LZ4"]',
+            'GZIP':'typing.Literal["GZIP"]',
+            'GZIP-1':'typing.Literal["GZIP-1"]',
+            'GZIP-9':'typing.Literal["GZIP-9"]',
+            'ZSTD':'typing.Literal["ZSTD"]',
+            'ZSTD-FAST':'typing.Literal["ZSTD-FAST"]',
+            'ZLE':'typing.Literal["ZLE"]',
+            'LZJB':'typing.Literal["LZJB"]',
+            'ZSTD-1':'typing.Literal["ZSTD-1"]',
+            'ZSTD-2':'typing.Literal["ZSTD-2"]',
+            'ZSTD-3':'typing.Literal["ZSTD-3"]',
+            'ZSTD-4':'typing.Literal["ZSTD-4"]',
+            'ZSTD-5':'typing.Literal["ZSTD-5"]',
+            'ZSTD-6':'typing.Literal["ZSTD-6"]',
+            'ZSTD-7':'typing.Literal["ZSTD-7"]',
+            'ZSTD-8':'typing.Literal["ZSTD-8"]',
+            'ZSTD-9':'typing.Literal["ZSTD-9"]',
+            'ZSTD-10':'typing.Literal["ZSTD-10"]',
+            'ZSTD-11':'typing.Literal["ZSTD-11"]',
+            'ZSTD-12':'typing.Literal["ZSTD-12"]',
+            'ZSTD-13':'typing.Literal["ZSTD-13"]',
+            'ZSTD-14':'typing.Literal["ZSTD-14"]',
+            'ZSTD-15':'typing.Literal["ZSTD-15"]',
+            'ZSTD-16':'typing.Literal["ZSTD-16"]',
+            'ZSTD-17':'typing.Literal["ZSTD-17"]',
+            'ZSTD-18':'typing.Literal["ZSTD-18"]',
+            'ZSTD-19':'typing.Literal["ZSTD-19"]',
+            'ZSTD-FAST-1':'typing.Literal["ZSTD-FAST-1"]',
+            'ZSTD-FAST-2':'typing.Literal["ZSTD-FAST-2"]',
+            'ZSTD-FAST-3':'typing.Literal["ZSTD-FAST-3"]',
+            'ZSTD-FAST-4':'typing.Literal["ZSTD-FAST-4"]',
+            'ZSTD-FAST-5':'typing.Literal["ZSTD-FAST-5"]',
+            'ZSTD-FAST-6':'typing.Literal["ZSTD-FAST-6"]',
+            'ZSTD-FAST-7':'typing.Literal["ZSTD-FAST-7"]',
+            'ZSTD-FAST-8':'typing.Literal["ZSTD-FAST-8"]',
+            'ZSTD-FAST-9':'typing.Literal["ZSTD-FAST-9"]',
+            'ZSTD-FAST-10':'typing.Literal["ZSTD-FAST-10"]',
+            'ZSTD-FAST-20':'typing.Literal["ZSTD-FAST-20"]',
+            'ZSTD-FAST-30':'typing.Literal["ZSTD-FAST-30"]',
+            'ZSTD-FAST-40':'typing.Literal["ZSTD-FAST-40"]',
+            'ZSTD-FAST-50':'typing.Literal["ZSTD-FAST-50"]',
+            'ZSTD-FAST-60':'typing.Literal["ZSTD-FAST-60"]',
+            'ZSTD-FAST-70':'typing.Literal["ZSTD-FAST-70"]',
+            'ZSTD-FAST-80':'typing.Literal["ZSTD-FAST-80"]',
+            'ZSTD-FAST-90':'typing.Literal["ZSTD-FAST-90"]',
+            'ZSTD-FAST-100':'typing.Literal["ZSTD-FAST-100"]',
+            'ZSTD-FAST-500':'typing.Literal["ZSTD-FAST-500"]',
+            'ZSTD-FAST-1000':'typing.Literal["ZSTD-FAST-1000"]',
     })
     Compression_ = typing.TypedDict('Compression_', {
             'parsed':'typing.Union[str, int, bool, dict[str], list]',
@@ -321,9 +300,6 @@ class PoolDataset(TableExtMixin, Namespace):
             'source':'typing.Optional[str]',
             'source_info':'typing.Union[str, int, bool, dict[str], list]',
     })
-    class EDONR(str,Enum):
-        EDONR = 'EDONR'
-        ...
     EncryptionAlgorithm = typing.TypedDict('EncryptionAlgorithm', {
             'parsed':'typing.Union[str, int, bool, dict[str], list]',
             'rawvalue':'typing.Optional[str]',
@@ -332,12 +308,12 @@ class PoolDataset(TableExtMixin, Namespace):
             'source_info':'typing.Union[str, int, bool, dict[str], list]',
     })
     EncryptionAlgorithmChoices = typing.TypedDict('EncryptionAlgorithmChoices', {
-            'AES-128-CCM':'AES128CCM',
-            'AES-192-CCM':'AES192CCM',
-            'AES-256-CCM':'AES256CCM',
-            'AES-128-GCM':'AES128GCM',
-            'AES-192-GCM':'AES192GCM',
-            'AES-256-GCM':'AES256GCM',
+            'AES-128-CCM':'typing.Literal["AES-128-CCM"]',
+            'AES-192-CCM':'typing.Literal["AES-192-CCM"]',
+            'AES-256-CCM':'typing.Literal["AES-256-CCM"]',
+            'AES-128-GCM':'typing.Literal["AES-128-GCM"]',
+            'AES-192-GCM':'typing.Literal["AES-192-GCM"]',
+            'AES-256-GCM':'typing.Literal["AES-256-GCM"]',
     })
     EncryptionOptions = typing.TypedDict('EncryptionOptions', {
             'generate_key':'bool',
@@ -363,12 +339,6 @@ class PoolDataset(TableExtMixin, Namespace):
             'source':'typing.Optional[str]',
             'source_info':'typing.Union[str, int, bool, dict[str], list]',
     })
-    class FLETCHER2(str,Enum):
-        FLETCHER2 = 'FLETCHER2'
-        ...
-    class FLETCHER4(str,Enum):
-        FLETCHER4 = 'FLETCHER4'
-        ...
     Flags = typing.TypedDict('Flags', {
             'FILE_INHERIT':'bool',
             'DIRECTORY_INHERIT':'bool',
@@ -377,15 +347,6 @@ class PoolDataset(TableExtMixin, Namespace):
             'INHERITED':'bool',
             'BASIC':'BASIC_',
     })
-    class GZIP(str,Enum):
-        GZIP = 'GZIP'
-        ...
-    class GZIP1(str,Enum):
-        GZIP1 = 'GZIP-1'
-        ...
-    class GZIP9(str,Enum):
-        GZIP9 = 'GZIP-9'
-        ...
     KeyFormat = typing.TypedDict('KeyFormat', {
             'parsed':'typing.Union[str, int, bool, dict[str], list]',
             'rawvalue':'typing.Optional[str]',
@@ -393,12 +354,6 @@ class PoolDataset(TableExtMixin, Namespace):
             'source':'typing.Optional[str]',
             'source_info':'typing.Union[str, int, bool, dict[str], list]',
     })
-    class LZ4(str,Enum):
-        LZ4 = 'LZ4'
-        ...
-    class LZJB(str,Enum):
-        LZJB = 'LZJB'
-        ...
     LockOptions = typing.TypedDict('LockOptions', {
             'force_umount':'bool',
     })
@@ -416,12 +371,6 @@ class PoolDataset(TableExtMixin, Namespace):
             'perms':'Perms',
             'flags':'Flags',
     })
-    class OFF(str,Enum):
-        OFF = 'OFF'
-        ...
-    class ON(str,Enum):
-        ON = 'ON'
-        ...
     Options = typing.TypedDict('Options', {
             'set_default_acl':'bool',
             'stripacl':'bool',
@@ -471,28 +420,28 @@ class PoolDataset(TableExtMixin, Namespace):
             'volblocksize':'Volblocksize',
             'sparse':'bool',
             'force_size':'bool',
-            'comments':'typing.Union[str, Choices]',
+            'comments':'typing.Union[str, typing.Literal["INHERIT"]]',
             'sync':'Sync',
             'snapdev':'Snapdev',
             'compression':'Compression',
             'atime':'Atime',
             'exec':'Exec',
-            'managedby':'typing.Union[str, Choices]',
+            'managedby':'typing.Union[str, typing.Literal["INHERIT"]]',
             'quota':'typing.Optional[int]',
-            'quota_warning':'typing.Union[int, Choices]',
-            'quota_critical':'typing.Union[int, Choices]',
+            'quota_warning':'typing.Union[int, typing.Literal["INHERIT"]]',
+            'quota_critical':'typing.Union[int, typing.Literal["INHERIT"]]',
             'refquota':'typing.Optional[int]',
-            'refquota_warning':'typing.Union[int, Choices]',
-            'refquota_critical':'typing.Union[int, Choices]',
+            'refquota_warning':'typing.Union[int, typing.Literal["INHERIT"]]',
+            'refquota_critical':'typing.Union[int, typing.Literal["INHERIT"]]',
             'reservation':'int',
             'refreservation':'int',
-            'special_small_block_size':'typing.Union[int, Choices]',
-            'copies':'typing.Union[int, Choices]',
+            'special_small_block_size':'typing.Union[int, typing.Literal["INHERIT"]]',
+            'copies':'typing.Union[int, typing.Literal["INHERIT"]]',
             'snapdir':'Snapdir',
             'deduplication':'Deduplication',
             'checksum':'Checksum',
             'readonly':'Readonly',
-            'recordsize':'typing.Union[str, Choices]',
+            'recordsize':'typing.Union[str, typing.Literal["INHERIT"]]',
             'casesensitivity':'Casesensitivity',
             'aclmode':'Aclmode',
             'acltype':'Acltype',
@@ -622,28 +571,28 @@ class PoolDataset(TableExtMixin, Namespace):
     PoolDatasetUpdate = typing.TypedDict('PoolDatasetUpdate', {
             'volsize':'int',
             'force_size':'bool',
-            'comments':'typing.Union[str, Choices]',
+            'comments':'typing.Union[str, typing.Literal["INHERIT"]]',
             'sync':'Sync',
             'snapdev':'Snapdev',
             'compression':'Compression',
             'atime':'Atime',
             'exec':'Exec',
-            'managedby':'typing.Union[str, Choices]',
+            'managedby':'typing.Union[str, typing.Literal["INHERIT"]]',
             'quota':'typing.Optional[int]',
-            'quota_warning':'typing.Union[int, Choices]',
-            'quota_critical':'typing.Union[int, Choices]',
+            'quota_warning':'typing.Union[int, typing.Literal["INHERIT"]]',
+            'quota_critical':'typing.Union[int, typing.Literal["INHERIT"]]',
             'refquota':'typing.Optional[int]',
-            'refquota_warning':'typing.Union[int, Choices]',
-            'refquota_critical':'typing.Union[int, Choices]',
+            'refquota_warning':'typing.Union[int, typing.Literal["INHERIT"]]',
+            'refquota_critical':'typing.Union[int, typing.Literal["INHERIT"]]',
             'reservation':'int',
             'refreservation':'int',
-            'special_small_block_size':'typing.Union[int, Choices]',
-            'copies':'typing.Union[int, Choices]',
+            'special_small_block_size':'typing.Union[int, typing.Literal["INHERIT"]]',
+            'copies':'typing.Union[int, typing.Literal["INHERIT"]]',
             'snapdir':'Snapdir',
             'deduplication':'Deduplication',
             'checksum':'Checksum',
             'readonly':'Readonly',
-            'recordsize':'typing.Union[str, Choices]',
+            'recordsize':'typing.Union[str, typing.Literal["INHERIT"]]',
             'aclmode':'Aclmode',
             'acltype':'Acltype',
             'xattr':'Xattr',
@@ -838,15 +787,6 @@ class PoolDataset(TableExtMixin, Namespace):
             'source':'typing.Optional[str]',
             'source_info':'typing.Union[str, int, bool, dict[str], list]',
     })
-    class SHA256(str,Enum):
-        SHA256 = 'SHA256'
-        ...
-    class SHA512(str,Enum):
-        SHA512 = 'SHA512'
-        ...
-    class SKEIN(str,Enum):
-        SKEIN = 'SKEIN'
-        ...
     class ShareType(str,Enum):
         GENERIC = 'GENERIC'
         SMB = 'SMB'
@@ -1028,132 +968,3 @@ class PoolDataset(TableExtMixin, Namespace):
             'source':'typing.Optional[str]',
             'source_info':'typing.Union[str, int, bool, dict[str], list]',
     })
-    class ZLE(str,Enum):
-        ZLE = 'ZLE'
-        ...
-    class ZSTD(str,Enum):
-        ZSTD = 'ZSTD'
-        ...
-    class ZSTD1(str,Enum):
-        ZSTD1 = 'ZSTD-1'
-        ...
-    class ZSTD10(str,Enum):
-        ZSTD10 = 'ZSTD-10'
-        ...
-    class ZSTD11(str,Enum):
-        ZSTD11 = 'ZSTD-11'
-        ...
-    class ZSTD12(str,Enum):
-        ZSTD12 = 'ZSTD-12'
-        ...
-    class ZSTD13(str,Enum):
-        ZSTD13 = 'ZSTD-13'
-        ...
-    class ZSTD14(str,Enum):
-        ZSTD14 = 'ZSTD-14'
-        ...
-    class ZSTD15(str,Enum):
-        ZSTD15 = 'ZSTD-15'
-        ...
-    class ZSTD16(str,Enum):
-        ZSTD16 = 'ZSTD-16'
-        ...
-    class ZSTD17(str,Enum):
-        ZSTD17 = 'ZSTD-17'
-        ...
-    class ZSTD18(str,Enum):
-        ZSTD18 = 'ZSTD-18'
-        ...
-    class ZSTD19(str,Enum):
-        ZSTD19 = 'ZSTD-19'
-        ...
-    class ZSTD2(str,Enum):
-        ZSTD2 = 'ZSTD-2'
-        ...
-    class ZSTD3(str,Enum):
-        ZSTD3 = 'ZSTD-3'
-        ...
-    class ZSTD4(str,Enum):
-        ZSTD4 = 'ZSTD-4'
-        ...
-    class ZSTD5(str,Enum):
-        ZSTD5 = 'ZSTD-5'
-        ...
-    class ZSTD6(str,Enum):
-        ZSTD6 = 'ZSTD-6'
-        ...
-    class ZSTD7(str,Enum):
-        ZSTD7 = 'ZSTD-7'
-        ...
-    class ZSTD8(str,Enum):
-        ZSTD8 = 'ZSTD-8'
-        ...
-    class ZSTD9(str,Enum):
-        ZSTD9 = 'ZSTD-9'
-        ...
-    class ZSTDFAST(str,Enum):
-        ZSTDFAST = 'ZSTD-FAST'
-        ...
-    class ZSTDFAST1(str,Enum):
-        ZSTDFAST1 = 'ZSTD-FAST-1'
-        ...
-    class ZSTDFAST10(str,Enum):
-        ZSTDFAST10 = 'ZSTD-FAST-10'
-        ...
-    class ZSTDFAST100(str,Enum):
-        ZSTDFAST100 = 'ZSTD-FAST-100'
-        ...
-    class ZSTDFAST1000(str,Enum):
-        ZSTDFAST1000 = 'ZSTD-FAST-1000'
-        ...
-    class ZSTDFAST2(str,Enum):
-        ZSTDFAST2 = 'ZSTD-FAST-2'
-        ...
-    class ZSTDFAST20(str,Enum):
-        ZSTDFAST20 = 'ZSTD-FAST-20'
-        ...
-    class ZSTDFAST3(str,Enum):
-        ZSTDFAST3 = 'ZSTD-FAST-3'
-        ...
-    class ZSTDFAST30(str,Enum):
-        ZSTDFAST30 = 'ZSTD-FAST-30'
-        ...
-    class ZSTDFAST4(str,Enum):
-        ZSTDFAST4 = 'ZSTD-FAST-4'
-        ...
-    class ZSTDFAST40(str,Enum):
-        ZSTDFAST40 = 'ZSTD-FAST-40'
-        ...
-    class ZSTDFAST5(str,Enum):
-        ZSTDFAST5 = 'ZSTD-FAST-5'
-        ...
-    class ZSTDFAST50(str,Enum):
-        ZSTDFAST50 = 'ZSTD-FAST-50'
-        ...
-    class ZSTDFAST500(str,Enum):
-        ZSTDFAST500 = 'ZSTD-FAST-500'
-        ...
-    class ZSTDFAST6(str,Enum):
-        ZSTDFAST6 = 'ZSTD-FAST-6'
-        ...
-    class ZSTDFAST60(str,Enum):
-        ZSTDFAST60 = 'ZSTD-FAST-60'
-        ...
-    class ZSTDFAST7(str,Enum):
-        ZSTDFAST7 = 'ZSTD-FAST-7'
-        ...
-    class ZSTDFAST70(str,Enum):
-        ZSTDFAST70 = 'ZSTD-FAST-70'
-        ...
-    class ZSTDFAST8(str,Enum):
-        ZSTDFAST8 = 'ZSTD-FAST-8'
-        ...
-    class ZSTDFAST80(str,Enum):
-        ZSTDFAST80 = 'ZSTD-FAST-80'
-        ...
-    class ZSTDFAST9(str,Enum):
-        ZSTDFAST9 = 'ZSTD-FAST-9'
-        ...
-    class ZSTDFAST90(str,Enum):
-        ZSTDFAST90 = 'ZSTD-FAST-90'
-        ...

@@ -23,6 +23,8 @@ class PythonNamespaceSignature(_api.NamespaceSignature):
                 for ty in param.type.required_types():
                     if not isinstance(ty, (_api.Object, _api.Enum)) or not ty:
                              continue
+                    if isinstance(ty, _api.Enum) and len(ty.options) == 1:
+                        continue
                     ty.name = _utils.classname(ty.name).rstrip("_")
                     if not ty.name:
                         if isinstance(ty, _api.Object):

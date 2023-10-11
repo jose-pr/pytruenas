@@ -488,9 +488,6 @@ class Interface(
             'address':'str',
             'netmask':'str',
     })
-    class FAST(str,Enum):
-        FAST = 'FAST'
-        ...
     InUseIp = typing.TypedDict('InUseIp', {
             'type':'str',
             'address':'str',
@@ -617,18 +614,9 @@ class Interface(
             'any':'bool',
             'static':'bool',
     })
-    class LAYER2(str,Enum):
-        LAYER2 = 'LAYER2'
-        ...
-    class LAYER2Plus3(str,Enum):
-        LAYER2Plus3 = 'LAYER2+3'
-        ...
-    class LAYER3Plus4(str,Enum):
-        LAYER3Plus4 = 'LAYER3+4'
-        ...
     LacpduRateChoices = typing.TypedDict('LacpduRateChoices', {
-            'SLOW':'SLOW',
-            'FAST':'FAST',
+            'SLOW':'typing.Literal["SLOW"]',
+            'FAST':'typing.Literal["FAST"]',
     })
     LagPorts = typing.TypedDict('LagPorts', {
             'name':'str',
@@ -681,9 +669,6 @@ class Interface(
             'limit':'int',
             'force_sql_filters':'bool',
     })
-    class SLOW(str,Enum):
-        SLOW = 'SLOW'
-        ...
     ServiceRestart = typing.TypedDict('ServiceRestart', {
             'type':'str',
             'service':'str',
@@ -735,7 +720,7 @@ class Interface(
         INET6 = 'INET6'
         ...
     XmitHashPolicyChoices = typing.TypedDict('XmitHashPolicyChoices', {
-            'LAYER2':'LAYER2',
-            'LAYER2+3':'LAYER2Plus3',
-            'LAYER3+4':'LAYER3Plus4',
+            'LAYER2':'typing.Literal["LAYER2"]',
+            'LAYER2+3':'typing.Literal["LAYER2+3"]',
+            'LAYER3+4':'typing.Literal["LAYER3+4"]',
     })
