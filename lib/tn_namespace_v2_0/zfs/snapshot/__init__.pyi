@@ -10,7 +10,7 @@ class ZfsSnapshot(
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload
     def clone(self, 
-        snapshot_clone:'SnapshotClone'={},
+        snapshot_clone:'SnapshotClone',
     /) -> None: 
         """
         Clone a given snapshot to a new dataset.
@@ -28,7 +28,7 @@ class ZfsSnapshot(
         ...
     @typing.overload
     def create(self, 
-        snapshot_create:'SnapshotCreate'={},
+        snapshot_create:'SnapshotCreate',
     /) -> 'dict[str]': 
         """
         Take a snapshot from a given dataset.
@@ -46,7 +46,7 @@ class ZfsSnapshot(
     @typing.overload
     def delete(self, 
         id:'str',
-        options:'Options'={},
+        options:'Options',
     /) -> 'bool': 
         """
         Delete snapshot of name `id`.
@@ -68,7 +68,7 @@ class ZfsSnapshot(
     @typing.overload
     def get_instance(self, 
         id:'typing.Union[str, int, bool, dict[str], list]',
-        query_options_get_instance:'QueryOptionsGetInstance'={},
+        query_options_get_instance:'QueryOptionsGetInstance',
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -88,7 +88,7 @@ class ZfsSnapshot(
     @typing.overload
     def hold(self, 
         id:'str',
-        options:'Options_'={},
+        options:'Options_',
     /) -> None: 
         """
         Holds snapshot `id`.
@@ -109,9 +109,9 @@ class ZfsSnapshot(
         ...
     @typing.overload
     def query(self, 
-        query_filters:'list[list]'=[],
-        query_options:'QueryOptions'={},
-    /) -> 'typing.Union[list[dict[str]], dict[str], int]': 
+        query_filters:'list[list]',
+        query_options:'QueryOptions',
+    /) -> 'typing.Union[list, dict[str], int]': 
         """
         Query all ZFS Snapshots with `query-filters` and `query-options`.
         
@@ -129,14 +129,14 @@ class ZfsSnapshot(
             query-options
         Returns
         -------
-        typing.Union[list[dict[str]], dict[str], int]:
+        typing.Union[list, dict[str], int]:
             
         """
         ...
     @typing.overload
     def release(self, 
         id:'str',
-        options:'Options_'={},
+        options:'Options_',
     /) -> None: 
         """
         Release held snapshot `id`.
@@ -158,7 +158,7 @@ class ZfsSnapshot(
         ...
     @typing.overload
     def remove(self, 
-        snapshot_remove:'SnapshotRemove'={},
+        snapshot_remove:'SnapshotRemove',
     /) -> None: 
         """
         Remove a snapshot from a given dataset.
@@ -177,7 +177,7 @@ class ZfsSnapshot(
     @typing.overload
     def rollback(self, 
         id:'str',
-        options:'Options__'={},
+        options:'Options__',
     /) -> None: 
         """
         Rollback to a given snapshot `id`.
@@ -205,7 +205,7 @@ class ZfsSnapshot(
     @typing.overload
     def update(self, 
         id:'str',
-        snapshot_update:'SnapshotUpdate'={},
+        snapshot_update:'SnapshotUpdate',
     /) -> 'dict[str]': 
         """
         
@@ -283,11 +283,11 @@ class ZfsSnapshot(
             'force':'bool',
             'recursive_rollback':'bool',
     })
+    SnapshotUpdate = typing.TypedDict('SnapshotUpdate', {
+            'user_properties_update':'list[UserProperty]',
+    })
     UserProperty = typing.TypedDict('UserProperty', {
             'key':'str',
             'value':'str',
             'remove':'bool',
-    })
-    SnapshotUpdate = typing.TypedDict('SnapshotUpdate', {
-            'user_properties_update':'list[UserProperty]',
     })

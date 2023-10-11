@@ -10,7 +10,7 @@ class Catalog(
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload
     def create(self, 
-        catalog_create:'CatalogCreate'={},
+        catalog_create:'CatalogCreate',
     /) -> 'CatalogCreateReturns': 
         """
         `catalog_create.preferred_trains` specifies trains which will be displayed in the UI directly for a user.
@@ -45,7 +45,7 @@ class Catalog(
     @typing.overload
     def get_instance(self, 
         id:'typing.Union[str, int, bool, dict[str], list]',
-        query_options_get_instance:'QueryOptionsGetInstance'={},
+        query_options_get_instance:'QueryOptionsGetInstance',
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -65,7 +65,7 @@ class Catalog(
     @typing.overload
     def get_item_details(self, 
         item_name:'str',
-        item_version_details:'ItemVersionDetails'={},
+        item_version_details:'ItemVersionDetails',
     /) -> 'ItemDetails': 
         """
         Retrieve information of `item_name` `item_version_details.catalog` catalog item.
@@ -85,7 +85,7 @@ class Catalog(
     @typing.overload
     def items(self, 
         label:'str',
-        options:'Options'={},
+        options:'Options',
     /) -> 'dict[str]': 
         """
         Retrieve item details for `label` catalog.
@@ -152,9 +152,9 @@ class Catalog(
         ...
     @typing.overload
     def query(self, 
-        query_filters:'list[list]'=[],
-        query_options:'QueryOptions'={},
-    /) -> 'typing.Union[list[CatalogEntry], CatalogEntry_, int, CatalogEntry__]': 
+        query_filters:'list[list]',
+        query_options:'QueryOptions',
+    /) -> 'typing.Union[list[CatalogEntry], CatalogEntry, int]': 
         """
         
 
@@ -166,7 +166,7 @@ class Catalog(
             query-options
         Returns
         -------
-        typing.Union[list[CatalogEntry], CatalogEntry_, int, CatalogEntry__]:
+        typing.Union[list[CatalogEntry], CatalogEntry, int]:
             
         """
         ...
@@ -200,7 +200,7 @@ class Catalog(
     @typing.overload
     def update(self, 
         id:'str',
-        catalog_update:'CatalogUpdate'={},
+        catalog_update:'CatalogUpdate',
     /) -> 'CatalogUpdateReturns': 
         """
         
@@ -242,11 +242,6 @@ class Catalog(
             'preferred_trains':'list',
             'force':'bool',
     })
-    CachingProgress = typing.TypedDict('CachingProgress', {
-            'description':'typing.Optional[str]',
-            'extra':'typing.Union[str, int, bool, dict[str], list]',
-            'percent':'typing.Optional[float]',
-    })
     CatalogCreateReturns = typing.TypedDict('CatalogCreateReturns', {
             'label':'str',
             'repository':'str',
@@ -261,6 +256,11 @@ class Catalog(
             'cached':'bool',
             'caching_progress':'CachingProgress',
             'caching_job':'dict[str]',
+    })
+    CachingProgress = typing.TypedDict('CachingProgress', {
+            'description':'typing.Optional[str]',
+            'extra':'typing.Union[str, int, bool, dict[str], list]',
+            'percent':'typing.Optional[float]',
     })
     QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
             'relationships':'bool',
@@ -321,11 +321,6 @@ class Catalog(
             'limit':'int',
             'force_sql_filters':'bool',
     })
-    CachingProgress_ = typing.TypedDict('CachingProgress_', {
-            'description':'typing.Optional[str]',
-            'extra':'typing.Union[str, int, bool, dict[str], list]',
-            'percent':'typing.Optional[float]',
-    })
     CatalogEntry = typing.TypedDict('CatalogEntry', {
             'label':'str',
             'repository':'str',
@@ -338,56 +333,11 @@ class Catalog(
             'error':'bool',
             'builtin':'bool',
             'cached':'bool',
-            'caching_progress':'CachingProgress_',
-            'caching_job':'dict[str]',
-    })
-    CachingProgress__ = typing.TypedDict('CachingProgress__', {
-            'description':'typing.Optional[str]',
-            'extra':'typing.Union[str, int, bool, dict[str], list]',
-            'percent':'typing.Optional[float]',
-    })
-    CatalogEntry_ = typing.TypedDict('CatalogEntry_', {
-            'label':'str',
-            'repository':'str',
-            'branch':'str',
-            'location':'str',
-            'id':'str',
-            'preferred_trains':'list',
-            'trains':'dict[str]',
-            'healthy':'bool',
-            'error':'bool',
-            'builtin':'bool',
-            'cached':'bool',
-            'caching_progress':'CachingProgress__',
-            'caching_job':'dict[str]',
-    })
-    CachingProgress___ = typing.TypedDict('CachingProgress___', {
-            'description':'typing.Optional[str]',
-            'extra':'typing.Union[str, int, bool, dict[str], list]',
-            'percent':'typing.Optional[float]',
-    })
-    CatalogEntry__ = typing.TypedDict('CatalogEntry__', {
-            'label':'str',
-            'repository':'str',
-            'branch':'str',
-            'location':'str',
-            'id':'str',
-            'preferred_trains':'list',
-            'trains':'dict[str]',
-            'healthy':'bool',
-            'error':'bool',
-            'builtin':'bool',
-            'cached':'bool',
-            'caching_progress':'CachingProgress___',
+            'caching_progress':'CachingProgress',
             'caching_job':'dict[str]',
     })
     CatalogUpdate = typing.TypedDict('CatalogUpdate', {
             'preferred_trains':'list',
-    })
-    CachingProgress____ = typing.TypedDict('CachingProgress____', {
-            'description':'typing.Optional[str]',
-            'extra':'typing.Union[str, int, bool, dict[str], list]',
-            'percent':'typing.Optional[float]',
     })
     CatalogUpdateReturns = typing.TypedDict('CatalogUpdateReturns', {
             'label':'str',
@@ -401,6 +351,6 @@ class Catalog(
             'error':'bool',
             'builtin':'bool',
             'cached':'bool',
-            'caching_progress':'CachingProgress____',
+            'caching_progress':'CachingProgress',
             'caching_job':'dict[str]',
     })

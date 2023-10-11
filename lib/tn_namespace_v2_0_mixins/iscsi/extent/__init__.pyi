@@ -12,7 +12,7 @@ class IscsiExtent(
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload
     def create(self, 
-        iscsi_extent_create:'IscsiExtentCreate'={},
+        iscsi_extent_create:'IscsiExtentCreate',
     /) -> 'dict[str]': 
         """
         Create an iSCSI Extent.
@@ -42,8 +42,8 @@ class IscsiExtent(
     @typing.overload
     def delete(self, 
         id:'int',
-        remove:'bool'=False,
-        force:'bool'=False,
+        remove:'bool',
+        force:'bool',
     /) -> 'bool': 
         """
         Delete iSCSI Extent of `id`.
@@ -80,7 +80,7 @@ class IscsiExtent(
     @typing.overload
     def get_instance(self, 
         id:'typing.Union[str, int, bool, dict[str], list]',
-        query_options_get_instance:'QueryOptionsGetInstance'={},
+        query_options_get_instance:'QueryOptionsGetInstance',
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -99,9 +99,9 @@ class IscsiExtent(
         ...
     @typing.overload
     def query(self, 
-        query_filters:'list[list]'=[],
-        query_options:'QueryOptions'={},
-    /) -> 'typing.Union[list[dict[str]], dict[str], int]': 
+        query_filters:'list[list]',
+        query_options:'QueryOptions',
+    /) -> 'typing.Union[list, dict[str], int]': 
         """
         
 
@@ -113,14 +113,14 @@ class IscsiExtent(
             query-options
         Returns
         -------
-        typing.Union[list[dict[str]], dict[str], int]:
+        typing.Union[list, dict[str], int]:
             
         """
         ...
     @typing.overload
     def update(self, 
         id:'int',
-        iscsi_extent_update:'IscsiExtentUpdate'={},
+        iscsi_extent_update:'IscsiExtentUpdate',
     /) -> 'dict[str]': 
         """
         Update iSCSI Extent of `id`.
@@ -137,18 +137,6 @@ class IscsiExtent(
         dict[str]:
             iscsi_extent_update_returns
         """
-        ...
-    class Type(str,Enum):
-        DISK = 'DISK'
-        FILE = 'FILE'
-        ...
-    class Rpm(str,Enum):
-        UNKNOWN = 'UNKNOWN'
-        SSD = 'SSD'
-        _5400 = '5400'
-        _7200 = '7200'
-        _10000 = '10000'
-        _15000 = '15000'
         ...
     IscsiExtentCreate = typing.TypedDict('IscsiExtentCreate', {
             'name':'str',
@@ -167,6 +155,18 @@ class IscsiExtent(
             'ro':'bool',
             'enabled':'bool',
     })
+    class Type(str,Enum):
+        DISK = 'DISK'
+        FILE = 'FILE'
+        ...
+    class Rpm(str,Enum):
+        UNKNOWN = 'UNKNOWN'
+        SSD = 'SSD'
+        _5400 = '5400'
+        _7200 = '7200'
+        _10000 = '10000'
+        _15000 = '15000'
+        ...
     QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
             'relationships':'bool',
             'extend':'typing.Optional[str]',

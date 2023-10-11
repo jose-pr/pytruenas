@@ -24,7 +24,7 @@ class SystemSecurity(
         ...
     @typing.overload
     def update(self, 
-        system_security_update:'SystemSecurityUpdate'={},
+        system_security_update:'SystemSecurityUpdate',
     /) -> 'SystemSecurityUpdateReturns': 
         """
         Update System Security Service Configuration.

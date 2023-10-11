@@ -8,6 +8,19 @@ class Privilege(Namespace):
     def __init__(self, client) -> None:
         super().__init__(client, 'privilege')
 
+    PrivilegeCreate = typing.TypedDict('PrivilegeCreate', {
+            'id':'int',
+            'name':'str',
+            'local_groups':'list[int]',
+            'ds_groups':'list[int]',
+            'allowlist':'list[AllowlistItem]',
+            'roles':'list[str]',
+            'web_shell':'bool',
+    })
+    AllowlistItem = typing.TypedDict('AllowlistItem', {
+            'method':'Method',
+            'resource':'str',
+    })
     class Method(str,Enum):
         GET = 'GET'
         POST = 'POST'
@@ -15,27 +28,14 @@ class Privilege(Namespace):
         DELETE = 'DELETE'
         CALL = 'CALL'
         SUBSCRIBE = 'SUBSCRIBE'
-        _ = '*'
+        All = '*'
         ...
-    AllowlistItem = typing.TypedDict('AllowlistItem', {
-            'method':'Method',
-            'resource':'str',
-    })
-    PrivilegeCreate = typing.TypedDict('PrivilegeCreate', {
-            'id':'int',
-            'name':'str',
-            'local_groups':'list[int]',
-            'ds_groups':'list[typing.Union[int, str]]',
-            'allowlist':'list[AllowlistItem]',
-            'roles':'list[str]',
-            'web_shell':'bool',
-    })
     PrivilegeCreateReturns = typing.TypedDict('PrivilegeCreateReturns', {
             'id':'int',
             'builtin_name':'typing.Optional[str]',
             'name':'str',
             'local_groups':'list[int]',
-            'ds_groups':'list[typing.Union[int, str]]',
+            'ds_groups':'list[int]',
             'allowlist':'list[AllowlistItem]',
             'roles':'list[str]',
             'web_shell':'bool',
@@ -73,27 +73,7 @@ class Privilege(Namespace):
             'builtin_name':'typing.Optional[str]',
             'name':'str',
             'local_groups':'list[int]',
-            'ds_groups':'list[typing.Union[int, str]]',
-            'allowlist':'list[AllowlistItem]',
-            'roles':'list[str]',
-            'web_shell':'bool',
-    })
-    PrivilegeEntry_ = typing.TypedDict('PrivilegeEntry_', {
-            'id':'int',
-            'builtin_name':'typing.Optional[str]',
-            'name':'str',
-            'local_groups':'list[int]',
-            'ds_groups':'list[typing.Union[int, str]]',
-            'allowlist':'list[AllowlistItem]',
-            'roles':'list[str]',
-            'web_shell':'bool',
-    })
-    PrivilegeEntry__ = typing.TypedDict('PrivilegeEntry__', {
-            'id':'int',
-            'builtin_name':'typing.Optional[str]',
-            'name':'str',
-            'local_groups':'list[int]',
-            'ds_groups':'list[typing.Union[int, str]]',
+            'ds_groups':'list[int]',
             'allowlist':'list[AllowlistItem]',
             'roles':'list[str]',
             'web_shell':'bool',
@@ -102,7 +82,7 @@ class Privilege(Namespace):
             'id':'int',
             'name':'str',
             'local_groups':'list[int]',
-            'ds_groups':'list[typing.Union[int, str]]',
+            'ds_groups':'list[int]',
             'allowlist':'list[AllowlistItem]',
             'roles':'list[str]',
             'web_shell':'bool',
@@ -112,7 +92,7 @@ class Privilege(Namespace):
             'builtin_name':'typing.Optional[str]',
             'name':'str',
             'local_groups':'list[int]',
-            'ds_groups':'list[typing.Union[int, str]]',
+            'ds_groups':'list[int]',
             'allowlist':'list[AllowlistItem]',
             'roles':'list[str]',
             'web_shell':'bool',

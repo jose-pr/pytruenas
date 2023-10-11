@@ -36,8 +36,8 @@ class Failover(
     @typing.overload
     def call_remote(self, 
         method:'str',
-        args:'list'=[],
-        options:'Options'={},
+        args:'list',
+        options:'Options',
     /) -> 'typing.Union[str, int, bool, dict[str], list]': 
         """
         Call a method on the other node.
@@ -93,7 +93,7 @@ class Failover(
     @typing.overload
     def control(self, 
         action:'Action',
-        options:'Options_'={},
+        options:'Options_',
     /) -> None: 
         """
         
@@ -238,7 +238,7 @@ class Failover(
         ...
     @typing.overload
     def sync_to_peer(self, 
-        options:'Options__'={},
+        options:'Options__',
     /) -> None: 
         """
         Sync database and files to the other controller.
@@ -255,7 +255,7 @@ class Failover(
         ...
     @typing.overload
     def unlock(self, 
-        options:'Options___'={},
+        options:'Options___',
     /) -> 'bool': 
         """
         Unlock datasets in HA, syncing passphrase between controllers and forcing this controller
@@ -273,7 +273,7 @@ class Failover(
         ...
     @typing.overload
     def update(self, 
-        failover_update:'FailoverUpdate'={},
+        failover_update:'FailoverUpdate',
     /) -> 'FailoverUpdateReturns': 
         """
         Update failover state.
@@ -302,7 +302,7 @@ class Failover(
         ...
     @typing.overload
     def upgrade(self, 
-        failover_upgrade:'FailoverUpgrade'={},
+        failover_upgrade:'FailoverUpgrade',
     /) -> 'bool': 
         """
         Upgrades both controllers.
@@ -387,6 +387,10 @@ class Failover(
     Options__ = typing.TypedDict('Options__', {
             'reboot':'bool',
     })
+    Options___ = typing.TypedDict('Options___', {
+            'pools':'list[PoolKeys]',
+            'datasets':'list[DatasetKeys]',
+    })
     PoolKeys = typing.TypedDict('PoolKeys', {
             'name':'str',
             'passphrase':'str',
@@ -394,10 +398,6 @@ class Failover(
     DatasetKeys = typing.TypedDict('DatasetKeys', {
             'name':'str',
             'passphrase':'str',
-    })
-    Options___ = typing.TypedDict('Options___', {
-            'pools':'list[PoolKeys]',
-            'datasets':'list[DatasetKeys]',
     })
     FailoverUpdate = typing.TypedDict('FailoverUpdate', {
             'disabled':'bool',

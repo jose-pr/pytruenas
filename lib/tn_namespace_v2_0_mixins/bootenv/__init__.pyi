@@ -29,7 +29,7 @@ class Bootenv(
         ...
     @typing.overload
     def create(self, 
-        bootenv_create:'BootenvCreate'={},
+        bootenv_create:'BootenvCreate',
     /) -> 'str': 
         """
         Create a new boot environment using `name`.
@@ -69,7 +69,7 @@ class Bootenv(
     @typing.overload
     def get_instance(self, 
         id:'typing.Union[str, int, bool, dict[str], list]',
-        query_options_get_instance:'QueryOptionsGetInstance'={},
+        query_options_get_instance:'QueryOptionsGetInstance',
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -88,8 +88,8 @@ class Bootenv(
         ...
     @typing.overload
     def query(self, 
-        query_filters:'list[list]'=[],
-        query_options:'QueryOptions'={},
+        query_filters:'list[list]',
+        query_options:'QueryOptions',
     /) -> 'typing.Union[list[BootenvEntry], BootenvEntry, int]': 
         """
         Query all Boot Environments with `query-filters` and `query-options`.
@@ -109,7 +109,7 @@ class Bootenv(
     @typing.overload
     def set_attribute(self, 
         id:'str',
-        attributes:'Attributes'={},
+        attributes:'Attributes',
     /) -> 'bool': 
         """
         Sets attributes boot environment `id`.
@@ -131,7 +131,7 @@ class Bootenv(
     @typing.overload
     def update(self, 
         id:'str',
-        bootenv_update:'BootenvUpdate'={},
+        bootenv_update:'BootenvUpdate',
     /) -> 'str': 
         """
         Update `id` boot environment name with a new provided valid `name`.

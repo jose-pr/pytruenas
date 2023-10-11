@@ -26,7 +26,7 @@ class Systemdataset(
         ...
     @typing.overload
     def pool_choices(self, 
-        include_current_pool:'bool'=True,
+        include_current_pool:'bool',
     /) -> 'dict[str]': 
         """
         Retrieve pool choices which can be used for configuring system dataset.
@@ -43,7 +43,7 @@ class Systemdataset(
         ...
     @typing.overload
     def update(self, 
-        sysdataset_update:'SysdatasetUpdate'={},
+        sysdataset_update:'SysdatasetUpdate',
     /) -> 'SystemdatasetUpdateReturns': 
         """
         Update System Dataset Service Configuration.

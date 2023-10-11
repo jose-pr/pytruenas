@@ -9,11 +9,6 @@ class Tunable(TableExtMixin, Namespace):
     def __init__(self, client) -> None:
         super().__init__(client, 'tunable')
 
-    class Type(str,Enum):
-        SYSCTL = 'SYSCTL'
-        UDEV = 'UDEV'
-        ZFS = 'ZFS'
-        ...
     TunableCreate = typing.TypedDict('TunableCreate', {
             'type':'Type',
             'var':'str',
@@ -22,6 +17,11 @@ class Tunable(TableExtMixin, Namespace):
             'enabled':'bool',
             'update_initramfs':'bool',
     })
+    class Type(str,Enum):
+        SYSCTL = 'SYSCTL'
+        UDEV = 'UDEV'
+        ZFS = 'ZFS'
+        ...
     TunableCreateReturns = typing.TypedDict('TunableCreateReturns', {
             'type':'Type',
             'var':'str',
@@ -68,6 +68,11 @@ class Tunable(TableExtMixin, Namespace):
             'update_initramfs':'bool',
             'id':'int',
     })
+    TunableTypeChoices = typing.TypedDict('TunableTypeChoices', {
+            'SYSCTL':'SYSCTL',
+            'UDEV':'UDEV',
+            'ZFS':'ZFS',
+    })
     class SYSCTL(str,Enum):
         SYSCTL = 'SYSCTL'
         ...
@@ -77,11 +82,6 @@ class Tunable(TableExtMixin, Namespace):
     class ZFS(str,Enum):
         ZFS = 'ZFS'
         ...
-    TunableTypeChoices = typing.TypedDict('TunableTypeChoices', {
-            'SYSCTL':'SYSCTL',
-            'UDEV':'UDEV',
-            'ZFS':'ZFS',
-    })
     TunableUpdate = typing.TypedDict('TunableUpdate', {
             'value':'str',
             'comment':'str',

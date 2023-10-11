@@ -10,7 +10,7 @@ class Cronjob(
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload
     def create(self, 
-        cron_job_create:'CronJobCreate'={},
+        cron_job_create:'CronJobCreate',
     /) -> 'CronjobCreateReturns': 
         """
         Create a new cron job.
@@ -48,7 +48,7 @@ class Cronjob(
     @typing.overload
     def get_instance(self, 
         id:'typing.Union[str, int, bool, dict[str], list]',
-        query_options_get_instance:'QueryOptionsGetInstance'={},
+        query_options_get_instance:'QueryOptionsGetInstance',
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -67,8 +67,8 @@ class Cronjob(
         ...
     @typing.overload
     def query(self, 
-        query_filters:'list[list]'=[],
-        query_options:'QueryOptions'={},
+        query_filters:'list[list]',
+        query_options:'QueryOptions',
     /) -> 'typing.Union[list[CronJobEntry], CronJobEntry, int]': 
         """
         
@@ -88,7 +88,7 @@ class Cronjob(
     @typing.overload
     def run(self, 
         id:'int',
-        skip_disabled:'bool'=False,
+        skip_disabled:'bool',
     /) -> None: 
         """
         Job to run cronjob task of `id`.
@@ -106,7 +106,7 @@ class Cronjob(
     @typing.overload
     def update(self, 
         id:'int',
-        cronjob_update:'CronjobUpdate'={},
+        cronjob_update:'CronjobUpdate',
     /) -> 'CronjobUpdateReturns': 
         """
         Update cronjob of `id`.
@@ -124,13 +124,6 @@ class Cronjob(
             cronjob_update_returns
         """
         ...
-    Schedule = typing.TypedDict('Schedule', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
     CronJobCreate = typing.TypedDict('CronJobCreate', {
             'enabled':'bool',
             'stderr':'bool',
@@ -139,6 +132,13 @@ class Cronjob(
             'command':'str',
             'description':'str',
             'user':'str',
+    })
+    Schedule = typing.TypedDict('Schedule', {
+            'minute':'str',
+            'hour':'str',
+            'dom':'str',
+            'month':'str',
+            'dow':'str',
     })
     CronjobCreateReturns = typing.TypedDict('CronjobCreateReturns', {
             'enabled':'bool',

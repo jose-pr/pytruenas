@@ -1,15 +1,18 @@
 #!/bin/python3
-from pytruenas import TrueNASClient, Creds, AuthMethod
+from pytruenas import TrueNASClient, Credentials
 from pytruenas.mixins import UpdateReturn
 
 import os
 
 from pytruenas.mixins import TableExtMixin
+
+
+tn_host = os.environ.get("TN_HOST")
+tn_creds = Credentials.from_env()
+client = TrueNASClient(tn_host, tn_creds, sslverify=False)
+
 from tn_namespace_v2_0 import Cronjob as _Cronjob, Auth
-from tn_namespace_v2_0_exts import SystemGeneral
 from tn_namespace_v2_0_mixins import SystemAdvanced
-
-
 #
 # Extend automatic generated namespace with some methods for Map/list
 #
@@ -17,37 +20,15 @@ class Cronjob(TableExtMixin[_Cronjob.CronJobEntry], _Cronjob):
     ...
 
 
-tn_host = os.environ.get("TN_HOST")
-tn_creds = Creds.from_env()
-client = TrueNASClient(tn_host, tn_creds, sslverify=False)
-sysgeneral = SystemGeneral(client)
+
 sysadv = SystemAdvanced(client)
 config = sysadv.config()
-config = sysgeneral.config()
-port = config["ui_port"]
-timezones = sysgeneral.timezone_choices()
 cronjobs = Cronjob(client)
 count = len(cronjobs)
 _cronjobs = cronjobs.query()
 _first = _cronjobs[0] if cronjobs else None
 firstid = _first["id"] if cronjobs else None
 assert cronjobs.get(firstid, None) == _first
-#
-# By default returns the new config
-#
-config = sysgeneral.update({"ui_port": 80})
-#
-# Get the changes and the full config
-#
-diff, config = sysgeneral.update(
-    {"ui_port": 81}, _return=UpdateReturn.Both, ui_port=80, ui_httpsport=443
-)
-print(f"Changes: {diff}")
-#
-# Only do an action if config changed
-#
-if sysgeneral.update(_return=UpdateReturn.Diff, ui_port=port):
-    print("Settings changed back")
 auth = Auth(client)
 try:
     whoami = auth.me()

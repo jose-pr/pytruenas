@@ -15,6 +15,7 @@ import re as _re
 
 def classname(name: "str") -> str:
     std = _re.sub(r"[-\s_]+", "_", name)
+    std = std.replace('+', 'Plus').replace('!','Not').replace("*", "All")
     std = _re.sub('\W|^(?=\d)','_', std)
     if std == "":
         std = '_'

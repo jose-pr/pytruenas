@@ -12,7 +12,7 @@ class IscsiTargetextent(
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload
     def create(self, 
-        iscsi_targetextent_create:'IscsiTargetextentCreate'={},
+        iscsi_targetextent_create:'IscsiTargetextentCreate',
     /) -> 'dict[str]': 
         """
         Create an Associated Target.
@@ -32,7 +32,7 @@ class IscsiTargetextent(
     @typing.overload
     def delete(self, 
         id:'int',
-        force:'bool'=False,
+        force:'bool',
     /) -> 'bool': 
         """
         Delete Associated Target of `id`.
@@ -52,7 +52,7 @@ class IscsiTargetextent(
     @typing.overload
     def get_instance(self, 
         id:'typing.Union[str, int, bool, dict[str], list]',
-        query_options_get_instance:'QueryOptionsGetInstance'={},
+        query_options_get_instance:'QueryOptionsGetInstance',
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -71,9 +71,9 @@ class IscsiTargetextent(
         ...
     @typing.overload
     def query(self, 
-        query_filters:'list[list]'=[],
-        query_options:'QueryOptions'={},
-    /) -> 'typing.Union[list[dict[str]], dict[str], int]': 
+        query_filters:'list[list]',
+        query_options:'QueryOptions',
+    /) -> 'typing.Union[list, dict[str], int]': 
         """
         
 
@@ -85,14 +85,14 @@ class IscsiTargetextent(
             query-options
         Returns
         -------
-        typing.Union[list[dict[str]], dict[str], int]:
+        typing.Union[list, dict[str], int]:
             
         """
         ...
     @typing.overload
     def update(self, 
         id:'int',
-        iscsi_targetextent_update:'IscsiTargetextentUpdate'={},
+        iscsi_targetextent_update:'IscsiTargetextentUpdate',
     /) -> 'dict[str]': 
         """
         Update Associated Target of `id`.

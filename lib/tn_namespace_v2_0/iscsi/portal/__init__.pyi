@@ -10,7 +10,7 @@ class IscsiPortal(
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload
     def create(self, 
-        iscsiportal_create:'IscsiportalCreate'={},
+        iscsiportal_create:'IscsiportalCreate',
     /) -> 'dict[str]': 
         """
         Create a new iSCSI Portal.
@@ -47,7 +47,7 @@ class IscsiPortal(
     @typing.overload
     def get_instance(self, 
         id:'typing.Union[str, int, bool, dict[str], list]',
-        query_options_get_instance:'QueryOptionsGetInstance'={},
+        query_options_get_instance:'QueryOptionsGetInstance',
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -78,9 +78,9 @@ class IscsiPortal(
         ...
     @typing.overload
     def query(self, 
-        query_filters:'list[list]'=[],
-        query_options:'QueryOptions'={},
-    /) -> 'typing.Union[list[dict[str]], dict[str], int]': 
+        query_filters:'list[list]',
+        query_options:'QueryOptions',
+    /) -> 'typing.Union[list, dict[str], int]': 
         """
         
 
@@ -92,14 +92,14 @@ class IscsiPortal(
             query-options
         Returns
         -------
-        typing.Union[list[dict[str]], dict[str], int]:
+        typing.Union[list, dict[str], int]:
             
         """
         ...
     @typing.overload
     def update(self, 
         id:'int',
-        iscsiportal_update:'IscsiportalUpdate'={},
+        iscsiportal_update:'IscsiportalUpdate',
     /) -> 'dict[str]': 
         """
         Update iSCSI Portal `id`.
@@ -117,6 +117,12 @@ class IscsiPortal(
             iscsi_portal_update_returns
         """
         ...
+    IscsiportalCreate = typing.TypedDict('IscsiportalCreate', {
+            'comment':'str',
+            'discovery_authmethod':'DiscoveryAuthmethod',
+            'discovery_authgroup':'typing.Optional[int]',
+            'listen':'list[Listen]',
+    })
     class DiscoveryAuthmethod(str,Enum):
         NONE = 'NONE'
         CHAP = 'CHAP'
@@ -124,12 +130,6 @@ class IscsiPortal(
         ...
     Listen = typing.TypedDict('Listen', {
             'ip':'str',
-    })
-    IscsiportalCreate = typing.TypedDict('IscsiportalCreate', {
-            'comment':'str',
-            'discovery_authmethod':'DiscoveryAuthmethod',
-            'discovery_authgroup':'typing.Optional[int]',
-            'listen':'list[Listen]',
     })
     QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
             'relationships':'bool',

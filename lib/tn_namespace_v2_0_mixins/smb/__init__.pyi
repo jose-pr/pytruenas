@@ -64,7 +64,7 @@ class Smb(
         ...
     @typing.overload
     def get_remote_acl(self, 
-        get_remote_acl:'GetRemoteAcl'={},
+        get_remote_acl:'GetRemoteAcl',
     /) -> None: 
         """
         Retrieves an ACL from a remote SMB server.
@@ -96,10 +96,10 @@ class Smb(
         ...
     @typing.overload
     def status(self, 
-        info_level:'InfoLevel'="ALL",
-        query_filters:'list[list]'=[],
-        query_options:'QueryOptions'={},
-        status_options:'StatusOptions'={},
+        info_level:'InfoLevel',
+        query_filters:'list[list]',
+        query_options:'QueryOptions',
+        status_options:'StatusOptions',
     /) -> None: 
         """
         Returns SMB server status (sessions, open files, locks, notifications).
@@ -144,7 +144,7 @@ class Smb(
         ...
     @typing.overload
     def update(self, 
-        smb_update:'SmbUpdate'={},
+        smb_update:'SmbUpdate',
     /) -> 'dict[str]': 
         """
         Update SMB Service Configuration.
@@ -188,14 +188,6 @@ class Smb(
             smb_update_returns
         """
         ...
-    class OutputFormat(str,Enum):
-        SMB = 'SMB'
-        LOCAL = 'LOCAL'
-        ...
-    Options = typing.TypedDict('Options', {
-            'use_kerberos':'bool',
-            'output_format':'OutputFormat',
-    })
     GetRemoteAcl = typing.TypedDict('GetRemoteAcl', {
             'server':'str',
             'share':'str',
@@ -204,6 +196,14 @@ class Smb(
             'password':'str',
             'options':'Options',
     })
+    Options = typing.TypedDict('Options', {
+            'use_kerberos':'bool',
+            'output_format':'OutputFormat',
+    })
+    class OutputFormat(str,Enum):
+        SMB = 'SMB'
+        LOCAL = 'LOCAL'
+        ...
     class InfoLevel(str,Enum):
         AUTHLOG = 'AUTH_LOG'
         ALL = 'ALL'
@@ -233,13 +233,6 @@ class Smb(
             'restrict_user':'str',
             'restrict_session':'str',
     })
-    class Loglevel(str,Enum):
-        NONE = 'NONE'
-        MINIMUM = 'MINIMUM'
-        NORMAL = 'NORMAL'
-        FULL = 'FULL'
-        DEBUG = 'DEBUG'
-        ...
     SmbUpdate = typing.TypedDict('SmbUpdate', {
             'netbiosname':'str',
             'netbiosname_b':'str',
@@ -261,3 +254,10 @@ class Smb(
             'bindip':'list[str]',
             'smb_options':'str',
     })
+    class Loglevel(str,Enum):
+        NONE = 'NONE'
+        MINIMUM = 'MINIMUM'
+        NORMAL = 'NORMAL'
+        FULL = 'FULL'
+        DEBUG = 'DEBUG'
+        ...

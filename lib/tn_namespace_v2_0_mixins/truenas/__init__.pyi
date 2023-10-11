@@ -91,7 +91,7 @@ class Truenas(
     @typing.overload
     def set_production(self, 
         production:'bool',
-        attach_debug:'bool'=False,
+        attach_debug:'bool',
     /) -> 'SetProduction': 
         """
         Sets system production state and optionally sends initial debug.
@@ -110,7 +110,7 @@ class Truenas(
         ...
     @typing.overload
     def update_customer_information(self, 
-        customer_information_update:'CustomerInformationUpdate'={},
+        customer_information_update:'CustomerInformationUpdate',
     /) -> None: 
         """
         Updates customer information.
@@ -127,6 +127,15 @@ class Truenas(
             'ticket':'typing.Optional[int]',
             'url':'typing.Optional[str]',
             'has_debug':'bool',
+    })
+    CustomerInformationUpdate = typing.TypedDict('CustomerInformationUpdate', {
+            'company':'str',
+            'administrative_user':'AdministrativeUser',
+            'technical_user':'TechnicalUser',
+            'reseller':'Reseller',
+            'physical_location':'PhysicalLocation',
+            'primary_use_case':'str',
+            'other_primary_use_case':'str',
     })
     AdministrativeUser = typing.TypedDict('AdministrativeUser', {
             'first_name':'str',
@@ -173,13 +182,4 @@ class Truenas(
             'contact_name':'str',
             'contact_phone_number':'str',
             'contact_email':'str',
-    })
-    CustomerInformationUpdate = typing.TypedDict('CustomerInformationUpdate', {
-            'company':'str',
-            'administrative_user':'AdministrativeUser',
-            'technical_user':'TechnicalUser',
-            'reseller':'Reseller',
-            'physical_location':'PhysicalLocation',
-            'primary_use_case':'str',
-            'other_primary_use_case':'str',
     })

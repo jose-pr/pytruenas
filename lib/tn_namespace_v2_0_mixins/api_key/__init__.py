@@ -9,6 +9,14 @@ class Api_key(TableExtMixin, Namespace):
     def __init__(self, client) -> None:
         super().__init__(client, 'api_key')
 
+    ApiKeyCreate = typing.TypedDict('ApiKeyCreate', {
+            'name':'str',
+            'allowlist':'list[AllowlistItem]',
+    })
+    AllowlistItem = typing.TypedDict('AllowlistItem', {
+            'method':'Method',
+            'resource':'str',
+    })
     class Method(str,Enum):
         GET = 'GET'
         POST = 'POST'
@@ -16,16 +24,8 @@ class Api_key(TableExtMixin, Namespace):
         DELETE = 'DELETE'
         CALL = 'CALL'
         SUBSCRIBE = 'SUBSCRIBE'
-        _ = '*'
+        All = '*'
         ...
-    AllowlistItem = typing.TypedDict('AllowlistItem', {
-            'method':'Method',
-            'resource':'str',
-    })
-    ApiKeyCreate = typing.TypedDict('ApiKeyCreate', {
-            'name':'str',
-            'allowlist':'list[AllowlistItem]',
-    })
     QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
             'relationships':'bool',
             'extend':'typing.Optional[str]',

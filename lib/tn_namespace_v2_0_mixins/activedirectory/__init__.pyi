@@ -26,7 +26,7 @@ class Activedirectory(
         ...
     @typing.overload
     def domain_info(self, 
-        domain:'str'="",
+        domain:'str',
     /) -> 'DomainInfo': 
         """
         Returns the following information about the currently joined domain:
@@ -74,7 +74,7 @@ class Activedirectory(
         ...
     @typing.overload
     def leave(self, 
-        kerberos_username_password:'KerberosUsernamePassword'={},
+        kerberos_username_password:'KerberosUsernamePassword',
     /) -> None: 
         """
         Leave Active Directory domain. This will remove computer
@@ -123,7 +123,7 @@ class Activedirectory(
         ...
     @typing.overload
     def update(self, 
-        activedirectory_update:'ActivedirectoryUpdate'={},
+        activedirectory_update:'ActivedirectoryUpdate',
     /) -> 'dict[str]': 
         """
         Update active directory configuration.
@@ -248,11 +248,6 @@ class Activedirectory(
         SFU20 = 'SFU20'
         RFC2307 = 'RFC2307'
         ...
-    class NssInfo(str,Enum):
-        SFU = 'SFU'
-        SFU20 = 'SFU20'
-        RFC2307 = 'RFC2307'
-        ...
     ActivedirectoryUpdate = typing.TypedDict('ActivedirectoryUpdate', {
             'domainname':'str',
             'bindname':'str',
@@ -268,7 +263,7 @@ class Activedirectory(
             'kerberos_principal':'typing.Optional[str]',
             'timeout':'int',
             'dns_timeout':'int',
-            'nss_info':'typing.Optional[NssInfo]',
+            'nss_info':'typing.Optional[str]',
             'createcomputer':'str',
             'netbiosname':'str',
             'netbiosname_b':'str',

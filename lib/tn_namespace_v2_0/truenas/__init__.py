@@ -13,6 +13,15 @@ class Truenas(Namespace):
             'url':'typing.Optional[str]',
             'has_debug':'bool',
     })
+    CustomerInformationUpdate = typing.TypedDict('CustomerInformationUpdate', {
+            'company':'str',
+            'administrative_user':'AdministrativeUser',
+            'technical_user':'TechnicalUser',
+            'reseller':'Reseller',
+            'physical_location':'PhysicalLocation',
+            'primary_use_case':'str',
+            'other_primary_use_case':'str',
+    })
     AdministrativeUser = typing.TypedDict('AdministrativeUser', {
             'first_name':'str',
             'last_name':'str',
@@ -58,13 +67,4 @@ class Truenas(Namespace):
             'contact_name':'str',
             'contact_phone_number':'str',
             'contact_email':'str',
-    })
-    CustomerInformationUpdate = typing.TypedDict('CustomerInformationUpdate', {
-            'company':'str',
-            'administrative_user':'AdministrativeUser',
-            'technical_user':'TechnicalUser',
-            'reseller':'Reseller',
-            'physical_location':'PhysicalLocation',
-            'primary_use_case':'str',
-            'other_primary_use_case':'str',
     })

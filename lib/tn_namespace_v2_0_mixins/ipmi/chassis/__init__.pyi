@@ -10,7 +10,7 @@ class IpmiChassis(
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload
     def identify(self, 
-        verb:'Verb'="ON",
+        verb:'Verb',
     /) -> None: 
         """
         Toggle the chassis identify light.

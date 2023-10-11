@@ -8,7 +8,7 @@ class ChartRelease(Namespace):
     def __init__(self, client) -> None:
         super().__init__(client, 'chart.release')
 
-    CertificateEntry = typing.TypedDict('CertificateEntry', {
+    CertificateauthorityEntry = typing.TypedDict('CertificateauthorityEntry', {
             'id':'int',
             'type':'int',
             'name':'str',
@@ -35,7 +35,7 @@ class ChartRelease(Namespace):
             'city':'typing.Optional[str]',
             'organization':'typing.Optional[str]',
             'organizational_unit':'typing.Optional[str]',
-            'san':'typing.Optional[list[str]]',
+            'san':'typing.Optional[list]',
             'email':'typing.Optional[str]',
             'DN':'typing.Optional[str]',
             'subject_name_hash':'typing.Optional[str]',
@@ -64,7 +64,7 @@ class ChartRelease(Namespace):
             'signed_certificates':'int',
             'add_to_trusted_store':'bool',
     })
-    CertificateEntry_ = typing.TypedDict('CertificateEntry_', {
+    CertificateEntry = typing.TypedDict('CertificateEntry', {
             'id':'int',
             'type':'int',
             'name':'str',
@@ -91,7 +91,7 @@ class ChartRelease(Namespace):
             'city':'typing.Optional[str]',
             'organization':'typing.Optional[str]',
             'organizational_unit':'typing.Optional[str]',
-            'san':'typing.Optional[list[str]]',
+            'san':'typing.Optional[list]',
             'email':'typing.Optional[str]',
             'DN':'typing.Optional[str]',
             'subject_name_hash':'typing.Optional[str]',
@@ -127,6 +127,31 @@ class ChartRelease(Namespace):
             'train':'str',
             'version':'str',
     })
+    ChartReleaseCreateReturns = typing.TypedDict('ChartReleaseCreateReturns', {
+            'name':'str',
+            'info':'dict[str]',
+            'config':'dict[str]',
+            'hooks':'list',
+            'version':'int',
+            'namespace':'str',
+            'chart_metadata':'ChartMetadata',
+            'id':'str',
+            'catalog':'str',
+            'catalog_train':'str',
+            'path':'str',
+            'dataset':'str',
+            'status':'str',
+            'used_ports':'list[Port]',
+            'pod_status':'PodStatus',
+            'update_available':'bool',
+            'human_version':'str',
+            'human_latest_version':'str',
+            'container_images_update_available':'bool',
+            'portals':'dict[str]',
+            'chart_schema':'dict[str]',
+            'history':'dict[str]',
+            'resources':'Resources',
+    })
     ChartMetadata = typing.TypedDict('ChartMetadata', {
             'name':'str',
             'version':'str',
@@ -155,33 +180,12 @@ class ChartRelease(Namespace):
             'pods':'list',
             'statefulsets':'list',
     })
-    ChartReleaseCreateReturns = typing.TypedDict('ChartReleaseCreateReturns', {
-            'name':'str',
-            'info':'dict[str]',
-            'config':'dict[str]',
-            'hooks':'list',
-            'version':'int',
-            'namespace':'str',
-            'chart_metadata':'ChartMetadata',
-            'id':'str',
-            'catalog':'str',
-            'catalog_train':'str',
-            'path':'str',
-            'dataset':'str',
-            'status':'str',
-            'used_ports':'list[Port]',
-            'pod_status':'PodStatus',
-            'update_available':'bool',
-            'human_version':'str',
-            'human_latest_version':'str',
-            'container_images_update_available':'bool',
-            'portals':'dict[str]',
-            'chart_schema':'dict[str]',
-            'history':'dict[str]',
-            'resources':'Resources',
-    })
     Options = typing.TypedDict('Options', {
             'delete_unused_images':'bool',
+    })
+    Event = typing.TypedDict('Event', {
+            'involvedObject':'InvolvedObject',
+            'metadata':'Metadata',
     })
     InvolvedObject = typing.TypedDict('InvolvedObject', {
             'kind':'str',
@@ -192,10 +196,6 @@ class ChartRelease(Namespace):
             'namespace':'str',
             'uid':'str',
             'name':'str',
-    })
-    Event = typing.TypedDict('Event', {
-            'involvedObject':'InvolvedObject',
-            'metadata':'Metadata',
     })
     QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
             'relationships':'bool',
@@ -217,16 +217,16 @@ class ChartRelease(Namespace):
             'pod_name':'str',
             'container_name':'str',
     })
-    class Status(str,Enum):
-        ACTIVE = 'ACTIVE'
-        DEPLOYING = 'DEPLOYING'
-        STOPPED = 'STOPPED'
-        ...
     PodStatus_ = typing.TypedDict('PodStatus_', {
             'available':'int',
             'desired':'int',
             'status':'Status',
     })
+    class Status(str,Enum):
+        ACTIVE = 'ACTIVE'
+        DEPLOYING = 'DEPLOYING'
+        STOPPED = 'STOPPED'
+        ...
     PullContainerImagesOptions = typing.TypedDict('PullContainerImagesOptions', {
             'redeploy':'bool',
     })
@@ -243,21 +243,6 @@ class ChartRelease(Namespace):
             'offset':'int',
             'limit':'int',
             'force_sql_filters':'bool',
-    })
-    Resources_ = typing.TypedDict('Resources_', {
-            'storage_class':'dict[str]',
-            'persistent_volumes':'list',
-            'host_path_volumes':'list',
-            'locked_host_paths':'list',
-            'container_images':'dict[str]',
-            'truenas_certificates':'list[int]',
-            'truenas_certificate_authorities':'list[int]',
-            'cronjobs':'list',
-            'deployments':'list',
-            'jobs':'list',
-            'persistent_volume_claims':'list',
-            'pods':'list',
-            'statefulsets':'list',
     })
     ChartReleaseEntry = typing.TypedDict('ChartReleaseEntry', {
             'name':'str',
@@ -282,127 +267,7 @@ class ChartRelease(Namespace):
             'portals':'dict[str]',
             'chart_schema':'dict[str]',
             'history':'dict[str]',
-            'resources':'Resources_',
-    })
-    Resources__ = typing.TypedDict('Resources__', {
-            'storage_class':'dict[str]',
-            'persistent_volumes':'list',
-            'host_path_volumes':'list',
-            'locked_host_paths':'list',
-            'container_images':'dict[str]',
-            'truenas_certificates':'list[int]',
-            'truenas_certificate_authorities':'list[int]',
-            'cronjobs':'list',
-            'deployments':'list',
-            'jobs':'list',
-            'persistent_volume_claims':'list',
-            'pods':'list',
-            'statefulsets':'list',
-    })
-    ChartReleaseEntry_ = typing.TypedDict('ChartReleaseEntry_', {
-            'name':'str',
-            'info':'dict[str]',
-            'config':'dict[str]',
-            'hooks':'list',
-            'version':'int',
-            'namespace':'str',
-            'chart_metadata':'ChartMetadata',
-            'id':'str',
-            'catalog':'str',
-            'catalog_train':'str',
-            'path':'str',
-            'dataset':'str',
-            'status':'str',
-            'used_ports':'list[Port]',
-            'pod_status':'PodStatus',
-            'update_available':'bool',
-            'human_version':'str',
-            'human_latest_version':'str',
-            'container_images_update_available':'bool',
-            'portals':'dict[str]',
-            'chart_schema':'dict[str]',
-            'history':'dict[str]',
-            'resources':'Resources__',
-    })
-    Resources___ = typing.TypedDict('Resources___', {
-            'storage_class':'dict[str]',
-            'persistent_volumes':'list',
-            'host_path_volumes':'list',
-            'locked_host_paths':'list',
-            'container_images':'dict[str]',
-            'truenas_certificates':'list[int]',
-            'truenas_certificate_authorities':'list[int]',
-            'cronjobs':'list',
-            'deployments':'list',
-            'jobs':'list',
-            'persistent_volume_claims':'list',
-            'pods':'list',
-            'statefulsets':'list',
-    })
-    ChartReleaseEntry__ = typing.TypedDict('ChartReleaseEntry__', {
-            'name':'str',
-            'info':'dict[str]',
-            'config':'dict[str]',
-            'hooks':'list',
-            'version':'int',
-            'namespace':'str',
-            'chart_metadata':'ChartMetadata',
-            'id':'str',
-            'catalog':'str',
-            'catalog_train':'str',
-            'path':'str',
-            'dataset':'str',
-            'status':'str',
-            'used_ports':'list[Port]',
-            'pod_status':'PodStatus',
-            'update_available':'bool',
-            'human_version':'str',
-            'human_latest_version':'str',
-            'container_images_update_available':'bool',
-            'portals':'dict[str]',
-            'chart_schema':'dict[str]',
-            'history':'dict[str]',
-            'resources':'Resources___',
-    })
-    Resources____ = typing.TypedDict('Resources____', {
-            'storage_class':'dict[str]',
-            'persistent_volumes':'list',
-            'host_path_volumes':'list',
-            'locked_host_paths':'list',
-            'container_images':'dict[str]',
-            'truenas_certificates':'list[int]',
-            'truenas_certificate_authorities':'list[int]',
-            'cronjobs':'list',
-            'deployments':'list',
-            'jobs':'list',
-            'persistent_volume_claims':'list',
-            'pods':'list',
-            'statefulsets':'list',
-    })
-    ChartReleaseEntry___ = typing.TypedDict('ChartReleaseEntry___', {
-            'name':'str',
-            'info':'dict[str]',
-            'config':'dict[str]',
-            'hooks':'list',
-            'version':'int',
-            'namespace':'str',
-            'chart_metadata':'ChartMetadata',
-            'id':'str',
-            'catalog':'str',
-            'catalog_train':'str',
-            'path':'str',
-            'dataset':'str',
-            'status':'str',
-            'used_ports':'list[Port]',
-            'pod_status':'PodStatus',
-            'update_available':'bool',
-            'human_version':'str',
-            'human_latest_version':'str',
-            'container_images_update_available':'bool',
-            'portals':'dict[str]',
-            'chart_schema':'dict[str]',
-            'history':'dict[str]',
-            'resources':'Resources____',
+            'resources':'Resources',
     })
     RollbackOptions = typing.TypedDict('RollbackOptions', {
             'force_rollback':'bool',
@@ -410,48 +275,12 @@ class ChartRelease(Namespace):
             'rollback_snapshot':'bool',
             'item_version':'str',
     })
-    Resources_____ = typing.TypedDict('Resources_____', {
-            'storage_class':'dict[str]',
-            'persistent_volumes':'list',
-            'host_path_volumes':'list',
-            'locked_host_paths':'list',
-            'container_images':'dict[str]',
-            'truenas_certificates':'list[int]',
-            'truenas_certificate_authorities':'list[int]',
-            'cronjobs':'list',
-            'deployments':'list',
-            'jobs':'list',
-            'persistent_volume_claims':'list',
-            'pods':'list',
-            'statefulsets':'list',
-    })
-    ChartReleaseEntry____ = typing.TypedDict('ChartReleaseEntry____', {
-            'name':'str',
-            'info':'dict[str]',
-            'config':'dict[str]',
-            'hooks':'list',
-            'version':'int',
-            'namespace':'str',
-            'chart_metadata':'ChartMetadata',
-            'id':'str',
-            'catalog':'str',
-            'catalog_train':'str',
-            'path':'str',
-            'dataset':'str',
-            'status':'str',
-            'used_ports':'list[Port]',
-            'pod_status':'PodStatus',
-            'update_available':'bool',
-            'human_version':'str',
-            'human_latest_version':'str',
-            'container_images_update_available':'bool',
-            'portals':'dict[str]',
-            'chart_schema':'dict[str]',
-            'history':'dict[str]',
-            'resources':'Resources_____',
-    })
     ScaleOptions = typing.TypedDict('ScaleOptions', {
             'replica_count':'int',
+    })
+    ScaleChartRelease = typing.TypedDict('ScaleChartRelease', {
+            'before_scale':'BeforeScale',
+            'after_scale':'AfterScale',
     })
     BeforeScale = typing.TypedDict('BeforeScale', {
             'deployments':'dict[str]',
@@ -461,18 +290,18 @@ class ChartRelease(Namespace):
             'deployments':'dict[str]',
             'statefulsets':'dict[str]',
     })
-    ScaleChartRelease = typing.TypedDict('ScaleChartRelease', {
-            'before_scale':'BeforeScale',
-            'after_scale':'AfterScale',
+    ScaleWorkload = typing.TypedDict('ScaleWorkload', {
+            'replica_count':'int',
+            'type':'Type',
+            'name':'str',
     })
     class Type(str,Enum):
         DEPLOYMENT = 'DEPLOYMENT'
         STATEFULSET = 'STATEFULSET'
         ...
-    ScaleWorkload = typing.TypedDict('ScaleWorkload', {
-            'replica_count':'int',
-            'type':'Type',
-            'name':'str',
+    ScaleableResources = typing.TypedDict('ScaleableResources', {
+            'DEPLOYMENT':'DEPLOYMENT',
+            'STATEFULSET':'STATEFULSET',
     })
     class DEPLOYMENT(str,Enum):
         DEPLOYMENT = 'DEPLOYMENT'
@@ -480,27 +309,8 @@ class ChartRelease(Namespace):
     class STATEFULSET(str,Enum):
         STATEFULSET = 'STATEFULSET'
         ...
-    ScaleableResources = typing.TypedDict('ScaleableResources', {
-            'DEPLOYMENT':'DEPLOYMENT',
-            'STATEFULSET':'STATEFULSET',
-    })
     ChartReleaseUpdate = typing.TypedDict('ChartReleaseUpdate', {
             'values':'dict[str]',
-    })
-    Resources______ = typing.TypedDict('Resources______', {
-            'storage_class':'dict[str]',
-            'persistent_volumes':'list',
-            'host_path_volumes':'list',
-            'locked_host_paths':'list',
-            'container_images':'dict[str]',
-            'truenas_certificates':'list[int]',
-            'truenas_certificate_authorities':'list[int]',
-            'cronjobs':'list',
-            'deployments':'list',
-            'jobs':'list',
-            'persistent_volume_claims':'list',
-            'pods':'list',
-            'statefulsets':'list',
     })
     ChartReleaseUpdateReturns = typing.TypedDict('ChartReleaseUpdateReturns', {
             'name':'str',
@@ -525,58 +335,14 @@ class ChartRelease(Namespace):
             'portals':'dict[str]',
             'chart_schema':'dict[str]',
             'history':'dict[str]',
-            'resources':'Resources______',
+            'resources':'Resources',
     })
     UpgradeOptions = typing.TypedDict('UpgradeOptions', {
             'values':'dict[str]',
             'item_version':'str',
     })
-    Resources_______ = typing.TypedDict('Resources_______', {
-            'storage_class':'dict[str]',
-            'persistent_volumes':'list',
-            'host_path_volumes':'list',
-            'locked_host_paths':'list',
-            'container_images':'dict[str]',
-            'truenas_certificates':'list[int]',
-            'truenas_certificate_authorities':'list[int]',
-            'cronjobs':'list',
-            'deployments':'list',
-            'jobs':'list',
-            'persistent_volume_claims':'list',
-            'pods':'list',
-            'statefulsets':'list',
-    })
-    ChartReleaseEntry_____ = typing.TypedDict('ChartReleaseEntry_____', {
-            'name':'str',
-            'info':'dict[str]',
-            'config':'dict[str]',
-            'hooks':'list',
-            'version':'int',
-            'namespace':'str',
-            'chart_metadata':'ChartMetadata',
-            'id':'str',
-            'catalog':'str',
-            'catalog_train':'str',
-            'path':'str',
-            'dataset':'str',
-            'status':'str',
-            'used_ports':'list[Port]',
-            'pod_status':'PodStatus',
-            'update_available':'bool',
-            'human_version':'str',
-            'human_latest_version':'str',
-            'container_images_update_available':'bool',
-            'portals':'dict[str]',
-            'chart_schema':'dict[str]',
-            'history':'dict[str]',
-            'resources':'Resources_______',
-    })
     Options__ = typing.TypedDict('Options__', {
             'item_version':'str',
-    })
-    VersionInfo = typing.TypedDict('VersionInfo', {
-            'version':'str',
-            'human_version':'str',
     })
     UpgradeSummary = typing.TypedDict('UpgradeSummary', {
             'image_update_available':'bool',
@@ -588,4 +354,8 @@ class ChartRelease(Namespace):
             'upgrade_human_version':'str',
             'changelog':'typing.Optional[str]',
             'available_versions_for_upgrade':'list[VersionInfo]',
+    })
+    VersionInfo = typing.TypedDict('VersionInfo', {
+            'version':'str',
+            'human_version':'str',
     })

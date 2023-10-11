@@ -25,17 +25,21 @@ class Kubernetes(Namespace):
             'dataset':'typing.Optional[str]',
             'id':'int',
     })
-    Metadata = typing.TypedDict('Metadata', {
-            'name':'str',
-    })
     Event = typing.TypedDict('Event', {
             'metadata':'Metadata',
             'message':'str',
     })
+    Metadata = typing.TypedDict('Metadata', {
+            'name':'str',
+    })
     Options = typing.TypedDict('Options', {
             'wait_for_csi':'bool',
     })
-    class Status(str,Enum):
+    Status = typing.TypedDict('Status', {
+            'status':'Status_',
+            'description':'str',
+    })
+    class Status_(str,Enum):
         PENDING = 'PENDING'
         RUNNING = 'RUNNING'
         INITIALIZING = 'INITIALIZING'
@@ -44,13 +48,6 @@ class Kubernetes(Namespace):
         UNCONFIGURED = 'UNCONFIGURED'
         FAILED = 'FAILED'
         ...
-    Status_ = typing.TypedDict('Status_', {
-            'status':'Status',
-            'description':'str',
-    })
-    MigrationOptions = typing.TypedDict('MigrationOptions', {
-            'passphrase':'str',
-    })
     KubernetesUpdate = typing.TypedDict('KubernetesUpdate', {
             'servicelb':'bool',
             'configure_gpus':'bool',
@@ -68,6 +65,9 @@ class Kubernetes(Namespace):
             'migrate_applications':'bool',
             'force':'bool',
             'migration_options':'MigrationOptions',
+    })
+    MigrationOptions = typing.TypedDict('MigrationOptions', {
+            'passphrase':'str',
     })
     KubernetesUpdateReturns = typing.TypedDict('KubernetesUpdateReturns', {
             'servicelb':'bool',

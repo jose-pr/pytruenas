@@ -8,12 +8,6 @@ class Smart(Namespace):
     def __init__(self, client) -> None:
         super().__init__(client, 'smart')
 
-    class Powermode(str,Enum):
-        NEVER = 'NEVER'
-        SLEEP = 'SLEEP'
-        STANDBY = 'STANDBY'
-        IDLE = 'IDLE'
-        ...
     SmartEntry = typing.TypedDict('SmartEntry', {
             'interval':'int',
             'id':'int',
@@ -22,6 +16,12 @@ class Smart(Namespace):
             'informational':'int',
             'critical':'int',
     })
+    class Powermode(str,Enum):
+        NEVER = 'NEVER'
+        SLEEP = 'SLEEP'
+        STANDBY = 'STANDBY'
+        IDLE = 'IDLE'
+        ...
     SmartUpdate = typing.TypedDict('SmartUpdate', {
             'interval':'int',
             'powermode':'Powermode',

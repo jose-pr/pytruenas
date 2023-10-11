@@ -8,10 +8,6 @@ class GlusterVolume(Namespace):
     def __init__(self, client) -> None:
         super().__init__(client, 'gluster.volume')
 
-    Brick = typing.TypedDict('Brick', {
-            'peer_name':'str',
-            'peer_path':'str',
-    })
     GlustervolumeCreate = typing.TypedDict('GlustervolumeCreate', {
             'name':'str',
             'bricks':'list[Brick]',
@@ -22,9 +18,9 @@ class GlusterVolume(Namespace):
             'redundancy':'int',
             'force':'bool',
     })
-    Ports = typing.TypedDict('Ports', {
-            'tcp':'str',
-            'rdma':'str',
+    Brick = typing.TypedDict('Brick', {
+            'peer_name':'str',
+            'peer_path':'str',
     })
     GlusterVolumeCreateReturns = typing.TypedDict('GlusterVolumeCreateReturns', {
             'name':'str',
@@ -43,6 +39,10 @@ class GlusterVolume(Namespace):
             'block_size':'str',
             'mnt_options':'str',
             'fs_name':'str',
+    })
+    Ports = typing.TypedDict('Ports', {
+            'tcp':'str',
+            'rdma':'str',
     })
     QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
             'relationships':'bool',

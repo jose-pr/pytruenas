@@ -207,7 +207,7 @@ class System(
         ...
     @typing.overload
     def reboot(self, 
-        system_reboot:'SystemReboot'={},
+        system_reboot:'SystemReboot',
     /) -> None: 
         """
         Reboots the operating system.
@@ -224,7 +224,7 @@ class System(
         ...
     @typing.overload
     def release_notes_url(self, 
-        version_str:'str'=None,
+        version_str:'str',
     /) -> 'typing.Optional[str]': 
         """
         Returns the release notes URL for a version of SCALE.
@@ -246,7 +246,7 @@ class System(
         ...
     @typing.overload
     def shutdown(self, 
-        system_shutdown:'SystemShutdown'={},
+        system_shutdown:'SystemShutdown',
     /) -> None: 
         """
         Shuts down the operating system.

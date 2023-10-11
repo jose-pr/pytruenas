@@ -10,7 +10,7 @@ class Initshutdownscript(
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload
     def create(self, 
-        init_shutdown_script_create:'InitShutdownScriptCreate'={},
+        init_shutdown_script_create:'InitShutdownScriptCreate',
     /) -> 'InitshutdownscriptCreateReturns': 
         """
         Create an initshutdown script task.
@@ -59,7 +59,7 @@ class Initshutdownscript(
     @typing.overload
     def get_instance(self, 
         id:'typing.Union[str, int, bool, dict[str], list]',
-        query_options_get_instance:'QueryOptionsGetInstance'={},
+        query_options_get_instance:'QueryOptionsGetInstance',
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -78,9 +78,9 @@ class Initshutdownscript(
         ...
     @typing.overload
     def query(self, 
-        query_filters:'list[list]'=[],
-        query_options:'QueryOptions'={},
-    /) -> 'typing.Union[list[InitShutdownScriptEntry], InitShutdownScriptEntry_, int, InitShutdownScriptEntry__]': 
+        query_filters:'list[list]',
+        query_options:'QueryOptions',
+    /) -> 'typing.Union[list[InitShutdownScriptEntry], InitShutdownScriptEntry, int]': 
         """
         
 
@@ -92,14 +92,14 @@ class Initshutdownscript(
             query-options
         Returns
         -------
-        typing.Union[list[InitShutdownScriptEntry], InitShutdownScriptEntry_, int, InitShutdownScriptEntry__]:
+        typing.Union[list[InitShutdownScriptEntry], InitShutdownScriptEntry, int]:
             
         """
         ...
     @typing.overload
     def update(self, 
         id:'int',
-        initshutdownscript_update:'InitshutdownscriptUpdate'={},
+        initshutdownscript_update:'InitshutdownscriptUpdate',
     /) -> 'InitshutdownscriptUpdateReturns': 
         """
         Update initshutdown script task of `id`.
@@ -117,15 +117,6 @@ class Initshutdownscript(
             initshutdownscript_update_returns
         """
         ...
-    class Type(str,Enum):
-        COMMAND = 'COMMAND'
-        SCRIPT = 'SCRIPT'
-        ...
-    class When(str,Enum):
-        PREINIT = 'PREINIT'
-        POSTINIT = 'POSTINIT'
-        SHUTDOWN = 'SHUTDOWN'
-        ...
     InitShutdownScriptCreate = typing.TypedDict('InitShutdownScriptCreate', {
             'type':'Type',
             'command':'typing.Optional[str]',
@@ -136,6 +127,15 @@ class Initshutdownscript(
             'timeout':'int',
             'comment':'str',
     })
+    class Type(str,Enum):
+        COMMAND = 'COMMAND'
+        SCRIPT = 'SCRIPT'
+        ...
+    class When(str,Enum):
+        PREINIT = 'PREINIT'
+        POSTINIT = 'POSTINIT'
+        SHUTDOWN = 'SHUTDOWN'
+        ...
     InitshutdownscriptCreateReturns = typing.TypedDict('InitshutdownscriptCreateReturns', {
             'type':'Type',
             'command':'typing.Optional[str]',
@@ -176,28 +176,6 @@ class Initshutdownscript(
             'force_sql_filters':'bool',
     })
     InitShutdownScriptEntry = typing.TypedDict('InitShutdownScriptEntry', {
-            'type':'Type',
-            'command':'typing.Optional[str]',
-            'script_text':'typing.Optional[str]',
-            'script':'typing.Optional[str]',
-            'when':'When',
-            'enabled':'bool',
-            'timeout':'int',
-            'comment':'str',
-            'id':'int',
-    })
-    InitShutdownScriptEntry_ = typing.TypedDict('InitShutdownScriptEntry_', {
-            'type':'Type',
-            'command':'typing.Optional[str]',
-            'script_text':'typing.Optional[str]',
-            'script':'typing.Optional[str]',
-            'when':'When',
-            'enabled':'bool',
-            'timeout':'int',
-            'comment':'str',
-            'id':'int',
-    })
-    InitShutdownScriptEntry__ = typing.TypedDict('InitShutdownScriptEntry__', {
             'type':'Type',
             'command':'typing.Optional[str]',
             'script_text':'typing.Optional[str]',

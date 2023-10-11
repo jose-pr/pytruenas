@@ -24,7 +24,7 @@ class AuthTwofactor(
         ...
     @typing.overload
     def update(self, 
-        auth_twofactor_update:'AuthTwofactorUpdate'={},
+        auth_twofactor_update:'AuthTwofactorUpdate',
     /) -> 'AuthTwofactorUpdateReturns': 
         """
         `otp_digits` represents number of allowed digits in the OTP.
@@ -43,9 +43,6 @@ class AuthTwofactor(
             auth_twofactor_update_returns
         """
         ...
-    Services = typing.TypedDict('Services', {
-            'ssh':'bool',
-    })
     AuthTwofactorEntry = typing.TypedDict('AuthTwofactorEntry', {
             'enabled':'bool',
             'otp_digits':'int',
@@ -53,6 +50,9 @@ class AuthTwofactor(
             'interval':'int',
             'services':'Services',
             'id':'int',
+    })
+    Services = typing.TypedDict('Services', {
+            'ssh':'bool',
     })
     AuthTwofactorUpdate = typing.TypedDict('AuthTwofactorUpdate', {
             'enabled':'bool',

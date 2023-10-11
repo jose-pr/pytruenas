@@ -35,7 +35,7 @@ class Filesystem(
     def can_access_as_user(self, 
         username:'str',
         path:'str',
-        permissions:'Permissions'={},
+        permissions:'Permissions',
     /) -> 'bool': 
         """
         Check if `username` is able to access `path` with specific `permissions`. At least one of `read/write/execute`
@@ -58,7 +58,7 @@ class Filesystem(
         ...
     @typing.overload
     def chown(self, 
-        filesystem_ownership:'FilesystemOwnership'={},
+        filesystem_ownership:'FilesystemOwnership',
     /) -> None: 
         """
         Change owner or group of file at `path`.
@@ -83,7 +83,7 @@ class Filesystem(
         ...
     @typing.overload
     def default_acl_choices(self, 
-        path:'str'="",
+        path:'str',
     /) -> 'list[str]': 
         """
         `DEPRECATED`
@@ -117,8 +117,8 @@ class Filesystem(
         ...
     @typing.overload
     def get_default_acl(self, 
-        acl_type:'str'="POSIX_OPEN",
-        share_type:'ShareType'="NONE",
+        acl_type:'str',
+        share_type:'ShareType',
     /) -> 'typing.Union[list[Nfs4Ace], list[Posix1eAce]]': 
         """
         `DEPRECATED`
@@ -159,8 +159,8 @@ class Filesystem(
     @typing.overload
     def getacl(self, 
         path:'str',
-        simplified:'bool'=True,
-        resolve_ids:'bool'=False,
+        simplified:'bool',
+        resolve_ids:'bool',
     /) -> 'TruenasAcl': 
         """
         Return ACL of a given path. This may return a POSIX1e ACL or a NFSv4 ACL. The acl type is indicated
@@ -238,9 +238,9 @@ class Filesystem(
     @typing.overload
     def listdir(self, 
         path:'str',
-        query_filters:'list[list]'=[],
-        query_options:'QueryOptions'={},
-    /) -> 'typing.Union[int, PathEntry, list[PathEntry_]]': 
+        query_filters:'list[list]',
+        query_options:'QueryOptions',
+    /) -> 'typing.Union[int, PathEntry, list[PathEntry]]': 
         """
         Get the contents of a directory.
         
@@ -272,14 +272,14 @@ class Filesystem(
             query-options
         Returns
         -------
-        typing.Union[int, PathEntry, list[PathEntry_]]:
+        typing.Union[int, PathEntry, list[PathEntry]]:
             
         """
         ...
     @typing.overload
     def mkdir(self, 
         path:'str',
-    /) -> 'PathEntry__': 
+    /) -> 'PathEntry': 
         """
         Create a directory at the specified path.
 
@@ -289,14 +289,14 @@ class Filesystem(
             path
         Returns
         -------
-        PathEntry__:
+        PathEntry:
             path_entry
         """
         ...
     @typing.overload
     def put(self, 
         path:'str',
-        options:'Options_'={},
+        options:'Options_',
     /) -> 'bool': 
         """
         Job to put contents to `path`.
@@ -315,7 +315,7 @@ class Filesystem(
         ...
     @typing.overload
     def set_dosmode(self, 
-        set_dosmode:'SetDosmode'={},
+        set_dosmode:'SetDosmode',
     /) -> None: 
         """
         
@@ -350,7 +350,7 @@ class Filesystem(
         ...
     @typing.overload
     def setacl(self, 
-        filesystem_acl:'FilesystemAcl'={},
+        filesystem_acl:'FilesystemAcl',
     /) -> None: 
         """
         Set ACL of a given path. Takes the following parameters:
@@ -396,7 +396,7 @@ class Filesystem(
         ...
     @typing.overload
     def setperm(self, 
-        filesystem_permission:'FilesystemPermission'={},
+        filesystem_permission:'FilesystemPermission',
     /) -> None: 
         """
         Set unix permissions on given `path`.
@@ -487,21 +487,28 @@ class Filesystem(
             'write':'typing.Optional[bool]',
             'execute':'typing.Optional[bool]',
     })
-    Options = typing.TypedDict('Options', {
-            'recursive':'bool',
-            'traverse':'bool',
-    })
     FilesystemOwnership = typing.TypedDict('FilesystemOwnership', {
             'path':'str',
             'uid':'typing.Optional[int]',
             'gid':'typing.Optional[int]',
             'options':'Options',
     })
+    Options = typing.TypedDict('Options', {
+            'recursive':'bool',
+            'traverse':'bool',
+    })
     class ShareType(str,Enum):
         NONE = 'NONE'
         SMB = 'SMB'
         NFS = 'NFS'
         ...
+    Nfs4Ace = typing.TypedDict('Nfs4Ace', {
+            'tag':'Tag',
+            'id':'typing.Optional[int]',
+            'type':'Type',
+            'perms':'Perms',
+            'flags':'Flags',
+    })
     class Tag(str,Enum):
         Owner = 'owner@'
         Group = 'group@'
@@ -512,12 +519,6 @@ class Filesystem(
     class Type(str,Enum):
         ALLOW = 'ALLOW'
         DENY = 'DENY'
-        ...
-    class BASIC(str,Enum):
-        FULLCONTROL = 'FULL_CONTROL'
-        MODIFY = 'MODIFY'
-        READ = 'READ'
-        TRAVERSE = 'TRAVERSE'
         ...
     Perms = typing.TypedDict('Perms', {
             'READ_DATA':'bool',
@@ -536,9 +537,11 @@ class Filesystem(
             'SYNCHRONIZE':'bool',
             'BASIC':'BASIC',
     })
-    class BASIC_(str,Enum):
-        INHERIT = 'INHERIT'
-        NOINHERIT = 'NOINHERIT'
+    class BASIC(str,Enum):
+        FULLCONTROL = 'FULL_CONTROL'
+        MODIFY = 'MODIFY'
+        READ = 'READ'
+        TRAVERSE = 'TRAVERSE'
         ...
     Flags = typing.TypedDict('Flags', {
             'FILE_INHERIT':'bool',
@@ -548,12 +551,15 @@ class Filesystem(
             'INHERITED':'bool',
             'BASIC':'BASIC_',
     })
-    Nfs4Ace = typing.TypedDict('Nfs4Ace', {
-            'tag':'Tag',
-            'id':'typing.Optional[int]',
-            'type':'Type',
-            'perms':'Perms',
-            'flags':'Flags',
+    class BASIC_(str,Enum):
+        INHERIT = 'INHERIT'
+        NOINHERIT = 'NOINHERIT'
+        ...
+    Posix1eAce = typing.TypedDict('Posix1eAce', {
+            'default':'bool',
+            'tag':'Tag_',
+            'id':'int',
+            'perms':'Perms_',
     })
     class Tag_(str,Enum):
         USEROBJ = 'USER_OBJ'
@@ -568,12 +574,6 @@ class Filesystem(
             'WRITE':'bool',
             'EXECUTE':'bool',
     })
-    Posix1eAce = typing.TypedDict('Posix1eAce', {
-            'default':'bool',
-            'tag':'Tag_',
-            'id':'int',
-            'perms':'Perms_',
-    })
     Dosmode = typing.TypedDict('Dosmode', {
             'readonly':'bool',
             'hidden':'bool',
@@ -583,23 +583,11 @@ class Filesystem(
             'offline':'bool',
             'sparse':'bool',
     })
-    class Acltype(str,Enum):
-        NFS4 = 'NFS4'
-        POSIX1E = 'POSIX1E'
-        DISABLED = 'DISABLED'
-        ...
-    Nfs4Ace_ = typing.TypedDict('Nfs4Ace_', {
-            'tag':'Tag',
-            'id':'typing.Optional[int]',
-            'type':'Type',
-            'perms':'Perms',
-            'flags':'Flags',
-    })
     TruenasAcl = typing.TypedDict('TruenasAcl', {
             'path':'str',
             'trivial':'bool',
-            'acltype':'typing.Optional[Acltype]',
-            'acl':'typing.Union[list[Nfs4Ace_], list[Posix1eAce]]',
+            'acltype':'typing.Optional[str]',
+            'acl':'typing.Union[list[Nfs4Ace], list[Posix1eAce]]',
     })
     QueryOptions = typing.TypedDict('QueryOptions', {
             'relationships':'bool',
@@ -615,12 +603,6 @@ class Filesystem(
             'limit':'int',
             'force_sql_filters':'bool',
     })
-    class Type_(str,Enum):
-        DIRECTORY = 'DIRECTORY'
-        FILE = 'FILE'
-        SYMLINK = 'SYMLINK'
-        OTHER = 'OTHER'
-        ...
     PathEntry = typing.TypedDict('PathEntry', {
             'name':'str',
             'path':'str',
@@ -634,32 +616,12 @@ class Filesystem(
             'is_mountpoint':'bool',
             'is_ctldir':'bool',
     })
-    PathEntry_ = typing.TypedDict('PathEntry_', {
-            'name':'str',
-            'path':'str',
-            'realpath':'str',
-            'type':'Type_',
-            'size':'typing.Optional[int]',
-            'mode':'typing.Optional[int]',
-            'acl':'typing.Optional[bool]',
-            'uid':'typing.Optional[int]',
-            'gid':'typing.Optional[int]',
-            'is_mountpoint':'bool',
-            'is_ctldir':'bool',
-    })
-    PathEntry__ = typing.TypedDict('PathEntry__', {
-            'name':'str',
-            'path':'str',
-            'realpath':'str',
-            'type':'Type_',
-            'size':'typing.Optional[int]',
-            'mode':'typing.Optional[int]',
-            'acl':'typing.Optional[bool]',
-            'uid':'typing.Optional[int]',
-            'gid':'typing.Optional[int]',
-            'is_mountpoint':'bool',
-            'is_ctldir':'bool',
-    })
+    class Type_(str,Enum):
+        DIRECTORY = 'DIRECTORY'
+        FILE = 'FILE'
+        SYMLINK = 'SYMLINK'
+        OTHER = 'OTHER'
+        ...
     Options_ = typing.TypedDict('Options_', {
             'append':'bool',
             'mode':'int',
@@ -668,12 +630,14 @@ class Filesystem(
             'path':'str',
             'dosmode':'Dosmode',
     })
-    Nfs4Ace__ = typing.TypedDict('Nfs4Ace__', {
-            'tag':'Tag',
-            'id':'typing.Optional[int]',
-            'type':'Type',
-            'perms':'Perms',
-            'flags':'Flags',
+    FilesystemAcl = typing.TypedDict('FilesystemAcl', {
+            'path':'str',
+            'uid':'typing.Optional[int]',
+            'gid':'typing.Optional[int]',
+            'dacl':'typing.Union[list[Nfs4Ace], list[Posix1eAce]]',
+            'nfs41_flags':'Nfs41Flags',
+            'acltype':'typing.Optional[str]',
+            'options':'Options__',
     })
     Nfs41Flags = typing.TypedDict('Nfs41Flags', {
             'autoinherit':'bool',
@@ -685,26 +649,17 @@ class Filesystem(
             'traverse':'bool',
             'canonicalize':'bool',
     })
-    FilesystemAcl = typing.TypedDict('FilesystemAcl', {
-            'path':'str',
-            'uid':'typing.Optional[int]',
-            'gid':'typing.Optional[int]',
-            'dacl':'typing.Union[list[Nfs4Ace__], list[Posix1eAce]]',
-            'nfs41_flags':'Nfs41Flags',
-            'acltype':'typing.Optional[Acltype]',
-            'options':'Options__',
-    })
-    Options___ = typing.TypedDict('Options___', {
-            'stripacl':'bool',
-            'recursive':'bool',
-            'traverse':'bool',
-    })
     FilesystemPermission = typing.TypedDict('FilesystemPermission', {
             'path':'str',
             'mode':'typing.Optional[str]',
             'uid':'typing.Optional[int]',
             'gid':'typing.Optional[int]',
             'options':'Options___',
+    })
+    Options___ = typing.TypedDict('Options___', {
+            'stripacl':'bool',
+            'recursive':'bool',
+            'traverse':'bool',
     })
     PathStats = typing.TypedDict('PathStats', {
             'realpath':'str',

@@ -8,26 +8,6 @@ class Cloudsync(Namespace):
     def __init__(self, client) -> None:
         super().__init__(client, 'cloudsync')
 
-    Schedule = typing.TypedDict('Schedule', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
-    CloudSyncBwlimit = typing.TypedDict('CloudSyncBwlimit', {
-            'time':'str',
-            'bandwidth':'typing.Optional[int]',
-    })
-    class Direction(str,Enum):
-        PUSH = 'PUSH'
-        PULL = 'PULL'
-        ...
-    class TransferMode(str,Enum):
-        SYNC = 'SYNC'
-        COPY = 'COPY'
-        MOVE = 'MOVE'
-        ...
     CloudSyncCreate = typing.TypedDict('CloudSyncCreate', {
             'description':'str',
             'path':'str',
@@ -52,6 +32,26 @@ class Cloudsync(Namespace):
             'create_empty_src_dirs':'bool',
             'follow_symlinks':'bool',
     })
+    Schedule = typing.TypedDict('Schedule', {
+            'minute':'str',
+            'hour':'str',
+            'dom':'str',
+            'month':'str',
+            'dow':'str',
+    })
+    CloudSyncBwlimit = typing.TypedDict('CloudSyncBwlimit', {
+            'time':'str',
+            'bandwidth':'typing.Optional[int]',
+    })
+    class Direction(str,Enum):
+        PUSH = 'PUSH'
+        PULL = 'PULL'
+        ...
+    class TransferMode(str,Enum):
+        SYNC = 'SYNC'
+        COPY = 'COPY'
+        MOVE = 'MOVE'
+        ...
     QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
             'relationships':'bool',
             'extend':'typing.Optional[str]',
@@ -89,21 +89,17 @@ class Cloudsync(Namespace):
             'limit':'int',
             'force_sql_filters':'bool',
     })
-    class TransferMode_(str,Enum):
-        SYNC = 'SYNC'
-        COPY = 'COPY'
-        ...
     CloudSyncRestore = typing.TypedDict('CloudSyncRestore', {
             'description':'str',
             'transfer_mode':'TransferMode_',
             'path':'str',
     })
+    class TransferMode_(str,Enum):
+        SYNC = 'SYNC'
+        COPY = 'COPY'
+        ...
     CloudSyncSyncOptions = typing.TypedDict('CloudSyncSyncOptions', {
             'dry_run':'bool',
-    })
-    CloudSyncBwlimit_ = typing.TypedDict('CloudSyncBwlimit_', {
-            'time':'str',
-            'bandwidth':'typing.Optional[int]',
     })
     CloudSyncSyncOnetime = typing.TypedDict('CloudSyncSyncOnetime', {
             'description':'str',
@@ -114,7 +110,7 @@ class Cloudsync(Namespace):
             'pre_script':'str',
             'post_script':'str',
             'snapshot':'bool',
-            'bwlimit':'list[CloudSyncBwlimit_]',
+            'bwlimit':'list[CloudSyncBwlimit]',
             'include':'list[str]',
             'exclude':'list[str]',
             'transfers':'typing.Optional[int]',
@@ -132,10 +128,6 @@ class Cloudsync(Namespace):
     CloudSyncSyncOnetimeOptions = typing.TypedDict('CloudSyncSyncOnetimeOptions', {
             'dry_run':'bool',
     })
-    CloudSyncBwlimit__ = typing.TypedDict('CloudSyncBwlimit__', {
-            'time':'str',
-            'bandwidth':'typing.Optional[int]',
-    })
     CloudSyncUpdate = typing.TypedDict('CloudSyncUpdate', {
             'description':'str',
             'path':'str',
@@ -145,7 +137,7 @@ class Cloudsync(Namespace):
             'pre_script':'str',
             'post_script':'str',
             'snapshot':'bool',
-            'bwlimit':'list[CloudSyncBwlimit__]',
+            'bwlimit':'list[CloudSyncBwlimit]',
             'include':'list[str]',
             'exclude':'list[str]',
             'transfers':'typing.Optional[int]',

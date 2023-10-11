@@ -10,7 +10,7 @@ class Vmware(
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload
     def create(self, 
-        vmware_create:'VmwareCreate'={},
+        vmware_create:'VmwareCreate',
     /) -> 'dict[str]': 
         """
         Create VMWare snapshot.
@@ -69,7 +69,7 @@ class Vmware(
         ...
     @typing.overload
     def get_datastores(self, 
-        vmware_creds:'VmwareCreds'={},
+        vmware_creds:'VmwareCreds',
     /) -> None: 
         """
         Get datastores from VMWare.
@@ -85,7 +85,7 @@ class Vmware(
     @typing.overload
     def get_instance(self, 
         id:'typing.Union[str, int, bool, dict[str], list]',
-        query_options_get_instance:'QueryOptionsGetInstance'={},
+        query_options_get_instance:'QueryOptionsGetInstance',
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -119,7 +119,7 @@ class Vmware(
         ...
     @typing.overload
     def match_datastores_with_datasets(self, 
-        vmware_creds:'VmwareCreds'={},
+        vmware_creds:'VmwareCreds',
     /) -> None: 
         """
         Requests datastores from vCenter server and tries to match them with local filesystems.
@@ -136,9 +136,9 @@ class Vmware(
         ...
     @typing.overload
     def query(self, 
-        query_filters:'list[list]'=[],
-        query_options:'QueryOptions'={},
-    /) -> 'typing.Union[list[dict[str]], dict[str], int]': 
+        query_filters:'list[list]',
+        query_options:'QueryOptions',
+    /) -> 'typing.Union[list, dict[str], int]': 
         """
         
 
@@ -150,14 +150,14 @@ class Vmware(
             query-options
         Returns
         -------
-        typing.Union[list[dict[str]], dict[str], int]:
+        typing.Union[list, dict[str], int]:
             
         """
         ...
     @typing.overload
     def update(self, 
         id:'int',
-        vmware_update:'VmwareUpdate'={},
+        vmware_update:'VmwareUpdate',
     /) -> 'dict[str]': 
         """
         Update VMWare snapshot of `id`.

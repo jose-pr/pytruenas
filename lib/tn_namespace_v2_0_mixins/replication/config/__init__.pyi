@@ -26,7 +26,7 @@ class ReplicationConfig(
         ...
     @typing.overload
     def update(self, 
-        replication_config_update:'ReplicationConfigUpdate'={},
+        replication_config_update:'ReplicationConfigUpdate',
     /) -> 'dict[str]': 
         """
         `max_parallel_replication_tasks` represents a maximum number of parallel replication tasks running.

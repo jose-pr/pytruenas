@@ -72,36 +72,6 @@ class Group(Namespace):
             'nt_name':'typing.Optional[str]',
             'sid':'typing.Optional[str]',
     })
-    GroupEntry_ = typing.TypedDict('GroupEntry_', {
-            'gid':'int',
-            'name':'str',
-            'smb':'bool',
-            'sudo_commands':'list[str]',
-            'sudo_commands_nopasswd':'list[str]',
-            'users':'list[int]',
-            'id':'int',
-            'group':'str',
-            'builtin':'bool',
-            'id_type_both':'bool',
-            'local':'bool',
-            'nt_name':'typing.Optional[str]',
-            'sid':'typing.Optional[str]',
-    })
-    GroupEntry__ = typing.TypedDict('GroupEntry__', {
-            'gid':'int',
-            'name':'str',
-            'smb':'bool',
-            'sudo_commands':'list[str]',
-            'sudo_commands_nopasswd':'list[str]',
-            'users':'list[int]',
-            'id':'int',
-            'group':'str',
-            'builtin':'bool',
-            'id_type_both':'bool',
-            'local':'bool',
-            'nt_name':'typing.Optional[str]',
-            'sid':'typing.Optional[str]',
-    })
     GroupUpdate = typing.TypedDict('GroupUpdate', {
             'gid':'int',
             'name':'str',

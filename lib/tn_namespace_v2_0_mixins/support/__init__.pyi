@@ -12,7 +12,7 @@ class Support(
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload
     def attach_ticket(self, 
-        attach_ticket:'AttachTicket'={},
+        attach_ticket:'AttachTicket',
     /) -> None: 
         """
         Method to attach a file to a existing ticket.
@@ -55,7 +55,7 @@ class Support(
         ...
     @typing.overload
     def fetch_categories(self, 
-        token:'str'="",
+        token:'str',
     /) -> 'dict[str]': 
         """
         Fetch issue categories using access token `token`.
@@ -121,7 +121,7 @@ class Support(
         ...
     @typing.overload
     def new_ticket(self, 
-        new_ticket:'NewTicket'={},
+        new_ticket:'NewTicket',
     /) -> 'NewTicketResponse': 
         """
         Creates a new ticket for support.
@@ -143,7 +143,7 @@ class Support(
         ...
     @typing.overload
     def update(self, 
-        support_update:'SupportUpdate'={},
+        support_update:'SupportUpdate',
     /) -> 'SupportUpdateReturns': 
         """
         Update Proactive Support settings.
@@ -175,10 +175,6 @@ class Support(
             'secondary_phone':'str',
             'id':'int',
     })
-    class Type(str,Enum):
-        BUG = 'BUG'
-        FEATURE = 'FEATURE'
-        ...
     NewTicket = typing.TypedDict('NewTicket', {
             'title':'str',
             'body':'str',
@@ -193,6 +189,10 @@ class Support(
             'email':'str',
             'cc':'list[str]',
     })
+    class Type(str,Enum):
+        BUG = 'BUG'
+        FEATURE = 'FEATURE'
+        ...
     NewTicketResponse = typing.TypedDict('NewTicketResponse', {
             'ticket':'typing.Optional[int]',
             'url':'typing.Optional[str]',

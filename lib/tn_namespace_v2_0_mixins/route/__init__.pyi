@@ -30,9 +30,9 @@ class Route(
         ...
     @typing.overload
     def system_routes(self, 
-        query_filters:'list[list]'=[],
-        query_options:'QueryOptions'={},
-    /) -> 'typing.Union[int, SystemRoute, list[SystemRoute_]]': 
+        query_filters:'list[list]',
+        query_options:'QueryOptions',
+    /) -> 'typing.Union[int, SystemRoute, list[SystemRoute]]': 
         """
         Get current/applied network routes.
 
@@ -44,7 +44,7 @@ class Route(
             query-options
         Returns
         -------
-        typing.Union[int, SystemRoute, list[SystemRoute_]]:
+        typing.Union[int, SystemRoute, list[SystemRoute]]:
             
         """
         ...
@@ -63,16 +63,6 @@ class Route(
             'force_sql_filters':'bool',
     })
     SystemRoute = typing.TypedDict('SystemRoute', {
-            'network':'str',
-            'netmask':'str',
-            'gateway':'typing.Optional[str]',
-            'interface':'str',
-            'flags':'list',
-            'table_id':'int',
-            'scope':'int',
-            'preferred_source':'typing.Optional[str]',
-    })
-    SystemRoute_ = typing.TypedDict('SystemRoute_', {
             'network':'str',
             'netmask':'str',
             'gateway':'typing.Optional[str]',

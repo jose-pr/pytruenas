@@ -32,13 +32,3 @@ class Route(Namespace):
             'scope':'int',
             'preferred_source':'typing.Optional[str]',
     })
-    SystemRoute_ = typing.TypedDict('SystemRoute_', {
-            'network':'str',
-            'netmask':'str',
-            'gateway':'typing.Optional[str]',
-            'interface':'str',
-            'flags':'list',
-            'table_id':'int',
-            'scope':'int',
-            'preferred_source':'typing.Optional[str]',
-    })

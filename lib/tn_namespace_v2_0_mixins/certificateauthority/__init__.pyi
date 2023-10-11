@@ -12,7 +12,7 @@ class Certificateauthority(
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload
     def ca_sign_csr(self, 
-        ca_sign_csr:'CaSignCsr'={},
+        ca_sign_csr:'CaSignCsr',
     /) -> 'CertificateEntry': 
         """
         Sign CSR by Certificate Authority of `ca_id`
@@ -34,7 +34,7 @@ class Certificateauthority(
         ...
     @typing.overload
     def create(self, 
-        ca_create:'CaCreate'={},
+        ca_create:'CaCreate',
     /) -> 'CertificateauthorityCreateReturns': 
         """
         Create a new Certificate Authority
@@ -87,7 +87,7 @@ class Certificateauthority(
     @typing.overload
     def get_instance(self, 
         id:'typing.Union[str, int, bool, dict[str], list]',
-        query_options_get_instance:'QueryOptionsGetInstance'={},
+        query_options_get_instance:'QueryOptionsGetInstance',
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -121,9 +121,9 @@ class Certificateauthority(
         ...
     @typing.overload
     def query(self, 
-        query_filters:'list[list]'=[],
-        query_options:'QueryOptions'={},
-    /) -> 'typing.Union[list[CertificateEntry_], CertificateEntry__, int, CertificateEntry___]': 
+        query_filters:'list[list]',
+        query_options:'QueryOptions',
+    /) -> 'typing.Union[list[CertificateauthorityEntry], CertificateauthorityEntry, int]': 
         """
         
 
@@ -135,14 +135,14 @@ class Certificateauthority(
             query-options
         Returns
         -------
-        typing.Union[list[CertificateEntry_], CertificateEntry__, int, CertificateEntry___]:
+        typing.Union[list[CertificateauthorityEntry], CertificateauthorityEntry, int]:
             
         """
         ...
     @typing.overload
     def update(self, 
         id:'int',
-        ca_update:'CaUpdate'={},
+        ca_update:'CaUpdate',
     /) -> 'CertificateauthorityUpdateReturns': 
         """
         Update Certificate Authority of `id`
@@ -164,6 +164,18 @@ class Certificateauthority(
             certificateauthority_update_returns
         """
         ...
+    CaSignCsr = typing.TypedDict('CaSignCsr', {
+            'ca_id':'int',
+            'csr_cert_id':'int',
+            'name':'str',
+            'cert_extensions':'CertExtensions',
+    })
+    CertExtensions = typing.TypedDict('CertExtensions', {
+            'BasicConstraints':'BasicConstraints',
+            'AuthorityKeyIdentifier':'AuthorityKeyIdentifier',
+            'ExtendedKeyUsage':'ExtendedKeyUsage',
+            'KeyUsage':'KeyUsage',
+    })
     BasicConstraints = typing.TypedDict('BasicConstraints', {
             'ca':'bool',
             'enabled':'bool',
@@ -172,6 +184,11 @@ class Certificateauthority(
     })
     AuthorityKeyIdentifier = typing.TypedDict('AuthorityKeyIdentifier', {
             'authority_cert_issuer':'bool',
+            'enabled':'bool',
+            'extension_critical':'bool',
+    })
+    ExtendedKeyUsage = typing.TypedDict('ExtendedKeyUsage', {
+            'usages':'list[Usage]',
             'enabled':'bool',
             'extension_critical':'bool',
     })
@@ -188,11 +205,6 @@ class Certificateauthority(
         SMARTCARDLOGON = 'SMARTCARD_LOGON'
         TIMESTAMPING = 'TIME_STAMPING'
         ...
-    ExtendedKeyUsage = typing.TypedDict('ExtendedKeyUsage', {
-            'usages':'list[Usage]',
-            'enabled':'bool',
-            'extension_critical':'bool',
-    })
     KeyUsage = typing.TypedDict('KeyUsage', {
             'enabled':'bool',
             'digital_signature':'bool',
@@ -205,18 +217,6 @@ class Certificateauthority(
             'encipher_only':'bool',
             'decipher_only':'bool',
             'extension_critical':'bool',
-    })
-    CertExtensions = typing.TypedDict('CertExtensions', {
-            'BasicConstraints':'BasicConstraints',
-            'AuthorityKeyIdentifier':'AuthorityKeyIdentifier',
-            'ExtendedKeyUsage':'ExtendedKeyUsage',
-            'KeyUsage':'KeyUsage',
-    })
-    CaSignCsr = typing.TypedDict('CaSignCsr', {
-            'ca_id':'int',
-            'csr_cert_id':'int',
-            'name':'str',
-            'cert_extensions':'CertExtensions',
     })
     CertificateEntry = typing.TypedDict('CertificateEntry', {
             'id':'int',
@@ -245,7 +245,7 @@ class Certificateauthority(
             'city':'typing.Optional[str]',
             'organization':'typing.Optional[str]',
             'organizational_unit':'typing.Optional[str]',
-            'san':'typing.Optional[list[str]]',
+            'san':'typing.Optional[list]',
             'email':'typing.Optional[str]',
             'DN':'typing.Optional[str]',
             'subject_name_hash':'typing.Optional[str]',
@@ -272,57 +272,6 @@ class Certificateauthority(
             'revoked_certs':'list',
             'crl_path':'str',
             'signed_certificates':'int',
-    })
-    class EcCurve(str,Enum):
-        SECP256R1 = 'SECP256R1'
-        SECP384R1 = 'SECP384R1'
-        SECP521R1 = 'SECP521R1'
-        Ed25519 = 'ed25519'
-        ...
-    class KeyType(str,Enum):
-        RSA = 'RSA'
-        EC = 'EC'
-        ...
-    class CreateType(str,Enum):
-        CACREATEINTERNAL = 'CA_CREATE_INTERNAL'
-        CACREATEIMPORTED = 'CA_CREATE_IMPORTED'
-        CACREATEINTERMEDIATE = 'CA_CREATE_INTERMEDIATE'
-        ...
-    class DigestAlgorithm(str,Enum):
-        SHA224 = 'SHA224'
-        SHA256 = 'SHA256'
-        SHA384 = 'SHA384'
-        SHA512 = 'SHA512'
-        ...
-    BasicConstraints_ = typing.TypedDict('BasicConstraints_', {
-            'ca':'bool',
-            'enabled':'bool',
-            'path_length':'typing.Optional[int]',
-            'extension_critical':'bool',
-    })
-    ExtendedKeyUsage_ = typing.TypedDict('ExtendedKeyUsage_', {
-            'usages':'list[Usage]',
-            'enabled':'bool',
-            'extension_critical':'bool',
-    })
-    KeyUsage_ = typing.TypedDict('KeyUsage_', {
-            'enabled':'bool',
-            'digital_signature':'bool',
-            'content_commitment':'bool',
-            'key_encipherment':'bool',
-            'data_encipherment':'bool',
-            'key_agreement':'bool',
-            'key_cert_sign':'bool',
-            'crl_sign':'bool',
-            'encipher_only':'bool',
-            'decipher_only':'bool',
-            'extension_critical':'bool',
-    })
-    CertExtensions_ = typing.TypedDict('CertExtensions_', {
-            'BasicConstraints':'BasicConstraints_',
-            'AuthorityKeyIdentifier':'AuthorityKeyIdentifier',
-            'ExtendedKeyUsage':'ExtendedKeyUsage_',
-            'KeyUsage':'KeyUsage_',
     })
     CaCreate = typing.TypedDict('CaCreate', {
             'tos':'bool',
@@ -354,6 +303,57 @@ class Certificateauthority(
             'cert_extensions':'CertExtensions_',
             'add_to_trusted_store':'bool',
     })
+    class EcCurve(str,Enum):
+        SECP256R1 = 'SECP256R1'
+        SECP384R1 = 'SECP384R1'
+        SECP521R1 = 'SECP521R1'
+        Ed25519 = 'ed25519'
+        ...
+    class KeyType(str,Enum):
+        RSA = 'RSA'
+        EC = 'EC'
+        ...
+    class CreateType(str,Enum):
+        CACREATEINTERNAL = 'CA_CREATE_INTERNAL'
+        CACREATEIMPORTED = 'CA_CREATE_IMPORTED'
+        CACREATEINTERMEDIATE = 'CA_CREATE_INTERMEDIATE'
+        ...
+    class DigestAlgorithm(str,Enum):
+        SHA224 = 'SHA224'
+        SHA256 = 'SHA256'
+        SHA384 = 'SHA384'
+        SHA512 = 'SHA512'
+        ...
+    CertExtensions_ = typing.TypedDict('CertExtensions_', {
+            'BasicConstraints':'BasicConstraints_',
+            'AuthorityKeyIdentifier':'AuthorityKeyIdentifier',
+            'ExtendedKeyUsage':'ExtendedKeyUsage_',
+            'KeyUsage':'KeyUsage_',
+    })
+    BasicConstraints_ = typing.TypedDict('BasicConstraints_', {
+            'ca':'bool',
+            'enabled':'bool',
+            'path_length':'typing.Optional[int]',
+            'extension_critical':'bool',
+    })
+    ExtendedKeyUsage_ = typing.TypedDict('ExtendedKeyUsage_', {
+            'usages':'list[Usage]',
+            'enabled':'bool',
+            'extension_critical':'bool',
+    })
+    KeyUsage_ = typing.TypedDict('KeyUsage_', {
+            'enabled':'bool',
+            'digital_signature':'bool',
+            'content_commitment':'bool',
+            'key_encipherment':'bool',
+            'data_encipherment':'bool',
+            'key_agreement':'bool',
+            'key_cert_sign':'bool',
+            'crl_sign':'bool',
+            'encipher_only':'bool',
+            'decipher_only':'bool',
+            'extension_critical':'bool',
+    })
     CertificateauthorityCreateReturns = typing.TypedDict('CertificateauthorityCreateReturns', {
             'id':'int',
             'type':'int',
@@ -381,7 +381,7 @@ class Certificateauthority(
             'city':'typing.Optional[str]',
             'organization':'typing.Optional[str]',
             'organizational_unit':'typing.Optional[str]',
-            'san':'typing.Optional[list[str]]',
+            'san':'typing.Optional[list]',
             'email':'typing.Optional[str]',
             'DN':'typing.Optional[str]',
             'subject_name_hash':'typing.Optional[str]',
@@ -441,7 +441,7 @@ class Certificateauthority(
             'limit':'int',
             'force_sql_filters':'bool',
     })
-    CertificateEntry_ = typing.TypedDict('CertificateEntry_', {
+    CertificateauthorityEntry = typing.TypedDict('CertificateauthorityEntry', {
             'id':'int',
             'type':'int',
             'name':'str',
@@ -468,7 +468,7 @@ class Certificateauthority(
             'city':'typing.Optional[str]',
             'organization':'typing.Optional[str]',
             'organizational_unit':'typing.Optional[str]',
-            'san':'typing.Optional[list[str]]',
+            'san':'typing.Optional[list]',
             'email':'typing.Optional[str]',
             'DN':'typing.Optional[str]',
             'subject_name_hash':'typing.Optional[str]',
@@ -497,121 +497,6 @@ class Certificateauthority(
             'signed_certificates':'int',
             'add_to_trusted_store':'bool',
     })
-    CertificateEntry__ = typing.TypedDict('CertificateEntry__', {
-            'id':'int',
-            'type':'int',
-            'name':'str',
-            'certificate':'typing.Optional[str]',
-            'privatekey':'typing.Optional[str]',
-            'CSR':'typing.Optional[str]',
-            'acme_uri':'typing.Optional[str]',
-            'domains_authenticators':'dict[str]',
-            'renew_days':'int',
-            'revoked_date':'typing.Optional[str]',
-            'signedby':'dict[str]',
-            'root_path':'str',
-            'acme':'dict[str]',
-            'certificate_path':'typing.Optional[str]',
-            'privatekey_path':'typing.Optional[str]',
-            'csr_path':'typing.Optional[str]',
-            'cert_type':'str',
-            'revoked':'bool',
-            'expired':'typing.Optional[bool]',
-            'issuer':'typing.Union[str, NoneType, dict[str]]',
-            'chain_list':'list[str]',
-            'country':'typing.Optional[str]',
-            'state':'typing.Optional[str]',
-            'city':'typing.Optional[str]',
-            'organization':'typing.Optional[str]',
-            'organizational_unit':'typing.Optional[str]',
-            'san':'typing.Optional[list[str]]',
-            'email':'typing.Optional[str]',
-            'DN':'typing.Optional[str]',
-            'subject_name_hash':'typing.Optional[str]',
-            'digest_algorithm':'typing.Optional[str]',
-            'from':'typing.Optional[str]',
-            'common':'typing.Optional[str]',
-            'until':'typing.Optional[str]',
-            'fingerprint':'typing.Optional[str]',
-            'key_type':'typing.Optional[str]',
-            'internal':'typing.Optional[str]',
-            'lifetime':'typing.Optional[int]',
-            'serial':'typing.Optional[int]',
-            'key_length':'typing.Optional[int]',
-            'chain':'typing.Optional[bool]',
-            'CA_type_existing':'bool',
-            'CA_type_internal':'bool',
-            'CA_type_intermediate':'bool',
-            'cert_type_existing':'bool',
-            'cert_type_internal':'bool',
-            'cert_type_CSR':'bool',
-            'parsed':'bool',
-            'can_be_revoked':'bool',
-            'extensions':'dict[str]',
-            'revoked_certs':'list',
-            'crl_path':'str',
-            'signed_certificates':'int',
-            'add_to_trusted_store':'bool',
-    })
-    CertificateEntry___ = typing.TypedDict('CertificateEntry___', {
-            'id':'int',
-            'type':'int',
-            'name':'str',
-            'certificate':'typing.Optional[str]',
-            'privatekey':'typing.Optional[str]',
-            'CSR':'typing.Optional[str]',
-            'acme_uri':'typing.Optional[str]',
-            'domains_authenticators':'dict[str]',
-            'renew_days':'int',
-            'revoked_date':'typing.Optional[str]',
-            'signedby':'dict[str]',
-            'root_path':'str',
-            'acme':'dict[str]',
-            'certificate_path':'typing.Optional[str]',
-            'privatekey_path':'typing.Optional[str]',
-            'csr_path':'typing.Optional[str]',
-            'cert_type':'str',
-            'revoked':'bool',
-            'expired':'typing.Optional[bool]',
-            'issuer':'typing.Union[str, NoneType, dict[str]]',
-            'chain_list':'list[str]',
-            'country':'typing.Optional[str]',
-            'state':'typing.Optional[str]',
-            'city':'typing.Optional[str]',
-            'organization':'typing.Optional[str]',
-            'organizational_unit':'typing.Optional[str]',
-            'san':'typing.Optional[list[str]]',
-            'email':'typing.Optional[str]',
-            'DN':'typing.Optional[str]',
-            'subject_name_hash':'typing.Optional[str]',
-            'digest_algorithm':'typing.Optional[str]',
-            'from':'typing.Optional[str]',
-            'common':'typing.Optional[str]',
-            'until':'typing.Optional[str]',
-            'fingerprint':'typing.Optional[str]',
-            'key_type':'typing.Optional[str]',
-            'internal':'typing.Optional[str]',
-            'lifetime':'typing.Optional[int]',
-            'serial':'typing.Optional[int]',
-            'key_length':'typing.Optional[int]',
-            'chain':'typing.Optional[bool]',
-            'CA_type_existing':'bool',
-            'CA_type_internal':'bool',
-            'CA_type_intermediate':'bool',
-            'cert_type_existing':'bool',
-            'cert_type_internal':'bool',
-            'cert_type_CSR':'bool',
-            'parsed':'bool',
-            'can_be_revoked':'bool',
-            'extensions':'dict[str]',
-            'revoked_certs':'list',
-            'crl_path':'str',
-            'signed_certificates':'int',
-            'add_to_trusted_store':'bool',
-    })
-    class CreateType_(str,Enum):
-        CASIGNCSR = 'CA_SIGN_CSR'
-        ...
     CaUpdate = typing.TypedDict('CaUpdate', {
             'revoked':'bool',
             'add_to_trusted_store':'bool',
@@ -620,6 +505,9 @@ class Certificateauthority(
             'create_type':'CreateType_',
             'name':'str',
     })
+    class CreateType_(str,Enum):
+        CASIGNCSR = 'CA_SIGN_CSR'
+        ...
     CertificateauthorityUpdateReturns = typing.TypedDict('CertificateauthorityUpdateReturns', {
             'id':'int',
             'type':'int',
@@ -647,7 +535,7 @@ class Certificateauthority(
             'city':'typing.Optional[str]',
             'organization':'typing.Optional[str]',
             'organizational_unit':'typing.Optional[str]',
-            'san':'typing.Optional[list[str]]',
+            'san':'typing.Optional[list]',
             'email':'typing.Optional[str]',
             'DN':'typing.Optional[str]',
             'subject_name_hash':'typing.Optional[str]',

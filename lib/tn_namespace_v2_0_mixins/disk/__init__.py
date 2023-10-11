@@ -37,32 +37,6 @@ class Disk(TableExtMixin, Namespace):
             'limit':'int',
             'force_sql_filters':'bool',
     })
-    class Hddstandby(str,Enum):
-        ALWAYSON = 'ALWAYS ON'
-        _5 = '5'
-        _10 = '10'
-        _20 = '20'
-        _30 = '30'
-        _60 = '60'
-        _120 = '120'
-        _180 = '180'
-        _240 = '240'
-        _300 = '300'
-        _330 = '330'
-        ...
-    class Advpowermgmt(str,Enum):
-        DISABLED = 'DISABLED'
-        _1 = '1'
-        _64 = '64'
-        _127 = '127'
-        _128 = '128'
-        _192 = '192'
-        _254 = '254'
-        ...
-    Enclosure = typing.TypedDict('Enclosure', {
-            'number':'int',
-            'slot':'int',
-    })
     DiskEntry = typing.TypedDict('DiskEntry', {
             'identifier':'str',
             'name':'str',
@@ -93,69 +67,45 @@ class Disk(TableExtMixin, Namespace):
             'kmip_uid':'typing.Optional[str]',
             'supports_smart':'typing.Optional[bool]',
     })
-    DiskEntry_ = typing.TypedDict('DiskEntry_', {
-            'identifier':'str',
-            'name':'str',
-            'subsystem':'str',
+    class Hddstandby(str,Enum):
+        ALWAYSON = 'ALWAYS ON'
+        _5 = '5'
+        _10 = '10'
+        _20 = '20'
+        _30 = '30'
+        _60 = '60'
+        _120 = '120'
+        _180 = '180'
+        _240 = '240'
+        _300 = '300'
+        _330 = '330'
+        ...
+    class Advpowermgmt(str,Enum):
+        DISABLED = 'DISABLED'
+        _1 = '1'
+        _64 = '64'
+        _127 = '127'
+        _128 = '128'
+        _192 = '192'
+        _254 = '254'
+        ...
+    Enclosure = typing.TypedDict('Enclosure', {
             'number':'int',
-            'serial':'str',
-            'lunid':'typing.Optional[str]',
-            'size':'int',
-            'description':'str',
-            'transfermode':'str',
-            'hddstandby':'Hddstandby',
-            'togglesmart':'bool',
-            'advpowermgmt':'Advpowermgmt',
-            'smartoptions':'str',
-            'expiretime':'typing.Optional[str]',
-            'critical':'typing.Optional[int]',
-            'difference':'typing.Optional[int]',
-            'informational':'typing.Optional[int]',
-            'model':'typing.Optional[str]',
-            'rotationrate':'typing.Optional[int]',
-            'type':'typing.Optional[str]',
-            'zfs_guid':'typing.Optional[str]',
-            'bus':'str',
-            'devname':'str',
-            'enclosure':'Enclosure',
-            'pool':'typing.Optional[str]',
-            'passwd':'str',
-            'kmip_uid':'typing.Optional[str]',
-            'supports_smart':'typing.Optional[bool]',
+            'slot':'int',
     })
-    DiskEntry__ = typing.TypedDict('DiskEntry__', {
-            'identifier':'str',
-            'name':'str',
-            'subsystem':'str',
-            'number':'int',
-            'serial':'str',
-            'lunid':'typing.Optional[str]',
-            'size':'int',
-            'description':'str',
-            'transfermode':'str',
-            'hddstandby':'Hddstandby',
-            'togglesmart':'bool',
-            'advpowermgmt':'Advpowermgmt',
-            'smartoptions':'str',
-            'expiretime':'typing.Optional[str]',
-            'critical':'typing.Optional[int]',
-            'difference':'typing.Optional[int]',
-            'informational':'typing.Optional[int]',
-            'model':'typing.Optional[str]',
-            'rotationrate':'typing.Optional[int]',
-            'type':'typing.Optional[str]',
-            'zfs_guid':'typing.Optional[str]',
-            'bus':'str',
-            'devname':'str',
-            'enclosure':'Enclosure',
-            'pool':'typing.Optional[str]',
-            'passwd':'str',
-            'kmip_uid':'typing.Optional[str]',
-            'supports_smart':'typing.Optional[bool]',
-    })
-    Object = typing.TypedDict('Object', {
+    ResizeProperties = typing.TypedDict('ResizeProperties', {
             'name':'str',
             'size':'int',
+    })
+    SmartAttribute = typing.TypedDict('SmartAttribute', {
+            'id':'int',
+            'value':'int',
+            'worst':'int',
+            'thresh':'int',
+            'name':'str',
+            'when_failed':'str',
+            'flags':'Flags',
+            'raw':'Raw',
     })
     Flags = typing.TypedDict('Flags', {
             'value':'int',
@@ -171,15 +121,9 @@ class Disk(TableExtMixin, Namespace):
             'value':'int',
             'string':'str',
     })
-    SmartAttribute = typing.TypedDict('SmartAttribute', {
-            'id':'int',
-            'value':'int',
-            'worst':'int',
-            'thresh':'int',
-            'name':'str',
-            'when_failed':'str',
-            'flags':'Flags',
-            'raw':'Raw',
+    Options = typing.TypedDict('Options', {
+            'cache':'typing.Optional[int]',
+            'powermode':'Powermode',
     })
     class Powermode(str,Enum):
         NEVER = 'NEVER'
@@ -187,10 +131,6 @@ class Disk(TableExtMixin, Namespace):
         STANDBY = 'STANDBY'
         IDLE = 'IDLE'
         ...
-    Options = typing.TypedDict('Options', {
-            'cache':'typing.Optional[int]',
-            'powermode':'Powermode',
-    })
     Alert = typing.TypedDict('Alert', {
             'uuid':'str',
             'source':'str',

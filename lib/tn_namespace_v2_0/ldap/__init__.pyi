@@ -53,7 +53,7 @@ class Ldap(
         ...
     @typing.overload
     def ssl_choices(self, 
-    /) -> 'list[LdapSslChoice]': 
+    /) -> 'list[Ssl]': 
         """
         Returns list of SSL choices.
 
@@ -61,13 +61,13 @@ class Ldap(
         ----------
         Returns
         -------
-        list[LdapSslChoice]:
+        list[Ssl]:
             ssl_choices
         """
         ...
     @typing.overload
     def update(self, 
-        ldap_update:'LdapUpdate'={},
+        ldap_update:'LdapUpdate',
     /) -> 'dict[str]': 
         """
         `hostname` list of ip addresses or hostnames of LDAP servers with
@@ -142,7 +142,7 @@ class Ldap(
         RFC2307 = 'RFC2307'
         RFC2307BIS = 'RFC2307BIS'
         ...
-    class LdapSslChoice(str,Enum):
+    class Ssl(str,Enum):
         OFF = 'OFF'
         ON = 'ON'
         STARTTLS = 'START_TLS'
@@ -153,7 +153,7 @@ class Ldap(
             'binddn':'str',
             'bindpw':'str',
             'anonbind':'bool',
-            'ssl':'LdapSslChoice',
+            'ssl':'Ssl',
             'certificate':'typing.Optional[int]',
             'validate_certificates':'bool',
             'disable_freenas_cache':'bool',
@@ -163,6 +163,10 @@ class Ldap(
             'kerberos_principal':'str',
             'has_samba_schema':'bool',
             'auxiliary_parameters':'str',
-            'schema':'NssInfoLdap',
+            'schema':'Schema',
             'enable':'bool',
     })
+    class Schema(str,Enum):
+        RFC2307 = 'RFC2307'
+        RFC2307BIS = 'RFC2307BIS'
+        ...

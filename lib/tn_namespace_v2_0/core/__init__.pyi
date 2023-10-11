@@ -11,8 +11,8 @@ class Core(
     @typing.overload
     def bulk(self, 
         method:'str',
-        params:'list'=[],
-        description:'typing.Optional[str]'=None,
+        params:'list',
+        description:'typing.Optional[str]',
     /) -> None: 
         """
         Will sequentially call `method` with arguments from the `params` list. For example, running
@@ -50,7 +50,7 @@ class Core(
         ...
     @typing.overload
     def debug(self, 
-        options:'Options'={},
+        options:'Options',
     /) -> None: 
         """
         Setup middlewared for remote debugging.
@@ -88,9 +88,9 @@ class Core(
     @typing.overload
     def download(self, 
         method:'str',
-        args:'list'=[],
+        args:'list',
         filename:'str',
-        buffered:'bool'=False,
+        buffered:'bool',
     /) -> None: 
         """
         Core helper to call a job marked for download.
@@ -131,9 +131,9 @@ class Core(
         ...
     @typing.overload
     def get_jobs(self, 
-        query_filters:'list[list]'=[],
-        query_options:'QueryOptions'={},
-    /) -> 'typing.Union[int, Job, list[Job_]]': 
+        query_filters:'list[list]',
+        query_options:'QueryOptions',
+    /) -> 'typing.Union[int, Job, list[Job]]': 
         """
         Get the long running jobs.
 
@@ -145,7 +145,7 @@ class Core(
             query-options
         Returns
         -------
-        typing.Union[int, Job, list[Job_]]:
+        typing.Union[int, Job, list[Job]]:
             
         """
         ...
@@ -167,7 +167,7 @@ class Core(
     @typing.overload
     def job_update(self, 
         id:'int',
-        job_update:'JobUpdate'={},
+        job_update:'JobUpdate',
     /) -> None: 
         """
         
@@ -213,7 +213,7 @@ class Core(
         ...
     @typing.overload
     def ping_remote(self, 
-        options:'Options_'={},
+        options:'Options_',
     /) -> None: 
         """
         Method that will send an ICMP echo request to "hostname"
@@ -250,8 +250,8 @@ class Core(
         ...
     @typing.overload
     def sessions(self, 
-        query_filters:'list[list]'=[],
-        query_options:'QueryOptions_'={},
+        query_filters:'list[list]',
+        query_options:'QueryOptions',
     /) -> 'typing.Union[int, Session, list[Session]]': 
         """
         Get currently open websocket sessions.
@@ -302,16 +302,6 @@ class Core(
             'limit':'int',
             'force_sql_filters':'bool',
     })
-    Progress = typing.TypedDict('Progress', {
-            'percent':'typing.Optional[int]',
-            'description':'typing.Optional[str]',
-            'extra':'typing.Union[str, int, bool, dict[str], list]',
-    })
-    ExcInfo = typing.TypedDict('ExcInfo', {
-            'repr':'typing.Optional[str]',
-            'type':'typing.Optional[str]',
-            'extra':'typing.Union[str, int, bool, dict[str], list]',
-    })
     Job = typing.TypedDict('Job', {
             'id':'int',
             'method':'str',
@@ -330,61 +320,29 @@ class Core(
             'time_started':'typing.Optional[str]',
             'time_finished':'typing.Optional[str]',
     })
-    Progress_ = typing.TypedDict('Progress_', {
+    Progress = typing.TypedDict('Progress', {
             'percent':'typing.Optional[int]',
             'description':'typing.Optional[str]',
             'extra':'typing.Union[str, int, bool, dict[str], list]',
     })
-    ExcInfo_ = typing.TypedDict('ExcInfo_', {
+    ExcInfo = typing.TypedDict('ExcInfo', {
             'repr':'typing.Optional[str]',
             'type':'typing.Optional[str]',
             'extra':'typing.Union[str, int, bool, dict[str], list]',
     })
-    Job_ = typing.TypedDict('Job_', {
-            'id':'int',
-            'method':'str',
-            'arguments':'list',
-            'transient':'bool',
-            'description':'typing.Optional[str]',
-            'abortable':'bool',
-            'logs_path':'typing.Optional[str]',
-            'logs_excerpt':'typing.Optional[str]',
-            'progress':'Progress_',
-            'result':'typing.Union[str, int, bool, dict[str], list]',
-            'error':'typing.Optional[str]',
-            'exception':'typing.Optional[str]',
-            'exc_info':'ExcInfo_',
-            'state':'str',
-            'time_started':'typing.Optional[str]',
-            'time_finished':'typing.Optional[str]',
-    })
     JobUpdate = typing.TypedDict('JobUpdate', {
             'progress':'dict[str]',
+    })
+    Options_ = typing.TypedDict('Options_', {
+            'type':'Type',
+            'hostname':'str',
+            'timeout':'int',
     })
     class Type(str,Enum):
         ICMP = 'ICMP'
         ICMPV4 = 'ICMPV4'
         ICMPV6 = 'ICMPV6'
         ...
-    Options_ = typing.TypedDict('Options_', {
-            'type':'Type',
-            'hostname':'str',
-            'timeout':'int',
-    })
-    QueryOptions_ = typing.TypedDict('QueryOptions_', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
     Session = typing.TypedDict('Session', {
             'id':'str',
             'socket_family':'str',

@@ -10,9 +10,9 @@ class IpmiSensors(
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload
     def query(self, 
-        query_filters:'list[list]'=[],
-        query_options:'QueryOptions'={},
-    /) -> 'typing.Union[int, list[dict[str]], list[list[dict[str]]]]': 
+        query_filters:'list[list]',
+        query_options:'QueryOptions',
+    /) -> 'typing.Union[int, list, list[list]]': 
         """
         
 
@@ -24,7 +24,7 @@ class IpmiSensors(
             query-options
         Returns
         -------
-        typing.Union[int, list[dict[str]], list[list[dict[str]]]]:
+        typing.Union[int, list, list[list]]:
             
         """
         ...

@@ -1,5 +1,5 @@
 <%
-    from pytruenas.codegen import Object, Enum
+    from pytruenas.api import Object, Enum
     from pytruenas import _utils
 %>
 from ${str(ns.baseclass.__module__)} import ${str(ns.baseclass.__name__)}
@@ -18,15 +18,15 @@ ${str(ns.baseclass.__name__)}):
     def __init__(self, client) -> None:
         super().__init__(client, '${ns.dotname}')
 
-    %for name, obj in ns.objects.items():
+    %for obj in ns.objects:
     %if isinstance(obj, Object):
-    ${name} = typing.TypedDict('${name}', {
+    ${obj.name} = typing.TypedDict('${obj.name}', {
     %for pname, ty in obj.properties.items():
             '${pname}':'${ty.python()}',
     %endfor
     })
     %elif isinstance(obj, Enum):
-    class ${name}(str,Enum):
+    class ${obj.name}(${obj.type.python()},Enum):
     %for val in obj.options:
     %if val is None:
         NONE = None

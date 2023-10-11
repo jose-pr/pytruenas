@@ -12,7 +12,7 @@ class Replication(
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload
     def count_eligible_manual_snapshots(self, 
-        count_eligible_manual_snapshots:'CountEligibleManualSnapshots'={},
+        count_eligible_manual_snapshots:'CountEligibleManualSnapshots',
     /) -> 'CountEligibleManualSnapshots_': 
         """
         Count how many existing snapshots of `dataset` match `naming_schema`.
@@ -29,7 +29,7 @@ class Replication(
         ...
     @typing.overload
     def create(self, 
-        replication_create:'ReplicationCreate'={},
+        replication_create:'ReplicationCreate',
     /) -> 'dict[str]': 
         """
         Create a Replication Task
@@ -96,7 +96,7 @@ class Replication(
     def create_dataset(self, 
         dataset:'str',
         transport:'Transport',
-        ssh_credentials:'typing.Optional[int]'=None,
+        ssh_credentials:'typing.Optional[int]',
     /) -> None: 
         """
         Creates dataset on remote side
@@ -135,7 +135,7 @@ class Replication(
     @typing.overload
     def get_instance(self, 
         id:'typing.Union[str, int, bool, dict[str], list]',
-        query_options_get_instance:'QueryOptionsGetInstance'={},
+        query_options_get_instance:'QueryOptionsGetInstance',
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -155,7 +155,7 @@ class Replication(
     @typing.overload
     def list_datasets(self, 
         transport:'Transport',
-        ssh_credentials:'typing.Optional[int]'=None,
+        ssh_credentials:'typing.Optional[int]',
     /) -> 'list[str]': 
         """
         List datasets on remote side
@@ -190,9 +190,9 @@ class Replication(
         ...
     @typing.overload
     def query(self, 
-        query_filters:'list[list]'=[],
-        query_options:'QueryOptions'={},
-    /) -> 'typing.Union[list[dict[str]], dict[str], int]': 
+        query_filters:'list[list]',
+        query_options:'QueryOptions',
+    /) -> 'typing.Union[list, dict[str], int]': 
         """
         
 
@@ -204,14 +204,14 @@ class Replication(
             query-options
         Returns
         -------
-        typing.Union[list[dict[str]], dict[str], int]:
+        typing.Union[list, dict[str], int]:
             
         """
         ...
     @typing.overload
     def restore(self, 
         id:'int',
-        replication_restore:'ReplicationRestore'={},
+        replication_restore:'ReplicationRestore',
     /) -> None: 
         """
         Create the opposite of replication task `id` (PULL if it was PUSH and vice versa).
@@ -243,7 +243,7 @@ class Replication(
         ...
     @typing.overload
     def run_onetime(self, 
-        replication_run_onetime:'ReplicationRunOnetime'={},
+        replication_run_onetime:'ReplicationRunOnetime',
     /) -> None: 
         """
         Run replication task without creating it.
@@ -264,7 +264,7 @@ class Replication(
         source_datasets:'list[str]',
         target_dataset:'str',
         transport:'Transport_',
-        ssh_credentials:'typing.Optional[int]'=None,
+        ssh_credentials:'typing.Optional[int]',
     /) -> 'dict[str]': 
         """
         Check if target has any snapshots that do not exist on source. Returns these snapshots grouped by dataset.
@@ -301,7 +301,7 @@ class Replication(
     @typing.overload
     def update(self, 
         id:'int',
-        replication_update:'ReplicationUpdate'={},
+        replication_update:'ReplicationUpdate',
     /) -> 'dict[str]': 
         """
         Update a Replication Task with specific `id`
@@ -320,11 +320,6 @@ class Replication(
             replication_update_returns
         """
         ...
-    class Transport(str,Enum):
-        SSH = 'SSH'
-        SSHNETCAT = 'SSH+NETCAT'
-        LOCAL = 'LOCAL'
-        ...
     CountEligibleManualSnapshots = typing.TypedDict('CountEligibleManualSnapshots', {
             'datasets':'list[str]',
             'naming_schema':'list[str]',
@@ -332,21 +327,66 @@ class Replication(
             'transport':'Transport',
             'ssh_credentials':'typing.Optional[int]',
     })
+    class Transport(str,Enum):
+        SSH = 'SSH'
+        SSHPlusNETCAT = 'SSH+NETCAT'
+        LOCAL = 'LOCAL'
+        ...
     CountEligibleManualSnapshots_ = typing.TypedDict('CountEligibleManualSnapshots_', {
             'total':'int',
             'eligible':'int',
     })
+    ReplicationCreate = typing.TypedDict('ReplicationCreate', {
+            'name':'str',
+            'direction':'Direction',
+            'transport':'Transport',
+            'ssh_credentials':'typing.Optional[int]',
+            'netcat_active_side':'typing.Optional[str]',
+            'netcat_active_side_listen_address':'typing.Optional[str]',
+            'netcat_active_side_port_min':'typing.Optional[int]',
+            'netcat_active_side_port_max':'typing.Optional[int]',
+            'netcat_passive_side_connect_address':'typing.Optional[str]',
+            'sudo':'bool',
+            'source_datasets':'list[str]',
+            'target_dataset':'str',
+            'recursive':'bool',
+            'exclude':'list[str]',
+            'properties':'bool',
+            'properties_exclude':'list[str]',
+            'properties_override':'dict[str]',
+            'replicate':'bool',
+            'encryption':'bool',
+            'encryption_inherit':'typing.Optional[bool]',
+            'encryption_key':'typing.Optional[str]',
+            'encryption_key_format':'typing.Optional[str]',
+            'encryption_key_location':'typing.Optional[str]',
+            'periodic_snapshot_tasks':'list[int]',
+            'naming_schema':'list[str]',
+            'also_include_naming_schema':'list[str]',
+            'name_regex':'typing.Optional[str]',
+            'auto':'bool',
+            'schedule':'Schedule',
+            'restrict_schedule':'RestrictSchedule',
+            'only_matching_schedule':'bool',
+            'allow_from_scratch':'bool',
+            'readonly':'Readonly',
+            'hold_pending_snapshots':'bool',
+            'retention_policy':'RetentionPolicy',
+            'lifetime_value':'typing.Optional[int]',
+            'lifetime_unit':'typing.Optional[str]',
+            'lifetimes':'list[Lifetime]',
+            'compression':'typing.Optional[str]',
+            'speed_limit':'typing.Optional[int]',
+            'large_block':'bool',
+            'embed':'bool',
+            'compressed':'bool',
+            'retries':'int',
+            'logging_level':'typing.Optional[str]',
+            'enabled':'bool',
+    })
     class Direction(str,Enum):
         PUSH = 'PUSH'
         PULL = 'PULL'
-        ...
-    class NetcatActiveSide(str,Enum):
-        LOCAL = 'LOCAL'
-        REMOTE = 'REMOTE'
-        ...
-    class EncryptionKeyFormat(str,Enum):
-        HEX = 'HEX'
-        PASSPHRASE = 'PASSPHRASE'
         ...
     Schedule = typing.TypedDict('Schedule', {
             'minute':'str',
@@ -376,13 +416,11 @@ class Replication(
         CUSTOM = 'CUSTOM'
         NONE = 'NONE'
         ...
-    class LifetimeUnit(str,Enum):
-        HOUR = 'HOUR'
-        DAY = 'DAY'
-        WEEK = 'WEEK'
-        MONTH = 'MONTH'
-        YEAR = 'YEAR'
-        ...
+    Lifetime = typing.TypedDict('Lifetime', {
+            'schedule':'Schedule_',
+            'lifetime_value':'int',
+            'lifetime_unit':'LifetimeUnit',
+    })
     Schedule_ = typing.TypedDict('Schedule_', {
             'minute':'str',
             'hour':'str',
@@ -390,70 +428,13 @@ class Replication(
             'month':'str',
             'dow':'str',
     })
-    Lifetime = typing.TypedDict('Lifetime', {
-            'schedule':'Schedule_',
-            'lifetime_value':'int',
-            'lifetime_unit':'LifetimeUnit',
-    })
-    class Compression(str,Enum):
-        LZ4 = 'LZ4'
-        PIGZ = 'PIGZ'
-        PLZIP = 'PLZIP'
+    class LifetimeUnit(str,Enum):
+        HOUR = 'HOUR'
+        DAY = 'DAY'
+        WEEK = 'WEEK'
+        MONTH = 'MONTH'
+        YEAR = 'YEAR'
         ...
-    class LoggingLevel(str,Enum):
-        DEBUG = 'DEBUG'
-        INFO = 'INFO'
-        WARNING = 'WARNING'
-        ERROR = 'ERROR'
-        ...
-    ReplicationCreate = typing.TypedDict('ReplicationCreate', {
-            'name':'str',
-            'direction':'Direction',
-            'transport':'Transport',
-            'ssh_credentials':'typing.Optional[int]',
-            'netcat_active_side':'typing.Optional[NetcatActiveSide]',
-            'netcat_active_side_listen_address':'typing.Optional[str]',
-            'netcat_active_side_port_min':'typing.Optional[int]',
-            'netcat_active_side_port_max':'typing.Optional[int]',
-            'netcat_passive_side_connect_address':'typing.Optional[str]',
-            'sudo':'bool',
-            'source_datasets':'list[str]',
-            'target_dataset':'str',
-            'recursive':'bool',
-            'exclude':'list[str]',
-            'properties':'bool',
-            'properties_exclude':'list[str]',
-            'properties_override':'dict[str]',
-            'replicate':'bool',
-            'encryption':'bool',
-            'encryption_inherit':'typing.Optional[bool]',
-            'encryption_key':'typing.Optional[str]',
-            'encryption_key_format':'typing.Optional[EncryptionKeyFormat]',
-            'encryption_key_location':'typing.Optional[str]',
-            'periodic_snapshot_tasks':'list[int]',
-            'naming_schema':'list[str]',
-            'also_include_naming_schema':'list[str]',
-            'name_regex':'typing.Optional[str]',
-            'auto':'bool',
-            'schedule':'Schedule',
-            'restrict_schedule':'RestrictSchedule',
-            'only_matching_schedule':'bool',
-            'allow_from_scratch':'bool',
-            'readonly':'Readonly',
-            'hold_pending_snapshots':'bool',
-            'retention_policy':'RetentionPolicy',
-            'lifetime_value':'typing.Optional[int]',
-            'lifetime_unit':'typing.Optional[LifetimeUnit]',
-            'lifetimes':'list[Lifetime]',
-            'compression':'typing.Optional[Compression]',
-            'speed_limit':'typing.Optional[int]',
-            'large_block':'bool',
-            'embed':'bool',
-            'compressed':'bool',
-            'retries':'int',
-            'logging_level':'typing.Optional[LoggingLevel]',
-            'enabled':'bool',
-    })
     QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
             'relationships':'bool',
             'extend':'typing.Optional[str]',
@@ -490,7 +471,7 @@ class Replication(
             'direction':'Direction',
             'transport':'Transport',
             'ssh_credentials':'typing.Optional[int]',
-            'netcat_active_side':'typing.Optional[NetcatActiveSide]',
+            'netcat_active_side':'typing.Optional[str]',
             'netcat_active_side_listen_address':'typing.Optional[str]',
             'netcat_active_side_port_min':'typing.Optional[int]',
             'netcat_active_side_port_max':'typing.Optional[int]',
@@ -507,7 +488,7 @@ class Replication(
             'encryption':'bool',
             'encryption_inherit':'typing.Optional[bool]',
             'encryption_key':'typing.Optional[str]',
-            'encryption_key_format':'typing.Optional[EncryptionKeyFormat]',
+            'encryption_key_format':'typing.Optional[str]',
             'encryption_key_location':'typing.Optional[str]',
             'periodic_snapshot_tasks':'list[int]',
             'naming_schema':'list[str]',
@@ -519,21 +500,21 @@ class Replication(
             'hold_pending_snapshots':'bool',
             'retention_policy':'RetentionPolicy',
             'lifetime_value':'typing.Optional[int]',
-            'lifetime_unit':'typing.Optional[LifetimeUnit]',
+            'lifetime_unit':'typing.Optional[str]',
             'lifetimes':'list[Lifetime]',
-            'compression':'typing.Optional[Compression]',
+            'compression':'typing.Optional[str]',
             'speed_limit':'typing.Optional[int]',
             'large_block':'bool',
             'embed':'bool',
             'compressed':'bool',
             'retries':'int',
-            'logging_level':'typing.Optional[LoggingLevel]',
+            'logging_level':'typing.Optional[str]',
             'exclude_mountpoint_property':'bool',
             'only_from_scratch':'bool',
     })
     class Transport_(str,Enum):
         SSH = 'SSH'
-        SSHNETCAT = 'SSH+NETCAT'
+        SSHPlusNETCAT = 'SSH+NETCAT'
         LOCAL = 'LOCAL'
         LEGACY = 'LEGACY'
         ...
@@ -542,7 +523,7 @@ class Replication(
             'direction':'Direction',
             'transport':'Transport',
             'ssh_credentials':'typing.Optional[int]',
-            'netcat_active_side':'typing.Optional[NetcatActiveSide]',
+            'netcat_active_side':'typing.Optional[str]',
             'netcat_active_side_listen_address':'typing.Optional[str]',
             'netcat_active_side_port_min':'typing.Optional[int]',
             'netcat_active_side_port_max':'typing.Optional[int]',
@@ -559,7 +540,7 @@ class Replication(
             'encryption':'bool',
             'encryption_inherit':'typing.Optional[bool]',
             'encryption_key':'typing.Optional[str]',
-            'encryption_key_format':'typing.Optional[EncryptionKeyFormat]',
+            'encryption_key_format':'typing.Optional[str]',
             'encryption_key_location':'typing.Optional[str]',
             'periodic_snapshot_tasks':'list[int]',
             'naming_schema':'list[str]',
@@ -574,14 +555,14 @@ class Replication(
             'hold_pending_snapshots':'bool',
             'retention_policy':'RetentionPolicy',
             'lifetime_value':'typing.Optional[int]',
-            'lifetime_unit':'typing.Optional[LifetimeUnit]',
+            'lifetime_unit':'typing.Optional[str]',
             'lifetimes':'list[Lifetime]',
-            'compression':'typing.Optional[Compression]',
+            'compression':'typing.Optional[str]',
             'speed_limit':'typing.Optional[int]',
             'large_block':'bool',
             'embed':'bool',
             'compressed':'bool',
             'retries':'int',
-            'logging_level':'typing.Optional[LoggingLevel]',
+            'logging_level':'typing.Optional[str]',
             'enabled':'bool',
     })

@@ -11,7 +11,7 @@ class Boot(
     @typing.overload
     def attach(self, 
         dev:'str',
-        options:'Options'={},
+        options:'Options',
     /) -> None: 
         """
         Attach a disk to the boot pool, turning a stripe into a mirror.
@@ -136,14 +136,6 @@ class Boot(
     Options = typing.TypedDict('Options', {
             'expand':'bool',
     })
-    Topology = typing.TypedDict('Topology', {
-            'data':'list',
-            'log':'list',
-            'cache':'list',
-            'spare':'list',
-            'special':'list',
-            'dedup':'list',
-    })
     GetState = typing.TypedDict('GetState', {
             'name':'str',
             'status':'str',
@@ -165,4 +157,12 @@ class Boot(
             'freeing_str':'typing.Optional[str]',
             'autotrim':'dict[str]',
             'topology':'Topology',
+    })
+    Topology = typing.TypedDict('Topology', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
     })

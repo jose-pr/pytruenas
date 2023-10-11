@@ -50,9 +50,9 @@ class Auth(
         ...
     @typing.overload
     def generate_token(self, 
-        ttl:'typing.Optional[int]'=600,
-        attrs:'dict[str]'={},
-        match_origin:'bool'=False,
+        ttl:'typing.Optional[int]',
+        attrs,
+        match_origin:'bool',
     /) -> 'str': 
         """
         Generate a token to be used for authentication.
@@ -83,7 +83,7 @@ class Auth(
     def login(self, 
         username:'str',
         password:'str',
-        otp_token:'typing.Optional[str]'=None,
+        otp_token:'typing.Optional[str]',
     /) -> 'bool': 
         """
         Authenticate session using username and password.
@@ -168,8 +168,8 @@ class Auth(
         ...
     @typing.overload
     def sessions(self, 
-        query_filters:'list[list]'=[],
-        query_options:'QueryOptions'={},
+        query_filters:'list[list]',
+        query_options:'QueryOptions',
     /) -> 'typing.Union[int, Session, list[Session]]': 
         """
         Returns list of active auth sessions.

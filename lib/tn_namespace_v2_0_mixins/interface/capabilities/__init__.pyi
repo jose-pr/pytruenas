@@ -30,7 +30,7 @@ class InterfaceCapabilities(
         ...
     @typing.overload
     def set(self, 
-        capabilities_set:'CapabilitiesSet'={},
+        capabilities_set:'CapabilitiesSet',
     /) -> 'list[str]': 
         """
         Enable or Disable capabilties (also known as features) on a given interface.
@@ -55,12 +55,12 @@ class InterfaceCapabilities(
             'disabled':'list[str]',
             'supported':'list[str]',
     })
-    class Action(str,Enum):
-        ENABLE = 'ENABLE'
-        DISABLE = 'DISABLE'
-        ...
     CapabilitiesSet = typing.TypedDict('CapabilitiesSet', {
             'name':'str',
             'capabilties':'list',
             'action':'Action',
     })
+    class Action(str,Enum):
+        ENABLE = 'ENABLE'
+        DISABLE = 'DISABLE'
+        ...

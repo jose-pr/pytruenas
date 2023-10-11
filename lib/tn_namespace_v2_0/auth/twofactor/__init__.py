@@ -8,9 +8,6 @@ class AuthTwofactor(Namespace):
     def __init__(self, client) -> None:
         super().__init__(client, 'auth.twofactor')
 
-    Services = typing.TypedDict('Services', {
-            'ssh':'bool',
-    })
     AuthTwofactorEntry = typing.TypedDict('AuthTwofactorEntry', {
             'enabled':'bool',
             'otp_digits':'int',
@@ -18,6 +15,9 @@ class AuthTwofactor(Namespace):
             'interval':'int',
             'services':'Services',
             'id':'int',
+    })
+    Services = typing.TypedDict('Services', {
+            'ssh':'bool',
     })
     AuthTwofactorUpdate = typing.TypedDict('AuthTwofactorUpdate', {
             'enabled':'bool',

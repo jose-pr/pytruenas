@@ -12,7 +12,7 @@ class KerberosKeytab(
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload
     def create(self, 
-        kerberos_keytab_create:'KerberosKeytabCreate'={},
+        kerberos_keytab_create:'KerberosKeytabCreate',
     /) -> 'KerberosKeytabCreateReturns': 
         """
         Create a kerberos keytab. Uploaded keytab files will be merged with the system
@@ -52,7 +52,7 @@ class KerberosKeytab(
     @typing.overload
     def get_instance(self, 
         id:'typing.Union[str, int, bool, dict[str], list]',
-        query_options_get_instance:'QueryOptionsGetInstance'={},
+        query_options_get_instance:'QueryOptionsGetInstance',
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -71,8 +71,8 @@ class KerberosKeytab(
         ...
     @typing.overload
     def query(self, 
-        query_filters:'list[list]'=[],
-        query_options:'QueryOptions'={},
+        query_filters:'list[list]',
+        query_options:'QueryOptions',
     /) -> 'typing.Union[list[KerberosKeytabEntry], KerberosKeytabEntry, int]': 
         """
         
@@ -106,7 +106,7 @@ class KerberosKeytab(
     @typing.overload
     def update(self, 
         id:'int',
-        kerberos_keytab_update:'KerberosKeytabUpdate'={},
+        kerberos_keytab_update:'KerberosKeytabUpdate',
     /) -> 'KerberosKeytabUpdateReturns': 
         """
         Update kerberos keytab by id.
@@ -125,7 +125,7 @@ class KerberosKeytab(
         ...
     @typing.overload
     def upload_keytab(self, 
-        keytab_data:'KeytabData'={},
+        keytab_data:'KeytabData',
     /) -> 'KerberosKeytabEntry': 
         """
         Upload a keytab file. This method expects the keytab file to be uploaded using

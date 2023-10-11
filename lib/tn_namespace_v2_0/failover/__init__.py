@@ -32,6 +32,10 @@ class Failover(Namespace):
     Options__ = typing.TypedDict('Options__', {
             'reboot':'bool',
     })
+    Options___ = typing.TypedDict('Options___', {
+            'pools':'list[PoolKeys]',
+            'datasets':'list[DatasetKeys]',
+    })
     PoolKeys = typing.TypedDict('PoolKeys', {
             'name':'str',
             'passphrase':'str',
@@ -39,10 +43,6 @@ class Failover(Namespace):
     DatasetKeys = typing.TypedDict('DatasetKeys', {
             'name':'str',
             'passphrase':'str',
-    })
-    Options___ = typing.TypedDict('Options___', {
-            'pools':'list[PoolKeys]',
-            'datasets':'list[DatasetKeys]',
     })
     FailoverUpdate = typing.TypedDict('FailoverUpdate', {
             'disabled':'bool',

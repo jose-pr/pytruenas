@@ -8,13 +8,13 @@ class PoolDatasetUserprop(Namespace):
     def __init__(self, client) -> None:
         super().__init__(client, 'pool.dataset.userprop')
 
-    Property = typing.TypedDict('Property', {
-            'name':'str',
-            'value':'str',
-    })
     DatasetUserPropCreate = typing.TypedDict('DatasetUserPropCreate', {
             'id':'str',
             'property':'Property',
+    })
+    Property = typing.TypedDict('Property', {
+            'name':'str',
+            'value':'str',
     })
     PoolDatasetUserpropCreateReturns = typing.TypedDict('PoolDatasetUserpropCreateReturns', {
             'id':'str',

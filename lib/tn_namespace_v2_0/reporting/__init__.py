@@ -16,8 +16,15 @@ class Reporting(Namespace):
             'id':'int',
     })
     Graph = typing.TypedDict('Graph', {
-            'name':'str',
+            'name':'Name',
             'identifier':'typing.Optional[str]',
+    })
+    ReportingQuery = typing.TypedDict('ReportingQuery', {
+            'unit':'Unit',
+            'page':'int',
+            'start':'str',
+            'end':'str',
+            'aggregate':'bool',
     })
     class Unit(str,Enum):
         HOUR = 'HOUR'
@@ -26,23 +33,16 @@ class Reporting(Namespace):
         MONTH = 'MONTH'
         YEAR = 'YEAR'
         ...
-    ReportingQuery = typing.TypedDict('ReportingQuery', {
-            'unit':'Unit',
-            'page':'int',
-            'start':'str',
-            'end':'str',
-            'aggregate':'bool',
-    })
-    Aggregations = typing.TypedDict('Aggregations', {
-            'min':'list',
-            'max':'list',
-            'mean':'list',
-    })
     GraphReportingData = typing.TypedDict('GraphReportingData', {
             'name':'str',
             'identifier':'typing.Optional[str]',
             'data':'list',
             'aggregations':'Aggregations',
+    })
+    Aggregations = typing.TypedDict('Aggregations', {
+            'min':'list',
+            'max':'list',
+            'mean':'list',
     })
     QueryOptions = typing.TypedDict('QueryOptions', {
             'relationships':'bool',
@@ -62,15 +62,7 @@ class Reporting(Namespace):
             'name':'str',
             'title':'str',
             'vertical_label':'str',
-            'identifiers':'typing.Optional[list[str]]',
-            'stacked':'bool',
-            'stacked_show_total':'bool',
-    })
-    Graph__ = typing.TypedDict('Graph__', {
-            'name':'str',
-            'title':'str',
-            'vertical_label':'str',
-            'identifiers':'typing.Optional[list[str]]',
+            'identifiers':'typing.Optional[list]',
             'stacked':'bool',
             'stacked_show_total':'bool',
     })
@@ -89,10 +81,6 @@ class Reporting(Namespace):
         Arcresult = 'arcresult'
         Disktemp = 'disktemp'
         ...
-    Graph___ = typing.TypedDict('Graph___', {
-            'name':'Name',
-            'identifier':'typing.Optional[str]',
-    })
     ReportingQueryNetdata = typing.TypedDict('ReportingQueryNetdata', {
             'unit':'Unit',
             'page':'int',
@@ -106,37 +94,11 @@ class Reporting(Namespace):
             'data':'list',
             'aggregations':'Aggregations',
     })
-    NetdataGraphReportingData_ = typing.TypedDict('NetdataGraphReportingData_', {
-            'name':'str',
-            'identifier':'typing.Optional[str]',
-            'data':'list',
-            'aggregations':'Aggregations',
-    })
-    QueryOptions_ = typing.TypedDict('QueryOptions_', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    Graph____ = typing.TypedDict('Graph____', {
+    Graph__ = typing.TypedDict('Graph__', {
             'name':'str',
             'title':'str',
             'vertical_label':'str',
-            'identifiers':'typing.Optional[list[str]]',
-    })
-    Graph_____ = typing.TypedDict('Graph_____', {
-            'name':'str',
-            'title':'str',
-            'vertical_label':'str',
-            'identifiers':'typing.Optional[list[str]]',
+            'identifiers':'typing.Optional[list]',
     })
     ReportingUpdate = typing.TypedDict('ReportingUpdate', {
             'graphite':'str',

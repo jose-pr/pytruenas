@@ -10,7 +10,7 @@ class User(
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload
     def create(self, 
-        user_create:'UserCreate'={},
+        user_create:'UserCreate',
     /) -> 'int': 
         """
         Create a new user.
@@ -39,7 +39,7 @@ class User(
     @typing.overload
     def delete(self, 
         id:'int',
-        options:'Options'={},
+        options:'Options',
     /) -> 'int': 
         """
         Delete user `id`.
@@ -62,7 +62,7 @@ class User(
     @typing.overload
     def get_instance(self, 
         id:'typing.Union[str, int, bool, dict[str], list]',
-        query_options_get_instance:'QueryOptionsGetInstance'={},
+        query_options_get_instance:'QueryOptionsGetInstance',
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -95,7 +95,7 @@ class User(
         ...
     @typing.overload
     def get_user_obj(self, 
-        get_user_obj:'GetUserObj'={},
+        get_user_obj:'GetUserObj',
     /) -> 'UserInformation': 
         """
         Returns dictionary containing information from struct passwd for the user specified by either
@@ -175,9 +175,9 @@ class User(
         ...
     @typing.overload
     def query(self, 
-        query_filters:'list[list]'=[],
-        query_options:'QueryOptions'={},
-    /) -> 'typing.Union[list[UserEntry], UserEntry_, int, UserEntry__]': 
+        query_filters:'list[list]',
+        query_options:'QueryOptions',
+    /) -> 'typing.Union[list[UserEntry], UserEntry, int]': 
         """
         Query users with `query-filters` and `query-options`. As a performance optimization, only local users
         will be queried by default.
@@ -200,14 +200,14 @@ class User(
             query-options
         Returns
         -------
-        typing.Union[list[UserEntry], UserEntry_, int, UserEntry__]:
+        typing.Union[list[UserEntry], UserEntry, int]:
             
         """
         ...
     @typing.overload
     def renew_2fa_secret(self, 
         username:'str',
-    /) -> 'UserEntry___': 
+    /) -> 'UserEntry': 
         """
         Renew `username` user's two-factor authentication secret.
 
@@ -217,14 +217,14 @@ class User(
             username
         Returns
         -------
-        UserEntry___:
+        UserEntry:
             user_entry
         """
         ...
     @typing.overload
     def set_root_password(self, 
         password:'str',
-        options:'dict[str]'={},
+        options,
     /) -> None: 
         """
         Deprecated method. Use `user.setup_local_administrator`
@@ -243,7 +243,7 @@ class User(
     def setup_local_administrator(self, 
         username:'Username',
         password:'str',
-        options:'Options_'={},
+        options:'Options_',
     /) -> None: 
         """
         Set up local administrator (this method does not require authentication if local administrator is not already
@@ -263,7 +263,7 @@ class User(
         ...
     @typing.overload
     def shell_choices(self, 
-        group_ids:'list[int]'=[],
+        group_ids:'list[int]',
     /) -> 'ShellInfo': 
         """
         Return the available shell choices to be used in `user.create` and `user.update`.
@@ -309,7 +309,7 @@ class User(
     @typing.overload
     def update(self, 
         id:'int',
-        user_update:'UserUpdate'={},
+        user_update:'UserUpdate',
     /) -> 'int': 
         """
         Update attributes of an existing user.
@@ -440,93 +440,15 @@ class User(
             'nt_name':'typing.Optional[str]',
             'sid':'typing.Optional[str]',
     })
-    UserEntry_ = typing.TypedDict('UserEntry_', {
-            'uid':'int',
-            'username':'str',
-            'home':'str',
-            'shell':'str',
-            'full_name':'str',
-            'email':'typing.Optional[str]',
-            'password_disabled':'bool',
-            'ssh_password_enabled':'bool',
-            'locked':'bool',
-            'smb':'bool',
-            'sudo_commands':'list[str]',
-            'sudo_commands_nopasswd':'list[str]',
-            'sshpubkey':'typing.Optional[str]',
-            'groups':'list[int]',
-            'group':'dict[str]',
-            'id':'int',
-            'builtin':'bool',
-            'id_type_both':'bool',
-            'local':'bool',
-            'twofactor_auth_configured':'bool',
-            'unixhash':'str',
-            'smbhash':'str',
-            'nt_name':'typing.Optional[str]',
-            'sid':'typing.Optional[str]',
-    })
-    UserEntry__ = typing.TypedDict('UserEntry__', {
-            'uid':'int',
-            'username':'str',
-            'home':'str',
-            'shell':'str',
-            'full_name':'str',
-            'email':'typing.Optional[str]',
-            'password_disabled':'bool',
-            'ssh_password_enabled':'bool',
-            'locked':'bool',
-            'smb':'bool',
-            'sudo_commands':'list[str]',
-            'sudo_commands_nopasswd':'list[str]',
-            'sshpubkey':'typing.Optional[str]',
-            'groups':'list[int]',
-            'group':'dict[str]',
-            'id':'int',
-            'builtin':'bool',
-            'id_type_both':'bool',
-            'local':'bool',
-            'twofactor_auth_configured':'bool',
-            'unixhash':'str',
-            'smbhash':'str',
-            'nt_name':'typing.Optional[str]',
-            'sid':'typing.Optional[str]',
-    })
-    UserEntry___ = typing.TypedDict('UserEntry___', {
-            'uid':'int',
-            'username':'str',
-            'home':'str',
-            'shell':'str',
-            'full_name':'str',
-            'email':'typing.Optional[str]',
-            'password_disabled':'bool',
-            'ssh_password_enabled':'bool',
-            'locked':'bool',
-            'smb':'bool',
-            'sudo_commands':'list[str]',
-            'sudo_commands_nopasswd':'list[str]',
-            'sshpubkey':'typing.Optional[str]',
-            'groups':'list[int]',
-            'group':'dict[str]',
-            'id':'int',
-            'builtin':'bool',
-            'id_type_both':'bool',
-            'local':'bool',
-            'twofactor_auth_configured':'bool',
-            'unixhash':'str',
-            'smbhash':'str',
-            'nt_name':'typing.Optional[str]',
-            'sid':'typing.Optional[str]',
-    })
     class Username(str,Enum):
         Root = 'root'
         Admin = 'admin'
         ...
-    Ec2 = typing.TypedDict('Ec2', {
-            'instance_id':'str',
-    })
     Options_ = typing.TypedDict('Options_', {
             'ec2':'Ec2',
+    })
+    Ec2 = typing.TypedDict('Ec2', {
+            'instance_id':'str',
     })
     ShellInfo = typing.TypedDict('ShellInfo', {
             'shell_path':'str',

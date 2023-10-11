@@ -25,7 +25,7 @@ class Cloudsync(
         ...
     @typing.overload
     def create(self, 
-        cloud_sync_create:'CloudSyncCreate'={},
+        cloud_sync_create:'CloudSyncCreate',
     /) -> 'dict[str]': 
         """
         Creates a new cloud_sync entry.
@@ -78,7 +78,7 @@ class Cloudsync(
     @typing.overload
     def get_instance(self, 
         id:'typing.Union[str, int, bool, dict[str], list]',
-        query_options_get_instance:'QueryOptionsGetInstance'={},
+        query_options_get_instance:'QueryOptionsGetInstance',
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -112,7 +112,7 @@ class Cloudsync(
         ...
     @typing.overload
     def list_directory(self, 
-        cloud_sync_ls:'CloudSyncLs'={},
+        cloud_sync_ls:'CloudSyncLs',
     /) -> None: 
         """
         List contents of a remote bucket / directory.
@@ -190,9 +190,9 @@ class Cloudsync(
         ...
     @typing.overload
     def query(self, 
-        query_filters:'list[list]'=[],
-        query_options:'QueryOptions'={},
-    /) -> 'typing.Union[list[dict[str]], dict[str], int]': 
+        query_filters:'list[list]',
+        query_options:'QueryOptions',
+    /) -> 'typing.Union[list, dict[str], int]': 
         """
         
 
@@ -204,14 +204,14 @@ class Cloudsync(
             query-options
         Returns
         -------
-        typing.Union[list[dict[str]], dict[str], int]:
+        typing.Union[list, dict[str], int]:
             
         """
         ...
     @typing.overload
     def restore(self, 
         id:'int',
-        cloud_sync_restore:'CloudSyncRestore'={},
+        cloud_sync_restore:'CloudSyncRestore',
     /) -> None: 
         """
         Create the opposite of cloud sync task `id` (PULL if it was PUSH and vice versa).
@@ -229,7 +229,7 @@ class Cloudsync(
     @typing.overload
     def sync(self, 
         id:'int',
-        cloud_sync_sync_options:'CloudSyncSyncOptions'={},
+        cloud_sync_sync_options:'CloudSyncSyncOptions',
     /) -> None: 
         """
         Run the cloud_sync job `id`, syncing the local data to remote.
@@ -246,8 +246,8 @@ class Cloudsync(
         ...
     @typing.overload
     def sync_onetime(self, 
-        cloud_sync_sync_onetime:'CloudSyncSyncOnetime'={},
-        cloud_sync_sync_onetime_options:'CloudSyncSyncOnetimeOptions'={},
+        cloud_sync_sync_onetime:'CloudSyncSyncOnetime',
+        cloud_sync_sync_onetime_options:'CloudSyncSyncOnetimeOptions',
     /) -> None: 
         """
         Run cloud sync task without creating it.
@@ -265,7 +265,7 @@ class Cloudsync(
     @typing.overload
     def update(self, 
         id:'int',
-        cloud_sync_update:'CloudSyncUpdate'={},
+        cloud_sync_update:'CloudSyncUpdate',
     /) -> 'dict[str]': 
         """
         Updates the cloud_sync entry `id` with `data`.
@@ -282,26 +282,6 @@ class Cloudsync(
         dict[str]:
             cloudsync_update_returns
         """
-        ...
-    Schedule = typing.TypedDict('Schedule', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
-    CloudSyncBwlimit = typing.TypedDict('CloudSyncBwlimit', {
-            'time':'str',
-            'bandwidth':'typing.Optional[int]',
-    })
-    class Direction(str,Enum):
-        PUSH = 'PUSH'
-        PULL = 'PULL'
-        ...
-    class TransferMode(str,Enum):
-        SYNC = 'SYNC'
-        COPY = 'COPY'
-        MOVE = 'MOVE'
         ...
     CloudSyncCreate = typing.TypedDict('CloudSyncCreate', {
             'description':'str',
@@ -327,6 +307,26 @@ class Cloudsync(
             'create_empty_src_dirs':'bool',
             'follow_symlinks':'bool',
     })
+    Schedule = typing.TypedDict('Schedule', {
+            'minute':'str',
+            'hour':'str',
+            'dom':'str',
+            'month':'str',
+            'dow':'str',
+    })
+    CloudSyncBwlimit = typing.TypedDict('CloudSyncBwlimit', {
+            'time':'str',
+            'bandwidth':'typing.Optional[int]',
+    })
+    class Direction(str,Enum):
+        PUSH = 'PUSH'
+        PULL = 'PULL'
+        ...
+    class TransferMode(str,Enum):
+        SYNC = 'SYNC'
+        COPY = 'COPY'
+        MOVE = 'MOVE'
+        ...
     QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
             'relationships':'bool',
             'extend':'typing.Optional[str]',
@@ -364,21 +364,17 @@ class Cloudsync(
             'limit':'int',
             'force_sql_filters':'bool',
     })
-    class TransferMode_(str,Enum):
-        SYNC = 'SYNC'
-        COPY = 'COPY'
-        ...
     CloudSyncRestore = typing.TypedDict('CloudSyncRestore', {
             'description':'str',
             'transfer_mode':'TransferMode_',
             'path':'str',
     })
+    class TransferMode_(str,Enum):
+        SYNC = 'SYNC'
+        COPY = 'COPY'
+        ...
     CloudSyncSyncOptions = typing.TypedDict('CloudSyncSyncOptions', {
             'dry_run':'bool',
-    })
-    CloudSyncBwlimit_ = typing.TypedDict('CloudSyncBwlimit_', {
-            'time':'str',
-            'bandwidth':'typing.Optional[int]',
     })
     CloudSyncSyncOnetime = typing.TypedDict('CloudSyncSyncOnetime', {
             'description':'str',
@@ -389,7 +385,7 @@ class Cloudsync(
             'pre_script':'str',
             'post_script':'str',
             'snapshot':'bool',
-            'bwlimit':'list[CloudSyncBwlimit_]',
+            'bwlimit':'list[CloudSyncBwlimit]',
             'include':'list[str]',
             'exclude':'list[str]',
             'transfers':'typing.Optional[int]',
@@ -407,10 +403,6 @@ class Cloudsync(
     CloudSyncSyncOnetimeOptions = typing.TypedDict('CloudSyncSyncOnetimeOptions', {
             'dry_run':'bool',
     })
-    CloudSyncBwlimit__ = typing.TypedDict('CloudSyncBwlimit__', {
-            'time':'str',
-            'bandwidth':'typing.Optional[int]',
-    })
     CloudSyncUpdate = typing.TypedDict('CloudSyncUpdate', {
             'description':'str',
             'path':'str',
@@ -420,7 +412,7 @@ class Cloudsync(
             'pre_script':'str',
             'post_script':'str',
             'snapshot':'bool',
-            'bwlimit':'list[CloudSyncBwlimit__]',
+            'bwlimit':'list[CloudSyncBwlimit]',
             'include':'list[str]',
             'exclude':'list[str]',
             'transfers':'typing.Optional[int]',

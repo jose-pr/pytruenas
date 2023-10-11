@@ -9,6 +9,13 @@ class Alertservice(TableExtMixin, Namespace):
     def __init__(self, client) -> None:
         super().__init__(client, 'alertservice')
 
+    AlertServiceCreate = typing.TypedDict('AlertServiceCreate', {
+            'name':'str',
+            'type':'str',
+            'attributes':'dict[str]',
+            'level':'Level',
+            'enabled':'bool',
+    })
     class Level(str,Enum):
         INFO = 'INFO'
         NOTICE = 'NOTICE'
@@ -18,13 +25,6 @@ class Alertservice(TableExtMixin, Namespace):
         ALERT = 'ALERT'
         EMERGENCY = 'EMERGENCY'
         ...
-    AlertServiceCreate = typing.TypedDict('AlertServiceCreate', {
-            'name':'str',
-            'type':'str',
-            'attributes':'dict[str]',
-            'level':'Level',
-            'enabled':'bool',
-    })
     AlertserviceCreateReturns = typing.TypedDict('AlertserviceCreateReturns', {
             'name':'str',
             'type':'str',

@@ -12,7 +12,7 @@ class Group(
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload
     def create(self, 
-        group_create:'GroupCreate'={},
+        group_create:'GroupCreate',
     /) -> 'int': 
         """
         Create a new group.
@@ -38,7 +38,7 @@ class Group(
     @typing.overload
     def delete(self, 
         id:'int',
-        options:'Options'={},
+        options:'Options',
     /) -> 'int': 
         """
         Delete group `id`.
@@ -59,7 +59,7 @@ class Group(
         ...
     @typing.overload
     def get_group_obj(self, 
-        get_group_obj:'GetGroupObj'={},
+        get_group_obj:'GetGroupObj',
     /) -> 'GroupInfo': 
         """
         Returns dictionary containing information from struct grp for the group specified by either
@@ -78,7 +78,7 @@ class Group(
     @typing.overload
     def get_instance(self, 
         id:'typing.Union[str, int, bool, dict[str], list]',
-        query_options_get_instance:'QueryOptionsGetInstance'={},
+        query_options_get_instance:'QueryOptionsGetInstance',
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -111,8 +111,8 @@ class Group(
         ...
     @typing.overload
     def has_password_enabled_user(self, 
-        gids:'list[int]'=[],
-        exclude_user_ids:'list[int]'=[],
+        gids:'list[int]',
+        exclude_user_ids:'list[int]',
     /) -> None: 
         """
         Checks whether at least one local user with a password is a member of any of the `group_ids`.
@@ -129,9 +129,9 @@ class Group(
         ...
     @typing.overload
     def query(self, 
-        query_filters:'list[list]'=[],
-        query_options:'QueryOptions'={},
-    /) -> 'typing.Union[list[GroupEntry], GroupEntry_, int, GroupEntry__]': 
+        query_filters:'list[list]',
+        query_options:'QueryOptions',
+    /) -> 'typing.Union[list[GroupEntry], GroupEntry, int]': 
         """
         Query groups with `query-filters` and `query-options`. As a performance optimization, only local groups
         will be queried by default.
@@ -153,14 +153,14 @@ class Group(
             query-options
         Returns
         -------
-        typing.Union[list[GroupEntry], GroupEntry_, int, GroupEntry__]:
+        typing.Union[list[GroupEntry], GroupEntry, int]:
             
         """
         ...
     @typing.overload
     def update(self, 
         id:'int',
-        group_update:'GroupUpdate'={},
+        group_update:'GroupUpdate',
     /) -> 'int': 
         """
         Update attributes of an existing group.
@@ -227,36 +227,6 @@ class Group(
             'force_sql_filters':'bool',
     })
     GroupEntry = typing.TypedDict('GroupEntry', {
-            'gid':'int',
-            'name':'str',
-            'smb':'bool',
-            'sudo_commands':'list[str]',
-            'sudo_commands_nopasswd':'list[str]',
-            'users':'list[int]',
-            'id':'int',
-            'group':'str',
-            'builtin':'bool',
-            'id_type_both':'bool',
-            'local':'bool',
-            'nt_name':'typing.Optional[str]',
-            'sid':'typing.Optional[str]',
-    })
-    GroupEntry_ = typing.TypedDict('GroupEntry_', {
-            'gid':'int',
-            'name':'str',
-            'smb':'bool',
-            'sudo_commands':'list[str]',
-            'sudo_commands_nopasswd':'list[str]',
-            'users':'list[int]',
-            'id':'int',
-            'group':'str',
-            'builtin':'bool',
-            'id_type_both':'bool',
-            'local':'bool',
-            'nt_name':'typing.Optional[str]',
-            'sid':'typing.Optional[str]',
-    })
-    GroupEntry__ = typing.TypedDict('GroupEntry__', {
             'gid':'int',
             'name':'str',
             'smb':'bool',

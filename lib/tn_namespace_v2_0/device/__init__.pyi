@@ -59,6 +59,14 @@ class Device(
             'size':'int',
             'description':'str',
     })
+    GpuInfo = typing.TypedDict('GpuInfo', {
+            'addr':'Addr',
+            'description':'str',
+            'devices':'list[GpuDevice]',
+            'vendor':'typing.Optional[str]',
+            'available_to_host':'bool',
+            'uses_system_critical_devices':'bool',
+    })
     Addr = typing.TypedDict('Addr', {
             'pci_slot':'str',
             'domain':'str',
@@ -69,12 +77,4 @@ class Device(
             'pci_id':'str',
             'pci_slot':'str',
             'vm_pci_slot':'str',
-    })
-    GpuInfo = typing.TypedDict('GpuInfo', {
-            'addr':'Addr',
-            'description':'str',
-            'devices':'list[GpuDevice]',
-            'vendor':'typing.Optional[str]',
-            'available_to_host':'bool',
-            'uses_system_critical_devices':'bool',
     })

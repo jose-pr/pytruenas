@@ -25,10 +25,6 @@ class Support(Namespace):
             'secondary_phone':'str',
             'id':'int',
     })
-    class Type(str,Enum):
-        BUG = 'BUG'
-        FEATURE = 'FEATURE'
-        ...
     NewTicket = typing.TypedDict('NewTicket', {
             'title':'str',
             'body':'str',
@@ -43,6 +39,10 @@ class Support(Namespace):
             'email':'str',
             'cc':'list[str]',
     })
+    class Type(str,Enum):
+        BUG = 'BUG'
+        FEATURE = 'FEATURE'
+        ...
     NewTicketResponse = typing.TypedDict('NewTicketResponse', {
             'ticket':'typing.Optional[int]',
             'url':'typing.Optional[str]',

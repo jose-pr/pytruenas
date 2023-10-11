@@ -12,7 +12,7 @@ class IscsiInitiator(
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload
     def create(self, 
-        iscsi_initiator_create:'IscsiInitiatorCreate'={},
+        iscsi_initiator_create:'IscsiInitiatorCreate',
     /) -> 'dict[str]': 
         """
         Create an iSCSI Initiator.
@@ -50,7 +50,7 @@ class IscsiInitiator(
     @typing.overload
     def get_instance(self, 
         id:'typing.Union[str, int, bool, dict[str], list]',
-        query_options_get_instance:'QueryOptionsGetInstance'={},
+        query_options_get_instance:'QueryOptionsGetInstance',
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -69,9 +69,9 @@ class IscsiInitiator(
         ...
     @typing.overload
     def query(self, 
-        query_filters:'list[list]'=[],
-        query_options:'QueryOptions'={},
-    /) -> 'typing.Union[list[dict[str]], dict[str], int]': 
+        query_filters:'list[list]',
+        query_options:'QueryOptions',
+    /) -> 'typing.Union[list, dict[str], int]': 
         """
         
 
@@ -83,14 +83,14 @@ class IscsiInitiator(
             query-options
         Returns
         -------
-        typing.Union[list[dict[str]], dict[str], int]:
+        typing.Union[list, dict[str], int]:
             
         """
         ...
     @typing.overload
     def update(self, 
         id:'int',
-        iscsi_initiator_update:'IscsiInitiatorUpdate'={},
+        iscsi_initiator_update:'IscsiInitiatorUpdate',
     /) -> 'dict[str]': 
         """
         Update iSCSI initiator of `id`.

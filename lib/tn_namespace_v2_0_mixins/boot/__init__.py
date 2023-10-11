@@ -11,14 +11,6 @@ class Boot(Namespace):
     Options = typing.TypedDict('Options', {
             'expand':'bool',
     })
-    Topology = typing.TypedDict('Topology', {
-            'data':'list',
-            'log':'list',
-            'cache':'list',
-            'spare':'list',
-            'special':'list',
-            'dedup':'list',
-    })
     GetState = typing.TypedDict('GetState', {
             'name':'str',
             'status':'str',
@@ -40,4 +32,12 @@ class Boot(Namespace):
             'freeing_str':'typing.Optional[str]',
             'autotrim':'dict[str]',
             'topology':'Topology',
+    })
+    Topology = typing.TypedDict('Topology', {
+            'data':'list',
+            'log':'list',
+            'cache':'list',
+            'spare':'list',
+            'special':'list',
+            'dedup':'list',
     })

@@ -12,7 +12,7 @@ class Api_key(
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload
     def create(self, 
-        api_key_create:'ApiKeyCreate'={},
+        api_key_create:'ApiKeyCreate',
     /) -> 'dict[str]': 
         """
         Creates API Key.
@@ -49,7 +49,7 @@ class Api_key(
     @typing.overload
     def get_instance(self, 
         id:'typing.Union[str, int, bool, dict[str], list]',
-        query_options_get_instance:'QueryOptionsGetInstance'={},
+        query_options_get_instance:'QueryOptionsGetInstance',
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -68,9 +68,9 @@ class Api_key(
         ...
     @typing.overload
     def query(self, 
-        query_filters:'list[list]'=[],
-        query_options:'QueryOptions'={},
-    /) -> 'typing.Union[list[dict[str]], dict[str], int]': 
+        query_filters:'list[list]',
+        query_options:'QueryOptions',
+    /) -> 'typing.Union[list, dict[str], int]': 
         """
         
 
@@ -82,14 +82,14 @@ class Api_key(
             query-options
         Returns
         -------
-        typing.Union[list[dict[str]], dict[str], int]:
+        typing.Union[list, dict[str], int]:
             
         """
         ...
     @typing.overload
     def update(self, 
         id:'int',
-        api_key_update:'ApiKeyUpdate'={},
+        api_key_update:'ApiKeyUpdate',
     /) -> 'dict[str]': 
         """
         Update API Key `id`.
@@ -108,6 +108,14 @@ class Api_key(
             api_key_update_returns
         """
         ...
+    ApiKeyCreate = typing.TypedDict('ApiKeyCreate', {
+            'name':'str',
+            'allowlist':'list[AllowlistItem]',
+    })
+    AllowlistItem = typing.TypedDict('AllowlistItem', {
+            'method':'Method',
+            'resource':'str',
+    })
     class Method(str,Enum):
         GET = 'GET'
         POST = 'POST'
@@ -115,16 +123,8 @@ class Api_key(
         DELETE = 'DELETE'
         CALL = 'CALL'
         SUBSCRIBE = 'SUBSCRIBE'
-        _ = '*'
+        All = '*'
         ...
-    AllowlistItem = typing.TypedDict('AllowlistItem', {
-            'method':'Method',
-            'resource':'str',
-    })
-    ApiKeyCreate = typing.TypedDict('ApiKeyCreate', {
-            'name':'str',
-            'allowlist':'list[AllowlistItem]',
-    })
     QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
             'relationships':'bool',
             'extend':'typing.Optional[str]',

@@ -10,7 +10,7 @@ class Interface(
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload
     def bridge_members_choices(self, 
-        id:'typing.Optional[str]'=None,
+        id:'typing.Optional[str]',
     /) -> 'dict[str]': 
         """
         Return available interface choices that can be added to a `br` (bridge) interface.
@@ -75,7 +75,7 @@ class Interface(
         ...
     @typing.overload
     def choices(self, 
-        options:'Options'={},
+        options:'Options',
     /) -> 'dict[str]': 
         """
         Choices of available network interfaces.
@@ -98,7 +98,7 @@ class Interface(
         ...
     @typing.overload
     def commit(self, 
-        options:'Options_'={},
+        options:'Options_',
     /) -> None: 
         """
         Commit/apply pending interfaces changes.
@@ -118,7 +118,7 @@ class Interface(
         ...
     @typing.overload
     def create(self, 
-        interface_create:'InterfaceCreate'={},
+        interface_create:'InterfaceCreate',
     /) -> 'InterfaceCreateReturns': 
         """
         Create virtual interfaces (Link Aggregation, VLAN)
@@ -179,7 +179,7 @@ class Interface(
     @typing.overload
     def get_instance(self, 
         id:'typing.Union[str, int, bool, dict[str], list]',
-        query_options_get_instance:'QueryOptionsGetInstance'={},
+        query_options_get_instance:'QueryOptionsGetInstance',
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -212,7 +212,7 @@ class Interface(
         ...
     @typing.overload
     def ip_in_use(self, 
-        ips:'Ips'={},
+        ips:'Ips',
     /) -> 'list[InUseIp]': 
         """
         Get all IPv4 / Ipv6 from all valid interfaces, excluding tap and epair.
@@ -265,7 +265,7 @@ class Interface(
         ...
     @typing.overload
     def lag_ports_choices(self, 
-        id:'typing.Optional[str]'=None,
+        id:'typing.Optional[str]',
     /) -> 'dict[str]': 
         """
         Return available interface choices that can be added to a `bond` (lag) interface.
@@ -285,9 +285,9 @@ class Interface(
         ...
     @typing.overload
     def query(self, 
-        query_filters:'list[list]'=[],
-        query_options:'QueryOptions'={},
-    /) -> 'typing.Union[list[InterfaceEntry], InterfaceEntry_, int, InterfaceEntry__]': 
+        query_filters:'list[list]',
+        query_options:'QueryOptions',
+    /) -> 'typing.Union[list[InterfaceEntry], InterfaceEntry, int]': 
         """
         Query Interfaces with `query-filters` and `query-options`
 
@@ -299,7 +299,7 @@ class Interface(
             query-options
         Returns
         -------
-        typing.Union[list[InterfaceEntry], InterfaceEntry_, int, InterfaceEntry__]:
+        typing.Union[list[InterfaceEntry], InterfaceEntry, int]:
             
         """
         ...
@@ -401,7 +401,7 @@ class Interface(
     @typing.overload
     def update(self, 
         id:'str',
-        interface_update:'InterfaceUpdate'={},
+        interface_update:'InterfaceUpdate',
     /) -> 'InterfaceUpdateReturns': 
         """
         Update Interface of `id`.
@@ -475,13 +475,6 @@ class Interface(
             xmit_hash_policy_choices
         """
         ...
-    class Type(str,Enum):
-        BRIDGE = 'BRIDGE'
-        LINKAGGREGATION = 'LINK_AGGREGATION'
-        PHYSICAL = 'PHYSICAL'
-        UNKNOWN = 'UNKNOWN'
-        VLAN = 'VLAN'
-        ...
     Options = typing.TypedDict('Options', {
             'bridge_members':'bool',
             'lag_ports':'bool',
@@ -490,48 +483,17 @@ class Interface(
             'exclude_types':'list[Type]',
             'include':'list',
     })
+    class Type(str,Enum):
+        BRIDGE = 'BRIDGE'
+        LINKAGGREGATION = 'LINK_AGGREGATION'
+        PHYSICAL = 'PHYSICAL'
+        UNKNOWN = 'UNKNOWN'
+        VLAN = 'VLAN'
+        ...
     Options_ = typing.TypedDict('Options_', {
             'rollback':'bool',
             'checkin_timeout':'int',
     })
-    class Type_(str,Enum):
-        BRIDGE = 'BRIDGE'
-        LINKAGGREGATION = 'LINK_AGGREGATION'
-        VLAN = 'VLAN'
-        ...
-    class Type__(str,Enum):
-        INET = 'INET'
-        INET6 = 'INET6'
-        ...
-    InterfaceAlias = typing.TypedDict('InterfaceAlias', {
-            'type':'Type__',
-            'address':'str',
-            'netmask':'int',
-    })
-    InterfaceFailoverAlias = typing.TypedDict('InterfaceFailoverAlias', {
-            'type':'Type__',
-            'address':'str',
-    })
-    InterfaceVirtualAlias = typing.TypedDict('InterfaceVirtualAlias', {
-            'type':'Type__',
-            'address':'str',
-    })
-    class LagProtocol(str,Enum):
-        LACP = 'LACP'
-        FAILOVER = 'FAILOVER'
-        LOADBALANCE = 'LOADBALANCE'
-        ROUNDROBIN = 'ROUNDROBIN'
-        NONE = 'NONE'
-        ...
-    class XmitHashPolicy(str,Enum):
-        LAYER2 = 'LAYER2'
-        LAYER23 = 'LAYER2+3'
-        LAYER34 = 'LAYER3+4'
-        ...
-    class LacpduRate(str,Enum):
-        SLOW = 'SLOW'
-        FAST = 'FAST'
-        ...
     InterfaceCreate = typing.TypedDict('InterfaceCreate', {
             'name':'str',
             'description':'str',
@@ -547,23 +509,60 @@ class Interface(
             'bridge_members':'list',
             'stp':'bool',
             'lag_protocol':'LagProtocol',
-            'xmit_hash_policy':'typing.Optional[XmitHashPolicy]',
-            'lacpdu_rate':'typing.Optional[LacpduRate]',
+            'xmit_hash_policy':'typing.Optional[str]',
+            'lacpdu_rate':'typing.Optional[str]',
             'lag_ports':'list[str]',
             'vlan_parent_interface':'str',
             'vlan_tag':'int',
             'vlan_pcp':'typing.Optional[int]',
             'mtu':'typing.Optional[int]',
     })
-    Alias = typing.TypedDict('Alias', {
-            'type':'str',
+    class Type_(str,Enum):
+        BRIDGE = 'BRIDGE'
+        LINKAGGREGATION = 'LINK_AGGREGATION'
+        VLAN = 'VLAN'
+        ...
+    InterfaceAlias = typing.TypedDict('InterfaceAlias', {
+            'type':'Type__',
             'address':'str',
-            'netmask':'str',
-            'broadcast':'str',
+            'netmask':'int',
     })
-    LagPorts = typing.TypedDict('LagPorts', {
+    class Type__(str,Enum):
+        INET = 'INET'
+        INET6 = 'INET6'
+        ...
+    InterfaceFailoverAlias = typing.TypedDict('InterfaceFailoverAlias', {
+            'type':'Type__',
+            'address':'str',
+    })
+    InterfaceVirtualAlias = typing.TypedDict('InterfaceVirtualAlias', {
+            'type':'Type__',
+            'address':'str',
+    })
+    class LagProtocol(str,Enum):
+        LACP = 'LACP'
+        FAILOVER = 'FAILOVER'
+        LOADBALANCE = 'LOADBALANCE'
+        ROUNDROBIN = 'ROUNDROBIN'
+        NONE = 'NONE'
+        ...
+    InterfaceCreateReturns = typing.TypedDict('InterfaceCreateReturns', {
+            'id':'str',
             'name':'str',
-            'flags':'list[str]',
+            'fake':'bool',
+            'type':'str',
+            'state':'State',
+            'aliases':'list[Alias_]',
+            'ipv4_dhcp':'bool',
+            'ipv6_auto':'bool',
+            'description':'str',
+            'mtu':'typing.Optional[int]',
+            'vlan_parent_interface':'typing.Optional[str]',
+            'vlan_tag':'typing.Optional[int]',
+            'vlan_pcp':'typing.Optional[int]',
+            'lag_protocol':'str',
+            'lag_ports':'list[str]',
+            'bridge_members':'list[str]',
     })
     State = typing.TypedDict('State', {
             'name':'str',
@@ -594,28 +593,20 @@ class Interface(
             'tag':'typing.Optional[int]',
             'pcp':'typing.Optional[int]',
     })
+    Alias = typing.TypedDict('Alias', {
+            'type':'str',
+            'address':'str',
+            'netmask':'str',
+            'broadcast':'str',
+    })
+    LagPorts = typing.TypedDict('LagPorts', {
+            'name':'str',
+            'flags':'list[str]',
+    })
     Alias_ = typing.TypedDict('Alias_', {
             'type':'str',
             'address':'str',
             'netmask':'str',
-    })
-    InterfaceCreateReturns = typing.TypedDict('InterfaceCreateReturns', {
-            'id':'str',
-            'name':'str',
-            'fake':'bool',
-            'type':'str',
-            'state':'State',
-            'aliases':'list[Alias_]',
-            'ipv4_dhcp':'bool',
-            'ipv6_auto':'bool',
-            'description':'str',
-            'mtu':'typing.Optional[int]',
-            'vlan_parent_interface':'typing.Optional[str]',
-            'vlan_tag':'typing.Optional[int]',
-            'vlan_pcp':'typing.Optional[int]',
-            'lag_protocol':'str',
-            'lag_ports':'list[str]',
-            'bridge_members':'list[str]',
     })
     QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
             'relationships':'bool',
@@ -645,16 +636,16 @@ class Interface(
             'netmask':'int',
             'broadcast':'str',
     })
+    LacpduRateChoices = typing.TypedDict('LacpduRateChoices', {
+            'SLOW':'SLOW',
+            'FAST':'FAST',
+    })
     class SLOW(str,Enum):
         SLOW = 'SLOW'
         ...
     class FAST(str,Enum):
         FAST = 'FAST'
         ...
-    LacpduRateChoices = typing.TypedDict('LacpduRateChoices', {
-            'SLOW':'SLOW',
-            'FAST':'FAST',
-    })
     QueryOptions = typing.TypedDict('QueryOptions', {
             'relationships':'bool',
             'extend':'typing.Optional[str]',
@@ -669,147 +660,12 @@ class Interface(
             'limit':'int',
             'force_sql_filters':'bool',
     })
-    LagPorts_ = typing.TypedDict('LagPorts_', {
-            'name':'str',
-            'flags':'list[str]',
-    })
-    State_ = typing.TypedDict('State_', {
-            'name':'str',
-            'orig_name':'str',
-            'description':'str',
-            'mtu':'int',
-            'cloned':'bool',
-            'flags':'list[str]',
-            'nd6_flags':'list',
-            'capabilities':'list',
-            'link_state':'str',
-            'media_type':'str',
-            'media_subtype':'str',
-            'active_media_type':'str',
-            'active_media_subtype':'str',
-            'supported_media':'list',
-            'media_options':'typing.Optional[list]',
-            'link_address':'str',
-            'rx_queues':'int',
-            'tx_queues':'int',
-            'aliases':'list[Alias]',
-            'vrrp_config':'typing.Optional[list]',
-            'protocol':'typing.Optional[str]',
-            'ports':'list[LagPorts_]',
-            'xmit_hash_policy':'typing.Optional[str]',
-            'lacpdu_rate':'typing.Optional[str]',
-            'parent':'typing.Optional[str]',
-            'tag':'typing.Optional[int]',
-            'pcp':'typing.Optional[int]',
-    })
     InterfaceEntry = typing.TypedDict('InterfaceEntry', {
             'id':'str',
             'name':'str',
             'fake':'bool',
             'type':'str',
-            'state':'State_',
-            'aliases':'list[Alias_]',
-            'ipv4_dhcp':'bool',
-            'ipv6_auto':'bool',
-            'description':'str',
-            'mtu':'typing.Optional[int]',
-            'vlan_parent_interface':'typing.Optional[str]',
-            'vlan_tag':'typing.Optional[int]',
-            'vlan_pcp':'typing.Optional[int]',
-            'lag_protocol':'str',
-            'lag_ports':'list[str]',
-            'bridge_members':'list[str]',
-    })
-    LagPorts__ = typing.TypedDict('LagPorts__', {
-            'name':'str',
-            'flags':'list[str]',
-    })
-    State__ = typing.TypedDict('State__', {
-            'name':'str',
-            'orig_name':'str',
-            'description':'str',
-            'mtu':'int',
-            'cloned':'bool',
-            'flags':'list[str]',
-            'nd6_flags':'list',
-            'capabilities':'list',
-            'link_state':'str',
-            'media_type':'str',
-            'media_subtype':'str',
-            'active_media_type':'str',
-            'active_media_subtype':'str',
-            'supported_media':'list',
-            'media_options':'typing.Optional[list]',
-            'link_address':'str',
-            'rx_queues':'int',
-            'tx_queues':'int',
-            'aliases':'list[Alias]',
-            'vrrp_config':'typing.Optional[list]',
-            'protocol':'typing.Optional[str]',
-            'ports':'list[LagPorts__]',
-            'xmit_hash_policy':'typing.Optional[str]',
-            'lacpdu_rate':'typing.Optional[str]',
-            'parent':'typing.Optional[str]',
-            'tag':'typing.Optional[int]',
-            'pcp':'typing.Optional[int]',
-    })
-    InterfaceEntry_ = typing.TypedDict('InterfaceEntry_', {
-            'id':'str',
-            'name':'str',
-            'fake':'bool',
-            'type':'str',
-            'state':'State__',
-            'aliases':'list[Alias_]',
-            'ipv4_dhcp':'bool',
-            'ipv6_auto':'bool',
-            'description':'str',
-            'mtu':'typing.Optional[int]',
-            'vlan_parent_interface':'typing.Optional[str]',
-            'vlan_tag':'typing.Optional[int]',
-            'vlan_pcp':'typing.Optional[int]',
-            'lag_protocol':'str',
-            'lag_ports':'list[str]',
-            'bridge_members':'list[str]',
-    })
-    LagPorts___ = typing.TypedDict('LagPorts___', {
-            'name':'str',
-            'flags':'list[str]',
-    })
-    State___ = typing.TypedDict('State___', {
-            'name':'str',
-            'orig_name':'str',
-            'description':'str',
-            'mtu':'int',
-            'cloned':'bool',
-            'flags':'list[str]',
-            'nd6_flags':'list',
-            'capabilities':'list',
-            'link_state':'str',
-            'media_type':'str',
-            'media_subtype':'str',
-            'active_media_type':'str',
-            'active_media_subtype':'str',
-            'supported_media':'list',
-            'media_options':'typing.Optional[list]',
-            'link_address':'str',
-            'rx_queues':'int',
-            'tx_queues':'int',
-            'aliases':'list[Alias]',
-            'vrrp_config':'typing.Optional[list]',
-            'protocol':'typing.Optional[str]',
-            'ports':'list[LagPorts___]',
-            'xmit_hash_policy':'typing.Optional[str]',
-            'lacpdu_rate':'typing.Optional[str]',
-            'parent':'typing.Optional[str]',
-            'tag':'typing.Optional[int]',
-            'pcp':'typing.Optional[int]',
-    })
-    InterfaceEntry__ = typing.TypedDict('InterfaceEntry__', {
-            'id':'str',
-            'name':'str',
-            'fake':'bool',
-            'type':'str',
-            'state':'State___',
+            'state':'State',
             'aliases':'list[Alias_]',
             'ipv4_dhcp':'bool',
             'ipv6_auto':'bool',
@@ -841,53 +697,20 @@ class Interface(
             'bridge_members':'list',
             'stp':'bool',
             'lag_protocol':'LagProtocol',
-            'xmit_hash_policy':'typing.Optional[XmitHashPolicy]',
-            'lacpdu_rate':'typing.Optional[LacpduRate]',
+            'xmit_hash_policy':'typing.Optional[str]',
+            'lacpdu_rate':'typing.Optional[str]',
             'lag_ports':'list[str]',
             'vlan_parent_interface':'str',
             'vlan_tag':'int',
             'vlan_pcp':'typing.Optional[int]',
             'mtu':'typing.Optional[int]',
     })
-    LagPorts____ = typing.TypedDict('LagPorts____', {
-            'name':'str',
-            'flags':'list[str]',
-    })
-    State____ = typing.TypedDict('State____', {
-            'name':'str',
-            'orig_name':'str',
-            'description':'str',
-            'mtu':'int',
-            'cloned':'bool',
-            'flags':'list[str]',
-            'nd6_flags':'list',
-            'capabilities':'list',
-            'link_state':'str',
-            'media_type':'str',
-            'media_subtype':'str',
-            'active_media_type':'str',
-            'active_media_subtype':'str',
-            'supported_media':'list',
-            'media_options':'typing.Optional[list]',
-            'link_address':'str',
-            'rx_queues':'int',
-            'tx_queues':'int',
-            'aliases':'list[Alias]',
-            'vrrp_config':'typing.Optional[list]',
-            'protocol':'typing.Optional[str]',
-            'ports':'list[LagPorts____]',
-            'xmit_hash_policy':'typing.Optional[str]',
-            'lacpdu_rate':'typing.Optional[str]',
-            'parent':'typing.Optional[str]',
-            'tag':'typing.Optional[int]',
-            'pcp':'typing.Optional[int]',
-    })
     InterfaceUpdateReturns = typing.TypedDict('InterfaceUpdateReturns', {
             'id':'str',
             'name':'str',
             'fake':'bool',
             'type':'str',
-            'state':'State____',
+            'state':'State',
             'aliases':'list[Alias_]',
             'ipv4_dhcp':'bool',
             'ipv6_auto':'bool',
@@ -900,17 +723,17 @@ class Interface(
             'lag_ports':'list[str]',
             'bridge_members':'list[str]',
     })
+    XmitHashPolicyChoices = typing.TypedDict('XmitHashPolicyChoices', {
+            'LAYER2':'LAYER2',
+            'LAYER2+3':'LAYER2Plus3',
+            'LAYER3+4':'LAYER3Plus4',
+    })
     class LAYER2(str,Enum):
         LAYER2 = 'LAYER2'
         ...
-    class LAYER23(str,Enum):
-        LAYER23 = 'LAYER2+3'
+    class LAYER2Plus3(str,Enum):
+        LAYER2Plus3 = 'LAYER2+3'
         ...
-    class LAYER34(str,Enum):
-        LAYER34 = 'LAYER3+4'
+    class LAYER3Plus4(str,Enum):
+        LAYER3Plus4 = 'LAYER3+4'
         ...
-    XmitHashPolicyChoices = typing.TypedDict('XmitHashPolicyChoices', {
-            'LAYER2':'LAYER2',
-            'LAYER2+3':'LAYER23',
-            'LAYER3+4':'LAYER34',
-    })

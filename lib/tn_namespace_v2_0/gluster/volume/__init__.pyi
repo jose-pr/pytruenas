@@ -10,7 +10,7 @@ class GlusterVolume(
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload
     def create(self, 
-        glustervolume_create:'GlustervolumeCreate'={},
+        glustervolume_create:'GlustervolumeCreate',
     /) -> 'GlusterVolumeCreateReturns': 
         """
         Create a gluster volume.
@@ -65,7 +65,7 @@ class GlusterVolume(
     @typing.overload
     def get_instance(self, 
         id:'typing.Union[str, int, bool, dict[str], list]',
-        query_options_get_instance:'QueryOptionsGetInstance'={},
+        query_options_get_instance:'QueryOptionsGetInstance',
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -84,7 +84,7 @@ class GlusterVolume(
         ...
     @typing.overload
     def info(self, 
-        volume_info:'VolumeInfo'={},
+        volume_info:'VolumeInfo',
     /) -> 'list[Volume]': 
         """
         Return information about gluster volume(s).
@@ -117,7 +117,7 @@ class GlusterVolume(
         ...
     @typing.overload
     def optreset(self, 
-        volume_optreset:'VolumeOptreset'={},
+        volume_optreset:'VolumeOptreset',
     /) -> None: 
         """
         Reset volumes options.
@@ -138,7 +138,7 @@ class GlusterVolume(
         ...
     @typing.overload
     def optset(self, 
-        volume_optset:'VolumeOptset'={},
+        volume_optset:'VolumeOptset',
     /) -> None: 
         """
         Set gluster volume options.
@@ -161,8 +161,8 @@ class GlusterVolume(
         ...
     @typing.overload
     def query(self, 
-        query_filters:'list[list]'=[],
-        query_options:'QueryOptions'={},
+        query_filters:'list[list]',
+        query_options:'QueryOptions',
     /) -> 'typing.Union[list[GlusterVolumeEntry], GlusterVolumeEntry, int]': 
         """
         
@@ -181,7 +181,7 @@ class GlusterVolume(
         ...
     @typing.overload
     def quota(self, 
-        volume_quota:'VolumeQuota'={},
+        volume_quota:'VolumeQuota',
     /) -> None: 
         """
         Enable/Disable the quota for a given gluster volume.
@@ -202,7 +202,7 @@ class GlusterVolume(
         ...
     @typing.overload
     def restart(self, 
-        volume_restart:'VolumeRestart'={},
+        volume_restart:'VolumeRestart',
     /) -> None: 
         """
         Restart a gluster volume.
@@ -220,7 +220,7 @@ class GlusterVolume(
         ...
     @typing.overload
     def start(self, 
-        volume_start:'VolumeStart'={},
+        volume_start:'VolumeStart',
     /) -> None: 
         """
         Start a gluster volume.
@@ -241,7 +241,7 @@ class GlusterVolume(
         ...
     @typing.overload
     def status(self, 
-        volume_status:'VolumeStatus'={},
+        volume_status:'VolumeStatus',
     /) -> 'list[GlusterVolumeEntry]': 
         """
         Return detailed information about gluster volume.
@@ -261,7 +261,7 @@ class GlusterVolume(
         ...
     @typing.overload
     def stop(self, 
-        volume_stop:'VolumeStop'={},
+        volume_stop:'VolumeStop',
     /) -> None: 
         """
         Stop a gluster volume.
@@ -280,10 +280,6 @@ class GlusterVolume(
         -------
         """
         ...
-    Brick = typing.TypedDict('Brick', {
-            'peer_name':'str',
-            'peer_path':'str',
-    })
     GlustervolumeCreate = typing.TypedDict('GlustervolumeCreate', {
             'name':'str',
             'bricks':'list[Brick]',
@@ -294,9 +290,9 @@ class GlusterVolume(
             'redundancy':'int',
             'force':'bool',
     })
-    Ports = typing.TypedDict('Ports', {
-            'tcp':'str',
-            'rdma':'str',
+    Brick = typing.TypedDict('Brick', {
+            'peer_name':'str',
+            'peer_path':'str',
     })
     GlusterVolumeCreateReturns = typing.TypedDict('GlusterVolumeCreateReturns', {
             'name':'str',
@@ -315,6 +311,10 @@ class GlusterVolume(
             'block_size':'str',
             'mnt_options':'str',
             'fs_name':'str',
+    })
+    Ports = typing.TypedDict('Ports', {
+            'tcp':'str',
+            'rdma':'str',
     })
     QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
             'relationships':'bool',

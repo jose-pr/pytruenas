@@ -27,7 +27,7 @@ class Cloud_backup(
         ...
     @typing.overload
     def create(self, 
-        cloud_backup_create:'CloudBackupCreate'={},
+        cloud_backup_create:'CloudBackupCreate',
     /) -> 'dict[str]': 
         """
         
@@ -62,7 +62,7 @@ class Cloud_backup(
     @typing.overload
     def get_instance(self, 
         id:'typing.Union[str, int, bool, dict[str], list]',
-        query_options_get_instance:'QueryOptionsGetInstance'={},
+        query_options_get_instance:'QueryOptionsGetInstance',
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -96,9 +96,9 @@ class Cloud_backup(
         ...
     @typing.overload
     def query(self, 
-        query_filters:'list[list]'=[],
-        query_options:'QueryOptions'={},
-    /) -> 'typing.Union[list[dict[str]], dict[str], int]': 
+        query_filters:'list[list]',
+        query_options:'QueryOptions',
+    /) -> 'typing.Union[list, dict[str], int]': 
         """
         
 
@@ -110,14 +110,14 @@ class Cloud_backup(
             query-options
         Returns
         -------
-        typing.Union[list[dict[str]], dict[str], int]:
+        typing.Union[list, dict[str], int]:
             
         """
         ...
     @typing.overload
     def sync(self, 
         id:'int',
-        cloud_backup_sync_options:'CloudBackupSyncOptions'={},
+        cloud_backup_sync_options:'CloudBackupSyncOptions',
     /) -> None: 
         """
         Run the cloud backup job `id`.
@@ -135,7 +135,7 @@ class Cloud_backup(
     @typing.overload
     def update(self, 
         id:'int',
-        cloud_backup_update:'CloudBackupUpdate'={},
+        cloud_backup_update:'CloudBackupUpdate',
     /) -> 'dict[str]': 
         """
         Updates the cloud backup entry `id` with `data`.
@@ -152,17 +152,6 @@ class Cloud_backup(
             cloud_backup_update_returns
         """
         ...
-    Schedule = typing.TypedDict('Schedule', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
-    CloudSyncBwlimit = typing.TypedDict('CloudSyncBwlimit', {
-            'time':'str',
-            'bandwidth':'typing.Optional[int]',
-    })
     CloudBackupCreate = typing.TypedDict('CloudBackupCreate', {
             'description':'str',
             'path':'str',
@@ -179,6 +168,17 @@ class Cloud_backup(
             'args':'str',
             'enabled':'bool',
             'password':'str',
+    })
+    Schedule = typing.TypedDict('Schedule', {
+            'minute':'str',
+            'hour':'str',
+            'dom':'str',
+            'month':'str',
+            'dow':'str',
+    })
+    CloudSyncBwlimit = typing.TypedDict('CloudSyncBwlimit', {
+            'time':'str',
+            'bandwidth':'typing.Optional[int]',
     })
     QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
             'relationships':'bool',
@@ -211,10 +211,6 @@ class Cloud_backup(
     CloudBackupSyncOptions = typing.TypedDict('CloudBackupSyncOptions', {
             'dry_run':'bool',
     })
-    CloudSyncBwlimit_ = typing.TypedDict('CloudSyncBwlimit_', {
-            'time':'str',
-            'bandwidth':'typing.Optional[int]',
-    })
     CloudBackupUpdate = typing.TypedDict('CloudBackupUpdate', {
             'description':'str',
             'path':'str',
@@ -224,7 +220,7 @@ class Cloud_backup(
             'pre_script':'str',
             'post_script':'str',
             'snapshot':'bool',
-            'bwlimit':'list[CloudSyncBwlimit_]',
+            'bwlimit':'list[CloudSyncBwlimit]',
             'include':'list[str]',
             'exclude':'list[str]',
             'transfers':'typing.Optional[int]',

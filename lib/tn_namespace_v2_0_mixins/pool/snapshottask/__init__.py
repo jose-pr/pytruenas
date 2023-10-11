@@ -9,6 +9,17 @@ class PoolSnapshottask(TableExtMixin, Namespace):
     def __init__(self, client) -> None:
         super().__init__(client, 'pool.snapshottask')
 
+    PeriodicSnapshotCreate = typing.TypedDict('PeriodicSnapshotCreate', {
+            'dataset':'str',
+            'recursive':'bool',
+            'exclude':'list[str]',
+            'lifetime_value':'int',
+            'lifetime_unit':'LifetimeUnit',
+            'naming_schema':'str',
+            'schedule':'Schedule',
+            'allow_empty':'bool',
+            'enabled':'bool',
+    })
     class LifetimeUnit(str,Enum):
         HOUR = 'HOUR'
         DAY = 'DAY'
@@ -24,17 +35,6 @@ class PoolSnapshottask(TableExtMixin, Namespace):
             'dow':'str',
             'begin':'str',
             'end':'str',
-    })
-    PeriodicSnapshotCreate = typing.TypedDict('PeriodicSnapshotCreate', {
-            'dataset':'str',
-            'recursive':'bool',
-            'exclude':'list[str]',
-            'lifetime_value':'int',
-            'lifetime_unit':'LifetimeUnit',
-            'naming_schema':'str',
-            'schedule':'Schedule',
-            'allow_empty':'bool',
-            'enabled':'bool',
     })
     Options = typing.TypedDict('Options', {
             'fixate_removal_date':'bool',

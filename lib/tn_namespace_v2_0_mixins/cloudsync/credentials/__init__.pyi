@@ -12,7 +12,7 @@ class CloudsyncCredentials(
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload
     def create(self, 
-        cloud_sync_credentials_create:'CloudSyncCredentialsCreate'={},
+        cloud_sync_credentials_create:'CloudSyncCredentialsCreate',
     /) -> 'dict[str]': 
         """
         Create Cloud Sync Credentials.
@@ -49,7 +49,7 @@ class CloudsyncCredentials(
     @typing.overload
     def get_instance(self, 
         id:'typing.Union[str, int, bool, dict[str], list]',
-        query_options_get_instance:'QueryOptionsGetInstance'={},
+        query_options_get_instance:'QueryOptionsGetInstance',
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -68,9 +68,9 @@ class CloudsyncCredentials(
         ...
     @typing.overload
     def query(self, 
-        query_filters:'list[list]'=[],
-        query_options:'QueryOptions'={},
-    /) -> 'typing.Union[list[dict[str]], dict[str], int]': 
+        query_filters:'list[list]',
+        query_options:'QueryOptions',
+    /) -> 'typing.Union[list, dict[str], int]': 
         """
         
 
@@ -82,14 +82,14 @@ class CloudsyncCredentials(
             query-options
         Returns
         -------
-        typing.Union[list[dict[str]], dict[str], int]:
+        typing.Union[list, dict[str], int]:
             
         """
         ...
     @typing.overload
     def update(self, 
         id:'int',
-        cloud_sync_credentials_update:'CloudSyncCredentialsUpdate'={},
+        cloud_sync_credentials_update:'CloudSyncCredentialsUpdate',
     /) -> 'dict[str]': 
         """
         Update Cloud Sync Credentials of `id`.
@@ -109,7 +109,7 @@ class CloudsyncCredentials(
         ...
     @typing.overload
     def verify(self, 
-        cloud_sync_credentials_verify:'CloudSyncCredentialsVerify'={},
+        cloud_sync_credentials_verify:'CloudSyncCredentialsVerify',
     /) -> None: 
         """
         Verify if `attributes` provided for `provider` are authorized by the `provider`.
