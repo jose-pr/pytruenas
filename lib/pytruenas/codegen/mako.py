@@ -4,7 +4,7 @@ import typing as _ty
 from .._utils import MISSING
 from . import NamespaceCodegen as _NSCodegen, PythonNamespaceSignature
 
-_DEFAULT_TEMPLATE = _P(__file__).parent.parent / "namespace" / "_template.py.mako"
+_DEFAULT_TEMPLATE = _P(__file__).parent.parent / "namespace" / "ns_template.py.mako"
 
 
 class NamespaceCodegen(_NSCodegen):

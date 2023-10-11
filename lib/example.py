@@ -12,7 +12,7 @@ tn_creds = Credentials.from_env()
 client = TrueNASClient(tn_host, tn_creds, sslverify=False)
 
 from tn_namespace_v2_0 import Cronjob as _Cronjob, Auth
-from tn_namespace_v2_0_mixins import SystemAdvanced
+from tn_namespace_v2_0_mixins import SystemAdvanced, PoolDataset
 #
 # Extend automatic generated namespace with some methods for Map/list
 #
@@ -23,6 +23,7 @@ class Cronjob(TableExtMixin[_Cronjob.CronJobEntry], _Cronjob):
 
 sysadv = SystemAdvanced(client)
 config = sysadv.config()
+choices = PoolDataset(client).encryption_algorithm_choices()
 cronjobs = Cronjob(client)
 count = len(cronjobs)
 _cronjobs = cronjobs.query()
