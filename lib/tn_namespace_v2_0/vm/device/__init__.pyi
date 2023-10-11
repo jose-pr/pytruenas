@@ -310,30 +310,15 @@ class VmDevice(
         RAW = 'RAW'
         USB = 'USB'
         ...
-    class Ehci(str,Enum):
-        Ehci = 'ehci'
-        ...
-    class IOURING(str,Enum):
-        IOURING = 'IO_URING'
-        ...
-    class Ich9Ehci1(str,Enum):
-        Ich9Ehci1 = 'ich9-ehci1'
-        ...
     IommuGroup = typing.TypedDict('IommuGroup', {
             'number':'int',
             'addresses':'list[Address]',
     })
     IotypeChoices = typing.TypedDict('IotypeChoices', {
-            'NATIVE':'NATIVE',
-            'THREADS':'THREADS',
-            'IO_URING':'IOURING',
+            'NATIVE':'typing.Literal["NATIVE"]',
+            'THREADS':'typing.Literal["THREADS"]',
+            'IO_URING':'typing.Literal["IO_URING"]',
     })
-    class NATIVE(str,Enum):
-        NATIVE = 'NATIVE'
-        ...
-    class NecXhci(str,Enum):
-        NecXhci = 'nec-xhci'
-        ...
     PassthroughDevice = typing.TypedDict('PassthroughDevice', {
             'capability':'Capability',
             'controller_type':'typing.Optional[str]',
@@ -345,18 +330,6 @@ class VmDevice(
             'reset_mechanism_defined':'bool',
             'description':'str',
     })
-    class PciOhci(str,Enum):
-        PciOhci = 'pci-ohci'
-        ...
-    class Piix3Uhci(str,Enum):
-        Piix3Uhci = 'piix3-uhci'
-        ...
-    class Piix4Uhci(str,Enum):
-        Piix4Uhci = 'piix4-uhci'
-        ...
-    class QemuXhci(str,Enum):
-        QemuXhci = 'qemu-xhci'
-        ...
     QueryOptions = typing.TypedDict('QueryOptions', {
             'relationships':'bool',
             'extend':'typing.Optional[str]',
@@ -385,18 +358,15 @@ class VmDevice(
             'limit':'int',
             'force_sql_filters':'bool',
     })
-    class THREADS(str,Enum):
-        THREADS = 'THREADS'
-        ...
     UsbControllerChoices = typing.TypedDict('UsbControllerChoices', {
-            'piix3-uhci':'Piix3Uhci',
-            'piix4-uhci':'Piix4Uhci',
-            'ehci':'Ehci',
-            'ich9-ehci1':'Ich9Ehci1',
-            'vt82c686b-uhci':'Vt82c686bUhci',
-            'pci-ohci':'PciOhci',
-            'nec-xhci':'NecXhci',
-            'qemu-xhci':'QemuXhci',
+            'piix3-uhci':'typing.Literal["piix3-uhci"]',
+            'piix4-uhci':'typing.Literal["piix4-uhci"]',
+            'ehci':'typing.Literal["ehci"]',
+            'ich9-ehci1':'typing.Literal["ich9-ehci1"]',
+            'vt82c686b-uhci':'typing.Literal["vt82c686b-uhci"]',
+            'pci-ohci':'typing.Literal["pci-ohci"]',
+            'nec-xhci':'typing.Literal["nec-xhci"]',
+            'qemu-xhci':'typing.Literal["qemu-xhci"]',
     })
     UsbPassthroughDevice = typing.TypedDict('UsbPassthroughDevice', {
             'capability':'Capability_',
@@ -441,6 +411,3 @@ class VmDevice(
             'attributes':'dict[str]',
             'order':'typing.Optional[int]',
     })
-    class Vt82c686bUhci(str,Enum):
-        Vt82c686bUhci = 'vt82c686b-uhci'
-        ...

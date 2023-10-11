@@ -77,18 +77,6 @@ class SystemGeneral(ConfigMixin, Namespace):
             'ds_auth':'bool',
             'id':'int',
     })
-    class TLSv1(str,Enum):
-        TLSv1 = 'TLSv1'
-        ...
-    class TLSv11(str,Enum):
-        TLSv11 = 'TLSv1.1'
-        ...
-    class TLSv12(str,Enum):
-        TLSv12 = 'TLSv1.2'
-        ...
-    class TLSv13(str,Enum):
-        TLSv13 = 'TLSv1.3'
-        ...
     UiCertificate = typing.TypedDict('UiCertificate', {
             'id':'int',
             'type':'int',
@@ -145,10 +133,10 @@ class SystemGeneral(ConfigMixin, Namespace):
             'signed_certificates':'int',
     })
     UiHttpsProtocols = typing.TypedDict('UiHttpsProtocols', {
-            'TLSv1':'TLSv1',
-            'TLSv1.1':'TLSv11',
-            'TLSv1.2':'TLSv12',
-            'TLSv1.3':'TLSv13',
+            'TLSv1':'typing.Literal["TLSv1"]',
+            'TLSv1.1':'typing.Literal["TLSv1.1"]',
+            'TLSv1.2':'typing.Literal["TLSv1.2"]',
+            'TLSv1.3':'typing.Literal["TLSv1.3"]',
     })
     class UiXFrameOptions(str,Enum):
         SAMEORIGIN = 'SAMEORIGIN'

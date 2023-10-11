@@ -156,22 +156,13 @@ class Kmip(
             'server':'typing.Optional[str]',
             'ssl_version':'SslVersion',
     })
-    class PROTOCOLTLSv1(str,Enum):
-        PROTOCOLTLSv1 = 'PROTOCOL_TLSv1'
-        ...
-    class PROTOCOLTLSv11(str,Enum):
-        PROTOCOLTLSv11 = 'PROTOCOL_TLSv1_1'
-        ...
-    class PROTOCOLTLSv12(str,Enum):
-        PROTOCOLTLSv12 = 'PROTOCOL_TLSv1_2'
-        ...
     class SslVersion(str,Enum):
         PROTOCOLTLSv1 = 'PROTOCOL_TLSv1'
         PROTOCOLTLSv11 = 'PROTOCOL_TLSv1_1'
         PROTOCOLTLSv12 = 'PROTOCOL_TLSv1_2'
         ...
     SslVersionChoices = typing.TypedDict('SslVersionChoices', {
-            'PROTOCOL_TLSv1':'PROTOCOLTLSv1',
-            'PROTOCOL_TLSv1_1':'PROTOCOLTLSv11',
-            'PROTOCOL_TLSv1_2':'PROTOCOLTLSv12',
+            'PROTOCOL_TLSv1':'typing.Literal["PROTOCOL_TLSv1"]',
+            'PROTOCOL_TLSv1_1':'typing.Literal["PROTOCOL_TLSv1_1"]',
+            'PROTOCOL_TLSv1_2':'typing.Literal["PROTOCOL_TLSv1_2"]',
     })

@@ -218,9 +218,6 @@ class ChartRelease(Namespace):
             'history':'dict[str]',
             'resources':'Resources',
     })
-    class DEPLOYMENT(str,Enum):
-        DEPLOYMENT = 'DEPLOYMENT'
-        ...
     Event = typing.TypedDict('Event', {
             'involvedObject':'InvolvedObject',
             'metadata':'Metadata',
@@ -312,9 +309,6 @@ class ChartRelease(Namespace):
             'rollback_snapshot':'bool',
             'item_version':'str',
     })
-    class STATEFULSET(str,Enum):
-        STATEFULSET = 'STATEFULSET'
-        ...
     ScaleChartRelease = typing.TypedDict('ScaleChartRelease', {
             'before_scale':'BeforeScale',
             'after_scale':'AfterScale',
@@ -328,8 +322,8 @@ class ChartRelease(Namespace):
             'name':'str',
     })
     ScaleableResources = typing.TypedDict('ScaleableResources', {
-            'DEPLOYMENT':'DEPLOYMENT',
-            'STATEFULSET':'STATEFULSET',
+            'DEPLOYMENT':'typing.Literal["DEPLOYMENT"]',
+            'STATEFULSET':'typing.Literal["STATEFULSET"]',
     })
     class Status(str,Enum):
         ACTIVE = 'ACTIVE'

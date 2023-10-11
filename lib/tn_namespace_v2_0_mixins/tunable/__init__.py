@@ -37,9 +37,6 @@ class Tunable(TableExtMixin, Namespace):
             'limit':'int',
             'force_sql_filters':'bool',
     })
-    class SYSCTL(str,Enum):
-        SYSCTL = 'SYSCTL'
-        ...
     TunableCreate = typing.TypedDict('TunableCreate', {
             'type':'Type',
             'var':'str',
@@ -67,9 +64,9 @@ class Tunable(TableExtMixin, Namespace):
             'id':'int',
     })
     TunableTypeChoices = typing.TypedDict('TunableTypeChoices', {
-            'SYSCTL':'SYSCTL',
-            'UDEV':'UDEV',
-            'ZFS':'ZFS',
+            'SYSCTL':'typing.Literal["SYSCTL"]',
+            'UDEV':'typing.Literal["UDEV"]',
+            'ZFS':'typing.Literal["ZFS"]',
     })
     TunableUpdate = typing.TypedDict('TunableUpdate', {
             'value':'str',
@@ -89,11 +86,5 @@ class Tunable(TableExtMixin, Namespace):
     class Type(str,Enum):
         SYSCTL = 'SYSCTL'
         UDEV = 'UDEV'
-        ZFS = 'ZFS'
-        ...
-    class UDEV(str,Enum):
-        UDEV = 'UDEV'
-        ...
-    class ZFS(str,Enum):
         ZFS = 'ZFS'
         ...

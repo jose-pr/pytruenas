@@ -222,7 +222,7 @@ class Certificateauthority(
             'add_to_trusted_store':'bool',
             'ca_id':'int',
             'csr_cert_id':'int',
-            'create_type':'CreateType_',
+            'create_type':'typing.Literal["CA_SIGN_CSR"]',
             'name':'str',
     })
     CertExtensions = typing.TypedDict('CertExtensions', {
@@ -467,9 +467,6 @@ class Certificateauthority(
         CACREATEINTERNAL = 'CA_CREATE_INTERNAL'
         CACREATEIMPORTED = 'CA_CREATE_IMPORTED'
         CACREATEINTERMEDIATE = 'CA_CREATE_INTERMEDIATE'
-        ...
-    class CreateType_(str,Enum):
-        CASIGNCSR = 'CA_SIGN_CSR'
         ...
     class DigestAlgorithm(str,Enum):
         SHA224 = 'SHA224'

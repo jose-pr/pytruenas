@@ -32,7 +32,7 @@ class Pool(TableExtMixin, Namespace):
         OFF = 'OFF'
         ...
     Cachevdevs = typing.TypedDict('Cachevdevs', {
-            'type':'Type__',
+            'type':'typing.Literal["STRIPE"]',
             'disks':'list[str]',
     })
     Datavdevs = typing.TypedDict('Datavdevs', {
@@ -53,7 +53,7 @@ class Pool(TableExtMixin, Namespace):
             'key':'typing.Optional[str]',
     })
     Logvdevs = typing.TypedDict('Logvdevs', {
-            'type':'Type___',
+            'type':'Type__',
             'disks':'list[str]',
     })
     Options = typing.TypedDict('Options', {
@@ -242,12 +242,9 @@ class Pool(TableExtMixin, Namespace):
         ...
     class Type__(str,Enum):
         STRIPE = 'STRIPE'
-        ...
-    class Type___(str,Enum):
-        STRIPE = 'STRIPE'
         MIRROR = 'MIRROR'
         ...
-    class Type____(str,Enum):
+    class Type___(str,Enum):
         FILESYSTEM = 'FILESYSTEM'
         VOLUME = 'VOLUME'
         ...
