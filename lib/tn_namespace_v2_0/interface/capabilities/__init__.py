@@ -13,12 +13,12 @@ class InterfaceCapabilities(Namespace):
             'disabled':'list[str]',
             'supported':'list[str]',
     })
-    class Action(str,Enum):
-        ENABLE = 'ENABLE'
-        DISABLE = 'DISABLE'
-        ...
     CapabilitiesSet = typing.TypedDict('CapabilitiesSet', {
             'name':'str',
             'capabilties':'list',
             'action':'Action',
     })
+    class Action(str,Enum):
+        ENABLE = 'ENABLE'
+        DISABLE = 'DISABLE'
+        ...

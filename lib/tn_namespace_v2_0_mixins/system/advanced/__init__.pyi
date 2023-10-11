@@ -82,7 +82,7 @@ class SystemAdvanced(
         ...
     @typing.overload
     def update(self, 
-        system_advanced_update:'SystemAdvancedUpdate'={},
+        system_advanced_update:'SystemAdvancedUpdate',
     /) -> 'SystemAdvancedUpdateReturns': 
         """
         Update System Advanced Service Configuration.
@@ -125,32 +125,6 @@ class SystemAdvanced(
         -------
         """
         ...
-    class Serialspeed(str,Enum):
-        _9600 = '9600'
-        _19200 = '19200'
-        _38400 = '38400'
-        _57600 = '57600'
-        _115200 = '115200'
-        ...
-    class SedUser(str,Enum):
-        USER = 'USER'
-        MASTER = 'MASTER'
-        ...
-    class Sysloglevel(str,Enum):
-        FEMERG = 'F_EMERG'
-        FALERT = 'F_ALERT'
-        FCRIT = 'F_CRIT'
-        FERR = 'F_ERR'
-        FWARNING = 'F_WARNING'
-        FNOTICE = 'F_NOTICE'
-        FINFO = 'F_INFO'
-        FDEBUG = 'F_DEBUG'
-        ...
-    class SyslogTransport(str,Enum):
-        UDP = 'UDP'
-        TCP = 'TCP'
-        TLS = 'TLS'
-        ...
     SystemAdvancedEntry = typing.TypedDict('SystemAdvancedEntry', {
             'advancedmode':'bool',
             'autotune':'bool',
@@ -181,6 +155,32 @@ class SystemAdvanced(
             'kernel_extra_options':'str',
             'id':'int',
     })
+    class Serialspeed(str,Enum):
+        _9600 = '9600'
+        _19200 = '19200'
+        _38400 = '38400'
+        _57600 = '57600'
+        _115200 = '115200'
+        ...
+    class SedUser(str,Enum):
+        USER = 'USER'
+        MASTER = 'MASTER'
+        ...
+    class Sysloglevel(str,Enum):
+        FEMERG = 'F_EMERG'
+        FALERT = 'F_ALERT'
+        FCRIT = 'F_CRIT'
+        FERR = 'F_ERR'
+        FWARNING = 'F_WARNING'
+        FNOTICE = 'F_NOTICE'
+        FINFO = 'F_INFO'
+        FDEBUG = 'F_DEBUG'
+        ...
+    class SyslogTransport(str,Enum):
+        UDP = 'UDP'
+        TCP = 'TCP'
+        TLS = 'TLS'
+        ...
     SystemAdvancedUpdate = typing.TypedDict('SystemAdvancedUpdate', {
             'advancedmode':'bool',
             'autotune':'bool',

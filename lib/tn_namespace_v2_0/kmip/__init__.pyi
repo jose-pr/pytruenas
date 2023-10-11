@@ -80,7 +80,7 @@ class Kmip(
         ...
     @typing.overload
     def update(self, 
-        kmip_update:'KmipUpdate'={},
+        kmip_update:'KmipUpdate',
     /) -> 'KmipUpdateReturns': 
         """
         Update KMIP Server Configuration.
@@ -119,11 +119,6 @@ class Kmip(
             kmip_update_returns
         """
         ...
-    class SslVersion(str,Enum):
-        PROTOCOLTLSv1 = 'PROTOCOL_TLSv1'
-        PROTOCOLTLSv11 = 'PROTOCOL_TLSv1_1'
-        PROTOCOLTLSv12 = 'PROTOCOL_TLSv1_2'
-        ...
     KmipEntry = typing.TypedDict('KmipEntry', {
             'id':'int',
             'enabled':'bool',
@@ -135,6 +130,16 @@ class Kmip(
             'server':'typing.Optional[str]',
             'ssl_version':'SslVersion',
     })
+    class SslVersion(str,Enum):
+        PROTOCOLTLSv1 = 'PROTOCOL_TLSv1'
+        PROTOCOLTLSv11 = 'PROTOCOL_TLSv1_1'
+        PROTOCOLTLSv12 = 'PROTOCOL_TLSv1_2'
+        ...
+    SslVersionChoices = typing.TypedDict('SslVersionChoices', {
+            'PROTOCOL_TLSv1':'PROTOCOLTLSv1',
+            'PROTOCOL_TLSv1_1':'PROTOCOLTLSv11',
+            'PROTOCOL_TLSv1_2':'PROTOCOLTLSv12',
+    })
     class PROTOCOLTLSv1(str,Enum):
         PROTOCOLTLSv1 = 'PROTOCOL_TLSv1'
         ...
@@ -144,11 +149,6 @@ class Kmip(
     class PROTOCOLTLSv12(str,Enum):
         PROTOCOLTLSv12 = 'PROTOCOL_TLSv1_2'
         ...
-    SslVersionChoices = typing.TypedDict('SslVersionChoices', {
-            'PROTOCOL_TLSv1':'PROTOCOLTLSv1',
-            'PROTOCOL_TLSv1_1':'PROTOCOLTLSv11',
-            'PROTOCOL_TLSv1_2':'PROTOCOLTLSv12',
-    })
     KmipUpdate = typing.TypedDict('KmipUpdate', {
             'enabled':'bool',
             'manage_sed_disks':'bool',

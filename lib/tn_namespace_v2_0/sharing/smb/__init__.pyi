@@ -10,7 +10,7 @@ class SharingSmb(
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload
     def create(self, 
-        sharingsmb_create:'SharingsmbCreate'={},
+        sharingsmb_create:'SharingsmbCreate',
     /) -> 'dict[str]': 
         """
         Create a SMB Share.
@@ -74,7 +74,7 @@ class SharingSmb(
     @typing.overload
     def get_instance(self, 
         id:'typing.Union[str, int, bool, dict[str], list]',
-        query_options_get_instance:'QueryOptionsGetInstance'={},
+        query_options_get_instance:'QueryOptionsGetInstance',
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -93,7 +93,7 @@ class SharingSmb(
         ...
     @typing.overload
     def getacl(self, 
-        smb_getacl:'SmbGetacl'={},
+        smb_getacl:'SmbGetacl',
     /) -> 'SmbShareAcl': 
         """
         
@@ -123,9 +123,9 @@ class SharingSmb(
         ...
     @typing.overload
     def query(self, 
-        query_filters:'list[list]'=[],
-        query_options:'QueryOptions'={},
-    /) -> 'typing.Union[list[dict[str]], dict[str], int]': 
+        query_filters:'list[list]',
+        query_options:'QueryOptions',
+    /) -> 'typing.Union[list, dict[str], int]': 
         """
         Query shares with filters. In clustered environments, local datastore query
         is bypassed in favor of clustered registry.
@@ -138,14 +138,14 @@ class SharingSmb(
             query-options
         Returns
         -------
-        typing.Union[list[dict[str]], dict[str], int]:
+        typing.Union[list, dict[str], int]:
             
         """
         ...
     @typing.overload
     def setacl(self, 
-        smb_share_acl:'SmbShareAcl_'={},
-    /) -> 'SmbShareAcl__': 
+        smb_share_acl:'SmbShareAcl',
+    /) -> 'SmbShareAcl': 
         """
         Set an ACL on `share_name`. This only impacts access through the SMB protocol.
         Either ae_who_sid, ae_who_id must, ae_who_str be specified for each ACL entry in the
@@ -173,14 +173,14 @@ class SharingSmb(
             smb_share_acl
         Returns
         -------
-        SmbShareAcl__:
+        SmbShareAcl:
             smb_share_acl
         """
         ...
     @typing.overload
     def update(self, 
         id:'int',
-        sharingsmb_update:'SharingsmbUpdate'={},
+        sharingsmb_update:'SharingsmbUpdate',
     /) -> 'dict[str]': 
         """
         Update SMB Share of `id`.
@@ -197,17 +197,6 @@ class SharingSmb(
         dict[str]:
             sharing_smb_update_returns
         """
-        ...
-    class Purpose(str,Enum):
-        NOPRESET = 'NO_PRESET'
-        DEFAULTCLUSTERSHARE = 'DEFAULT_CLUSTER_SHARE'
-        DEFAULTSHARE = 'DEFAULT_SHARE'
-        TIMEMACHINE = 'TIMEMACHINE'
-        ENHANCEDTIMEMACHINE = 'ENHANCED_TIMEMACHINE'
-        MULTIPROTOCOLNFS = 'MULTI_PROTOCOL_NFS'
-        PRIVATEDATASETS = 'PRIVATE_DATASETS'
-        READONLY = 'READ_ONLY'
-        WORMDROPBOX = 'WORM_DROPBOX'
         ...
     SharingsmbCreate = typing.TypedDict('SharingsmbCreate', {
             'purpose':'Purpose',
@@ -236,6 +225,17 @@ class SharingSmb(
             'cluster_volname':'str',
             'afp':'bool',
     })
+    class Purpose(str,Enum):
+        NOPRESET = 'NO_PRESET'
+        DEFAULTCLUSTERSHARE = 'DEFAULT_CLUSTER_SHARE'
+        DEFAULTSHARE = 'DEFAULT_SHARE'
+        TIMEMACHINE = 'TIMEMACHINE'
+        ENHANCEDTIMEMACHINE = 'ENHANCED_TIMEMACHINE'
+        MULTIPROTOCOLNFS = 'MULTI_PROTOCOL_NFS'
+        PRIVATEDATASETS = 'PRIVATE_DATASETS'
+        READONLY = 'READ_ONLY'
+        WORMDROPBOX = 'WORM_DROPBOX'
+        ...
     QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
             'relationships':'bool',
             'extend':'typing.Optional[str]',
@@ -253,15 +253,25 @@ class SharingSmb(
     SmbGetacl = typing.TypedDict('SmbGetacl', {
             'share_name':'str',
     })
+    SmbShareAcl = typing.TypedDict('SmbShareAcl', {
+            'share_name':'str',
+            'share_acl':'list[Aclentry]',
+    })
+    Aclentry = typing.TypedDict('Aclentry', {
+            'ae_who_sid':'str',
+            'ae_who_id':'AeWhoId',
+            'ae_perm':'AePerm',
+            'ae_type':'AeType',
+    })
+    AeWhoId = typing.TypedDict('AeWhoId', {
+            'id_type':'IdType',
+            'id':'int',
+    })
     class IdType(str,Enum):
         USER = 'USER'
         GROUP = 'GROUP'
         BOTH = 'BOTH'
         ...
-    AeWhoId = typing.TypedDict('AeWhoId', {
-            'id_type':'IdType',
-            'id':'int',
-    })
     class AePerm(str,Enum):
         FULL = 'FULL'
         CHANGE = 'CHANGE'
@@ -271,16 +281,6 @@ class SharingSmb(
         ALLOWED = 'ALLOWED'
         DENIED = 'DENIED'
         ...
-    Aclentry = typing.TypedDict('Aclentry', {
-            'ae_who_sid':'str',
-            'ae_who_id':'AeWhoId',
-            'ae_perm':'AePerm',
-            'ae_type':'AeType',
-    })
-    SmbShareAcl = typing.TypedDict('SmbShareAcl', {
-            'share_name':'str',
-            'share_acl':'list[Aclentry]',
-    })
     QueryOptions = typing.TypedDict('QueryOptions', {
             'relationships':'bool',
             'extend':'typing.Optional[str]',
@@ -294,14 +294,6 @@ class SharingSmb(
             'offset':'int',
             'limit':'int',
             'force_sql_filters':'bool',
-    })
-    SmbShareAcl_ = typing.TypedDict('SmbShareAcl_', {
-            'share_name':'str',
-            'share_acl':'list[Aclentry]',
-    })
-    SmbShareAcl__ = typing.TypedDict('SmbShareAcl__', {
-            'share_name':'str',
-            'share_acl':'list[Aclentry]',
     })
     SharingsmbUpdate = typing.TypedDict('SharingsmbUpdate', {
             'purpose':'Purpose',

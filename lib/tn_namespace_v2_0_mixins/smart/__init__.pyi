@@ -26,7 +26,7 @@ class Smart(
         ...
     @typing.overload
     def update(self, 
-        smart_update:'SmartUpdate'={},
+        smart_update:'SmartUpdate',
     /) -> 'SmartUpdateReturns': 
         """
         Update SMART Service Configuration.
@@ -48,12 +48,6 @@ class Smart(
             smart_update_returns
         """
         ...
-    class Powermode(str,Enum):
-        NEVER = 'NEVER'
-        SLEEP = 'SLEEP'
-        STANDBY = 'STANDBY'
-        IDLE = 'IDLE'
-        ...
     SmartEntry = typing.TypedDict('SmartEntry', {
             'interval':'int',
             'id':'int',
@@ -62,6 +56,12 @@ class Smart(
             'informational':'int',
             'critical':'int',
     })
+    class Powermode(str,Enum):
+        NEVER = 'NEVER'
+        SLEEP = 'SLEEP'
+        STANDBY = 'STANDBY'
+        IDLE = 'IDLE'
+        ...
     SmartUpdate = typing.TypedDict('SmartUpdate', {
             'interval':'int',
             'powermode':'Powermode',

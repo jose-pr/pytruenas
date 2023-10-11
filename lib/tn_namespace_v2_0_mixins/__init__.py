@@ -58,7 +58,7 @@ from .ipmi.sel import IpmiSel
 from .ipmi.sensors import IpmiSensors
 from .iscsi.auth import IscsiAuth
 from .iscsi.extent import IscsiExtent
-from .iscsi.global_ import IscsiGlobal_
+from .iscsi.global_ import IscsiGlobal
 from .iscsi.host import IscsiHost
 from .iscsi.initiator import IscsiInitiator
 from .iscsi.portal import IscsiPortal

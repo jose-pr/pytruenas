@@ -53,14 +53,21 @@ class Directoryservices(
             directory_services_states
         """
         ...
-    class DirectoryserviceState(str,Enum):
+    DirectoryServicesStates = typing.TypedDict('DirectoryServicesStates', {
+            'activedirectory':'Activedirectory',
+            'ldap':'Ldap',
+    })
+    class Activedirectory(str,Enum):
         DISABLED = 'DISABLED'
         FAULTED = 'FAULTED'
         LEAVING = 'LEAVING'
         JOINING = 'JOINING'
         HEALTHY = 'HEALTHY'
         ...
-    DirectoryServicesStates = typing.TypedDict('DirectoryServicesStates', {
-            'activedirectory':'DirectoryserviceState',
-            'ldap':'DirectoryserviceState',
-    })
+    class Ldap(str,Enum):
+        DISABLED = 'DISABLED'
+        FAULTED = 'FAULTED'
+        LEAVING = 'LEAVING'
+        JOINING = 'JOINING'
+        HEALTHY = 'HEALTHY'
+        ...

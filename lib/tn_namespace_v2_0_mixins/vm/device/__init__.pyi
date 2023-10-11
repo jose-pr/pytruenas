@@ -26,7 +26,7 @@ class VmDevice(
         ...
     @typing.overload
     def create(self, 
-        vmdevice_create:'VmdeviceCreate'={},
+        vmdevice_create:'VmdeviceCreate',
     /) -> 'VmDeviceCreateReturns': 
         """
         Create a new device for the VM of id `vm`.
@@ -50,7 +50,7 @@ class VmDevice(
     @typing.overload
     def delete(self, 
         id:'int',
-        vm_device_delete:'VmDeviceDelete'={},
+        vm_device_delete:'VmDeviceDelete',
     /) -> 'bool': 
         """
         Delete a VM device of `id`.
@@ -89,7 +89,7 @@ class VmDevice(
     @typing.overload
     def get_instance(self, 
         id:'typing.Union[str, int, bool, dict[str], list]',
-        query_options_get_instance:'QueryOptionsGetInstance'={},
+        query_options_get_instance:'QueryOptionsGetInstance',
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -167,7 +167,7 @@ class VmDevice(
         ...
     @typing.overload
     def passthrough_device_choices(self, 
-    /) -> 'list[PassthroughDevice_]': 
+    /) -> 'list[PassthroughDevice]': 
         """
         Available choices for PCI passthru devices
 
@@ -175,13 +175,13 @@ class VmDevice(
         ----------
         Returns
         -------
-        list[PassthroughDevice_]:
+        list[PassthroughDevice]:
             passthrough_device_choices
         """
         ...
     @typing.overload
     def pptdev_choices(self, 
-    /) -> 'list[PassthroughDevice__]': 
+    /) -> 'list[PassthroughDevice]': 
         """
         Available choices for PCI passthru device
 
@@ -189,15 +189,15 @@ class VmDevice(
         ----------
         Returns
         -------
-        list[PassthroughDevice__]:
+        list[PassthroughDevice]:
             passthrough_device_choices
         """
         ...
     @typing.overload
     def query(self, 
-        query_filters:'list[list]'=[],
-        query_options:'QueryOptions'={},
-    /) -> 'typing.Union[list[VmDeviceEntry], VmDeviceEntry_, int, VmDeviceEntry__]': 
+        query_filters:'list[list]',
+        query_options:'QueryOptions',
+    /) -> 'typing.Union[list[VmDeviceEntry], VmDeviceEntry, int]': 
         """
         
 
@@ -209,14 +209,14 @@ class VmDevice(
             query-options
         Returns
         -------
-        typing.Union[list[VmDeviceEntry], VmDeviceEntry_, int, VmDeviceEntry__]:
+        typing.Union[list[VmDeviceEntry], VmDeviceEntry, int]:
             
         """
         ...
     @typing.overload
     def update(self, 
         id:'int',
-        vm_device_update:'VmDeviceUpdate'={},
+        vm_device_update:'VmDeviceUpdate',
     /) -> 'VmDeviceUpdateReturns': 
         """
         Update a VM device of `id`.
@@ -266,7 +266,7 @@ class VmDevice(
     @typing.overload
     def usb_passthrough_device(self, 
         device:'str',
-    /) -> 'UsbPassthroughDevice_': 
+    /) -> 'UsbPassthroughDevice': 
         """
         Retrieve details about `device` USB device.
 
@@ -276,10 +276,16 @@ class VmDevice(
             device
         Returns
         -------
-        UsbPassthroughDevice_:
+        UsbPassthroughDevice:
             usb_passthrough_device
         """
         ...
+    VmdeviceCreate = typing.TypedDict('VmdeviceCreate', {
+            'dtype':'Dtype',
+            'vm':'int',
+            'attributes':'dict[str]',
+            'order':'typing.Optional[int]',
+    })
     class Dtype(str,Enum):
         NIC = 'NIC'
         DISK = 'DISK'
@@ -289,12 +295,6 @@ class VmDevice(
         RAW = 'RAW'
         USB = 'USB'
         ...
-    VmdeviceCreate = typing.TypedDict('VmdeviceCreate', {
-            'dtype':'Dtype',
-            'vm':'int',
-            'attributes':'dict[str]',
-            'order':'typing.Optional[int]',
-    })
     VmDeviceCreateReturns = typing.TypedDict('VmDeviceCreateReturns', {
             'dtype':'Dtype',
             'vm':'int',
@@ -321,6 +321,11 @@ class VmDevice(
             'limit':'int',
             'force_sql_filters':'bool',
     })
+    IotypeChoices = typing.TypedDict('IotypeChoices', {
+            'NATIVE':'NATIVE',
+            'THREADS':'THREADS',
+            'IO_URING':'IOURING',
+    })
     class NATIVE(str,Enum):
         NATIVE = 'NATIVE'
         ...
@@ -330,30 +335,6 @@ class VmDevice(
     class IOURING(str,Enum):
         IOURING = 'IO_URING'
         ...
-    IotypeChoices = typing.TypedDict('IotypeChoices', {
-            'NATIVE':'NATIVE',
-            'THREADS':'THREADS',
-            'IO_URING':'IOURING',
-    })
-    Capability = typing.TypedDict('Capability', {
-            'class':'typing.Optional[str]',
-            'domain':'typing.Optional[str]',
-            'bus':'typing.Optional[str]',
-            'slot':'typing.Optional[str]',
-            'function':'typing.Optional[str]',
-            'product':'typing.Optional[str]',
-            'vendor':'typing.Optional[str]',
-    })
-    Address = typing.TypedDict('Address', {
-            'domain':'str',
-            'bus':'str',
-            'slot':'str',
-            'function':'str',
-    })
-    IommuGroup = typing.TypedDict('IommuGroup', {
-            'number':'int',
-            'addresses':'list[Address]',
-    })
     PassthroughDevice = typing.TypedDict('PassthroughDevice', {
             'capability':'Capability',
             'controller_type':'typing.Optional[str]',
@@ -365,7 +346,7 @@ class VmDevice(
             'reset_mechanism_defined':'bool',
             'description':'str',
     })
-    Capability_ = typing.TypedDict('Capability_', {
+    Capability = typing.TypedDict('Capability', {
             'class':'typing.Optional[str]',
             'domain':'typing.Optional[str]',
             'bus':'typing.Optional[str]',
@@ -374,44 +355,15 @@ class VmDevice(
             'product':'typing.Optional[str]',
             'vendor':'typing.Optional[str]',
     })
-    IommuGroup_ = typing.TypedDict('IommuGroup_', {
+    IommuGroup = typing.TypedDict('IommuGroup', {
             'number':'int',
             'addresses':'list[Address]',
     })
-    PassthroughDevice_ = typing.TypedDict('PassthroughDevice_', {
-            'capability':'Capability_',
-            'controller_type':'typing.Optional[str]',
-            'iommu_group':'IommuGroup_',
-            'available':'bool',
-            'drivers':'list[str]',
-            'error':'typing.Optional[str]',
-            'device_path':'typing.Optional[str]',
-            'reset_mechanism_defined':'bool',
-            'description':'str',
-    })
-    Capability__ = typing.TypedDict('Capability__', {
-            'class':'typing.Optional[str]',
-            'domain':'typing.Optional[str]',
-            'bus':'typing.Optional[str]',
-            'slot':'typing.Optional[str]',
-            'function':'typing.Optional[str]',
-            'product':'typing.Optional[str]',
-            'vendor':'typing.Optional[str]',
-    })
-    IommuGroup__ = typing.TypedDict('IommuGroup__', {
-            'number':'int',
-            'addresses':'list[Address]',
-    })
-    PassthroughDevice__ = typing.TypedDict('PassthroughDevice__', {
-            'capability':'Capability__',
-            'controller_type':'typing.Optional[str]',
-            'iommu_group':'IommuGroup__',
-            'available':'bool',
-            'drivers':'list[str]',
-            'error':'typing.Optional[str]',
-            'device_path':'typing.Optional[str]',
-            'reset_mechanism_defined':'bool',
-            'description':'str',
+    Address = typing.TypedDict('Address', {
+            'domain':'str',
+            'bus':'str',
+            'slot':'str',
+            'function':'str',
     })
     QueryOptions = typing.TypedDict('QueryOptions', {
             'relationships':'bool',
@@ -434,20 +386,6 @@ class VmDevice(
             'order':'typing.Optional[int]',
             'id':'int',
     })
-    VmDeviceEntry_ = typing.TypedDict('VmDeviceEntry_', {
-            'dtype':'Dtype',
-            'vm':'int',
-            'attributes':'dict[str]',
-            'order':'typing.Optional[int]',
-            'id':'int',
-    })
-    VmDeviceEntry__ = typing.TypedDict('VmDeviceEntry__', {
-            'dtype':'Dtype',
-            'vm':'int',
-            'attributes':'dict[str]',
-            'order':'typing.Optional[int]',
-            'id':'int',
-    })
     VmDeviceUpdate = typing.TypedDict('VmDeviceUpdate', {
             'dtype':'Dtype',
             'vm':'int',
@@ -460,6 +398,16 @@ class VmDevice(
             'attributes':'dict[str]',
             'order':'typing.Optional[int]',
             'id':'int',
+    })
+    UsbControllerChoices = typing.TypedDict('UsbControllerChoices', {
+            'piix3-uhci':'Piix3Uhci',
+            'piix4-uhci':'Piix4Uhci',
+            'ehci':'Ehci',
+            'ich9-ehci1':'Ich9Ehci1',
+            'vt82c686b-uhci':'Vt82c686bUhci',
+            'pci-ohci':'PciOhci',
+            'nec-xhci':'NecXhci',
+            'qemu-xhci':'QemuXhci',
     })
     class Piix3Uhci(str,Enum):
         Piix3Uhci = 'piix3-uhci'
@@ -485,39 +433,16 @@ class VmDevice(
     class QemuXhci(str,Enum):
         QemuXhci = 'qemu-xhci'
         ...
-    UsbControllerChoices = typing.TypedDict('UsbControllerChoices', {
-            'piix3-uhci':'Piix3Uhci',
-            'piix4-uhci':'Piix4Uhci',
-            'ehci':'Ehci',
-            'ich9-ehci1':'Ich9Ehci1',
-            'vt82c686b-uhci':'Vt82c686bUhci',
-            'pci-ohci':'PciOhci',
-            'nec-xhci':'NecXhci',
-            'qemu-xhci':'QemuXhci',
-    })
-    Capability___ = typing.TypedDict('Capability___', {
-            'product':'typing.Optional[str]',
-            'product_id':'typing.Optional[str]',
-            'vendor':'typing.Optional[str]',
-            'vendor_id':'typing.Optional[str]',
-            'bus':'typing.Optional[str]',
-            'device':'typing.Optional[str]',
-    })
     UsbPassthroughDevice = typing.TypedDict('UsbPassthroughDevice', {
-            'capability':'Capability___',
+            'capability':'Capability_',
             'available':'bool',
             'error':'typing.Optional[str]',
     })
-    Capability____ = typing.TypedDict('Capability____', {
+    Capability_ = typing.TypedDict('Capability_', {
             'product':'typing.Optional[str]',
             'product_id':'typing.Optional[str]',
             'vendor':'typing.Optional[str]',
             'vendor_id':'typing.Optional[str]',
             'bus':'typing.Optional[str]',
             'device':'typing.Optional[str]',
-    })
-    UsbPassthroughDevice_ = typing.TypedDict('UsbPassthroughDevice_', {
-            'capability':'Capability____',
-            'available':'bool',
-            'error':'typing.Optional[str]',
     })

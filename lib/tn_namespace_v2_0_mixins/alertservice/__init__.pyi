@@ -12,7 +12,7 @@ class Alertservice(
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload
     def create(self, 
-        alert_service_create:'AlertServiceCreate'={},
+        alert_service_create:'AlertServiceCreate',
     /) -> 'AlertserviceCreateReturns': 
         """
         Create an Alert Service of specified `type`.
@@ -49,7 +49,7 @@ class Alertservice(
     @typing.overload
     def get_instance(self, 
         id:'typing.Union[str, int, bool, dict[str], list]',
-        query_options_get_instance:'QueryOptionsGetInstance'={},
+        query_options_get_instance:'QueryOptionsGetInstance',
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -82,8 +82,8 @@ class Alertservice(
         ...
     @typing.overload
     def query(self, 
-        query_filters:'list[list]'=[],
-        query_options:'QueryOptions'={},
+        query_filters:'list[list]',
+        query_options:'QueryOptions',
     /) -> 'typing.Union[list[AlertserviceEntry], AlertserviceEntry, int]': 
         """
         
@@ -102,7 +102,7 @@ class Alertservice(
         ...
     @typing.overload
     def test(self, 
-        alert_service_create:'AlertServiceCreate'={},
+        alert_service_create:'AlertServiceCreate',
     /) -> 'bool': 
         """
         Send a test alert using `type` of Alert Service.
@@ -120,7 +120,7 @@ class Alertservice(
     @typing.overload
     def update(self, 
         id:'int',
-        alert_service_update:'AlertServiceUpdate'={},
+        alert_service_update:'AlertServiceUpdate',
     /) -> 'AlertserviceUpdateReturns': 
         """
         Update Alert Service of `id`.
@@ -137,6 +137,13 @@ class Alertservice(
             alertservice_update_returns
         """
         ...
+    AlertServiceCreate = typing.TypedDict('AlertServiceCreate', {
+            'name':'str',
+            'type':'str',
+            'attributes':'dict[str]',
+            'level':'Level',
+            'enabled':'bool',
+    })
     class Level(str,Enum):
         INFO = 'INFO'
         NOTICE = 'NOTICE'
@@ -146,13 +153,6 @@ class Alertservice(
         ALERT = 'ALERT'
         EMERGENCY = 'EMERGENCY'
         ...
-    AlertServiceCreate = typing.TypedDict('AlertServiceCreate', {
-            'name':'str',
-            'type':'str',
-            'attributes':'dict[str]',
-            'level':'Level',
-            'enabled':'bool',
-    })
     AlertserviceCreateReturns = typing.TypedDict('AlertserviceCreateReturns', {
             'name':'str',
             'type':'str',

@@ -102,93 +102,15 @@ class User(Namespace):
             'nt_name':'typing.Optional[str]',
             'sid':'typing.Optional[str]',
     })
-    UserEntry_ = typing.TypedDict('UserEntry_', {
-            'uid':'int',
-            'username':'str',
-            'home':'str',
-            'shell':'str',
-            'full_name':'str',
-            'email':'typing.Optional[str]',
-            'password_disabled':'bool',
-            'ssh_password_enabled':'bool',
-            'locked':'bool',
-            'smb':'bool',
-            'sudo_commands':'list[str]',
-            'sudo_commands_nopasswd':'list[str]',
-            'sshpubkey':'typing.Optional[str]',
-            'groups':'list[int]',
-            'group':'dict[str]',
-            'id':'int',
-            'builtin':'bool',
-            'id_type_both':'bool',
-            'local':'bool',
-            'twofactor_auth_configured':'bool',
-            'unixhash':'str',
-            'smbhash':'str',
-            'nt_name':'typing.Optional[str]',
-            'sid':'typing.Optional[str]',
-    })
-    UserEntry__ = typing.TypedDict('UserEntry__', {
-            'uid':'int',
-            'username':'str',
-            'home':'str',
-            'shell':'str',
-            'full_name':'str',
-            'email':'typing.Optional[str]',
-            'password_disabled':'bool',
-            'ssh_password_enabled':'bool',
-            'locked':'bool',
-            'smb':'bool',
-            'sudo_commands':'list[str]',
-            'sudo_commands_nopasswd':'list[str]',
-            'sshpubkey':'typing.Optional[str]',
-            'groups':'list[int]',
-            'group':'dict[str]',
-            'id':'int',
-            'builtin':'bool',
-            'id_type_both':'bool',
-            'local':'bool',
-            'twofactor_auth_configured':'bool',
-            'unixhash':'str',
-            'smbhash':'str',
-            'nt_name':'typing.Optional[str]',
-            'sid':'typing.Optional[str]',
-    })
-    UserEntry___ = typing.TypedDict('UserEntry___', {
-            'uid':'int',
-            'username':'str',
-            'home':'str',
-            'shell':'str',
-            'full_name':'str',
-            'email':'typing.Optional[str]',
-            'password_disabled':'bool',
-            'ssh_password_enabled':'bool',
-            'locked':'bool',
-            'smb':'bool',
-            'sudo_commands':'list[str]',
-            'sudo_commands_nopasswd':'list[str]',
-            'sshpubkey':'typing.Optional[str]',
-            'groups':'list[int]',
-            'group':'dict[str]',
-            'id':'int',
-            'builtin':'bool',
-            'id_type_both':'bool',
-            'local':'bool',
-            'twofactor_auth_configured':'bool',
-            'unixhash':'str',
-            'smbhash':'str',
-            'nt_name':'typing.Optional[str]',
-            'sid':'typing.Optional[str]',
-    })
     class Username(str,Enum):
         Root = 'root'
         Admin = 'admin'
         ...
-    Ec2 = typing.TypedDict('Ec2', {
-            'instance_id':'str',
-    })
     Options_ = typing.TypedDict('Options_', {
             'ec2':'Ec2',
+    })
+    Ec2 = typing.TypedDict('Ec2', {
+            'instance_id':'str',
     })
     ShellInfo = typing.TypedDict('ShellInfo', {
             'shell_path':'str',

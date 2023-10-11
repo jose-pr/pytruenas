@@ -69,11 +69,11 @@ class ZfsSnapshot(Namespace):
             'force':'bool',
             'recursive_rollback':'bool',
     })
+    SnapshotUpdate = typing.TypedDict('SnapshotUpdate', {
+            'user_properties_update':'list[UserProperty]',
+    })
     UserProperty = typing.TypedDict('UserProperty', {
             'key':'str',
             'value':'str',
             'remove':'bool',
-    })
-    SnapshotUpdate = typing.TypedDict('SnapshotUpdate', {
-            'user_properties_update':'list[UserProperty]',
     })

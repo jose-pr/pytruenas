@@ -9,22 +9,6 @@ class IscsiTarget(TableExtMixin, Namespace):
     def __init__(self, client) -> None:
         super().__init__(client, 'iscsi.target')
 
-    class Mode(str,Enum):
-        ISCSI = 'ISCSI'
-        FC = 'FC'
-        BOTH = 'BOTH'
-        ...
-    class Authmethod(str,Enum):
-        NONE = 'NONE'
-        CHAP = 'CHAP'
-        CHAPMUTUAL = 'CHAP_MUTUAL'
-        ...
-    Group = typing.TypedDict('Group', {
-            'portal':'int',
-            'initiator':'typing.Optional[int]',
-            'authmethod':'Authmethod',
-            'auth':'typing.Optional[int]',
-    })
     IscsiTargetCreate = typing.TypedDict('IscsiTargetCreate', {
             'name':'str',
             'alias':'typing.Optional[str]',
@@ -32,6 +16,22 @@ class IscsiTarget(TableExtMixin, Namespace):
             'groups':'list[Group]',
             'auth_networks':'list[str]',
     })
+    class Mode(str,Enum):
+        ISCSI = 'ISCSI'
+        FC = 'FC'
+        BOTH = 'BOTH'
+        ...
+    Group = typing.TypedDict('Group', {
+            'portal':'int',
+            'initiator':'typing.Optional[int]',
+            'authmethod':'Authmethod',
+            'auth':'typing.Optional[int]',
+    })
+    class Authmethod(str,Enum):
+        NONE = 'NONE'
+        CHAP = 'CHAP'
+        CHAPMUTUAL = 'CHAP_MUTUAL'
+        ...
     QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
             'relationships':'bool',
             'extend':'typing.Optional[str]',
@@ -60,16 +60,10 @@ class IscsiTarget(TableExtMixin, Namespace):
             'limit':'int',
             'force_sql_filters':'bool',
     })
-    Group_ = typing.TypedDict('Group_', {
-            'portal':'int',
-            'initiator':'typing.Optional[int]',
-            'authmethod':'Authmethod',
-            'auth':'typing.Optional[int]',
-    })
     IscsiTargetUpdate = typing.TypedDict('IscsiTargetUpdate', {
             'name':'str',
             'alias':'typing.Optional[str]',
             'mode':'Mode',
-            'groups':'list[Group_]',
+            'groups':'list[Group]',
             'auth_networks':'list[str]',
     })

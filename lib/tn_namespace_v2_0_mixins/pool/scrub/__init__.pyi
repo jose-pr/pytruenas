@@ -12,7 +12,7 @@ class PoolScrub(
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload
     def create(self, 
-        pool_scrub_entry:'PoolScrubEntry'={},
+        pool_scrub_entry:'PoolScrubEntry',
     /) -> 'PoolScrubCreateReturns': 
         """
         Create a scrub task for a pool.
@@ -50,7 +50,7 @@ class PoolScrub(
     @typing.overload
     def get_instance(self, 
         id:'typing.Union[str, int, bool, dict[str], list]',
-        query_options_get_instance:'QueryOptionsGetInstance'={},
+        query_options_get_instance:'QueryOptionsGetInstance',
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -69,8 +69,8 @@ class PoolScrub(
         ...
     @typing.overload
     def query(self, 
-        query_filters:'list[list]'=[],
-        query_options:'QueryOptions'={},
+        query_filters:'list[list]',
+        query_options:'QueryOptions',
     /) -> 'typing.Union[list[PoolScrubEntry_], PoolScrubEntry_, int]': 
         """
         
@@ -90,7 +90,7 @@ class PoolScrub(
     @typing.overload
     def run(self, 
         name:'str',
-        threshold:'int'=35,
+        threshold:'int',
     /) -> None: 
         """
         Initiate a scrub of a pool `name` if last scrub was performed more than `threshold` days before.
@@ -108,7 +108,7 @@ class PoolScrub(
     @typing.overload
     def scrub(self, 
         name:'str',
-        action:'Action'="START",
+        action:'Action',
     /) -> None: 
         """
         Start/Stop/Pause a scrub on pool `name`.
@@ -126,7 +126,7 @@ class PoolScrub(
     @typing.overload
     def update(self, 
         id:'int',
-        pool_scrub_update:'PoolScrubUpdate'={},
+        pool_scrub_update:'PoolScrubUpdate',
     /) -> 'PoolScrubUpdateReturns': 
         """
         Update scrub task of `id`.
@@ -144,19 +144,19 @@ class PoolScrub(
             pool_scrub_update_returns
         """
         ...
-    Schedule = typing.TypedDict('Schedule', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
     PoolScrubEntry = typing.TypedDict('PoolScrubEntry', {
             'pool':'int',
             'threshold':'int',
             'description':'str',
             'schedule':'Schedule',
             'enabled':'bool',
+    })
+    Schedule = typing.TypedDict('Schedule', {
+            'minute':'str',
+            'hour':'str',
+            'dom':'str',
+            'month':'str',
+            'dow':'str',
     })
     PoolScrubCreateReturns = typing.TypedDict('PoolScrubCreateReturns', {
             'pool':'int',

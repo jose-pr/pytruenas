@@ -10,8 +10,8 @@ class Stats(
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload
     def get_data(self, 
-        stats_list:'list[StatsData]'=[],
-        stats_filter:'StatsFilter'={},
+        stats_list:'list[StatsData]',
+        stats_filter:'StatsFilter',
     /) -> 'StatsData_': 
         """
         Get data points from rrd files.

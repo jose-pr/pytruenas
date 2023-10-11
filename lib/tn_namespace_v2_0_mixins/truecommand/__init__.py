@@ -9,6 +9,15 @@ class Truecommand(ConfigMixin, Namespace):
     def __init__(self, client) -> None:
         super().__init__(client, 'truecommand')
 
+    TruecommandEntry = typing.TypedDict('TruecommandEntry', {
+            'id':'int',
+            'api_key':'typing.Optional[str]',
+            'status':'Status',
+            'status_reason':'StatusReason',
+            'remote_url':'typing.Optional[str]',
+            'remote_ip_address':'typing.Optional[str]',
+            'enabled':'bool',
+    })
     class Status(str,Enum):
         CONNECTED = 'CONNECTED'
         CONNECTING = 'CONNECTING'
@@ -21,15 +30,6 @@ class Truecommand(ConfigMixin, Namespace):
         TruecommandServiceIsDisabled = 'Truecommand service is disabled.'
         TruecommandAPIKeyDisabledByIXPortal = 'Truecommand API Key Disabled by iX Portal.'
         ...
-    TruecommandEntry = typing.TypedDict('TruecommandEntry', {
-            'id':'int',
-            'api_key':'typing.Optional[str]',
-            'status':'Status',
-            'status_reason':'StatusReason',
-            'remote_url':'typing.Optional[str]',
-            'remote_ip_address':'typing.Optional[str]',
-            'enabled':'bool',
-    })
     TruecommandConnected = typing.TypedDict('TruecommandConnected', {
             'connected':'bool',
             'truecommand_ip':'typing.Optional[str]',

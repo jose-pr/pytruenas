@@ -42,7 +42,6 @@ class Parameter(TypedDict):
     def _normalize(self) -> "Parameter":
         # type: ignore
         if self:
-            self = {k.strip("_"): v for k, v in self.items()}
             _ty = self.get("type", _utils.MISSING)
             match _ty:
                 case _utils.MISSING:

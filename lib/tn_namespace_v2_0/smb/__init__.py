@@ -8,14 +8,6 @@ class Smb(Namespace):
     def __init__(self, client) -> None:
         super().__init__(client, 'smb')
 
-    class OutputFormat(str,Enum):
-        SMB = 'SMB'
-        LOCAL = 'LOCAL'
-        ...
-    Options = typing.TypedDict('Options', {
-            'use_kerberos':'bool',
-            'output_format':'OutputFormat',
-    })
     GetRemoteAcl = typing.TypedDict('GetRemoteAcl', {
             'server':'str',
             'share':'str',
@@ -24,6 +16,14 @@ class Smb(Namespace):
             'password':'str',
             'options':'Options',
     })
+    Options = typing.TypedDict('Options', {
+            'use_kerberos':'bool',
+            'output_format':'OutputFormat',
+    })
+    class OutputFormat(str,Enum):
+        SMB = 'SMB'
+        LOCAL = 'LOCAL'
+        ...
     class InfoLevel(str,Enum):
         AUTHLOG = 'AUTH_LOG'
         ALL = 'ALL'
@@ -53,13 +53,6 @@ class Smb(Namespace):
             'restrict_user':'str',
             'restrict_session':'str',
     })
-    class Loglevel(str,Enum):
-        NONE = 'NONE'
-        MINIMUM = 'MINIMUM'
-        NORMAL = 'NORMAL'
-        FULL = 'FULL'
-        DEBUG = 'DEBUG'
-        ...
     SmbUpdate = typing.TypedDict('SmbUpdate', {
             'netbiosname':'str',
             'netbiosname_b':'str',
@@ -81,3 +74,10 @@ class Smb(Namespace):
             'bindip':'list[str]',
             'smb_options':'str',
     })
+    class Loglevel(str,Enum):
+        NONE = 'NONE'
+        MINIMUM = 'MINIMUM'
+        NORMAL = 'NORMAL'
+        FULL = 'FULL'
+        DEBUG = 'DEBUG'
+        ...

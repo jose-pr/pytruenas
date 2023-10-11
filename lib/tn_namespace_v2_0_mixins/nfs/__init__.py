@@ -13,10 +13,6 @@ class Nfs(ConfigMixin, Namespace):
             'username':'str',
             'password':'str',
     })
-    class Protocol(str,Enum):
-        NFSV3 = 'NFSV3'
-        NFSV4 = 'NFSV4'
-        ...
     NfsEntry = typing.TypedDict('NfsEntry', {
             'id':'int',
             'servers':'int',
@@ -35,21 +31,11 @@ class Nfs(ConfigMixin, Namespace):
             'v4_krb_enabled':'bool',
             'userd_manage_gids':'bool',
     })
+    class Protocol(str,Enum):
+        NFSV3 = 'NFSV3'
+        NFSV4 = 'NFSV4'
+        ...
     QueryOptions = typing.TypedDict('QueryOptions', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    QueryOptions_ = typing.TypedDict('QueryOptions_', {
             'relationships':'bool',
             'extend':'typing.Optional[str]',
             'extend_context':'typing.Optional[str]',

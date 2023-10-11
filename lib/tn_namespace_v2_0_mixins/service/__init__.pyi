@@ -13,7 +13,7 @@ class Service(
     @typing.overload
     def get_instance(self, 
         id:'typing.Union[str, int, bool, dict[str], list]',
-        query_options_get_instance:'QueryOptionsGetInstance'={},
+        query_options_get_instance:'QueryOptionsGetInstance',
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -32,9 +32,9 @@ class Service(
         ...
     @typing.overload
     def query(self, 
-        query_filters:'list[list]'=[],
-        query_options:'QueryOptions'={},
-    /) -> 'typing.Union[list[ServiceEntry], ServiceEntry_, int, ServiceEntry__]': 
+        query_filters:'list[list]',
+        query_options:'QueryOptions',
+    /) -> 'typing.Union[list[ServiceEntry], ServiceEntry, int]': 
         """
         Query all system services with `query-filters` and `query-options`.
         
@@ -50,14 +50,14 @@ class Service(
             query-options
         Returns
         -------
-        typing.Union[list[ServiceEntry], ServiceEntry_, int, ServiceEntry__]:
+        typing.Union[list[ServiceEntry], ServiceEntry, int]:
             
         """
         ...
     @typing.overload
     def reload(self, 
         service:'str',
-        service_control:'ServiceControl'={},
+        service_control:'ServiceControl',
     /) -> 'bool': 
         """
         Reload the service specified by `service`.
@@ -77,7 +77,7 @@ class Service(
     @typing.overload
     def restart(self, 
         service:'str',
-        service_control:'ServiceControl'={},
+        service_control:'ServiceControl',
     /) -> 'bool': 
         """
         Restart the service specified by `service`.
@@ -97,7 +97,7 @@ class Service(
     @typing.overload
     def start(self, 
         service:'str',
-        service_control:'ServiceControl'={},
+        service_control:'ServiceControl',
     /) -> 'bool': 
         """
         Start the service specified by `service`.
@@ -154,7 +154,7 @@ class Service(
     @typing.overload
     def stop(self, 
         service:'str',
-        service_control:'ServiceControl'={},
+        service_control:'ServiceControl',
     /) -> 'bool': 
         """
         Stop the service specified by `service`.
@@ -174,7 +174,7 @@ class Service(
     @typing.overload
     def terminate_process(self, 
         pid:'int',
-        timeout:'int'=10,
+        timeout:'int',
     /) -> 'bool': 
         """
         Terminate process by `pid`.
@@ -196,7 +196,7 @@ class Service(
     @typing.overload
     def update(self, 
         id_or_name:'str',
-        service_update:'ServiceUpdate'={},
+        service_update:'ServiceUpdate',
     /) -> 'int': 
         """
         Update service entry of `id_or_name`.
@@ -245,20 +245,6 @@ class Service(
             'force_sql_filters':'bool',
     })
     ServiceEntry = typing.TypedDict('ServiceEntry', {
-            'id':'int',
-            'service':'str',
-            'enable':'bool',
-            'state':'str',
-            'pids':'list[int]',
-    })
-    ServiceEntry_ = typing.TypedDict('ServiceEntry_', {
-            'id':'int',
-            'service':'str',
-            'enable':'bool',
-            'state':'str',
-            'pids':'list[int]',
-    })
-    ServiceEntry__ = typing.TypedDict('ServiceEntry__', {
             'id':'int',
             'service':'str',
             'enable':'bool',

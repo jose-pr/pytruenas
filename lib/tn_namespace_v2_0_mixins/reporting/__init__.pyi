@@ -38,8 +38,8 @@ class Reporting(
         ...
     @typing.overload
     def get_data(self, 
-        graphs:'list[Graph]'=[],
-        reporting_query:'ReportingQuery'={},
+        graphs:'list[Graph]',
+        reporting_query:'ReportingQuery',
     /) -> 'list[GraphReportingData]': 
         """
         Get reporting data for given graphs.
@@ -65,9 +65,9 @@ class Reporting(
         ...
     @typing.overload
     def graphs(self, 
-        query_filters:'list[list]'=[],
-        query_options:'QueryOptions'={},
-    /) -> 'typing.Union[int, Graph_, list[Graph__]]': 
+        query_filters:'list[list]',
+        query_options:'QueryOptions',
+    /) -> 'typing.Union[int, Graph_, list[Graph_]]': 
         """
         
 
@@ -79,14 +79,14 @@ class Reporting(
             query-options
         Returns
         -------
-        typing.Union[int, Graph_, list[Graph__]]:
+        typing.Union[int, Graph_, list[Graph_]]:
             
         """
         ...
     @typing.overload
     def netdata_get_data(self, 
-        graphs:'list[Graph___]'=[],
-        reporting_query_netdata:'ReportingQueryNetdata'={},
+        graphs:'list[Graph]',
+        reporting_query_netdata:'ReportingQueryNetdata',
     /) -> 'list[NetdataGraphReportingData]': 
         """
         Get reporting data for given graphs.
@@ -113,8 +113,8 @@ class Reporting(
     @typing.overload
     def netdata_graph(self, 
         name:'str',
-        reporting_query_netdata:'ReportingQueryNetdata'={},
-    /) -> 'NetdataGraphReportingData_': 
+        reporting_query_netdata:'ReportingQueryNetdata',
+    /) -> 'NetdataGraphReportingData': 
         """
         Get reporting data for `name` graph.
 
@@ -126,15 +126,15 @@ class Reporting(
             reporting_query_netdata
         Returns
         -------
-        NetdataGraphReportingData_:
+        NetdataGraphReportingData:
             netdata_graph_reporting_data
         """
         ...
     @typing.overload
     def netdata_graphs(self, 
-        query_filters:'list[list]'=[],
-        query_options:'QueryOptions_'={},
-    /) -> 'typing.Union[int, Graph____, list[Graph_____]]': 
+        query_filters:'list[list]',
+        query_options:'QueryOptions',
+    /) -> 'typing.Union[int, Graph__, list[Graph__]]': 
         """
         Get reporting netdata graphs.
 
@@ -146,13 +146,13 @@ class Reporting(
             query-options
         Returns
         -------
-        typing.Union[int, Graph____, list[Graph_____]]:
+        typing.Union[int, Graph__, list[Graph__]]:
             
         """
         ...
     @typing.overload
     def update(self, 
-        reporting_update:'ReportingUpdate'={},
+        reporting_update:'ReportingUpdate',
     /) -> 'ReportingUpdateReturns': 
         """
         Configure Reporting Database settings.
@@ -183,8 +183,15 @@ class Reporting(
             'id':'int',
     })
     Graph = typing.TypedDict('Graph', {
-            'name':'str',
+            'name':'Name',
             'identifier':'typing.Optional[str]',
+    })
+    ReportingQuery = typing.TypedDict('ReportingQuery', {
+            'unit':'Unit',
+            'page':'int',
+            'start':'str',
+            'end':'str',
+            'aggregate':'bool',
     })
     class Unit(str,Enum):
         HOUR = 'HOUR'
@@ -193,23 +200,16 @@ class Reporting(
         MONTH = 'MONTH'
         YEAR = 'YEAR'
         ...
-    ReportingQuery = typing.TypedDict('ReportingQuery', {
-            'unit':'Unit',
-            'page':'int',
-            'start':'str',
-            'end':'str',
-            'aggregate':'bool',
-    })
-    Aggregations = typing.TypedDict('Aggregations', {
-            'min':'list',
-            'max':'list',
-            'mean':'list',
-    })
     GraphReportingData = typing.TypedDict('GraphReportingData', {
             'name':'str',
             'identifier':'typing.Optional[str]',
             'data':'list',
             'aggregations':'Aggregations',
+    })
+    Aggregations = typing.TypedDict('Aggregations', {
+            'min':'list',
+            'max':'list',
+            'mean':'list',
     })
     QueryOptions = typing.TypedDict('QueryOptions', {
             'relationships':'bool',
@@ -229,15 +229,7 @@ class Reporting(
             'name':'str',
             'title':'str',
             'vertical_label':'str',
-            'identifiers':'typing.Optional[list[str]]',
-            'stacked':'bool',
-            'stacked_show_total':'bool',
-    })
-    Graph__ = typing.TypedDict('Graph__', {
-            'name':'str',
-            'title':'str',
-            'vertical_label':'str',
-            'identifiers':'typing.Optional[list[str]]',
+            'identifiers':'typing.Optional[list]',
             'stacked':'bool',
             'stacked_show_total':'bool',
     })
@@ -256,10 +248,6 @@ class Reporting(
         Arcresult = 'arcresult'
         Disktemp = 'disktemp'
         ...
-    Graph___ = typing.TypedDict('Graph___', {
-            'name':'Name',
-            'identifier':'typing.Optional[str]',
-    })
     ReportingQueryNetdata = typing.TypedDict('ReportingQueryNetdata', {
             'unit':'Unit',
             'page':'int',
@@ -273,37 +261,11 @@ class Reporting(
             'data':'list',
             'aggregations':'Aggregations',
     })
-    NetdataGraphReportingData_ = typing.TypedDict('NetdataGraphReportingData_', {
-            'name':'str',
-            'identifier':'typing.Optional[str]',
-            'data':'list',
-            'aggregations':'Aggregations',
-    })
-    QueryOptions_ = typing.TypedDict('QueryOptions_', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    Graph____ = typing.TypedDict('Graph____', {
+    Graph__ = typing.TypedDict('Graph__', {
             'name':'str',
             'title':'str',
             'vertical_label':'str',
-            'identifiers':'typing.Optional[list[str]]',
-    })
-    Graph_____ = typing.TypedDict('Graph_____', {
-            'name':'str',
-            'title':'str',
-            'vertical_label':'str',
-            'identifiers':'typing.Optional[list[str]]',
+            'identifiers':'typing.Optional[list]',
     })
     ReportingUpdate = typing.TypedDict('ReportingUpdate', {
             'graphite':'str',

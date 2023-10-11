@@ -41,7 +41,7 @@ class Truecommand(
         ...
     @typing.overload
     def update(self, 
-        truecommand_update:'TruecommandUpdate'={},
+        truecommand_update:'TruecommandUpdate',
     /) -> 'TruecommandUpdateReturns': 
         """
         Update Truecommand service settings.
@@ -58,6 +58,15 @@ class Truecommand(
             truecommand_update_returns
         """
         ...
+    TruecommandEntry = typing.TypedDict('TruecommandEntry', {
+            'id':'int',
+            'api_key':'typing.Optional[str]',
+            'status':'Status',
+            'status_reason':'StatusReason',
+            'remote_url':'typing.Optional[str]',
+            'remote_ip_address':'typing.Optional[str]',
+            'enabled':'bool',
+    })
     class Status(str,Enum):
         CONNECTED = 'CONNECTED'
         CONNECTING = 'CONNECTING'
@@ -70,15 +79,6 @@ class Truecommand(
         TruecommandServiceIsDisabled = 'Truecommand service is disabled.'
         TruecommandAPIKeyDisabledByIXPortal = 'Truecommand API Key Disabled by iX Portal.'
         ...
-    TruecommandEntry = typing.TypedDict('TruecommandEntry', {
-            'id':'int',
-            'api_key':'typing.Optional[str]',
-            'status':'Status',
-            'status_reason':'StatusReason',
-            'remote_url':'typing.Optional[str]',
-            'remote_ip_address':'typing.Optional[str]',
-            'enabled':'bool',
-    })
     TruecommandConnected = typing.TypedDict('TruecommandConnected', {
             'connected':'bool',
             'truecommand_ip':'typing.Optional[str]',

@@ -12,7 +12,7 @@ class Kubernetes(
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload
     def backup_chart_releases(self, 
-        backup_name:'typing.Optional[str]'=None,
+        backup_name:'typing.Optional[str]',
     /) -> 'str': 
         """
         Create a backup of existing chart releases.
@@ -118,7 +118,7 @@ class Kubernetes(
     @typing.overload
     def restore_backup(self, 
         backup_name:'str',
-        options:'Options'={},
+        options:'Options',
     /) -> None: 
         """
         Restore `backup_name` chart releases backup.
@@ -152,7 +152,7 @@ class Kubernetes(
         ...
     @typing.overload
     def status(self, 
-    /) -> 'Status_': 
+    /) -> 'Status': 
         """
         Returns the status of the Kubernetes service.
 
@@ -160,13 +160,13 @@ class Kubernetes(
         ----------
         Returns
         -------
-        Status_:
+        Status:
             status
         """
         ...
     @typing.overload
     def update(self, 
-        kubernetes_update:'KubernetesUpdate'={},
+        kubernetes_update:'KubernetesUpdate',
     /) -> 'KubernetesUpdateReturns': 
         """
         `pool` must be a valid ZFS pool configured in the system. Kubernetes service will initialise the pool by
@@ -241,17 +241,21 @@ class Kubernetes(
             'dataset':'typing.Optional[str]',
             'id':'int',
     })
-    Metadata = typing.TypedDict('Metadata', {
-            'name':'str',
-    })
     Event = typing.TypedDict('Event', {
             'metadata':'Metadata',
             'message':'str',
     })
+    Metadata = typing.TypedDict('Metadata', {
+            'name':'str',
+    })
     Options = typing.TypedDict('Options', {
             'wait_for_csi':'bool',
     })
-    class Status(str,Enum):
+    Status = typing.TypedDict('Status', {
+            'status':'Status_',
+            'description':'str',
+    })
+    class Status_(str,Enum):
         PENDING = 'PENDING'
         RUNNING = 'RUNNING'
         INITIALIZING = 'INITIALIZING'
@@ -260,13 +264,6 @@ class Kubernetes(
         UNCONFIGURED = 'UNCONFIGURED'
         FAILED = 'FAILED'
         ...
-    Status_ = typing.TypedDict('Status_', {
-            'status':'Status',
-            'description':'str',
-    })
-    MigrationOptions = typing.TypedDict('MigrationOptions', {
-            'passphrase':'str',
-    })
     KubernetesUpdate = typing.TypedDict('KubernetesUpdate', {
             'servicelb':'bool',
             'configure_gpus':'bool',
@@ -284,6 +281,9 @@ class Kubernetes(
             'migrate_applications':'bool',
             'force':'bool',
             'migration_options':'MigrationOptions',
+    })
+    MigrationOptions = typing.TypedDict('MigrationOptions', {
+            'passphrase':'str',
     })
     KubernetesUpdateReturns = typing.TypedDict('KubernetesUpdateReturns', {
             'servicelb':'bool',

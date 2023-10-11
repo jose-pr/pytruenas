@@ -9,17 +9,6 @@ class SharingSmb(TableExtMixin, Namespace):
     def __init__(self, client) -> None:
         super().__init__(client, 'sharing.smb')
 
-    class Purpose(str,Enum):
-        NOPRESET = 'NO_PRESET'
-        DEFAULTCLUSTERSHARE = 'DEFAULT_CLUSTER_SHARE'
-        DEFAULTSHARE = 'DEFAULT_SHARE'
-        TIMEMACHINE = 'TIMEMACHINE'
-        ENHANCEDTIMEMACHINE = 'ENHANCED_TIMEMACHINE'
-        MULTIPROTOCOLNFS = 'MULTI_PROTOCOL_NFS'
-        PRIVATEDATASETS = 'PRIVATE_DATASETS'
-        READONLY = 'READ_ONLY'
-        WORMDROPBOX = 'WORM_DROPBOX'
-        ...
     SharingsmbCreate = typing.TypedDict('SharingsmbCreate', {
             'purpose':'Purpose',
             'path':'str',
@@ -47,6 +36,17 @@ class SharingSmb(TableExtMixin, Namespace):
             'cluster_volname':'str',
             'afp':'bool',
     })
+    class Purpose(str,Enum):
+        NOPRESET = 'NO_PRESET'
+        DEFAULTCLUSTERSHARE = 'DEFAULT_CLUSTER_SHARE'
+        DEFAULTSHARE = 'DEFAULT_SHARE'
+        TIMEMACHINE = 'TIMEMACHINE'
+        ENHANCEDTIMEMACHINE = 'ENHANCED_TIMEMACHINE'
+        MULTIPROTOCOLNFS = 'MULTI_PROTOCOL_NFS'
+        PRIVATEDATASETS = 'PRIVATE_DATASETS'
+        READONLY = 'READ_ONLY'
+        WORMDROPBOX = 'WORM_DROPBOX'
+        ...
     QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
             'relationships':'bool',
             'extend':'typing.Optional[str]',
@@ -64,15 +64,25 @@ class SharingSmb(TableExtMixin, Namespace):
     SmbGetacl = typing.TypedDict('SmbGetacl', {
             'share_name':'str',
     })
+    SmbShareAcl = typing.TypedDict('SmbShareAcl', {
+            'share_name':'str',
+            'share_acl':'list[Aclentry]',
+    })
+    Aclentry = typing.TypedDict('Aclentry', {
+            'ae_who_sid':'str',
+            'ae_who_id':'AeWhoId',
+            'ae_perm':'AePerm',
+            'ae_type':'AeType',
+    })
+    AeWhoId = typing.TypedDict('AeWhoId', {
+            'id_type':'IdType',
+            'id':'int',
+    })
     class IdType(str,Enum):
         USER = 'USER'
         GROUP = 'GROUP'
         BOTH = 'BOTH'
         ...
-    AeWhoId = typing.TypedDict('AeWhoId', {
-            'id_type':'IdType',
-            'id':'int',
-    })
     class AePerm(str,Enum):
         FULL = 'FULL'
         CHANGE = 'CHANGE'
@@ -82,16 +92,6 @@ class SharingSmb(TableExtMixin, Namespace):
         ALLOWED = 'ALLOWED'
         DENIED = 'DENIED'
         ...
-    Aclentry = typing.TypedDict('Aclentry', {
-            'ae_who_sid':'str',
-            'ae_who_id':'AeWhoId',
-            'ae_perm':'AePerm',
-            'ae_type':'AeType',
-    })
-    SmbShareAcl = typing.TypedDict('SmbShareAcl', {
-            'share_name':'str',
-            'share_acl':'list[Aclentry]',
-    })
     QueryOptions = typing.TypedDict('QueryOptions', {
             'relationships':'bool',
             'extend':'typing.Optional[str]',
@@ -105,14 +105,6 @@ class SharingSmb(TableExtMixin, Namespace):
             'offset':'int',
             'limit':'int',
             'force_sql_filters':'bool',
-    })
-    SmbShareAcl_ = typing.TypedDict('SmbShareAcl_', {
-            'share_name':'str',
-            'share_acl':'list[Aclentry]',
-    })
-    SmbShareAcl__ = typing.TypedDict('SmbShareAcl__', {
-            'share_name':'str',
-            'share_acl':'list[Aclentry]',
     })
     SharingsmbUpdate = typing.TypedDict('SharingsmbUpdate', {
             'purpose':'Purpose',

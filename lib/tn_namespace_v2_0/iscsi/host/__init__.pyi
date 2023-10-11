@@ -10,7 +10,7 @@ class IscsiHost(
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload
     def create(self, 
-        iscsi_host_create:'IscsiHostCreate'={},
+        iscsi_host_create:'IscsiHostCreate',
     /) -> 'dict[str]': 
         """
         Creates iSCSI host.
@@ -64,7 +64,7 @@ class IscsiHost(
     @typing.overload
     def get_instance(self, 
         id:'typing.Union[str, int, bool, dict[str], list]',
-        query_options_get_instance:'QueryOptionsGetInstance'={},
+        query_options_get_instance:'QueryOptionsGetInstance',
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -98,9 +98,9 @@ class IscsiHost(
         ...
     @typing.overload
     def query(self, 
-        query_filters:'list[list]'=[],
-        query_options:'QueryOptions'={},
-    /) -> 'typing.Union[list[dict[str]], dict[str], int]': 
+        query_filters:'list[list]',
+        query_options:'QueryOptions',
+    /) -> 'typing.Union[list, dict[str], int]': 
         """
         
 
@@ -112,15 +112,15 @@ class IscsiHost(
             query-options
         Returns
         -------
-        typing.Union[list[dict[str]], dict[str], int]:
+        typing.Union[list, dict[str], int]:
             
         """
         ...
     @typing.overload
     def set_initiators(self, 
         id:'int',
-        ids:'list[int]'=[],
-        force:'bool'=False,
+        ids:'list[int]',
+        force:'bool',
     /) -> None: 
         """
         Associates initiator groups `ids` with host `id`.
@@ -141,7 +141,7 @@ class IscsiHost(
     @typing.overload
     def set_targets(self, 
         id:'int',
-        ids:'list[int]'=[],
+        ids:'list[int]',
     /) -> None: 
         """
         Associates targets `ids` with host `id`.
@@ -159,7 +159,7 @@ class IscsiHost(
     @typing.overload
     def update(self, 
         id:'int',
-        iscsi_host_update:'IscsiHostUpdate'={},
+        iscsi_host_update:'IscsiHostUpdate',
     /) -> 'dict[str]': 
         """
         Update iSCSI host `id`.

@@ -9,15 +9,6 @@ class Initshutdownscript(TableExtMixin, Namespace):
     def __init__(self, client) -> None:
         super().__init__(client, 'initshutdownscript')
 
-    class Type(str,Enum):
-        COMMAND = 'COMMAND'
-        SCRIPT = 'SCRIPT'
-        ...
-    class When(str,Enum):
-        PREINIT = 'PREINIT'
-        POSTINIT = 'POSTINIT'
-        SHUTDOWN = 'SHUTDOWN'
-        ...
     InitShutdownScriptCreate = typing.TypedDict('InitShutdownScriptCreate', {
             'type':'Type',
             'command':'typing.Optional[str]',
@@ -28,6 +19,15 @@ class Initshutdownscript(TableExtMixin, Namespace):
             'timeout':'int',
             'comment':'str',
     })
+    class Type(str,Enum):
+        COMMAND = 'COMMAND'
+        SCRIPT = 'SCRIPT'
+        ...
+    class When(str,Enum):
+        PREINIT = 'PREINIT'
+        POSTINIT = 'POSTINIT'
+        SHUTDOWN = 'SHUTDOWN'
+        ...
     InitshutdownscriptCreateReturns = typing.TypedDict('InitshutdownscriptCreateReturns', {
             'type':'Type',
             'command':'typing.Optional[str]',
@@ -68,28 +68,6 @@ class Initshutdownscript(TableExtMixin, Namespace):
             'force_sql_filters':'bool',
     })
     InitShutdownScriptEntry = typing.TypedDict('InitShutdownScriptEntry', {
-            'type':'Type',
-            'command':'typing.Optional[str]',
-            'script_text':'typing.Optional[str]',
-            'script':'typing.Optional[str]',
-            'when':'When',
-            'enabled':'bool',
-            'timeout':'int',
-            'comment':'str',
-            'id':'int',
-    })
-    InitShutdownScriptEntry_ = typing.TypedDict('InitShutdownScriptEntry_', {
-            'type':'Type',
-            'command':'typing.Optional[str]',
-            'script_text':'typing.Optional[str]',
-            'script':'typing.Optional[str]',
-            'when':'When',
-            'enabled':'bool',
-            'timeout':'int',
-            'comment':'str',
-            'id':'int',
-    })
-    InitShutdownScriptEntry__ = typing.TypedDict('InitShutdownScriptEntry__', {
             'type':'Type',
             'command':'typing.Optional[str]',
             'script_text':'typing.Optional[str]',

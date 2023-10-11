@@ -10,7 +10,7 @@ class CtdbPrivateIps(
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload
     def create(self, 
-        private_create:'PrivateCreate'={},
+        private_create:'PrivateCreate',
     /) -> 'dict[str]': 
         """
         Add a ctdb private address to the cluster
@@ -34,7 +34,7 @@ class CtdbPrivateIps(
     @typing.overload
     def get_instance(self, 
         id:'typing.Union[str, int, bool, dict[str], list]',
-        query_options_get_instance:'QueryOptionsGetInstance'={},
+        query_options_get_instance:'QueryOptionsGetInstance',
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -53,9 +53,9 @@ class CtdbPrivateIps(
         ...
     @typing.overload
     def query(self, 
-        query_filters:'list[list]'=[],
-        query_options:'QueryOptions'={},
-    /) -> 'typing.Union[list[dict[str]], dict[str], int]': 
+        query_filters:'list[list]',
+        query_options:'QueryOptions',
+    /) -> 'typing.Union[list, dict[str], int]': 
         """
         This returns contents of the CTDB nodes file (private IP addresses)
         Explanation of keys are as follows:
@@ -81,14 +81,14 @@ class CtdbPrivateIps(
             query-options
         Returns
         -------
-        typing.Union[list[dict[str]], dict[str], int]:
+        typing.Union[list, dict[str], int]:
             
         """
         ...
     @typing.overload
     def update(self, 
         id:'int',
-        private_update:'PrivateUpdate'={},
+        private_update:'PrivateUpdate',
     /) -> 'dict[str]': 
         """
         Update Private IP address from the ctdb cluster with pnn value of `id`.

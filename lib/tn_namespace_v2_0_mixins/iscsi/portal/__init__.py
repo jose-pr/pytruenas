@@ -9,6 +9,12 @@ class IscsiPortal(TableExtMixin, Namespace):
     def __init__(self, client) -> None:
         super().__init__(client, 'iscsi.portal')
 
+    IscsiportalCreate = typing.TypedDict('IscsiportalCreate', {
+            'comment':'str',
+            'discovery_authmethod':'DiscoveryAuthmethod',
+            'discovery_authgroup':'typing.Optional[int]',
+            'listen':'list[Listen]',
+    })
     class DiscoveryAuthmethod(str,Enum):
         NONE = 'NONE'
         CHAP = 'CHAP'
@@ -16,12 +22,6 @@ class IscsiPortal(TableExtMixin, Namespace):
         ...
     Listen = typing.TypedDict('Listen', {
             'ip':'str',
-    })
-    IscsiportalCreate = typing.TypedDict('IscsiportalCreate', {
-            'comment':'str',
-            'discovery_authmethod':'DiscoveryAuthmethod',
-            'discovery_authgroup':'typing.Optional[int]',
-            'listen':'list[Listen]',
     })
     QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
             'relationships':'bool',

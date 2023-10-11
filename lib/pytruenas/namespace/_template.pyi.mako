@@ -1,5 +1,5 @@
 <%
-        from pytruenas.codegen import Object, Enum
+        from pytruenas.api import Object, Enum
         from pytruenas import _utils
 %>
 from pytruenas import TrueNASClient
@@ -17,14 +17,13 @@ class ${ns.classname}(
     ):
     _namespace:typing.Literal['${ns.dotname}']
     def __init__(self, client:TrueNASClient) -> None: ...
-% for name, signatures in ns.methods.items():
-% for method in signatures:
+% for method in ns.methods:
     @typing.overload
-    def ${name}(self, 
+    def ${method.name}(self, 
     % for pname, param in method.arguments.items():
         ${pname}\
         %if param.type:
-:'${'|'.join([t.python() for t in param.type])}'\
+:'${param.type.python()}'\
         %endif
         %if not param.required and param.default != MISSING:
 =${param.default}\
@@ -36,9 +35,7 @@ class ${ns.classname}(
  -> None\
 %else:
  -> '\
-%for p in method.returns:
-${'|'.join([t.python() for t in p.type])}\
- %endfor
+${'|'.join([p.type.python() for p in method.returns])}\
 '\
 %endif
 : 
@@ -54,24 +51,21 @@ ${'|'.join([t.python() for t in p.type])}\
         Returns
         -------
 % for param in method.returns:
-% for t in param.type:
-        ${t.python()}:
+        ${param.type.python()}:
             ${(param.description or '').strip().replace('\n', '\n            ')}
-%endfor
 %endfor
         """
         ...
 % endfor
-% endfor
-    %for name, obj in ns.objects.items():
+    %for obj in ns.objects:
     %if isinstance(obj, Object):
-    ${name} = typing.TypedDict('${name}', {
+    ${obj.name} = typing.TypedDict('${obj.name}', {
     %for pname, ty in obj.properties.items():
             '${pname}':'${ty.python()}',
     %endfor
     })
     %elif isinstance(obj, Enum):
-    class ${name}(str,Enum):
+    class ${obj.name}(${obj.type.python()},Enum):
     %for val in obj.options:
     %if val is None:
         NONE = None

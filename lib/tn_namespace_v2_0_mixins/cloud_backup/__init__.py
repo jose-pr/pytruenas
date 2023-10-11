@@ -9,17 +9,6 @@ class Cloud_backup(TableExtMixin, Namespace):
     def __init__(self, client) -> None:
         super().__init__(client, 'cloud_backup')
 
-    Schedule = typing.TypedDict('Schedule', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
-    CloudSyncBwlimit = typing.TypedDict('CloudSyncBwlimit', {
-            'time':'str',
-            'bandwidth':'typing.Optional[int]',
-    })
     CloudBackupCreate = typing.TypedDict('CloudBackupCreate', {
             'description':'str',
             'path':'str',
@@ -36,6 +25,17 @@ class Cloud_backup(TableExtMixin, Namespace):
             'args':'str',
             'enabled':'bool',
             'password':'str',
+    })
+    Schedule = typing.TypedDict('Schedule', {
+            'minute':'str',
+            'hour':'str',
+            'dom':'str',
+            'month':'str',
+            'dow':'str',
+    })
+    CloudSyncBwlimit = typing.TypedDict('CloudSyncBwlimit', {
+            'time':'str',
+            'bandwidth':'typing.Optional[int]',
     })
     QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
             'relationships':'bool',
@@ -68,10 +68,6 @@ class Cloud_backup(TableExtMixin, Namespace):
     CloudBackupSyncOptions = typing.TypedDict('CloudBackupSyncOptions', {
             'dry_run':'bool',
     })
-    CloudSyncBwlimit_ = typing.TypedDict('CloudSyncBwlimit_', {
-            'time':'str',
-            'bandwidth':'typing.Optional[int]',
-    })
     CloudBackupUpdate = typing.TypedDict('CloudBackupUpdate', {
             'description':'str',
             'path':'str',
@@ -81,7 +77,7 @@ class Cloud_backup(TableExtMixin, Namespace):
             'pre_script':'str',
             'post_script':'str',
             'snapshot':'bool',
-            'bwlimit':'list[CloudSyncBwlimit_]',
+            'bwlimit':'list[CloudSyncBwlimit]',
             'include':'list[str]',
             'exclude':'list[str]',
             'transfers':'typing.Optional[int]',

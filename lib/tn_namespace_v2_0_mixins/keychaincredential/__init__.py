@@ -78,6 +78,13 @@ class Keychaincredential(TableExtMixin, Namespace):
             'connect_timeout':'int',
             'sudo':'bool',
     })
+    SetupSshConnection = typing.TypedDict('SetupSshConnection', {
+            'private_key':'PrivateKey',
+            'connection_name':'str',
+            'setup_type':'SetupType',
+            'semi_automatic_setup':'SemiAutomaticSetup',
+            'manual_setup':'dict[str]',
+    })
     PrivateKey = typing.TypedDict('PrivateKey', {
             'generate_key':'bool',
             'existing_key_id':'int',
@@ -96,13 +103,6 @@ class Keychaincredential(TableExtMixin, Namespace):
             'username':'str',
             'connect_timeout':'int',
             'sudo':'bool',
-    })
-    SetupSshConnection = typing.TypedDict('SetupSshConnection', {
-            'private_key':'PrivateKey',
-            'connection_name':'str',
-            'setup_type':'SetupType',
-            'semi_automatic_setup':'SemiAutomaticSetup',
-            'manual_setup':'dict[str]',
     })
     KeychainCredentialUpdate = typing.TypedDict('KeychainCredentialUpdate', {
             'name':'str',

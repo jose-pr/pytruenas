@@ -26,7 +26,7 @@ class Kerberos(
         ...
     @typing.overload
     def update(self, 
-        kerberos_settings_update:'KerberosSettingsUpdate'={},
+        kerberos_settings_update:'KerberosSettingsUpdate',
     /) -> 'dict[str]': 
         """
         `appdefaults_aux` add parameters to "appdefaults" section of the krb5.conf file.

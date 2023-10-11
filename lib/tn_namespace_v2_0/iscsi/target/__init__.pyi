@@ -10,7 +10,7 @@ class IscsiTarget(
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload
     def create(self, 
-        iscsi_target_create:'IscsiTargetCreate'={},
+        iscsi_target_create:'IscsiTargetCreate',
     /) -> 'dict[str]': 
         """
         Create an iSCSI Target.
@@ -35,7 +35,7 @@ class IscsiTarget(
     @typing.overload
     def delete(self, 
         id:'int',
-        force:'bool'=False,
+        force:'bool',
     /) -> 'bool': 
         """
         Delete iSCSI Target of `id`.
@@ -57,7 +57,7 @@ class IscsiTarget(
     @typing.overload
     def get_instance(self, 
         id:'typing.Union[str, int, bool, dict[str], list]',
-        query_options_get_instance:'QueryOptionsGetInstance'={},
+        query_options_get_instance:'QueryOptionsGetInstance',
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -76,9 +76,9 @@ class IscsiTarget(
         ...
     @typing.overload
     def query(self, 
-        query_filters:'list[list]'=[],
-        query_options:'QueryOptions'={},
-    /) -> 'typing.Union[list[dict[str]], dict[str], int]': 
+        query_filters:'list[list]',
+        query_options:'QueryOptions',
+    /) -> 'typing.Union[list, dict[str], int]': 
         """
         
 
@@ -90,14 +90,14 @@ class IscsiTarget(
             query-options
         Returns
         -------
-        typing.Union[list[dict[str]], dict[str], int]:
+        typing.Union[list, dict[str], int]:
             
         """
         ...
     @typing.overload
     def update(self, 
         id:'int',
-        iscsi_target_update:'IscsiTargetUpdate'={},
+        iscsi_target_update:'IscsiTargetUpdate',
     /) -> 'dict[str]': 
         """
         Update iSCSI Target of `id`.
@@ -118,7 +118,7 @@ class IscsiTarget(
     @typing.overload
     def validate_name(self, 
         name:'str',
-        existing_id:'typing.Optional[int]'=None,
+        existing_id:'typing.Optional[int]',
     /) -> None: 
         """
         Returns validation error for iSCSI target name
@@ -137,22 +137,6 @@ class IscsiTarget(
         -------
         """
         ...
-    class Mode(str,Enum):
-        ISCSI = 'ISCSI'
-        FC = 'FC'
-        BOTH = 'BOTH'
-        ...
-    class Authmethod(str,Enum):
-        NONE = 'NONE'
-        CHAP = 'CHAP'
-        CHAPMUTUAL = 'CHAP_MUTUAL'
-        ...
-    Group = typing.TypedDict('Group', {
-            'portal':'int',
-            'initiator':'typing.Optional[int]',
-            'authmethod':'Authmethod',
-            'auth':'typing.Optional[int]',
-    })
     IscsiTargetCreate = typing.TypedDict('IscsiTargetCreate', {
             'name':'str',
             'alias':'typing.Optional[str]',
@@ -160,6 +144,22 @@ class IscsiTarget(
             'groups':'list[Group]',
             'auth_networks':'list[str]',
     })
+    class Mode(str,Enum):
+        ISCSI = 'ISCSI'
+        FC = 'FC'
+        BOTH = 'BOTH'
+        ...
+    Group = typing.TypedDict('Group', {
+            'portal':'int',
+            'initiator':'typing.Optional[int]',
+            'authmethod':'Authmethod',
+            'auth':'typing.Optional[int]',
+    })
+    class Authmethod(str,Enum):
+        NONE = 'NONE'
+        CHAP = 'CHAP'
+        CHAPMUTUAL = 'CHAP_MUTUAL'
+        ...
     QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
             'relationships':'bool',
             'extend':'typing.Optional[str]',
@@ -188,16 +188,10 @@ class IscsiTarget(
             'limit':'int',
             'force_sql_filters':'bool',
     })
-    Group_ = typing.TypedDict('Group_', {
-            'portal':'int',
-            'initiator':'typing.Optional[int]',
-            'authmethod':'Authmethod',
-            'auth':'typing.Optional[int]',
-    })
     IscsiTargetUpdate = typing.TypedDict('IscsiTargetUpdate', {
             'name':'str',
             'alias':'typing.Optional[str]',
             'mode':'Mode',
-            'groups':'list[Group_]',
+            'groups':'list[Group]',
             'auth_networks':'list[str]',
     })

@@ -8,26 +8,6 @@ class NetworkConfiguration(Namespace):
     def __init__(self, client) -> None:
         super().__init__(client, 'network.configuration')
 
-    ServiceAnnouncement = typing.TypedDict('ServiceAnnouncement', {
-            'netbios':'bool',
-            'mdns':'bool',
-            'wsd':'bool',
-    })
-    class Type(str,Enum):
-        ALLOW = 'ALLOW'
-        DENY = 'DENY'
-        ...
-    Activity = typing.TypedDict('Activity', {
-            'type':'Type',
-            'activities':'list[str]',
-    })
-    State = typing.TypedDict('State', {
-            'ipv4gateway':'str',
-            'ipv6gateway':'str',
-            'nameserver1':'str',
-            'nameserver2':'str',
-            'nameserver3':'str',
-    })
     NetworkConfigurationEntry = typing.TypedDict('NetworkConfigurationEntry', {
             'id':'int',
             'hostname':'str',
@@ -47,9 +27,25 @@ class NetworkConfiguration(Namespace):
             'hostname_virtual':'typing.Optional[str]',
             'state':'State',
     })
-    Activity_ = typing.TypedDict('Activity_', {
+    ServiceAnnouncement = typing.TypedDict('ServiceAnnouncement', {
+            'netbios':'bool',
+            'mdns':'bool',
+            'wsd':'bool',
+    })
+    Activity = typing.TypedDict('Activity', {
             'type':'Type',
             'activities':'list[str]',
+    })
+    class Type(str,Enum):
+        ALLOW = 'ALLOW'
+        DENY = 'DENY'
+        ...
+    State = typing.TypedDict('State', {
+            'ipv4gateway':'str',
+            'ipv6gateway':'str',
+            'nameserver1':'str',
+            'nameserver2':'str',
+            'nameserver3':'str',
     })
     GlobalConfigurationUpdate = typing.TypedDict('GlobalConfigurationUpdate', {
             'hostname':'str',
@@ -63,13 +59,9 @@ class NetworkConfiguration(Namespace):
             'hosts':'list[str]',
             'domains':'list[str]',
             'service_announcement':'ServiceAnnouncement',
-            'activity':'Activity_',
+            'activity':'Activity',
             'hostname_b':'typing.Optional[str]',
             'hostname_virtual':'typing.Optional[str]',
-    })
-    Activity__ = typing.TypedDict('Activity__', {
-            'type':'Type',
-            'activities':'list[str]',
     })
     NetworkConfigurationUpdateReturns = typing.TypedDict('NetworkConfigurationUpdateReturns', {
             'id':'int',
@@ -84,7 +76,7 @@ class NetworkConfiguration(Namespace):
             'hosts':'list[str]',
             'domains':'list[str]',
             'service_announcement':'ServiceAnnouncement',
-            'activity':'Activity__',
+            'activity':'Activity',
             'hostname_local':'str',
             'hostname_b':'typing.Optional[str]',
             'hostname_virtual':'typing.Optional[str]',

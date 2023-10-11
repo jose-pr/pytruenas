@@ -8,28 +8,15 @@ class Vm(Namespace):
     def __init__(self, client) -> None:
         super().__init__(client, 'vm')
 
+    BootloaderOptions = typing.TypedDict('BootloaderOptions', {
+            'UEFI':'UEFI',
+            'UEFI_CSM':'UEFICSM',
+    })
     class UEFI(str,Enum):
         UEFI = 'UEFI'
         ...
     class UEFICSM(str,Enum):
         LegacyBIOS = 'Legacy BIOS'
-        ...
-    BootloaderOptions = typing.TypedDict('BootloaderOptions', {
-            'UEFI':'UEFI',
-            'UEFI_CSM':'UEFICSM',
-    })
-    class CpuMode(str,Enum):
-        CUSTOM = 'CUSTOM'
-        HOSTMODEL = 'HOST-MODEL'
-        HOSTPASSTHROUGH = 'HOST-PASSTHROUGH'
-        ...
-    class Bootloader(str,Enum):
-        UEFI = 'UEFI'
-        UEFICSM = 'UEFI_CSM'
-        ...
-    class Time(str,Enum):
-        LOCAL = 'LOCAL'
-        UTC = 'UTC'
         ...
     VmCreate = typing.TypedDict('VmCreate', {
             'command_line_args':'str',
@@ -59,11 +46,19 @@ class Vm(Namespace):
             'machine_type':'typing.Optional[str]',
             'uuid':'typing.Optional[str]',
     })
-    Status = typing.TypedDict('Status', {
-            'state':'str',
-            'pid':'typing.Optional[int]',
-            'domain_state':'str',
-    })
+    class CpuMode(str,Enum):
+        CUSTOM = 'CUSTOM'
+        HOSTMODEL = 'HOST-MODEL'
+        HOSTPASSTHROUGH = 'HOST-PASSTHROUGH'
+        ...
+    class Bootloader(str,Enum):
+        UEFI = 'UEFI'
+        UEFICSM = 'UEFI_CSM'
+        ...
+    class Time(str,Enum):
+        LOCAL = 'LOCAL'
+        UTC = 'UTC'
+        ...
     VmCreateReturns = typing.TypedDict('VmCreateReturns', {
             'command_line_args':'str',
             'cpu_mode':'CpuMode',
@@ -95,6 +90,11 @@ class Vm(Namespace):
             'status':'Status',
             'id':'int',
     })
+    Status = typing.TypedDict('Status', {
+            'state':'str',
+            'pid':'typing.Optional[int]',
+            'domain_state':'str',
+    })
     VmDelete = typing.TypedDict('VmDelete', {
             'zvols':'bool',
             'force':'bool',
@@ -105,6 +105,13 @@ class Vm(Namespace):
             'amd_rvi':'bool',
             'amd_asids':'bool',
     })
+    VmDeviceEntry = typing.TypedDict('VmDeviceEntry', {
+            'dtype':'Dtype',
+            'vm':'int',
+            'attributes':'dict[str]',
+            'order':'typing.Optional[int]',
+            'id':'int',
+    })
     class Dtype(str,Enum):
         NIC = 'NIC'
         DISK = 'DISK'
@@ -114,20 +121,13 @@ class Vm(Namespace):
         RAW = 'RAW'
         USB = 'USB'
         ...
-    VmDeviceEntry = typing.TypedDict('VmDeviceEntry', {
-            'dtype':'Dtype',
-            'vm':'int',
-            'attributes':'dict[str]',
-            'order':'typing.Optional[int]',
-            'id':'int',
+    Options = typing.TypedDict('Options', {
+            'protocol':'Protocol',
     })
     class Protocol(str,Enum):
         HTTP = 'HTTP'
         HTTPS = 'HTTPS'
         ...
-    Options = typing.TypedDict('Options', {
-            'protocol':'Protocol',
-    })
     DisplayDevicesUri = typing.TypedDict('DisplayDevicesUri', {
             'error':'typing.Optional[str]',
             'uri':'typing.Optional[str]',
@@ -180,11 +180,6 @@ class Vm(Namespace):
             'limit':'int',
             'force_sql_filters':'bool',
     })
-    Status_ = typing.TypedDict('Status_', {
-            'state':'str',
-            'pid':'typing.Optional[int]',
-            'domain_state':'str',
-    })
     VmEntry = typing.TypedDict('VmEntry', {
             'command_line_args':'str',
             'cpu_mode':'CpuMode',
@@ -213,80 +208,20 @@ class Vm(Namespace):
             'machine_type':'typing.Optional[str]',
             'uuid':'typing.Optional[str]',
             'devices':'list',
-            'status':'Status_',
+            'status':'Status',
             'id':'int',
     })
-    Status__ = typing.TypedDict('Status__', {
-            'state':'str',
-            'pid':'typing.Optional[int]',
-            'domain_state':'str',
-    })
-    VmEntry_ = typing.TypedDict('VmEntry_', {
-            'command_line_args':'str',
-            'cpu_mode':'CpuMode',
-            'cpu_model':'typing.Optional[str]',
-            'name':'str',
-            'description':'str',
-            'vcpus':'int',
-            'cores':'int',
-            'threads':'int',
-            'cpuset':'typing.Optional[str]',
-            'nodeset':'typing.Optional[str]',
-            'pin_vcpus':'bool',
-            'suspend_on_snapshot':'bool',
-            'trusted_platform_module':'bool',
-            'memory':'int',
-            'min_memory':'typing.Optional[int]',
-            'hyperv_enlightenments':'bool',
-            'bootloader':'Bootloader',
-            'bootloader_ovmf':'str',
-            'autostart':'bool',
-            'hide_from_msr':'bool',
-            'ensure_display_device':'bool',
-            'time':'Time',
-            'shutdown_timeout':'int',
-            'arch_type':'typing.Optional[str]',
-            'machine_type':'typing.Optional[str]',
-            'uuid':'typing.Optional[str]',
-            'devices':'list',
-            'status':'Status__',
-            'id':'int',
-    })
-    Status___ = typing.TypedDict('Status___', {
-            'state':'str',
-            'pid':'typing.Optional[int]',
-            'domain_state':'str',
-    })
-    VmEntry__ = typing.TypedDict('VmEntry__', {
-            'command_line_args':'str',
-            'cpu_mode':'CpuMode',
-            'cpu_model':'typing.Optional[str]',
-            'name':'str',
-            'description':'str',
-            'vcpus':'int',
-            'cores':'int',
-            'threads':'int',
-            'cpuset':'typing.Optional[str]',
-            'nodeset':'typing.Optional[str]',
-            'pin_vcpus':'bool',
-            'suspend_on_snapshot':'bool',
-            'trusted_platform_module':'bool',
-            'memory':'int',
-            'min_memory':'typing.Optional[int]',
-            'hyperv_enlightenments':'bool',
-            'bootloader':'Bootloader',
-            'bootloader_ovmf':'str',
-            'autostart':'bool',
-            'hide_from_msr':'bool',
-            'ensure_display_device':'bool',
-            'time':'Time',
-            'shutdown_timeout':'int',
-            'arch_type':'typing.Optional[str]',
-            'machine_type':'typing.Optional[str]',
-            'uuid':'typing.Optional[str]',
-            'devices':'list',
-            'status':'Status___',
-            'id':'int',
+    ResolutionChoices = typing.TypedDict('ResolutionChoices', {
+            '1920x1200':'_1920x1200',
+            '1920x1080':'_1920x1080',
+            '1600x1200':'_1600x1200',
+            '1600x900':'_1600x900',
+            '1400x1050':'_1400x1050',
+            '1280x1024':'_1280x1024',
+            '1280x720':'_1280x720',
+            '1024x768':'_1024x768',
+            '800x600':'_800x600',
+            '640x480':'_640x480',
     })
     class _1920x1200(str,Enum):
         _1920x1200 = '1920x1200'
@@ -318,18 +253,6 @@ class Vm(Namespace):
     class _640x480(str,Enum):
         _640x480 = '640x480'
         ...
-    ResolutionChoices = typing.TypedDict('ResolutionChoices', {
-            '1920x1200':'_1920x1200',
-            '1920x1080':'_1920x1080',
-            '1600x1200':'_1600x1200',
-            '1600x900':'_1600x900',
-            '1400x1050':'_1400x1050',
-            '1280x1024':'_1280x1024',
-            '1280x720':'_1280x720',
-            '1024x768':'_1024x768',
-            '800x600':'_800x600',
-            '640x480':'_640x480',
-    })
     Options_ = typing.TypedDict('Options_', {
             'overcommit':'bool',
     })
@@ -371,11 +294,6 @@ class Vm(Namespace):
             'uuid':'typing.Optional[str]',
             'id':'int',
     })
-    Status____ = typing.TypedDict('Status____', {
-            'state':'str',
-            'pid':'typing.Optional[int]',
-            'domain_state':'str',
-    })
     VmUpdateReturns = typing.TypedDict('VmUpdateReturns', {
             'command_line_args':'str',
             'cpu_mode':'CpuMode',
@@ -404,7 +322,7 @@ class Vm(Namespace):
             'machine_type':'typing.Optional[str]',
             'uuid':'typing.Optional[str]',
             'devices':'list',
-            'status':'Status____',
+            'status':'Status',
             'id':'int',
     })
     VirtualizationDetails = typing.TypedDict('VirtualizationDetails', {

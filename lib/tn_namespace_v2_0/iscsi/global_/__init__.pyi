@@ -3,7 +3,7 @@ from pytruenas import TrueNASClient
 from pytruenas.base import Namespace
 from enum import Enum
 import typing
-class IscsiGlobal_(
+class IscsiGlobal(
     Namespace
     ):
     _namespace:typing.Literal['iscsi.global']
@@ -48,9 +48,9 @@ class IscsiGlobal_(
         ...
     @typing.overload
     def sessions(self, 
-        query_filters:'list[list]'=[],
-        query_options:'QueryOptions'={},
-    /) -> 'typing.Union[int, Session, list[Session_]]': 
+        query_filters:'list[list]',
+        query_options:'QueryOptions',
+    /) -> 'typing.Union[int, Session, list[Session]]': 
         """
         Get a list of currently running iSCSI sessions. This includes initiator and target names
         and the unique connection IDs.
@@ -63,13 +63,13 @@ class IscsiGlobal_(
             query-options
         Returns
         -------
-        typing.Union[int, Session, list[Session_]]:
+        typing.Union[int, Session, list[Session]]:
             
         """
         ...
     @typing.overload
     def update(self, 
-        iscsiglobal_update:'IscsiglobalUpdate'={},
+        iscsiglobal_update:'IscsiglobalUpdate',
     /) -> 'dict[str]': 
         """
         `alua` is a no-op for FreeNAS.
@@ -99,22 +99,6 @@ class IscsiGlobal_(
             'force_sql_filters':'bool',
     })
     Session = typing.TypedDict('Session', {
-            'initiator':'str',
-            'initiator_addr':'str',
-            'initiator_alias':'typing.Optional[str]',
-            'target':'str',
-            'target_alias':'str',
-            'header_digest':'typing.Optional[str]',
-            'data_digest':'typing.Optional[str]',
-            'max_data_segment_length':'typing.Optional[int]',
-            'max_receive_data_segment_length':'typing.Optional[int]',
-            'max_burst_length':'typing.Optional[int]',
-            'first_burst_length':'typing.Optional[int]',
-            'immediate_data':'bool',
-            'iser':'bool',
-            'offload':'bool',
-    })
-    Session_ = typing.TypedDict('Session_', {
             'initiator':'str',
             'initiator_addr':'str',
             'initiator_alias':'typing.Optional[str]',

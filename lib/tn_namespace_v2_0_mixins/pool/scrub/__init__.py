@@ -9,19 +9,19 @@ class PoolScrub(TableExtMixin, Namespace):
     def __init__(self, client) -> None:
         super().__init__(client, 'pool.scrub')
 
-    Schedule = typing.TypedDict('Schedule', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
     PoolScrubEntry = typing.TypedDict('PoolScrubEntry', {
             'pool':'int',
             'threshold':'int',
             'description':'str',
             'schedule':'Schedule',
             'enabled':'bool',
+    })
+    Schedule = typing.TypedDict('Schedule', {
+            'minute':'str',
+            'hour':'str',
+            'dom':'str',
+            'month':'str',
+            'dow':'str',
     })
     PoolScrubCreateReturns = typing.TypedDict('PoolScrubCreateReturns', {
             'pool':'int',

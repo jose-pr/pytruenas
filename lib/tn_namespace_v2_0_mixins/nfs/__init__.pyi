@@ -12,7 +12,7 @@ class Nfs(
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload
     def add_principal(self, 
-        kerberos_username_password:'KerberosUsernamePassword'={},
+        kerberos_username_password:'KerberosUsernamePassword',
     /) -> 'bool': 
         """
         Use user-provided admin credentials to kinit, add NFS SPN
@@ -77,8 +77,8 @@ class Nfs(
         ...
     @typing.overload
     def get_nfs3_clients(self, 
-        query_filters:'list[list]'=[],
-        query_options:'QueryOptions'={},
+        query_filters:'list[list]',
+        query_options:'QueryOptions',
     /) -> None: 
         """
         Read contents of rmtab. This information may not
@@ -97,8 +97,8 @@ class Nfs(
         ...
     @typing.overload
     def get_nfs4_clients(self, 
-        query_filters:'list[list]'=[],
-        query_options:'QueryOptions_'={},
+        query_filters:'list[list]',
+        query_options:'QueryOptions',
     /) -> None: 
         """
         Read information about NFSv4 clients from
@@ -116,7 +116,7 @@ class Nfs(
         ...
     @typing.overload
     def update(self, 
-        nfs_update:'NfsUpdate'={},
+        nfs_update:'NfsUpdate',
     /) -> 'NfsUpdateReturns': 
         """
         Update NFS Service Configuration.
@@ -156,10 +156,6 @@ class Nfs(
             'username':'str',
             'password':'str',
     })
-    class Protocol(str,Enum):
-        NFSV3 = 'NFSV3'
-        NFSV4 = 'NFSV4'
-        ...
     NfsEntry = typing.TypedDict('NfsEntry', {
             'id':'int',
             'servers':'int',
@@ -178,21 +174,11 @@ class Nfs(
             'v4_krb_enabled':'bool',
             'userd_manage_gids':'bool',
     })
+    class Protocol(str,Enum):
+        NFSV3 = 'NFSV3'
+        NFSV4 = 'NFSV4'
+        ...
     QueryOptions = typing.TypedDict('QueryOptions', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    QueryOptions_ = typing.TypedDict('QueryOptions_', {
             'relationships':'bool',
             'extend':'typing.Optional[str]',
             'extend_context':'typing.Optional[str]',

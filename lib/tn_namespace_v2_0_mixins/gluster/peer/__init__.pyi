@@ -12,7 +12,7 @@ class GlusterPeer(
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload
     def create(self, 
-        peer_create:'PeerCreate'={},
+        peer_create:'PeerCreate',
     /) -> 'GlusterPeerCreateReturns': 
         """
         Add peer to the Trusted Storage Pool.
@@ -59,7 +59,7 @@ class GlusterPeer(
     @typing.overload
     def get_instance(self, 
         id:'typing.Union[str, int, bool, dict[str], list]',
-        query_options_get_instance:'QueryOptionsGetInstance'={},
+        query_options_get_instance:'QueryOptionsGetInstance',
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -92,8 +92,8 @@ class GlusterPeer(
         ...
     @typing.overload
     def query(self, 
-        query_filters:'list[list]'=[],
-        query_options:'QueryOptions'={},
+        query_filters:'list[list]',
+        query_options:'QueryOptions',
     /) -> 'typing.Union[list[GlusterPeerEntry], GlusterPeerEntry, int]': 
         """
         
@@ -112,7 +112,7 @@ class GlusterPeer(
         ...
     @typing.overload
     def status(self, 
-        peer_status:'PeerStatus'={},
+        peer_status:'PeerStatus',
     /) -> 'list[GlusterPeerEntry]': 
         """
         List the status of peers in the Trusted Storage Pool.

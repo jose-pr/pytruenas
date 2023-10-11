@@ -10,7 +10,7 @@ class Staticroute(
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload
     def create(self, 
-        staticroute_create:'StaticrouteCreate'={},
+        staticroute_create:'StaticrouteCreate',
     /) -> 'StaticrouteCreateReturns': 
         """
         Create a Static Route.
@@ -49,7 +49,7 @@ class Staticroute(
     @typing.overload
     def get_instance(self, 
         id:'typing.Union[str, int, bool, dict[str], list]',
-        query_options_get_instance:'QueryOptionsGetInstance'={},
+        query_options_get_instance:'QueryOptionsGetInstance',
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -68,8 +68,8 @@ class Staticroute(
         ...
     @typing.overload
     def query(self, 
-        query_filters:'list[list]'=[],
-        query_options:'QueryOptions'={},
+        query_filters:'list[list]',
+        query_options:'QueryOptions',
     /) -> 'typing.Union[list[StaticrouteEntry], StaticrouteEntry, int]': 
         """
         
@@ -89,7 +89,7 @@ class Staticroute(
     @typing.overload
     def update(self, 
         id:'int',
-        staticroute_update:'StaticrouteUpdate'={},
+        staticroute_update:'StaticrouteUpdate',
     /) -> 'StaticrouteUpdateReturns': 
         """
         Update Static Route of `id`.

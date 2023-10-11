@@ -97,16 +97,16 @@ class Alert(
             'formatted':'typing.Optional[str]',
             'one_shot':'bool',
     })
+    Category = typing.TypedDict('Category', {
+            'id':'str',
+            'title':'str',
+            'classes':'list[CategoryClass]',
+    })
     CategoryClass = typing.TypedDict('CategoryClass', {
             'id':'str',
             'title':'str',
             'level':'str',
             'proactive_support':'bool',
-    })
-    Category = typing.TypedDict('Category', {
-            'id':'str',
-            'title':'str',
-            'classes':'list[CategoryClass]',
     })
     class Policy(str,Enum):
         IMMEDIATELY = 'IMMEDIATELY'

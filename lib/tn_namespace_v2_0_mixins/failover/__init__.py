@@ -33,6 +33,10 @@ class Failover(ConfigMixin, Namespace):
     Options__ = typing.TypedDict('Options__', {
             'reboot':'bool',
     })
+    Options___ = typing.TypedDict('Options___', {
+            'pools':'list[PoolKeys]',
+            'datasets':'list[DatasetKeys]',
+    })
     PoolKeys = typing.TypedDict('PoolKeys', {
             'name':'str',
             'passphrase':'str',
@@ -40,10 +44,6 @@ class Failover(ConfigMixin, Namespace):
     DatasetKeys = typing.TypedDict('DatasetKeys', {
             'name':'str',
             'passphrase':'str',
-    })
-    Options___ = typing.TypedDict('Options___', {
-            'pools':'list[PoolKeys]',
-            'datasets':'list[DatasetKeys]',
     })
     FailoverUpdate = typing.TypedDict('FailoverUpdate', {
             'disabled':'bool',

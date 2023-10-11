@@ -10,7 +10,7 @@ class ClusterManagement(
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload
     def add_nodes(self, 
-        add_cluster_nodes:'AddClusterNodes'={},
+        add_cluster_nodes:'AddClusterNodes',
     /) -> 'ClusterInformation': 
         """
         WARNING: clustering APIs are not intended for 3rd-party consumption and may result
@@ -44,8 +44,8 @@ class ClusterManagement(
         ...
     @typing.overload
     def cluster_create(self, 
-        cluster_configuration:'ClusterConfiguration'={},
-    /) -> 'ClusterInformation_': 
+        cluster_configuration:'ClusterConfiguration',
+    /) -> 'ClusterInformation': 
         """
         WARNING: clustering APIs are not intended for 3rd-party consumption and may result
         in a misconfigured SCALE cluster, production outage, or data loss.
@@ -94,13 +94,13 @@ class ClusterManagement(
             cluster_configuration
         Returns
         -------
-        ClusterInformation_:
+        ClusterInformation:
             cluster_information
         """
         ...
     @typing.overload
     def summary(self, 
-        summary_options:'SummaryOptions'={},
+        summary_options:'SummaryOptions',
     /) -> 'Summary': 
         """
         WARNING: clustering APIs are not intended for 3rd-party consumption and may result
@@ -148,6 +148,16 @@ class ClusterManagement(
             summary
         """
         ...
+    AddClusterNodes = typing.TypedDict('AddClusterNodes', {
+            'new_cluster_nodes':'list[ClusterPeer]',
+            'options':'Options',
+    })
+    ClusterPeer = typing.TypedDict('ClusterPeer', {
+            'remote_credential':'typing.Union[PlainCred, AuthenticationToken, ApiKey]',
+            'hostname':'str',
+            'private_address':'str',
+            'brick_path':'str',
+    })
     PlainCred = typing.TypedDict('PlainCred', {
             'username':'str',
             'password':'str',
@@ -158,23 +168,14 @@ class ClusterManagement(
     ApiKey = typing.TypedDict('ApiKey', {
             'api_key':'str',
     })
-    ClusterPeer = typing.TypedDict('ClusterPeer', {
-            'remote_credential':'typing.Union[PlainCred, AuthenticationToken, ApiKey]',
-            'hostname':'str',
-            'private_address':'str',
-            'brick_path':'str',
-    })
     Options = typing.TypedDict('Options', {
             'skip_brick_add':'bool',
             'rebalance_volume':'bool',
     })
-    AddClusterNodes = typing.TypedDict('AddClusterNodes', {
-            'new_cluster_nodes':'list[ClusterPeer]',
-            'options':'Options',
-    })
-    Ports = typing.TypedDict('Ports', {
-            'tcp':'str',
-            'rdma':'str',
+    ClusterInformation = typing.TypedDict('ClusterInformation', {
+            'gluster_volume':'list[GlusterVolumeEntry]',
+            'gluster_peers':'list[GlusterPeerEntry]',
+            'ctdb_configuration':'CtdbConfiguration',
     })
     GlusterVolumeEntry = typing.TypedDict('GlusterVolumeEntry', {
             'name':'str',
@@ -194,6 +195,10 @@ class ClusterManagement(
             'mnt_options':'str',
             'fs_name':'str',
     })
+    Ports = typing.TypedDict('Ports', {
+            'tcp':'str',
+            'rdma':'str',
+    })
     GlusterPeerEntry = typing.TypedDict('GlusterPeerEntry', {
             'id':'str',
             'uuid':'str',
@@ -201,6 +206,10 @@ class ClusterManagement(
             'connected':'str',
             'state':'str',
             'status':'str',
+    })
+    CtdbConfiguration = typing.TypedDict('CtdbConfiguration', {
+            'root_dir_config':'RootDirConfig',
+            'private_ips':'list[CtdbPrivateIp]',
     })
     RootDirConfig = typing.TypedDict('RootDirConfig', {
             'volume_name':'str',
@@ -218,14 +227,14 @@ class ClusterManagement(
             'this_node':'bool',
             'node_uuid':'str',
     })
-    CtdbConfiguration = typing.TypedDict('CtdbConfiguration', {
-            'root_dir_config':'RootDirConfig',
-            'private_ips':'list[CtdbPrivateIp]',
+    ClusterConfiguration = typing.TypedDict('ClusterConfiguration', {
+            'volume_configuration':'VolumeConfiguration',
+            'local_node_configuration':'LocalNodeConfiguration',
+            'peers':'list[ClusterPeer]',
     })
-    ClusterInformation = typing.TypedDict('ClusterInformation', {
-            'gluster_volume':'list[GlusterVolumeEntry]',
-            'gluster_peers':'list[GlusterPeerEntry]',
-            'ctdb_configuration':'CtdbConfiguration',
+    VolumeConfiguration = typing.TypedDict('VolumeConfiguration', {
+            'name':'str',
+            'brick_layout':'typing.Union[ReplicatedBrickLayout, DispersedBrickLayout, DistributedBrickLayout]',
     })
     ReplicatedBrickLayout = typing.TypedDict('ReplicatedBrickLayout', {
             'replica_distribute':'int',
@@ -238,58 +247,33 @@ class ClusterManagement(
     DistributedBrickLayout = typing.TypedDict('DistributedBrickLayout', {
             'distribute_bricks':'int',
     })
-    VolumeConfiguration = typing.TypedDict('VolumeConfiguration', {
-            'name':'str',
-            'brick_layout':'typing.Union[ReplicatedBrickLayout, DispersedBrickLayout, DistributedBrickLayout]',
-    })
     LocalNodeConfiguration = typing.TypedDict('LocalNodeConfiguration', {
             'hostname':'str',
             'private_address':'str',
             'brick_path':'str',
     })
-    ClusterPeer_ = typing.TypedDict('ClusterPeer_', {
-            'remote_credential':'typing.Union[PlainCred, AuthenticationToken, ApiKey]',
-            'hostname':'str',
-            'private_address':'str',
-            'brick_path':'str',
-    })
-    ClusterConfiguration = typing.TypedDict('ClusterConfiguration', {
-            'volume_configuration':'VolumeConfiguration',
-            'local_node_configuration':'LocalNodeConfiguration',
-            'peers':'list[ClusterPeer_]',
-    })
-    CtdbConfiguration_ = typing.TypedDict('CtdbConfiguration_', {
-            'root_dir_config':'RootDirConfig',
-            'private_ips':'list[CtdbPrivateIp]',
-    })
-    ClusterInformation_ = typing.TypedDict('ClusterInformation_', {
-            'gluster_volume':'list[GlusterVolumeEntry]',
-            'gluster_peers':'list[GlusterPeerEntry]',
-            'ctdb_configuration':'CtdbConfiguration_',
-    })
     SummaryOptions = typing.TypedDict('SummaryOptions', {
             'include_volumes':'bool',
+    })
+    Summary = typing.TypedDict('Summary', {
+            'healthy':'bool',
+            'version':'Version',
+            'ctdb_root_dir_config':'CtdbRootDirConfig',
+            'leader':'Leader',
+            'cluster_nodes':'list[ClusterNode]',
+            'cluster_volumes':'list',
     })
     Version = typing.TypedDict('Version', {
             'major':'int',
             'minor':'int',
     })
-    Node = typing.TypedDict('Node', {
-            'flags':'list',
-            'partially_online':'bool',
-    })
-    Peering = typing.TypedDict('Peering', {
-            'connected':'str',
-            'state':'str',
-            'status':'str',
-    })
-    Status = typing.TypedDict('Status', {
-            'node':'Node',
-            'peering':'Peering',
-    })
-    VirtualAddresses = typing.TypedDict('VirtualAddresses', {
-            'configured':'list',
-            'active':'list',
+    CtdbRootDirConfig = typing.TypedDict('CtdbRootDirConfig', {
+            'volume_name':'str',
+            'volume_mountpoint':'str',
+            'volume_type':'str',
+            'path':'str',
+            'mountpoint':'str',
+            'uuid':'str',
     })
     Leader = typing.TypedDict('Leader', {
             'pnn':'int',
@@ -300,6 +284,23 @@ class ClusterManagement(
             'private_address':'str',
             'virtual_addresses':'VirtualAddresses',
     })
+    Status = typing.TypedDict('Status', {
+            'node':'Node',
+            'peering':'Peering',
+    })
+    Node = typing.TypedDict('Node', {
+            'flags':'list',
+            'partially_online':'bool',
+    })
+    Peering = typing.TypedDict('Peering', {
+            'connected':'str',
+            'state':'str',
+            'status':'str',
+    })
+    VirtualAddresses = typing.TypedDict('VirtualAddresses', {
+            'configured':'list',
+            'active':'list',
+    })
     ClusterNode = typing.TypedDict('ClusterNode', {
             'pnn':'int',
             'this_node':'bool',
@@ -308,12 +309,4 @@ class ClusterManagement(
             'status':'Status',
             'private_address':'str',
             'virtual_addresses':'VirtualAddresses',
-    })
-    Summary = typing.TypedDict('Summary', {
-            'healthy':'bool',
-            'version':'Version',
-            'ctdb_root_dir_config':'RootDirConfig',
-            'leader':'Leader',
-            'cluster_nodes':'list[ClusterNode]',
-            'cluster_volumes':'list',
     })

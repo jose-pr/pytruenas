@@ -12,7 +12,7 @@ class Keychaincredential(
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload
     def create(self, 
-        keychain_credential_create:'KeychainCredentialCreate'={},
+        keychain_credential_create:'KeychainCredentialCreate',
     /) -> 'KeychaincredentialCreateReturns': 
         """
         Create a Keychain Credential
@@ -48,7 +48,7 @@ class Keychaincredential(
     @typing.overload
     def delete(self, 
         id:'int',
-        options:'Options'={},
+        options:'Options',
     /) -> None: 
         """
         Delete Keychain Credential with specific `id`
@@ -82,7 +82,7 @@ class Keychaincredential(
     @typing.overload
     def get_instance(self, 
         id:'typing.Union[str, int, bool, dict[str], list]',
-        query_options_get_instance:'QueryOptionsGetInstance'={},
+        query_options_get_instance:'QueryOptionsGetInstance',
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -101,8 +101,8 @@ class Keychaincredential(
         ...
     @typing.overload
     def query(self, 
-        query_filters:'list[list]'=[],
-        query_options:'QueryOptions'={},
+        query_filters:'list[list]',
+        query_options:'QueryOptions',
     /) -> 'typing.Union[list[KeychainCredentialEntry], KeychainCredentialEntry, int]': 
         """
         
@@ -121,7 +121,7 @@ class Keychaincredential(
         ...
     @typing.overload
     def remote_ssh_host_key_scan(self, 
-        keychain_remote_ssh_host_key_scan:'KeychainRemoteSshHostKeyScan'={},
+        keychain_remote_ssh_host_key_scan:'KeychainRemoteSshHostKeyScan',
     /) -> 'str': 
         """
         Discover a remote host key
@@ -140,7 +140,7 @@ class Keychaincredential(
         ...
     @typing.overload
     def remote_ssh_semiautomatic_setup(self, 
-        keychain_remote_ssh_semiautomatic_setup:'KeychainRemoteSshSemiautomaticSetup'={},
+        keychain_remote_ssh_semiautomatic_setup:'KeychainRemoteSshSemiautomaticSetup',
     /) -> 'KeychainCredentialEntry': 
         """
         Perform semi-automatic SSH connection setup with other FreeNAS machine
@@ -162,7 +162,7 @@ class Keychaincredential(
         ...
     @typing.overload
     def setup_ssh_connection(self, 
-        setup_ssh_connection:'SetupSshConnection'={},
+        setup_ssh_connection:'SetupSshConnection',
     /) -> 'KeychainCredentialEntry': 
         """
         Creates a SSH Connection performing the following steps:
@@ -186,7 +186,7 @@ class Keychaincredential(
     @typing.overload
     def update(self, 
         id:'int',
-        keychain_credential_update:'KeychainCredentialUpdate'={},
+        keychain_credential_update:'KeychainCredentialUpdate',
     /) -> 'KeychaincredentialUpdateReturns': 
         """
         Update a Keychain Credential with specific `id`
@@ -295,6 +295,13 @@ class Keychaincredential(
             'connect_timeout':'int',
             'sudo':'bool',
     })
+    SetupSshConnection = typing.TypedDict('SetupSshConnection', {
+            'private_key':'PrivateKey',
+            'connection_name':'str',
+            'setup_type':'SetupType',
+            'semi_automatic_setup':'SemiAutomaticSetup',
+            'manual_setup':'dict[str]',
+    })
     PrivateKey = typing.TypedDict('PrivateKey', {
             'generate_key':'bool',
             'existing_key_id':'int',
@@ -313,13 +320,6 @@ class Keychaincredential(
             'username':'str',
             'connect_timeout':'int',
             'sudo':'bool',
-    })
-    SetupSshConnection = typing.TypedDict('SetupSshConnection', {
-            'private_key':'PrivateKey',
-            'connection_name':'str',
-            'setup_type':'SetupType',
-            'semi_automatic_setup':'SemiAutomaticSetup',
-            'manual_setup':'dict[str]',
     })
     KeychainCredentialUpdate = typing.TypedDict('KeychainCredentialUpdate', {
             'name':'str',

@@ -5,228 +5,39 @@ import re as _re
 import keyword as _kw
 import typing as _ty
 from ..base import TrueNASClient, Namespace
-from .. import _utils, _core
+from .. import _utils, _core, api as _api
+from dataclasses import dataclass as _dataclass, field as _field
 
+@_dataclass
+class PythonNamespaceSignature(_api.NamespaceSignature):
+    objects: list[_api.Object|_api.Enum] = _field(default_factory=lambda: [])
+    baseclass: Namespace = Namespace
+    mixins: list[type] = _field(default_factory=lambda: [])
 
-class Object(_ty.NamedTuple):
-    properties: _ty.OrderedDict[str, "OpenApiType"]
-
-    def __bool__(self) -> int:
-        return self.properties.__len__() > 0
-
-    def __eq__(self, other):
-        if not isinstance(other, Object):
-            # don't attempt to compare against unrelated types
-            return False
-        a = self.properties
-        b = other.properties
-        if len(a) != len(b):
-            return False
-        for k, v in a.items():
-            if k not in b:
-                return False
-            diff = _utils.diff(b[k]._raw, v._raw)
-            diff.pop("description", None)
-            if diff:
-                return False
-        return True
-
-class Enum(_ty.NamedTuple):
-    options: list[str]
-    def __bool__(self) -> int:
-        return self.options.__len__() > 0
-    def __eq__(self, other):
-        if not isinstance(other, Enum):
-            return False
-        return self.options == other.options
-
-class OpenApiType:
-    _raw: _core.Parameter
-    _obj: str | None
-
-    def __init__(self, raw: _core.Parameter | str, objects: dict[str, Object]):
-        raw: _core.Parameter = raw if isinstance(raw, dict) else {"type": raw}
-        self._raw = raw
-
-        typescheck = ["anyOf", "oneOf", "items"]
-        if "type" in raw and isinstance(raw["type"], str):
-            pass
-        else:
-            typescheck.append("type")
-
-        for k in typescheck:
-            if k in raw:
-                _type = raw[k]
-                types = []
-                if not isinstance(_type, list):
-                    _type = [_type]
-                for t in _type:
-                    if isinstance(t, str):
-                        t = {**raw, "type": t}
-                    if not isinstance(t, OpenApiType):
-                        t = OpenApiType(t, objects)
-                    types.append(t)
-                raw[k] = types
-
-        if 'properties' in raw:
-            obj = Object(_ty.OrderedDict())
-            for name, prop in raw["properties"].items():
-                obj.properties[name] = OpenApiType(prop, objects)
-        elif 'enum' in raw:
-            obj = Enum([])
-            for enum in raw['enum']:
-                obj.options.append(enum)
-        else:
-            obj = None
-
-        if not obj:
-            self._obj = None
-        else:
-            name: str = self._raw.get("title", "Object")
-            name = _utils.classname(name).rstrip("_")
-            if name in objects:
-                ...
-            while name in objects and not objects[name].__eq__(obj):
-                name += "_"
-            objects[name] = obj
-            self._obj = name
-
-
-            
-
-    @property
-    def type(self) -> "list[OpenApiType]|_core.Parameter":
-        for k in ["type", "anyOf", "oneOf"]:
-            if k in self._raw:
-                ty = self._raw[k]
-                if isinstance(ty, str):
-                    return self._raw
-                else:
-                    return ty
-    _FORWARDREF = _re.compile(r"ForwardRef\('([^']*)'\)")
-    def python(self) -> "type | Object":
-        py = self._python()
-        ty = str(py)
-        if "<" in ty:
-            ty = py.__name__
-        ty=self._FORWARDREF.sub(r'\1', ty)
-        return ty.replace("'", "")
-
-    def _python(self) -> str:
-        types = self.type
-        if isinstance(types, list):
-            return _ty.Union[tuple([t._python() for t in types])]  # type: ignore
-        elif not types:
-            return None
-        ty = types
-        if isinstance(ty, OpenApiType):
-            return ty._python()
-        ty = ty["type"]
-        union = []
-        for item in self._raw.get("items", []):
-            union.append(item._python())
-        if len(union) > 1:
-            union = _ty.Union[tuple(union)]  # type: ignore
-        elif union:
-            union = union[0]
-        if "format" in self._raw:
-            pass
-        match ty:
-            case "float":
-                ty = float
-            case "null":
-                ty = None
-            case "boolean":
-                ty = bool
-            case "integer":
-                ty = int
-            case "string":
-                if self._obj:
-                    ty = self._obj
-                else:
-                    ty = str
-            case "array":
-                if union:
-                    ty = list[union]
-                else:
-                    ty = list
-            case "object":
-                if self._obj:
-                    ty = self._obj
-                else:
-                    ty = dict[str]
-                pass
-            case _:
-                raise ValueError(ty)
-        return ty
-
-
-class Paramater(_ty.NamedTuple):
-    type: list[OpenApiType]
-    description: str
-    default: "_ty.Any"
-    required: bool
-
-    @classmethod
-    def from_param(cls, param: "_core.Parameter", objects: dict):
-        param = param or {}
-        type = []
-        desc = param.get("description", param.get("title", ""))
-        required = param.get("required", True)
-        type = [OpenApiType(param, objects)]
-        default = param.get("default", _utils.MISSING)
-        if default is not _utils.MISSING:
-            match default:
-                case True:
-                    ...
-                case False:
-                    ...
-                case None:
-                    ...
-                case _:
-                    default = json.dumps(default)
-        return cls(type, desc, default, required)
-
-
-class MethodSignature(_ty.NamedTuple):
-    description: str
-    arguments: _ty.OrderedDict[str, Paramater]
-    returns: list[Paramater]
-
-
-class NamespaceSignature:
-    _raw: _core.NamespaceInfo
-    methods: dict[str, list[MethodSignature]]
-    objects: dict[str, Object]
-    baseclass: Namespace
-    mixins: list[type]
-
-    def __init__(self, raw: _core.NamespaceInfo, baseclass=None, mixins=None) -> None:
-        self._raw = raw
-        self.methods = {}
-        self.objects = dict()
-        self.mixins = mixins or []
-        self.baseclass = baseclass or Namespace
-        for name, method in self._raw["methods"].items():
-            signatures = []
-            descr = method["description"]
-            returns = []
-            args = _ty.OrderedDict()
-            for p in method["accepts"]:
-                pname = p["name"].replace("-", "_")
-                args[pname] = Paramater.from_param(p, self.objects)
-            for p in method["returns"]:
-                returns.append(Paramater.from_param(p, self.objects))
-            signatures.append(MethodSignature(descr, args, returns))
-            self.methods[name] = signatures
-
-    @property
-    def description(self):
-        return self._raw["config"]["cli_description"]
+    @staticmethod
+    def from_( ns:_api.NamespaceSignature, baseclass=None, mixins=None) -> 'PythonNamespaceSignature':
+        ns = PythonNamespaceSignature(**ns.__dict__, baseclass=baseclass or Namespace, mixins=mixins or [])
+        objects = {}
+        for method in ns.methods:
+            for param in [*method.arguments.values(), *method.returns]:
+                for ty in param.type.required_types():
+                    if not isinstance(ty, (_api.Object, _api.Enum)) or not ty:
+                             continue
+                    ty.name = _utils.classname(ty.name).rstrip("_")
+                    if not ty.name:
+                        if isinstance(ty, _api.Object):
+                            ty.name = _utils.classname(f"{method.name}Properties").rstrip("_")
+                        else:
+                            ty.name = _utils.classname(f"{method.name}Options").rstrip("_")
+                    while ty.name in objects and not objects[ty.name].__eq__(ty):
+                        ty.name += "_"
+                    objects[ty.name] = ty
+        ns.objects = list(objects.values())
+        return ns
 
     @property
     def dotname(self):
-        return self._raw["config"]["namespace"]
+        return self.name
 
     @property
     def module(self):
@@ -241,15 +52,15 @@ class NamespaceSignature:
     @property
     def classname(self):
         return (
-            self.module[0].upper()
-            + _re.sub("\.[a-z]", lambda m: m.group(0)[1:].upper(), self.module)[1:]
+            self.dotname[0].upper()
+            + _re.sub("\.[a-z]", lambda m: m.group(0)[1:].upper(), self.dotname)[1:]
         )
 
 
 class NamespaceCodegen:
     def generate(
         self,
-        namespace: NamespaceSignature,
+        namespace: _api.NamespaceSignature,
     ) -> tuple[str, str] | str:
         ...
 
@@ -265,16 +76,14 @@ class Codegen:
         self,
         client: TrueNASClient,
         root: _P | str,
-        modns: _ty.Callable[[NamespaceSignature], None] = None,
+        modns: _ty.Callable[[_api.NamespaceSignature], None] = None,
     ):
         root = _P(root)
         root.mkdir(exist_ok=True)
-
+        api = client.api()
         with (root / _INIT).open("w") as index:
-            for ns in sorted(
-                client.namespaces(), key=lambda ns: ns["config"]["namespace"]
-            ):
-                ns = NamespaceSignature(ns)
+            for ns in api.namespaces:
+                ns = PythonNamespaceSignature.from_(ns)
                 if modns:
                     modns(ns)
                 code = self.nscodegen.generate(ns)

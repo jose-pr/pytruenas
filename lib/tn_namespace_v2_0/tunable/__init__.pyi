@@ -10,7 +10,7 @@ class Tunable(
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload
     def create(self, 
-        tunable_create:'TunableCreate'={},
+        tunable_create:'TunableCreate',
     /) -> 'TunableCreateReturns': 
         """
         Create a tunable.
@@ -57,7 +57,7 @@ class Tunable(
     @typing.overload
     def get_instance(self, 
         id:'typing.Union[str, int, bool, dict[str], list]',
-        query_options_get_instance:'QueryOptionsGetInstance'={},
+        query_options_get_instance:'QueryOptionsGetInstance',
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -76,8 +76,8 @@ class Tunable(
         ...
     @typing.overload
     def query(self, 
-        query_filters:'list[list]'=[],
-        query_options:'QueryOptions'={},
+        query_filters:'list[list]',
+        query_options:'QueryOptions',
     /) -> 'typing.Union[list[TunableEntry], TunableEntry, int]': 
         """
         
@@ -111,7 +111,7 @@ class Tunable(
     @typing.overload
     def update(self, 
         id:'int',
-        tunable_update:'TunableUpdate'={},
+        tunable_update:'TunableUpdate',
     /) -> 'TunableUpdateReturns': 
         """
         Update Tunable of `id`.
@@ -129,11 +129,6 @@ class Tunable(
             tunable_update_returns
         """
         ...
-    class Type(str,Enum):
-        SYSCTL = 'SYSCTL'
-        UDEV = 'UDEV'
-        ZFS = 'ZFS'
-        ...
     TunableCreate = typing.TypedDict('TunableCreate', {
             'type':'Type',
             'var':'str',
@@ -142,6 +137,11 @@ class Tunable(
             'enabled':'bool',
             'update_initramfs':'bool',
     })
+    class Type(str,Enum):
+        SYSCTL = 'SYSCTL'
+        UDEV = 'UDEV'
+        ZFS = 'ZFS'
+        ...
     TunableCreateReturns = typing.TypedDict('TunableCreateReturns', {
             'type':'Type',
             'var':'str',
@@ -188,6 +188,11 @@ class Tunable(
             'update_initramfs':'bool',
             'id':'int',
     })
+    TunableTypeChoices = typing.TypedDict('TunableTypeChoices', {
+            'SYSCTL':'SYSCTL',
+            'UDEV':'UDEV',
+            'ZFS':'ZFS',
+    })
     class SYSCTL(str,Enum):
         SYSCTL = 'SYSCTL'
         ...
@@ -197,11 +202,6 @@ class Tunable(
     class ZFS(str,Enum):
         ZFS = 'ZFS'
         ...
-    TunableTypeChoices = typing.TypedDict('TunableTypeChoices', {
-            'SYSCTL':'SYSCTL',
-            'UDEV':'UDEV',
-            'ZFS':'ZFS',
-    })
     TunableUpdate = typing.TypedDict('TunableUpdate', {
             'value':'str',
             'comment':'str',

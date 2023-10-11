@@ -9,14 +9,6 @@ class Ups(ConfigMixin, Namespace):
     def __init__(self, client) -> None:
         super().__init__(client, 'ups')
 
-    class Mode(str,Enum):
-        MASTER = 'MASTER'
-        SLAVE = 'SLAVE'
-        ...
-    class Shutdown(str,Enum):
-        LOWBATT = 'LOWBATT'
-        BATT = 'BATT'
-        ...
     UpsEntry = typing.TypedDict('UpsEntry', {
             'powerdown':'bool',
             'rmonitor':'bool',
@@ -40,6 +32,14 @@ class Ups(ConfigMixin, Namespace):
             'shutdowncmd':'typing.Optional[str]',
             'complete_identifier':'str',
     })
+    class Mode(str,Enum):
+        MASTER = 'MASTER'
+        SLAVE = 'SLAVE'
+        ...
+    class Shutdown(str,Enum):
+        LOWBATT = 'LOWBATT'
+        BATT = 'BATT'
+        ...
     UpsUpdate = typing.TypedDict('UpsUpdate', {
             'powerdown':'bool',
             'rmonitor':'bool',

@@ -10,7 +10,7 @@ class GlusterEventsd(
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload
     def create(self, 
-        webhook_create:'WebhookCreate'={},
+        webhook_create:'WebhookCreate',
     /) -> None: 
         """
         Add `url` webhook that will be called
@@ -35,7 +35,7 @@ class GlusterEventsd(
         ...
     @typing.overload
     def delete(self, 
-        webhook_delete:'WebhookDelete'={},
+        webhook_delete:'WebhookDelete',
     /) -> None: 
         """
         Delete `url` webhook

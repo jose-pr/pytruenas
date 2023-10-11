@@ -10,7 +10,7 @@ class AcmeDnsAuthenticator(
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload
     def authenticator_schemas(self, 
-    /) -> 'list[AuthenticatorSchema]': 
+    /) -> 'list[SchemaEntry]': 
         """
         Get the schemas for all DNS providers we support for ACME DNS Challenge and the respective attributes
         required for connecting to them while validating a DNS Challenge
@@ -19,13 +19,13 @@ class AcmeDnsAuthenticator(
         ----------
         Returns
         -------
-        list[AuthenticatorSchema]:
+        list[SchemaEntry]:
             Authenticator Schemas
         """
         ...
     @typing.overload
     def create(self, 
-        acme_dns_authenticator_create:'AcmeDnsAuthenticatorCreate'={},
+        acme_dns_authenticator_create:'AcmeDnsAuthenticatorCreate',
     /) -> 'AcmeDnsAuthenticatorCreateReturns': 
         """
         Create a DNS Authenticator
@@ -63,7 +63,7 @@ class AcmeDnsAuthenticator(
     @typing.overload
     def get_instance(self, 
         id:'typing.Union[str, int, bool, dict[str], list]',
-        query_options_get_instance:'QueryOptionsGetInstance'={},
+        query_options_get_instance:'QueryOptionsGetInstance',
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -82,8 +82,8 @@ class AcmeDnsAuthenticator(
         ...
     @typing.overload
     def query(self, 
-        query_filters:'list[list]'=[],
-        query_options:'QueryOptions'={},
+        query_filters:'list[list]',
+        query_options:'QueryOptions',
     /) -> 'typing.Union[list[AcmeDnsAuthenticatorEntry], AcmeDnsAuthenticatorEntry, int]': 
         """
         
@@ -103,7 +103,7 @@ class AcmeDnsAuthenticator(
     @typing.overload
     def update(self, 
         id:'int',
-        dns_authenticator_update:'DnsAuthenticatorUpdate'={},
+        dns_authenticator_update:'DnsAuthenticatorUpdate',
     /) -> 'AcmeDnsAuthenticatorUpdateReturns': 
         """
         Update DNS Authenticator of `id`
@@ -120,14 +120,19 @@ class AcmeDnsAuthenticator(
             acme_dns_authenticator_update_returns
         """
         ...
+    SchemaEntry = typing.TypedDict('SchemaEntry', {
+            'key':'str',
+            'schema':'list[AttributeSchema]',
+    })
     AttributeSchema = typing.TypedDict('AttributeSchema', {
             '_name_':'str',
             'title':'str',
             '_required_':'bool',
     })
-    AuthenticatorSchema = typing.TypedDict('AuthenticatorSchema', {
-            'key':'str',
-            'schema':'list[AttributeSchema]',
+    AcmeDnsAuthenticatorCreate = typing.TypedDict('AcmeDnsAuthenticatorCreate', {
+            'authenticator':'Authenticator',
+            'attributes':'dict[str]',
+            'name':'str',
     })
     class Authenticator(str,Enum):
         Cloudflare = 'cloudflare'
@@ -135,11 +140,6 @@ class AcmeDnsAuthenticator(
         OVH = 'OVH'
         Shell = 'shell'
         ...
-    AcmeDnsAuthenticatorCreate = typing.TypedDict('AcmeDnsAuthenticatorCreate', {
-            'authenticator':'Authenticator',
-            'attributes':'dict[str]',
-            'name':'str',
-    })
     AcmeDnsAuthenticatorCreateReturns = typing.TypedDict('AcmeDnsAuthenticatorCreateReturns', {
             'id':'int',
             'authenticator':'Authenticator',

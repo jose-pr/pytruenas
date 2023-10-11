@@ -8,18 +8,6 @@ class IscsiExtent(Namespace):
     def __init__(self, client) -> None:
         super().__init__(client, 'iscsi.extent')
 
-    class Type(str,Enum):
-        DISK = 'DISK'
-        FILE = 'FILE'
-        ...
-    class Rpm(str,Enum):
-        UNKNOWN = 'UNKNOWN'
-        SSD = 'SSD'
-        _5400 = '5400'
-        _7200 = '7200'
-        _10000 = '10000'
-        _15000 = '15000'
-        ...
     IscsiExtentCreate = typing.TypedDict('IscsiExtentCreate', {
             'name':'str',
             'type':'Type',
@@ -37,6 +25,18 @@ class IscsiExtent(Namespace):
             'ro':'bool',
             'enabled':'bool',
     })
+    class Type(str,Enum):
+        DISK = 'DISK'
+        FILE = 'FILE'
+        ...
+    class Rpm(str,Enum):
+        UNKNOWN = 'UNKNOWN'
+        SSD = 'SSD'
+        _5400 = '5400'
+        _7200 = '7200'
+        _10000 = '10000'
+        _15000 = '15000'
+        ...
     QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
             'relationships':'bool',
             'extend':'typing.Optional[str]',

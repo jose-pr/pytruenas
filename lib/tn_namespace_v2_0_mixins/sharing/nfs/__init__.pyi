@@ -12,7 +12,7 @@ class SharingNfs(
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload
     def create(self, 
-        sharingnfs_create:'SharingnfsCreate'={},
+        sharingnfs_create:'SharingnfsCreate',
     /) -> 'SharingNfsCreateReturns': 
         """
         Create a NFS Share.
@@ -55,7 +55,7 @@ class SharingNfs(
     @typing.overload
     def get_instance(self, 
         id:'typing.Union[str, int, bool, dict[str], list]',
-        query_options_get_instance:'QueryOptionsGetInstance'={},
+        query_options_get_instance:'QueryOptionsGetInstance',
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -74,9 +74,9 @@ class SharingNfs(
         ...
     @typing.overload
     def query(self, 
-        query_filters:'list[list]'=[],
-        query_options:'QueryOptions'={},
-    /) -> 'typing.Union[list[SharingNfsEntry], SharingNfsEntry_, int, SharingNfsEntry__]': 
+        query_filters:'list[list]',
+        query_options:'QueryOptions',
+    /) -> 'typing.Union[list[SharingNfsEntry], SharingNfsEntry, int]': 
         """
         
 
@@ -88,14 +88,14 @@ class SharingNfs(
             query-options
         Returns
         -------
-        typing.Union[list[SharingNfsEntry], SharingNfsEntry_, int, SharingNfsEntry__]:
+        typing.Union[list[SharingNfsEntry], SharingNfsEntry, int]:
             
         """
         ...
     @typing.overload
     def update(self, 
         id:'int',
-        sharingnfs_update:'SharingnfsUpdate'={},
+        sharingnfs_update:'SharingnfsUpdate',
     /) -> 'SharingNfsUpdateReturns': 
         """
         Update NFS Share of `id`.
@@ -113,12 +113,6 @@ class SharingNfs(
             sharing_nfs_update_returns
         """
         ...
-    class Provider(str,Enum):
-        SYS = 'SYS'
-        KRB5 = 'KRB5'
-        KRB5I = 'KRB5I'
-        KRB5P = 'KRB5P'
-        ...
     SharingnfsCreate = typing.TypedDict('SharingnfsCreate', {
             'path':'str',
             'aliases':'list[str]',
@@ -133,6 +127,12 @@ class SharingNfs(
             'security':'list[Provider]',
             'enabled':'bool',
     })
+    class Provider(str,Enum):
+        SYS = 'SYS'
+        KRB5 = 'KRB5'
+        KRB5I = 'KRB5I'
+        KRB5P = 'KRB5P'
+        ...
     SharingNfsCreateReturns = typing.TypedDict('SharingNfsCreateReturns', {
             'path':'str',
             'aliases':'list[str]',
@@ -178,38 +178,6 @@ class SharingNfs(
             'force_sql_filters':'bool',
     })
     SharingNfsEntry = typing.TypedDict('SharingNfsEntry', {
-            'path':'str',
-            'aliases':'list[str]',
-            'comment':'str',
-            'networks':'list[str]',
-            'hosts':'list[str]',
-            'ro':'bool',
-            'maproot_user':'typing.Optional[str]',
-            'maproot_group':'typing.Optional[str]',
-            'mapall_user':'typing.Optional[str]',
-            'mapall_group':'typing.Optional[str]',
-            'security':'list[Provider]',
-            'enabled':'bool',
-            'id':'int',
-            'locked':'bool',
-    })
-    SharingNfsEntry_ = typing.TypedDict('SharingNfsEntry_', {
-            'path':'str',
-            'aliases':'list[str]',
-            'comment':'str',
-            'networks':'list[str]',
-            'hosts':'list[str]',
-            'ro':'bool',
-            'maproot_user':'typing.Optional[str]',
-            'maproot_group':'typing.Optional[str]',
-            'mapall_user':'typing.Optional[str]',
-            'mapall_group':'typing.Optional[str]',
-            'security':'list[Provider]',
-            'enabled':'bool',
-            'id':'int',
-            'locked':'bool',
-    })
-    SharingNfsEntry__ = typing.TypedDict('SharingNfsEntry__', {
             'path':'str',
             'aliases':'list[str]',
             'comment':'str',

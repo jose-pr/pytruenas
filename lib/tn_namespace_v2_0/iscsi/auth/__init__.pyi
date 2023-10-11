@@ -10,7 +10,7 @@ class IscsiAuth(
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload
     def create(self, 
-        iscsi_auth_create:'IscsiAuthCreate'={},
+        iscsi_auth_create:'IscsiAuthCreate',
     /) -> 'dict[str]': 
         """
         Create an iSCSI Authorized Access.
@@ -52,7 +52,7 @@ class IscsiAuth(
     @typing.overload
     def get_instance(self, 
         id:'typing.Union[str, int, bool, dict[str], list]',
-        query_options_get_instance:'QueryOptionsGetInstance'={},
+        query_options_get_instance:'QueryOptionsGetInstance',
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -71,9 +71,9 @@ class IscsiAuth(
         ...
     @typing.overload
     def query(self, 
-        query_filters:'list[list]'=[],
-        query_options:'QueryOptions'={},
-    /) -> 'typing.Union[list[dict[str]], dict[str], int]': 
+        query_filters:'list[list]',
+        query_options:'QueryOptions',
+    /) -> 'typing.Union[list, dict[str], int]': 
         """
         
 
@@ -85,14 +85,14 @@ class IscsiAuth(
             query-options
         Returns
         -------
-        typing.Union[list[dict[str]], dict[str], int]:
+        typing.Union[list, dict[str], int]:
             
         """
         ...
     @typing.overload
     def update(self, 
         id:'int',
-        iscsi_auth_update:'IscsiAuthUpdate'={},
+        iscsi_auth_update:'IscsiAuthUpdate',
     /) -> 'dict[str]': 
         """
         Update iSCSI Authorized Access of `id`.

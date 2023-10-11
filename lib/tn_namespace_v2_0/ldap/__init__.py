@@ -19,7 +19,7 @@ class Ldap(Namespace):
         RFC2307 = 'RFC2307'
         RFC2307BIS = 'RFC2307BIS'
         ...
-    class LdapSslChoice(str,Enum):
+    class Ssl(str,Enum):
         OFF = 'OFF'
         ON = 'ON'
         STARTTLS = 'START_TLS'
@@ -30,7 +30,7 @@ class Ldap(Namespace):
             'binddn':'str',
             'bindpw':'str',
             'anonbind':'bool',
-            'ssl':'LdapSslChoice',
+            'ssl':'Ssl',
             'certificate':'typing.Optional[int]',
             'validate_certificates':'bool',
             'disable_freenas_cache':'bool',
@@ -40,6 +40,10 @@ class Ldap(Namespace):
             'kerberos_principal':'str',
             'has_samba_schema':'bool',
             'auxiliary_parameters':'str',
-            'schema':'NssInfoLdap',
+            'schema':'Schema',
             'enable':'bool',
     })
+    class Schema(str,Enum):
+        RFC2307 = 'RFC2307'
+        RFC2307BIS = 'RFC2307BIS'
+        ...

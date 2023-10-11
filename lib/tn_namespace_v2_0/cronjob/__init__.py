@@ -8,13 +8,6 @@ class Cronjob(Namespace):
     def __init__(self, client) -> None:
         super().__init__(client, 'cronjob')
 
-    Schedule = typing.TypedDict('Schedule', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
     CronJobCreate = typing.TypedDict('CronJobCreate', {
             'enabled':'bool',
             'stderr':'bool',
@@ -23,6 +16,13 @@ class Cronjob(Namespace):
             'command':'str',
             'description':'str',
             'user':'str',
+    })
+    Schedule = typing.TypedDict('Schedule', {
+            'minute':'str',
+            'hour':'str',
+            'dom':'str',
+            'month':'str',
+            'dow':'str',
     })
     CronjobCreateReturns = typing.TypedDict('CronjobCreateReturns', {
             'enabled':'bool',

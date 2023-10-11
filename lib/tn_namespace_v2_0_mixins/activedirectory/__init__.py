@@ -36,11 +36,6 @@ class Activedirectory(ConfigMixin, Namespace):
         SFU20 = 'SFU20'
         RFC2307 = 'RFC2307'
         ...
-    class NssInfo(str,Enum):
-        SFU = 'SFU'
-        SFU20 = 'SFU20'
-        RFC2307 = 'RFC2307'
-        ...
     ActivedirectoryUpdate = typing.TypedDict('ActivedirectoryUpdate', {
             'domainname':'str',
             'bindname':'str',
@@ -56,7 +51,7 @@ class Activedirectory(ConfigMixin, Namespace):
             'kerberos_principal':'typing.Optional[str]',
             'timeout':'int',
             'dns_timeout':'int',
-            'nss_info':'typing.Optional[NssInfo]',
+            'nss_info':'typing.Optional[str]',
             'createcomputer':'str',
             'netbiosname':'str',
             'netbiosname_b':'str',

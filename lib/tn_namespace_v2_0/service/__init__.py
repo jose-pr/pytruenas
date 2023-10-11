@@ -43,20 +43,6 @@ class Service(Namespace):
             'state':'str',
             'pids':'list[int]',
     })
-    ServiceEntry_ = typing.TypedDict('ServiceEntry_', {
-            'id':'int',
-            'service':'str',
-            'enable':'bool',
-            'state':'str',
-            'pids':'list[int]',
-    })
-    ServiceEntry__ = typing.TypedDict('ServiceEntry__', {
-            'id':'int',
-            'service':'str',
-            'enable':'bool',
-            'state':'str',
-            'pids':'list[int]',
-    })
     ServiceControl = typing.TypedDict('ServiceControl', {
             'ha_propagate':'bool',
             'silent':'bool',

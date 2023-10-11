@@ -8,14 +8,19 @@ class AcmeDnsAuthenticator(Namespace):
     def __init__(self, client) -> None:
         super().__init__(client, 'acme.dns.authenticator')
 
+    SchemaEntry = typing.TypedDict('SchemaEntry', {
+            'key':'str',
+            'schema':'list[AttributeSchema]',
+    })
     AttributeSchema = typing.TypedDict('AttributeSchema', {
             '_name_':'str',
             'title':'str',
             '_required_':'bool',
     })
-    AuthenticatorSchema = typing.TypedDict('AuthenticatorSchema', {
-            'key':'str',
-            'schema':'list[AttributeSchema]',
+    AcmeDnsAuthenticatorCreate = typing.TypedDict('AcmeDnsAuthenticatorCreate', {
+            'authenticator':'Authenticator',
+            'attributes':'dict[str]',
+            'name':'str',
     })
     class Authenticator(str,Enum):
         Cloudflare = 'cloudflare'
@@ -23,11 +28,6 @@ class AcmeDnsAuthenticator(Namespace):
         OVH = 'OVH'
         Shell = 'shell'
         ...
-    AcmeDnsAuthenticatorCreate = typing.TypedDict('AcmeDnsAuthenticatorCreate', {
-            'authenticator':'Authenticator',
-            'attributes':'dict[str]',
-            'name':'str',
-    })
     AcmeDnsAuthenticatorCreateReturns = typing.TypedDict('AcmeDnsAuthenticatorCreateReturns', {
             'id':'int',
             'authenticator':'Authenticator',

@@ -10,7 +10,7 @@ class Config(
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload
     def reset(self, 
-        options:'Options'={},
+        options:'Options',
     /) -> None: 
         """
         Reset database to configuration defaults.
@@ -28,7 +28,7 @@ class Config(
         ...
     @typing.overload
     def save(self, 
-        configsave:'Configsave'={},
+        configsave:'Configsave',
     /) -> None: 
         """
         Create a tar file of security-sensitive information. These options select which information

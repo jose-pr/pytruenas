@@ -25,7 +25,7 @@ class ContainerImage(
         ...
     @typing.overload
     def get_chart_releases_consuming_image(self, 
-        image_tags:'list[str]'=[],
+        image_tags:'list[str]',
     /) -> 'list': 
         """
         Retrieve chart releases consuming `image_tag` image.
@@ -43,7 +43,7 @@ class ContainerImage(
     @typing.overload
     def get_instance(self, 
         id:'typing.Union[str, int, bool, dict[str], list]',
-        query_options_get_instance:'QueryOptionsGetInstance'={},
+        query_options_get_instance:'QueryOptionsGetInstance',
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -62,7 +62,7 @@ class ContainerImage(
         ...
     @typing.overload
     def pull(self, 
-        image_pull:'ImagePull'={},
+        image_pull:'ImagePull',
     /) -> None: 
         """
         `from_image` is the name of the image to pull. Format for the name is "registry/repo/image" where
@@ -83,9 +83,9 @@ class ContainerImage(
         ...
     @typing.overload
     def query(self, 
-        query_filters:'list[list]'=[],
-        query_options:'QueryOptions'={},
-    /) -> 'typing.Union[list[ContainerImageEntry], ContainerImageEntry_, int, ContainerImageEntry__]': 
+        query_filters:'list[list]',
+        query_options:'QueryOptions',
+    /) -> 'typing.Union[list[ContainerImageEntry], ContainerImageEntry, int]': 
         """
         Retrieve container images present in the system.
         
@@ -100,7 +100,7 @@ class ContainerImage(
             query-options
         Returns
         -------
-        typing.Union[list[ContainerImageEntry], ContainerImageEntry_, int, ContainerImageEntry__]:
+        typing.Union[list[ContainerImageEntry], ContainerImageEntry, int]:
             
         """
         ...
@@ -118,14 +118,14 @@ class ContainerImage(
             'limit':'int',
             'force_sql_filters':'bool',
     })
-    Authentication = typing.TypedDict('Authentication', {
-            'username':'str',
-            'password':'str',
-    })
     ImagePull = typing.TypedDict('ImagePull', {
             'authentication':'Authentication',
             'from_image':'str',
             'tag':'typing.Optional[str]',
+    })
+    Authentication = typing.TypedDict('Authentication', {
+            'username':'str',
+            'password':'str',
     })
     QueryOptions = typing.TypedDict('QueryOptions', {
             'relationships':'bool',
@@ -141,12 +141,6 @@ class ContainerImage(
             'limit':'int',
             'force_sql_filters':'bool',
     })
-    ParsedRepoTag = typing.TypedDict('ParsedRepoTag', {
-            'image':'str',
-            'tag':'str',
-            'registry':'str',
-            'complete_tag':'str',
-    })
     ContainerImageEntry = typing.TypedDict('ContainerImageEntry', {
             'id':'str',
             'repo_tags':'list[str]',
@@ -158,25 +152,9 @@ class ContainerImage(
             'parsed_repo_tags':'list[ParsedRepoTag]',
             'complete_tags':'list[str]',
     })
-    ContainerImageEntry_ = typing.TypedDict('ContainerImageEntry_', {
-            'id':'str',
-            'repo_tags':'list[str]',
-            'repo_digests':'list[str]',
-            'size':'int',
-            'dangling':'bool',
-            'update_available':'bool',
-            'system_image':'bool',
-            'parsed_repo_tags':'list[ParsedRepoTag]',
-            'complete_tags':'list[str]',
-    })
-    ContainerImageEntry__ = typing.TypedDict('ContainerImageEntry__', {
-            'id':'str',
-            'repo_tags':'list[str]',
-            'repo_digests':'list[str]',
-            'size':'int',
-            'dangling':'bool',
-            'update_available':'bool',
-            'system_image':'bool',
-            'parsed_repo_tags':'list[ParsedRepoTag]',
-            'complete_tags':'list[str]',
+    ParsedRepoTag = typing.TypedDict('ParsedRepoTag', {
+            'image':'str',
+            'tag':'str',
+            'registry':'str',
+            'complete_tag':'str',
     })
