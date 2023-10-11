@@ -133,9 +133,6 @@ class Boot(
             interval
         """
         ...
-    Options = typing.TypedDict('Options', {
-            'expand':'bool',
-    })
     GetState = typing.TypedDict('GetState', {
             'name':'str',
             'status':'str',
@@ -157,6 +154,9 @@ class Boot(
             'freeing_str':'typing.Optional[str]',
             'autotrim':'dict[str]',
             'topology':'Topology',
+    })
+    Options = typing.TypedDict('Options', {
+            'expand':'bool',
     })
     Topology = typing.TypedDict('Topology', {
             'data':'list',

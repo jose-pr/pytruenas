@@ -61,6 +61,11 @@ class Systemdataset(
             systemdataset_update_returns
         """
         ...
+    SysdatasetUpdate = typing.TypedDict('SysdatasetUpdate', {
+            'pool':'typing.Optional[str]',
+            'pool_exclude':'typing.Optional[str]',
+            'syslog':'bool',
+    })
     SystemdatasetEntry = typing.TypedDict('SystemdatasetEntry', {
             'id':'int',
             'pool':'str',
@@ -71,11 +76,6 @@ class Systemdataset(
             'uuid_a':'str',
             'syslog':'bool',
             'path':'typing.Optional[str]',
-    })
-    SysdatasetUpdate = typing.TypedDict('SysdatasetUpdate', {
-            'pool':'typing.Optional[str]',
-            'pool_exclude':'typing.Optional[str]',
-            'syslog':'bool',
     })
     SystemdatasetUpdateReturns = typing.TypedDict('SystemdatasetUpdateReturns', {
             'id':'int',

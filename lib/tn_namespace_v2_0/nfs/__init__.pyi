@@ -172,24 +172,6 @@ class Nfs(
             'v4_krb_enabled':'bool',
             'userd_manage_gids':'bool',
     })
-    class Protocol(str,Enum):
-        NFSV3 = 'NFSV3'
-        NFSV4 = 'NFSV4'
-        ...
-    QueryOptions = typing.TypedDict('QueryOptions', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
     NfsUpdate = typing.TypedDict('NfsUpdate', {
             'servers':'int',
             'udp':'bool',
@@ -223,4 +205,22 @@ class Nfs(
             'statd_lockd_log':'bool',
             'v4_krb_enabled':'bool',
             'userd_manage_gids':'bool',
+    })
+    class Protocol(str,Enum):
+        NFSV3 = 'NFSV3'
+        NFSV4 = 'NFSV4'
+        ...
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
     })

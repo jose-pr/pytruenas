@@ -306,14 +306,14 @@ class System(
             truenas_version_shortname
         """
         ...
-    class ProductRunningEnvironment(str,Enum):
-        DEFAULT = 'DEFAULT'
-        EC2 = 'EC2'
-        ...
     class Feature(str,Enum):
         DEDUP = 'DEDUP'
         FIBRECHANNEL = 'FIBRECHANNEL'
         VM = 'VM'
+        ...
+    class ProductRunningEnvironment(str,Enum):
+        DEFAULT = 'DEFAULT'
+        EC2 = 'EC2'
         ...
     SystemInfo = typing.TypedDict('SystemInfo', {
             'version':'str',

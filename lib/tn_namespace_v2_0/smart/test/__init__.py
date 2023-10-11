@@ -8,32 +8,36 @@ class SmartTest(Namespace):
     def __init__(self, client) -> None:
         super().__init__(client, 'smart.test')
 
-    SmartTaskCreate = typing.TypedDict('SmartTaskCreate', {
-            'schedule':'Schedule',
-            'desc':'str',
-            'all_disks':'bool',
-            'disks':'list[str]',
+    CurrentTest = typing.TypedDict('CurrentTest', {
+            'progress':'int',
+    })
+    DiskRun = typing.TypedDict('DiskRun', {
+            'identifier':'str',
+            'mode':'Mode',
             'type':'Type',
     })
-    Schedule = typing.TypedDict('Schedule', {
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
+    DiskSmartTestResult = typing.TypedDict('DiskSmartTestResult', {
+            'disk':'str',
+            'tests':'list[TestResult]',
+            'current_test':'CurrentTest',
     })
-    class Type(str,Enum):
-        LONG = 'LONG'
-        SHORT = 'SHORT'
-        CONVEYANCE = 'CONVEYANCE'
-        OFFLINE = 'OFFLINE'
+    class Mode(str,Enum):
+        FOREGROUND = 'FOREGROUND'
+        BACKGROUND = 'BACKGROUND'
         ...
-    SmartTestCreateReturns = typing.TypedDict('SmartTestCreateReturns', {
-            'schedule':'Schedule',
-            'desc':'str',
-            'all_disks':'bool',
-            'disks':'list[str]',
-            'type':'Type',
-            'id':'int',
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
     })
     QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
             'relationships':'bool',
@@ -49,15 +53,12 @@ class SmartTest(Namespace):
             'limit':'int',
             'force_sql_filters':'bool',
     })
-    DiskRun = typing.TypedDict('DiskRun', {
-            'identifier':'str',
-            'mode':'Mode',
-            'type':'Type',
+    Schedule = typing.TypedDict('Schedule', {
+            'hour':'str',
+            'dom':'str',
+            'month':'str',
+            'dow':'str',
     })
-    class Mode(str,Enum):
-        FOREGROUND = 'FOREGROUND'
-        BACKGROUND = 'BACKGROUND'
-        ...
     SmartManualTestDiskResponse = typing.TypedDict('SmartManualTestDiskResponse', {
             'disk':'str',
             'identifier':'str',
@@ -65,19 +66,12 @@ class SmartTest(Namespace):
             'expected_result_time':'str',
             'job':'int',
     })
-    QueryOptions = typing.TypedDict('QueryOptions', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
+    SmartTaskCreate = typing.TypedDict('SmartTaskCreate', {
+            'schedule':'Schedule',
+            'desc':'str',
+            'all_disks':'bool',
+            'disks':'list[str]',
+            'type':'Type',
     })
     SmartTaskEntry = typing.TypedDict('SmartTaskEntry', {
             'schedule':'Schedule',
@@ -87,22 +81,13 @@ class SmartTest(Namespace):
             'type':'Type',
             'id':'int',
     })
-    DiskSmartTestResult = typing.TypedDict('DiskSmartTestResult', {
-            'disk':'str',
-            'tests':'list[TestResult]',
-            'current_test':'CurrentTest',
-    })
-    TestResult = typing.TypedDict('TestResult', {
-            'num':'int',
-            'description':'str',
-            'status':'str',
-            'status_verbose':'str',
-            'remaining':'float',
-            'lifetime':'int',
-            'lba_of_first_error':'typing.Optional[str]',
-    })
-    CurrentTest = typing.TypedDict('CurrentTest', {
-            'progress':'int',
+    SmartTestCreateReturns = typing.TypedDict('SmartTestCreateReturns', {
+            'schedule':'Schedule',
+            'desc':'str',
+            'all_disks':'bool',
+            'disks':'list[str]',
+            'type':'Type',
+            'id':'int',
     })
     SmartTestUpdate = typing.TypedDict('SmartTestUpdate', {
             'schedule':'Schedule',
@@ -119,3 +104,18 @@ class SmartTest(Namespace):
             'type':'Type',
             'id':'int',
     })
+    TestResult = typing.TypedDict('TestResult', {
+            'num':'int',
+            'description':'str',
+            'status':'str',
+            'status_verbose':'str',
+            'remaining':'float',
+            'lifetime':'int',
+            'lba_of_first_error':'typing.Optional[str]',
+    })
+    class Type(str,Enum):
+        LONG = 'LONG'
+        SHORT = 'SHORT'
+        CONVEYANCE = 'CONVEYANCE'
+        OFFLINE = 'OFFLINE'
+        ...

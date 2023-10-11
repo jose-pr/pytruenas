@@ -13,7 +13,10 @@ class PoolDatasetUserprop(TableExtMixin, Namespace):
             'id':'str',
             'property':'Property',
     })
-    Property = typing.TypedDict('Property', {
+    DatasetUserPropDelete = typing.TypedDict('DatasetUserPropDelete', {
+            'name':'str',
+    })
+    DatasetUserPropUpdate = typing.TypedDict('DatasetUserPropUpdate', {
             'name':'str',
             'value':'str',
     })
@@ -21,22 +24,17 @@ class PoolDatasetUserprop(TableExtMixin, Namespace):
             'id':'str',
             'properties':'dict[str]',
     })
-    DatasetUserPropDelete = typing.TypedDict('DatasetUserPropDelete', {
-            'name':'str',
+    PoolDatasetUserpropEntry = typing.TypedDict('PoolDatasetUserpropEntry', {
+            'id':'str',
+            'properties':'dict[str]',
     })
-    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
+    PoolDatasetUserpropUpdateReturns = typing.TypedDict('PoolDatasetUserpropUpdateReturns', {
+            'id':'str',
+            'properties':'dict[str]',
+    })
+    Property = typing.TypedDict('Property', {
+            'name':'str',
+            'value':'str',
     })
     QueryOptions = typing.TypedDict('QueryOptions', {
             'relationships':'bool',
@@ -52,15 +50,17 @@ class PoolDatasetUserprop(TableExtMixin, Namespace):
             'limit':'int',
             'force_sql_filters':'bool',
     })
-    PoolDatasetUserpropEntry = typing.TypedDict('PoolDatasetUserpropEntry', {
-            'id':'str',
-            'properties':'dict[str]',
-    })
-    DatasetUserPropUpdate = typing.TypedDict('DatasetUserPropUpdate', {
-            'name':'str',
-            'value':'str',
-    })
-    PoolDatasetUserpropUpdateReturns = typing.TypedDict('PoolDatasetUserpropUpdateReturns', {
-            'id':'str',
-            'properties':'dict[str]',
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
     })

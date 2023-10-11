@@ -15,15 +15,59 @@ class Replication(Namespace):
             'transport':'Transport',
             'ssh_credentials':'typing.Optional[int]',
     })
-    class Transport(str,Enum):
-        SSH = 'SSH'
-        SSHPlusNETCAT = 'SSH+NETCAT'
-        LOCAL = 'LOCAL'
-        ...
     CountEligibleManualSnapshots_ = typing.TypedDict('CountEligibleManualSnapshots_', {
             'total':'int',
             'eligible':'int',
     })
+    class Direction(str,Enum):
+        PUSH = 'PUSH'
+        PULL = 'PULL'
+        ...
+    Lifetime = typing.TypedDict('Lifetime', {
+            'schedule':'Schedule_',
+            'lifetime_value':'int',
+            'lifetime_unit':'LifetimeUnit',
+    })
+    class LifetimeUnit(str,Enum):
+        HOUR = 'HOUR'
+        DAY = 'DAY'
+        WEEK = 'WEEK'
+        MONTH = 'MONTH'
+        YEAR = 'YEAR'
+        ...
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    class Readonly(str,Enum):
+        SET = 'SET'
+        REQUIRE = 'REQUIRE'
+        IGNORE = 'IGNORE'
+        ...
     ReplicationCreate = typing.TypedDict('ReplicationCreate', {
             'name':'str',
             'direction':'Direction',
@@ -71,85 +115,6 @@ class Replication(Namespace):
             'retries':'int',
             'logging_level':'typing.Optional[str]',
             'enabled':'bool',
-    })
-    class Direction(str,Enum):
-        PUSH = 'PUSH'
-        PULL = 'PULL'
-        ...
-    Schedule = typing.TypedDict('Schedule', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-            'begin':'str',
-            'end':'str',
-    })
-    RestrictSchedule = typing.TypedDict('RestrictSchedule', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-            'begin':'str',
-            'end':'str',
-    })
-    class Readonly(str,Enum):
-        SET = 'SET'
-        REQUIRE = 'REQUIRE'
-        IGNORE = 'IGNORE'
-        ...
-    class RetentionPolicy(str,Enum):
-        SOURCE = 'SOURCE'
-        CUSTOM = 'CUSTOM'
-        NONE = 'NONE'
-        ...
-    Lifetime = typing.TypedDict('Lifetime', {
-            'schedule':'Schedule_',
-            'lifetime_value':'int',
-            'lifetime_unit':'LifetimeUnit',
-    })
-    Schedule_ = typing.TypedDict('Schedule_', {
-            'minute':'str',
-            'hour':'str',
-            'dom':'str',
-            'month':'str',
-            'dow':'str',
-    })
-    class LifetimeUnit(str,Enum):
-        HOUR = 'HOUR'
-        DAY = 'DAY'
-        WEEK = 'WEEK'
-        MONTH = 'MONTH'
-        YEAR = 'YEAR'
-        ...
-    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    QueryOptions = typing.TypedDict('QueryOptions', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
     })
     ReplicationRestore = typing.TypedDict('ReplicationRestore', {
             'name':'str',
@@ -200,12 +165,6 @@ class Replication(Namespace):
             'exclude_mountpoint_property':'bool',
             'only_from_scratch':'bool',
     })
-    class Transport_(str,Enum):
-        SSH = 'SSH'
-        SSHPlusNETCAT = 'SSH+NETCAT'
-        LOCAL = 'LOCAL'
-        LEGACY = 'LEGACY'
-        ...
     ReplicationUpdate = typing.TypedDict('ReplicationUpdate', {
             'name':'str',
             'direction':'Direction',
@@ -254,3 +213,44 @@ class Replication(Namespace):
             'logging_level':'typing.Optional[str]',
             'enabled':'bool',
     })
+    RestrictSchedule = typing.TypedDict('RestrictSchedule', {
+            'minute':'str',
+            'hour':'str',
+            'dom':'str',
+            'month':'str',
+            'dow':'str',
+            'begin':'str',
+            'end':'str',
+    })
+    class RetentionPolicy(str,Enum):
+        SOURCE = 'SOURCE'
+        CUSTOM = 'CUSTOM'
+        NONE = 'NONE'
+        ...
+    Schedule = typing.TypedDict('Schedule', {
+            'minute':'str',
+            'hour':'str',
+            'dom':'str',
+            'month':'str',
+            'dow':'str',
+            'begin':'str',
+            'end':'str',
+    })
+    Schedule_ = typing.TypedDict('Schedule_', {
+            'minute':'str',
+            'hour':'str',
+            'dom':'str',
+            'month':'str',
+            'dow':'str',
+    })
+    class Transport(str,Enum):
+        SSH = 'SSH'
+        SSHPlusNETCAT = 'SSH+NETCAT'
+        LOCAL = 'LOCAL'
+        ...
+    class Transport_(str,Enum):
+        SSH = 'SSH'
+        SSHPlusNETCAT = 'SSH+NETCAT'
+        LOCAL = 'LOCAL'
+        LEGACY = 'LEGACY'
+        ...

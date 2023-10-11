@@ -9,7 +9,10 @@ class Enclosure(TableExtMixin, Namespace):
     def __init__(self, client) -> None:
         super().__init__(client, 'enclosure')
 
-    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+    EnclosureUpdate = typing.TypedDict('EnclosureUpdate', {
+            'label':'str',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
             'relationships':'bool',
             'extend':'typing.Optional[str]',
             'extend_context':'typing.Optional[str]',
@@ -23,7 +26,7 @@ class Enclosure(TableExtMixin, Namespace):
             'limit':'int',
             'force_sql_filters':'bool',
     })
-    QueryOptions = typing.TypedDict('QueryOptions', {
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
             'relationships':'bool',
             'extend':'typing.Optional[str]',
             'extend_context':'typing.Optional[str]',
@@ -42,6 +45,3 @@ class Enclosure(TableExtMixin, Namespace):
         FAULT = 'FAULT'
         IDENTIFY = 'IDENTIFY'
         ...
-    EnclosureUpdate = typing.TypedDict('EnclosureUpdate', {
-            'label':'str',
-    })

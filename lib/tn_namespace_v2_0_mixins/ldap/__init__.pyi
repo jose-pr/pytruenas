@@ -140,15 +140,6 @@ class Ldap(
         JOINING = 'JOINING'
         HEALTHY = 'HEALTHY'
         ...
-    class NssInfoLdap(str,Enum):
-        RFC2307 = 'RFC2307'
-        RFC2307BIS = 'RFC2307BIS'
-        ...
-    class Ssl(str,Enum):
-        OFF = 'OFF'
-        ON = 'ON'
-        STARTTLS = 'START_TLS'
-        ...
     LdapUpdate = typing.TypedDict('LdapUpdate', {
             'hostname':'list',
             'basedn':'str',
@@ -168,7 +159,16 @@ class Ldap(
             'schema':'Schema',
             'enable':'bool',
     })
+    class NssInfoLdap(str,Enum):
+        RFC2307 = 'RFC2307'
+        RFC2307BIS = 'RFC2307BIS'
+        ...
     class Schema(str,Enum):
         RFC2307 = 'RFC2307'
         RFC2307BIS = 'RFC2307BIS'
+        ...
+    class Ssl(str,Enum):
+        OFF = 'OFF'
+        ON = 'ON'
+        STARTTLS = 'START_TLS'
         ...

@@ -51,9 +51,6 @@ class AuthTwofactor(
             'services':'Services',
             'id':'int',
     })
-    Services = typing.TypedDict('Services', {
-            'ssh':'bool',
-    })
     AuthTwofactorUpdate = typing.TypedDict('AuthTwofactorUpdate', {
             'enabled':'bool',
             'otp_digits':'int',
@@ -68,4 +65,7 @@ class AuthTwofactor(
             'interval':'int',
             'services':'Services',
             'id':'int',
+    })
+    Services = typing.TypedDict('Services', {
+            'ssh':'bool',
     })

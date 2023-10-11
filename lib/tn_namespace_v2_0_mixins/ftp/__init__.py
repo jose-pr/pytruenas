@@ -52,18 +52,6 @@ class Ftp(ConfigMixin, Namespace):
             'options':'str',
             'id':'int',
     })
-    class TlsPolicy(str,Enum):
-        On = 'on'
-        Off = 'off'
-        Data = 'data'
-        Notdata = '!data'
-        Auth = 'auth'
-        Ctrl = 'ctrl'
-        CtrlPlusdata = 'ctrl+data'
-        CtrlPlusNotdata = 'ctrl+!data'
-        AuthPlusdata = 'auth+data'
-        AuthPlusNotdata = 'auth+!data'
-        ...
     FtpUpdate = typing.TypedDict('FtpUpdate', {
             'port':'int',
             'clients':'int',
@@ -149,3 +137,15 @@ class Ftp(ConfigMixin, Namespace):
             'options':'str',
             'id':'int',
     })
+    class TlsPolicy(str,Enum):
+        On = 'on'
+        Off = 'off'
+        Data = 'data'
+        Notdata = '!data'
+        Auth = 'auth'
+        Ctrl = 'ctrl'
+        CtrlPlusdata = 'ctrl+data'
+        CtrlPlusNotdata = 'ctrl+!data'
+        AuthPlusdata = 'auth+data'
+        AuthPlusNotdata = 'auth+!data'
+        ...

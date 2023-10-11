@@ -283,24 +283,10 @@ class Core(
         -------
         """
         ...
-    Options = typing.TypedDict('Options', {
-            'bind_address':'str',
-            'bind_port':'int',
-            'threaded':'bool',
-    })
-    QueryOptions = typing.TypedDict('QueryOptions', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
+    ExcInfo = typing.TypedDict('ExcInfo', {
+            'repr':'typing.Optional[str]',
+            'type':'typing.Optional[str]',
+            'extra':'typing.Union[str, int, bool, dict[str], list]',
     })
     Job = typing.TypedDict('Job', {
             'id':'int',
@@ -320,29 +306,38 @@ class Core(
             'time_started':'typing.Optional[str]',
             'time_finished':'typing.Optional[str]',
     })
-    Progress = typing.TypedDict('Progress', {
-            'percent':'typing.Optional[int]',
-            'description':'typing.Optional[str]',
-            'extra':'typing.Union[str, int, bool, dict[str], list]',
-    })
-    ExcInfo = typing.TypedDict('ExcInfo', {
-            'repr':'typing.Optional[str]',
-            'type':'typing.Optional[str]',
-            'extra':'typing.Union[str, int, bool, dict[str], list]',
-    })
     JobUpdate = typing.TypedDict('JobUpdate', {
             'progress':'dict[str]',
+    })
+    Options = typing.TypedDict('Options', {
+            'bind_address':'str',
+            'bind_port':'int',
+            'threaded':'bool',
     })
     Options_ = typing.TypedDict('Options_', {
             'type':'Type',
             'hostname':'str',
             'timeout':'int',
     })
-    class Type(str,Enum):
-        ICMP = 'ICMP'
-        ICMPV4 = 'ICMPV4'
-        ICMPV6 = 'ICMPV6'
-        ...
+    Progress = typing.TypedDict('Progress', {
+            'percent':'typing.Optional[int]',
+            'description':'typing.Optional[str]',
+            'extra':'typing.Union[str, int, bool, dict[str], list]',
+    })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
     Session = typing.TypedDict('Session', {
             'id':'str',
             'socket_family':'str',
@@ -350,3 +345,8 @@ class Core(
             'authenticated':'bool',
             'call_count':'int',
     })
+    class Type(str,Enum):
+        ICMP = 'ICMP'
+        ICMPV4 = 'ICMPV4'
+        ICMPV6 = 'ICMPV6'
+        ...

@@ -79,13 +79,13 @@ class GlusterFuse(
             umount
         """
         ...
-    GlusterfuseMounted = typing.TypedDict('GlusterfuseMounted', {
-            'name':'str',
-    })
     GluserfuseMount = typing.TypedDict('GluserfuseMount', {
             'name':'str',
             'all':'bool',
             'raise':'bool',
+    })
+    GlusterfuseMounted = typing.TypedDict('GlusterfuseMounted', {
+            'name':'str',
     })
     GlusterfuseUmount = typing.TypedDict('GlusterfuseUmount', {
             'name':'str',

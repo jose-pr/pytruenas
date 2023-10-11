@@ -18,16 +18,7 @@ class Initshutdownscript(Namespace):
             'timeout':'int',
             'comment':'str',
     })
-    class Type(str,Enum):
-        COMMAND = 'COMMAND'
-        SCRIPT = 'SCRIPT'
-        ...
-    class When(str,Enum):
-        PREINIT = 'PREINIT'
-        POSTINIT = 'POSTINIT'
-        SHUTDOWN = 'SHUTDOWN'
-        ...
-    InitshutdownscriptCreateReturns = typing.TypedDict('InitshutdownscriptCreateReturns', {
+    InitShutdownScriptEntry = typing.TypedDict('InitShutdownScriptEntry', {
             'type':'Type',
             'command':'typing.Optional[str]',
             'script_text':'typing.Optional[str]',
@@ -38,35 +29,7 @@ class Initshutdownscript(Namespace):
             'comment':'str',
             'id':'int',
     })
-    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    QueryOptions = typing.TypedDict('QueryOptions', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    InitShutdownScriptEntry = typing.TypedDict('InitShutdownScriptEntry', {
+    InitshutdownscriptCreateReturns = typing.TypedDict('InitshutdownscriptCreateReturns', {
             'type':'Type',
             'command':'typing.Optional[str]',
             'script_text':'typing.Optional[str]',
@@ -98,3 +61,40 @@ class Initshutdownscript(Namespace):
             'comment':'str',
             'id':'int',
     })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    class Type(str,Enum):
+        COMMAND = 'COMMAND'
+        SCRIPT = 'SCRIPT'
+        ...
+    class When(str,Enum):
+        PREINIT = 'PREINIT'
+        POSTINIT = 'POSTINIT'
+        SHUTDOWN = 'SHUTDOWN'
+        ...

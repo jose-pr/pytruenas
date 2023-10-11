@@ -8,9 +8,6 @@ class Boot(Namespace):
     def __init__(self, client) -> None:
         super().__init__(client, 'boot')
 
-    Options = typing.TypedDict('Options', {
-            'expand':'bool',
-    })
     GetState = typing.TypedDict('GetState', {
             'name':'str',
             'status':'str',
@@ -32,6 +29,9 @@ class Boot(Namespace):
             'freeing_str':'typing.Optional[str]',
             'autotrim':'dict[str]',
             'topology':'Topology',
+    })
+    Options = typing.TypedDict('Options', {
+            'expand':'bool',
     })
     Topology = typing.TypedDict('Topology', {
             'data':'list',

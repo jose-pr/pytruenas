@@ -25,46 +25,6 @@ class IscsiExtent(Namespace):
             'ro':'bool',
             'enabled':'bool',
     })
-    class Type(str,Enum):
-        DISK = 'DISK'
-        FILE = 'FILE'
-        ...
-    class Rpm(str,Enum):
-        UNKNOWN = 'UNKNOWN'
-        SSD = 'SSD'
-        _5400 = '5400'
-        _7200 = '7200'
-        _10000 = '10000'
-        _15000 = '15000'
-        ...
-    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    QueryOptions = typing.TypedDict('QueryOptions', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
     IscsiExtentUpdate = typing.TypedDict('IscsiExtentUpdate', {
             'name':'str',
             'type':'Type',
@@ -82,3 +42,43 @@ class IscsiExtent(Namespace):
             'ro':'bool',
             'enabled':'bool',
     })
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    class Rpm(str,Enum):
+        UNKNOWN = 'UNKNOWN'
+        SSD = 'SSD'
+        _5400 = '5400'
+        _7200 = '7200'
+        _10000 = '10000'
+        _15000 = '15000'
+        ...
+    class Type(str,Enum):
+        DISK = 'DISK'
+        FILE = 'FILE'
+        ...

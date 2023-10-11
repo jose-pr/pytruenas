@@ -245,14 +245,15 @@ class Idmap(
             idmap_update_returns
         """
         ...
-    IdmapDomainCreate = typing.TypedDict('IdmapDomainCreate', {
-            'name':'str',
-            'dns_domain_name':'str',
-            'range_low':'int',
-            'range_high':'int',
-            'idmap_backend':'IdmapBackend',
-            'certificate':'typing.Optional[int]',
-            'options':'typing.Union[IdmapAdOptions, IdmapAutoridOptions, IdmapLdapOptions, IdmapNssOptions, IdmapRfc2307Options, IdmapRidOptions, dict[str]]',
+    IdmapAdOptions = typing.TypedDict('IdmapAdOptions', {
+            'schema_mode':'SchemaMode',
+            'unix_primary_group':'bool',
+            'unix_nss_info':'bool',
+    })
+    IdmapAutoridOptions = typing.TypedDict('IdmapAutoridOptions', {
+            'rangesize':'int',
+            'readonly':'bool',
+            'ignore_builtin':'bool',
     })
     class IdmapBackend(str,Enum):
         AD = 'AD'
@@ -263,20 +264,34 @@ class Idmap(
         RID = 'RID'
         TDB = 'TDB'
         ...
-    IdmapAdOptions = typing.TypedDict('IdmapAdOptions', {
-            'schema_mode':'SchemaMode',
-            'unix_primary_group':'bool',
-            'unix_nss_info':'bool',
+    IdmapCreateReturns = typing.TypedDict('IdmapCreateReturns', {
+            'name':'str',
+            'dns_domain_name':'str',
+            'range_low':'int',
+            'range_high':'int',
+            'idmap_backend':'IdmapBackend',
+            'certificate':'typing.Optional[int]',
+            'options':'typing.Union[IdmapAdOptions, IdmapAutoridOptions, IdmapLdapOptions, IdmapNssOptions, IdmapRfc2307Options, IdmapRidOptions, dict[str]]',
+            'id':'int',
     })
-    class SchemaMode(str,Enum):
-        SFU = 'SFU'
-        SFU20 = 'SFU20'
-        RFC2307 = 'RFC2307'
-        ...
-    IdmapAutoridOptions = typing.TypedDict('IdmapAutoridOptions', {
-            'rangesize':'int',
-            'readonly':'bool',
-            'ignore_builtin':'bool',
+    IdmapDomainCreate = typing.TypedDict('IdmapDomainCreate', {
+            'name':'str',
+            'dns_domain_name':'str',
+            'range_low':'int',
+            'range_high':'int',
+            'idmap_backend':'IdmapBackend',
+            'certificate':'typing.Optional[int]',
+            'options':'typing.Union[IdmapAdOptions, IdmapAutoridOptions, IdmapLdapOptions, IdmapNssOptions, IdmapRfc2307Options, IdmapRidOptions, dict[str]]',
+    })
+    IdmapDomainEntry = typing.TypedDict('IdmapDomainEntry', {
+            'name':'str',
+            'dns_domain_name':'str',
+            'range_low':'int',
+            'range_high':'int',
+            'idmap_backend':'IdmapBackend',
+            'certificate':'typing.Optional[int]',
+            'options':'typing.Union[IdmapAdOptions, IdmapAutoridOptions, IdmapLdapOptions, IdmapNssOptions, IdmapRfc2307Options, IdmapRidOptions, dict[str]]',
+            'id':'int',
     })
     IdmapLdapOptions = typing.TypedDict('IdmapLdapOptions', {
             'ldap_base_dn':'str',
@@ -287,18 +302,9 @@ class Idmap(
             'ssl':'Ssl',
             'validate_certificates':'bool',
     })
-    class Ssl(str,Enum):
-        OFF = 'OFF'
-        ON = 'ON'
-        STARTTLS = 'START_TLS'
-        ...
     IdmapNssOptions = typing.TypedDict('IdmapNssOptions', {
             'linked_service':'LinkedService',
     })
-    class LinkedService(str,Enum):
-        LOCALACCOUNT = 'LOCAL_ACCOUNT'
-        LDAP = 'LDAP'
-        ...
     IdmapRfc2307Options = typing.TypedDict('IdmapRfc2307Options', {
             'ldap_server':'LdapServer',
             'ldap_realm':'bool',
@@ -313,60 +319,8 @@ class Idmap(
             'ssl':'Ssl',
             'validate_certificates':'bool',
     })
-    class LdapServer(str,Enum):
-        AD = 'AD'
-        STANDALONE = 'STANDALONE'
-        ...
     IdmapRidOptions = typing.TypedDict('IdmapRidOptions', {
             'sssd_compat':'bool',
-    })
-    IdmapCreateReturns = typing.TypedDict('IdmapCreateReturns', {
-            'name':'str',
-            'dns_domain_name':'str',
-            'range_low':'int',
-            'range_high':'int',
-            'idmap_backend':'IdmapBackend',
-            'certificate':'typing.Optional[int]',
-            'options':'typing.Union[IdmapAdOptions, IdmapAutoridOptions, IdmapLdapOptions, IdmapNssOptions, IdmapRfc2307Options, IdmapRidOptions, dict[str]]',
-            'id':'int',
-    })
-    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    QueryOptions = typing.TypedDict('QueryOptions', {
-            'relationships':'bool',
-            'extend':'typing.Optional[str]',
-            'extend_context':'typing.Optional[str]',
-            'prefix':'typing.Optional[str]',
-            'extra':'dict[str]',
-            'order_by':'list',
-            'select':'list',
-            'count':'bool',
-            'get':'bool',
-            'offset':'int',
-            'limit':'int',
-            'force_sql_filters':'bool',
-    })
-    IdmapDomainEntry = typing.TypedDict('IdmapDomainEntry', {
-            'name':'str',
-            'dns_domain_name':'str',
-            'range_low':'int',
-            'range_high':'int',
-            'idmap_backend':'IdmapBackend',
-            'certificate':'typing.Optional[int]',
-            'options':'typing.Union[IdmapAdOptions, IdmapAutoridOptions, IdmapLdapOptions, IdmapNssOptions, IdmapRfc2307Options, IdmapRidOptions, dict[str]]',
-            'id':'int',
     })
     IdmapUpdate = typing.TypedDict('IdmapUpdate', {
             'name':'str',
@@ -387,3 +341,49 @@ class Idmap(
             'options':'typing.Union[IdmapAdOptions, IdmapAutoridOptions, IdmapLdapOptions, IdmapNssOptions, IdmapRfc2307Options, IdmapRidOptions, dict[str]]',
             'id':'int',
     })
+    class LdapServer(str,Enum):
+        AD = 'AD'
+        STANDALONE = 'STANDALONE'
+        ...
+    class LinkedService(str,Enum):
+        LOCALACCOUNT = 'LOCAL_ACCOUNT'
+        LDAP = 'LDAP'
+        ...
+    QueryOptions = typing.TypedDict('QueryOptions', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+            'relationships':'bool',
+            'extend':'typing.Optional[str]',
+            'extend_context':'typing.Optional[str]',
+            'prefix':'typing.Optional[str]',
+            'extra':'dict[str]',
+            'order_by':'list',
+            'select':'list',
+            'count':'bool',
+            'get':'bool',
+            'offset':'int',
+            'limit':'int',
+            'force_sql_filters':'bool',
+    })
+    class SchemaMode(str,Enum):
+        SFU = 'SFU'
+        SFU20 = 'SFU20'
+        RFC2307 = 'RFC2307'
+        ...
+    class Ssl(str,Enum):
+        OFF = 'OFF'
+        ON = 'ON'
+        STARTTLS = 'START_TLS'
+        ...

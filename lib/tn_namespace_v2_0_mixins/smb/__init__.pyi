@@ -196,14 +196,6 @@ class Smb(
             'password':'str',
             'options':'Options',
     })
-    Options = typing.TypedDict('Options', {
-            'use_kerberos':'bool',
-            'output_format':'OutputFormat',
-    })
-    class OutputFormat(str,Enum):
-        SMB = 'SMB'
-        LOCAL = 'LOCAL'
-        ...
     class InfoLevel(str,Enum):
         AUTHLOG = 'AUTH_LOG'
         ALL = 'ALL'
@@ -212,6 +204,21 @@ class Smb(
         LOCKS = 'LOCKS'
         BYTERANGE = 'BYTERANGE'
         NOTIFICATIONS = 'NOTIFICATIONS'
+        ...
+    class Loglevel(str,Enum):
+        NONE = 'NONE'
+        MINIMUM = 'MINIMUM'
+        NORMAL = 'NORMAL'
+        FULL = 'FULL'
+        DEBUG = 'DEBUG'
+        ...
+    Options = typing.TypedDict('Options', {
+            'use_kerberos':'bool',
+            'output_format':'OutputFormat',
+    })
+    class OutputFormat(str,Enum):
+        SMB = 'SMB'
+        LOCAL = 'LOCAL'
         ...
     QueryOptions = typing.TypedDict('QueryOptions', {
             'relationships':'bool',
@@ -226,12 +233,6 @@ class Smb(
             'offset':'int',
             'limit':'int',
             'force_sql_filters':'bool',
-    })
-    StatusOptions = typing.TypedDict('StatusOptions', {
-            'verbose':'bool',
-            'fast':'bool',
-            'restrict_user':'str',
-            'restrict_session':'str',
     })
     SmbUpdate = typing.TypedDict('SmbUpdate', {
             'netbiosname':'str',
@@ -254,10 +255,9 @@ class Smb(
             'bindip':'list[str]',
             'smb_options':'str',
     })
-    class Loglevel(str,Enum):
-        NONE = 'NONE'
-        MINIMUM = 'MINIMUM'
-        NORMAL = 'NORMAL'
-        FULL = 'FULL'
-        DEBUG = 'DEBUG'
-        ...
+    StatusOptions = typing.TypedDict('StatusOptions', {
+            'verbose':'bool',
+            'fast':'bool',
+            'restrict_user':'str',
+            'restrict_session':'str',
+    })

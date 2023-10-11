@@ -32,7 +32,7 @@ class PythonNamespaceSignature(_api.NamespaceSignature):
                     while ty.name in objects and not objects[ty.name].__eq__(ty):
                         ty.name += "_"
                     objects[ty.name] = ty
-        ns.objects = list(objects.values())
+        ns.objects = list(sorted(objects.values(), key=lambda o: o.name))
         return ns
 
     @property

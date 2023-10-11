@@ -132,7 +132,7 @@ class CtdbPublicIps(
             'netmask':'int',
             'interface':'str',
     })
-    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
+    QueryOptions = typing.TypedDict('QueryOptions', {
             'relationships':'bool',
             'extend':'typing.Optional[str]',
             'extend_context':'typing.Optional[str]',
@@ -146,7 +146,7 @@ class CtdbPublicIps(
             'limit':'int',
             'force_sql_filters':'bool',
     })
-    QueryOptions = typing.TypedDict('QueryOptions', {
+    QueryOptionsGetInstance = typing.TypedDict('QueryOptionsGetInstance', {
             'relationships':'bool',
             'extend':'typing.Optional[str]',
             'extend_context':'typing.Optional[str]',
