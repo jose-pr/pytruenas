@@ -20,7 +20,7 @@ class Cronjob(TableExtMixin[_Cronjob.CronJobEntry], _Cronjob):
     ...
 
 
-
+api = client.api()
 sysadv = SystemAdvanced(client)
 config = sysadv.config()
 choices = PoolDataset(client).encryption_algorithm_choices()
