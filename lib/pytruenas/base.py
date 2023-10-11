@@ -111,13 +111,33 @@ class TrueNASClient:
                         _src=method,
                     )
                 )
-
+            _events: dict[str, _core.Event] = core.get_events()
+            events = []
+            for name, event in _events.items():
+                returns = []
+                args = _ty.OrderedDict()
+                for p in event["accepts"]:
+                    pname = p["_name_"].replace("-", "_")
+                    args[pname] = _api.Paramater.from_param(p)
+                for p in event["returns"]:
+                    returns.append(_api.Paramater.from_param(p))
+                events.append(
+                    _api.Event(
+                        name=name,
+                        description=event["description"],
+                        wildcard_subscription=event["wildcard_subscription"],
+                        arguments=args,
+                        returns=returns,
+                        _src=event,
+                    )
+                )
             namespaces.append(
                 _api.NamespaceSignature(
                     name=service["config"]["namespace"],
                     type=service["type"],
-                    description=service["config"]["cli_description"] or '',
+                    description=service["config"]["cli_description"] or "",
                     methods=methods,
+                    events=events,
                     _src=service,
                 )
             )

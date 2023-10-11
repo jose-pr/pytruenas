@@ -273,6 +273,9 @@ class MethodSignature:
     returns: list[Paramater] = _field(default_factory=lambda: [])
     _src: dict = None
 
+@_dataclass
+class Event(MethodSignature):
+    wildcard_subscription: bool = False
 
 @_dataclass
 class NamespaceSignature:
@@ -280,6 +283,7 @@ class NamespaceSignature:
     type: str
     description: str = ""
     methods: list[MethodSignature] = _field(default_factory=lambda: [])
+    events: list[Event] =  _field(default_factory=lambda: [])
     _src: dict = None
 
 
