@@ -1,3 +1,5 @@
+import errno
+import time
 import typing as _ty
 from enum import Enum as _Enum
 import re as _re
@@ -74,7 +76,17 @@ class TrueNASClient:
         return self._conn
 
     def call(self, method: str, *args, **kwds):
-        return self.conn.call(method, *args, **kwds)
+        reconnect = 1
+        while reconnect > 0:
+            try:
+                return self.conn.call(method, *args, **kwds)
+            except  _conn.ClientException as e:
+                if e.errno == errno.ECONNABORTED:
+                    reconnect -= 1
+                    self._conn = None
+                    time.sleep(1)
+                else:
+                    raise e from None
 
     @_ty.overload
     def namespace(self, name: str) -> Namespace:
