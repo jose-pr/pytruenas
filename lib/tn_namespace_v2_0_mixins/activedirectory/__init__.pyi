@@ -26,7 +26,7 @@ class Activedirectory(
         ...
     @typing.overload
     def domain_info(self, 
-        domain:'str',
+        _domain:'str',
     /) -> 'DomainInfo': 
         """
         Returns the following information about the currently joined domain:
@@ -74,7 +74,7 @@ class Activedirectory(
         ...
     @typing.overload
     def leave(self, 
-        kerberos_username_password:'KerberosUsernamePassword',
+        _kerberos_username_password:'KerberosUsernamePassword',
     /) -> None: 
         """
         Leave Active Directory domain. This will remove computer
@@ -123,7 +123,7 @@ class Activedirectory(
         ...
     @typing.overload
     def update(self, 
-        activedirectory_update:'ActivedirectoryUpdate',
+        _activedirectory_update:'ActivedirectoryUpdate',
     /) -> 'dict[str]': 
         """
         Update active directory configuration.

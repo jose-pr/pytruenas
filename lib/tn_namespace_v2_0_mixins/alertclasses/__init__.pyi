@@ -26,7 +26,7 @@ class Alertclasses(
         ...
     @typing.overload
     def update(self, 
-        alertclasses_update:'AlertclassesUpdate',
+        _alertclasses_update:'AlertclassesUpdate',
     /) -> 'AlertclassesUpdateReturns': 
         """
         Update default Alert settings.

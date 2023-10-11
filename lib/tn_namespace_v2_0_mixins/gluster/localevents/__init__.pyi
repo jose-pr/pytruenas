@@ -10,7 +10,7 @@ class GlusterLocalevents(
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload
     def add_jwt_secret(self, 
-        add_secret:'AddSecret',
+        _add_secret:'AddSecret',
     /) -> None: 
         """
         Add a `secret` key used to encode/decode

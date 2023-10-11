@@ -90,8 +90,8 @@ class Truenas(
         ...
     @typing.overload
     def set_production(self, 
-        production:'bool',
-        attach_debug:'bool',
+        _production:'bool',
+        _attach_debug:'bool',
     /) -> 'SetProduction': 
         """
         Sets system production state and optionally sends initial debug.
@@ -110,7 +110,7 @@ class Truenas(
         ...
     @typing.overload
     def update_customer_information(self, 
-        customer_information_update:'CustomerInformationUpdate',
+        _customer_information_update:'CustomerInformationUpdate',
     /) -> None: 
         """
         Updates customer information.

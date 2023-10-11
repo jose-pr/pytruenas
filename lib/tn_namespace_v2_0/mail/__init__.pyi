@@ -24,8 +24,8 @@ class Mail(
         ...
     @typing.overload
     def send(self, 
-        mail_message:'MailMessage',
-        mail_update:'MailUpdate',
+        _mail_message:'MailMessage',
+        _mail_update:'MailUpdate',
     /) -> 'bool': 
         """
         Sends mail using configured mail settings.
@@ -74,7 +74,7 @@ class Mail(
         ...
     @typing.overload
     def update(self, 
-        mail_update:'MailUpdate',
+        _mail_update:'MailUpdate',
     /) -> 'MailUpdateReturns': 
         """
         Update Mail Service Configuration.

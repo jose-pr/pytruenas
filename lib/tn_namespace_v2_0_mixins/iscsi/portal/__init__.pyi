@@ -12,7 +12,7 @@ class IscsiPortal(
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload
     def create(self, 
-        iscsiportal_create:'IscsiportalCreate',
+        _iscsiportal_create:'IscsiportalCreate',
     /) -> 'dict[str]': 
         """
         Create a new iSCSI Portal.
@@ -31,7 +31,7 @@ class IscsiPortal(
         ...
     @typing.overload
     def delete(self, 
-        id:'int',
+        _id:'int',
     /) -> 'bool': 
         """
         Delete iSCSI Portal `id`.
@@ -48,8 +48,8 @@ class IscsiPortal(
         ...
     @typing.overload
     def get_instance(self, 
-        id:'typing.Union[str, int, bool, dict[str], list]',
-        query_options_get_instance:'QueryOptionsGetInstance',
+        _id:'typing.Union[str, int, bool, dict[str], list]',
+        _query_options_get_instance:'QueryOptionsGetInstance',
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -80,8 +80,8 @@ class IscsiPortal(
         ...
     @typing.overload
     def query(self, 
-        query_filters:'list[list]',
-        query_options:'QueryOptions',
+        _query_filters:'list[list]',
+        _query_options:'QueryOptions',
     /) -> 'typing.Union[list, dict[str], int]': 
         """
         
@@ -100,8 +100,8 @@ class IscsiPortal(
         ...
     @typing.overload
     def update(self, 
-        id:'int',
-        iscsiportal_update:'IscsiportalUpdate',
+        _id:'int',
+        _iscsiportal_update:'IscsiportalUpdate',
     /) -> 'dict[str]': 
         """
         Update iSCSI Portal `id`.

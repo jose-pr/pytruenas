@@ -10,7 +10,7 @@ class SharingSmb(
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload
     def create(self, 
-        sharingsmb_create:'SharingsmbCreate',
+        _sharingsmb_create:'SharingsmbCreate',
     /) -> 'dict[str]': 
         """
         Create a SMB Share.
@@ -55,7 +55,7 @@ class SharingSmb(
         ...
     @typing.overload
     def delete(self, 
-        id:'int',
+        _id:'int',
     /) -> 'bool': 
         """
         Delete SMB Share of `id`. This will forcibly disconnect SMB clients
@@ -73,8 +73,8 @@ class SharingSmb(
         ...
     @typing.overload
     def get_instance(self, 
-        id:'typing.Union[str, int, bool, dict[str], list]',
-        query_options_get_instance:'QueryOptionsGetInstance',
+        _id:'typing.Union[str, int, bool, dict[str], list]',
+        _query_options_get_instance:'QueryOptionsGetInstance',
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -93,7 +93,7 @@ class SharingSmb(
         ...
     @typing.overload
     def getacl(self, 
-        smb_getacl:'SmbGetacl',
+        _smb_getacl:'SmbGetacl',
     /) -> 'SmbShareAcl': 
         """
         
@@ -123,8 +123,8 @@ class SharingSmb(
         ...
     @typing.overload
     def query(self, 
-        query_filters:'list[list]',
-        query_options:'QueryOptions',
+        _query_filters:'list[list]',
+        _query_options:'QueryOptions',
     /) -> 'typing.Union[list, dict[str], int]': 
         """
         Query shares with filters. In clustered environments, local datastore query
@@ -144,7 +144,7 @@ class SharingSmb(
         ...
     @typing.overload
     def setacl(self, 
-        smb_share_acl:'SmbShareAcl',
+        _smb_share_acl:'SmbShareAcl',
     /) -> 'SmbShareAcl': 
         """
         Set an ACL on `share_name`. This only impacts access through the SMB protocol.
@@ -179,8 +179,8 @@ class SharingSmb(
         ...
     @typing.overload
     def update(self, 
-        id:'int',
-        sharingsmb_update:'SharingsmbUpdate',
+        _id:'int',
+        _sharingsmb_update:'SharingsmbUpdate',
     /) -> 'dict[str]': 
         """
         Update SMB Share of `id`.

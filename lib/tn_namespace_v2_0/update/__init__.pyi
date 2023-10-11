@@ -10,7 +10,7 @@ class Update(
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload
     def check_available(self, 
-        update_check_available:'UpdateCheckAvailable',
+        _update_check_available:'UpdateCheckAvailable',
     /) -> None: 
         """
         Checks if there is an update available from update server.
@@ -43,7 +43,7 @@ class Update(
         ...
     @typing.overload
     def file(self, 
-        updatefile:'Updatefile',
+        _updatefile:'Updatefile',
     /) -> None: 
         """
         Updates the system using the uploaded .tar file.
@@ -76,7 +76,7 @@ class Update(
         ...
     @typing.overload
     def get_pending(self, 
-        path:'typing.Optional[str]',
+        _path:'typing.Optional[str]',
     /) -> None: 
         """
         Gets a list of packages already downloaded and ready to be applied.
@@ -110,8 +110,8 @@ class Update(
         ...
     @typing.overload
     def manual(self, 
-        path:'str',
-        options:'Options',
+        _path:'str',
+        _options:'Options',
     /) -> None: 
         """
         Update the system using a manual update file.
@@ -136,7 +136,7 @@ class Update(
         ...
     @typing.overload
     def set_auto_download(self, 
-        autocheck:'bool',
+        _autocheck:'bool',
     /) -> None: 
         """
         Sets if update auto-download is enabled.
@@ -151,7 +151,7 @@ class Update(
         ...
     @typing.overload
     def set_train(self, 
-        train:'str',
+        _train:'str',
     /) -> None: 
         """
         Set an update train to be used by default in updates.
@@ -166,7 +166,7 @@ class Update(
         ...
     @typing.overload
     def update(self, 
-        update:'Update',
+        _update:'Update',
     /) -> None: 
         """
         Downloads (if not already in cache) and apply an update.

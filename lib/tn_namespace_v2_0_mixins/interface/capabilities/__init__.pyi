@@ -10,7 +10,7 @@ class InterfaceCapabilities(
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload
     def get(self, 
-        name:'str',
+        _name:'str',
     /) -> 'Capabilties': 
         """
         Return enabled, disabled and supported capabilities (also known as features)
@@ -30,7 +30,7 @@ class InterfaceCapabilities(
         ...
     @typing.overload
     def set(self, 
-        capabilities_set:'CapabilitiesSet',
+        _capabilities_set:'CapabilitiesSet',
     /) -> 'list[str]': 
         """
         Enable or Disable capabilties (also known as features) on a given interface.

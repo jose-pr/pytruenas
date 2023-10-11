@@ -12,7 +12,7 @@ class Catalog(
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload
     def create(self, 
-        catalog_create:'CatalogCreate',
+        _catalog_create:'CatalogCreate',
     /) -> 'CatalogCreateReturns': 
         """
         `catalog_create.preferred_trains` specifies trains which will be displayed in the UI directly for a user.
@@ -29,7 +29,7 @@ class Catalog(
         ...
     @typing.overload
     def delete(self, 
-        label:'str',
+        _label:'str',
     /) -> 'bool': 
         """
         
@@ -46,8 +46,8 @@ class Catalog(
         ...
     @typing.overload
     def get_instance(self, 
-        id:'typing.Union[str, int, bool, dict[str], list]',
-        query_options_get_instance:'QueryOptionsGetInstance',
+        _id:'typing.Union[str, int, bool, dict[str], list]',
+        _query_options_get_instance:'QueryOptionsGetInstance',
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -66,8 +66,8 @@ class Catalog(
         ...
     @typing.overload
     def get_item_details(self, 
-        item_name:'str',
-        item_version_details:'ItemVersionDetails',
+        _item_name:'str',
+        _item_version_details:'ItemVersionDetails',
     /) -> 'ItemDetails': 
         """
         Retrieve information of `item_name` `item_version_details.catalog` catalog item.
@@ -86,8 +86,8 @@ class Catalog(
         ...
     @typing.overload
     def items(self, 
-        label:'str',
-        options:'Options',
+        _label:'str',
+        _options:'Options',
     /) -> 'dict[str]': 
         """
         Retrieve item details for `label` catalog.
@@ -154,8 +154,8 @@ class Catalog(
         ...
     @typing.overload
     def query(self, 
-        query_filters:'list[list]',
-        query_options:'QueryOptions',
+        _query_filters:'list[list]',
+        _query_options:'QueryOptions',
     /) -> 'typing.Union[list[CatalogEntry], CatalogEntry, int]': 
         """
         
@@ -174,7 +174,7 @@ class Catalog(
         ...
     @typing.overload
     def sync(self, 
-        label:'str',
+        _label:'str',
     /) -> None: 
         """
         Sync `label` catalog to retrieve latest changes from upstream.
@@ -201,8 +201,8 @@ class Catalog(
         ...
     @typing.overload
     def update(self, 
-        id:'str',
-        catalog_update:'CatalogUpdate',
+        _id:'str',
+        _catalog_update:'CatalogUpdate',
     /) -> 'CatalogUpdateReturns': 
         """
         
@@ -221,7 +221,7 @@ class Catalog(
         ...
     @typing.overload
     def validate(self, 
-        label:'str',
+        _label:'str',
     /) -> None: 
         """
         Validates `label` catalog format which includes validating trains and applications with their versions.

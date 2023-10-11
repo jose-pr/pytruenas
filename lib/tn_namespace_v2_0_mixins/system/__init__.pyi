@@ -68,7 +68,7 @@ class System(
         ...
     @typing.overload
     def feature_enabled(self, 
-        feature:'Feature',
+        _feature:'Feature',
     /) -> 'bool': 
         """
         Returns whether the `feature` is enabled or not
@@ -147,7 +147,7 @@ class System(
         ...
     @typing.overload
     def license_update(self, 
-        license:'str',
+        _license:'str',
     /) -> None: 
         """
         Update license file
@@ -207,7 +207,7 @@ class System(
         ...
     @typing.overload
     def reboot(self, 
-        system_reboot:'SystemReboot',
+        _system_reboot:'SystemReboot',
     /) -> None: 
         """
         Reboots the operating system.
@@ -224,7 +224,7 @@ class System(
         ...
     @typing.overload
     def release_notes_url(self, 
-        version_str:'str',
+        _version_str:'str',
     /) -> 'typing.Optional[str]': 
         """
         Returns the release notes URL for a version of SCALE.
@@ -246,7 +246,7 @@ class System(
         ...
     @typing.overload
     def shutdown(self, 
-        system_shutdown:'SystemShutdown',
+        _system_shutdown:'SystemShutdown',
     /) -> None: 
         """
         Shuts down the operating system.

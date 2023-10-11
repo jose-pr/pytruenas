@@ -10,7 +10,7 @@ class Route(
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload
     def ipv4gw_reachable(self, 
-        ipv4_gateway:'str',
+        _ipv4_gateway:'str',
     /) -> 'bool': 
         """
         Get the IPv4 gateway and verify if it is reachable by any interface.
@@ -30,8 +30,8 @@ class Route(
         ...
     @typing.overload
     def system_routes(self, 
-        query_filters:'list[list]',
-        query_options:'QueryOptions',
+        _query_filters:'list[list]',
+        _query_options:'QueryOptions',
     /) -> 'typing.Union[int, SystemRoute, list[SystemRoute]]': 
         """
         Get current/applied network routes.

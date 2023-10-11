@@ -12,7 +12,7 @@ class IscsiExtent(
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload
     def create(self, 
-        iscsi_extent_create:'IscsiExtentCreate',
+        _iscsi_extent_create:'IscsiExtentCreate',
     /) -> 'dict[str]': 
         """
         Create an iSCSI Extent.
@@ -41,9 +41,9 @@ class IscsiExtent(
         ...
     @typing.overload
     def delete(self, 
-        id:'int',
-        remove:'bool',
-        force:'bool',
+        _id:'int',
+        _remove:'bool',
+        _force:'bool',
     /) -> 'bool': 
         """
         Delete iSCSI Extent of `id`.
@@ -79,8 +79,8 @@ class IscsiExtent(
         ...
     @typing.overload
     def get_instance(self, 
-        id:'typing.Union[str, int, bool, dict[str], list]',
-        query_options_get_instance:'QueryOptionsGetInstance',
+        _id:'typing.Union[str, int, bool, dict[str], list]',
+        _query_options_get_instance:'QueryOptionsGetInstance',
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -99,8 +99,8 @@ class IscsiExtent(
         ...
     @typing.overload
     def query(self, 
-        query_filters:'list[list]',
-        query_options:'QueryOptions',
+        _query_filters:'list[list]',
+        _query_options:'QueryOptions',
     /) -> 'typing.Union[list, dict[str], int]': 
         """
         
@@ -119,8 +119,8 @@ class IscsiExtent(
         ...
     @typing.overload
     def update(self, 
-        id:'int',
-        iscsi_extent_update:'IscsiExtentUpdate',
+        _id:'int',
+        _iscsi_extent_update:'IscsiExtentUpdate',
     /) -> 'dict[str]': 
         """
         Update iSCSI Extent of `id`.

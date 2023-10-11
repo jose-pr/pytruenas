@@ -26,7 +26,7 @@ class PoolResilver(
         ...
     @typing.overload
     def update(self, 
-        pool_resilver_update:'PoolResilverUpdate',
+        _pool_resilver_update:'PoolResilverUpdate',
     /) -> 'PoolResilverUpdateReturns': 
         """
         Configure Pool Resilver Priority.

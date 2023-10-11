@@ -12,7 +12,7 @@ class Vmware(
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload
     def create(self, 
-        vmware_create:'VmwareCreate',
+        _vmware_create:'VmwareCreate',
     /) -> 'dict[str]': 
         """
         Create VMWare snapshot.
@@ -36,8 +36,8 @@ class Vmware(
         ...
     @typing.overload
     def dataset_has_vms(self, 
-        dataset:'str',
-        recursive:'bool',
+        _dataset:'str',
+        _recursive:'bool',
     /) -> None: 
         """
         Returns "true" if `dataset` is configured with a VMWare snapshot
@@ -54,7 +54,7 @@ class Vmware(
         ...
     @typing.overload
     def delete(self, 
-        id:'int',
+        _id:'int',
     /) -> 'bool': 
         """
         Delete VMWare snapshot of `id`.
@@ -71,7 +71,7 @@ class Vmware(
         ...
     @typing.overload
     def get_datastores(self, 
-        vmware_creds:'VmwareCreds',
+        _vmware_creds:'VmwareCreds',
     /) -> None: 
         """
         Get datastores from VMWare.
@@ -86,8 +86,8 @@ class Vmware(
         ...
     @typing.overload
     def get_instance(self, 
-        id:'typing.Union[str, int, bool, dict[str], list]',
-        query_options_get_instance:'QueryOptionsGetInstance',
+        _id:'typing.Union[str, int, bool, dict[str], list]',
+        _query_options_get_instance:'QueryOptionsGetInstance',
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -106,7 +106,7 @@ class Vmware(
         ...
     @typing.overload
     def get_virtual_machines(self, 
-        pk:'int',
+        _pk:'int',
     /) -> None: 
         """
         Returns Virtual Machines on the VMWare host identified by `pk`.
@@ -121,7 +121,7 @@ class Vmware(
         ...
     @typing.overload
     def match_datastores_with_datasets(self, 
-        vmware_creds:'VmwareCreds',
+        _vmware_creds:'VmwareCreds',
     /) -> None: 
         """
         Requests datastores from vCenter server and tries to match them with local filesystems.
@@ -138,8 +138,8 @@ class Vmware(
         ...
     @typing.overload
     def query(self, 
-        query_filters:'list[list]',
-        query_options:'QueryOptions',
+        _query_filters:'list[list]',
+        _query_options:'QueryOptions',
     /) -> 'typing.Union[list, dict[str], int]': 
         """
         
@@ -158,8 +158,8 @@ class Vmware(
         ...
     @typing.overload
     def update(self, 
-        id:'int',
-        vmware_update:'VmwareUpdate',
+        _id:'int',
+        _vmware_update:'VmwareUpdate',
     /) -> 'dict[str]': 
         """
         Update VMWare snapshot of `id`.

@@ -10,8 +10,8 @@ class Disk(
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload
     def get_instance(self, 
-        id:'typing.Union[str, int, bool, dict[str], list]',
-        query_options_get_instance:'QueryOptionsGetInstance',
+        _id:'typing.Union[str, int, bool, dict[str], list]',
+        _query_options_get_instance:'QueryOptionsGetInstance',
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -30,7 +30,7 @@ class Disk(
         ...
     @typing.overload
     def get_unused(self, 
-        join_partitions:'bool',
+        _join_partitions:'bool',
     /) -> None: 
         """
         Return disks that are not in use by any zpool that is currently imported. It will
@@ -49,8 +49,8 @@ class Disk(
         ...
     @typing.overload
     def query(self, 
-        query_filters:'list[list]',
-        query_options:'QueryOptions',
+        _query_filters:'list[list]',
+        _query_options:'QueryOptions',
     /) -> 'typing.Union[list[DiskEntry], DiskEntry, int]': 
         """
         Query disks.
@@ -77,9 +77,9 @@ class Disk(
         ...
     @typing.overload
     def resize(self, 
-        disks:'list[ResizeProperties]',
-        sync:'bool',
-        raise_error:'bool',
+        _disks:'list[ResizeProperties]',
+        _sync:'bool',
+        _raise_error:'bool',
     /) -> None: 
         """
         Takes a list of disks. Each list entry is a dict that requires a key, value pair.
@@ -114,7 +114,7 @@ class Disk(
         ...
     @typing.overload
     def retaste(self, 
-        disks:'list[str]',
+        _disks:'list[str]',
     /) -> None: 
         """
         
@@ -129,7 +129,7 @@ class Disk(
         ...
     @typing.overload
     def smart_attributes(self, 
-        name:'str',
+        _name:'str',
     /) -> 'list[SmartAttribute]': 
         """
         Returns S.M.A.R.T. attributes values for specified disk name.
@@ -146,8 +146,8 @@ class Disk(
         ...
     @typing.overload
     def temperature(self, 
-        name:'str',
-        options:'Options',
+        _name:'str',
+        _options:'Options',
     /) -> 'typing.Optional[int]': 
         """
         Returns temperature for device `name` using specified S.M.A.R.T. `powermode`. If `cache` is not null
@@ -167,8 +167,8 @@ class Disk(
         ...
     @typing.overload
     def temperature_agg(self, 
-        names:'list[str]',
-        days:'int',
+        _names:'list[str]',
+        _days:'int',
     /) -> 'dict[str]': 
         """
         Returns min/max/avg temperature for `names` disks for the last `days` days
@@ -187,7 +187,7 @@ class Disk(
         ...
     @typing.overload
     def temperature_alerts(self, 
-        names:'list[str]',
+        _names:'list[str]',
     /) -> 'Alert': 
         """
         Returns existing temperature alerts for specified disk `names.`
@@ -204,8 +204,8 @@ class Disk(
         ...
     @typing.overload
     def temperatures(self, 
-        names:'list[str]',
-        options:'Options_',
+        _names:'list[str]',
+        _options:'Options_',
     /) -> 'dict[str]': 
         """
         Returns temperatures for a list of devices (runs in parallel).
@@ -226,8 +226,8 @@ class Disk(
         ...
     @typing.overload
     def update(self, 
-        id:'str',
-        disk_update:'DiskUpdate',
+        _id:'str',
+        _disk_update:'DiskUpdate',
     /) -> 'DiskUpdateReturns': 
         """
         Update disk of `id`.
@@ -259,10 +259,10 @@ class Disk(
         ...
     @typing.overload
     def wipe(self, 
-        dev:'str',
-        mode:'Mode',
-        synccache:'bool',
-        swap_removal_options:'SwapRemovalOptions',
+        _dev:'str',
+        _mode:'Mode',
+        _synccache:'bool',
+        _swap_removal_options:'SwapRemovalOptions',
     /) -> None: 
         """
         Performs a wipe of a disk `dev`.

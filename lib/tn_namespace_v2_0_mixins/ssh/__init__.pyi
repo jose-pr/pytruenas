@@ -40,7 +40,7 @@ class Ssh(
         ...
     @typing.overload
     def update(self, 
-        ssh_update:'SshUpdate',
+        _ssh_update:'SshUpdate',
     /) -> 'SshUpdateReturns': 
         """
         Update settings of SSH daemon service.

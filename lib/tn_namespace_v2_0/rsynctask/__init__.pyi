@@ -10,7 +10,7 @@ class Rsynctask(
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload
     def create(self, 
-        rsync_task_create:'RsyncTaskCreate',
+        _rsync_task_create:'RsyncTaskCreate',
     /) -> 'RsynctaskCreateReturns': 
         """
         Create a Rsync Task.
@@ -57,7 +57,7 @@ class Rsynctask(
         ...
     @typing.overload
     def delete(self, 
-        id:'int',
+        _id:'int',
     /) -> 'bool': 
         """
         Delete Rsync Task of `id`.
@@ -74,8 +74,8 @@ class Rsynctask(
         ...
     @typing.overload
     def get_instance(self, 
-        id:'typing.Union[str, int, bool, dict[str], list]',
-        query_options_get_instance:'QueryOptionsGetInstance',
+        _id:'typing.Union[str, int, bool, dict[str], list]',
+        _query_options_get_instance:'QueryOptionsGetInstance',
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -94,8 +94,8 @@ class Rsynctask(
         ...
     @typing.overload
     def query(self, 
-        query_filters:'list[list]',
-        query_options:'QueryOptions',
+        _query_filters:'list[list]',
+        _query_options:'QueryOptions',
     /) -> 'typing.Union[list[RsyncTaskEntry], RsyncTaskEntry, int]': 
         """
         
@@ -114,7 +114,7 @@ class Rsynctask(
         ...
     @typing.overload
     def run(self, 
-        id:'int',
+        _id:'int',
     /) -> None: 
         """
         Job to run rsync task of `id`.
@@ -131,8 +131,8 @@ class Rsynctask(
         ...
     @typing.overload
     def update(self, 
-        id:'int',
-        rsync_task_update:'RsyncTaskUpdate',
+        _id:'int',
+        _rsync_task_update:'RsyncTaskUpdate',
     /) -> 'RsynctaskUpdateReturns': 
         """
         Update Rsync Task of `id`.

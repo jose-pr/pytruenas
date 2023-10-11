@@ -38,7 +38,7 @@ class ChartRelease(
         ...
     @typing.overload
     def create(self, 
-        chart_release_create:'ChartReleaseCreate',
+        _chart_release_create:'ChartReleaseCreate',
     /) -> 'ChartReleaseCreateReturns': 
         """
         Create a chart release for a catalog item.
@@ -66,8 +66,8 @@ class ChartRelease(
         ...
     @typing.overload
     def delete(self, 
-        release_name:'str',
-        options:'Options',
+        _release_name:'str',
+        _options:'Options',
     /) -> 'bool': 
         """
         Delete existing chart release.
@@ -89,7 +89,7 @@ class ChartRelease(
         ...
     @typing.overload
     def events(self, 
-        release_name:'str',
+        _release_name:'str',
     /) -> 'list[Event]': 
         """
         Returns kubernetes events for `release_name` Chart Release.
@@ -106,7 +106,7 @@ class ChartRelease(
         ...
     @typing.overload
     def get_chart_releases_using_chart_release_images(self, 
-        chart_release_name:'str',
+        _chart_release_name:'str',
     /) -> 'dict[str]': 
         """
         Retrieve chart releases which are consuming any images in use by `chart_release_name`.
@@ -130,8 +130,8 @@ class ChartRelease(
         ...
     @typing.overload
     def get_instance(self, 
-        id:'typing.Union[str, int, bool, dict[str], list]',
-        query_options_get_instance:'QueryOptionsGetInstance',
+        _id:'typing.Union[str, int, bool, dict[str], list]',
+        _query_options_get_instance:'QueryOptionsGetInstance',
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -164,7 +164,7 @@ class ChartRelease(
         ...
     @typing.overload
     def pod_console_choices(self, 
-        release_name:'str',
+        _release_name:'str',
     /) -> 'dict[str]': 
         """
         Returns choices for console access to a chart release.
@@ -191,8 +191,8 @@ class ChartRelease(
         ...
     @typing.overload
     def pod_logs(self, 
-        release_name:'str',
-        options:'Options_',
+        _release_name:'str',
+        _options:'Options_',
     /) -> None: 
         """
         Export logs of `options.container_name` container in `options.pod_name` pod in `release_name` chart release.
@@ -218,7 +218,7 @@ class ChartRelease(
         ...
     @typing.overload
     def pod_logs_choices(self, 
-        release_name:'str',
+        _release_name:'str',
     /) -> 'dict[str]': 
         """
         Returns choices for accessing logs of any container in any pod in a chart release.
@@ -242,7 +242,7 @@ class ChartRelease(
         ...
     @typing.overload
     def pod_status(self, 
-        release_name:'str',
+        _release_name:'str',
     /) -> 'PodStatus_': 
         """
         Retrieve available/desired pods status for a chart release and it's current state.
@@ -259,8 +259,8 @@ class ChartRelease(
         ...
     @typing.overload
     def pull_container_images(self, 
-        release_name:'str',
-        pull_container_images_options:'PullContainerImagesOptions',
+        _release_name:'str',
+        _pull_container_images_options:'PullContainerImagesOptions',
     /) -> 'dict[str]': 
         """
         Update container images being used by `release_name` chart release.
@@ -289,8 +289,8 @@ class ChartRelease(
         ...
     @typing.overload
     def query(self, 
-        query_filters:'list[list]',
-        query_options:'QueryOptions',
+        _query_filters:'list[list]',
+        _query_options:'QueryOptions',
     /) -> 'typing.Union[list[ChartReleaseEntry], ChartReleaseEntry, int]': 
         """
         Query available chart releases.
@@ -321,7 +321,7 @@ class ChartRelease(
         ...
     @typing.overload
     def redeploy(self, 
-        release_name:'str',
+        _release_name:'str',
     /) -> 'ChartReleaseEntry': 
         """
         Redeploy will initiate a new rollout of the Helm chart according to upgrade strategy defined by the chart
@@ -339,8 +339,8 @@ class ChartRelease(
         ...
     @typing.overload
     def remove_ix_volume(self, 
-        release_name:'str',
-        volume_name:'str',
+        _release_name:'str',
+        _volume_name:'str',
     /) -> None: 
         """
         Remove `volume_name` ix_volume from `release_name` chart release.
@@ -357,8 +357,8 @@ class ChartRelease(
         ...
     @typing.overload
     def rollback(self, 
-        release_name:'str',
-        rollback_options:'RollbackOptions',
+        _release_name:'str',
+        _rollback_options:'RollbackOptions',
     /) -> 'ChartReleaseEntry': 
         """
         Rollback a chart release to a previous chart version.
@@ -392,8 +392,8 @@ class ChartRelease(
         ...
     @typing.overload
     def scale(self, 
-        release_name:'str',
-        scale_options:'ScaleOptions',
+        _release_name:'str',
+        _scale_options:'ScaleOptions',
     /) -> 'ScaleChartRelease': 
         """
         Scale a `release_name` chart release to `scale_options.replica_count` specified.
@@ -414,8 +414,8 @@ class ChartRelease(
         ...
     @typing.overload
     def scale_workloads(self, 
-        release_name:'str',
-        workloads:'list[ScaleWorkload]',
+        _release_name:'str',
+        _workloads:'list[ScaleWorkload]',
     /) -> None: 
         """
         Scale workloads in a chart release to specified `replica_count`.
@@ -446,8 +446,8 @@ class ChartRelease(
         ...
     @typing.overload
     def update(self, 
-        chart_release:'str',
-        chart_release_update:'ChartReleaseUpdate',
+        _chart_release:'str',
+        _chart_release_update:'ChartReleaseUpdate',
     /) -> 'ChartReleaseUpdateReturns': 
         """
         Update an existing chart release.
@@ -469,8 +469,8 @@ class ChartRelease(
         ...
     @typing.overload
     def upgrade(self, 
-        release_name:'str',
-        upgrade_options:'UpgradeOptions',
+        _release_name:'str',
+        _upgrade_options:'UpgradeOptions',
     /) -> 'ChartReleaseEntry': 
         """
         Upgrade `release_name` chart release.
@@ -502,8 +502,8 @@ class ChartRelease(
         ...
     @typing.overload
     def upgrade_summary(self, 
-        release_name:'str',
-        options:'Options__',
+        _release_name:'str',
+        _options:'Options__',
     /) -> 'UpgradeSummary': 
         """
         Retrieve upgrade summary for `release_name` which will include which container images will be updated

@@ -10,7 +10,7 @@ class GlusterFuse(
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload
     def is_mounted(self, 
-        glusterfuse_mounted:'GlusterfuseMounted',
+        _glusterfuse_mounted:'GlusterfuseMounted',
     /) -> 'bool': 
         """
         Check if gluster volume is FUSE mounted locally.
@@ -29,7 +29,7 @@ class GlusterFuse(
         ...
     @typing.overload
     def mount(self, 
-        gluserfuse_mount:'GluserfuseMount',
+        _gluserfuse_mount:'GluserfuseMount',
     /) -> 'bool': 
         """
         Mount a gluster volume using the gluster FUSE client.
@@ -55,7 +55,7 @@ class GlusterFuse(
         ...
     @typing.overload
     def umount(self, 
-        glusterfuse_umount:'GlusterfuseUmount',
+        _glusterfuse_umount:'GlusterfuseUmount',
     /) -> 'bool': 
         """
         Unmount a locally FUSE mounted gluster volume.

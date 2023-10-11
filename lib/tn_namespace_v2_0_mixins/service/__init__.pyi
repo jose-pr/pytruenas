@@ -12,8 +12,8 @@ class Service(
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload
     def get_instance(self, 
-        id:'typing.Union[str, int, bool, dict[str], list]',
-        query_options_get_instance:'QueryOptionsGetInstance',
+        _id:'typing.Union[str, int, bool, dict[str], list]',
+        _query_options_get_instance:'QueryOptionsGetInstance',
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -32,8 +32,8 @@ class Service(
         ...
     @typing.overload
     def query(self, 
-        query_filters:'list[list]',
-        query_options:'QueryOptions',
+        _query_filters:'list[list]',
+        _query_options:'QueryOptions',
     /) -> 'typing.Union[list[ServiceEntry], ServiceEntry, int]': 
         """
         Query all system services with `query-filters` and `query-options`.
@@ -56,8 +56,8 @@ class Service(
         ...
     @typing.overload
     def reload(self, 
-        service:'str',
-        service_control:'ServiceControl',
+        _service:'str',
+        _service_control:'ServiceControl',
     /) -> 'bool': 
         """
         Reload the service specified by `service`.
@@ -76,8 +76,8 @@ class Service(
         ...
     @typing.overload
     def restart(self, 
-        service:'str',
-        service_control:'ServiceControl',
+        _service:'str',
+        _service_control:'ServiceControl',
     /) -> 'bool': 
         """
         Restart the service specified by `service`.
@@ -96,8 +96,8 @@ class Service(
         ...
     @typing.overload
     def start(self, 
-        service:'str',
-        service_control:'ServiceControl',
+        _service:'str',
+        _service_control:'ServiceControl',
     /) -> 'bool': 
         """
         Start the service specified by `service`.
@@ -119,7 +119,7 @@ class Service(
         ...
     @typing.overload
     def started(self, 
-        service:'str',
+        _service:'str',
     /) -> 'bool': 
         """
         Test if service specified by `service` has been started.
@@ -136,7 +136,7 @@ class Service(
         ...
     @typing.overload
     def started_or_enabled(self, 
-        service:'str',
+        _service:'str',
     /) -> 'bool': 
         """
         Test if service specified by `service` is started or enabled to start automatically.
@@ -153,8 +153,8 @@ class Service(
         ...
     @typing.overload
     def stop(self, 
-        service:'str',
-        service_control:'ServiceControl',
+        _service:'str',
+        _service_control:'ServiceControl',
     /) -> 'bool': 
         """
         Stop the service specified by `service`.
@@ -173,8 +173,8 @@ class Service(
         ...
     @typing.overload
     def terminate_process(self, 
-        pid:'int',
-        timeout:'int',
+        _pid:'int',
+        _timeout:'int',
     /) -> 'bool': 
         """
         Terminate process by `pid`.
@@ -195,8 +195,8 @@ class Service(
         ...
     @typing.overload
     def update(self, 
-        id_or_name:'str',
-        service_update:'ServiceUpdate',
+        _id_or_name:'str',
+        _service_update:'ServiceUpdate',
     /) -> 'int': 
         """
         Update service entry of `id_or_name`.

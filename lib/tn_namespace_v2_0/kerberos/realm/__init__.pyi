@@ -10,7 +10,7 @@ class KerberosRealm(
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload
     def create(self, 
-        kerberos_realm_create:'KerberosRealmCreate',
+        _kerberos_realm_create:'KerberosRealmCreate',
     /) -> 'KerberosRealmCreateReturns': 
         """
         Create a new kerberos realm. This will be automatically populated during the
@@ -36,7 +36,7 @@ class KerberosRealm(
         ...
     @typing.overload
     def delete(self, 
-        id:'int',
+        _id:'int',
     /) -> 'bool': 
         """
         Delete a kerberos realm by ID.
@@ -53,8 +53,8 @@ class KerberosRealm(
         ...
     @typing.overload
     def get_instance(self, 
-        id:'typing.Union[str, int, bool, dict[str], list]',
-        query_options_get_instance:'QueryOptionsGetInstance',
+        _id:'typing.Union[str, int, bool, dict[str], list]',
+        _query_options_get_instance:'QueryOptionsGetInstance',
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -73,8 +73,8 @@ class KerberosRealm(
         ...
     @typing.overload
     def query(self, 
-        query_filters:'list[list]',
-        query_options:'QueryOptions',
+        _query_filters:'list[list]',
+        _query_options:'QueryOptions',
     /) -> 'typing.Union[list[KerberosRealmEntry], KerberosRealmEntry, int]': 
         """
         
@@ -93,8 +93,8 @@ class KerberosRealm(
         ...
     @typing.overload
     def update(self, 
-        id:'int',
-        kerberos_realm_update:'KerberosRealmUpdate',
+        _id:'int',
+        _kerberos_realm_update:'KerberosRealmUpdate',
     /) -> 'KerberosRealmUpdateReturns': 
         """
         Update a kerberos realm by id. This will be automatically populated during the

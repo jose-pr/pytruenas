@@ -12,7 +12,7 @@ class CtdbPublicIps(
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload
     def create(self, 
-        public_create:'PublicCreate',
+        _public_create:'PublicCreate',
     /) -> 'dict[str]': 
         """
         Add a ctdb public address to the cluster
@@ -37,8 +37,8 @@ class CtdbPublicIps(
         ...
     @typing.overload
     def delete(self, 
-        public_ip:'str',
-        pnn:'int',
+        _public_ip:'str',
+        _pnn:'int',
     /) -> 'bool': 
         """
         Remove the specified `address` from the configuration for the node specified by `pnn`.
@@ -66,8 +66,8 @@ class CtdbPublicIps(
         ...
     @typing.overload
     def get_instance(self, 
-        id:'typing.Union[str, int, bool, dict[str], list]',
-        query_options_get_instance:'QueryOptionsGetInstance',
+        _id:'typing.Union[str, int, bool, dict[str], list]',
+        _query_options_get_instance:'QueryOptionsGetInstance',
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -86,7 +86,7 @@ class CtdbPublicIps(
         ...
     @typing.overload
     def interface_choices(self, 
-        exclude_ifaces:'list[str]',
+        _exclude_ifaces:'list[str]',
     /) -> 'list[str]': 
         """
         Retrieve list of available interface choices that can be used for assigning a ctdbd public ip.
@@ -103,8 +103,8 @@ class CtdbPublicIps(
         ...
     @typing.overload
     def query(self, 
-        query_filters:'list[list]',
-        query_options:'QueryOptions',
+        _query_filters:'list[list]',
+        _query_options:'QueryOptions',
     /) -> 'typing.Union[list, dict[str], int]': 
         """
         Retrieve information about configured public IP addresses for the

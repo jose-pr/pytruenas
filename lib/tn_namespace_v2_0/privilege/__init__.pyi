@@ -10,7 +10,7 @@ class Privilege(
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload
     def create(self, 
-        privilege_create:'PrivilegeCreate',
+        _privilege_create:'PrivilegeCreate',
     /) -> 'PrivilegeCreateReturns': 
         """
         Creates a privilege.
@@ -37,7 +37,7 @@ class Privilege(
         ...
     @typing.overload
     def delete(self, 
-        id:'int',
+        _id:'int',
     /) -> 'bool': 
         """
         Delete the privilege `id`.
@@ -54,8 +54,8 @@ class Privilege(
         ...
     @typing.overload
     def get_instance(self, 
-        id:'typing.Union[str, int, bool, dict[str], list]',
-        query_options_get_instance:'QueryOptionsGetInstance',
+        _id:'typing.Union[str, int, bool, dict[str], list]',
+        _query_options_get_instance:'QueryOptionsGetInstance',
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -74,8 +74,8 @@ class Privilege(
         ...
     @typing.overload
     def query(self, 
-        query_filters:'list[list]',
-        query_options:'QueryOptions',
+        _query_filters:'list[list]',
+        _query_options:'QueryOptions',
     /) -> 'typing.Union[list[PrivilegeEntry], PrivilegeEntry, int]': 
         """
         
@@ -94,8 +94,8 @@ class Privilege(
         ...
     @typing.overload
     def update(self, 
-        id:'int',
-        privilege_update:'PrivilegeUpdate',
+        _id:'int',
+        _privilege_update:'PrivilegeUpdate',
     /) -> 'PrivilegeUpdateReturns': 
         """
         Update the privilege `id`.

@@ -37,9 +37,9 @@ class Failover(
         ...
     @typing.overload
     def call_remote(self, 
-        method:'str',
-        args:'list',
-        options:'Options',
+        _method:'str',
+        _args:'list',
+        _options:'Options',
     /) -> 'typing.Union[str, int, bool, dict[str], list]': 
         """
         Call a method on the other node.
@@ -94,8 +94,8 @@ class Failover(
         ...
     @typing.overload
     def control(self, 
-        action:'Action',
-        options:'Options_',
+        _action:'Action',
+        _options:'Options_',
     /) -> None: 
         """
         
@@ -240,7 +240,7 @@ class Failover(
         ...
     @typing.overload
     def sync_to_peer(self, 
-        options:'Options__',
+        _options:'Options__',
     /) -> None: 
         """
         Sync database and files to the other controller.
@@ -257,7 +257,7 @@ class Failover(
         ...
     @typing.overload
     def unlock(self, 
-        options:'Options___',
+        _options:'Options___',
     /) -> 'bool': 
         """
         Unlock datasets in HA, syncing passphrase between controllers and forcing this controller
@@ -275,7 +275,7 @@ class Failover(
         ...
     @typing.overload
     def update(self, 
-        failover_update:'FailoverUpdate',
+        _failover_update:'FailoverUpdate',
     /) -> 'FailoverUpdateReturns': 
         """
         Update failover state.
@@ -304,7 +304,7 @@ class Failover(
         ...
     @typing.overload
     def upgrade(self, 
-        failover_upgrade:'FailoverUpgrade',
+        _failover_upgrade:'FailoverUpgrade',
     /) -> 'bool': 
         """
         Upgrades both controllers.

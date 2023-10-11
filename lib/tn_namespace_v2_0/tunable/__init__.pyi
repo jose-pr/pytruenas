@@ -10,7 +10,7 @@ class Tunable(
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload
     def create(self, 
-        tunable_create:'TunableCreate',
+        _tunable_create:'TunableCreate',
     /) -> 'TunableCreateReturns': 
         """
         Create a tunable.
@@ -39,7 +39,7 @@ class Tunable(
         ...
     @typing.overload
     def delete(self, 
-        id:'int',
+        _id:'int',
     /) -> 'bool': 
         """
         Delete Tunable of `id`.
@@ -56,8 +56,8 @@ class Tunable(
         ...
     @typing.overload
     def get_instance(self, 
-        id:'typing.Union[str, int, bool, dict[str], list]',
-        query_options_get_instance:'QueryOptionsGetInstance',
+        _id:'typing.Union[str, int, bool, dict[str], list]',
+        _query_options_get_instance:'QueryOptionsGetInstance',
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -76,8 +76,8 @@ class Tunable(
         ...
     @typing.overload
     def query(self, 
-        query_filters:'list[list]',
-        query_options:'QueryOptions',
+        _query_filters:'list[list]',
+        _query_options:'QueryOptions',
     /) -> 'typing.Union[list[TunableEntry], TunableEntry, int]': 
         """
         
@@ -110,8 +110,8 @@ class Tunable(
         ...
     @typing.overload
     def update(self, 
-        id:'int',
-        tunable_update:'TunableUpdate',
+        _id:'int',
+        _tunable_update:'TunableUpdate',
     /) -> 'TunableUpdateReturns': 
         """
         Update Tunable of `id`.

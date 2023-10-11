@@ -10,9 +10,9 @@ class Core(
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload
     def bulk(self, 
-        method:'str',
-        params:'list',
-        description:'typing.Optional[str]',
+        _method:'str',
+        _params:'list',
+        _description:'typing.Optional[str]',
     /) -> None: 
         """
         Will sequentially call `method` with arguments from the `params` list. For example, running
@@ -50,7 +50,7 @@ class Core(
         ...
     @typing.overload
     def debug(self, 
-        options:'Options',
+        _options:'Options',
     /) -> None: 
         """
         Setup middlewared for remote debugging.
@@ -87,10 +87,10 @@ class Core(
         ...
     @typing.overload
     def download(self, 
-        method:'str',
-        args:'list',
-        filename:'str',
-        buffered:'bool',
+        _method:'str',
+        _args:'list',
+        _filename:'str',
+        _buffered:'bool',
     /) -> None: 
         """
         Core helper to call a job marked for download.
@@ -131,8 +131,8 @@ class Core(
         ...
     @typing.overload
     def get_jobs(self, 
-        query_filters:'list[list]',
-        query_options:'QueryOptions',
+        _query_filters:'list[list]',
+        _query_options:'QueryOptions',
     /) -> 'typing.Union[int, Job, list[Job]]': 
         """
         Get the long running jobs.
@@ -151,7 +151,7 @@ class Core(
         ...
     @typing.overload
     def job_abort(self, 
-        id:'int',
+        _id:'int',
     /) -> None: 
         """
         
@@ -166,8 +166,8 @@ class Core(
         ...
     @typing.overload
     def job_update(self, 
-        id:'int',
-        job_update:'JobUpdate',
+        _id:'int',
+        _job_update:'JobUpdate',
     /) -> None: 
         """
         
@@ -184,7 +184,7 @@ class Core(
         ...
     @typing.overload
     def job_wait(self, 
-        id:'int',
+        _id:'int',
     /) -> None: 
         """
         
@@ -213,7 +213,7 @@ class Core(
         ...
     @typing.overload
     def ping_remote(self, 
-        options:'Options_',
+        _options:'Options_',
     /) -> None: 
         """
         Method that will send an ICMP echo request to "hostname"
@@ -229,9 +229,9 @@ class Core(
         ...
     @typing.overload
     def resize_shell(self, 
-        id:'str',
-        cols:'int',
-        rows:'int',
+        _id:'str',
+        _cols:'int',
+        _rows:'int',
     /) -> None: 
         """
         Resize terminal session (/websocket/shell) to cols x rows
@@ -250,8 +250,8 @@ class Core(
         ...
     @typing.overload
     def sessions(self, 
-        query_filters:'list[list]',
-        query_options:'QueryOptions',
+        _query_filters:'list[list]',
+        _query_options:'QueryOptions',
     /) -> 'typing.Union[int, Session, list[Session]]': 
         """
         Get currently open websocket sessions.
@@ -270,7 +270,7 @@ class Core(
         ...
     @typing.overload
     def set_debug_mode(self, 
-        debug_mode:'bool',
+        _debug_mode:'bool',
     /) -> None: 
         """
         Set `debug_mode` for middleware.

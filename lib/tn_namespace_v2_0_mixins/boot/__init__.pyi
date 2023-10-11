@@ -10,8 +10,8 @@ class Boot(
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload
     def attach(self, 
-        dev:'str',
-        options:'Options',
+        _dev:'str',
+        _options:'Options',
     /) -> None: 
         """
         Attach a disk to the boot pool, turning a stripe into a mirror.
@@ -31,7 +31,7 @@ class Boot(
         ...
     @typing.overload
     def detach(self, 
-        dev:'str',
+        _dev:'str',
     /) -> None: 
         """
         Detach given `dev` from boot pool.
@@ -88,8 +88,8 @@ class Boot(
         ...
     @typing.overload
     def replace(self, 
-        label:'str',
-        dev:'str',
+        _label:'str',
+        _dev:'str',
     /) -> None: 
         """
         Replace device `label` on boot pool with `dev`.
@@ -118,7 +118,7 @@ class Boot(
         ...
     @typing.overload
     def set_scrub_interval(self, 
-        interval:'int',
+        _interval:'int',
     /) -> 'int': 
         """
         Set Automatic Scrub Interval value in days.

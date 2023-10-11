@@ -12,7 +12,7 @@ class PoolDataset(
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload
     def attachments(self, 
-        id:'str',
+        _id:'str',
     /) -> 'list[Attachment]': 
         """
         Return a list of services dependent of this dataset.
@@ -41,8 +41,8 @@ class PoolDataset(
         ...
     @typing.overload
     def change_key(self, 
-        id:'str',
-        change_key_options:'ChangeKeyOptions',
+        _id:'str',
+        _change_key_options:'ChangeKeyOptions',
     /) -> None: 
         """
         Change encryption properties for `id` encrypted dataset.
@@ -92,7 +92,7 @@ class PoolDataset(
         ...
     @typing.overload
     def create(self, 
-        pool_dataset_create:'PoolDatasetCreate',
+        _pool_dataset_create:'PoolDatasetCreate',
     /) -> 'PoolDatasetCreateReturns': 
         """
         Creates a dataset/zvol.
@@ -128,8 +128,8 @@ class PoolDataset(
         ...
     @typing.overload
     def delete(self, 
-        id:'str',
-        dataset_delete:'DatasetDelete',
+        _id:'str',
+        _dataset_delete:'DatasetDelete',
     /) -> 'bool': 
         """
         Delete dataset/zvol `id`.
@@ -156,8 +156,8 @@ class PoolDataset(
         ...
     @typing.overload
     def destroy_snapshots(self, 
-        name:'str',
-        snapshots:'Snapshots',
+        _name:'str',
+        _snapshots:'Snapshots',
     /) -> 'list[str]': 
         """
         Destroy specified snapshots of a given dataset.
@@ -489,8 +489,8 @@ class PoolDataset(
         ...
     @typing.overload
     def encryption_summary(self, 
-        id:'str',
-        encryption_root_summary_options:'EncryptionRootSummaryOptions',
+        _id:'str',
+        _encryption_root_summary_options:'EncryptionRootSummaryOptions',
     /) -> 'list[DatasetEncryptionSummary]': 
         """
         Retrieve summary of all encrypted roots under `id`.
@@ -574,8 +574,8 @@ class PoolDataset(
         ...
     @typing.overload
     def export_key(self, 
-        id:'str',
-        download:'bool',
+        _id:'str',
+        _download:'bool',
     /) -> 'typing.Optional[str]': 
         """
         Export own encryption key for dataset `id`. If `download` is `true`, key will be downloaded in a json file
@@ -599,7 +599,7 @@ class PoolDataset(
         ...
     @typing.overload
     def export_keys(self, 
-        id:'str',
+        _id:'str',
     /) -> None: 
         """
         Export keys for `id` and its children which are stored in the system. The exported file is a JSON file
@@ -618,7 +618,7 @@ class PoolDataset(
         ...
     @typing.overload
     def export_keys_for_replication(self, 
-        id:'int',
+        _id:'int',
     /) -> None: 
         """
         Export keys for replication task `id` for source dataset(s) which are stored in the system. The exported file
@@ -637,8 +637,8 @@ class PoolDataset(
         ...
     @typing.overload
     def get_instance(self, 
-        id:'typing.Union[str, int, bool, dict[str], list]',
-        query_options_get_instance:'QueryOptionsGetInstance',
+        _id:'typing.Union[str, int, bool, dict[str], list]',
+        _query_options_get_instance:'QueryOptionsGetInstance',
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -657,10 +657,10 @@ class PoolDataset(
         ...
     @typing.overload
     def get_quota(self, 
-        ds:'str',
-        quota_type:'QuotaType',
-        query_filters:'list[list]',
-        query_options:'QueryOptions',
+        _ds:'str',
+        _quota_type:'QuotaType',
+        _query_filters:'list[list]',
+        _query_options:'QueryOptions',
     /) -> None: 
         """
         Return a list of the specified `quota_type` of quotas on the ZFS dataset `ds`.
@@ -708,7 +708,7 @@ class PoolDataset(
         ...
     @typing.overload
     def inherit_parent_encryption_properties(self, 
-        id:'str',
+        _id:'str',
     /) -> None: 
         """
         Allows inheriting parent's encryption root discarding its current encryption settings. This
@@ -724,8 +724,8 @@ class PoolDataset(
         ...
     @typing.overload
     def lock(self, 
-        id:'str',
-        lock_options:'LockOptions',
+        _id:'str',
+        _lock_options:'LockOptions',
     /) -> 'bool': 
         """
         Locks `id` dataset. It will unmount the dataset and its children before locking.
@@ -748,8 +748,8 @@ class PoolDataset(
         ...
     @typing.overload
     def mountpoint(self, 
-        dataset:'str',
-        raise:'bool',
+        _dataset:'str',
+        _raise:'bool',
     /) -> 'typing.Optional[str]': 
         """
         Returns mountpoint for specific mounted dataset. If it is not mounted and `raise` is `true` (default), an
@@ -769,8 +769,8 @@ class PoolDataset(
         ...
     @typing.overload
     def permission(self, 
-        id:'str',
-        pool_dataset_permission:'PoolDatasetPermission',
+        _id:'str',
+        _pool_dataset_permission:'PoolDatasetPermission',
     /) -> 'PoolDatasetPermission': 
         """
         Set permissions for a dataset `id`. Permissions may be specified as
@@ -817,7 +817,7 @@ class PoolDataset(
         ...
     @typing.overload
     def processes(self, 
-        id:'str',
+        _id:'str',
     /) -> 'list[Process]': 
         """
         Return a list of processes using this dataset.
@@ -849,7 +849,7 @@ class PoolDataset(
         ...
     @typing.overload
     def promote(self, 
-        id:'str',
+        _id:'str',
     /) -> None: 
         """
         Promote the cloned dataset `id`.
@@ -864,8 +864,8 @@ class PoolDataset(
         ...
     @typing.overload
     def query(self, 
-        query_filters:'list[list]',
-        query_options:'QueryOptions',
+        _query_filters:'list[list]',
+        _query_options:'QueryOptions',
     /) -> 'typing.Union[list[PoolDatasetEntry], PoolDatasetEntry, int]': 
         """
         Query Pool Datasets with `query-filters` and `query-options`.
@@ -910,7 +910,7 @@ class PoolDataset(
         ...
     @typing.overload
     def recommended_zvol_blocksize(self, 
-        pool:'str',
+        _pool:'str',
     /) -> 'str': 
         """
         Helper method to get recommended size for a new zvol (dataset of type VOLUME).
@@ -927,7 +927,7 @@ class PoolDataset(
         ...
     @typing.overload
     def recordsize_choices(self, 
-        pool_name:'typing.Optional[str]',
+        _pool_name:'typing.Optional[str]',
     /) -> 'list[str]': 
         """
         Retrieve recordsize choices for datasets.
@@ -944,8 +944,8 @@ class PoolDataset(
         ...
     @typing.overload
     def set_quota(self, 
-        ds:'str',
-        quotas:'list[QuotaEntry]',
+        _ds:'str',
+        _quotas:'list[QuotaEntry]',
     /) -> None: 
         """
         There are three over-arching types of quotas for ZFS datasets.
@@ -991,7 +991,7 @@ class PoolDataset(
         ...
     @typing.overload
     def snapshot_count(self, 
-        dataset:'str',
+        _dataset:'str',
     /) -> 'int': 
         """
         Returns snapshot count for specified `dataset`.
@@ -1008,8 +1008,8 @@ class PoolDataset(
         ...
     @typing.overload
     def unlock(self, 
-        id:'str',
-        unlock_options:'UnlockOptions',
+        _id:'str',
+        _unlock_options:'UnlockOptions',
     /) -> 'Unlock': 
         """
         Unlock dataset `id` (and its children if `unlock_options.recursive` is `true`).
@@ -1058,7 +1058,7 @@ class PoolDataset(
         ...
     @typing.overload
     def unlock_services_restart_choices(self, 
-        dataset:'str',
+        _dataset:'str',
     /) -> 'dict[str]': 
         """
         Get a mapping of services identifiers and labels that can be restart on dataset unlock.
@@ -1075,8 +1075,8 @@ class PoolDataset(
         ...
     @typing.overload
     def update(self, 
-        id:'str',
-        pool_dataset_update:'PoolDatasetUpdate',
+        _id:'str',
+        _pool_dataset_update:'PoolDatasetUpdate',
     /) -> 'PoolDatasetUpdateReturns': 
         """
         Updates a dataset/zvol `id`.

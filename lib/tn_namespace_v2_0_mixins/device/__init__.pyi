@@ -10,7 +10,7 @@ class Device(
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload
     def get_info(self, 
-        type:'Type',
+        _type:'Type',
     /) -> 'typing.Union[list[SerialInfo], list[GpuInfo], dict[str]]': 
         """
         Get info for SERIAL/DISK/GPU device types.

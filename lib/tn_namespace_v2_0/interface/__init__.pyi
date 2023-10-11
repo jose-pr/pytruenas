@@ -10,7 +10,7 @@ class Interface(
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload
     def bridge_members_choices(self, 
-        id:'typing.Optional[str]',
+        _id:'typing.Optional[str]',
     /) -> 'dict[str]': 
         """
         Return available interface choices that can be added to a `br` (bridge) interface.
@@ -75,7 +75,7 @@ class Interface(
         ...
     @typing.overload
     def choices(self, 
-        options:'Options',
+        _options:'Options',
     /) -> 'dict[str]': 
         """
         Choices of available network interfaces.
@@ -98,7 +98,7 @@ class Interface(
         ...
     @typing.overload
     def commit(self, 
-        options:'Options_',
+        _options:'Options_',
     /) -> None: 
         """
         Commit/apply pending interfaces changes.
@@ -118,7 +118,7 @@ class Interface(
         ...
     @typing.overload
     def create(self, 
-        interface_create:'InterfaceCreate',
+        _interface_create:'InterfaceCreate',
     /) -> 'InterfaceCreateReturns': 
         """
         Create virtual interfaces (Link Aggregation, VLAN)
@@ -161,7 +161,7 @@ class Interface(
         ...
     @typing.overload
     def delete(self, 
-        id:'str',
+        _id:'str',
     /) -> 'str': 
         """
         Delete Interface of `id`.
@@ -178,8 +178,8 @@ class Interface(
         ...
     @typing.overload
     def get_instance(self, 
-        id:'typing.Union[str, int, bool, dict[str], list]',
-        query_options_get_instance:'QueryOptionsGetInstance',
+        _id:'typing.Union[str, int, bool, dict[str], list]',
+        _query_options_get_instance:'QueryOptionsGetInstance',
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -212,7 +212,7 @@ class Interface(
         ...
     @typing.overload
     def ip_in_use(self, 
-        ips:'Ips',
+        _ips:'Ips',
     /) -> 'list[InUseIp]': 
         """
         Get all IPv4 / Ipv6 from all valid interfaces, excluding tap and epair.
@@ -265,7 +265,7 @@ class Interface(
         ...
     @typing.overload
     def lag_ports_choices(self, 
-        id:'typing.Optional[str]',
+        _id:'typing.Optional[str]',
     /) -> 'dict[str]': 
         """
         Return available interface choices that can be added to a `bond` (lag) interface.
@@ -285,8 +285,8 @@ class Interface(
         ...
     @typing.overload
     def query(self, 
-        query_filters:'list[list]',
-        query_options:'QueryOptions',
+        _query_filters:'list[list]',
+        _query_options:'QueryOptions',
     /) -> 'typing.Union[list[InterfaceEntry], InterfaceEntry, int]': 
         """
         Query Interfaces with `query-filters` and `query-options`
@@ -317,7 +317,7 @@ class Interface(
         ...
     @typing.overload
     def save_default_route(self, 
-        gw:'str',
+        _gw:'str',
     /) -> None: 
         """
         This method exists _solely_ to provide a "warning" and therefore
@@ -400,8 +400,8 @@ class Interface(
         ...
     @typing.overload
     def update(self, 
-        id:'str',
-        interface_update:'InterfaceUpdate',
+        _id:'str',
+        _interface_update:'InterfaceUpdate',
     /) -> 'InterfaceUpdateReturns': 
         """
         Update Interface of `id`.

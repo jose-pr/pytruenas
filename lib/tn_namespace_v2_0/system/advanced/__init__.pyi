@@ -80,7 +80,7 @@ class SystemAdvanced(
         ...
     @typing.overload
     def update(self, 
-        system_advanced_update:'SystemAdvancedUpdate',
+        _system_advanced_update:'SystemAdvancedUpdate',
     /) -> 'SystemAdvancedUpdateReturns': 
         """
         Update System Advanced Service Configuration.
@@ -110,7 +110,7 @@ class SystemAdvanced(
         ...
     @typing.overload
     def update_gpu_pci_ids(self, 
-        isolated_gpu_pci_ids:'list[str]',
+        _isolated_gpu_pci_ids:'list[str]',
     /) -> None: 
         """
         `isolated_gpu_pci_ids` is a list of PCI ids which are isolated from host system.

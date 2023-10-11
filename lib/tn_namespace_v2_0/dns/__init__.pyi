@@ -10,8 +10,8 @@ class Dns(
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload
     def query(self, 
-        query_filters:'list[list]',
-        query_options:'QueryOptions',
+        _query_filters:'list[list]',
+        _query_options:'QueryOptions',
     /) -> 'typing.Union[int, Nameserver, list[Nameserver]]': 
         """
         Query Name Servers with `query-filters` and `query-options`.

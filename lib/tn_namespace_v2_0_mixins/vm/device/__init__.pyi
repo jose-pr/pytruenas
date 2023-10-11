@@ -26,7 +26,7 @@ class VmDevice(
         ...
     @typing.overload
     def create(self, 
-        vmdevice_create:'VmdeviceCreate',
+        _vmdevice_create:'VmdeviceCreate',
     /) -> 'VmDeviceCreateReturns': 
         """
         Create a new device for the VM of id `vm`.
@@ -49,8 +49,8 @@ class VmDevice(
         ...
     @typing.overload
     def delete(self, 
-        id:'int',
-        vm_device_delete:'VmDeviceDelete',
+        _id:'int',
+        _vm_device_delete:'VmDeviceDelete',
     /) -> 'bool': 
         """
         Delete a VM device of `id`.
@@ -88,8 +88,8 @@ class VmDevice(
         ...
     @typing.overload
     def get_instance(self, 
-        id:'typing.Union[str, int, bool, dict[str], list]',
-        query_options_get_instance:'QueryOptionsGetInstance',
+        _id:'typing.Union[str, int, bool, dict[str], list]',
+        _query_options_get_instance:'QueryOptionsGetInstance',
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -150,7 +150,7 @@ class VmDevice(
         ...
     @typing.overload
     def passthrough_device(self, 
-        device:'str',
+        _device:'str',
     /) -> 'PassthroughDevice': 
         """
         Retrieve details about `device` PCI device
@@ -195,8 +195,8 @@ class VmDevice(
         ...
     @typing.overload
     def query(self, 
-        query_filters:'list[list]',
-        query_options:'QueryOptions',
+        _query_filters:'list[list]',
+        _query_options:'QueryOptions',
     /) -> 'typing.Union[list[VmDeviceEntry], VmDeviceEntry, int]': 
         """
         
@@ -215,8 +215,8 @@ class VmDevice(
         ...
     @typing.overload
     def update(self, 
-        id:'int',
-        vm_device_update:'VmDeviceUpdate',
+        _id:'int',
+        _vm_device_update:'VmDeviceUpdate',
     /) -> 'VmDeviceUpdateReturns': 
         """
         Update a VM device of `id`.
@@ -265,7 +265,7 @@ class VmDevice(
         ...
     @typing.overload
     def usb_passthrough_device(self, 
-        device:'str',
+        _device:'str',
     /) -> 'UsbPassthroughDevice': 
         """
         Retrieve details about `device` USB device.

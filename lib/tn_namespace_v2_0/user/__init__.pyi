@@ -10,7 +10,7 @@ class User(
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload
     def create(self, 
-        user_create:'UserCreate',
+        _user_create:'UserCreate',
     /) -> 'int': 
         """
         Create a new user.
@@ -38,8 +38,8 @@ class User(
         ...
     @typing.overload
     def delete(self, 
-        id:'int',
-        options:'Options',
+        _id:'int',
+        _options:'Options',
     /) -> 'int': 
         """
         Delete user `id`.
@@ -61,8 +61,8 @@ class User(
         ...
     @typing.overload
     def get_instance(self, 
-        id:'typing.Union[str, int, bool, dict[str], list]',
-        query_options_get_instance:'QueryOptionsGetInstance',
+        _id:'typing.Union[str, int, bool, dict[str], list]',
+        _query_options_get_instance:'QueryOptionsGetInstance',
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -95,7 +95,7 @@ class User(
         ...
     @typing.overload
     def get_user_obj(self, 
-        get_user_obj:'GetUserObj',
+        _get_user_obj:'GetUserObj',
     /) -> 'UserInformation': 
         """
         Returns dictionary containing information from struct passwd for the user specified by either
@@ -157,7 +157,7 @@ class User(
         ...
     @typing.overload
     def provisioning_uri(self, 
-        username:'str',
+        _username:'str',
     /) -> 'str': 
         """
         Returns the provisioning URI for the OTP for `username`. This can then be encoded in a QR code and used
@@ -175,8 +175,8 @@ class User(
         ...
     @typing.overload
     def query(self, 
-        query_filters:'list[list]',
-        query_options:'QueryOptions',
+        _query_filters:'list[list]',
+        _query_options:'QueryOptions',
     /) -> 'typing.Union[list[UserEntry], UserEntry, int]': 
         """
         Query users with `query-filters` and `query-options`. As a performance optimization, only local users
@@ -206,7 +206,7 @@ class User(
         ...
     @typing.overload
     def renew_2fa_secret(self, 
-        username:'str',
+        _username:'str',
     /) -> 'UserEntry': 
         """
         Renew `username` user's two-factor authentication secret.
@@ -223,8 +223,8 @@ class User(
         ...
     @typing.overload
     def set_root_password(self, 
-        password:'str',
-        options,
+        _password:'str',
+        _options,
     /) -> None: 
         """
         Deprecated method. Use `user.setup_local_administrator`
@@ -241,9 +241,9 @@ class User(
         ...
     @typing.overload
     def setup_local_administrator(self, 
-        username:'Username',
-        password:'str',
-        options:'Options_',
+        _username:'Username',
+        _password:'str',
+        _options:'Options_',
     /) -> None: 
         """
         Set up local administrator (this method does not require authentication if local administrator is not already
@@ -263,7 +263,7 @@ class User(
         ...
     @typing.overload
     def shell_choices(self, 
-        group_ids:'list[int]',
+        _group_ids:'list[int]',
     /) -> 'ShellInfo': 
         """
         Return the available shell choices to be used in `user.create` and `user.update`.
@@ -293,7 +293,7 @@ class User(
         ...
     @typing.overload
     def unset_2fa_secret(self, 
-        username:'str',
+        _username:'str',
     /) -> None: 
         """
         Unset two-factor authentication secret for `username`.
@@ -308,8 +308,8 @@ class User(
         ...
     @typing.overload
     def update(self, 
-        id:'int',
-        user_update:'UserUpdate',
+        _id:'int',
+        _user_update:'UserUpdate',
     /) -> 'int': 
         """
         Update attributes of an existing user.
@@ -328,8 +328,8 @@ class User(
         ...
     @typing.overload
     def verify_twofactor_token(self, 
-        username:'str',
-        token:'typing.Optional[str]',
+        _username:'str',
+        _token:'typing.Optional[str]',
     /) -> 'bool': 
         """
         Returns boolean true if provided `token` is successfully authenticated for `username`.

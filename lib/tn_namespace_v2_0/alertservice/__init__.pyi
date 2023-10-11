@@ -10,7 +10,7 @@ class Alertservice(
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload
     def create(self, 
-        alert_service_create:'AlertServiceCreate',
+        _alert_service_create:'AlertServiceCreate',
     /) -> 'AlertserviceCreateReturns': 
         """
         Create an Alert Service of specified `type`.
@@ -29,7 +29,7 @@ class Alertservice(
         ...
     @typing.overload
     def delete(self, 
-        id:'int',
+        _id:'int',
     /) -> 'bool': 
         """
         Delete Alert Service of `id`.
@@ -46,8 +46,8 @@ class Alertservice(
         ...
     @typing.overload
     def get_instance(self, 
-        id:'typing.Union[str, int, bool, dict[str], list]',
-        query_options_get_instance:'QueryOptionsGetInstance',
+        _id:'typing.Union[str, int, bool, dict[str], list]',
+        _query_options_get_instance:'QueryOptionsGetInstance',
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -80,8 +80,8 @@ class Alertservice(
         ...
     @typing.overload
     def query(self, 
-        query_filters:'list[list]',
-        query_options:'QueryOptions',
+        _query_filters:'list[list]',
+        _query_options:'QueryOptions',
     /) -> 'typing.Union[list[AlertserviceEntry], AlertserviceEntry, int]': 
         """
         
@@ -100,7 +100,7 @@ class Alertservice(
         ...
     @typing.overload
     def test(self, 
-        alert_service_create:'AlertServiceCreate',
+        _alert_service_create:'AlertServiceCreate',
     /) -> 'bool': 
         """
         Send a test alert using `type` of Alert Service.
@@ -117,8 +117,8 @@ class Alertservice(
         ...
     @typing.overload
     def update(self, 
-        id:'int',
-        alert_service_update:'AlertServiceUpdate',
+        _id:'int',
+        _alert_service_update:'AlertServiceUpdate',
     /) -> 'AlertserviceUpdateReturns': 
         """
         Update Alert Service of `id`.

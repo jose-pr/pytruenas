@@ -12,7 +12,7 @@ class Group(
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload
     def create(self, 
-        group_create:'GroupCreate',
+        _group_create:'GroupCreate',
     /) -> 'int': 
         """
         Create a new group.
@@ -37,8 +37,8 @@ class Group(
         ...
     @typing.overload
     def delete(self, 
-        id:'int',
-        options:'Options',
+        _id:'int',
+        _options:'Options',
     /) -> 'int': 
         """
         Delete group `id`.
@@ -59,7 +59,7 @@ class Group(
         ...
     @typing.overload
     def get_group_obj(self, 
-        get_group_obj:'GetGroupObj',
+        _get_group_obj:'GetGroupObj',
     /) -> 'GroupInfo': 
         """
         Returns dictionary containing information from struct grp for the group specified by either
@@ -77,8 +77,8 @@ class Group(
         ...
     @typing.overload
     def get_instance(self, 
-        id:'typing.Union[str, int, bool, dict[str], list]',
-        query_options_get_instance:'QueryOptionsGetInstance',
+        _id:'typing.Union[str, int, bool, dict[str], list]',
+        _query_options_get_instance:'QueryOptionsGetInstance',
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -111,8 +111,8 @@ class Group(
         ...
     @typing.overload
     def has_password_enabled_user(self, 
-        gids:'list[int]',
-        exclude_user_ids:'list[int]',
+        _gids:'list[int]',
+        _exclude_user_ids:'list[int]',
     /) -> None: 
         """
         Checks whether at least one local user with a password is a member of any of the `group_ids`.
@@ -129,8 +129,8 @@ class Group(
         ...
     @typing.overload
     def query(self, 
-        query_filters:'list[list]',
-        query_options:'QueryOptions',
+        _query_filters:'list[list]',
+        _query_options:'QueryOptions',
     /) -> 'typing.Union[list[GroupEntry], GroupEntry, int]': 
         """
         Query groups with `query-filters` and `query-options`. As a performance optimization, only local groups
@@ -159,8 +159,8 @@ class Group(
         ...
     @typing.overload
     def update(self, 
-        id:'int',
-        group_update:'GroupUpdate',
+        _id:'int',
+        _group_update:'GroupUpdate',
     /) -> 'int': 
         """
         Update attributes of an existing group.

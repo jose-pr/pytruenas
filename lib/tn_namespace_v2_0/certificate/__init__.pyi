@@ -112,7 +112,7 @@ class Certificate(
         ...
     @typing.overload
     def create(self, 
-        certificate_create:'CertificateCreate',
+        _certificate_create:'CertificateCreate',
     /) -> 'CertificateCreateReturns': 
         """
         Create a new Certificate
@@ -151,8 +151,8 @@ class Certificate(
         ...
     @typing.overload
     def delete(self, 
-        id:'int',
-        force:'bool',
+        _id:'int',
+        _force:'bool',
     /) -> 'bool': 
         """
         Delete certificate of `id`.
@@ -207,8 +207,8 @@ class Certificate(
         ...
     @typing.overload
     def get_instance(self, 
-        id:'typing.Union[str, int, bool, dict[str], list]',
-        query_options_get_instance:'QueryOptionsGetInstance',
+        _id:'typing.Union[str, int, bool, dict[str], list]',
+        _query_options_get_instance:'QueryOptionsGetInstance',
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -256,8 +256,8 @@ class Certificate(
         ...
     @typing.overload
     def query(self, 
-        query_filters:'list[list]',
-        query_options:'QueryOptions',
+        _query_filters:'list[list]',
+        _query_options:'QueryOptions',
     /) -> 'typing.Union[list[CertificateEntry], CertificateEntry, int]': 
         """
         
@@ -276,8 +276,8 @@ class Certificate(
         ...
     @typing.overload
     def update(self, 
-        id:'int',
-        certificate_update:'CertificateUpdate',
+        _id:'int',
+        _certificate_update:'CertificateUpdate',
     /) -> 'CertificateUpdateReturns': 
         """
         Update certificate of `id`

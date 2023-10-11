@@ -21,7 +21,7 @@ class ${ns.classname}(
     @typing.overload
     def ${method.name}(self, 
     % for pname, param in method.arguments.items():
-        ${pname}\
+        _${pname}\
         %if param.type:
 :'${param.type.python()}'\
         %endif

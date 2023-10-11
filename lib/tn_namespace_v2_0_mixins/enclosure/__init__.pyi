@@ -12,8 +12,8 @@ class Enclosure(
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload
     def get_instance(self, 
-        id:'typing.Union[str, int, bool, dict[str], list]',
-        query_options_get_instance:'QueryOptionsGetInstance',
+        _id:'typing.Union[str, int, bool, dict[str], list]',
+        _query_options_get_instance:'QueryOptionsGetInstance',
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -32,8 +32,8 @@ class Enclosure(
         ...
     @typing.overload
     def query(self, 
-        query_filters:'list[list]',
-        query_options:'QueryOptions',
+        _query_filters:'list[list]',
+        _query_options:'QueryOptions',
     /) -> 'typing.Union[list, dict[str], int]': 
         """
         
@@ -52,9 +52,9 @@ class Enclosure(
         ...
     @typing.overload
     def set_slot_status(self, 
-        enclosure_id:'str',
-        slot:'int',
-        status:'Status',
+        _enclosure_id:'str',
+        _slot:'int',
+        _status:'Status',
     /) -> None: 
         """
         
@@ -73,8 +73,8 @@ class Enclosure(
         ...
     @typing.overload
     def update(self, 
-        id:'str',
-        enclosure_update:'EnclosureUpdate',
+        _id:'str',
+        _enclosure_update:'EnclosureUpdate',
     /) -> 'dict[str]': 
         """
         
