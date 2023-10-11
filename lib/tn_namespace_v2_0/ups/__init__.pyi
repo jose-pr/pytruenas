@@ -57,7 +57,7 @@ class Ups(
         ...
     @typing.overload
     def update(self, 
-        ups_update:'UpsUpdate',
+        _ups_update:'UpsUpdate',
     /) -> 'UpsUpdateReturns': 
         """
         Update UPS Service Configuration.

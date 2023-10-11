@@ -50,8 +50,8 @@ class IscsiGlobal(
         ...
     @typing.overload
     def sessions(self, 
-        query_filters:'list[list]',
-        query_options:'QueryOptions',
+        _query_filters:'list[list]',
+        _query_options:'QueryOptions',
     /) -> 'typing.Union[int, Session, list[Session]]': 
         """
         Get a list of currently running iSCSI sessions. This includes initiator and target names
@@ -71,7 +71,7 @@ class IscsiGlobal(
         ...
     @typing.overload
     def update(self, 
-        iscsiglobal_update:'IscsiglobalUpdate',
+        _iscsiglobal_update:'IscsiglobalUpdate',
     /) -> 'dict[str]': 
         """
         `alua` is a no-op for FreeNAS.

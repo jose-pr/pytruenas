@@ -69,7 +69,7 @@ class Ldap(
         ...
     @typing.overload
     def update(self, 
-        ldap_update:'LdapUpdate',
+        _ldap_update:'LdapUpdate',
     /) -> 'dict[str]': 
         """
         `hostname` list of ip addresses or hostnames of LDAP servers with

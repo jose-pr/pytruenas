@@ -10,7 +10,7 @@ class Filesystem(
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload
     def acl_is_trivial(self, 
-        path:'str',
+        _path:'str',
     /) -> 'bool': 
         """
         Returns True if the ACL can be fully expressed as a file mode without losing
@@ -33,9 +33,9 @@ class Filesystem(
         ...
     @typing.overload
     def can_access_as_user(self, 
-        username:'str',
-        path:'str',
-        permissions:'Permissions',
+        _username:'str',
+        _path:'str',
+        _permissions:'Permissions',
     /) -> 'bool': 
         """
         Check if `username` is able to access `path` with specific `permissions`. At least one of `read/write/execute`
@@ -58,7 +58,7 @@ class Filesystem(
         ...
     @typing.overload
     def chown(self, 
-        filesystem_ownership:'FilesystemOwnership',
+        _filesystem_ownership:'FilesystemOwnership',
     /) -> None: 
         """
         Change owner or group of file at `path`.
@@ -83,7 +83,7 @@ class Filesystem(
         ...
     @typing.overload
     def default_acl_choices(self, 
-        path:'str',
+        _path:'str',
     /) -> 'list[str]': 
         """
         `DEPRECATED`
@@ -102,7 +102,7 @@ class Filesystem(
         ...
     @typing.overload
     def get(self, 
-        path:'str',
+        _path:'str',
     /) -> None: 
         """
         Job to get contents of `path`.
@@ -117,8 +117,8 @@ class Filesystem(
         ...
     @typing.overload
     def get_default_acl(self, 
-        acl_type:'str',
-        share_type:'ShareType',
+        _acl_type:'str',
+        _share_type:'ShareType',
     /) -> 'typing.Union[list[Nfs4Ace], list[Posix1eAce]]': 
         """
         `DEPRECATED`
@@ -141,7 +141,7 @@ class Filesystem(
         ...
     @typing.overload
     def get_dosmode(self, 
-        path:'str',
+        _path:'str',
     /) -> 'Dosmode': 
         """
         
@@ -158,9 +158,9 @@ class Filesystem(
         ...
     @typing.overload
     def getacl(self, 
-        path:'str',
-        simplified:'bool',
-        resolve_ids:'bool',
+        _path:'str',
+        _simplified:'bool',
+        _resolve_ids:'bool',
     /) -> 'TruenasAcl': 
         """
         Return ACL of a given path. This may return a POSIX1e ACL or a NFSv4 ACL. The acl type is indicated
@@ -220,7 +220,7 @@ class Filesystem(
         ...
     @typing.overload
     def is_immutable(self, 
-        path:'str',
+        _path:'str',
     /) -> 'bool': 
         """
         Retrieves boolean which is set when immutable flag is set on `path`.
@@ -237,9 +237,9 @@ class Filesystem(
         ...
     @typing.overload
     def listdir(self, 
-        path:'str',
-        query_filters:'list[list]',
-        query_options:'QueryOptions',
+        _path:'str',
+        _query_filters:'list[list]',
+        _query_options:'QueryOptions',
     /) -> 'typing.Union[int, PathEntry, list[PathEntry]]': 
         """
         Get the contents of a directory.
@@ -278,7 +278,7 @@ class Filesystem(
         ...
     @typing.overload
     def mkdir(self, 
-        path:'str',
+        _path:'str',
     /) -> 'PathEntry': 
         """
         Create a directory at the specified path.
@@ -295,8 +295,8 @@ class Filesystem(
         ...
     @typing.overload
     def put(self, 
-        path:'str',
-        options:'Options_',
+        _path:'str',
+        _options:'Options_',
     /) -> 'bool': 
         """
         Job to put contents to `path`.
@@ -315,7 +315,7 @@ class Filesystem(
         ...
     @typing.overload
     def set_dosmode(self, 
-        set_dosmode:'SetDosmode',
+        _set_dosmode:'SetDosmode',
     /) -> None: 
         """
         
@@ -330,8 +330,8 @@ class Filesystem(
         ...
     @typing.overload
     def set_immutable(self, 
-        set_flag:'bool',
-        path:'str',
+        _set_flag:'bool',
+        _path:'str',
     /) -> None: 
         """
         Set/Unset immutable flag at `path`.
@@ -350,7 +350,7 @@ class Filesystem(
         ...
     @typing.overload
     def setacl(self, 
-        filesystem_acl:'FilesystemAcl',
+        _filesystem_acl:'FilesystemAcl',
     /) -> None: 
         """
         Set ACL of a given path. Takes the following parameters:
@@ -396,7 +396,7 @@ class Filesystem(
         ...
     @typing.overload
     def setperm(self, 
-        filesystem_permission:'FilesystemPermission',
+        _filesystem_permission:'FilesystemPermission',
     /) -> None: 
         """
         Set unix permissions on given `path`.
@@ -437,7 +437,7 @@ class Filesystem(
         ...
     @typing.overload
     def stat(self, 
-        path:'str',
+        _path:'str',
     /) -> 'PathStats': 
         """
         Return the filesystem stat(2) for a given `path`.
@@ -459,7 +459,7 @@ class Filesystem(
         ...
     @typing.overload
     def statfs(self, 
-        path:'str',
+        _path:'str',
     /) -> 'PathStatfs': 
         """
         Return stats from the filesystem of a given path.

@@ -12,7 +12,7 @@ class IscsiTarget(
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload
     def create(self, 
-        iscsi_target_create:'IscsiTargetCreate',
+        _iscsi_target_create:'IscsiTargetCreate',
     /) -> 'dict[str]': 
         """
         Create an iSCSI Target.
@@ -36,8 +36,8 @@ class IscsiTarget(
         ...
     @typing.overload
     def delete(self, 
-        id:'int',
-        force:'bool',
+        _id:'int',
+        _force:'bool',
     /) -> 'bool': 
         """
         Delete iSCSI Target of `id`.
@@ -58,8 +58,8 @@ class IscsiTarget(
         ...
     @typing.overload
     def get_instance(self, 
-        id:'typing.Union[str, int, bool, dict[str], list]',
-        query_options_get_instance:'QueryOptionsGetInstance',
+        _id:'typing.Union[str, int, bool, dict[str], list]',
+        _query_options_get_instance:'QueryOptionsGetInstance',
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -78,8 +78,8 @@ class IscsiTarget(
         ...
     @typing.overload
     def query(self, 
-        query_filters:'list[list]',
-        query_options:'QueryOptions',
+        _query_filters:'list[list]',
+        _query_options:'QueryOptions',
     /) -> 'typing.Union[list, dict[str], int]': 
         """
         
@@ -98,8 +98,8 @@ class IscsiTarget(
         ...
     @typing.overload
     def update(self, 
-        id:'int',
-        iscsi_target_update:'IscsiTargetUpdate',
+        _id:'int',
+        _iscsi_target_update:'IscsiTargetUpdate',
     /) -> 'dict[str]': 
         """
         Update iSCSI Target of `id`.
@@ -119,8 +119,8 @@ class IscsiTarget(
         ...
     @typing.overload
     def validate_name(self, 
-        name:'str',
-        existing_id:'typing.Optional[int]',
+        _name:'str',
+        _existing_id:'typing.Optional[int]',
     /) -> None: 
         """
         Returns validation error for iSCSI target name

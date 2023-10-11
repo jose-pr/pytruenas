@@ -12,7 +12,7 @@ class PoolSnapshottask(
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload
     def create(self, 
-        periodic_snapshot_create:'PeriodicSnapshotCreate',
+        _periodic_snapshot_create:'PeriodicSnapshotCreate',
     /) -> 'dict[str]': 
         """
         Create a Periodic Snapshot Task
@@ -39,8 +39,8 @@ class PoolSnapshottask(
         ...
     @typing.overload
     def delete(self, 
-        id:'int',
-        options:'Options',
+        _id:'int',
+        _options:'Options',
     /) -> 'bool': 
         """
         Delete a Periodic Snapshot Task with specific `id`
@@ -59,7 +59,7 @@ class PoolSnapshottask(
         ...
     @typing.overload
     def delete_will_change_retention_for(self, 
-        id:'int',
+        _id:'int',
     /) -> 'dict[str]': 
         """
         Returns a list of snapshots which will change the retention if periodic snapshot task `id` is deleted.
@@ -76,7 +76,7 @@ class PoolSnapshottask(
         ...
     @typing.overload
     def foreseen_count(self, 
-        periodic_snapshot_foreseen_count:'PeriodicSnapshotForeseenCount',
+        _periodic_snapshot_foreseen_count:'PeriodicSnapshotForeseenCount',
     /) -> 'int': 
         """
         Returns a number of snapshots (per-dataset) being retained if a periodic snapshot task with specific parameters
@@ -94,8 +94,8 @@ class PoolSnapshottask(
         ...
     @typing.overload
     def get_instance(self, 
-        id:'typing.Union[str, int, bool, dict[str], list]',
-        query_options_get_instance:'QueryOptionsGetInstance',
+        _id:'typing.Union[str, int, bool, dict[str], list]',
+        _query_options_get_instance:'QueryOptionsGetInstance',
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -142,8 +142,8 @@ class PoolSnapshottask(
         ...
     @typing.overload
     def query(self, 
-        query_filters:'list[list]',
-        query_options:'QueryOptions',
+        _query_filters:'list[list]',
+        _query_options:'QueryOptions',
     /) -> 'typing.Union[list, dict[str], int]': 
         """
         
@@ -162,7 +162,7 @@ class PoolSnapshottask(
         ...
     @typing.overload
     def run(self, 
-        id:'int',
+        _id:'int',
     /) -> None: 
         """
         Execute a Periodic Snapshot Task of `id`.
@@ -177,8 +177,8 @@ class PoolSnapshottask(
         ...
     @typing.overload
     def update(self, 
-        id:'int',
-        periodic_snapshot_update:'PeriodicSnapshotUpdate',
+        _id:'int',
+        _periodic_snapshot_update:'PeriodicSnapshotUpdate',
     /) -> 'dict[str]': 
         """
         Update a Periodic Snapshot Task with specific `id`
@@ -199,8 +199,8 @@ class PoolSnapshottask(
         ...
     @typing.overload
     def update_will_change_retention_for(self, 
-        id:'int',
-        periodic_snapshot_update_will_change_retention:'PeriodicSnapshotUpdateWillChangeRetention',
+        _id:'int',
+        _periodic_snapshot_update_will_change_retention:'PeriodicSnapshotUpdateWillChangeRetention',
     /) -> 'dict[str]': 
         """
         Returns a list of snapshots which will change the retention if periodic snapshot task `id` is updated

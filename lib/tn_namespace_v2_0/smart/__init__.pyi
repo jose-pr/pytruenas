@@ -24,7 +24,7 @@ class Smart(
         ...
     @typing.overload
     def update(self, 
-        smart_update:'SmartUpdate',
+        _smart_update:'SmartUpdate',
     /) -> 'SmartUpdateReturns': 
         """
         Update SMART Service Configuration.

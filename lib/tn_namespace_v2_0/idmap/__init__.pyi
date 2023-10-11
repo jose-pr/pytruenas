@@ -48,7 +48,7 @@ class Idmap(
         ...
     @typing.overload
     def create(self, 
-        idmap_domain_create:'IdmapDomainCreate',
+        _idmap_domain_create:'IdmapDomainCreate',
     /) -> 'IdmapCreateReturns': 
         """
         Create a new IDMAP domain. These domains must be unique. This table
@@ -151,7 +151,7 @@ class Idmap(
         ...
     @typing.overload
     def delete(self, 
-        id:'int',
+        _id:'int',
     /) -> 'bool': 
         """
         Delete a domain by id. Deletion of default system domains is not permitted.
@@ -170,8 +170,8 @@ class Idmap(
         ...
     @typing.overload
     def get_instance(self, 
-        id:'typing.Union[str, int, bool, dict[str], list]',
-        query_options_get_instance:'QueryOptionsGetInstance',
+        _id:'typing.Union[str, int, bool, dict[str], list]',
+        _query_options_get_instance:'QueryOptionsGetInstance',
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -190,7 +190,7 @@ class Idmap(
         ...
     @typing.overload
     def options_choices(self, 
-        idmap_backend:'IdmapBackend',
+        _idmap_backend:'IdmapBackend',
     /) -> None: 
         """
         Returns a list of supported keys for the specified idmap backend.
@@ -205,8 +205,8 @@ class Idmap(
         ...
     @typing.overload
     def query(self, 
-        query_filters:'list[list]',
-        query_options:'QueryOptions',
+        _query_filters:'list[list]',
+        _query_options:'QueryOptions',
     /) -> 'typing.Union[list[IdmapDomainEntry], IdmapDomainEntry, int]': 
         """
         
@@ -225,8 +225,8 @@ class Idmap(
         ...
     @typing.overload
     def update(self, 
-        id:'int',
-        idmap_update:'IdmapUpdate',
+        _id:'int',
+        _idmap_update:'IdmapUpdate',
     /) -> 'IdmapUpdateReturns': 
         """
         Update a domain by id.

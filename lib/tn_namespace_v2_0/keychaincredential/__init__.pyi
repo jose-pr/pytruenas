@@ -10,7 +10,7 @@ class Keychaincredential(
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload
     def create(self, 
-        keychain_credential_create:'KeychainCredentialCreate',
+        _keychain_credential_create:'KeychainCredentialCreate',
     /) -> 'KeychaincredentialCreateReturns': 
         """
         Create a Keychain Credential
@@ -45,8 +45,8 @@ class Keychaincredential(
         ...
     @typing.overload
     def delete(self, 
-        id:'int',
-        options:'Options',
+        _id:'int',
+        _options:'Options',
     /) -> None: 
         """
         Delete Keychain Credential with specific `id`
@@ -79,8 +79,8 @@ class Keychaincredential(
         ...
     @typing.overload
     def get_instance(self, 
-        id:'typing.Union[str, int, bool, dict[str], list]',
-        query_options_get_instance:'QueryOptionsGetInstance',
+        _id:'typing.Union[str, int, bool, dict[str], list]',
+        _query_options_get_instance:'QueryOptionsGetInstance',
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -99,8 +99,8 @@ class Keychaincredential(
         ...
     @typing.overload
     def query(self, 
-        query_filters:'list[list]',
-        query_options:'QueryOptions',
+        _query_filters:'list[list]',
+        _query_options:'QueryOptions',
     /) -> 'typing.Union[list[KeychainCredentialEntry], KeychainCredentialEntry, int]': 
         """
         
@@ -119,7 +119,7 @@ class Keychaincredential(
         ...
     @typing.overload
     def remote_ssh_host_key_scan(self, 
-        keychain_remote_ssh_host_key_scan:'KeychainRemoteSshHostKeyScan',
+        _keychain_remote_ssh_host_key_scan:'KeychainRemoteSshHostKeyScan',
     /) -> 'str': 
         """
         Discover a remote host key
@@ -138,7 +138,7 @@ class Keychaincredential(
         ...
     @typing.overload
     def remote_ssh_semiautomatic_setup(self, 
-        keychain_remote_ssh_semiautomatic_setup:'KeychainRemoteSshSemiautomaticSetup',
+        _keychain_remote_ssh_semiautomatic_setup:'KeychainRemoteSshSemiautomaticSetup',
     /) -> 'KeychainCredentialEntry': 
         """
         Perform semi-automatic SSH connection setup with other FreeNAS machine
@@ -160,7 +160,7 @@ class Keychaincredential(
         ...
     @typing.overload
     def setup_ssh_connection(self, 
-        setup_ssh_connection:'SetupSshConnection',
+        _setup_ssh_connection:'SetupSshConnection',
     /) -> 'KeychainCredentialEntry': 
         """
         Creates a SSH Connection performing the following steps:
@@ -183,8 +183,8 @@ class Keychaincredential(
         ...
     @typing.overload
     def update(self, 
-        id:'int',
-        keychain_credential_update:'KeychainCredentialUpdate',
+        _id:'int',
+        _keychain_credential_update:'KeychainCredentialUpdate',
     /) -> 'KeychaincredentialUpdateReturns': 
         """
         Update a Keychain Credential with specific `id`
@@ -209,7 +209,7 @@ class Keychaincredential(
         ...
     @typing.overload
     def used_by(self, 
-        id:'int',
+        _id:'int',
     /) -> 'list[CredentialResult]': 
         """
         Returns list of objects that use this credential.

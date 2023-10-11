@@ -10,7 +10,7 @@ class ZfsSnapshot(
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload
     def clone(self, 
-        snapshot_clone:'SnapshotClone',
+        _snapshot_clone:'SnapshotClone',
     /) -> None: 
         """
         Clone a given snapshot to a new dataset.
@@ -28,7 +28,7 @@ class ZfsSnapshot(
         ...
     @typing.overload
     def create(self, 
-        snapshot_create:'SnapshotCreate',
+        _snapshot_create:'SnapshotCreate',
     /) -> 'dict[str]': 
         """
         Take a snapshot from a given dataset.
@@ -45,8 +45,8 @@ class ZfsSnapshot(
         ...
     @typing.overload
     def delete(self, 
-        id:'str',
-        options:'Options',
+        _id:'str',
+        _options:'Options',
     /) -> 'bool': 
         """
         Delete snapshot of name `id`.
@@ -67,8 +67,8 @@ class ZfsSnapshot(
         ...
     @typing.overload
     def get_instance(self, 
-        id:'typing.Union[str, int, bool, dict[str], list]',
-        query_options_get_instance:'QueryOptionsGetInstance',
+        _id:'typing.Union[str, int, bool, dict[str], list]',
+        _query_options_get_instance:'QueryOptionsGetInstance',
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -87,8 +87,8 @@ class ZfsSnapshot(
         ...
     @typing.overload
     def hold(self, 
-        id:'str',
-        options:'Options_',
+        _id:'str',
+        _options:'Options_',
     /) -> None: 
         """
         Holds snapshot `id`.
@@ -109,8 +109,8 @@ class ZfsSnapshot(
         ...
     @typing.overload
     def query(self, 
-        query_filters:'list[list]',
-        query_options:'QueryOptions',
+        _query_filters:'list[list]',
+        _query_options:'QueryOptions',
     /) -> 'typing.Union[list, dict[str], int]': 
         """
         Query all ZFS Snapshots with `query-filters` and `query-options`.
@@ -135,8 +135,8 @@ class ZfsSnapshot(
         ...
     @typing.overload
     def release(self, 
-        id:'str',
-        options:'Options_',
+        _id:'str',
+        _options:'Options_',
     /) -> None: 
         """
         Release held snapshot `id`.
@@ -158,7 +158,7 @@ class ZfsSnapshot(
         ...
     @typing.overload
     def remove(self, 
-        snapshot_remove:'SnapshotRemove',
+        _snapshot_remove:'SnapshotRemove',
     /) -> None: 
         """
         Remove a snapshot from a given dataset.
@@ -176,8 +176,8 @@ class ZfsSnapshot(
         ...
     @typing.overload
     def rollback(self, 
-        id:'str',
-        options:'Options__',
+        _id:'str',
+        _options:'Options__',
     /) -> None: 
         """
         Rollback to a given snapshot `id`.
@@ -204,8 +204,8 @@ class ZfsSnapshot(
         ...
     @typing.overload
     def update(self, 
-        id:'str',
-        snapshot_update:'SnapshotUpdate',
+        _id:'str',
+        _snapshot_update:'SnapshotUpdate',
     /) -> 'dict[str]': 
         """
         

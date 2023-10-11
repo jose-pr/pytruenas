@@ -12,7 +12,7 @@ class IscsiHost(
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload
     def create(self, 
-        iscsi_host_create:'IscsiHostCreate',
+        _iscsi_host_create:'IscsiHostCreate',
     /) -> 'dict[str]': 
         """
         Creates iSCSI host.
@@ -33,7 +33,7 @@ class IscsiHost(
         ...
     @typing.overload
     def delete(self, 
-        id:'int',
+        _id:'int',
     /) -> 'bool': 
         """
         Update iSCSI host `id`.
@@ -50,7 +50,7 @@ class IscsiHost(
         ...
     @typing.overload
     def get_initiators(self, 
-        id:'int',
+        _id:'int',
     /) -> None: 
         """
         Returns initiator groups associated with host `id`.
@@ -65,8 +65,8 @@ class IscsiHost(
         ...
     @typing.overload
     def get_instance(self, 
-        id:'typing.Union[str, int, bool, dict[str], list]',
-        query_options_get_instance:'QueryOptionsGetInstance',
+        _id:'typing.Union[str, int, bool, dict[str], list]',
+        _query_options_get_instance:'QueryOptionsGetInstance',
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -85,7 +85,7 @@ class IscsiHost(
         ...
     @typing.overload
     def get_targets(self, 
-        id:'int',
+        _id:'int',
     /) -> None: 
         """
         Returns targets associated with host `id`.
@@ -100,8 +100,8 @@ class IscsiHost(
         ...
     @typing.overload
     def query(self, 
-        query_filters:'list[list]',
-        query_options:'QueryOptions',
+        _query_filters:'list[list]',
+        _query_options:'QueryOptions',
     /) -> 'typing.Union[list, dict[str], int]': 
         """
         
@@ -120,9 +120,9 @@ class IscsiHost(
         ...
     @typing.overload
     def set_initiators(self, 
-        id:'int',
-        ids:'list[int]',
-        force:'bool',
+        _id:'int',
+        _ids:'list[int]',
+        _force:'bool',
     /) -> None: 
         """
         Associates initiator groups `ids` with host `id`.
@@ -142,8 +142,8 @@ class IscsiHost(
         ...
     @typing.overload
     def set_targets(self, 
-        id:'int',
-        ids:'list[int]',
+        _id:'int',
+        _ids:'list[int]',
     /) -> None: 
         """
         Associates targets `ids` with host `id`.
@@ -160,8 +160,8 @@ class IscsiHost(
         ...
     @typing.overload
     def update(self, 
-        id:'int',
-        iscsi_host_update:'IscsiHostUpdate',
+        _id:'int',
+        _iscsi_host_update:'IscsiHostUpdate',
     /) -> 'dict[str]': 
         """
         Update iSCSI host `id`.

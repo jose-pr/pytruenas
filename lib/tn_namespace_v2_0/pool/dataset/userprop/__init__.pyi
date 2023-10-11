@@ -10,7 +10,7 @@ class PoolDatasetUserprop(
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload
     def create(self, 
-        dataset_user_prop_create:'DatasetUserPropCreate',
+        _dataset_user_prop_create:'DatasetUserPropCreate',
     /) -> 'PoolDatasetUserpropCreateReturns': 
         """
         Create a user property for a given `id` dataset.
@@ -27,8 +27,8 @@ class PoolDatasetUserprop(
         ...
     @typing.overload
     def delete(self, 
-        id:'str',
-        dataset_user_prop_delete:'DatasetUserPropDelete',
+        _id:'str',
+        _dataset_user_prop_delete:'DatasetUserPropDelete',
     /) -> 'bool': 
         """
         Delete user property `dataset_user_prop_delete.name` for `id` dataset.
@@ -47,8 +47,8 @@ class PoolDatasetUserprop(
         ...
     @typing.overload
     def get_instance(self, 
-        id:'typing.Union[str, int, bool, dict[str], list]',
-        query_options_get_instance:'QueryOptionsGetInstance',
+        _id:'typing.Union[str, int, bool, dict[str], list]',
+        _query_options_get_instance:'QueryOptionsGetInstance',
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -67,8 +67,8 @@ class PoolDatasetUserprop(
         ...
     @typing.overload
     def query(self, 
-        query_filters:'list[list]',
-        query_options:'QueryOptions',
+        _query_filters:'list[list]',
+        _query_options:'QueryOptions',
     /) -> 'typing.Union[list[PoolDatasetUserpropEntry], PoolDatasetUserpropEntry, int]': 
         """
         Query all user properties for ZFS datasets.
@@ -87,8 +87,8 @@ class PoolDatasetUserprop(
         ...
     @typing.overload
     def update(self, 
-        id:'str',
-        dataset_user_prop_update:'DatasetUserPropUpdate',
+        _id:'str',
+        _dataset_user_prop_update:'DatasetUserPropUpdate',
     /) -> 'PoolDatasetUserpropUpdateReturns': 
         """
         Update `dataset_user_prop_update.name` user property for `id` dataset.

@@ -12,7 +12,7 @@ class Kubernetes(
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload
     def backup_chart_releases(self, 
-        backup_name:'typing.Optional[str]',
+        _backup_name:'typing.Optional[str]',
     /) -> 'str': 
         """
         Create a backup of existing chart releases.
@@ -60,7 +60,7 @@ class Kubernetes(
         ...
     @typing.overload
     def delete_backup(self, 
-        backup_name:'str',
+        _backup_name:'str',
     /) -> None: 
         """
         Delete `backup_name` chart releases backup.
@@ -117,8 +117,8 @@ class Kubernetes(
         ...
     @typing.overload
     def restore_backup(self, 
-        backup_name:'str',
-        options:'Options',
+        _backup_name:'str',
+        _options:'Options',
     /) -> None: 
         """
         Restore `backup_name` chart releases backup.
@@ -166,7 +166,7 @@ class Kubernetes(
         ...
     @typing.overload
     def update(self, 
-        kubernetes_update:'KubernetesUpdate',
+        _kubernetes_update:'KubernetesUpdate',
     /) -> 'KubernetesUpdateReturns': 
         """
         `pool` must be a valid ZFS pool configured in the system. Kubernetes service will initialise the pool by

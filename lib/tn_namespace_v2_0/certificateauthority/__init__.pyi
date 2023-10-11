@@ -10,7 +10,7 @@ class Certificateauthority(
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload
     def ca_sign_csr(self, 
-        ca_sign_csr:'CaSignCsr',
+        _ca_sign_csr:'CaSignCsr',
     /) -> 'CertificateEntry': 
         """
         Sign CSR by Certificate Authority of `ca_id`
@@ -32,7 +32,7 @@ class Certificateauthority(
         ...
     @typing.overload
     def create(self, 
-        ca_create:'CaCreate',
+        _ca_create:'CaCreate',
     /) -> 'CertificateauthorityCreateReturns': 
         """
         Create a new Certificate Authority
@@ -67,7 +67,7 @@ class Certificateauthority(
         ...
     @typing.overload
     def delete(self, 
-        id:'int',
+        _id:'int',
     /) -> 'bool': 
         """
         Delete a Certificate Authority of `id`
@@ -84,8 +84,8 @@ class Certificateauthority(
         ...
     @typing.overload
     def get_instance(self, 
-        id:'typing.Union[str, int, bool, dict[str], list]',
-        query_options_get_instance:'QueryOptionsGetInstance',
+        _id:'typing.Union[str, int, bool, dict[str], list]',
+        _query_options_get_instance:'QueryOptionsGetInstance',
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -119,8 +119,8 @@ class Certificateauthority(
         ...
     @typing.overload
     def query(self, 
-        query_filters:'list[list]',
-        query_options:'QueryOptions',
+        _query_filters:'list[list]',
+        _query_options:'QueryOptions',
     /) -> 'typing.Union[list[CertificateauthorityEntry], CertificateauthorityEntry, int]': 
         """
         
@@ -139,8 +139,8 @@ class Certificateauthority(
         ...
     @typing.overload
     def update(self, 
-        id:'int',
-        ca_update:'CaUpdate',
+        _id:'int',
+        _ca_update:'CaUpdate',
     /) -> 'CertificateauthorityUpdateReturns': 
         """
         Update Certificate Authority of `id`

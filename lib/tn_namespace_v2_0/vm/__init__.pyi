@@ -38,8 +38,8 @@ class Vm(
         ...
     @typing.overload
     def clone(self, 
-        id:'int',
-        name:'str',
+        _id:'int',
+        _name:'str',
     /) -> 'bool': 
         """
         Clone the VM `id`.
@@ -81,7 +81,7 @@ class Vm(
         ...
     @typing.overload
     def create(self, 
-        vm_create:'VmCreate',
+        _vm_create:'VmCreate',
     /) -> 'VmCreateReturns': 
         """
         Create a Virtual Machine (VM).
@@ -129,8 +129,8 @@ class Vm(
         ...
     @typing.overload
     def delete(self, 
-        id:'int',
-        vm_delete:'VmDelete',
+        _id:'int',
+        _vm_delete:'VmDelete',
     /) -> 'bool': 
         """
         Delete a VM.
@@ -163,7 +163,7 @@ class Vm(
         ...
     @typing.overload
     def get_available_memory(self, 
-        overcommit:'bool',
+        _overcommit:'bool',
     /) -> 'int': 
         """
         Get the current maximum amount of available memory to be allocated for VMs.
@@ -201,7 +201,7 @@ class Vm(
         ...
     @typing.overload
     def get_console(self, 
-        id:'int',
+        _id:'int',
     /) -> 'str': 
         """
         Get the console device from a given guest.
@@ -218,7 +218,7 @@ class Vm(
         ...
     @typing.overload
     def get_display_devices(self, 
-        id:'int',
+        _id:'int',
     /) -> 'list[VmDeviceEntry]': 
         """
         Get the display devices from a given guest. If a display device has password configured,
@@ -236,9 +236,9 @@ class Vm(
         ...
     @typing.overload
     def get_display_web_uri(self, 
-        id:'int',
-        host:'str',
-        options:'Options',
+        _id:'int',
+        _host:'str',
+        _options:'Options',
     /) -> 'DisplayDevicesUri': 
         """
         Retrieve Display URI for a given VM or appropriate error if there is no display device available
@@ -260,8 +260,8 @@ class Vm(
         ...
     @typing.overload
     def get_instance(self, 
-        id:'typing.Union[str, int, bool, dict[str], list]',
-        query_options_get_instance:'QueryOptionsGetInstance',
+        _id:'typing.Union[str, int, bool, dict[str], list]',
+        _query_options_get_instance:'QueryOptionsGetInstance',
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -280,7 +280,7 @@ class Vm(
         ...
     @typing.overload
     def get_memory_usage(self, 
-        vm_id:'int',
+        _vm_id:'int',
     /) -> 'int': 
         """
         
@@ -297,7 +297,7 @@ class Vm(
         ...
     @typing.overload
     def get_vm_memory_info(self, 
-        vm_id:'int',
+        _vm_id:'int',
     /) -> 'GetVmMemoryInfo': 
         """
         Returns memory information for `vm_id` VM if it is going to be started.
@@ -365,7 +365,7 @@ class Vm(
         ...
     @typing.overload
     def log_file_path(self, 
-        id:'int',
+        _id:'int',
     /) -> 'typing.Optional[str]': 
         """
         Retrieve log file path of `id` VM.
@@ -414,7 +414,7 @@ class Vm(
         ...
     @typing.overload
     def poweroff(self, 
-        id:'int',
+        _id:'int',
     /) -> None: 
         """
         Poweroff a VM.
@@ -443,8 +443,8 @@ class Vm(
         ...
     @typing.overload
     def query(self, 
-        query_filters:'list[list]',
-        query_options:'QueryOptions',
+        _query_filters:'list[list]',
+        _query_options:'QueryOptions',
     /) -> 'typing.Union[list[VmEntry], VmEntry, int]': 
         """
         
@@ -494,7 +494,7 @@ class Vm(
         ...
     @typing.overload
     def restart(self, 
-        id:'int',
+        _id:'int',
     /) -> None: 
         """
         Restart a VM.
@@ -509,7 +509,7 @@ class Vm(
         ...
     @typing.overload
     def resume(self, 
-        id:'int',
+        _id:'int',
     /) -> None: 
         """
         Resume suspended `id` VM.
@@ -524,8 +524,8 @@ class Vm(
         ...
     @typing.overload
     def start(self, 
-        id:'int',
-        options:'Options_',
+        _id:'int',
+        _options:'Options_',
     /) -> None: 
         """
         Start a VM.
@@ -550,7 +550,7 @@ class Vm(
         ...
     @typing.overload
     def status(self, 
-        id:'int',
+        _id:'int',
     /) -> 'VmStatus': 
         """
         Get the status of `id` VM.
@@ -571,8 +571,8 @@ class Vm(
         ...
     @typing.overload
     def stop(self, 
-        id:'int',
-        options:'Options__',
+        _id:'int',
+        _options:'Options__',
     /) -> None: 
         """
         Stops a VM.
@@ -610,7 +610,7 @@ class Vm(
         ...
     @typing.overload
     def suspend(self, 
-        id:'int',
+        _id:'int',
     /) -> None: 
         """
         Suspend `id` VM.
@@ -625,8 +625,8 @@ class Vm(
         ...
     @typing.overload
     def update(self, 
-        id:'int',
-        vm_update:'VmUpdate',
+        _id:'int',
+        _vm_update:'VmUpdate',
     /) -> 'VmUpdateReturns': 
         """
         Update all information of a specific VM.

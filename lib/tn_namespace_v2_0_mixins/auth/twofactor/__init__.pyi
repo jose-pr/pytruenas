@@ -26,7 +26,7 @@ class AuthTwofactor(
         ...
     @typing.overload
     def update(self, 
-        auth_twofactor_update:'AuthTwofactorUpdate',
+        _auth_twofactor_update:'AuthTwofactorUpdate',
     /) -> 'AuthTwofactorUpdateReturns': 
         """
         `otp_digits` represents number of allowed digits in the OTP.

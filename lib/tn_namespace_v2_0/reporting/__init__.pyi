@@ -36,8 +36,8 @@ class Reporting(
         ...
     @typing.overload
     def get_data(self, 
-        graphs:'list[Graph]',
-        reporting_query:'ReportingQuery',
+        _graphs:'list[Graph]',
+        _reporting_query:'ReportingQuery',
     /) -> 'list[GraphReportingData]': 
         """
         Get reporting data for given graphs.
@@ -63,8 +63,8 @@ class Reporting(
         ...
     @typing.overload
     def graphs(self, 
-        query_filters:'list[list]',
-        query_options:'QueryOptions',
+        _query_filters:'list[list]',
+        _query_options:'QueryOptions',
     /) -> 'typing.Union[int, Graph_, list[Graph_]]': 
         """
         
@@ -83,8 +83,8 @@ class Reporting(
         ...
     @typing.overload
     def netdata_get_data(self, 
-        graphs:'list[Graph]',
-        reporting_query_netdata:'ReportingQueryNetdata',
+        _graphs:'list[Graph]',
+        _reporting_query_netdata:'ReportingQueryNetdata',
     /) -> 'list[NetdataGraphReportingData]': 
         """
         Get reporting data for given graphs.
@@ -110,8 +110,8 @@ class Reporting(
         ...
     @typing.overload
     def netdata_graph(self, 
-        name:'str',
-        reporting_query_netdata:'ReportingQueryNetdata',
+        _name:'str',
+        _reporting_query_netdata:'ReportingQueryNetdata',
     /) -> 'NetdataGraphReportingData': 
         """
         Get reporting data for `name` graph.
@@ -130,8 +130,8 @@ class Reporting(
         ...
     @typing.overload
     def netdata_graphs(self, 
-        query_filters:'list[list]',
-        query_options:'QueryOptions',
+        _query_filters:'list[list]',
+        _query_options:'QueryOptions',
     /) -> 'typing.Union[int, Graph__, list[Graph__]]': 
         """
         Get reporting netdata graphs.
@@ -150,7 +150,7 @@ class Reporting(
         ...
     @typing.overload
     def update(self, 
-        reporting_update:'ReportingUpdate',
+        _reporting_update:'ReportingUpdate',
     /) -> 'ReportingUpdateReturns': 
         """
         Configure Reporting Database settings.

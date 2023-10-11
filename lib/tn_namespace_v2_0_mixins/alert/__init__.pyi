@@ -10,7 +10,7 @@ class Alert(
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload
     def dismiss(self, 
-        uuid:'str',
+        _uuid:'str',
     /) -> None: 
         """
         Dismiss `id` alert.
@@ -67,7 +67,7 @@ class Alert(
         ...
     @typing.overload
     def restore(self, 
-        uuid:'str',
+        _uuid:'str',
     /) -> None: 
         """
         Restore `id` alert which had been dismissed.

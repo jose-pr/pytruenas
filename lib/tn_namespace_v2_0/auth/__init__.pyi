@@ -10,8 +10,8 @@ class Auth(
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload
     def check_password(self, 
-        username:'str',
-        password:'str',
+        _username:'str',
+        _password:'str',
     /) -> 'bool': 
         """
         Verify username and password
@@ -30,8 +30,8 @@ class Auth(
         ...
     @typing.overload
     def check_user(self, 
-        username:'str',
-        password:'str',
+        _username:'str',
+        _password:'str',
     /) -> 'bool': 
         """
         Verify username and password
@@ -50,9 +50,9 @@ class Auth(
         ...
     @typing.overload
     def generate_token(self, 
-        ttl:'typing.Optional[int]',
-        attrs,
-        match_origin:'bool',
+        _ttl:'typing.Optional[int]',
+        _attrs,
+        _match_origin:'bool',
     /) -> 'str': 
         """
         Generate a token to be used for authentication.
@@ -81,9 +81,9 @@ class Auth(
         ...
     @typing.overload
     def login(self, 
-        username:'str',
-        password:'str',
-        otp_token:'typing.Optional[str]',
+        _username:'str',
+        _password:'str',
+        _otp_token:'typing.Optional[str]',
     /) -> 'bool': 
         """
         Authenticate session using username and password.
@@ -105,7 +105,7 @@ class Auth(
         ...
     @typing.overload
     def login_with_api_key(self, 
-        api_key:'str',
+        _api_key:'str',
     /) -> 'bool': 
         """
         Authenticate session using API Key.
@@ -122,7 +122,7 @@ class Auth(
         ...
     @typing.overload
     def login_with_token(self, 
-        token:'str',
+        _token:'str',
     /) -> 'bool': 
         """
         Authenticate session using token generated with `auth.generate_token`.
@@ -168,8 +168,8 @@ class Auth(
         ...
     @typing.overload
     def sessions(self, 
-        query_filters:'list[list]',
-        query_options:'QueryOptions',
+        _query_filters:'list[list]',
+        _query_options:'QueryOptions',
     /) -> 'typing.Union[int, Session, list[Session]]': 
         """
         Returns list of active auth sessions.
@@ -216,8 +216,8 @@ class Auth(
         ...
     @typing.overload
     def set_attribute(self, 
-        key:'str',
-        value:'typing.Union[str, int, bool, dict[str], list]',
+        _key:'str',
+        _value:'typing.Union[str, int, bool, dict[str], list]',
     /) -> None: 
         """
         Set current user's `attributes` dictionary `key` to `value`.
@@ -248,7 +248,7 @@ class Auth(
         ...
     @typing.overload
     def terminate_session(self, 
-        id:'str',
+        _id:'str',
     /) -> 'bool': 
         """
         Terminates session `id`.
@@ -265,8 +265,8 @@ class Auth(
         ...
     @typing.overload
     def two_factor_auth(self, 
-        username:'str',
-        password:'str',
+        _username:'str',
+        _password:'str',
     /) -> 'bool': 
         """
         Returns true if two-factor authorization is required for authorizing user's login.

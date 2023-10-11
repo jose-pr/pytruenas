@@ -22,8 +22,8 @@ class IpmiSel(
         ...
     @typing.overload
     def elist(self, 
-        query_filters:'list[list]',
-        query_options:'QueryOptions',
+        _query_filters:'list[list]',
+        _query_options:'QueryOptions',
     /) -> 'typing.Union[int, dict[str], list]': 
         """
         Query IPMI System Event Log (SEL) extended list

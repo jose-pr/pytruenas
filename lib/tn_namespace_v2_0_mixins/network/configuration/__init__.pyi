@@ -40,7 +40,7 @@ class NetworkConfiguration(
         ...
     @typing.overload
     def update(self, 
-        global_configuration_update:'GlobalConfigurationUpdate',
+        _global_configuration_update:'GlobalConfigurationUpdate',
     /) -> 'NetworkConfigurationUpdateReturns': 
         """
         Update Network Configuration Service configuration.

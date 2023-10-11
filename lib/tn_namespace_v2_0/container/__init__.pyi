@@ -24,7 +24,7 @@ class Container(
         ...
     @typing.overload
     def prune(self, 
-        prune_options:'PruneOptions',
+        _prune_options:'PruneOptions',
     /) -> 'PrunedResources': 
         """
         Prune unused images/containers. This will by default remove any dangling images.
@@ -61,7 +61,7 @@ class Container(
         ...
     @typing.overload
     def update(self, 
-        container_update:'ContainerUpdate',
+        _container_update:'ContainerUpdate',
     /) -> 'ContainerUpdateReturns': 
         """
         When `enable_image_updates` is set, system will check if existing container images need to be updated. System

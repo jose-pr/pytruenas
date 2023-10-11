@@ -10,7 +10,7 @@ class Support(
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload
     def attach_ticket(self, 
-        attach_ticket:'AttachTicket',
+        _attach_ticket:'AttachTicket',
     /) -> None: 
         """
         Method to attach a file to a existing ticket.
@@ -53,7 +53,7 @@ class Support(
         ...
     @typing.overload
     def fetch_categories(self, 
-        token:'str',
+        _token:'str',
     /) -> 'dict[str]': 
         """
         Fetch issue categories using access token `token`.
@@ -119,7 +119,7 @@ class Support(
         ...
     @typing.overload
     def new_ticket(self, 
-        new_ticket:'NewTicket',
+        _new_ticket:'NewTicket',
     /) -> 'NewTicketResponse': 
         """
         Creates a new ticket for support.
@@ -141,7 +141,7 @@ class Support(
         ...
     @typing.overload
     def update(self, 
-        support_update:'SupportUpdate',
+        _support_update:'SupportUpdate',
     /) -> 'SupportUpdateReturns': 
         """
         Update Proactive Support settings.

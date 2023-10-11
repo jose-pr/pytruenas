@@ -12,7 +12,7 @@ class SharingNfs(
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload
     def create(self, 
-        sharingnfs_create:'SharingnfsCreate',
+        _sharingnfs_create:'SharingnfsCreate',
     /) -> 'SharingNfsCreateReturns': 
         """
         Create a NFS Share.
@@ -39,7 +39,7 @@ class SharingNfs(
         ...
     @typing.overload
     def delete(self, 
-        id:'int',
+        _id:'int',
     /) -> None: 
         """
         Delete NFS Share of `id`.
@@ -54,8 +54,8 @@ class SharingNfs(
         ...
     @typing.overload
     def get_instance(self, 
-        id:'typing.Union[str, int, bool, dict[str], list]',
-        query_options_get_instance:'QueryOptionsGetInstance',
+        _id:'typing.Union[str, int, bool, dict[str], list]',
+        _query_options_get_instance:'QueryOptionsGetInstance',
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -74,8 +74,8 @@ class SharingNfs(
         ...
     @typing.overload
     def query(self, 
-        query_filters:'list[list]',
-        query_options:'QueryOptions',
+        _query_filters:'list[list]',
+        _query_options:'QueryOptions',
     /) -> 'typing.Union[list[SharingNfsEntry], SharingNfsEntry, int]': 
         """
         
@@ -94,8 +94,8 @@ class SharingNfs(
         ...
     @typing.overload
     def update(self, 
-        id:'int',
-        sharingnfs_update:'SharingnfsUpdate',
+        _id:'int',
+        _sharingnfs_update:'SharingnfsUpdate',
     /) -> 'SharingNfsUpdateReturns': 
         """
         Update NFS Share of `id`.

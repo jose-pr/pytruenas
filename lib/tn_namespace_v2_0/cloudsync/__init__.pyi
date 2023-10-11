@@ -10,7 +10,7 @@ class Cloudsync(
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload
     def abort(self, 
-        id:'int',
+        _id:'int',
     /) -> None: 
         """
         Aborts cloud sync task.
@@ -25,7 +25,7 @@ class Cloudsync(
         ...
     @typing.overload
     def create(self, 
-        cloud_sync_create:'CloudSyncCreate',
+        _cloud_sync_create:'CloudSyncCreate',
     /) -> 'dict[str]': 
         """
         Creates a new cloud_sync entry.
@@ -42,8 +42,8 @@ class Cloudsync(
         ...
     @typing.overload
     def create_bucket(self, 
-        credentials_id:'int',
-        name:'str',
+        _credentials_id:'int',
+        _name:'str',
     /) -> None: 
         """
         Creates a new bucket `name` using ` credentials_id`.
@@ -60,7 +60,7 @@ class Cloudsync(
         ...
     @typing.overload
     def delete(self, 
-        id:'int',
+        _id:'int',
     /) -> 'bool': 
         """
         Deletes cloud_sync entry `id`.
@@ -77,8 +77,8 @@ class Cloudsync(
         ...
     @typing.overload
     def get_instance(self, 
-        id:'typing.Union[str, int, bool, dict[str], list]',
-        query_options_get_instance:'QueryOptionsGetInstance',
+        _id:'typing.Union[str, int, bool, dict[str], list]',
+        _query_options_get_instance:'QueryOptionsGetInstance',
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -97,7 +97,7 @@ class Cloudsync(
         ...
     @typing.overload
     def list_buckets(self, 
-        credentials_id:'int',
+        _credentials_id:'int',
     /) -> None: 
         """
         
@@ -112,7 +112,7 @@ class Cloudsync(
         ...
     @typing.overload
     def list_directory(self, 
-        cloud_sync_ls:'CloudSyncLs',
+        _cloud_sync_ls:'CloudSyncLs',
     /) -> None: 
         """
         List contents of a remote bucket / directory.
@@ -190,8 +190,8 @@ class Cloudsync(
         ...
     @typing.overload
     def query(self, 
-        query_filters:'list[list]',
-        query_options:'QueryOptions',
+        _query_filters:'list[list]',
+        _query_options:'QueryOptions',
     /) -> 'typing.Union[list, dict[str], int]': 
         """
         
@@ -210,8 +210,8 @@ class Cloudsync(
         ...
     @typing.overload
     def restore(self, 
-        id:'int',
-        cloud_sync_restore:'CloudSyncRestore',
+        _id:'int',
+        _cloud_sync_restore:'CloudSyncRestore',
     /) -> None: 
         """
         Create the opposite of cloud sync task `id` (PULL if it was PUSH and vice versa).
@@ -228,8 +228,8 @@ class Cloudsync(
         ...
     @typing.overload
     def sync(self, 
-        id:'int',
-        cloud_sync_sync_options:'CloudSyncSyncOptions',
+        _id:'int',
+        _cloud_sync_sync_options:'CloudSyncSyncOptions',
     /) -> None: 
         """
         Run the cloud_sync job `id`, syncing the local data to remote.
@@ -246,8 +246,8 @@ class Cloudsync(
         ...
     @typing.overload
     def sync_onetime(self, 
-        cloud_sync_sync_onetime:'CloudSyncSyncOnetime',
-        cloud_sync_sync_onetime_options:'CloudSyncSyncOnetimeOptions',
+        _cloud_sync_sync_onetime:'CloudSyncSyncOnetime',
+        _cloud_sync_sync_onetime_options:'CloudSyncSyncOnetimeOptions',
     /) -> None: 
         """
         Run cloud sync task without creating it.
@@ -264,8 +264,8 @@ class Cloudsync(
         ...
     @typing.overload
     def update(self, 
-        id:'int',
-        cloud_sync_update:'CloudSyncUpdate',
+        _id:'int',
+        _cloud_sync_update:'CloudSyncUpdate',
     /) -> 'dict[str]': 
         """
         Updates the cloud_sync entry `id` with `data`.

@@ -62,7 +62,7 @@ class Smb(
         ...
     @typing.overload
     def get_remote_acl(self, 
-        get_remote_acl:'GetRemoteAcl',
+        _get_remote_acl:'GetRemoteAcl',
     /) -> None: 
         """
         Retrieves an ACL from a remote SMB server.
@@ -94,10 +94,10 @@ class Smb(
         ...
     @typing.overload
     def status(self, 
-        info_level:'InfoLevel',
-        query_filters:'list[list]',
-        query_options:'QueryOptions',
-        status_options:'StatusOptions',
+        _info_level:'InfoLevel',
+        _query_filters:'list[list]',
+        _query_options:'QueryOptions',
+        _status_options:'StatusOptions',
     /) -> None: 
         """
         Returns SMB server status (sessions, open files, locks, notifications).
@@ -142,7 +142,7 @@ class Smb(
         ...
     @typing.overload
     def update(self, 
-        smb_update:'SmbUpdate',
+        _smb_update:'SmbUpdate',
     /) -> 'dict[str]': 
         """
         Update SMB Service Configuration.

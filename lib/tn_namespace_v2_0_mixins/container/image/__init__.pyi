@@ -12,7 +12,7 @@ class ContainerImage(
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload
     def delete(self, 
-        id:'str',
+        _id:'str',
     /) -> None: 
         """
         `options.force` should be used to force delete an image even if it's in use by a stopped container.
@@ -27,7 +27,7 @@ class ContainerImage(
         ...
     @typing.overload
     def get_chart_releases_consuming_image(self, 
-        image_tags:'list[str]',
+        _image_tags:'list[str]',
     /) -> 'list': 
         """
         Retrieve chart releases consuming `image_tag` image.
@@ -44,8 +44,8 @@ class ContainerImage(
         ...
     @typing.overload
     def get_instance(self, 
-        id:'typing.Union[str, int, bool, dict[str], list]',
-        query_options_get_instance:'QueryOptionsGetInstance',
+        _id:'typing.Union[str, int, bool, dict[str], list]',
+        _query_options_get_instance:'QueryOptionsGetInstance',
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -64,7 +64,7 @@ class ContainerImage(
         ...
     @typing.overload
     def pull(self, 
-        image_pull:'ImagePull',
+        _image_pull:'ImagePull',
     /) -> None: 
         """
         `from_image` is the name of the image to pull. Format for the name is "registry/repo/image" where
@@ -85,8 +85,8 @@ class ContainerImage(
         ...
     @typing.overload
     def query(self, 
-        query_filters:'list[list]',
-        query_options:'QueryOptions',
+        _query_filters:'list[list]',
+        _query_options:'QueryOptions',
     /) -> 'typing.Union[list[ContainerImageEntry], ContainerImageEntry, int]': 
         """
         Retrieve container images present in the system.

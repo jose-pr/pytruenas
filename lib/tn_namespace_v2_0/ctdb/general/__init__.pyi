@@ -24,7 +24,7 @@ class CtdbGeneral(
         ...
     @typing.overload
     def ips(self, 
-        ctdb_ips:'CtdbIps',
+        _ctdb_ips:'CtdbIps',
     /) -> 'list[CtdbPublicIp]': 
         """
         Return a list of public ip addresses in the ctdb cluster.
@@ -87,7 +87,7 @@ class CtdbGeneral(
         ...
     @typing.overload
     def status(self, 
-        ctdb_status:'CtdbStatus',
+        _ctdb_status:'CtdbStatus',
     /) -> 'CtdbStatus_': 
         """
         List the status of the ctdb cluster.

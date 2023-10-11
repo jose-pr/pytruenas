@@ -26,7 +26,7 @@ class Snmp(
         ...
     @typing.overload
     def update(self, 
-        snmp_update:'SnmpUpdate',
+        _snmp_update:'SnmpUpdate',
     /) -> 'SnmpUpdateReturns': 
         """
         Update SNMP Service Configuration.

@@ -12,7 +12,7 @@ class PoolScrub(
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload
     def create(self, 
-        pool_scrub_entry:'PoolScrubEntry',
+        _pool_scrub_entry:'PoolScrubEntry',
     /) -> 'PoolScrubCreateReturns': 
         """
         Create a scrub task for a pool.
@@ -32,7 +32,7 @@ class PoolScrub(
         ...
     @typing.overload
     def delete(self, 
-        id:'int',
+        _id:'int',
     /) -> 'bool': 
         """
         Delete scrub task of `id`.
@@ -49,8 +49,8 @@ class PoolScrub(
         ...
     @typing.overload
     def get_instance(self, 
-        id:'typing.Union[str, int, bool, dict[str], list]',
-        query_options_get_instance:'QueryOptionsGetInstance',
+        _id:'typing.Union[str, int, bool, dict[str], list]',
+        _query_options_get_instance:'QueryOptionsGetInstance',
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -69,8 +69,8 @@ class PoolScrub(
         ...
     @typing.overload
     def query(self, 
-        query_filters:'list[list]',
-        query_options:'QueryOptions',
+        _query_filters:'list[list]',
+        _query_options:'QueryOptions',
     /) -> 'typing.Union[list[PoolScrubEntry_], PoolScrubEntry_, int]': 
         """
         
@@ -89,8 +89,8 @@ class PoolScrub(
         ...
     @typing.overload
     def run(self, 
-        name:'str',
-        threshold:'int',
+        _name:'str',
+        _threshold:'int',
     /) -> None: 
         """
         Initiate a scrub of a pool `name` if last scrub was performed more than `threshold` days before.
@@ -107,8 +107,8 @@ class PoolScrub(
         ...
     @typing.overload
     def scrub(self, 
-        name:'str',
-        action:'Action',
+        _name:'str',
+        _action:'Action',
     /) -> None: 
         """
         Start/Stop/Pause a scrub on pool `name`.
@@ -125,8 +125,8 @@ class PoolScrub(
         ...
     @typing.overload
     def update(self, 
-        id:'int',
-        pool_scrub_update:'PoolScrubUpdate',
+        _id:'int',
+        _pool_scrub_update:'PoolScrubUpdate',
     /) -> 'PoolScrubUpdateReturns': 
         """
         Update scrub task of `id`.

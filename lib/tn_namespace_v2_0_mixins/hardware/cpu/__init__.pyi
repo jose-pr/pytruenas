@@ -38,7 +38,7 @@ class HardwareCpu(
         ...
     @typing.overload
     def set_governor(self, 
-        governor:'str',
+        _governor:'str',
     /) -> None: 
         """
         Set the cpu governor to `governor` on all cpus

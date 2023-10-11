@@ -24,7 +24,7 @@ class Ftp(
         ...
     @typing.overload
     def update(self, 
-        ftp_update:'FtpUpdate',
+        _ftp_update:'FtpUpdate',
     /) -> 'FtpUpdateReturns': 
         """
         Update ftp service configuration.

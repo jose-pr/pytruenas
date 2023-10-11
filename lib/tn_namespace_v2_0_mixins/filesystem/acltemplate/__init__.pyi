@@ -12,7 +12,7 @@ class FilesystemAcltemplate(
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload
     def by_path(self, 
-        acltemplate_by_path:'AcltemplateByPath',
+        _acltemplate_by_path:'AcltemplateByPath',
     /) -> 'list[AcltemplateEntry]': 
         """
         Retrieve list of available ACL templates for a given `path`.
@@ -38,7 +38,7 @@ class FilesystemAcltemplate(
         ...
     @typing.overload
     def create(self, 
-        acltemplate_create:'AcltemplateCreate',
+        _acltemplate_create:'AcltemplateCreate',
     /) -> 'FilesystemAcltemplateCreateReturns': 
         """
         Create a new filesystem ACL template.
@@ -55,7 +55,7 @@ class FilesystemAcltemplate(
         ...
     @typing.overload
     def delete(self, 
-        id:'int',
+        _id:'int',
     /) -> 'bool': 
         """
         
@@ -72,8 +72,8 @@ class FilesystemAcltemplate(
         ...
     @typing.overload
     def get_instance(self, 
-        id:'typing.Union[str, int, bool, dict[str], list]',
-        query_options_get_instance:'QueryOptionsGetInstance',
+        _id:'typing.Union[str, int, bool, dict[str], list]',
+        _query_options_get_instance:'QueryOptionsGetInstance',
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -92,8 +92,8 @@ class FilesystemAcltemplate(
         ...
     @typing.overload
     def query(self, 
-        query_filters:'list[list]',
-        query_options:'QueryOptions',
+        _query_filters:'list[list]',
+        _query_options:'QueryOptions',
     /) -> 'typing.Union[list[AcltemplateEntry], AcltemplateEntry, int]': 
         """
         
@@ -112,8 +112,8 @@ class FilesystemAcltemplate(
         ...
     @typing.overload
     def update(self, 
-        id:'int',
-        acltemplate_update:'AcltemplateUpdate',
+        _id:'int',
+        _acltemplate_update:'AcltemplateUpdate',
     /) -> 'FilesystemAcltemplateUpdateReturns': 
         """
         update filesystem ACL template with `id`.

@@ -12,7 +12,7 @@ class Replication(
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload
     def count_eligible_manual_snapshots(self, 
-        count_eligible_manual_snapshots:'CountEligibleManualSnapshots',
+        _count_eligible_manual_snapshots:'CountEligibleManualSnapshots',
     /) -> 'CountEligibleManualSnapshots_': 
         """
         Count how many existing snapshots of `dataset` match `naming_schema`.
@@ -29,7 +29,7 @@ class Replication(
         ...
     @typing.overload
     def create(self, 
-        replication_create:'ReplicationCreate',
+        _replication_create:'ReplicationCreate',
     /) -> 'dict[str]': 
         """
         Create a Replication Task
@@ -94,9 +94,9 @@ class Replication(
         ...
     @typing.overload
     def create_dataset(self, 
-        dataset:'str',
-        transport:'Transport',
-        ssh_credentials:'typing.Optional[int]',
+        _dataset:'str',
+        _transport:'Transport',
+        _ssh_credentials:'typing.Optional[int]',
     /) -> None: 
         """
         Creates dataset on remote side
@@ -117,7 +117,7 @@ class Replication(
         ...
     @typing.overload
     def delete(self, 
-        id:'int',
+        _id:'int',
     /) -> 'bool': 
         """
         Delete a Replication Task with specific `id`
@@ -134,8 +134,8 @@ class Replication(
         ...
     @typing.overload
     def get_instance(self, 
-        id:'typing.Union[str, int, bool, dict[str], list]',
-        query_options_get_instance:'QueryOptionsGetInstance',
+        _id:'typing.Union[str, int, bool, dict[str], list]',
+        _query_options_get_instance:'QueryOptionsGetInstance',
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -154,8 +154,8 @@ class Replication(
         ...
     @typing.overload
     def list_datasets(self, 
-        transport:'Transport',
-        ssh_credentials:'typing.Optional[int]',
+        _transport:'Transport',
+        _ssh_credentials:'typing.Optional[int]',
     /) -> 'list[str]': 
         """
         List datasets on remote side
@@ -190,8 +190,8 @@ class Replication(
         ...
     @typing.overload
     def query(self, 
-        query_filters:'list[list]',
-        query_options:'QueryOptions',
+        _query_filters:'list[list]',
+        _query_options:'QueryOptions',
     /) -> 'typing.Union[list, dict[str], int]': 
         """
         
@@ -210,8 +210,8 @@ class Replication(
         ...
     @typing.overload
     def restore(self, 
-        id:'int',
-        replication_restore:'ReplicationRestore',
+        _id:'int',
+        _replication_restore:'ReplicationRestore',
     /) -> None: 
         """
         Create the opposite of replication task `id` (PULL if it was PUSH and vice versa).
@@ -228,7 +228,7 @@ class Replication(
         ...
     @typing.overload
     def run(self, 
-        id:'int',
+        _id:'int',
     /) -> None: 
         """
         Run Replication Task of `id`.
@@ -243,7 +243,7 @@ class Replication(
         ...
     @typing.overload
     def run_onetime(self, 
-        replication_run_onetime:'ReplicationRunOnetime',
+        _replication_run_onetime:'ReplicationRunOnetime',
     /) -> None: 
         """
         Run replication task without creating it.
@@ -260,11 +260,11 @@ class Replication(
         ...
     @typing.overload
     def target_unmatched_snapshots(self, 
-        direction:'Direction',
-        source_datasets:'list[str]',
-        target_dataset:'str',
-        transport:'Transport_',
-        ssh_credentials:'typing.Optional[int]',
+        _direction:'Direction',
+        _source_datasets:'list[str]',
+        _target_dataset:'str',
+        _transport:'Transport_',
+        _ssh_credentials:'typing.Optional[int]',
     /) -> 'dict[str]': 
         """
         Check if target has any snapshots that do not exist on source. Returns these snapshots grouped by dataset.
@@ -300,8 +300,8 @@ class Replication(
         ...
     @typing.overload
     def update(self, 
-        id:'int',
-        replication_update:'ReplicationUpdate',
+        _id:'int',
+        _replication_update:'ReplicationUpdate',
     /) -> 'dict[str]': 
         """
         Update a Replication Task with specific `id`

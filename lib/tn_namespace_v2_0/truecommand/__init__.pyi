@@ -39,7 +39,7 @@ class Truecommand(
         ...
     @typing.overload
     def update(self, 
-        truecommand_update:'TruecommandUpdate',
+        _truecommand_update:'TruecommandUpdate',
     /) -> 'TruecommandUpdateReturns': 
         """
         Update Truecommand service settings.

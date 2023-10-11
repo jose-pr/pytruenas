@@ -10,7 +10,7 @@ class Cloud_backup(
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload
     def abort(self, 
-        id:'int',
+        _id:'int',
     /) -> None: 
         """
         Aborts cloud backup task.
@@ -25,7 +25,7 @@ class Cloud_backup(
         ...
     @typing.overload
     def create(self, 
-        cloud_backup_create:'CloudBackupCreate',
+        _cloud_backup_create:'CloudBackupCreate',
     /) -> 'dict[str]': 
         """
         
@@ -42,7 +42,7 @@ class Cloud_backup(
         ...
     @typing.overload
     def delete(self, 
-        id:'int',
+        _id:'int',
     /) -> 'bool': 
         """
         Deletes cloud backup entry `id`.
@@ -59,8 +59,8 @@ class Cloud_backup(
         ...
     @typing.overload
     def get_instance(self, 
-        id:'typing.Union[str, int, bool, dict[str], list]',
-        query_options_get_instance:'QueryOptionsGetInstance',
+        _id:'typing.Union[str, int, bool, dict[str], list]',
+        _query_options_get_instance:'QueryOptionsGetInstance',
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -79,7 +79,7 @@ class Cloud_backup(
         ...
     @typing.overload
     def init(self, 
-        id:'int',
+        _id:'int',
     /) -> None: 
         """
         Initializes the repository for the cloud backup job `id`.
@@ -94,8 +94,8 @@ class Cloud_backup(
         ...
     @typing.overload
     def query(self, 
-        query_filters:'list[list]',
-        query_options:'QueryOptions',
+        _query_filters:'list[list]',
+        _query_options:'QueryOptions',
     /) -> 'typing.Union[list, dict[str], int]': 
         """
         
@@ -114,8 +114,8 @@ class Cloud_backup(
         ...
     @typing.overload
     def sync(self, 
-        id:'int',
-        cloud_backup_sync_options:'CloudBackupSyncOptions',
+        _id:'int',
+        _cloud_backup_sync_options:'CloudBackupSyncOptions',
     /) -> None: 
         """
         Run the cloud backup job `id`.
@@ -132,8 +132,8 @@ class Cloud_backup(
         ...
     @typing.overload
     def update(self, 
-        id:'int',
-        cloud_backup_update:'CloudBackupUpdate',
+        _id:'int',
+        _cloud_backup_update:'CloudBackupUpdate',
     /) -> 'dict[str]': 
         """
         Updates the cloud backup entry `id` with `data`.

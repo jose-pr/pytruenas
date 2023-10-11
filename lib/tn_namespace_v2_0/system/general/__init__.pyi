@@ -166,7 +166,7 @@ class SystemGeneral(
         ...
     @typing.overload
     def ui_restart(self, 
-        delay:'int',
+        _delay:'int',
     /) -> None: 
         """
         Restart HTTP server to use latest UI settings.
@@ -197,7 +197,7 @@ class SystemGeneral(
         ...
     @typing.overload
     def update(self, 
-        general_settings:'GeneralSettings',
+        _general_settings:'GeneralSettings',
     /) -> 'SystemGeneralUpdateReturns': 
         """
         Update System General Service Configuration.

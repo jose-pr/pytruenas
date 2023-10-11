@@ -10,8 +10,8 @@ class Pool(
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload
     def attach(self, 
-        oid:'int',
-        pool_attach:'PoolAttach',
+        _oid:'int',
+        _pool_attach:'PoolAttach',
     /) -> None: 
         """
         `target_vdev` is the GUID of the vdev where the disk needs to be attached. In case of STRIPED vdev, this
@@ -30,7 +30,7 @@ class Pool(
         ...
     @typing.overload
     def attachments(self, 
-        id:'int',
+        _id:'int',
     /) -> 'list[Attachment]': 
         """
         Return a list of services dependent of this pool.
@@ -50,7 +50,7 @@ class Pool(
         ...
     @typing.overload
     def create(self, 
-        pool_create:'PoolCreate',
+        _pool_create:'PoolCreate',
     /) -> 'PoolCreateReturns': 
         """
         Create a new ZFS Pool.
@@ -102,8 +102,8 @@ class Pool(
         ...
     @typing.overload
     def detach(self, 
-        id:'int',
-        options:'Options',
+        _id:'int',
+        _options:'Options',
     /) -> 'bool': 
         """
         Detach a disk from pool of id `id`.
@@ -124,7 +124,7 @@ class Pool(
         ...
     @typing.overload
     def expand(self, 
-        id:'int',
+        _id:'int',
     /) -> None: 
         """
         Expand pool to fit all available disk space.
@@ -139,8 +139,8 @@ class Pool(
         ...
     @typing.overload
     def export(self, 
-        id:'int',
-        options:'Options_',
+        _id:'int',
+        _options:'Options_',
     /) -> None: 
         """
         Export pool of `id`.
@@ -161,7 +161,7 @@ class Pool(
         ...
     @typing.overload
     def filesystem_choices(self, 
-        types:'list[Type____]',
+        _types:'list[Type____]',
     /) -> 'list[str]': 
         """
         Returns all available datasets, except the following:
@@ -181,7 +181,7 @@ class Pool(
         ...
     @typing.overload
     def get_disks(self, 
-        id:'typing.Optional[int]',
+        _id:'typing.Optional[int]',
     /) -> 'list[str]': 
         """
         Get all disks in use by pools.
@@ -199,8 +199,8 @@ class Pool(
         ...
     @typing.overload
     def get_instance(self, 
-        id:'typing.Union[str, int, bool, dict[str], list]',
-        query_options_get_instance:'QueryOptionsGetInstance',
+        _id:'typing.Union[str, int, bool, dict[str], list]',
+        _query_options_get_instance:'QueryOptionsGetInstance',
     /) -> None: 
         """
         Returns instance matching `id`. If `id` is not found, Validation error is raised.
@@ -219,7 +219,7 @@ class Pool(
         ...
     @typing.overload
     def get_instance_by_name(self, 
-        name:'str',
+        _name:'str',
     /) -> 'PoolEntry': 
         """
         Returns pool with name `name`. If `name` is not found, Validation error is raised.
@@ -252,7 +252,7 @@ class Pool(
         ...
     @typing.overload
     def import_pool(self, 
-        pool_import:'PoolImport',
+        _pool_import:'PoolImport',
     /) -> 'bool': 
         """
         Import a pool found with `pool.import_find`.
@@ -277,7 +277,7 @@ class Pool(
         ...
     @typing.overload
     def is_upgraded(self, 
-        id:'int',
+        _id:'int',
     /) -> 'bool': 
         """
         Returns whether or not the pool of `id` is on the latest version and with all feature
@@ -296,8 +296,8 @@ class Pool(
         ...
     @typing.overload
     def offline(self, 
-        id:'int',
-        options:'Options',
+        _id:'int',
+        _options:'Options',
     /) -> 'bool': 
         """
         Offline a disk from pool of id `id`.
@@ -318,8 +318,8 @@ class Pool(
         ...
     @typing.overload
     def online(self, 
-        id:'int',
-        options:'Options',
+        _id:'int',
+        _options:'Options',
     /) -> 'bool': 
         """
         Online a disk from pool of id `id`.
@@ -340,7 +340,7 @@ class Pool(
         ...
     @typing.overload
     def processes(self, 
-        id:'int',
+        _id:'int',
     /) -> 'list[Process]': 
         """
         Returns a list of running processes using this pool.
@@ -357,8 +357,8 @@ class Pool(
         ...
     @typing.overload
     def query(self, 
-        query_filters:'list[list]',
-        query_options:'QueryOptions',
+        _query_filters:'list[list]',
+        _query_options:'QueryOptions',
     /) -> 'typing.Union[list[PoolEntry], PoolEntry, int]': 
         """
         
@@ -377,8 +377,8 @@ class Pool(
         ...
     @typing.overload
     def remove(self, 
-        id:'int',
-        options:'Options',
+        _id:'int',
+        _options:'Options',
     /) -> None: 
         """
         Remove a disk from pool of id `id`.
@@ -403,8 +403,8 @@ class Pool(
         ...
     @typing.overload
     def replace(self, 
-        id:'int',
-        options:'Options__',
+        _id:'int',
+        _options:'Options__',
     /) -> 'bool': 
         """
         Replace a disk on a pool.
@@ -428,8 +428,8 @@ class Pool(
         ...
     @typing.overload
     def scrub(self, 
-        id:'int',
-        action:'Action',
+        _id:'int',
+        _action:'Action',
     /) -> None: 
         """
         Performs a scrub action to pool of `id`.
@@ -448,8 +448,8 @@ class Pool(
         ...
     @typing.overload
     def update(self, 
-        id:'int',
-        pool_update:'PoolUpdate',
+        _id:'int',
+        _pool_update:'PoolUpdate',
     /) -> 'PoolUpdateReturns': 
         """
         Update pool of `id`, adding the new topology.
@@ -470,7 +470,7 @@ class Pool(
         ...
     @typing.overload
     def upgrade(self, 
-        id:'int',
+        _id:'int',
     /) -> 'bool': 
         """
         Upgrade pool of `id` to latest version with all feature flags.
@@ -487,7 +487,7 @@ class Pool(
         ...
     @typing.overload
     def validate_name(self, 
-        pool_name:'str',
+        _pool_name:'str',
     /) -> None: 
         """
         Validates `pool_name` is a valid name for a pool.

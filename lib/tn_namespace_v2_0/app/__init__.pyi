@@ -10,8 +10,8 @@ class App(
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload
     def available(self, 
-        query_filters:'list[list]',
-        query_options:'QueryOptions',
+        _query_filters:'list[list]',
+        _query_options:'QueryOptions',
     /) -> 'typing.Union[int, AvailableApps, list[AvailableApps]]': 
         """
         Retrieve all available applications from all configured catalogs.
@@ -44,8 +44,8 @@ class App(
         ...
     @typing.overload
     def latest(self, 
-        query_filters:'list[list]',
-        query_options:'QueryOptions',
+        _query_filters:'list[list]',
+        _query_options:'QueryOptions',
     /) -> 'typing.Union[int, AvailableApps, list[AvailableApps]]': 
         """
         Retrieve latest updated apps.
@@ -64,9 +64,9 @@ class App(
         ...
     @typing.overload
     def similar(self, 
-        app_name:'str',
-        catalog:'str',
-        train:'str',
+        _app_name:'str',
+        _catalog:'str',
+        _train:'str',
     /) -> 'list[AvailableApps]': 
         """
         Retrieve applications which are similar to `app_name`.

@@ -10,7 +10,7 @@ class Nfs(
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload
     def add_principal(self, 
-        kerberos_username_password:'KerberosUsernamePassword',
+        _kerberos_username_password:'KerberosUsernamePassword',
     /) -> 'bool': 
         """
         Use user-provided admin credentials to kinit, add NFS SPN
@@ -75,8 +75,8 @@ class Nfs(
         ...
     @typing.overload
     def get_nfs3_clients(self, 
-        query_filters:'list[list]',
-        query_options:'QueryOptions',
+        _query_filters:'list[list]',
+        _query_options:'QueryOptions',
     /) -> None: 
         """
         Read contents of rmtab. This information may not
@@ -95,8 +95,8 @@ class Nfs(
         ...
     @typing.overload
     def get_nfs4_clients(self, 
-        query_filters:'list[list]',
-        query_options:'QueryOptions',
+        _query_filters:'list[list]',
+        _query_options:'QueryOptions',
     /) -> None: 
         """
         Read information about NFSv4 clients from
@@ -114,7 +114,7 @@ class Nfs(
         ...
     @typing.overload
     def update(self, 
-        nfs_update:'NfsUpdate',
+        _nfs_update:'NfsUpdate',
     /) -> 'NfsUpdateReturns': 
         """
         Update NFS Service Configuration.

@@ -10,7 +10,7 @@ class ClusterManagement(
     def __init__(self, client:TrueNASClient) -> None: ...
     @typing.overload
     def add_nodes(self, 
-        add_cluster_nodes:'AddClusterNodes',
+        _add_cluster_nodes:'AddClusterNodes',
     /) -> 'ClusterInformation': 
         """
         WARNING: clustering APIs are not intended for 3rd-party consumption and may result
@@ -44,7 +44,7 @@ class ClusterManagement(
         ...
     @typing.overload
     def cluster_create(self, 
-        cluster_configuration:'ClusterConfiguration',
+        _cluster_configuration:'ClusterConfiguration',
     /) -> 'ClusterInformation': 
         """
         WARNING: clustering APIs are not intended for 3rd-party consumption and may result
@@ -100,7 +100,7 @@ class ClusterManagement(
         ...
     @typing.overload
     def summary(self, 
-        summary_options:'SummaryOptions',
+        _summary_options:'SummaryOptions',
     /) -> 'Summary': 
         """
         WARNING: clustering APIs are not intended for 3rd-party consumption and may result
