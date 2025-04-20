@@ -18,6 +18,8 @@ client = TrueNASClient(tn_host, tn_creds, sslverify=False)
 client.logger.setLevel(logging.TRACE)
 
 state = client.api.directoryservices.status()
-users = client.api.user.query(sqlutils.filter_from_kwargs(username=sqlutils.RE('adm.*')))
+users = client.api.user._query(username=sqlutils.RE('adm.*'))
+admin = client.api.user._get(username='admin')
 print(users)
+print(admin)
 
