@@ -98,6 +98,23 @@ class TrueNASClient:
     @cached_property
     def api(self):
         return Namespace(self)
+    
+    def load_sshcreds(self, name:str = None):
+        name = name or 'pytruenas'
+        keypair = self.api.keychaincredential._get(type='SSH_KEY_PAIR', name=name)
+        if not keypair:
+            attrs = self.api.keychaincredential.generate_ssh_key_pair()
+            keypair = self.api.keychaincredential._upsert('name', type='SSH_KEY_PAIR', name=name, attributes=attrs)
+        pubkey = keypair['attributes']['public_key'].strip()
+        root = self.api.user._get(username='root')
+        rootauthkeys = (root.get('sshpubkey') or '').splitlines()
+
+        if pubkey not in rootauthkeys:
+            rootauthkeys.append(pubkey)
+            self.api.user._upsert('username', username='root', sshpubkey='\n'.join(rootauthkeys))
+
+        self.shell.logintype = 'client_keys'
+        self.shell.credentials = keypair["attributes"]['private_key']
 
     def run(
         self,

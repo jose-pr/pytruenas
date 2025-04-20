@@ -11,22 +11,9 @@ logging.getLogger().addHandler(handler)
 tn_host = os.environ.get("TN_HOST")
 tn_creds = Credentials.from_env()
 client = TrueNASClient(tn_host, tn_creds, sslverify=False)
-client.logger.setLevel(logging.TRACE)
+client.logger.setLevel(logging.DEBUG)
 
-pytruenaskey = client.api.keychaincredential._get(type='SSH_KEY_PAIR', name='pytruenas')
-if not pytruenaskey:
-    key = client.api.keychaincredential.generate_ssh_key_pair()
-    pytruenaskey = client.api.keychaincredential._upsert('name', type='SSH_KEY_PAIR', name='pytruenas', attributes=key)
-pubkey = pytruenaskey['attributes']['public_key'].strip()
-root = client.api.user._get(username='root')
-rootauthkeys = (root.get('sshpubkey') or '').splitlines()
-
-if pubkey not in rootauthkeys:
-    rootauthkeys.append(pubkey)
-    client.api.user._upsert('username', username='root', sshpubkey='\n'.join(rootauthkeys))
-
-client.shell.logintype = 'client_keys'
-client.shell.credentials = pytruenaskey["attributes"]['private_key']
+client.load_sshcreds()
 
 result = TrueNASClient().run(
     ("echo", "'\"text\"'"),
