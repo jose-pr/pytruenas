@@ -18,6 +18,8 @@ class _CredentialsMeta(type):
             raise AttributeError(args, kwargs)
         if args and len(args) == 1:
             cred = args[0]
+            if cred is None:
+                return LocalAuth()
             if isinstance(cred, Credentials):
                 return cred
             if isinstance(cred, (list, tuple)):
