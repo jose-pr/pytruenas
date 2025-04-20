@@ -1,6 +1,8 @@
 #!/bin/python3
 from pytruenas import TrueNASClient, Credentials
-
+import typing
+if typing.TYPE_CHECKING:
+    from truenasapi_typings.current import Current
 import os, sys
 import logging
 from pytruenas.utils import sql as sqlutils
@@ -12,7 +14,7 @@ logging.getLogger().addHandler(handler)
 
 tn_host = os.environ.get("TN_HOST")
 tn_creds = Credentials.from_env()
-client = TrueNASClient(tn_host, tn_creds, sslverify=False)
+client = TrueNASClient['Current'](tn_host, tn_creds, sslverify=False)
 client.logger.setLevel(logging.DEBUG)
 
 client.load_sshcreds()
@@ -35,7 +37,7 @@ result = client.run(
 )
 print(result.stdout)
 
-state = client.api.directoryservices.status()
+state = client.api.sharing.smb.getacl()
 users = client.api.user._query(username=sqlutils.RE("adm.*"))
 admin = client.api.user._get(username="admin")
 print(users)

@@ -1,0 +1,21 @@
+from pytruenas import Namespace as _NS
+{% for qn in ns.namespaces() %}
+from {{ qn.module.removeprefix(ns.module) if ns.module else '.' + qn.module }} import {{ qn.classname }}
+{% endfor %} 
+class {{ ns.classname }}(_NS):
+    {% for qn in ns.methods() %}
+    def {{ qn.methodname }}(
+        {% for param in qn.parameters() %}
+        {% endfor %}
+    ) -> {{ qn.classname }}:
+        ...
+    {% endfor %} 
+    {% for qn in ns.namespaces() %}
+    {{ qn.methodname }}: {{ qn.classname }}
+    {% endfor %} 
+
+
+{% for qn in ns.methods() %}
+class {{ qn.classname }}:
+    ...
+{% endfor %} 
