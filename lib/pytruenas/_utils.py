@@ -13,22 +13,23 @@ T = _ty.TypeVar("T")
 _Dict = dict[str, T]
 import re as _re
 
+
 def classname(name: "str") -> str:
     std = _re.sub(r"[-\s_]+", "_", name)
-    std = std.replace('+', 'Plus').replace('!','Not').replace("*", "All")
-    std = _re.sub('\W|^(?=\d)','_', std)
+    std = std.replace("+", "Plus").replace("!", "Not").replace("*", "All")
+    std = _re.sub("\W|^(?=\d)", "_", std)
     if std == "":
-        std = '_'
+        std = "_"
     std = std[0].upper() + _re.sub(
         "_[a-z]", lambda m: m.group(0)[1:].upper(), std[1:]
     ).replace("_", "")
     return std
+
+
 def propname(name: str) -> str:
     std = _re.sub(r"[-\s_]+", "_", name)
-    std = _re.sub('\W|^(?=\d)','_', std)
-    std = std[0].lower() + _re.sub(
-        "[A-Z]", lambda m: m.group(0)[1:].lower(), std[1:]
-    )
+    std = _re.sub("\W|^(?=\d)", "_", std)
+    std = std[0].lower() + _re.sub("[A-Z]", lambda m: m.group(0)[1:].lower(), std[1:])
     return std
 
 
@@ -52,8 +53,7 @@ def merge(*partials: _Map, **partial):
     return merged
 
 
-class _Missing:
-    ...
+class _Missing: ...
 
 
 MISSING = _Missing
@@ -65,3 +65,26 @@ def diff(base: _Map, against: _Map):
         if base.get(k, MISSING) != v:
             d[k] = v
     return d
+
+
+import logging
+
+def add_logging_level(name:str, level:int, force=False):
+    name = name.upper()
+    if hasattr(logging, name) and not force:
+        return
+    setattr(logging, name, level)
+    logging.addLevelName(level, name)
+
+    def log_logger(self: logging.Logger, message, *args, **kwargs):
+        if self.isEnabledFor(level):
+            self._log(level, message, args, **kwargs)
+
+    name = name.lower()
+    setattr(logging.getLoggerClass(), name, log_logger)
+
+    def log_root(msg, *args, **kwargs):
+        logging.log(level, msg, *args, **kwargs)
+
+    setattr(logging, name, log_root)
+
