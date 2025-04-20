@@ -1,52 +1,38 @@
-import argparse
+"""The websocket client prior to implementing JSONRPC-2.0 protocol. Used for backwards compatibility."""
+
+from base64 import b64decode
+from collections import defaultdict
 import errno
 import logging
-import os
 import pickle
-import pprint
 import random
 import socket
 import ssl
-import sys
+from threading import Event, Lock, Thread
 import time
 import urllib.parse
 import uuid
-from base64 import b64decode
-from collections import defaultdict, namedtuple
-from threading import Event, Lock, Thread
 
 from websocket import WebSocketApp
 from websocket._abnf import STATUS_NORMAL
+from websocket._exceptions import WebSocketConnectionClosedException
 from websocket._http import connect, proxy_info
 from websocket._socket import sock_opt
 
 from . import ejson as json
-from .utils import MIDDLEWARE_RUN_DIR, ProgressBar, undefined
-try:
-    from libzfs import Error as ZFSError
-except ImportError:
-    # this happens on our CI/CD runners as
-    # they do not install the py-libzfs module
-    # to run our api integration tests
-    LIBZFS = False
-else:
-    LIBZFS = True
+from .config import CALL_TIMEOUT
+from .exc import ReserveFDException, ClientException, ValidationErrors, CallTimeout
+from .utils import MIDDLEWARE_RUN_DIR, undefined, UndefinedType, set_socket_options
 
 logger = logging.getLogger(__name__)
 
-CALL_TIMEOUT = int(os.environ.get('CALL_TIMEOUT', 60))
-
-
-class ReserveFDException(Exception):
-    pass
-
-
 class WSClient:
-    def __init__(self, url, *, client, reserved_ports=False, verify=True):
+    def __init__(self, url, *, client, reserved_ports=False, verify_ssl=True):
         self.url = url
         self.client = client
         self.reserved_ports = reserved_ports
-        self.verify = verify
+        self.verify_ssl = verify_ssl
+
         self.socket = None
         self.app = None
 
@@ -68,10 +54,8 @@ class WSClient:
                 raise
             app_url = "ws://localhost/websocket"  # Adviced by official docs to use dummy hostname
         else:
-            sockopt = sock_opt(None, None)
+            sockopt = sock_opt(None, None if self.verify_ssl else {"cert_reqs": ssl.CERT_NONE})
             sockopt.timeout = 10
-            if self.verify == False:
-                sockopt.sslopt = {"cert_reqs": ssl.CERT_NONE}
             self.socket = connect(self.url, sockopt, proxy_info(), None)[0]
             app_url = self.url
 
@@ -119,21 +103,7 @@ class WSClient:
     def _on_open(self, app):
         # TCP keepalive settings don't apply to local unix sockets
         if 'ws+unix' not in self.url:
-            # enable keepalives on the socket
-            self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
-
-            # If the other node panics then the socket will
-            # remain open and we'll have to wait until the
-            # TCP timeout value expires (60 seconds default).
-            # To account for this:
-            #   1. if the socket is idle for 1 seconds
-            #   2. send a keepalive packet every 1 second
-            #   3. for a maximum up to 5 times
-            #
-            # after 5 times (5 seconds of no response), the socket will be closed
-            self.socket.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPIDLE, 1)
-            self.socket.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPINTVL, 1)
-            self.socket.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPCNT, 5)
+            set_socket_options(self.socket)
 
         # if we're able to connect put socket in blocking mode
         # until all operations complete or error is raised
@@ -197,70 +167,18 @@ class Job:
                 job['error'],
                 trace={
                     'class': job['exc_info']['type'],
+                    'frames': [],
                     'formatted': job['exception'],
-                    'repr': job['exc_info']['repr'],
+                    'repr': job['exc_info'].get('repr', job['exception'].splitlines()[-1]),
                 },
                 extra=job['exc_info']['extra']
             )
         return job['result']
 
 
-class ErrnoMixin:
-    ENOMETHOD = 201
-    ESERVICESTARTFAILURE = 202
-    EALERTCHECKERUNAVAILABLE = 203
-    EREMOTENODEERROR = 204
-    EDATASETISLOCKED = 205
-    EINVALIDRRDTIMESTAMP = 206
-    ENOTAUTHENTICATED = 207
-
-    @classmethod
-    def _get_errname(cls, code):
-        if LIBZFS and 2000 <= code <= 2100:
-            return 'EZFS_' + ZFSError(code).name
-        for k, v in cls.__dict__.items():
-            if k.startswith("E") and v == code:
-                return k
-
-
-class ClientException(ErrnoMixin, Exception):
-    def __init__(self, error, errno=None, trace=None, extra=None):
-        self.errno = errno
-        self.error = error
-        self.trace = trace
-        self.extra = extra
-
-    def __str__(self):
-        return self.error
-
-
-Error = namedtuple('Error', ['attribute', 'errmsg', 'errcode'])
-
-
-class ValidationErrors(ClientException):
-    def __init__(self, errors):
-        self.errors = []
-        for e in errors:
-            self.errors.append(Error(e[0], e[1], e[2]))
-
-        super().__init__(str(self))
-
-    def __str__(self):
-        msgs = []
-        for e in self.errors:
-            errcode = errno.errorcode.get(e.errcode, 'EUNKNOWN')
-            msgs.append(f'[{errcode}] {e.attribute or "ALL"}: {e.errmsg}')
-        return '\n'.join(msgs)
-
-
-class CallTimeout(ClientException):
-    def __init__(self):
-        super().__init__("Call timeout", errno.ETIMEDOUT)
-
-
-class Client:
+class LegacyClient:
     def __init__(self, uri=None, reserved_ports=False, py_exceptions=False, log_py_exceptions=False,
-                 call_timeout=undefined, sslverify=True):
+                 call_timeout: float | UndefinedType=undefined, verify_ssl=True):
         """
         Arguments:
            :reserved_ports(bool): should the local socket used a reserved port
@@ -287,7 +205,7 @@ class Client:
             uri,
             client=self,
             reserved_ports=reserved_ports,
-            verify = sslverify
+            verify_ssl=verify_ssl,
         )
         self._ws.connect()
         self._connected.wait(10)
@@ -307,7 +225,7 @@ class Client:
     def _send(self, data):
         try:
             self._ws.send(json.dumps(data))
-        except AttributeError:
+        except (AttributeError, WebSocketConnectionClosedException):
             # happens when other node on HA is rebooted, for example, and there are
             # running tasks in the event loop (i.e. failover.call_remote failover.get_disks_local)
             raise ClientException('Unexpected closure of remote connection', errno.ECONNABORTED)
@@ -333,11 +251,11 @@ class Client:
                     call.trace = message['error'].get('trace')
                     call.type = message['error'].get('type')
                     call.extra = message['error'].get('extra')
-                    call.py_exception = message['error'].get('py_exception')
-                    if self._py_exceptions and call.py_exception:
-                        call.py_exception = pickle.loads(b64decode(
-                            call.py_exception
-                        ))
+                    if self._py_exceptions and (py_exception := message['error'].get('py_exception')):
+                        try:
+                            call.py_exception = pickle.loads(b64decode(py_exception))
+                        except Exception as e:
+                            logger.warning("Error unpickling call exception: %r", e)
                 call.returned.set()
                 self._unregister_call(call)
             else:
@@ -444,7 +362,7 @@ class Client:
                     ).start()
                 if mtype == 'CHANGED' and job['state'] in ('SUCCESS', 'FAILED', 'ABORTED'):
                     # If an Event already exist we just set it to mark it finished.
-                    # Otherwise we create a new Event.
+                    # Otherwise, we create a new Event.
                     # This is to prevent a race-condition of job finishing before
                     # the client can create the Event.
                     event = job.get('__ready')
@@ -541,13 +459,13 @@ class Client:
             raise ValueError(payload['error'])
         return payload['id']
 
-    def unsubscribe(self, id):
+    def unsubscribe(self, id_):
         self._send({
             'msg': 'unsub',
-            'id': id,
+            'id': id_,
         })
         for k, events in list(self._event_callbacks.items()):
-            events = [v for v in events if v['id'] != id]
+            events = [v for v in events if v['id'] != id_]
             if events:
                 self._event_callbacks[k] = events
             else:
@@ -570,162 +488,3 @@ class Client:
         # Wait for websocketclient thread to close
         self._closed.wait(1)
         self._ws = None
-
-
-def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-q', '--quiet', action='store_true')
-    parser.add_argument('-u', '--uri')
-    parser.add_argument('-U', '--username')
-    parser.add_argument('-P', '--password')
-    parser.add_argument('-K', '--api-key')
-    parser.add_argument('-t', '--timeout', type=int)
-
-    subparsers = parser.add_subparsers(help='sub-command help', dest='name')
-    iparser = subparsers.add_parser('call', help='Call method')
-    iparser.add_argument(
-        '-j', '--job', help='Call a long running job', type=bool, default=False
-    )
-    iparser.add_argument(
-        '-jp', '--job-print',
-        help='Method to print job progress', type=str, choices=(
-            'progressbar', 'description',
-        ), default='progressbar',
-    )
-    iparser.add_argument('method', nargs='+')
-    subparsers.add_parser('ping', help='Ping')
-    subparsers.add_parser('waitready', help='Wait server')
-    iparser = subparsers.add_parser('sql', help='Run SQL command')
-    iparser.add_argument('sql', nargs='+')
-    iparser = subparsers.add_parser('subscribe', help='Subscribe to event')
-    iparser.add_argument('event')
-    iparser.add_argument('-n', '--number', type=int, help='Number of events to wait before exit')
-    iparser.add_argument('-t', '--timeout', type=int)
-    args = parser.parse_args()
-
-    def from_json(args):
-        for i in args:
-            try:
-                yield json.loads(i)
-            except Exception:
-                yield i
-
-    if args.name == 'call':
-        try:
-            with Client(uri=args.uri) as c:
-                try:
-                    if args.username and args.password:
-                        if not c.call('auth.login', args.username, args.password):
-                            raise ValueError('Invalid username or password')
-                    elif args.api_key:
-                        if not c.call('auth.login_with_api_key', args.api_key):
-                            raise ValueError('Invalid API key')
-                except Exception as e:
-                    print("Failed to login: ", e)
-                    sys.exit(0)
-                try:
-                    kwargs = {}
-                    if args.timeout:
-                        kwargs['timeout'] = args.timeout
-                    if args.job:
-                        if args.job_print == 'progressbar':
-                            # display the job progress and status message while we wait
-
-                            def callback(progress_bar, job):
-                                try:
-                                    progress_bar.update(
-                                        job['progress']['percent'], job['progress']['description']
-                                    )
-                                except Exception as e:
-                                    print(f'Failed to update progress bar: {e!s}', file=sys.stderr)
-
-                            with ProgressBar() as progress_bar:
-                                kwargs.update({
-                                    'job': True,
-                                    'callback': lambda job: callback(progress_bar, job)
-                                })
-                                rv = c.call(args.method[0], *list(from_json(args.method[1:])), **kwargs)
-                                progress_bar.finish()
-                        else:
-                            lastdesc = ''
-
-                            def callback(job):
-                                nonlocal lastdesc
-                                desc = job['progress']['description']
-                                if desc is not None and desc != lastdesc:
-                                    print(desc, file=sys.stderr)
-                                lastdesc = desc
-
-                            kwargs.update({
-                                'job': True,
-                                'callback': callback,
-                            })
-                            rv = c.call(args.method[0], *list(from_json(args.method[1:])), **kwargs)
-                    else:
-                        rv = c.call(args.method[0], *list(from_json(args.method[1:])), **kwargs)
-                    if isinstance(rv, (int, str)):
-                        print(rv)
-                    else:
-                        print(json.dumps(rv))
-                except ClientException as e:
-                    if not args.quiet:
-                        if e.error:
-                            print(e.error, file=sys.stderr)
-                        if e.trace:
-                            print(e.trace['formatted'], file=sys.stderr)
-                        if e.extra:
-                            pprint.pprint(e.extra, stream=sys.stderr)
-                    sys.exit(1)
-        except (FileNotFoundError, ConnectionRefusedError):
-            print('Failed to run middleware call. Daemon not running?', file=sys.stderr)
-            sys.exit(1)
-    elif args.name == 'ping':
-        with Client(uri=args.uri) as c:
-            if not c.ping():
-                sys.exit(1)
-    elif args.name == 'sql':
-        with Client(uri=args.uri) as c:
-            try:
-                if args.username and args.password:
-                    if not c.call('auth.login', args.username, args.password):
-                        raise ValueError('Invalid username or password')
-            except Exception as e:
-                print("Failed to login: ", e)
-                sys.exit(0)
-            rv = c.call('datastore.sql', args.sql[0])
-            if rv:
-                for i in rv:
-                    data = []
-                    for f in i:
-                        if isinstance(f, bool):
-                            data.append(str(int(f)))
-                        else:
-                            data.append(str(f))
-                    print('|'.join(data))
-
-    elif args.name == 'subscribe':
-        with Client(uri=args.uri) as c:
-
-            subscribe_payload = c.event_payload()
-            event = subscribe_payload['event']
-            number = 0
-
-            def cb(mtype, **message):
-                nonlocal number
-                print(json.dumps(message))
-                number += 1
-                if args.number and number >= args.number:
-                    event.set()
-
-            c.subscribe(args.event, cb, subscribe_payload)
-
-            if not event.wait(timeout=args.timeout):
-                sys.exit(1)
-
-            if subscribe_payload['error']:
-                raise ValueError(subscribe_payload['error'])
-            sys.exit(0)
-
-
-if __name__ == '__main__':
-    main()
