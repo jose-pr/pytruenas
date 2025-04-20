@@ -49,8 +49,9 @@ class ShellConfig:
         self.port = _config.get("port")
         self.path = _config.get("path")
 
+ApiVersion = _ty.TypeVar('ApiVersion', bound=Namespace)
 
-class TrueNASClient:
+class TrueNASClient(_ty.Generic[ApiVersion]):
     def __init__(
         self,
         target: str = None,
@@ -96,8 +97,14 @@ class TrueNASClient:
         return self._conn
 
     @cached_property
-    def api(self):
+    def api(self) -> 'ApiVersion':
         return Namespace(self)
+    
+    def dump_api(self):
+        import json
+        from .models.apidump import Api
+        api:Api = json.loads(self.run('middlewared --dump-api', capture_output=True).stdout)
+        return api
     
     def load_sshcreds(self, name:str = None):
         name = name or 'pytruenas'
