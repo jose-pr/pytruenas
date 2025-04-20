@@ -62,7 +62,7 @@ class Credentials(metaclass=_CredentialsMeta):
 
     def login(self, client: "TrueNASClient"):
         if self.METHOD:
-            return client.call("auth." + self.METHOD, *self._args())
+            return client.api.auth(*self._args(), _method=self.METHOD)
         return None
 
     @staticmethod
@@ -74,8 +74,7 @@ class Credentials(metaclass=_CredentialsMeta):
         return Credentials(env.get("TN_CREDS"))
 
 
-class LocalAuth(Credentials):
-    ...
+class LocalAuth(Credentials): ...
 
 
 class ApiKeyAuth(Credentials):

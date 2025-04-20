@@ -1,49 +1,46 @@
 import errno
 import time
-import typing as _ty
-from enum import Enum as _Enum
-import re as _re
 
-from . import _utils, _conn, _core
-from . import auth as _auth, api as _api
+from . import _conn
+from . import auth as _auth
+
+import logging
 
 
 class Namespace:
     _client: "TrueNASClient"
 
-    def __init__(self, client: "TrueNASClient", name: str = None) -> None:
+    def __init__(self, client: "TrueNASClient", *name: str) -> None:
         self._client = client
-        self.__namespace = name
+        self._namespace = ".".join([n for n in name if n])
 
     def __repr__(self) -> str:
-        return f"{self.__class__.__name__}({self._client._target or 'localhost'}/{self._namespace})"
+        return f"{self.__class__.__name__}({self._client._target}/{self._namespace.replace('.','/')})"
 
     def __str__(self) -> str:
         return self._namespace
 
-    @property
-    def _namespace(self):
-        if not getattr(self, f"_{Namespace.__name__}__namespace", None):
-            self.__namespace = _re.sub(
-                "[A-Z]+", lambda m: "." + m.group(0).lower(), self.__class__.__name__
-            ).strip(".")
-        return self.__namespace
-
-    def __call__(self, method: str, *args, **kwds):
-        return self._client.call(self._namespace + "." + method, *args, **kwds)
+    def __call__(self, *args, _tries=1, _method: str = None, **kwds):
+        method = self._namespace
+        if _method:
+            method = f"{method}.{_method}"
+        while _tries > 0:
+            try:
+                self._client.logger.trace(f"Calling method: {method}")
+                return self._client.conn.call(method, *args, **kwds)
+            except _conn.ClientException as e:
+                if e.errno == errno.ECONNABORTED and _tries:
+                    _tries -= 1
+                    self._conn = None
+                    time.sleep(1)
+                else:
+                    raise e
 
     def __getattr__(self, name: str):
         if isinstance(name, str) and not name.startswith("_"):
-
-            def method(*args, **kwds):
-                return self(name, *args, **kwds)
-
-            return method
+            return Namespace(self._client, self._namespace, name.removesuffix('_'))
         else:
             super().__getattribute__(name)
-
-
-NS = _ty.TypeVar("NS", bound=Namespace)
 
 
 class TrueNASClient:
@@ -53,110 +50,39 @@ class TrueNASClient:
         creds: "tuple[str,str]|str|dict" = None,
         autologin=True,
         sslverify=True,
+        *,
+        api=None,
+        logger: logging.Logger = None,
     ) -> None:
-        self._target = target
+        self._target = target or "localhost"
         self._creds = _auth.Credentials(creds)
-        self._conn: _conn.Client = None
+        self._conn: _conn.JSONRPCClient = None
         self.sslverify = sslverify
         self.autologin = autologin
+        self.api_uri = api or self._target
+        if not logger:
+            logger = logging.getLogger("pytruenas")
+        self.logger = logging.getLogger(logger) if isinstance(logger, str) else logger
 
     @property
-    def uri(self):
-        if not self._target or self._target.lower() in ["localhost", "127.0.0.1"]:
-            return None
+    def api_uri(self):
+        return self._api
+
+    @api_uri.setter
+    def api_uri(self, value: str):
+        if not value or value.lower() in ["localhost", "127.0.0.1"]:
+            self._api = None
         else:
-            return f"wss://{self._target}/websocket"
+            self._api = f"wss://{value}/api/current"
 
     @property
     def conn(self):
         if self._conn is None or self._conn._closed.is_set():
-            self._conn = _conn.Client(self.uri, sslverify=self.sslverify)
+            self._conn = _conn.Client(self.api_uri, verify_ssl=self.sslverify)
             if self.autologin:
                 self._creds.login(self)
         return self._conn
 
-    def call(self, method: str, *args, **kwds):
-        reconnect = 1
-        while reconnect > 0:
-            try:
-                return self.conn.call(method, *args, **kwds)
-            except  _conn.ClientException as e:
-                if e.errno == errno.ECONNABORTED:
-                    reconnect -= 1
-                    self._conn = None
-                    time.sleep(1)
-                else:
-                    raise e from None
-
-    @_ty.overload
-    def namespace(self, name: str) -> Namespace:
-        pass
-
-    def namespace(self, name: str, cls: type[NS] = None) -> NS:
-        if cls is None:
-            cls = Namespace
-        return cls(self, name)
-
-    def api(self) -> _api.Api:
-        core = Namespace(self, "core")
-        services: dict[str, _core.NamespaceInfo] = core.get_services()
-        namespaces = []
-        for name, service in services.items():
-            methods = []
-            for name, m in core.get_methods(name).items():
-                method = _core.Method._normalize(m)
-                name = name.removeprefix(service["config"]["namespace"] + ".")
-                descr = method["description"]
-                returns = []
-                args = _ty.OrderedDict()
-                for p in method["accepts"]:
-                    pname = p["_name_"].replace("-", "_")
-                    args[pname] = _api.Paramater.from_param(p)
-                for p in method["returns"]:
-                    returns.append(_api.Paramater.from_param(p))
-                methods.append(
-                    _api.MethodSignature(
-                        name=name,
-                        description=descr,
-                        arguments=args,
-                        returns=returns,
-                        _src=method,
-                    )
-                )
-            _events: dict[str, _core.Event] = core.get_events()
-            events = []
-            for name, event in _events.items():
-                returns = []
-                args = _ty.OrderedDict()
-                for p in event["accepts"]:
-                    pname = p["_name_"].replace("-", "_")
-                    args[pname] = _api.Paramater.from_param(p)
-                for p in event["returns"]:
-                    returns.append(_api.Paramater.from_param(p))
-                events.append(
-                    _api.Event(
-                        name=name,
-                        description=event["description"],
-                        wildcard_subscription=event["wildcard_subscription"],
-                        arguments=args,
-                        returns=returns,
-                        _src=event,
-                    )
-                )
-            namespaces.append(
-                _api.NamespaceSignature(
-                    name=service["config"]["namespace"],
-                    type=service["type"],
-                    description=service["config"]["cli_description"] or "",
-                    methods=methods,
-                    events=events,
-                    _src=service,
-                )
-            )
-
-        return _api.Api("", sorted(namespaces, key=lambda ns: ns.name))
-
-    def _events(self) -> _utils._Dict[_core.Event]:
-        core = Namespace(self, "core")
-        services: dict[str, _core.Event] = core.get_events()
-        return services
+    @property
+    def api(self):
+        return Namespace(self)
