@@ -3,10 +3,14 @@ from pytruenas import TrueNASClient, Credentials
 
 import os, sys
 import logging
+from pytruenas.utils import sql as sqlutils
 
 handler = logging.StreamHandler(sys.stderr)
 logging.getLogger().addHandler(handler)
 
+
+query = sqlutils.filter_from_kwargs(test=1, bob='test', bob2=sqlutils.EQ('equalto'))
+print(query)
 
 tn_host = os.environ.get("TN_HOST")
 tn_creds = Credentials.from_env()
@@ -14,6 +18,6 @@ client = TrueNASClient(tn_host, tn_creds, sslverify=False)
 client.logger.setLevel(logging.TRACE)
 
 state = client.api.directoryservices.status()
-print(state)
-
+users = client.api.user.query(sqlutils.filter_from_kwargs(username=sqlutils.RE('adm.*')))
+print(users)
 

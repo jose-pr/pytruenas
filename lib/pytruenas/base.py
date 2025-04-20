@@ -26,7 +26,7 @@ class Namespace:
             method = f"{method}.{_method}"
         while _tries > 0:
             try:
-                self._client.logger.trace(f"Calling method: {method}")
+                self._client.logger.trace(f"Calling method: {method} args: {args}")
                 return self._client.conn.call(method, *args, **kwds)
             except _conn.ClientException as e:
                 if e.errno == errno.ECONNABORTED and _tries:
