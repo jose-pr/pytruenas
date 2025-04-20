@@ -1,10 +1,13 @@
 import errno
 import time
+import typing as _ty
 
 from . import _conn
 from . import auth as _auth
 
 import logging
+
+from .utils import sql as _sql
 
 
 class Namespace:
@@ -36,11 +39,39 @@ class Namespace:
                 else:
                     raise e
 
-    def __getattr__(self, name: str):
+    def __getattr__(self, name: str) -> "Namespace":
         if isinstance(name, str) and not name.startswith("_"):
-            return Namespace(self._client, self._namespace, name.removesuffix('_'))
+            return Namespace(self._client, self._namespace, name.removesuffix("_"))
         else:
             super().__getattribute__(name)
+
+    def _query(self, *__opts: dict|_sql.Option, **filter) -> list[dict[str]]:
+        opts = _sql.Option.options(*__opts)
+        filter = _sql.filter_from_kwargs(**filter)
+        return self.query(filter, opts)
+
+    def _get(self, **filter) -> dict[str]:
+        result = self._query({"limit": 1}, **filter)
+        if result:
+            return result[0]
+
+    def _upsert(self, __unique: str | _ty.Sequence[str], *__opts: dict|_sql.Option, **fields) -> dict[str]:
+        opts = _sql.Option.options(*__opts)
+        idkey = opts.get('idkey') or "id"
+        unique = __unique or idkey
+        if isinstance(unique, str):
+            unique = (unique,)
+        current = self._get(**{name: fields[name] for name in unique})
+        if current:
+            exclude = (idkey, unique, *(opts.get('update_exclude') or []))
+            fields = {name: val for name, val in fields.items() if name not in exclude}
+            result = self.update(current[idkey], **fields)
+        else:
+            exclude = (idkey, *(opts.get('create_exclude') or []))
+            fields = {name: val for name, val in fields.items() if name not in exclude}
+            result = self.create(**fields)
+        
+        return result
 
 
 class TrueNASClient:
