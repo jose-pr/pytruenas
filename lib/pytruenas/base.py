@@ -4,7 +4,11 @@ import subprocess
 from pathlib import PurePath, PurePosixPath
 import typing as _ty
 import io as _io
+import warnings 
+warnings.filterwarnings(action='ignore',module='.*asyncssh.*')
+
 import asyncssh as _ssh
+import urllib.parse
 
 try:
     import pwd
@@ -21,6 +25,31 @@ PathLike = str | PurePath
 Input = bytes | str
 
 
+class ShellConfig:
+    def __init__(self, *configs, **fields):
+        _config = {}
+
+        for config in reversed([*configs, fields]):
+            config = config or {}
+            if isinstance(config, str):
+                parsed = urllib.parse.urlsplit("ssh://" + config)
+                config = {
+                    "hostname": parsed.hostname,
+                    "logintype": urllib.parse.unquote(parsed.username or ""),
+                    "credentials": urllib.parse.unquote(parsed.password or ""),
+                    "port": parsed.port,
+                    "path": parsed.path,
+                }
+            for k, v in config.items():
+                _config.setdefault(k, v)
+
+        self.hostname = _config.get("hostname")
+        self.logintype = _config.get("logintype")
+        self.credentials = _config.get("credentials")
+        self.port = _config.get("port")
+        self.path = _config.get("path")
+
+
 class TrueNASClient:
     def __init__(
         self,
@@ -30,7 +59,7 @@ class TrueNASClient:
         sslverify=True,
         *,
         api=None,
-        sshcreds=None,
+        shell=None,
         logger: logging.Logger = None,
     ) -> None:
         self._target = target or "localhost"
@@ -39,6 +68,7 @@ class TrueNASClient:
         self.sslverify = sslverify
         self.autologin = autologin
         self.api_uri = api or self._target
+        self.shell = ShellConfig(shell)
         if not logger:
             logger = logging.getLogger("pytruenas")
         self.logger = logging.getLogger(logger) if isinstance(logger, str) else logger
@@ -88,21 +118,24 @@ class TrueNASClient:
         is_local = self._is_local()
 
         if not executable:
-            try:
-                if is_local:
-                    executable = pwd.getpwnam("root").pw_shell
-                else:
-                    executable = self.api.user._get(username="root")["shell"]
-            except Exception as e:
-                print(e)
-                self.logger.warning(
-                    "Count not get default shell for root, using bash as default"
-                )
-                executable = "/bin/bash"
+            if self.shell.path:
+                executable = self.shell.path
+            else:
+                try:
+                    if is_local:
+                        executable = pwd.getpwnam("root").pw_shell
+                    else:
+                        executable = self.api.user._get(username="root")["shell"]
+                except Exception as e:
+                    print(e)
+                    self.logger.warning(
+                        "Count not get default shell for root, using bash as default"
+                    )
+                    executable = "/bin/bash"
 
         script = []
         for cmd in cmds:
-            if not isinstance(cmd, (tuple,list)):
+            if not isinstance(cmd, (tuple, list)):
                 if isinstance(cmd, PurePath):
                     cmd = shlex.quote(cmd.as_posix())
                 else:
@@ -112,7 +145,7 @@ class TrueNASClient:
                 cmd = shlex.join(cmd)
             script.append(cmd)
 
-        command = [executable, "-c", ';'.join(script)]
+        command = [executable, "-c", ";".join(script)]
 
         if is_local:
             result = subprocess.run(
@@ -131,8 +164,22 @@ class TrueNASClient:
         else:
             command = shlex.join(command)
 
+            connect_opts = {}
+            if self.shell.logintype:
+                creds = self.shell.credentials
+                if self.shell.logintype == "client_keys" and isinstance(
+                    creds, str
+                ):
+                    creds = creds.encode()
+                connect_opts[self.shell.logintype] = creds
             async def _run():
-                async with _ssh.connect(self._target) as conn:
+                async with _ssh.connect(
+                    self.shell.hostname or self._target,
+                    port=self.shell.port or 22,
+                    username="root",
+                    known_hosts=None,
+                    **connect_opts,
+                ) as conn:
                     result = await conn.run(
                         command,
                         bufsize=bufsize,
@@ -147,5 +194,5 @@ class TrueNASClient:
                     )
                 return result
 
-            result = _utils.async_to_sync(_run)
+            result = _utils.async_to_sync(_run())
         return result

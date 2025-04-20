@@ -38,12 +38,17 @@ class Namespace:
                     _time.sleep(1)
                 else:
                     raise e
-    @cache
-    def __getattr__(self, name: str) -> "Namespace":
-        if isinstance(name, str) and not name.startswith("_"):
-            return Namespace(self._client, self._namespace, name.removesuffix("_"))
-        else:
-            super().__getattribute__(name)
+    if not _ty.TYPE_CHECKING:
+        @cache
+        def __getattr__(self, name: str) -> "Namespace":
+            if isinstance(name, str) and not name.startswith("_"):
+                return Namespace(self._client, self._namespace, name.removesuffix("_"))
+            else:
+                super().__getattribute__(name)
+    else:
+        def __getattr__(self, name: str) -> "Namespace":
+            ...
+
 
     def _query(self, *__opts: dict | _sql.Option, **filter) -> list[dict[str]]:
         opts = _sql.Option.options(*__opts)
@@ -67,10 +72,10 @@ class Namespace:
         if current:
             exclude = (idkey, unique, *(opts.get("update_exclude") or []))
             fields = {name: val for name, val in fields.items() if name not in exclude}
-            result = self.update(current[idkey], **fields)
+            result = self.update(current[idkey], fields)
         else:
             exclude = (idkey, *(opts.get("create_exclude") or []))
             fields = {name: val for name, val in fields.items() if name not in exclude}
-            result = self.create(**fields)
+            result = self.create(fields)
 
         return result
