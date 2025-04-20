@@ -1,3 +1,4 @@
+from functools import cache
 import typing as _ty
 import errno as _errno
 import time as _time
@@ -37,7 +38,7 @@ class Namespace:
                     _time.sleep(1)
                 else:
                     raise e
-
+    @cache
     def __getattr__(self, name: str) -> "Namespace":
         if isinstance(name, str) and not name.startswith("_"):
             return Namespace(self._client, self._namespace, name.removesuffix("_"))

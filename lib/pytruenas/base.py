@@ -1,3 +1,4 @@
+from functools import cached_property
 import logging
 
 from . import _conn
@@ -44,6 +45,6 @@ class TrueNASClient:
                 self._creds.login(self)
         return self._conn
 
-    @property
+    @cached_property
     def api(self):
         return Namespace(self)
