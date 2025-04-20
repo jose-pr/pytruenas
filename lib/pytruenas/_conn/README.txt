@@ -1,2 +1,0 @@
-This code is just a copy of https://github.com/truenas/middleware/tree/master/src/middlewared/middlewared/client to be able to use outside a TrueNAS system.
-Modified to allow disabling SSL Certificate verification.
