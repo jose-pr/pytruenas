@@ -1,7 +1,7 @@
 from functools import cached_property
 import logging
 import subprocess
-from pathlib import PurePath, PurePosixPath
+from pathlib import PurePath
 import typing as _ty
 import io as _io
 import warnings
@@ -17,6 +17,7 @@ except ImportError:
     pass
 import shlex
 
+    
 from . import _conn, _utils
 from . import auth as _auth
 from .namespace import Namespace
@@ -50,8 +51,12 @@ class ShellConfig:
         self.port = _config.get("port")
         self.path = _config.get("path")
 
+if _ty.TYPE_CHECKING:
+    from truenasapi_typings.current import Current
+    ApiVersion = _ty.TypeVar("ApiVersion", bound=Namespace, default=Current)
+else:
+    ApiVersion = _ty.TypeVar("ApiVersion", bound=Namespace, )
 
-ApiVersion = _ty.TypeVar("ApiVersion", bound=Namespace)
 
 
 class TrueNASClient(_ty.Generic[ApiVersion]):
@@ -121,10 +126,11 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
         return api
 
     def install_sshcreds(self, name: str = None, private_key: str = None):
+        client:'TrueNASClient[Current]' = self
         name = name or "pytruenas"
-        keypair = self.api.keychaincredential._get(type="SSH_KEY_PAIR", name=name)
+        keypair = client.api.keychaincredential._get(type="SSH_KEY_PAIR", name=name)
         if not keypair and not private_key:
-            private_key = self.api.keychaincredential.generate_ssh_key_pair()[
+            private_key = client.api.keychaincredential.generate_ssh_key_pair()[
                 "private_key"
             ]
         elif not private_key:
@@ -132,24 +138,24 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
 
         pubkey = _ssh.import_private_key(private_key).export_public_key().decode().strip()
 
-        keypair = self.api.keychaincredential._upsert(
+        keypair = client.api.keychaincredential._upsert(
             "name",
             ("update_exclude", ["type"]),
             type="SSH_KEY_PAIR",
             name=name,
             attributes={"private_key": private_key, 'public_key':pubkey},
         )
-        root = self.api.user._get(username="root")
+        root = client.api.user._get(username="root")
         rootauthkeys = (root.get("sshpubkey") or "").splitlines()
 
         if pubkey not in rootauthkeys:
             rootauthkeys.append(pubkey)
-            self.api.user._upsert(
+            client.api.user._upsert(
                 "username", username="root", sshpubkey="\n".join(rootauthkeys)
             )
 
-        self.shell.logintype = "client_keys"
-        self.shell.credentials = keypair["attributes"]["private_key"]
+        client.shell.logintype = "client_keys"
+        client.shell.credentials = keypair["attributes"]["private_key"]
 
     def run(
         self,
