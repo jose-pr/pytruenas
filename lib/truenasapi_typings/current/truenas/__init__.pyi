@@ -1,72 +1,53 @@
-from pytruenas import Namespace as _NS
- 
+from pytruenas import Namespace as _NS 
 class Truenas(_NS):
     
     def accept_eula(
-        
     ) -> TruenasAccept_eula:
+        """Accept TrueNAS EULA."""
         ...
-    
     def get_chassis_hardware(
-        
     ) -> TruenasGet_chassis_hardware:
+        """Returns what type of hardware this is, detected from dmidecode."""
         ...
-    
     def get_eula(
-        
     ) -> TruenasGet_eula:
+        """Returns the TrueNAS End-User License Agreement (EULA)."""
         ...
-    
     def is_eula_accepted(
-        
     ) -> TruenasIs_eula_accepted:
+        """Returns whether the EULA is accepted or not."""
         ...
-    
     def is_ix_hardware(
-        
     ) -> TruenasIs_ix_hardware:
+        """Return a boolean value on whether this is hardware that iXsystems sells."""
         ...
-    
     def is_production(
-        
     ) -> TruenasIs_production:
+        """Returns if system is marked as production."""
         ...
-    
     def managed_by_truecommand(
-        
     ) -> TruenasManaged_by_truecommand:
+        """Returns whether TrueNAS is being managed by TrueCommand"""
         ...
-    
     def set_production(
-        
+        production,
+        attach_debug,
     ) -> TruenasSet_production:
+        """Sets system production state and optionally sends initial debug."""
         ...
-     
-     
-
-
-
 class TruenasAccept_eula:
     ...
-
 class TruenasGet_chassis_hardware:
     ...
-
 class TruenasGet_eula:
     ...
-
 class TruenasIs_eula_accepted:
     ...
-
 class TruenasIs_ix_hardware:
     ...
-
 class TruenasIs_production:
     ...
-
 class TruenasManaged_by_truecommand:
     ...
-
 class TruenasSet_production:
-    ...
- 
+    ... 

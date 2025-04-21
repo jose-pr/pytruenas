@@ -1,12 +1,5 @@
 from pytruenas import Namespace as _NS
-
-from .environment import BootEnvironment
- 
+from .environment import BootEnvironment 
 class Boot(_NS):
-     
     
-    environment: BootEnvironment
-     
-
-
- 
+    environment: BootEnvironment 

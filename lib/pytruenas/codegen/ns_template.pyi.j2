@@ -1,21 +1,23 @@
 from pytruenas import Namespace as _NS
-{% for qn in ns.namespaces() %}
+{%- for qn in ns.namespaces() %}
 from {{ qn.module.removeprefix(ns.module) if ns.module else '.' + qn.module }} import {{ qn.classname }}
-{% endfor %} 
+{%- endfor %} 
 class {{ ns.classname }}(_NS):
     {% for qn in ns.methods() %}
     def {{ qn.methodname }}(
-        {% for param in qn.parameters() %}
-        {% endfor %}
+        {%- for param in qn.parameters() %}
+        {{param.argument_declaration()}}, 
+        {%- endfor %}
     ) -> {{ qn.classname }}:
+        """{{ qn.doc }}"""
         ...
-    {% endfor %} 
-    {% for qn in ns.namespaces() %}
+    {%- endfor %} 
+    {%- for qn in ns.namespaces() %}
     {{ qn.methodname }}: {{ qn.classname }}
-    {% endfor %} 
+    {%- endfor %} 
 
 
-{% for qn in ns.methods() %}
+{%- for qn in ns.methods() %}
 class {{ qn.classname }}:
     ...
-{% endfor %} 
+{%- endfor %} 
