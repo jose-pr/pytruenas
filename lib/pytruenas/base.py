@@ -4,8 +4,9 @@ import subprocess
 from pathlib import PurePath, PurePosixPath
 import typing as _ty
 import io as _io
-import warnings 
-warnings.filterwarnings(action='ignore',module='.*asyncssh.*')
+import warnings
+
+warnings.filterwarnings(action="ignore", module=".*asyncssh.*")
 
 import asyncssh as _ssh
 import urllib.parse
@@ -49,7 +50,9 @@ class ShellConfig:
         self.port = _config.get("port")
         self.path = _config.get("path")
 
-ApiVersion = _ty.TypeVar('ApiVersion', bound=Namespace)
+
+ApiVersion = _ty.TypeVar("ApiVersion", bound=Namespace)
+
 
 class TrueNASClient(_ty.Generic[ApiVersion]):
     def __init__(
@@ -91,37 +94,62 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
     @property
     def conn(self):
         if self._conn is None or self._conn._closed.is_set():
-            self._conn = _conn.Client(self.api_uri, verify_ssl=self.sslverify)
             if self.autologin:
-                self._creds.login(self)
+                self.login()
+            else:
+                self._conn = _conn.Client(self.api_uri, verify_ssl=self.sslverify)
         return self._conn
 
+    def login(self, creds: _auth.Credentials = None):
+        if self._conn and not self.conn._closed.is_set():
+            self._conn.close()
+        self._conn = _conn.Client(self.api_uri, verify_ssl=self.sslverify)
+        creds = creds or self._creds
+        creds.login(self)
+
     @cached_property
-    def api(self) -> 'ApiVersion':
+    def api(self) -> "ApiVersion":
         return Namespace(self)
-    
+
     def dump_api(self):
         import json
         from .models.apidump import Api
-        api:Api = json.loads(self.run('middlewared --dump-api', capture_output=True).stdout)
+
+        api: Api = json.loads(
+            self.run("middlewared --dump-api", capture_output=True).stdout
+        )
         return api
-    
-    def load_sshcreds(self, name:str = None):
-        name = name or 'pytruenas'
-        keypair = self.api.keychaincredential._get(type='SSH_KEY_PAIR', name=name)
-        if not keypair:
-            attrs = self.api.keychaincredential.generate_ssh_key_pair()
-            keypair = self.api.keychaincredential._upsert('name', type='SSH_KEY_PAIR', name=name, attributes=attrs)
-        pubkey = keypair['attributes']['public_key'].strip()
-        root = self.api.user._get(username='root')
-        rootauthkeys = (root.get('sshpubkey') or '').splitlines()
+
+    def install_sshcreds(self, name: str = None, private_key: str = None):
+        name = name or "pytruenas"
+        keypair = self.api.keychaincredential._get(type="SSH_KEY_PAIR", name=name)
+        if not keypair and not private_key:
+            private_key = self.api.keychaincredential.generate_ssh_key_pair()[
+                "private_key"
+            ]
+        elif not private_key:
+            private_key = keypair["attributes"]['private_key']
+
+        pubkey = _ssh.import_private_key(private_key).export_public_key().decode().strip()
+
+        keypair = self.api.keychaincredential._upsert(
+            "name",
+            ("update_exclude", ["type"]),
+            type="SSH_KEY_PAIR",
+            name=name,
+            attributes={"private_key": private_key, 'public_key':pubkey},
+        )
+        root = self.api.user._get(username="root")
+        rootauthkeys = (root.get("sshpubkey") or "").splitlines()
 
         if pubkey not in rootauthkeys:
             rootauthkeys.append(pubkey)
-            self.api.user._upsert('username', username='root', sshpubkey='\n'.join(rootauthkeys))
+            self.api.user._upsert(
+                "username", username="root", sshpubkey="\n".join(rootauthkeys)
+            )
 
-        self.shell.logintype = 'client_keys'
-        self.shell.credentials = keypair["attributes"]['private_key']
+        self.shell.logintype = "client_keys"
+        self.shell.credentials = keypair["attributes"]["private_key"]
 
     def run(
         self,
@@ -191,11 +219,10 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
             connect_opts = {}
             if self.shell.logintype:
                 creds = self.shell.credentials
-                if self.shell.logintype == "client_keys" and isinstance(
-                    creds, str
-                ):
+                if self.shell.logintype == "client_keys" and isinstance(creds, str):
                     creds = creds.encode()
                 connect_opts[self.shell.logintype] = creds
+
             async def _run():
                 async with _ssh.connect(
                     self.shell.hostname or self._target,

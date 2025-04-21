@@ -19,7 +19,7 @@ cache = Path('_api.json')
 if cache.exists():
     apidump = json.loads(cache.read_text())
 else:
-    client.load_sshcreds()
+    client.install_sshcreds()
     apidump = client.dump_api()
 
 stubspath = Path('lib/truenasapi_typings')
