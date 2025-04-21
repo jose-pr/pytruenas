@@ -45,6 +45,15 @@ class _QualNamed:
         return self.pysafename.split(".")[-1]
 
 
+class Parameter:
+    def __init__(self, schema: _schema.Schema):
+        self.schema = schema
+        self.name = schema["title"]
+
+    def argument_declaration(self):
+        return self.name
+
+
 class Method(_QualNamed):
     def __init__(self, method: _api.Method):
         self.definition = method
@@ -53,15 +62,23 @@ class Method(_QualNamed):
     def qualname(self):
         return self.definition["name"]
 
-    def parameters(self):
-        items = self.definition["schemas"]["properties"]["Call parameters"]["prefixItems"]
-        params = []
-        return params
+    @property
+    def doc(self):
+        doc = self.definition["doc"] or ""
+        return doc.split('.. examples', maxsplit=1)[0].strip()
 
+    def parameters(self) -> dict[str]:
+        callparams = self.definition["schemas"]["properties"]["Call parameters"]
+        items = callparams["prefixItems"]
+        params = []
+        for item in items:
+            params.append(Parameter(item))
+        return params
 
     def returns(self):
         returns = self.definition["schemas"]["properties"]["Return value"]
         return None
+
 
 class Namespace(_QualNamed):
     childs: list["_QualNamed"]
@@ -90,19 +107,21 @@ class Namespace(_QualNamed):
     def methods(self):
         return self.query(Method)
 
+
 class RootNamespace(Namespace):
-    def __init__(self, rootname:str):
+    def __init__(self, rootname: str):
         self.rootname = rootname
-        super().__init__('')
+        super().__init__("")
 
     @property
     def classname(self):
         return self.rootname.capitalize()
 
-class NamespaceCodegen:
+
+class Renderer:
     def render(
         self,
-        ns: Namespace,
+        **ctx,
     ) -> str: ...
 
 
@@ -137,7 +156,7 @@ class Codegen:
         root.mkdir(exist_ok=True, parents=True)
         from . import jinja
 
-        nscodegen = jinja.NamespaceCodegen()
+        renderer = jinja.NamespaceRenderer()
         for ns in sorted(namespaces, key=lambda ns: ns.qualname):
             ns_path = root / ns.modpath / _INIT
             ns_path.parent.mkdir(exist_ok=True, parents=True)
@@ -146,4 +165,6 @@ class Codegen:
                     qn: _QualNamed
                     if qn.parent == ns and ns != qn:
                         ns.childs.append(qn)
-                ns_index.write(nscodegen.render(ns))
+                ns_index.write(
+                    renderer.render(ns=ns, path=ns_path, modpath=ns_path.parent)
+                )
