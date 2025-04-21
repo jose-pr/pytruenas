@@ -4,7 +4,7 @@ import errno as _errno
 import time as _time
 
 from . import _conn
-from .utils import sql as _sql
+from .utils import query as _q
 
 if _ty.TYPE_CHECKING:
     from . import TrueNASClient
@@ -50,9 +50,9 @@ class Namespace:
             ...
 
 
-    def _query(self, *__opts: dict | _sql.Option, **filter) -> list[dict[str]]:
-        opts = _sql.Option.options(*__opts)
-        filter = _sql.filter_from_kwargs(**filter)
+    def _query(self, *__opts: dict | _q.Option, **filter) -> list[dict[str]]:
+        opts = _q.Option.options(*__opts)
+        filter = _q.filter_from_kwargs(**filter)
         return self.query(filter, opts)
 
     def _get(self, **filter) -> dict[str]:
@@ -61,9 +61,9 @@ class Namespace:
             return result[0]
 
     def _upsert(
-        self, __unique: str | _ty.Sequence[str], *__opts: dict | _sql.Option, **fields
+        self, __unique: str | _ty.Sequence[str], *__opts: dict | _q.Option, **fields
     ) -> dict[str]:
-        opts = _sql.Option.options(*__opts)
+        opts = _q.Option.options(*__opts)
         idkey = opts.get("idkey") or "id"
         unique = __unique or idkey
         if isinstance(unique, str):
