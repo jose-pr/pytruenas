@@ -5,7 +5,7 @@ if typing.TYPE_CHECKING:
     from truenasapi_typings.current import Current
 import os, sys
 import logging
-from pytruenas.utils import sql as sqlutils
+from pytruenas.utils import query
 import json
 from pathlib import Path
 
@@ -37,7 +37,7 @@ result = client.run(
 )
 print(result.stdout)
 
-users = client.api.user._query(username=sqlutils.RE("adm.*"))
+users = client.api.user._query(username=query.RE("adm.*"))
 admin = client.api.user._get(username="admin")
 print(users)
 print(admin)
