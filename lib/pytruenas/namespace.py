@@ -18,7 +18,7 @@ class Namespace:
         self._namespace = ".".join([n for n in name if n])
 
     def __repr__(self) -> str:
-        return f"{self.__class__.__name__}({self._client._target}/{self._namespace.replace('.','/')})"
+        return f"{self.__class__.__name__}({self._client._api}/{self._namespace.replace('.','/')})"
 
     def __str__(self) -> str:
         return self._namespace
