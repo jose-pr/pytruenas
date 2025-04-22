@@ -1,7 +1,7 @@
 from functools import cached_property
 import logging
 import subprocess
-from pathlib import PurePath
+from pathlib import PurePath, PurePosixPath
 import typing as _ty
 import io as _io
 import warnings
@@ -71,15 +71,15 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
         autologin=True,
         sslverify=True,
         *,
-        shell:str=None,
+        shell: str = None,
         logger: logging.Logger = None,
     ) -> None:
         target = target or "localhost"
-        self._api = _TGT.parse(target, scheme='wss', path='/api/current')
+        self._api = _TGT.parse(target, scheme="wss", path="/api/current")
         if self._api.username or self._api.password:
             if not creds:
                 creds = f"{self._api.username}:{self._api.password}"
-            self._api = self._api._replace(username='', password='')
+            self._api = self._api._replace(username="", password="")
         self._creds = _auth.Credentials(creds)
         self._conn: _conn.JSONRPCClient = None
         self.sslverify = sslverify
@@ -90,7 +90,7 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
         self.logger = logging.getLogger(logger) if isinstance(logger, str) else logger
 
     def _is_local(self):
-        return self._api.host.lower() in ['',"localhost", "127.0.0.1"]
+        return self._api.host.lower() in ["", "localhost", "127.0.0.1"]
 
     @property
     def conn(self):
@@ -102,7 +102,7 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
         return self._conn
 
     def login(self, creds: _auth.Credentials = None):
-        if self._conn and not self.conn._closed.is_set():
+        if self._conn and not self._conn._closed.is_set():
             self._conn.close()
         self._conn = _conn.Client(self._api.uri, verify_ssl=self.sslverify)
         creds = creds or self._creds
@@ -163,6 +163,7 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
         stdin: FileHandle = None,
         stdout: FileHandle = None,
         stderr: FileHandle = None,
+        cwd: PathLike = None,
         env: _ty.Mapping | None = None,
         capture_output: bool = False,
         check: bool = False,
@@ -201,7 +202,13 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
                 cmd = shlex.join(cmd)
             script.append(cmd)
 
-        command = [executable, "-c", ";".join(script)]
+        if cwd:
+            cwd = PurePosixPath(cwd).as_posix()
+
+        script = ";".join(script)
+        self.logger.trace(f"Running Command: {script}")
+
+        command = [executable, "-c", script]
 
         if is_local:
             result = subprocess.run(
@@ -210,6 +217,7 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
                 stdin=stdin,
                 stdout=stdout,
                 stderr=stderr,
+                cwd=cwd,
                 env=env,
                 capture_output=capture_output,
                 check=check,
@@ -219,7 +227,8 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
             )
         else:
             command = shlex.join(command)
-
+            if cwd:
+                command = f"{shlex.join(['cd', cwd])}; {command}"
             connect_opts = {}
             if self.shell.logintype:
                 creds = self.shell.credentials
