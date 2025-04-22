@@ -287,7 +287,6 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
 
         if stdin:
             try:
-                stdin = memoryview(stdin)
                 stdin = _io.BytesIO(stdin)
             except:
                 pass
@@ -312,9 +311,9 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
                 if cwd:
                     command = f"{shlex.join(['cd', cwd])}; {command}"
 
-                if stdout in (None, subprocess.STDOUT):
+                if stdout in (None, subprocess.STDOUT, _sys.stdout):
                     stdout = open(_os.dup(_sys.stdout.fileno()), _sys.stdout.mode)
-                if stderr in (None,):
+                if stderr in (None, _sys.stderr):
                     stderr = open(_os.dup(_sys.stderr.fileno()), _sys.stderr.mode)
 
                 result = _utils.async_to_sync(
