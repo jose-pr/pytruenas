@@ -5,6 +5,8 @@ from pathlib import PurePath, PurePosixPath
 import typing as _ty
 import io as _io
 import warnings
+import requests as _req
+import json as _js
 
 warnings.filterwarnings(action="ignore", module=".*asyncssh.*")
 
@@ -85,6 +87,30 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
     @cached_property
     def api(self) -> "ApiVersion":
         return Namespace(self)
+
+    def upload(self, file:str|bytes, method: str, *params, token=None, wait=True):
+        client: "TrueNASClient[Current]" = self
+
+        scheme = "https" if client._api.scheme == "wss" else "http"
+        target = client._api._replace(scheme=scheme, path="/_upload", port=0)
+        data = {"method": method, "params": params}
+        if isinstance(file, str):
+            file = file.encode()
+
+        if not token:
+            token = client.api.auth.generate_token(5, "params", False)
+
+        resp = _req.post(
+            target.uri,
+            headers={"Authorization": f"Token {token}"},
+            verify=client.sslverify,
+            files={"data": _js.dumps(data).encode(), file: file},
+        )
+        jobid = resp.json()['job_id']
+        if wait:
+            client.api.core.job_wait(jobid, job=True)
+
+        return jobid
 
     def dump_api(self):
         import json
