@@ -1,17 +1,17 @@
 from pytruenas import Namespace as _NS 
 class VirtVolume(_NS):
     
-    def create(
+    def create(self,
         virt_volume_create,
     ) -> VirtVolumeCreate:
         """"""
         ...
-    def delete(
+    def delete(self,
         id,
     ) -> VirtVolumeDelete:
         """"""
         ...
-    def get_instance(
+    def get_instance(self,
         id,
         options,
     ) -> VirtVolumeGet_instance:
@@ -19,23 +19,23 @@ class VirtVolume(_NS):
 
 Please see `query` method documentation for `options`."""
         ...
-    def import_iso(
+    def import_iso(self,
         virt_volume_import_iso,
     ) -> VirtVolumeImport_iso:
         """"""
         ...
-    def import_zvol(
+    def import_zvol(self,
         virt_volume_import_iso,
     ) -> VirtVolumeImport_zvol:
         """"""
         ...
-    def query(
+    def query(self,
         filters,
         options,
     ) -> VirtVolumeQuery:
         """"""
         ...
-    def update(
+    def update(self,
         id,
         virt_volume_update,
     ) -> VirtVolumeUpdate:

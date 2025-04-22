@@ -1,15 +1,15 @@
 from pytruenas import Namespace as _NS 
 class Nfs(_NS):
     
-    def bindip_choices(
+    def bindip_choices(self,
     ) -> NfsBindip_choices:
         """Returns ip choices for NFS service to use"""
         ...
-    def config(
+    def config(self,
     ) -> NfsConfig:
         """"""
         ...
-    def update(
+    def update(self,
         nfs_update,
     ) -> NfsUpdate:
         """Update NFS Service Configuration.

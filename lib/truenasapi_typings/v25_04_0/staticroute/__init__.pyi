@@ -1,7 +1,7 @@
 from pytruenas import Namespace as _NS 
 class Staticroute(_NS):
     
-    def create(
+    def create(self,
         data,
     ) -> StaticrouteCreate:
         """Create a Static Route.
@@ -10,12 +10,12 @@ Address families of `gateway` and `destination` should match when creating a sta
 
 `description` is an optional attribute for any notes regarding the static route."""
         ...
-    def delete(
+    def delete(self,
         id,
     ) -> StaticrouteDelete:
         """Delete Static Route of `id`."""
         ...
-    def get_instance(
+    def get_instance(self,
         id,
         options,
     ) -> StaticrouteGet_instance:
@@ -23,13 +23,13 @@ Address families of `gateway` and `destination` should match when creating a sta
 
 Please see `query` method documentation for `options`."""
         ...
-    def query(
+    def query(self,
         filters,
         options,
     ) -> StaticrouteQuery:
         """"""
         ...
-    def update(
+    def update(self,
         id,
         data,
     ) -> StaticrouteUpdate:

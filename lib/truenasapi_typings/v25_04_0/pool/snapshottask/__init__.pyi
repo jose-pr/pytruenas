@@ -1,25 +1,25 @@
 from pytruenas import Namespace as _NS 
 class PoolSnapshottask(_NS):
     
-    def create(
+    def create(self,
         data,
     ) -> PoolSnapshottaskCreate:
         """Create a Periodic Snapshot Task
 
 Create a Periodic Snapshot Task that will take snapshots of specified `dataset` at specified `schedule`. Recursive snapshots can be created if `recursive` flag is enabled. You can `exclude` specific child datasets or zvols from the snapshot. Snapshots will be automatically destroyed after a certain amount of time, specified by `lifetime_value` and `lifetime_unit`. If multiple periodic tasks create snapshots at the same time (for example hourly and daily at 00:00) the snapshot will be kept until the last of these tasks reaches its expiry time. Snapshots will be named according to `naming_schema` which is a `strftime`-like template for snapshot name and must contain `%Y`, `%m`, `%d`, `%H` and `%M`."""
         ...
-    def delete(
+    def delete(self,
         id,
         options,
     ) -> PoolSnapshottaskDelete:
         """Delete a Periodic Snapshot Task with specific `id`"""
         ...
-    def delete_will_change_retention_for(
+    def delete_will_change_retention_for(self,
         id,
     ) -> PoolSnapshottaskDelete_will_change_retention_for:
         """Returns a list of snapshots which will change the retention if periodic snapshot task `id` is deleted."""
         ...
-    def get_instance(
+    def get_instance(self,
         id,
         options,
     ) -> PoolSnapshottaskGet_instance:
@@ -27,26 +27,26 @@ Create a Periodic Snapshot Task that will take snapshots of specified `dataset` 
 
 Please see `query` method documentation for `options`."""
         ...
-    def max_count(
+    def max_count(self,
     ) -> PoolSnapshottaskMax_count:
         """Returns a maximum amount of snapshots (per-dataset) the system can sustain."""
         ...
-    def max_total_count(
+    def max_total_count(self,
     ) -> PoolSnapshottaskMax_total_count:
         """Returns a maximum amount of snapshots (total) the system can sustain."""
         ...
-    def query(
+    def query(self,
         filters,
         options,
     ) -> PoolSnapshottaskQuery:
         """"""
         ...
-    def run(
+    def run(self,
         id,
     ) -> PoolSnapshottaskRun:
         """Execute a Periodic Snapshot Task of `id`."""
         ...
-    def update(
+    def update(self,
         id,
         data,
     ) -> PoolSnapshottaskUpdate:
@@ -54,7 +54,7 @@ Please see `query` method documentation for `options`."""
 
 See the documentation for `create` method for information on payload contents"""
         ...
-    def update_will_change_retention_for(
+    def update_will_change_retention_for(self,
         id,
         data,
     ) -> PoolSnapshottaskUpdate_will_change_retention_for:

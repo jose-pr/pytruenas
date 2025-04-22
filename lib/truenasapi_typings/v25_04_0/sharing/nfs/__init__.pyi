@@ -1,7 +1,7 @@
 from pytruenas import Namespace as _NS 
 class SharingNfs(_NS):
     
-    def create(
+    def create(self,
         data,
     ) -> SharingNfsCreate:
         """Create a NFS Share.
@@ -16,12 +16,12 @@ class SharingNfs(_NS):
 
 `expose_snapshots` enable TrueNAS Enterprise feature to allow access to the ZFS snapshot directory over NFS. This feature requires a valid enterprise license."""
         ...
-    def delete(
+    def delete(self,
         id,
     ) -> SharingNfsDelete:
         """Delete NFS Share of `id`."""
         ...
-    def get_instance(
+    def get_instance(self,
         id,
         options,
     ) -> SharingNfsGet_instance:
@@ -29,13 +29,13 @@ class SharingNfs(_NS):
 
 Please see `query` method documentation for `options`."""
         ...
-    def query(
+    def query(self,
         filters,
         options,
     ) -> SharingNfsQuery:
         """"""
         ...
-    def update(
+    def update(self,
         id,
         data,
     ) -> SharingNfsUpdate:

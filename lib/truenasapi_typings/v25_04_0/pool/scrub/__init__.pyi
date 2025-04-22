@@ -1,19 +1,19 @@
 from pytruenas import Namespace as _NS 
 class PoolScrub(_NS):
     
-    def create(
+    def create(self,
         data,
     ) -> PoolScrubCreate:
         """Create a scrub task for a pool.
 
 `threshold` refers to the minimum amount of time in days has to be passed before a scrub can run again."""
         ...
-    def delete(
+    def delete(self,
         id_,
     ) -> PoolScrubDelete:
         """Delete scrub task of `id`."""
         ...
-    def get_instance(
+    def get_instance(self,
         id,
         options,
     ) -> PoolScrubGet_instance:
@@ -21,25 +21,25 @@ class PoolScrub(_NS):
 
 Please see `query` method documentation for `options`."""
         ...
-    def query(
+    def query(self,
         filters,
         options,
     ) -> PoolScrubQuery:
         """"""
         ...
-    def run(
+    def run(self,
         name,
         threshold,
     ) -> PoolScrubRun:
         """Initiate a scrub of a pool `name` if last scrub was performed more than `threshold` days before."""
         ...
-    def scrub(
+    def scrub(self,
         name,
         action,
     ) -> PoolScrubScrub:
         """Start/Stop/Pause a scrub on pool `name`."""
         ...
-    def update(
+    def update(self,
         id_,
         data,
     ) -> PoolScrubUpdate:

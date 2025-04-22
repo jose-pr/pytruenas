@@ -2,11 +2,11 @@ from pytruenas import Namespace as _NS
 from .exporters import ReportingExporters 
 class Reporting(_NS):
     
-    def config(
+    def config(self,
     ) -> ReportingConfig:
         """"""
         ...
-    def get_data(
+    def get_data(self,
         graphs,
         query,
     ) -> ReportingGet_data:
@@ -18,19 +18,19 @@ For the time period of the graph either `unit` and `page` OR `start` and `end` s
 
 `aggregate` will return aggregate available data for each graph (e.g. min, max, mean)."""
         ...
-    def graph(
+    def graph(self,
         str,
         query,
     ) -> ReportingGraph:
         """Get reporting data for `name` graph."""
         ...
-    def graphs(
+    def graphs(self,
         filters,
         options,
     ) -> ReportingGraphs:
         """"""
         ...
-    def netdata_get_data(
+    def netdata_get_data(self,
         graphs,
         query,
     ) -> ReportingNetdata_get_data:
@@ -42,19 +42,19 @@ For the time period of the graph either `unit` and `page` OR `start` and `end` s
 
 `aggregate` will return aggregate available data for each graph (e.g. min, max, mean)."""
         ...
-    def netdata_graph(
+    def netdata_graph(self,
         str,
         query,
     ) -> ReportingNetdata_graph:
         """Get reporting data for `name` graph."""
         ...
-    def netdata_graphs(
+    def netdata_graphs(self,
         filters,
         options,
     ) -> ReportingNetdata_graphs:
         """Get reporting netdata graphs."""
         ...
-    def update(
+    def update(self,
         reporting_update,
     ) -> ReportingUpdate:
         """`tier1_days` can be set to specify for how many days we want to store reporting history which in netdata terms specifies the number of days netdata should be storing data in tier1 storage."""

@@ -1,24 +1,24 @@
 from pytruenas import Namespace as _NS 
 class Keychaincredential(_NS):
     
-    def create(
+    def create(self,
         keychain_credential_create,
     ) -> KeychaincredentialCreate:
         """Create a Keychain Credential.
 
 The following `type`s are supported: * `SSH_KEY_PAIR` * `SSH_CREDENTIALS`"""
         ...
-    def delete(
+    def delete(self,
         id,
         options,
     ) -> KeychaincredentialDelete:
         """Delete Keychain Credential with specific `id`."""
         ...
-    def generate_ssh_key_pair(
+    def generate_ssh_key_pair(self,
     ) -> KeychaincredentialGenerate_ssh_key_pair:
         """Generate a public/private key pair (useful for `SSH_KEY_PAIR` type)"""
         ...
-    def get_instance(
+    def get_instance(self,
         id,
         options,
     ) -> KeychaincredentialGet_instance:
@@ -26,25 +26,25 @@ The following `type`s are supported: * `SSH_KEY_PAIR` * `SSH_CREDENTIALS`"""
 
 Please see `query` method documentation for `options`."""
         ...
-    def query(
+    def query(self,
         filters,
         options,
     ) -> KeychaincredentialQuery:
         """"""
         ...
-    def remote_ssh_host_key_scan(
+    def remote_ssh_host_key_scan(self,
         keychain_remote_ssh_host_key_scan,
     ) -> KeychaincredentialRemote_ssh_host_key_scan:
         """Discover a remote host key (useful for `SSH_CREDENTIALS`)"""
         ...
-    def remote_ssh_semiautomatic_setup(
+    def remote_ssh_semiautomatic_setup(self,
         data,
     ) -> KeychaincredentialRemote_ssh_semiautomatic_setup:
         """Perform semi-automatic SSH connection setup with other TrueNAS machine.
 
 It creates an `SSH_CREDENTIALS` credential with specified `name` that can be used to connect to TrueNAS machine with specified `url` and temporary auth `token`. Other TrueNAS machine adds `private_key` to allowed `username`'s private keys. Other `SSH_CREDENTIALS` attributes such as `connect_timeout` can be specified as well."""
         ...
-    def setup_ssh_connection(
+    def setup_ssh_connection(self,
         options,
     ) -> KeychaincredentialSetup_ssh_connection:
         """Creates an SSH Connection performing the following steps:
@@ -53,7 +53,7 @@ It creates an `SSH_CREDENTIALS` credential with specified `name` that can be use
 
 In case (2) fails, it will be ensured that SSH Key Pair generated (if applicable) in the process is removed."""
         ...
-    def update(
+    def update(self,
         id,
         keychain_credential_update,
     ) -> KeychaincredentialUpdate:
@@ -61,7 +61,7 @@ In case (2) fails, it will be ensured that SSH Key Pair generated (if applicable
 
 Please note that you can't change `type`. You must specify full `attributes` value."""
         ...
-    def used_by(
+    def used_by(self,
         id,
     ) -> KeychaincredentialUsed_by:
         """Returns list of objects that use this credential."""

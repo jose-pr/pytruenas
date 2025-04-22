@@ -5,7 +5,7 @@ from .reboot import SystemReboot
 from .security import SystemSecurity 
 class System(_NS):
     
-    def reboot(
+    def reboot(self,
         reason,
         options,
     ) -> SystemReboot:
@@ -13,7 +13,7 @@ class System(_NS):
 
 Emits an "added" event of name "system" and id "reboot"."""
         ...
-    def shutdown(
+    def shutdown(self,
         reason,
         options,
     ) -> SystemShutdown:

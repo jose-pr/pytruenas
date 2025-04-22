@@ -1,7 +1,7 @@
 from pytruenas import Namespace as _NS 
 class IscsiExtent(_NS):
     
-    def create(
+    def create(self,
         iscsi_extent_create,
     ) -> IscsiExtentCreate:
         """Create an iSCSI Extent.
@@ -16,7 +16,7 @@ With `type` being set to DISK, a valid ZFS volume is required.
 
 `ro` when set to true prevents the initiator from writing to this LUN."""
         ...
-    def delete(
+    def delete(self,
         id,
         remove,
         force,
@@ -25,11 +25,11 @@ With `type` being set to DISK, a valid ZFS volume is required.
 
 If `id` iSCSI Extent's `type` was configured to FILE, `remove` can be set to remove the configured file."""
         ...
-    def disk_choices(
+    def disk_choices(self,
     ) -> IscsiExtentDisk_choices:
         """Return a dict of available zvols that can be used when creating an extent."""
         ...
-    def get_instance(
+    def get_instance(self,
         id,
         options,
     ) -> IscsiExtentGet_instance:
@@ -37,13 +37,13 @@ If `id` iSCSI Extent's `type` was configured to FILE, `remove` can be set to rem
 
 Please see `query` method documentation for `options`."""
         ...
-    def query(
+    def query(self,
         filters,
         options,
     ) -> IscsiExtentQuery:
         """"""
         ...
-    def update(
+    def update(self,
         id,
         iscsi_extent_update,
     ) -> IscsiExtentUpdate:

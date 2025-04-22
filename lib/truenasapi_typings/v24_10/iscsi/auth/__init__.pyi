@@ -1,7 +1,7 @@
 from pytruenas import Namespace as _NS 
 class IscsiAuth(_NS):
     
-    def create(
+    def create(self,
         data,
     ) -> IscsiAuthCreate:
         """Create an iSCSI Authorized Access.
@@ -12,12 +12,12 @@ class IscsiAuth(_NS):
 
 `peeruser` and `peersecret` are provided only when configuring mutual CHAP. `peersecret` should not be similar to `secret`."""
         ...
-    def delete(
+    def delete(self,
         id,
     ) -> IscsiAuthDelete:
         """Delete iSCSI Authorized Access of `id`."""
         ...
-    def get_instance(
+    def get_instance(self,
         id,
         options,
     ) -> IscsiAuthGet_instance:
@@ -25,13 +25,13 @@ class IscsiAuth(_NS):
 
 Please see `query` method documentation for `options`."""
         ...
-    def query(
+    def query(self,
         filters,
         options,
     ) -> IscsiAuthQuery:
         """"""
         ...
-    def update(
+    def update(self,
         id,
         data,
     ) -> IscsiAuthUpdate:

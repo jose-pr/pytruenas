@@ -1,11 +1,11 @@
 from pytruenas import Namespace as _NS 
 class PoolResilver(_NS):
     
-    def config(
+    def config(self,
     ) -> PoolResilverConfig:
         """"""
         ...
-    def update(
+    def update(self,
         data,
     ) -> PoolResilverUpdate:
         """Configure Pool Resilver Priority.

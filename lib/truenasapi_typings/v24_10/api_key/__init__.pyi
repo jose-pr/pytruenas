@@ -1,19 +1,19 @@
 from pytruenas import Namespace as _NS 
 class Api_key(_NS):
     
-    def create(
+    def create(self,
         api_key_create,
     ) -> Api_keyCreate:
         """Creates API Key.
 
 `name` is a user-readable name for key."""
         ...
-    def delete(
+    def delete(self,
         id,
     ) -> Api_keyDelete:
         """Delete API Key `id`."""
         ...
-    def get_instance(
+    def get_instance(self,
         id,
         options,
     ) -> Api_keyGet_instance:
@@ -21,17 +21,17 @@ class Api_key(_NS):
 
 Please see `query` method documentation for `options`."""
         ...
-    def my_keys(
+    def my_keys(self,
     ) -> Api_keyMy_keys:
         """Get the existing API keys for the currently-authenticated user"""
         ...
-    def query(
+    def query(self,
         filters,
         options,
     ) -> Api_keyQuery:
         """"""
         ...
-    def update(
+    def update(self,
         id,
         api_key_update,
     ) -> Api_keyUpdate:

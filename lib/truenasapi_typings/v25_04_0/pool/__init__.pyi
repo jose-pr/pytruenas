@@ -5,12 +5,12 @@ from .scrub import PoolScrub
 from .snapshottask import PoolSnapshottask 
 class Pool(_NS):
     
-    def ddt_prefetch(
+    def ddt_prefetch(self,
         pool_name,
     ) -> PoolDdt_prefetch:
         """Prefetch DDT entries in pool `pool_name`."""
         ...
-    def ddt_prune(
+    def ddt_prune(self,
         options,
     ) -> PoolDdt_prune:
         """Prune DDT entries in pool `pool_name` based on the specified options.

@@ -1,21 +1,21 @@
 from pytruenas import Namespace as _NS 
 class ReportingExporters(_NS):
     
-    def create(
+    def create(self,
         reporting_exporter_create,
     ) -> ReportingExportersCreate:
         """Create a specific reporting exporter configuration containing required details for exporting reporting metrics."""
         ...
-    def delete(
+    def delete(self,
         id,
     ) -> ReportingExportersDelete:
         """Delete Reporting Exporter of `id`."""
         ...
-    def exporter_schemas(
+    def exporter_schemas(self,
     ) -> ReportingExportersExporter_schemas:
         """Get the schemas for all the reporting export types we support with their respective attributes required for successfully exporting reporting metrics to them."""
         ...
-    def get_instance(
+    def get_instance(self,
         id,
         options,
     ) -> ReportingExportersGet_instance:
@@ -23,13 +23,13 @@ class ReportingExporters(_NS):
 
 Please see `query` method documentation for `options`."""
         ...
-    def query(
+    def query(self,
         filters,
         options,
     ) -> ReportingExportersQuery:
         """"""
         ...
-    def update(
+    def update(self,
         id,
         reporting_exporter_update,
     ) -> ReportingExportersUpdate:

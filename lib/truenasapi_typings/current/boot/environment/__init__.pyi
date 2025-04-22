@@ -1,27 +1,27 @@
 from pytruenas import Namespace as _NS 
 class BootEnvironment(_NS):
     
-    def activate(
+    def activate(self,
         boot_environment_activate,
     ) -> BootEnvironmentActivate:
         """"""
         ...
-    def clone(
+    def clone(self,
         boot_environment_clone,
     ) -> BootEnvironmentClone:
         """"""
         ...
-    def destroy(
+    def destroy(self,
         boot_environment_destroy,
     ) -> BootEnvironmentDestroy:
         """"""
         ...
-    def keep(
+    def keep(self,
         boot_environment_destroy,
     ) -> BootEnvironmentKeep:
         """"""
         ...
-    def query(
+    def query(self,
         filters,
         options,
     ) -> BootEnvironmentQuery:
