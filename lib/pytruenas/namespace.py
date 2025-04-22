@@ -33,6 +33,7 @@ class Namespace:
                 return self._client.websocket.call(method, *args, **kwds)
             except _conn.ClientException as e:
                 if e.errno == _errno.ECONNABORTED and _tries:
+                    self._client.logger.warning(f"Websocket connection was closed, trying again with new connection")
                     _tries -= 1
                     self._conn = None
                     _time.sleep(1)
@@ -78,7 +79,7 @@ class Namespace:
             exclude = (idkey, *(opts.get("create_exclude") or []))
             fields = {name: val for name, val in fields.items() if name not in exclude}
             result = self.create(fields)
-            
+
         wait = opts.get('wait', True)
         if isinstance(result, int) and wait is None or wait:
             result = self._client.api.core.job_wait(result, job=True)
