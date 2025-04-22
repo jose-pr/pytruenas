@@ -190,6 +190,7 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
     def ssh(self):
         if not self._sshsession or self._sshsession._close_event.is_set():
             connect_opts = {}
+            username = ''
             if self.shell.username:
                 if "|" in self.shell.username:
                     logintype, username = self.shell.username.split("|", maxsplit=1)
@@ -201,8 +202,7 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
                     creds = creds.encode()
                 connect_opts[logintype] = creds
             username = username or "root"
-            self._sshsession = _utils.async_to_sync(
-                _ssh.connect(
+            self._sshsession = _utils.async_to_sync(_ssh.connect(
                     self.shell.host,
                     port=self.shell.port or 22,
                     username=username,
