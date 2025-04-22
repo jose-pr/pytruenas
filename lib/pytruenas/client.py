@@ -26,32 +26,6 @@ FileHandle = None | int | _ty.IO
 PathLike = str | PurePath
 Input = bytes | str
 
-
-class ShellConfig:
-    def __init__(self, *configs, **fields):
-        _config = {}
-
-        for config in reversed([*configs, fields]):
-            config = config or {}
-            if isinstance(config, str):
-                parsed = _TGT(config, "ssh")
-                config = {
-                    "hostname": parsed.host,
-                    "logintype": parsed.username,
-                    "credentials": parsed.password,
-                    "port": parsed.port,
-                    "path": parsed.path,
-                }
-            for k, v in config.items():
-                _config.setdefault(k, v)
-
-        self.hostname = _config.get("hostname")
-        self.logintype = _config.get("logintype")
-        self.credentials = _config.get("credentials")
-        self.port = _config.get("port")
-        self.path = _config.get("path")
-
-
 if _ty.TYPE_CHECKING:
     from truenasapi_typings.current import Current
 
