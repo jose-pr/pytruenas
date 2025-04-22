@@ -16,14 +16,14 @@ class Target(_ty.NamedTuple):
     def parse(cls, connectionstring: str, **defaults):
         if "://" not in connectionstring:
             connectionstring = (
-                f"{defaults.get('scheme') or 'http'}://{connectionstring}"
+                f"{defaults.get('scheme') or 'http'}://{connectionstring or ''}"
             )
         parts = _urlparse.urlsplit(connectionstring)
         scheme = parts.scheme
-        username = _urlparse.unquote(parts.username or "") or defaults.get("username")
-        password = _urlparse.unquote(parts.password or "") or defaults.get("password")
-        path = _urlparse.unquote(parts.path or "") or defaults.get("path")
-        host = parts.hostname
+        username = _urlparse.unquote(parts.username or "") or defaults.get("username") or ''
+        password = _urlparse.unquote(parts.password or "") or defaults.get("password") or ''
+        path = _urlparse.unquote(parts.path or "") or defaults.get("path") or ''
+        host = parts.hostname or defaults.get('host') or ''
         port = int(parts.port or defaults.get("port") or 0)
         try:
             if port == 0:
@@ -45,3 +45,7 @@ class Target(_ty.NamedTuple):
             uri = f"{uri}{self.path}"
 
         return uri
+    
+    @property
+    def is_local(self):
+        return self.host.lower() in ["", "localhost", "127.0.0.1"]

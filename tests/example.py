@@ -19,6 +19,9 @@ client.logger.setLevel(logging.DEBUG)
 
 client.install_sshcreds()
 
+check = client.run('ls -lh', cwd='/mnt/')
+print(check)
+
 result = TrueNASClient().run(
     ("echo", "'\"text\"'"),
     ("ls", "-l", "/mnt"),
