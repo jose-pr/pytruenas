@@ -20,10 +20,12 @@ client.logger.setLevel(logging.DEBUG)
 
 client.install_sshcreds()
 
-datapool = Path('/mnt/data', client=client, methods='local')
+datapool = client.path('/mnt/data', methods='sftp')
 
 print(datapool)
 
 print(datapool.parent)
 
+print(datapool.exists())
+print(datapool.exists())
 print(datapool.exists())
