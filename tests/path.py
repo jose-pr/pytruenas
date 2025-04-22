@@ -20,7 +20,7 @@ client.logger.setLevel(logging.DEBUG)
 
 client.install_sshcreds()
 
-datapool = Path('/mnt/data', client=client)
+datapool = Path('/mnt/data', client=client, methods='local')
 
 print(datapool)
 
