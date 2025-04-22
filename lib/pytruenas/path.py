@@ -51,7 +51,7 @@ class Path(_Path):
         for method in self._methods:
             try:
                 if method == "local":
-                    path = _Path(self._path)
+                    path = _pathlib.Path(self._path)
                     if hasattr(_fs.local, name):
                         return getattr(_fs.local, name)
                     return getattr(path, name)
