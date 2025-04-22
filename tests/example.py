@@ -15,7 +15,7 @@ logging.getLogger().addHandler(handler)
 tn_host = os.environ.get("TN_HOST")
 tn_creds = Credentials.from_env()
 client = TrueNASClient['Current'](tn_host, tn_creds, sslverify=False)
-client.logger.setLevel(logging.DEBUG)
+client.logger.setLevel(logging.TRACE)
 
 client.install_sshcreds()
 
