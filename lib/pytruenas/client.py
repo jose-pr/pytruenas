@@ -9,7 +9,6 @@ import warnings
 warnings.filterwarnings(action="ignore", module=".*asyncssh.*")
 
 import asyncssh as _ssh
-import urllib.parse
 
 try:
     import pwd
@@ -17,8 +16,9 @@ except ImportError:
     pass
 import shlex
 
-    
+
 from . import _conn, _utils
+from .utils.target import Target as _TGT
 from . import auth as _auth
 from .namespace import Namespace
 
@@ -34,11 +34,11 @@ class ShellConfig:
         for config in reversed([*configs, fields]):
             config = config or {}
             if isinstance(config, str):
-                parsed = urllib.parse.urlsplit("ssh://" + config)
+                parsed = _TGT(config, "ssh")
                 config = {
-                    "hostname": parsed.hostname,
-                    "logintype": urllib.parse.unquote(parsed.username or ""),
-                    "credentials": urllib.parse.unquote(parsed.password or ""),
+                    "hostname": parsed.host,
+                    "logintype": parsed.username,
+                    "credentials": parsed.password,
                     "port": parsed.port,
                     "path": parsed.path,
                 }
@@ -51,12 +51,16 @@ class ShellConfig:
         self.port = _config.get("port")
         self.path = _config.get("path")
 
+
 if _ty.TYPE_CHECKING:
     from truenasapi_typings.current import Current
+
     ApiVersion = _ty.TypeVar("ApiVersion", bound=Namespace, default=Current)
 else:
-    ApiVersion = _ty.TypeVar("ApiVersion", bound=Namespace, )
-
+    ApiVersion = _ty.TypeVar(
+        "ApiVersion",
+        bound=Namespace,
+    )
 
 
 class TrueNASClient(_ty.Generic[ApiVersion]):
@@ -67,34 +71,26 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
         autologin=True,
         sslverify=True,
         *,
-        api=None,
-        shell=None,
+        shell:str=None,
         logger: logging.Logger = None,
     ) -> None:
-        self._target = target or "localhost"
+        target = target or "localhost"
+        self._api = _TGT.parse(target, scheme='wss', path='/api/current')
+        if self._api.username or self._api.password:
+            if not creds:
+                creds = f"{self._api.username}:{self._api.password}"
+            self._api = self._api._replace(username='', password='')
         self._creds = _auth.Credentials(creds)
         self._conn: _conn.JSONRPCClient = None
         self.sslverify = sslverify
         self.autologin = autologin
-        self.api_uri = api or self._target
         self.shell = ShellConfig(shell)
         if not logger:
             logger = logging.getLogger("pytruenas")
         self.logger = logging.getLogger(logger) if isinstance(logger, str) else logger
 
     def _is_local(self):
-        return self._target.lower() in ["localhost", "127.0.0.1"]
-
-    @property
-    def api_uri(self):
-        return self._api
-
-    @api_uri.setter
-    def api_uri(self, value: str):
-        if not value or value.lower() in ["localhost", "127.0.0.1"]:
-            self._api = None
-        else:
-            self._api = f"wss://{value}/api/current"
+        return self._api.host.lower() in ['',"localhost", "127.0.0.1"]
 
     @property
     def conn(self):
@@ -102,13 +98,13 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
             if self.autologin:
                 self.login()
             else:
-                self._conn = _conn.Client(self.api_uri, verify_ssl=self.sslverify)
+                self._conn = _conn.Client(self._api.uri, verify_ssl=self.sslverify)
         return self._conn
 
     def login(self, creds: _auth.Credentials = None):
         if self._conn and not self.conn._closed.is_set():
             self._conn.close()
-        self._conn = _conn.Client(self.api_uri, verify_ssl=self.sslverify)
+        self._conn = _conn.Client(self._api.uri, verify_ssl=self.sslverify)
         creds = creds or self._creds
         creds.login(self)
 
@@ -126,7 +122,7 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
         return api
 
     def install_sshcreds(self, name: str = None, private_key: str = None):
-        client:'TrueNASClient[Current]' = self
+        client: "TrueNASClient[Current]" = self
         name = name or "pytruenas"
         keypair = client.api.keychaincredential._get(type="SSH_KEY_PAIR", name=name)
         if not keypair and not private_key:
@@ -134,16 +130,18 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
                 "private_key"
             ]
         elif not private_key:
-            private_key = keypair["attributes"]['private_key']
+            private_key = keypair["attributes"]["private_key"]
 
-        pubkey = _ssh.import_private_key(private_key).export_public_key().decode().strip()
+        pubkey = (
+            _ssh.import_private_key(private_key).export_public_key().decode().strip()
+        )
 
         keypair = client.api.keychaincredential._upsert(
             "name",
             ("update_exclude", ["type"]),
             type="SSH_KEY_PAIR",
             name=name,
-            attributes={"private_key": private_key, 'public_key':pubkey},
+            attributes={"private_key": private_key, "public_key": pubkey},
         )
         root = client.api.user._get(username="root")
         rootauthkeys = (root.get("sshpubkey") or "").splitlines()
@@ -231,7 +229,7 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
 
             async def _run():
                 async with _ssh.connect(
-                    self.shell.hostname or self._target,
+                    self.shell.hostname or self._api.host,
                     port=self.shell.port or 22,
                     username="root",
                     known_hosts=None,

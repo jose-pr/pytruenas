@@ -12,6 +12,7 @@ logging.getLogger().addHandler(handler)
 tn_host = os.environ.get("TN_HOST")
 tn_creds = Credentials.from_env()
 client = TrueNASClient(tn_host, tn_creds, sslverify=False)
+uri = client._api.uri
 client.logger.setLevel(logging.DEBUG)
 
 cache = Path('_api.json')
