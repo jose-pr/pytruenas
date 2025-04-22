@@ -1,5 +1,9 @@
 """Patch asyncio to allow nested event loops."""
 
+# Source
+# https://github.com/erdewit/nest_asyncio/blob/master/nest_asyncio.py
+# https://github.com/erdewit/nest_asyncio/blob/master/LICENSE
+
 import asyncio
 import asyncio.events as events
 import os
