@@ -81,7 +81,7 @@ class Namespace:
             result = self.create(fields)
 
         wait = opts.get('wait', True)
-        if isinstance(result, int) and wait is None or wait:
+        if isinstance(result, int) and (wait is None or wait):
             result = self._client.api.core.job_wait(result, job=True)
 
         return result
