@@ -47,22 +47,15 @@ class Path(_Path):
     def __rtruediv__(self, key):
         return self._with_path(self._path.__rtruediv__(key))
 
-    def _getattr(self, name: str):
+    def _fsmethod(self, name: str):
         for method in self._methods:
             try:
-                if method == "local":
-                    path = _pathlib.Path(self._path)
-                    if hasattr(_fs.local, name):
-                        return getattr(_fs.local, name)
-                    return getattr(path, name)
-                else:
-                    fs = FILESYSTEMS[method]
-                    _method = getattr(fs, name)
+                fs = FILESYSTEMS[method]
+                _method = getattr(fs, name)
+                def method(*args, **kwargs):
+                    return _method(self._path, *args, **kwargs, client=self._client)
 
-                    def method(*args, **kwargs):
-                        return _method(self._path, *args, **kwargs, client=self._client)
-
-                    return method
+                return method
             except (AttributeError, NotImplementedError, KeyError):
                 pass
         return NotImplementedError
@@ -77,7 +70,7 @@ class Path(_Path):
         if hasattr(self._path, name):
             attr = getattr(self._path, name)
         else:
-            attr = self._getattr(name)
+            attr = self._fsmethod(name)
 
         if attr is NotImplementedError:
             raise NotImplementedError(name)
@@ -111,4 +104,4 @@ class Path(_Path):
     def chmod(self, mode: int | str):
         if isinstance(mode, str):
             mode = int(mode, 8)
-        return self._getattr("chmod")(mode)
+        return self._fsmethod("chmod")(mode)
