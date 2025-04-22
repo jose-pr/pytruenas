@@ -3,11 +3,29 @@ import typing as _ty
 import errno as _errno
 import time as _time
 
+import re as _re
+
 from . import _conn
 from .utils import query as _q
 
 if _ty.TYPE_CHECKING:
     from . import TrueNASClient
+
+_ERRNO_PATTERN = _re.compile(r"^\[([^]]*)\]\s*(.*)")
+
+
+def ioerror(error: _conn.ClientException):
+    match = _ERRNO_PATTERN.match(error.args[0])
+    if match:
+        name = match[1]
+        msg = match[2]
+
+        errno = getattr(_errno, name, None)
+        if error is not None:
+
+            error = IOError(errno, msg)
+
+    return error
 
 
 class Namespace:
@@ -23,7 +41,14 @@ class Namespace:
     def __str__(self) -> str:
         return self._namespace
 
-    def __call__(self, *args, _tries=1, _method: str = None, **kwds):
+    def __call__(
+        self,
+        *args,
+        _tries=1,
+        _method: str = None,
+        _ioerror=False,
+        **kwds,
+    ):
         method = self._namespace
         if _method:
             method = f"{method}.{_method}"
@@ -33,23 +58,27 @@ class Namespace:
                 return self._client.websocket.call(method, *args, **kwds)
             except _conn.ClientException as e:
                 if e.errno == _errno.ECONNABORTED and _tries:
-                    self._client.logger.warning(f"Websocket connection was closed, trying again with new connection")
+                    self._client.logger.warning(
+                        f"Websocket connection was closed, trying again with new connection"
+                    )
                     _tries -= 1
                     self._conn = None
                     _time.sleep(1)
                 else:
-                    raise e
+                    raise ioerror(e) if _ioerror else e from None
+
     if not _ty.TYPE_CHECKING:
+
         @cache
         def __getattr__(self, name: str) -> "Namespace":
             if isinstance(name, str) and not name.startswith("_"):
                 return Namespace(self._client, self._namespace, name.removesuffix("_"))
             else:
                 super().__getattribute__(name)
-    else:
-        def __getattr__(self, name: str) -> "Namespace":
-            ...
 
+    else:
+
+        def __getattr__(self, name: str) -> "Namespace": ...
 
     def _query(self, *__opts: dict | _q.Option, **filter) -> list[dict[str]]:
         opts = _q.Option.options(*__opts)
@@ -67,7 +96,7 @@ class Namespace:
         opts = _q.Option.options(*__opts)
         idkey = opts.get("idkey") or "id"
         unique = __unique or idkey
-        fields = {name: val for name, val in fields.items() if val is not _q.EXCLUDE }
+        fields = {name: val for name, val in fields.items() if val is not _q.EXCLUDE}
         if isinstance(unique, str):
             unique = (unique,)
         current = self._get(**{name: fields[name] for name in unique})
@@ -80,7 +109,7 @@ class Namespace:
             fields = {name: val for name, val in fields.items() if name not in exclude}
             result = self.create(fields)
 
-        wait = opts.get('wait', True)
+        wait = opts.get("wait", True)
         if isinstance(result, int) and (wait is None or wait):
             result = self._client.api.core.job_wait(result, job=True)
 

@@ -79,7 +79,7 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
             if self.autologin:
                 self.login()
             else:
-                self._conn = _conn.Client(self._api.uri, verify_ssl=self.sslverify)
+                self._conn = _conn.Client(self._api.uri, verify_ssl=self.sslverify, py_exceptions=True)
         return self._conn
 
     def login(self, creds: _auth.Credentials = None):
