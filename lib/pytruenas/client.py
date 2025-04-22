@@ -25,6 +25,7 @@ from . import _conn, _utils
 from .utils.target import Target as _TGT
 from . import auth as _auth
 from .namespace import Namespace
+from .path import Path
 
 FileHandle = None | int | _ty.IO
 PathLike = str | PurePath
@@ -59,7 +60,8 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
             self._api = self._api._replace(username="", password="")
         self._creds = _auth.Credentials(creds)
         self._conn: _conn.JSONRPCClient = None
-        self._sshsession: _ssh.SSHClientConnection = None
+        self._ssh: _ssh.SSHClientConnection = None
+        self._sftp: _ssh.SFTPClient = None
         self.sslverify = sslverify
         self.autologin = autologin
         self.shell = _TGT.parse(
@@ -188,9 +190,11 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
 
     @property
     def ssh(self):
-        if not self._sshsession or self._sshsession._close_event.is_set():
+        if not self._ssh or self._ssh._close_event.is_set():
+            self.logger.debug("Openning SSH connection")
+
             connect_opts = {}
-            username = ''
+            username = ""
             if self.shell.username:
                 if "|" in self.shell.username:
                     logintype, username = self.shell.username.split("|", maxsplit=1)
@@ -202,7 +206,8 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
                     creds = creds.encode()
                 connect_opts[logintype] = creds
             username = username or "root"
-            self._sshsession = _utils.async_to_sync(_ssh.connect(
+            self._ssh = _utils.async_to_sync(
+                _ssh.connect(
                     self.shell.host,
                     port=self.shell.port or 22,
                     username=username,
@@ -210,7 +215,21 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
                     **connect_opts,
                 )
             )
-        return self._sshsession
+        return self._ssh
+
+    @property
+    def sftp(self):
+        if (
+            not self._sftp
+            or not self._sftp._handler._writer
+            or self._sftp._handler._writer._chan._close_event.is_set()
+        ):
+            self.logger.debug("Openning SFTP channel")
+            self._sftp = _utils.async_to_sync(self.ssh.start_sftp_client())
+        return self._sftp
+
+    def path(self, *path: PathLike, **kwargs):
+        return Path(*path, **kwargs, client=self)
 
     def run(
         self,

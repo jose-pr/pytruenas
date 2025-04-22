@@ -1,12 +1,11 @@
-from pathlib import PurePosixPath as _Path
+import typing as _ty
 
-from .. import TrueNASClient as _Client
+if _ty.TYPE_CHECKING:
+    from .. import TrueNASClient as _Client
+    from pathlib import PosixPath as _Path
+
 from .. import _utils
 
-def exists(path:_Path, *,client:_Client):
-    async def run():
-        sftp = await client.ssh.start_sftp_client()
-        return await sftp.exists(path.as_posix())
 
-    return _utils.async_to_sync(run())
-
+def exists(path: "_Path", *, client: "_Client"):
+    return _utils.async_to_sync(client.sftp.exists(path.as_posix()))
