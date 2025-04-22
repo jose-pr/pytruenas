@@ -1,12 +1,12 @@
 from pytruenas import Namespace as _NS 
 class Auth(_NS):
     
-    def generate_onetime_password(
+    def generate_onetime_password(self,
         generate_single_use_password,
     ) -> AuthGenerate_onetime_password:
         """Generate a password for the specified username that may be used only a single time to authenticate to TrueNAS. This may be used by server administrators to allow users authenticate and then set a proper password and two-factor authentication token."""
         ...
-    def generate_token(
+    def generate_token(self,
         ttl,
         attrs,
         match_origin,
@@ -22,14 +22,14 @@ class Auth(_NS):
 
 NOTE: this endpoint is not supported when server security requires replay-resistant authentication as part of GPOS STIG requirements."""
         ...
-    def login(
+    def login(self,
         username,
         password,
         otp_token,
     ) -> AuthLogin:
         """Authenticate session using username and password. `otp_token` must be specified if two factor authentication is enabled."""
         ...
-    def login_ex(
+    def login_ex(self,
         login_data,
     ) -> AuthLogin_ex:
         """Authenticate using one of a variety of mechanisms
@@ -76,7 +76,7 @@ EXPIRED The specified credential is expired and not suitable for authentication.
 
 REDIRECT Authentication must be performed on different server."""
         ...
-    def login_ex_continue(
+    def login_ex_continue(self,
         login_data,
     ) -> AuthLogin_ex_continue:
         """Continue in-progress authentication attempt. This endpoint should be called to continue an auth.login_ex attempt that returned OTP_REQUIRED.
@@ -95,29 +95,29 @@ returns: JSON object containing the following keys:
 
     AUTH_ERR - invalid OTP token submitted too many times."""
         ...
-    def login_with_api_key(
+    def login_with_api_key(self,
         api_key,
     ) -> AuthLogin_with_api_key:
         """Authenticate session using API Key."""
         ...
-    def login_with_token(
+    def login_with_token(self,
         token,
     ) -> AuthLogin_with_token:
         """Authenticate session using token generated with `auth.generate_token`."""
         ...
-    def logout(
+    def logout(self,
     ) -> AuthLogout:
         """Deauthenticates an app and if a token exists, removes that from the session."""
         ...
-    def me(
+    def me(self,
     ) -> AuthMe:
         """Returns currently logged-in user."""
         ...
-    def mechanism_choices(
+    def mechanism_choices(self,
     ) -> AuthMechanism_choices:
         """Get list of available authentication mechanisms available for auth.login_ex"""
         ...
-    def sessions(
+    def sessions(self,
         filters,
         options,
     ) -> AuthSessions:
@@ -137,7 +137,7 @@ If you want to exclude all internal connections from the list, call this method 
         ["internal", "=", True] ]
 ]"""
         ...
-    def set_attribute(
+    def set_attribute(self,
         key,
         value,
     ) -> AuthSet_attribute:
@@ -145,11 +145,11 @@ If you want to exclude all internal connections from the list, call this method 
 
 e.g. Setting key="foo" value="var" will result in {"attributes": {"foo": "bar"}}"""
         ...
-    def terminate_other_sessions(
+    def terminate_other_sessions(self,
     ) -> AuthTerminate_other_sessions:
         """Terminates all other sessions (except the current one)."""
         ...
-    def terminate_session(
+    def terminate_session(self,
         id,
     ) -> AuthTerminate_session:
         """Terminates session `id`."""

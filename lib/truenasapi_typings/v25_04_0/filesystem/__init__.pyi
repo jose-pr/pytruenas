@@ -2,7 +2,7 @@ from pytruenas import Namespace as _NS
 from .acltemplate import FilesystemAcltemplate 
 class Filesystem(_NS):
     
-    def chown(
+    def chown(self,
         filesystem_chown,
     ) -> FilesystemChown:
         """Change owner or group of file at `path`.
@@ -15,17 +15,17 @@ class Filesystem(_NS):
 
 If `traverse` and `recursive` are specified, then the chown operation will traverse filesystem mount points."""
         ...
-    def get(
+    def get(self,
         path,
     ) -> FilesystemGet:
         """Job to get contents of `path`."""
         ...
-    def get_zfs_attributes(
+    def get_zfs_attributes(self,
         path,
     ) -> FilesystemGet_zfs_attributes:
         """Get the current ZFS attributes for the file at the given path"""
         ...
-    def getacl(
+    def getacl(self,
         path,
         simplified,
         resolve_ids,
@@ -50,7 +50,7 @@ Errata about ACLType NFSv4:
 
 If the permisssions do not fit within one of the pre-defined simplified permissions types, then the full ACL entry will be returned."""
         ...
-    def listdir(
+    def listdir(self,
         path,
         query_filters,
         query_options,
@@ -65,7 +65,7 @@ NOTE: an empty list for select (default) is treated as requesting all informatio
 
 Each entry of the list consists of: name(str): name of the file path(str): absolute path of the entry realpath(str): absolute real path of the entry (if SYMLINK) type(str): DIRECTORY | FILE | SYMLINK | OTHER size(int): size of the entry allocation_size(int): on-disk size of entry mode(int): file mode/permission uid(int): user id of entry owner gid(int): group id of entry owner acl(bool): extended ACL is present on file is_mountpoint(bool): path is a mountpoint is_ctldir(bool): path is within special .zfs directory attributes(list): list of statx file attributes that apply to the file. See statx(2) manpage for more details. xattrs(list): list of extended attribute names. zfs_attrs(list): list of ZFS file attributes on file"""
         ...
-    def mkdir(
+    def mkdir(self,
         filesystem_mkdir,
     ) -> FilesystemMkdir:
         """Create a directory at the specified path.
@@ -76,13 +76,13 @@ The following options are supported:
 
 NOTE: if chmod error is skipped, the resulting `mode` key in mkdir response will indicate the current permissions on the directory and not the permissions specified in the mkdir payload"""
         ...
-    def put(
+    def put(self,
         path,
         options,
     ) -> FilesystemPut:
         """Job to put contents to `path`."""
         ...
-    def set_zfs_attributes(
+    def set_zfs_attributes(self,
         set_zfs_file_attributes,
     ) -> FilesystemSet_zfs_attributes:
         """Set special ZFS-related file flags on the specified path
@@ -105,7 +105,7 @@ NOTE: if chmod error is skipped, the resulting `mode` key in mkdir response will
 
 `sparse` - maps to SPARSE MS-DOS attribute. Is presented to SMB clients, but has no impact on local filesystem."""
         ...
-    def setacl(
+    def setacl(self,
         filesystem_acl,
     ) -> FilesystemSetacl:
         """Set ACL of a given path. Takes the following parameters: `path` full path to directory or file.
@@ -162,7 +162,7 @@ Notes about posix1e ACL entry fields:
 
 `perms` - object containing posix permissions."""
         ...
-    def setperm(
+    def setperm(self,
         filesystem_setperm,
     ) -> FilesystemSetperm:
         """Set unix permissions on given `path`.
@@ -185,7 +185,7 @@ WARNING: `uid`, `gid, `user`, and `group` _should_ remain unset _unless_ the adm
 
 If no `mode` is set, and `stripacl` is True, then non-trivial ACLs will be converted to trivial ACLs. An ACL is trivial if it can be expressed as a file mode without losing any access rules."""
         ...
-    def stat(
+    def stat(self,
         path,
     ) -> FilesystemStat:
         """Return filesystem information for a given path.
@@ -228,7 +228,7 @@ If no `mode` is set, and `stripacl` is True, then non-trivial ACLs will be conve
 
 `attributes(list)`: list of statx file attributes that apply to the file. See statx(2) manpage for more details."""
         ...
-    def statfs(
+    def statfs(self,
         path,
     ) -> FilesystemStatfs:
         """Return stats from the filesystem of a given path.

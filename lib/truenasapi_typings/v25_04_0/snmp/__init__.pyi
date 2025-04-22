@@ -1,11 +1,11 @@
 from pytruenas import Namespace as _NS 
 class Snmp(_NS):
     
-    def config(
+    def config(self,
     ) -> SnmpConfig:
         """"""
         ...
-    def update(
+    def update(self,
         snmp_update,
     ) -> SnmpUpdate:
         """Update SNMP Service Configuration.

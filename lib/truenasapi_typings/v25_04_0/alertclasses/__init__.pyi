@@ -1,11 +1,11 @@
 from pytruenas import Namespace as _NS 
 class Alertclasses(_NS):
     
-    def config(
+    def config(self,
     ) -> AlertclassesConfig:
         """"""
         ...
-    def update(
+    def update(self,
         data,
     ) -> AlertclassesUpdate:
         """Update default Alert settings."""

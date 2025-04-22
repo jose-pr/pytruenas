@@ -1,40 +1,40 @@
 from pytruenas import Namespace as _NS 
 class VirtInstance(_NS):
     
-    def create(
+    def create(self,
         virt_instance_create,
     ) -> VirtInstanceCreate:
         """Create a new virtualized instance."""
         ...
-    def delete(
+    def delete(self,
         id,
     ) -> VirtInstanceDelete:
         """Delete an instance."""
         ...
-    def device_add(
+    def device_add(self,
         id,
         device,
     ) -> VirtInstanceDevice_add:
         """Add a device to an instance."""
         ...
-    def device_delete(
+    def device_delete(self,
         id,
         name,
     ) -> VirtInstanceDevice_delete:
         """Delete a device from an instance."""
         ...
-    def device_list(
+    def device_list(self,
         id,
     ) -> VirtInstanceDevice_list:
         """List all devices associated to an instance."""
         ...
-    def device_update(
+    def device_update(self,
         id,
         device,
     ) -> VirtInstanceDevice_update:
         """Update a device in an instance."""
         ...
-    def get_instance(
+    def get_instance(self,
         id,
         options,
     ) -> VirtInstanceGet_instance:
@@ -42,18 +42,18 @@ class VirtInstance(_NS):
 
 Please see `query` method documentation for `options`."""
         ...
-    def image_choices(
+    def image_choices(self,
         virt_instances_image_choices,
     ) -> VirtInstanceImage_choices:
         """Provide choices for instance image from a remote repository."""
         ...
-    def query(
+    def query(self,
         filters,
         options,
     ) -> VirtInstanceQuery:
         """Query all instances with `query-filters` and `query-options`."""
         ...
-    def restart(
+    def restart(self,
         id,
         stop_args,
     ) -> VirtInstanceRestart:
@@ -61,12 +61,12 @@ Please see `query` method documentation for `options`."""
 
 Timeout is how long it should wait for the instance to shutdown cleanly."""
         ...
-    def start(
+    def start(self,
         id,
     ) -> VirtInstanceStart:
         """Start an instance."""
         ...
-    def stop(
+    def stop(self,
         id,
         stop_args,
     ) -> VirtInstanceStop:
@@ -74,7 +74,7 @@ Timeout is how long it should wait for the instance to shutdown cleanly."""
 
 Timeout is how long it should wait for the instance to shutdown cleanly."""
         ...
-    def update(
+    def update(self,
         id,
         virt_instance_update,
     ) -> VirtInstanceUpdate:

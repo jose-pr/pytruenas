@@ -1,11 +1,11 @@
 from pytruenas import Namespace as _NS 
 class VirtDevice(_NS):
     
-    def disk_choices(
+    def disk_choices(self,
     ) -> VirtDeviceDisk_choices:
         """Returns disk choices available for device type "DISK" for virtual machines. This includes both available virt volumes and zvol choices. Disk choices for containers depend on the mounted file tree (paths)."""
         ...
-    def export_disk_image(
+    def export_disk_image(self,
         virt_device_export_disk_image,
     ) -> VirtDeviceExport_disk_image:
         """Exports a zvol to a formatted VM disk image.
@@ -18,12 +18,12 @@ As of this implementation it supports the following {format} options :
 
 `format` is a required parameter for the exported disk image `directory` is a required parameter for the export disk image `zvol` is the source for the disk image"""
         ...
-    def gpu_choices(
+    def gpu_choices(self,
         gpu_type,
     ) -> VirtDeviceGpu_choices:
         """Provide choices for GPU devices."""
         ...
-    def import_disk_image(
+    def import_disk_image(self,
         virt_device_import_disk_image,
     ) -> VirtDeviceImport_disk_image:
         """Imports a specified disk image.
@@ -36,16 +36,16 @@ As of this implementation it supports:
 
 `diskimg` is a required parameter for the incoming disk image `zvol` is the required target for the imported disk image"""
         ...
-    def nic_choices(
+    def nic_choices(self,
         nic_type,
     ) -> VirtDeviceNic_choices:
         """Returns choices for NIC device."""
         ...
-    def pci_choices(
+    def pci_choices(self,
     ) -> VirtDevicePci_choices:
         """Returns choices for PCI devices valid for VM virt instances."""
         ...
-    def usb_choices(
+    def usb_choices(self,
     ) -> VirtDeviceUsb_choices:
         """Provide choices for USB devices."""
         ...

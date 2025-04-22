@@ -1,7 +1,7 @@
 from pytruenas import Namespace as _NS 
 class IscsiTarget(_NS):
     
-    def create(
+    def create(self,
         iscsi_target_create,
     ) -> IscsiTargetCreate:
         """Create an iSCSI Target.
@@ -10,7 +10,7 @@ class IscsiTarget(_NS):
 
 `auth_networks` is a list of IP/CIDR addresses which are allowed to use this initiator. If all networks are to be allowed, this field should be left empty."""
         ...
-    def delete(
+    def delete(self,
         id,
         force,
         delete_extents,
@@ -19,7 +19,7 @@ class IscsiTarget(_NS):
 
 Deleting an iSCSI Target makes sure we delete all Associated Targets which use `id` iSCSI Target."""
         ...
-    def get_instance(
+    def get_instance(self,
         id,
         options,
     ) -> IscsiTargetGet_instance:
@@ -27,19 +27,19 @@ Deleting an iSCSI Target makes sure we delete all Associated Targets which use `
 
 Please see `query` method documentation for `options`."""
         ...
-    def query(
+    def query(self,
         filters,
         options,
     ) -> IscsiTargetQuery:
         """"""
         ...
-    def update(
+    def update(self,
         id,
         iscsi_target_update,
     ) -> IscsiTargetUpdate:
         """Update iSCSI Target of `id`."""
         ...
-    def validate_name(
+    def validate_name(self,
         name,
         existing_id,
     ) -> IscsiTargetValidate_name:

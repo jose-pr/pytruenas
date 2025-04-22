@@ -1,26 +1,26 @@
 from pytruenas import Namespace as _NS 
 class VirtGlobal(_NS):
     
-    def bridge_choices(
+    def bridge_choices(self,
     ) -> VirtGlobalBridge_choices:
         """Bridge choices for virtualization purposes.
 
 Empty means it will be managed/created automatically."""
         ...
-    def config(
+    def config(self,
     ) -> VirtGlobalConfig:
         """"""
         ...
-    def get_network(
+    def get_network(self,
         name,
     ) -> VirtGlobalGet_network:
         """Details for the given network."""
         ...
-    def pool_choices(
+    def pool_choices(self,
     ) -> VirtGlobalPool_choices:
         """Pool choices for virtualization purposes."""
         ...
-    def update(
+    def update(self,
         virt_global_update,
     ) -> VirtGlobalUpdate:
         """Update global virtualization settings.

@@ -1,11 +1,11 @@
 from pytruenas import Namespace as _NS 
 class Ftp(_NS):
     
-    def config(
+    def config(self,
     ) -> FtpConfig:
         """"""
         ...
-    def update(
+    def update(self,
         ftp_update,
     ) -> FtpUpdate:
         """Update ftp service configuration.

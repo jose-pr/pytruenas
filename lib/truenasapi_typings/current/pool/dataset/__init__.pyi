@@ -1,11 +1,11 @@
 from pytruenas import Namespace as _NS 
 class PoolDataset(_NS):
     
-    def details(
+    def details(self,
     ) -> PoolDatasetDetails:
         """Retrieve all dataset(s) details outlining any services/tasks which might be consuming them."""
         ...
-    def snapshot_count(
+    def snapshot_count(self,
         dataset,
     ) -> PoolDatasetSnapshot_count:
         """Returns snapshot count for specified `dataset`."""

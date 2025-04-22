@@ -1,7 +1,7 @@
 from pytruenas import Namespace as _NS 
 class DockerNetwork(_NS):
     
-    def get_instance(
+    def get_instance(self,
         id,
         options,
     ) -> DockerNetworkGet_instance:
@@ -9,7 +9,7 @@ class DockerNetwork(_NS):
 
 Please see `query` method documentation for `options`."""
         ...
-    def query(
+    def query(self,
         filters,
         options,
     ) -> DockerNetworkQuery:

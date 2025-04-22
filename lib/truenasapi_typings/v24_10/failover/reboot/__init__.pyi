@@ -1,11 +1,11 @@
 from pytruenas import Namespace as _NS 
 class FailoverReboot(_NS):
     
-    def info(
+    def info(self,
     ) -> FailoverRebootInfo:
         """"""
         ...
-    def other_node(
+    def other_node(self,
     ) -> FailoverRebootOther_node:
         """Reboot the other node and wait for it to come back online.
 

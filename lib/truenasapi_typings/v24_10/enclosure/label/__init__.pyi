@@ -1,7 +1,7 @@
 from pytruenas import Namespace as _NS 
 class EnclosureLabel(_NS):
     
-    def set(
+    def set(self,
         id,
         label,
     ) -> EnclosureLabelSet:

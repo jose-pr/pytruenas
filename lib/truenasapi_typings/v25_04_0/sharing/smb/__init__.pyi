@@ -1,16 +1,16 @@
 from pytruenas import Namespace as _NS 
 class SharingSmb(_NS):
     
-    def getacl(
+    def getacl(self,
         smb_getacl,
     ) -> SharingSmbGetacl:
         """"""
         ...
-    def presets(
+    def presets(self,
     ) -> SharingSmbPresets:
         """Retrieve pre-defined configuration sets for specific use-cases. These parameter combinations are often non-obvious, but beneficial in these scenarios."""
         ...
-    def setacl(
+    def setacl(self,
         smb_setacl,
     ) -> SharingSmbSetacl:
         """Set an ACL on `share_name`. This only impacts access through the SMB protocol.

@@ -1,7 +1,7 @@
 from pytruenas import Namespace as _NS 
 class SystemNtpserver(_NS):
     
-    def create(
+    def create(self,
         ntp_server_create,
     ) -> SystemNtpserverCreate:
         """Add an NTP Server.
@@ -20,12 +20,12 @@ class SystemNtpserver(_NS):
 
 `force` when enabled forces the addition of NTP server even if it is currently unreachable."""
         ...
-    def delete(
+    def delete(self,
         id,
     ) -> SystemNtpserverDelete:
         """Delete NTP server of `id`."""
         ...
-    def get_instance(
+    def get_instance(self,
         id,
         options,
     ) -> SystemNtpserverGet_instance:
@@ -33,13 +33,13 @@ class SystemNtpserver(_NS):
 
 Please see `query` method documentation for `options`."""
         ...
-    def query(
+    def query(self,
         filters,
         options,
     ) -> SystemNtpserverQuery:
         """"""
         ...
-    def update(
+    def update(self,
         id,
         ntp_server_update,
     ) -> SystemNtpserverUpdate:

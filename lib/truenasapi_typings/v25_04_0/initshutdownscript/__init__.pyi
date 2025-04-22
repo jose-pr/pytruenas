@@ -1,7 +1,7 @@
 from pytruenas import Namespace as _NS 
 class Initshutdownscript(_NS):
     
-    def create(
+    def create(self,
         data,
     ) -> InitshutdownscriptCreate:
         """Create an initshutdown script task.
@@ -14,12 +14,12 @@ There are three choices for `when`:
 
 `timeout` is an integer value which indicates time in seconds which the system should wait for the execution of script/command. It should be noted that a hard limit for a timeout is configured by the base OS, so when a script/command is set to execute on SHUTDOWN, the hard limit configured by the base OS is changed adding the timeout specified by script/command so it can be ensured that it executes as desired and is not interrupted by the base OS's limit."""
         ...
-    def delete(
+    def delete(self,
         id,
     ) -> InitshutdownscriptDelete:
         """Delete init/shutdown task of `id`."""
         ...
-    def get_instance(
+    def get_instance(self,
         id,
         options,
     ) -> InitshutdownscriptGet_instance:
@@ -27,13 +27,13 @@ There are three choices for `when`:
 
 Please see `query` method documentation for `options`."""
         ...
-    def query(
+    def query(self,
         filters,
         options,
     ) -> InitshutdownscriptQuery:
         """"""
         ...
-    def update(
+    def update(self,
         id,
         data,
     ) -> InitshutdownscriptUpdate:

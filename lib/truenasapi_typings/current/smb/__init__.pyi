@@ -1,19 +1,19 @@
 from pytruenas import Namespace as _NS 
 class Smb(_NS):
     
-    def bindip_choices(
+    def bindip_choices(self,
     ) -> SmbBindip_choices:
         """List of valid choices for IP addresses to which to bind the SMB service. Addresses assigned by DHCP are excluded from the results."""
         ...
-    def config(
+    def config(self,
     ) -> SmbConfig:
         """"""
         ...
-    def unixcharset_choices(
+    def unixcharset_choices(self,
     ) -> SmbUnixcharset_choices:
         """"""
         ...
-    def update(
+    def update(self,
         smb_update,
     ) -> SmbUpdate:
         """Update SMB Service Configuration.

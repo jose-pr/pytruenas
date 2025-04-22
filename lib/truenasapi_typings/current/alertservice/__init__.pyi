@@ -1,19 +1,19 @@
 from pytruenas import Namespace as _NS 
 class Alertservice(_NS):
     
-    def create(
+    def create(self,
         alert_service_create,
     ) -> AlertserviceCreate:
         """Create an Alert Service of specified `type`.
 
 If `enabled`, it sends alerts to the configured `type` of Alert Service."""
         ...
-    def delete(
+    def delete(self,
         id,
     ) -> AlertserviceDelete:
         """Delete Alert Service of `id`."""
         ...
-    def get_instance(
+    def get_instance(self,
         id,
         options,
     ) -> AlertserviceGet_instance:
@@ -21,18 +21,18 @@ If `enabled`, it sends alerts to the configured `type` of Alert Service."""
 
 Please see `query` method documentation for `options`."""
         ...
-    def query(
+    def query(self,
         filters,
         options,
     ) -> AlertserviceQuery:
         """"""
         ...
-    def test(
+    def test(self,
         alert_service_create,
     ) -> AlertserviceTest:
         """Send a test alert using `type` of Alert Service."""
         ...
-    def update(
+    def update(self,
         id,
         alert_service_update,
     ) -> AlertserviceUpdate:

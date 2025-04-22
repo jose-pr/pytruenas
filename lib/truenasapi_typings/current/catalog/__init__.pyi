@@ -1,7 +1,7 @@
 from pytruenas import Namespace as _NS 
 class Catalog(_NS):
     
-    def apps(
+    def apps(self,
         catalog_apps_options,
     ) -> CatalogApps:
         """Retrieve apps details for `label` catalog.
@@ -14,25 +14,25 @@ class Catalog(_NS):
 
 `options.trains` is a list of train name(s) which will allow selective filtering to retrieve only information of desired trains in a catalog. If `options.retrieve_all_trains` is set, it has precedence over `options.train`."""
         ...
-    def config(
+    def config(self,
     ) -> CatalogConfig:
         """"""
         ...
-    def get_app_details(
+    def get_app_details(self,
         app_name,
         app_version_details,
     ) -> CatalogGet_app_details:
         """Retrieve information of `app_name` `app_version_details.catalog` catalog app."""
         ...
-    def sync(
+    def sync(self,
     ) -> CatalogSync:
         """Sync truenas catalog to retrieve latest changes from upstream."""
         ...
-    def trains(
+    def trains(self,
     ) -> CatalogTrains:
         """Retrieve available trains."""
         ...
-    def update(
+    def update(self,
         catalog_update,
     ) -> CatalogUpdate:
         """Update catalog preferences."""

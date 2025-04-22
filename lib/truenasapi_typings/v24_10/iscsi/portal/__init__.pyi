@@ -1,17 +1,17 @@
 from pytruenas import Namespace as _NS 
 class IscsiPortal(_NS):
     
-    def create(
+    def create(self,
         iscsi_portal_create,
     ) -> IscsiPortalCreate:
         """Create a new iSCSI Portal."""
         ...
-    def delete(
+    def delete(self,
         id,
     ) -> IscsiPortalDelete:
         """Delete iSCSI Portal `id`."""
         ...
-    def get_instance(
+    def get_instance(self,
         id,
         options,
     ) -> IscsiPortalGet_instance:
@@ -19,17 +19,17 @@ class IscsiPortal(_NS):
 
 Please see `query` method documentation for `options`."""
         ...
-    def listen_ip_choices(
+    def listen_ip_choices(self,
     ) -> IscsiPortalListen_ip_choices:
         """Returns possible choices for `listen.ip` attribute of portal create and update."""
         ...
-    def query(
+    def query(self,
         filters,
         options,
     ) -> IscsiPortalQuery:
         """"""
         ...
-    def update(
+    def update(self,
         id,
         iscsi_portal_update,
     ) -> IscsiPortalUpdate:

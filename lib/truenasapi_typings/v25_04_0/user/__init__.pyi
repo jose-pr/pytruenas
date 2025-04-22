@@ -1,12 +1,12 @@
 from pytruenas import Namespace as _NS 
 class User(_NS):
     
-    def create(
+    def create(self,
         user_create,
     ) -> UserCreate:
         """Create a new user."""
         ...
-    def delete(
+    def delete(self,
         id,
         options,
     ) -> UserDelete:
@@ -14,7 +14,7 @@ class User(_NS):
 
 The `delete_group` option deletes the user primary group if it is not being used by any other user."""
         ...
-    def get_instance(
+    def get_instance(self,
         id,
         options,
     ) -> UserGet_instance:
@@ -22,24 +22,24 @@ The `delete_group` option deletes the user primary group if it is not being used
 
 Please see `query` method documentation for `options`."""
         ...
-    def get_next_uid(
+    def get_next_uid(self,
     ) -> UserGet_next_uid:
         """Get the next available/free uid."""
         ...
-    def get_user_obj(
+    def get_user_obj(self,
         get_user_obj,
     ) -> UserGet_user_obj:
         """Returns dictionary containing information from struct passwd for the user specified by either the username or uid. Bypasses user cache.
 
 NOTE: results will not include nested groups for Active Directory users."""
         ...
-    def has_local_administrator_set_up(
+    def has_local_administrator_set_up(self,
     ) -> UserHas_local_administrator_set_up:
         """Return whether a local administrator with a valid password exists.
 
 This is used when the system is installed without a password and must be set on first use/login."""
         ...
-    def query(
+    def query(self,
         filters,
         options,
     ) -> UserQuery:
@@ -47,7 +47,7 @@ This is used when the system is installed without a password and must be set on 
 
 If users provided by Active Directory or LDAP are not desired, then "local", "=", True should be added to filters."""
         ...
-    def renew_2fa_secret(
+    def renew_2fa_secret(self,
         username,
         twofactor_options,
     ) -> UserRenew_2fa_secret:
@@ -55,7 +55,7 @@ If users provided by Active Directory or LDAP are not desired, then "local", "="
 
 NOTE: This username must match the authenticated username unless authenticated credentials have FULL_ADMIN role."""
         ...
-    def set_password(
+    def set_password(self,
         set_password_data,
     ) -> UserSet_password:
         """Set the password of the specified `username` to the `new_password` specified in payload.
@@ -66,26 +66,26 @@ NOTE: when authenticated session has less than FULL_ADMIN role, password changes
 
 NOTE: users authenticated with a one-time password will be able to change the password without submitting a second time."""
         ...
-    def setup_local_administrator(
+    def setup_local_administrator(self,
         username,
         password,
         options,
     ) -> UserSetup_local_administrator:
         """Set up local administrator (this method does not require authentication if local administrator is not already set up)."""
         ...
-    def shell_choices(
+    def shell_choices(self,
         group_ids,
     ) -> UserShell_choices:
         """Return the available shell choices to be used in `user.create` and `user.update`.
 
 `group_ids` is a list of local group IDs for the user."""
         ...
-    def unset_2fa_secret(
+    def unset_2fa_secret(self,
         username,
     ) -> UserUnset_2fa_secret:
         """Unset two-factor authentication secret for `username`."""
         ...
-    def update(
+    def update(self,
         id,
         user_update,
     ) -> UserUpdate:

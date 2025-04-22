@@ -4,7 +4,7 @@ from {{ qn.module.removeprefix(ns.module) if ns.module else '.' + qn.module }} i
 {%- endfor %} 
 class {{ ns.classname }}(_NS):
     {% for qn in ns.methods() %}
-    def {{ qn.methodname }}(
+    def {{ qn.methodname }}(self,
         {%- for param in qn.parameters() %}
         {{param.argument_declaration()}}, 
         {%- endfor %}

@@ -1,19 +1,19 @@
 from pytruenas import Namespace as _NS 
 class IscsiInitiator(_NS):
     
-    def create(
+    def create(self,
         iscsi_initiator_create,
     ) -> IscsiInitiatorCreate:
         """Create an iSCSI Initiator.
 
 `initiators` is a list of initiator hostnames which are authorized to access an iSCSI Target. To allow all possible initiators, `initiators` can be left empty."""
         ...
-    def delete(
+    def delete(self,
         id,
     ) -> IscsiInitiatorDelete:
         """Delete iSCSI initiator of `id`."""
         ...
-    def get_instance(
+    def get_instance(self,
         id,
         options,
     ) -> IscsiInitiatorGet_instance:
@@ -21,13 +21,13 @@ class IscsiInitiator(_NS):
 
 Please see `query` method documentation for `options`."""
         ...
-    def query(
+    def query(self,
         filters,
         options,
     ) -> IscsiInitiatorQuery:
         """"""
         ...
-    def update(
+    def update(self,
         id,
         iscsi_initiator_update,
     ) -> IscsiInitiatorUpdate:

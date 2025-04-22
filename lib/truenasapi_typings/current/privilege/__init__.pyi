@@ -1,7 +1,7 @@
 from pytruenas import Namespace as _NS 
 class Privilege(_NS):
     
-    def create(
+    def create(self,
         privilege_create,
     ) -> PrivilegeCreate:
         """Creates a privilege.
@@ -16,12 +16,12 @@ class Privilege(_NS):
 
 `web_shell` controls whether users with this privilege are allowed to log in to the Web UI."""
         ...
-    def delete(
+    def delete(self,
         id,
     ) -> PrivilegeDelete:
         """Delete the privilege `id`."""
         ...
-    def get_instance(
+    def get_instance(self,
         id,
         options,
     ) -> PrivilegeGet_instance:
@@ -29,13 +29,13 @@ class Privilege(_NS):
 
 Please see `query` method documentation for `options`."""
         ...
-    def query(
+    def query(self,
         filters,
         options,
     ) -> PrivilegeQuery:
         """"""
         ...
-    def roles(
+    def roles(self,
         filters,
         options,
     ) -> PrivilegeRoles:
@@ -49,7 +49,7 @@ Each entry contains the following keys:
 
 `builtin` - role exists for internal backend purposes for access control."""
         ...
-    def update(
+    def update(self,
         id,
         privilege_update,
     ) -> PrivilegeUpdate:
