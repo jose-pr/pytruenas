@@ -112,23 +112,31 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
 
         return jobid
 
-    def download(self, method: str, *attrs, filename: str = None):
+    def download(
+        self, method: str, *attrs, filename: str = None, buffered=False, wait=True
+    ):
         client: "TrueNASClient[Current]" = self
 
         scheme = "https" if client._api.scheme == "wss" else "http"
-        target = client._api._replace(scheme=scheme, path="/_download", port=0)
 
         jobid, link = client.api.core.download(
             method, *attrs, filename=filename or "download"
         )
 
-        target = client._api._replace(path=link)
+        target = client._api._replace(scheme=scheme, path=link, port=0)
 
-        resp = _req.get(
-            target.uri,
-            verify=client.sslverify,
-        )
-        return resp.content
+        if wait:
+
+            if buffered:
+                client.api.core.job_wait(jobid, job=True)
+
+            resp = _req.get(
+                target.uri,
+                verify=client.sslverify,
+            )
+            return resp.content
+
+        return jobid
 
     def dump_api(self):
         import json
