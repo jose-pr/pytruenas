@@ -66,6 +66,7 @@ class Namespace:
         opts = _q.Option.options(*__opts)
         idkey = opts.get("idkey") or "id"
         unique = __unique or idkey
+        fields = {name: val for name, val in fields.items() if val is not _q.EXCLUDE }
         if isinstance(unique, str):
             unique = (unique,)
         current = self._get(**{name: fields[name] for name in unique})

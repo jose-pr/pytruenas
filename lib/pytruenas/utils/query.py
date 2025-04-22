@@ -1,5 +1,9 @@
 import typing as _ty
 
+class _Exclude:
+    ...
+
+EXCLUDE = _Exclude()
 
 class QueryFilter:
 
