@@ -47,5 +47,6 @@ class Target(_ty.NamedTuple):
         return uri
     
     @property
+    @_func.lru_cache    
     def is_local(self):
         return self.host.lower() in ["", "localhost", "127.0.0.1"]
