@@ -74,8 +74,7 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
         shell: str = None,
         logger: logging.Logger = None,
     ) -> None:
-        target = target or "localhost"
-        self._api = _TGT.parse(target, scheme="wss", path="/api/current")
+        self._api = _TGT.parse(target or "localhost", scheme="wss", path="/api/current")
         if self._api.username or self._api.password:
             if not creds:
                 creds = f"{self._api.username}:{self._api.password}"
@@ -84,16 +83,17 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
         self._conn: _conn.JSONRPCClient = None
         self.sslverify = sslverify
         self.autologin = autologin
-        self.shell = ShellConfig(shell)
+        self.shell = _TGT.parse(
+            shell or "",
+            scheme="local" if self._api.is_local else "ssh",
+            host=self._api.host,
+        )
         if not logger:
             logger = logging.getLogger("pytruenas")
         self.logger = logging.getLogger(logger) if isinstance(logger, str) else logger
 
-    def _is_local(self):
-        return self._api.host.lower() in ["", "localhost", "127.0.0.1"]
-
     @property
-    def conn(self):
+    def websocket(self):
         if self._conn is None or self._conn._closed.is_set():
             if self.autologin:
                 self.login()
@@ -151,9 +151,11 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
             client.api.user._upsert(
                 "username", username="root", sshpubkey="\n".join(rootauthkeys)
             )
-
-        client.shell.logintype = "client_keys"
-        client.shell.credentials = keypair["attributes"]["private_key"]
+        if not client.shell.username or not client.shell.password:
+            client.shell = client.shell._replace(
+                username="client_keys|root",
+                password=keypair["attributes"]["private_key"],
+            )
 
     def run(
         self,
@@ -172,14 +174,13 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
         input: Input | None = None,
         timeout: float | None = None,
     ) -> subprocess.CompletedProcess:
-        is_local = self._is_local()
 
         if not executable:
             if self.shell.path:
                 executable = self.shell.path
             else:
                 try:
-                    if is_local:
+                    if self._api.is_local:
                         executable = pwd.getpwnam("root").pw_shell
                     else:
                         executable = self.api.user._get(username="root")["shell"]
@@ -210,53 +211,62 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
 
         command = [executable, "-c", script]
 
-        if is_local:
-            result = subprocess.run(
-                command,
-                bufsize=bufsize,
-                stdin=stdin,
-                stdout=stdout,
-                stderr=stderr,
-                cwd=cwd,
-                env=env,
-                capture_output=capture_output,
-                check=check,
-                encoding=encoding,
-                errors=errors,
-                timeout=timeout,
-            )
-        else:
-            command = shlex.join(command)
-            if cwd:
-                command = f"{shlex.join(['cd', cwd])}; {command}"
-            connect_opts = {}
-            if self.shell.logintype:
-                creds = self.shell.credentials
-                if self.shell.logintype == "client_keys" and isinstance(creds, str):
-                    creds = creds.encode()
-                connect_opts[self.shell.logintype] = creds
+        match self.shell.scheme:
+            case "local":
+                result = subprocess.run(
+                    command,
+                    bufsize=bufsize,
+                    stdin=stdin,
+                    stdout=stdout,
+                    stderr=stderr,
+                    cwd=cwd,
+                    env=env,
+                    capture_output=capture_output,
+                    check=check,
+                    encoding=encoding,
+                    errors=errors,
+                    timeout=timeout,
+                )
+            case "ssh":
+                command = shlex.join(command)
+                if cwd:
+                    command = f"{shlex.join(['cd', cwd])}; {command}"
+                connect_opts = {}
+                if self.shell.username:
+                    if "|" in self.shell.username:
+                        logintype, username = self.shell.username.split("|", maxsplit=1)
+                    else:
+                        logintype = "password"
+                        username = "root"
+                    creds = self.shell.password
+                    if logintype == "client_keys" and isinstance(creds, str):
+                        creds = creds.encode()
+                    connect_opts[logintype] = creds
+                username = username or "root"
 
-            async def _run():
-                async with _ssh.connect(
-                    self.shell.hostname or self._api.host,
-                    port=self.shell.port or 22,
-                    username="root",
-                    known_hosts=None,
-                    **connect_opts,
-                ) as conn:
-                    result = await conn.run(
-                        command,
-                        bufsize=bufsize,
-                        stdin=stdin,
-                        stdout=stdout,
-                        stderr=stderr,
-                        env=env,
-                        check=check,
-                        encoding=encoding,
-                        errors=errors,
-                        timeout=timeout,
-                    )
-                return result
+                async def _run():
+                    async with _ssh.connect(
+                        self.shell.host,
+                        port=self.shell.port or 22,
+                        username=username,
+                        known_hosts=None,
+                        **connect_opts,
+                    ) as conn:
+                        result = await conn.run(
+                            command,
+                            bufsize=bufsize,
+                            stdin=stdin,
+                            stdout=stdout,
+                            stderr=stderr,
+                            env=env,
+                            check=check,
+                            encoding=encoding,
+                            errors=errors,
+                            timeout=timeout,
+                        )
+                    return result
 
-            result = _utils.async_to_sync(_run())
+                result = _utils.async_to_sync(_run())
+            case _:
+                raise NotImplementedError(self.shell.scheme)
         return result

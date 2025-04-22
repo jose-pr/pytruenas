@@ -30,7 +30,7 @@ class Namespace:
         while _tries > 0:
             try:
                 self._client.logger.trace(f"Calling method: {method} args: {args}")
-                return self._client.conn.call(method, *args, **kwds)
+                return self._client.websocket.call(method, *args, **kwds)
             except _conn.ClientException as e:
                 if e.errno == _errno.ECONNABORTED and _tries:
                     _tries -= 1
