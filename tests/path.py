@@ -13,11 +13,11 @@ client.logger.setLevel(logging.DEBUG)
 
 client.install_sshcreds()
 
-datapool = client.path('/mnt/data', methods='api')
+datapool = client.path('/mnt/data', methods='local')
 
 print(datapool)
 
 print(datapool.parent)
-print(datapool.stat())
-print(datapool.exists())
-print((datapool / 'doesnt exists').exists())
+print(datapool.stat(_force_local=True))
+print(datapool.exists(_force_local=True))
+print((datapool / 'doesnt exists').exists(_force_local=False))
