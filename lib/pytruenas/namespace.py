@@ -78,5 +78,9 @@ class Namespace:
             exclude = (idkey, *(opts.get("create_exclude") or []))
             fields = {name: val for name, val in fields.items() if name not in exclude}
             result = self.create(fields)
+            
+        wait = opts.get('wait', True)
+        if isinstance(result, int) and wait is None or wait:
+            result = self._client.api.core.job_wait(result, job=True)
 
         return result
