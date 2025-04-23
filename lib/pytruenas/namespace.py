@@ -84,17 +84,20 @@ class Namespace:
                     raise ioerror(e) if _ioerror else e from None
 
     if not _ty.TYPE_CHECKING:
-
         @cache
         def __getattr__(self, name: str) -> "Namespace":
             if isinstance(name, str) and not name.startswith("_"):
-                return Namespace(self._client, self._namespace, name.removesuffix("_"))
+                return self[name.removesuffix("_")]
             else:
                 super().__getattribute__(name)
 
     else:
 
         def __getattr__(self, name: str) -> "Namespace": ...
+
+    @cache
+    def __getitem__(self, name:str) -> "Namespace":
+         return Namespace(self._client, self._namespace, name)
 
     def _query(self, *__opts: dict | _q.Option, **filter) -> list[dict[str]]:
         opts = _q.Option.options(*__opts)

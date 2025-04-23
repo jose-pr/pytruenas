@@ -64,7 +64,7 @@ class Credentials(metaclass=_CredentialsMeta):
 
     def login(self, client: "TrueNASClient"):
         if self.METHOD:
-            return client.api.auth(*self._args(), _method=self.METHOD)
+            return client.api.auth[self.METHOD](*self._args())
         return None
 
     @staticmethod
