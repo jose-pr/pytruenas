@@ -1,5 +1,6 @@
 import pathlib as _pathlib
 import typing as _ty
+import io as _io
 
 if _ty.TYPE_CHECKING:
     from .. import TrueNASClient
@@ -13,10 +14,7 @@ from . import api
 from . import local
 from . import sftp
 
-ACCESSORS = {
-    _n: _v
-    for _n, _v in globals().items() if not _n.startswith('_')
-}
+ACCESSORS = {_n: _v for _n, _v in globals().items() if not _n.startswith("_")}
 
 
 class Path(_Path):
@@ -54,7 +52,6 @@ class Path(_Path):
         return self._with_path(self._path.__rtruediv__(key))
 
     def _fsmethod(self, name: str):
-        err = NotImplementedError
         for method in self._methods:
             try:
                 fs = ACCESSORS[method]
@@ -65,9 +62,8 @@ class Path(_Path):
 
                 return method
             except (AttributeError, NotImplementedError, KeyError):
-                err = err.__class__
                 pass
-        return err
+        return NotImplemented
 
     def __getattr__(self, name: str):
 
@@ -81,8 +77,8 @@ class Path(_Path):
         else:
             attr = self._fsmethod(name)
 
-        if attr is NotImplementedError:
-            raise NotImplementedError(name)
+        if attr is NotImplemented:
+            raise AttributeError(name)
 
         if callable(attr):
 
@@ -110,7 +106,58 @@ class Path(_Path):
             data = encode()
         return self.write_bytes(data)
 
-    def chmod(self, mode: int | str):
+    def read(self):
+        self.read_bytes()
+
+    def chmod(self, mode: int | str, *args, **kwargs):
         if isinstance(mode, str):
             mode = int(mode, 8)
-        return self._fsmethod("chmod")(mode)
+        return self._fsmethod("chmod")(mode, *args, **kwargs)
+
+    def open(
+        self,
+        mode: str = "r",
+        buffering=-1,
+        encoding: str = None,
+        errors: str = None,
+        newline=None,
+        *args,
+        **kwargs,
+    ):
+        method = self._fsmethod("open")
+        if method is NotImplemented:
+            raise NotImplementedError('open')
+        try:
+            return method(mode, buffering, encoding, errors, newline, *args, **kwargs)
+        except (NotImplementedError, TypeError) as e:
+            fh = method(mode +'b' if 'b' not in mode else mode, buffering, *args, **kwargs)
+            if 'b' not in mode:
+                fh = _io.TextIOWrapper(fh, encoding, errors, newline)
+            return fh
+
+    def read_text(self, encoding: str = None, errors: str = None, *args, **kwargs):
+        method = self._fsmethod("read_text")
+        if method is not NotImplemented:
+            return method(encoding, errors, *args, **kwargs)
+        return _io.TextIOWrapper(
+            _io.BytesIO(self.read_bytes()), encoding=encoding, errors=errors
+        ).read()
+
+    def write_text(
+        self,
+        data: str,
+        encoding: str = None,
+        errors: str = None,
+        newline=None,
+        *args,
+        **kwargs,
+    ):
+        method = self._fsmethod("write_text")
+        if method is not NotImplemented:
+            return method(data, encoding, errors, newline, *args, **kwargs)
+        buffer = _io.TextIOWrapper(
+            _io.BytesIO(), encoding=encoding, errors=errors, newline=newline
+        )
+        buffer.write(data)
+        buffer.seek(0)
+        return self.write_bytes(buffer)

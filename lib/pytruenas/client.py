@@ -79,7 +79,9 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
             if self.autologin:
                 self.login()
             else:
-                self._conn = _conn.Client(self._api.uri, verify_ssl=self.sslverify, py_exceptions=True)
+                self._conn = _conn.Client(
+                    self._api.uri, verify_ssl=self.sslverify, py_exceptions=True
+                )
         return self._conn
 
     def login(self, creds: _auth.Credentials = None):
@@ -93,7 +95,9 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
     def api(self) -> "ApiVersion":
         return Namespace(self)
 
-    def upload(self, file: str | bytes, method: str, *params, token=None, wait=True):
+    def upload(
+        self, file: str | bytes, method: str, *params, token=None, wait=True, **kwargs
+    ):
         client: "TrueNASClient[Current]" = self
 
         scheme = "https" if client._api.scheme == "wss" else "http"
@@ -103,13 +107,13 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
             file = file.encode()
 
         if not token:
-            token = client.api.auth.generate_token(5, "params", False)
+            token = client.api.auth.generate_token(5, {}, False, **kwargs)
 
         resp = _req.post(
             target.uri,
             headers={"Authorization": f"Token {token}"},
             verify=client.sslverify,
-            files={"data": _js.dumps(data).encode(), file: file},
+            files={"data": _js.dumps(data).encode(), 'file': file},
         )
         jobid = resp.json()["job_id"]
         if wait:
@@ -118,14 +122,20 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
         return jobid
 
     def download(
-        self, method: str, *attrs, filename: str = None, buffered=False, wait=True
+        self,
+        method: str,
+        *args,
+        filename: str = None,
+        buffered=False,
+        wait=True,
+        **kwargs,
     ):
         client: "TrueNASClient[Current]" = self
 
         scheme = "https" if client._api.scheme == "wss" else "http"
 
         jobid, link = client.api.core.download(
-            method, *attrs, filename=filename or "download"
+            method, args, filename or "download", **kwargs
         )
 
         target = client._api._replace(scheme=scheme, path=link, port=0)
