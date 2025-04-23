@@ -126,38 +126,28 @@ class Path(_Path):
     ):
         method = self._fsmethod("open")
         if method is NotImplemented:
-            raise NotImplementedError('open')
+            raise NotImplementedError("open")
         try:
             return method(mode, buffering, encoding, errors, newline, *args, **kwargs)
         except (NotImplementedError, TypeError) as e:
-            fh = method(mode +'b' if 'b' not in mode else mode, buffering, *args, **kwargs)
-            if 'b' not in mode:
+            fh = method(
+                mode + "b" if "b" not in mode else mode, buffering, *args, **kwargs
+            )
+            if "b" not in mode:
                 fh = _io.TextIOWrapper(fh, encoding, errors, newline)
             return fh
-
-    def read_text(self, encoding: str = None, errors: str = None, *args, **kwargs):
-        method = self._fsmethod("read_text")
+        
+    
+def _makeproxy(name:str):
+    defaultmethod = getattr(_pathlib.Path, name)
+    def proxy(self:Path, *args, **kwargs):
+        method = self._fsmethod(name)
         if method is not NotImplemented:
-            return method(encoding, errors, *args, **kwargs)
-        return _io.TextIOWrapper(
-            _io.BytesIO(self.read_bytes()), encoding=encoding, errors=errors
-        ).read()
+            return method(*args, **kwargs)
 
-    def write_text(
-        self,
-        data: str,
-        encoding: str = None,
-        errors: str = None,
-        newline=None,
-        *args,
-        **kwargs,
-    ):
-        method = self._fsmethod("write_text")
-        if method is not NotImplemented:
-            return method(data, encoding, errors, newline, *args, **kwargs)
-        buffer = _io.TextIOWrapper(
-            _io.BytesIO(), encoding=encoding, errors=errors, newline=newline
-        )
-        buffer.write(data)
-        buffer.seek(0)
-        return self.write_bytes(buffer)
+        return defaultmethod(self, *args, **kwargs)
+    return proxy
+
+
+for _method in ['read_bytes', 'read_text', 'write_bytes', 'write_text']:
+    setattr(Path, _method, _makeproxy(_method))
