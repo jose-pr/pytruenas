@@ -63,7 +63,6 @@ def open(path: "Path", mode: _ty.Literal["rb"] | _ty.Literal["wb"] | _ty.Literal
     else:
         return _ApiFileHandle(path, mode == "ab")
 
-
 class _ApiFileHandle(_io.IOBase):
     def __init__(self, file: "Path", append: bool):
         super().__init__()

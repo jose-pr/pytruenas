@@ -23,6 +23,8 @@ client.install_sshcreds()
 
 testfile.write_bytes(b'test data 1234')
 print(testfile.read_text())
+print(testfile.stat())
+print(TrueNASClient().path(testfile, methods='local').stat())
 with testfile.open('wb') as fh:
     fh.write(b'test2')
 with testfile.open('rb') as fh:
