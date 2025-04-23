@@ -3,8 +3,10 @@ from pytruenas import TrueNASClient, Credentials, fs
 import os, sys
 import logging
 
+import urllib3
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-print(fs.ACCESSORS)
+
 handler = logging.StreamHandler(sys.stderr)
 logging.getLogger().addHandler(handler)
 
@@ -13,11 +15,21 @@ tn_creds = Credentials.from_env()
 client = TrueNASClient(tn_host, tn_creds, sslverify=False)
 client.logger.setLevel(logging.DEBUG)
 
-client.install_sshcreds()
 
 datapool = client.path('/mnt/data', methods='local')
+testfile = client.path('/mnt/data/testfile', methods = 'api')
 
-print(datapool)
+testfile.write_bytes(b'test data 1234')
+print(testfile.read_text())
+with testfile.open('wb') as fh:
+    fh.write(b'test2')
+with testfile.open('rb') as fh:
+    print(fh.read())
+with testfile.open('w') as fh:
+    fh.write('test3')
+with testfile.open('r') as fh:
+    print(fh.read())
+exit()
 
 print(datapool.parent)
 print(datapool.stat(_force_local=True))

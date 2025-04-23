@@ -47,11 +47,29 @@ class Namespace:
         _tries=1,
         _method: str = None,
         _ioerror=False,
+        _filetransfer: bool | bytes = False,
         **kwds,
     ):
         method = self._namespace
         if _method:
             method = f"{method}.{_method}"
+        if _filetransfer is True:
+            return self._client.download(
+                method,
+                *args,
+                _ioerror=_ioerror,
+                filename=kwds.pop("filename", None),
+                wait=kwds.pop("wait", None),
+            )
+        elif isinstance(_filetransfer, (bytes, bytearray, memoryview)):
+            return self._client.upload(
+                _filetransfer,
+                method,
+                *args,
+                _ioerror=_ioerror,
+                token=kwds.pop("token", None),
+                wait=kwds.pop("wait", None),
+            )
         while _tries > 0:
             try:
                 self._client.logger.trace(f"Calling method: {method} args: {args}")
