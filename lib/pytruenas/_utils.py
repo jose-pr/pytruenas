@@ -10,9 +10,12 @@ import typing as _ty
 
 T = _ty.TypeVar("T")
 
-_Dict = dict[str, T]
 import re as _re
+import pathlib as _path
 
+STAT_FIELDS: tuple[str] = tuple(
+    _re.findall(r"(st_[^=]*)=", str(_path.Path(__file__).stat()))
+)
 
 def classname(name: "str") -> str:
     std = _re.sub(r"[-\s_]+", "_", name)

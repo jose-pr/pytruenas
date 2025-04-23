@@ -17,7 +17,9 @@ client.logger.setLevel(logging.DEBUG)
 
 
 datapool = client.path('/mnt/data', methods='local')
-testfile = client.path('/mnt/data/testfile', methods = 'api')
+testfile = client.path('/mnt/data/testfile', methods = 'sftp')
+
+client.install_sshcreds()
 
 testfile.write_bytes(b'test data 1234')
 print(testfile.read_text())
