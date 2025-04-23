@@ -58,8 +58,7 @@ class Namespace:
                 method,
                 *args,
                 _ioerror=_ioerror,
-                filename=kwds.pop("filename", None),
-                wait=kwds.pop("wait", None),
+                **kwds,
             )
         elif isinstance(_filetransfer, (bytes, bytearray, memoryview)):
             return self._client.upload(
@@ -67,8 +66,7 @@ class Namespace:
                 method,
                 *args,
                 _ioerror=_ioerror,
-                token=kwds.pop("token", None),
-                wait=kwds.pop("wait", None),
+                **kwds,
             )
         while _tries > 0:
             try:
