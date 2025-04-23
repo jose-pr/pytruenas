@@ -1,19 +1,23 @@
 import typing as _ty
-import pathlib as _pathlib
+from pathlib import Path as _LocalPath
+import os as _os
 
 if _ty.TYPE_CHECKING:
-    from .. import TrueNASClient as _Client
-    from pathlib import PosixPath as _Path
+    from . import Path
 
-_SAMPLE = _pathlib.Path(__file__)
+import sys as _sys
 
-
-def __getattr__(name: str):
-    getattr(_SAMPLE, name)
-
-    def attr(path: "_Path", *args, client: "_Client", _force_local=False, **kwargs):
-        if not client._api.is_local and not _force_local:
+def _make_proxy(func:_ty.Callable):
+    def _proxy(path: "Path", *args, _force_local=False, **kwargs):
+        if not path._client._api.is_local and not _force_local:
             raise NotImplementedError()
-        return getattr(_pathlib.Path(path), name)(*args, **kwargs)
+        return func(_LocalPath(path._path), *args, **kwargs)
+    return _proxy
 
-    return attr
+for _attr in dir(_LocalPath):
+    _method = getattr(_LocalPath, _attr)
+    if callable(_method) and not _attr.startswith('_'):
+        setattr(_sys.modules[__name__], _attr, _make_proxy(_method))
+
+def chown(path: 'Path', uid:int, gid:int,*, follow_symlinks:bool=True):
+    return _os.chown(path._path, uid, gid, follow_symlinks=follow_symlinks)

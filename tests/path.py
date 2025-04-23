@@ -1,8 +1,10 @@
 #!/bin/python3
-from pytruenas import TrueNASClient, Credentials
+from pytruenas import TrueNASClient, Credentials, fs
 import os, sys
 import logging
 
+
+print(fs.ACCESSORS)
 handler = logging.StreamHandler(sys.stderr)
 logging.getLogger().addHandler(handler)
 

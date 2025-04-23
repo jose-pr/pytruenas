@@ -25,7 +25,7 @@ from . import _conn, _utils
 from .utils.target import Target as _TGT
 from . import auth as _auth
 from .namespace import Namespace
-from .path import Path
+from .fs import Path
 
 FileHandle = None | int | _ty.IO
 PathLike = str | PurePath
