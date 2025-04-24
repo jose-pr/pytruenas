@@ -80,7 +80,7 @@ class _ApiFileHandle(_io.IOBase):
         return True
 
     def write(self, data):
-        if not isinstance(data, bytes):
+        if not isinstance(data, (memoryview, bytes, bytearray)):
             raise TypeError("argument must be a bytes-like object")
         self._buffer.extend(data)
         return len(data)
