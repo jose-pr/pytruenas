@@ -12,7 +12,8 @@
             "console": "integratedTerminal",
             "cwd": "${workspaceFolder}",
             "env": {
-                "PYTHONPATH": "${workspaceFolder}/lib"
+                "PYTHONPATH": "${workspaceFolder}/lib",
+                "VENDORED_TRUENAS_API_CLIENT": "1"
             },
             "envFile": "${workspaceFolder}/.pyenv",
             "justMyCode": false
