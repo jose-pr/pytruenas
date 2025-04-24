@@ -59,7 +59,7 @@ def open(path: "Path", mode: _ty.Literal["rb"] | _ty.Literal["wb"] | _ty.Literal
     if buffering != -1:
         pass
     if mode == "rb":
-        return _io.BytesIO(read_bytes(path))
+        return _io.BytesIO(_read(path))
     else:
         return _ApiFileHandle(path, mode == "ab")
 
@@ -71,6 +71,9 @@ class _ApiFileHandle(_io.IOBase):
         self.append = append
 
     def readable(self):
+        return False
+    
+    def seekable(self):
         return False
 
     def writable(self):
@@ -88,25 +91,28 @@ class _ApiFileHandle(_io.IOBase):
     def close(self):
         if self.closed:
             return
-        write_bytes(self.file, self._buffer, append=self.append)
+        _write(self.file, self._buffer, append=self.append)
         return super().close()
 
 
-def read_bytes(path: "Path"):
+def _read(path: "Path"):
     data = path._client.api.filesystem.get(
         path.as_posix(), _filetransfer=True, wait=True, _ioerror=True
     )
     return data
 
 
-def write_bytes(path: "Path", data: bytes, append=False, mode: int = None):
+def _write(path: "Path", data: bytes, append=False, mode: int = None):
     if hasattr(data, "read"):
         data = data.read()
     elif not isinstance(data, bytes):
         data = bytes(data)
+    opts = {"append": not not append }
+    if mode is not None:
+        opts['mode'] = int(mode, 8)
     result = path._client.api.filesystem.put(
         path.as_posix(),
-        {"append": append, "mode": mode},
+        opts,
         _filetransfer=data,
         _ioerror=True,
         wait=True,
