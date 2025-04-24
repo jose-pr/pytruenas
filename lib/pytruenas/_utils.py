@@ -108,3 +108,6 @@ def async_to_sync(awaitable):
         asyncio.set_event_loop(loop)
 
     return loop.run_until_complete(awaitable)
+
+def isbytelike(obj):
+    return  isinstance(obj, (memoryview, bytes, bytearray))
