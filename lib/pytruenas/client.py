@@ -113,7 +113,7 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
             target.uri,
             headers={"Authorization": f"Token {token}"},
             verify=client.sslverify,
-            files={"data": _js.dumps(data).encode(), 'file': file},
+            files={"data": _js.dumps(data).encode(), "file": file},
         )
         jobid = resp.json()["job_id"]
         if wait:
@@ -251,8 +251,8 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
         stderr: FileHandle = None,
         cwd: PathLike = None,
         env: _ty.Mapping | None = None,
-        capture_output: str | bool = False,
-        check: bool = False,
+        capture_output: str | bool = True,
+        check: bool = True,
         encoding: str | None = None,
         errors: str | None = None,
         input: Input | None = None,
@@ -308,23 +308,32 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
 
         if input:
             if stdin is not None:
-                raise AttributeError("stdin")
-            stdin = input
+                raise ValueError("stdin")
+
+        if _utils.isbytelike(stdin):
+            input = stdin
+            stdin = None
 
         if hasattr(stdin, "encode"):
             stdin = stdin.encode()
 
-        if stdin:
-            try:
-                stdin = _io.BytesIO(stdin)
-            except:
-                pass
-
         match self.shell.scheme:
             case "local":
+                if stdin:
+                    try:
+                        readme = stdin.fileno() == -1
+                    except (OSError, AttributeError):
+                        if not hasattr(stdin, "read"):
+                            raise TypeError(stdin)
+                        readme = True
+                    if readme:
+                        input = stdin.read()
+                        stdin = None
+
                 result = subprocess.run(
                     command,
                     bufsize=bufsize,
+                    input=input,
                     stdin=stdin,
                     stdout=stdout,
                     stderr=stderr,
@@ -344,6 +353,9 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
                     stdout = open(_os.dup(_sys.stdout.fileno()), _sys.stdout.mode)
                 if stderr in (None, _sys.stderr):
                     stderr = open(_os.dup(_sys.stderr.fileno()), _sys.stderr.mode)
+
+                if input:
+                    stdin = _io.BytesIO(input)
 
                 result = _utils.async_to_sync(
                     self.ssh.run(
