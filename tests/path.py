@@ -17,6 +17,8 @@ client.logger.setLevel(logging.DEBUG)
 
 
 datapool = client.path('/mnt/data', methods='local')
+datapool2 = client.path('/mnt/data', methods='auto')
+print(repr(datapool), repr(datapool2))
 testfile = client.path('/mnt/data/testfile', methods = 'api')
 
 client.install_sshcreds()

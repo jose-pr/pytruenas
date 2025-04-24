@@ -1,6 +1,7 @@
 import pathlib as _pathlib
 import typing as _ty
 import io as _io
+import functools as _ftools
 
 if _ty.TYPE_CHECKING:
     from .. import TrueNASClient
@@ -9,6 +10,8 @@ else:
 
     class _Path: ...
 
+
+from ..utils.target import Target as _Tgt
 
 from . import api
 from . import local
@@ -33,12 +36,25 @@ class Path(_Path):
         self._client = client
         self._path = _pathlib.PurePosixPath(*args)
 
+    @_ftools.cache
     def __str__(self):
         return self._path.as_posix()
 
+    @_ftools.cache
     def __repr__(self):
-        return f"{self.__class__.__name__}(client={self._client._api.host},methods={self._methods})"
+        _src = self._client._api
+        uri = _Tgt(
+            scheme="+".join(self._methods),
+            username="",
+            password="",
+            host=_src.host,
+            port=0,
+            path=self._path.as_posix(),
+        ).uri
 
+        return f"{self.__class__.__name__}({uri})"
+
+    @_ftools.cache
     def __fspath__(self):
         return self._path.as_posix()
 
@@ -65,6 +81,7 @@ class Path(_Path):
                 pass
         return NotImplemented
 
+    @_ftools.cache
     def __getattr__(self, name: str):
 
         if name.startswith("_"):
@@ -86,8 +103,8 @@ class Path(_Path):
                 val = attr(*args, **kwargs)
                 return (
                     self._with_path(val)
-                    if isinstance(attr, _pathlib.PurePath)
-                    and not isinstance(attr, self.__class__)
+                    if isinstance(val, _pathlib.PurePath)
+                    and not isinstance(val, self.__class__)
                     else val
                 )
 
@@ -136,18 +153,20 @@ class Path(_Path):
             if "b" not in mode:
                 fh = _io.TextIOWrapper(fh, encoding, errors, newline)
             return fh
-        
-    
-def _makeproxy(name:str):
+
+
+def _makeproxy(name: str):
     defaultmethod = getattr(_pathlib.Path, name)
-    def proxy(self:Path, *args, **kwargs):
+
+    def proxy(self: Path, *args, **kwargs):
         method = self._fsmethod(name)
         if method is not NotImplemented:
             return method(*args, **kwargs)
 
         return defaultmethod(self, *args, **kwargs)
+
     return proxy
 
 
-for _method in ['read_bytes', 'read_text', 'write_bytes', 'write_text', 'stat']:
+for _method in ["read_bytes", "read_text", "write_bytes", "write_text", "stat"]:
     setattr(Path, _method, _makeproxy(_method))
