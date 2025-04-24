@@ -61,7 +61,7 @@ class Namespace:
                 _ioerror=_ioerror,
                 **kwds,
             )
-        elif _utils.isbytelike(_filetransfer) or hasattr(_filetransfer, 'read'):
+        elif _utils.isbytelike(_filetransfer) or hasattr(_filetransfer, "read"):
             return self._client.upload(
                 _filetransfer,
                 method,
@@ -71,7 +71,7 @@ class Namespace:
             )
         elif _filetransfer:
             raise TypeError(_filetransfer)
-        
+
         while _tries > 0:
             try:
                 self._client.logger.trace(f"Calling method: {method} args: {args}")
@@ -88,6 +88,7 @@ class Namespace:
                     raise ioerror(e) if _ioerror else e from None
 
     if not _ty.TYPE_CHECKING:
+
         @cache
         def __getattr__(self, name: str) -> "Namespace":
             if isinstance(name, str) and not name.startswith("_"):
@@ -100,42 +101,58 @@ class Namespace:
         def __getattr__(self, name: str) -> "Namespace": ...
 
     @cache
-    def __getitem__(self, name:str) -> "Namespace":
-         return Namespace(self._client, self._namespace, name)
+    def __getitem__(self, name: str) -> "Namespace":
+        return Namespace(self._client, self._namespace, name)
 
     def _query(self, *__opts: dict | _q.Option, **filter) -> list[dict[str]]:
         opts = _q.Option.options(*__opts)
         filter = _q.filter_from_kwargs(**filter)
         return self.query(filter, opts)
 
-    def _get(self, __id = None, **filter) -> dict[str]:
+    def _get(self, __id=None, **filter) -> dict[str]:
         if __id is not None and filter:
             raise ValueError(filter)
-        
+
         if __id is not None:
             try:
                 return self.get_instance(__id, _ioerror=True)
             except FileNotFoundError as e:
                 return None
-        
+
         result = self._query({"limit": 1}, **filter)
         if result:
             return result[0]
 
     def _upsert(
-        self, __unique: str | _ty.Sequence[str], *__opts: dict | _q.Option, **fields
+        self,
+        __selector: int | str | _ty.Sequence[str] = None,
+        *__opts: dict | _q.Option,
+        **fields,
     ) -> dict[str]:
         opts = _q.Option.options(*__opts)
         idkey = opts.get("idkey") or "id"
-        unique = __unique or idkey
+        selectors = __selector or []
         fields = {name: val for name, val in fields.items() if val is not _q.EXCLUDE}
-        if isinstance(unique, str):
-            unique = (unique,)
-        current = self._get(**{name: fields[name] for name in unique})
-        if current:
-            exclude = (idkey, unique, *(opts.get("update_exclude") or []))
+        _id = None
+
+        if isinstance(selectors, str):
+            selectors = (selectors,)
+        elif isinstance(selectors, int):
+            _id = selectors
+            selectors = []
+
+        if _id is None and selectors:
+            current = self._get(**{name: fields[name] for name in selectors})
+            if current:
+                _id = current[idkey]
+        if _id is None and selectors is None:
+            result = self.update(fields)
+        elif _id is not None:
+            exclude = (idkey, *selectors, *(opts.get("update_exclude") or []))
             fields = {name: val for name, val in fields.items() if name not in exclude}
             result = self.update(current[idkey], fields)
+            if result == _id:
+                result = self._get(_id)
         else:
             exclude = (idkey, *(opts.get("create_exclude") or []))
             fields = {name: val for name, val in fields.items() if name not in exclude}
