@@ -131,6 +131,7 @@ class Namespace:
     ) -> dict[str]:
         opts = _q.Option.options(*__opts)
         idkey = opts.get("idkey") or "id"
+        create_if_missing = True
         selectors = __selector or []
         fields = {name: val for name, val in fields.items() if val is not _q.EXCLUDE}
         _id = None
@@ -140,23 +141,35 @@ class Namespace:
         elif isinstance(selectors, int):
             _id = selectors
             selectors = []
+        
+        filter = {}
 
-        if _id is None and selectors:
-            current = self._get(**{name: fields[name] for name in selectors})
+        for selector in selectors:
+            if isinstance(selector, bool):
+                create_if_missing = selector
+            else:
+                filter[selector] = fields[selector]
+            
+
+        if _id is None and filter:
+            current = self._get(**filter)
             if current:
                 _id = current[idkey]
-        if _id is None and selectors is None:
+
+        if _id is None and not filter:
             result = self.update(fields)
         elif _id is not None:
-            exclude = (idkey, *selectors, *(opts.get("update_exclude") or []))
+            exclude = (idkey, *filter.keys(), *(opts.get("update_exclude") or []))
             fields = {name: val for name, val in fields.items() if name not in exclude}
             result = self.update(current[idkey], fields)
             if result == _id:
                 result = self._get(_id)
-        else:
+        elif create_if_missing:
             exclude = (idkey, *(opts.get("create_exclude") or []))
             fields = {name: val for name, val in fields.items() if name not in exclude}
             result = self.create(fields)
+        else:
+            result = None
 
         wait = opts.get("wait", True)
         if isinstance(result, int) and (wait is None or wait):
