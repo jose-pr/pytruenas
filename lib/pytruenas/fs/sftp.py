@@ -27,6 +27,10 @@ def stat(path: "Path"):
     )
 
 
+def chmod(path: "Path", mode: int):
+    return _utils.async_to_sync(path._client.sftp.chmod(path.as_posix()))
+
+
 def chown(
     path: "Path",
     uid: int,
