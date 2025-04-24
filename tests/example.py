@@ -12,6 +12,8 @@ tn_creds = Credentials.from_env()
 client = TrueNASClient(tn_host, tn_creds, sslverify=False)
 client.logger.setLevel(logging.TRACE)
 
+client.api.keychaincredential._get(100)
+
 client.install_sshcreds()
 
 check = client.run('ls -lh', cwd='/mnt/')

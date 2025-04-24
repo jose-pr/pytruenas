@@ -5,7 +5,7 @@ import time as _time
 
 import re as _re
 
-from . import _conn
+from . import _conn, _utils
 from .utils import query as _q
 
 if _ty.TYPE_CHECKING:
@@ -15,7 +15,7 @@ _ERRNO_PATTERN = _re.compile(r"^\[([^]]*)\]\s*(.*)")
 
 
 def ioerror(error: _conn.ClientException):
-    match = _ERRNO_PATTERN.match(error.args[0])
+    match = _ERRNO_PATTERN.match(error.error)
     if match:
         name = match[1]
         msg = match[2]
@@ -35,6 +35,7 @@ class Namespace:
         self._client = client
         self._namespace = ".".join([n for n in name if n])
 
+    @cache
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}({self._client._api}/{self._namespace.replace('.','/')})"
 
@@ -60,7 +61,7 @@ class Namespace:
                 _ioerror=_ioerror,
                 **kwds,
             )
-        elif isinstance(_filetransfer, (bytes, bytearray, memoryview)):
+        elif _utils.isbytelike(_filetransfer) or hasattr(_filetransfer, 'read'):
             return self._client.upload(
                 _filetransfer,
                 method,
@@ -68,6 +69,9 @@ class Namespace:
                 _ioerror=_ioerror,
                 **kwds,
             )
+        elif _filetransfer:
+            raise TypeError(_filetransfer)
+        
         while _tries > 0:
             try:
                 self._client.logger.trace(f"Calling method: {method} args: {args}")
@@ -104,7 +108,16 @@ class Namespace:
         filter = _q.filter_from_kwargs(**filter)
         return self.query(filter, opts)
 
-    def _get(self, **filter) -> dict[str]:
+    def _get(self, __id = None, **filter) -> dict[str]:
+        if __id is not None and filter:
+            raise ValueError(filter)
+        
+        if __id is not None:
+            try:
+                return self.get_instance(__id, _ioerror=True)
+            except FileNotFoundError as e:
+                return None
+        
         result = self._query({"limit": 1}, **filter)
         if result:
             return result[0]

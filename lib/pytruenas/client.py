@@ -96,7 +96,7 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
 
     def _openwss(self):
         return _conn.Client(
-            self._api.uri, verify_ssl=self.sslverify, py_exceptions=True
+            self._api.uri, verify_ssl=self.sslverify, py_exceptions=False
         )
 
     @property
