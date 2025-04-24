@@ -53,7 +53,28 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
         shell: str = None,
         logger: logging.Logger = None,
     ) -> None:
-        self._api = _TGT.parse(target or "localhost", scheme="wss", path="/api/current")
+        self._api = _TGT.parse(
+            target or "localhost", scheme="ws" if not target else "wss"
+        )
+
+        if not self._api.path:
+            path = "/api/current"
+            for path in ["/api/current", "/websocket"]:
+                resp = _req.get(
+                    _TGT(
+                        self._api.scheme.replace("ws", "http"),
+                        username=None,
+                        password=None,
+                        host=self._api.host,
+                        port=self._api.port,
+                        path=path,
+                    ).uri,
+                    verify=False,
+                )
+                if resp.status_code == 400:
+                    self._api = self._api._replace(path=path)
+                    break
+
         if self._api.username or self._api.password:
             if not creds:
                 creds = f"{self._api.username}:{self._api.password}"
@@ -73,21 +94,24 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
             logger = logging.getLogger("pytruenas")
         self.logger = logging.getLogger(logger) if isinstance(logger, str) else logger
 
+    def _openwss(self):
+        return _conn.Client(
+            self._api.uri, verify_ssl=self.sslverify, py_exceptions=True
+        )
+
     @property
     def websocket(self):
         if self._conn is None or self._conn._closed.is_set():
             if self.autologin:
                 self.login()
             else:
-                self._conn = _conn.Client(
-                    self._api.uri, verify_ssl=self.sslverify, py_exceptions=True
-                )
+                self._conn = self._openwss()
         return self._conn
 
     def login(self, creds: _auth.Credentials = None):
         if self._conn and not self._conn._closed.is_set():
             self._conn.close()
-        self._conn = _conn.Client(self._api.uri, verify_ssl=self.sslverify)
+        self._conn = self._openwss()
         creds = creds or self._creds
         creds.login(self)
 
@@ -257,6 +281,7 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
         errors: str | None = None,
         input: Input | None = None,
         timeout: float | None = None,
+        loglevel: int = logging.TRACE,
     ) -> subprocess.CompletedProcess:
 
         if not executable:
@@ -269,7 +294,6 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
                     else:
                         executable = self.api.user._get(username="root")["shell"]
                 except Exception as e:
-                    print(e)
                     self.logger.warning(
                         "Count not get default shell for root, using bash as default"
                     )
@@ -291,7 +315,8 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
             cwd = PurePosixPath(cwd).as_posix()
 
         script = ";".join(script)
-        self.logger.trace(f"Running Command: {script}")
+        if loglevel:
+            self.logger.log(loglevel, f"Running Command: {script}")
 
         command = [executable, "-c", script]
 

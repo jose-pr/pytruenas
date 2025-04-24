@@ -21,7 +21,6 @@ datapool2 = client.path('/mnt/data', methods='auto')
 print(repr(datapool), repr(datapool2))
 testfile = client.path('/mnt/data/testfile', methods = 'api')
 
-client.install_sshcreds()
 
 testfile.write_bytes(b'test data 1234')
 print(testfile.read_text())
@@ -36,6 +35,8 @@ with testfile.open('w') as fh:
 with testfile.open('r') as fh:
     print(fh.read())
 exit()
+client.install_sshcreds()
+
 
 print(datapool.parent)
 print(datapool.stat(_force_local=True))
