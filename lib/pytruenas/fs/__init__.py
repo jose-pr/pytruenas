@@ -97,7 +97,8 @@ class Path(_Path):
             attr = self._fsmethod(name)
 
         if attr is NotImplemented:
-            raise AttributeError(name)
+            _default = getattr(_pathlib.Path, name)
+            raise NotImplementedError(name)
 
         if callable(attr):
 
