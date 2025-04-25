@@ -39,9 +39,23 @@ for backend in fs.BACKENDS:
     testfile.write_text(f"Test of backend {backend}")
     print(testfile.read_text())
     print(testfile.stat())
+
+
+    try:
+        linkto = testfile.with_suffix('.link')
+        linkto.with_backend('local').unlink(True)
+        linkto.symlink_to(testfile)
+        print(linkto.is_symlink(), linkto.read_text())
+    except NotImplementedError as e:
+        print(f"Symlink not supported for {backend}")
+
     try:
         testfile.unlink()
     except NotImplementedError as e:
         print(f"unlink not supported for {backend}")
 
+datapool = datapool.with_backend('sftp')
+for file in datapool.iterdir():
+    print(file, file.is_symlink(), file.is_dir(), file.is_file())
 
+print((datapool / 'unknown').is_symlink())

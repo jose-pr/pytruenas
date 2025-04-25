@@ -224,8 +224,7 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
         )
 
         keypair = client.api.keychaincredential._upsert(
-            "name",
-            ("update_exclude", ["type"]),
+            ("name", 'type'),
             type="SSH_KEY_PAIR",
             name=name,
             attributes={"private_key": private_key, "public_key": pubkey},

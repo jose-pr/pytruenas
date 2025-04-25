@@ -55,3 +55,5 @@ try:
     )
 except FileExistsError as e:
     print("SSH Key Pair exists", e.args[0])
+
+print(client.api.core.environ())
