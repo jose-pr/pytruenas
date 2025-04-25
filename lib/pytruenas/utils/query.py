@@ -1,9 +1,11 @@
 import typing as _ty
 
-class _Exclude:
-    ...
+
+class _Exclude: ...
+
 
 EXCLUDE = _Exclude()
+
 
 class QueryFilter:
 
@@ -64,7 +66,11 @@ class NIN(QueryFilter):
 
 
 def filter_from_kwargs(**kwargs):
-    return [QueryFilter.filter(name, filter) for name, filter in kwargs.items()]
+    return [
+        QueryFilter.filter(name, filter)
+        for name, filter in kwargs.items()
+        if filter is not EXCLUDE
+    ]
 
 
 class Option:

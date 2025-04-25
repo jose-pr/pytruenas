@@ -4,6 +4,7 @@ import errno as _errno
 import time as _time
 
 import re as _re
+import enum as _enum
 
 from . import _conn, _utils
 from .utils import query as _q
@@ -26,6 +27,79 @@ def ioerror(error: _conn.ClientException):
             error = IOError(errno, msg)
 
     return error
+
+
+class DbAction(_enum.StrEnum):
+    CREATE = "create"
+    UPDATE = "update"
+    UPSERT = "upsert"
+
+    def execute(
+        __action,
+        __namespace: "Namespace",
+        __selector: int | str | _ty.Sequence[str] = None,
+        *__opts: dict | _q.Option,
+        **__fields,
+    ) -> dict[str]:
+        opts = _q.Option.options(*__opts)
+        idkey = opts.get("idkey") or "id"
+        fields = {name: val for name, val in __fields.items() if val is not _q.EXCLUDE}
+
+        if isinstance(__selector, str) or not isinstance(__selector, _ty.Iterable):
+            _id = __selector
+            selectors = {}
+        else:
+            _id = None
+            selectors = (
+                __selector
+                if isinstance(__selector, _ty.Mapping)
+                else {
+                    selector.removeprefix("!"): (
+                        _q.EXCLUDE if selector.startswith("!") else fields[selector]
+                    )
+                    for selector in __selector
+                }
+            )
+
+        if _id is None and selectors:
+            current = __namespace._get(**selectors)
+            if current:
+                _id = current[idkey]
+        else:
+            current = None
+
+        if _id is None and not selectors:
+            result = __namespace.update(fields)
+        elif _id not in (None, _q.EXCLUDE):
+            if __action not in (DbAction.UPDATE, DbAction.UPSERT):
+                raise FileExistsError(_id)
+            exclude = (idkey, *(opts.get("update_exclude") or []))
+            fields = {
+                name: val
+                for name, val in fields.items()
+                if name not in exclude and selectors.get(name) not in (val, _q.EXCLUDE)
+            }
+            if fields:
+                result = __namespace.update(_id, fields)
+            else:
+                result = None
+
+            if result == _id:
+                result = __namespace._get(_id)
+            elif result is None:
+                result = __namespace._get(_id) if not current else current
+        else:
+            if __action not in (DbAction.CREATE, DbAction.UPSERT):
+                raise FileNotFoundError(selectors)
+            exclude = (idkey, *(opts.get("create_exclude") or []))
+            fields = {name: val for name, val in fields.items() if name not in exclude}
+            result = __namespace.create(fields)
+
+        wait = opts.get("wait", True)
+        if isinstance(result, int) and (wait is None or wait):
+            result = __namespace._client.api.core.job_wait(result, job=True)
+
+        return result
 
 
 class Namespace:
@@ -109,13 +183,22 @@ class Namespace:
         filter = _q.filter_from_kwargs(**filter)
         return self.query(filter, opts)
 
-    def _get(self, __id=None, **filter) -> dict[str]:
-        if __id is not None and filter:
-            raise ValueError(filter)
+    def _get(
+        self, __id_or_filter: _ty.Mapping | int | str = None, **__filter
+    ) -> dict[str]:
+        if isinstance(__id_or_filter, _ty.Mapping):
+            id = None
+            filter = {**__id_or_filter}
+            filter.update(__filter)
+        else:
+            id = __id_or_filter
+            filter = __filter
+        if id is not None and filter:
+            raise ValueError(__filter)
 
-        if __id is not None:
+        if id is not None:
             try:
-                return self.get_instance(__id, _ioerror=True)
+                return self.get_instance(id, _ioerror=True)
             except FileNotFoundError as e:
                 return None
 
@@ -127,52 +210,22 @@ class Namespace:
         self,
         __selector: int | str | _ty.Sequence[str] = None,
         *__opts: dict | _q.Option,
-        **fields,
+        **__fields,
     ) -> dict[str]:
-        opts = _q.Option.options(*__opts)
-        idkey = opts.get("idkey") or "id"
-        create_if_missing = True
-        selectors = __selector or []
-        fields = {name: val for name, val in fields.items() if val is not _q.EXCLUDE}
-        _id = None
+        return DbAction.UPSERT.execute(self, __selector, *__opts, **__fields)
 
-        if isinstance(selectors, str):
-            selectors = (selectors,)
-        elif isinstance(selectors, int):
-            _id = selectors
-            selectors = []
-        
-        filter = {}
+    def _update(
+        self,
+        __selector: int | str | _ty.Sequence[str] = None,
+        *__opts: dict | _q.Option,
+        **__fields,
+    ) -> dict[str]:
+        return DbAction.UPDATE.execute(self, __selector, *__opts, **__fields)
 
-        for selector in selectors:
-            if isinstance(selector, bool):
-                create_if_missing = selector
-            else:
-                filter[selector] = fields[selector]
-            
-
-        if _id is None and filter:
-            current = self._get(**filter)
-            if current:
-                _id = current[idkey]
-
-        if _id is None and not filter:
-            result = self.update(fields)
-        elif _id is not None:
-            exclude = (idkey, *filter.keys(), *(opts.get("update_exclude") or []))
-            fields = {name: val for name, val in fields.items() if name not in exclude}
-            result = self.update(current[idkey], fields)
-            if result == _id:
-                result = self._get(_id)
-        elif create_if_missing:
-            exclude = (idkey, *(opts.get("create_exclude") or []))
-            fields = {name: val for name, val in fields.items() if name not in exclude}
-            result = self.create(fields)
-        else:
-            result = None
-
-        wait = opts.get("wait", True)
-        if isinstance(result, int) and (wait is None or wait):
-            result = self._client.api.core.job_wait(result, job=True)
-
-        return result
+    def _create(
+        self,
+        __selector: int | str | _ty.Sequence[str] = None,
+        *__opts: dict | _q.Option,
+        **__fields,
+    ) -> dict[str]:
+        return DbAction.CREATE.execute(self, __selector, *__opts, **__fields)
