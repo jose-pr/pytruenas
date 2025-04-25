@@ -94,7 +94,7 @@ def add_logging_level(name:str, level:int, force=False):
 import asyncio
 
 try:
-    import nest_asyncio
+    import nest_asyncio #type:ignore
 except ImportError:
     from .vendor import nest_asyncio
 
