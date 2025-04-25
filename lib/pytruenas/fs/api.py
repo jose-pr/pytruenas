@@ -12,6 +12,7 @@ def stat(path: "Path"):
     stat: dict = path._client.api.filesystem.stat(path.as_posix(), _ioerror=True)
     return _stat([stat.get(field.removeprefix("st_")) for field in _utils.STAT_FIELDS])
 
+
 def chown(
     path: "Path",
     uid: int,
@@ -23,7 +24,7 @@ def chown(
 ):
     if uid == -1:
         uid = None
-    elif gid == -1:
+    if gid == -1:
         gid = None
 
     if not follow_symlinks:
@@ -53,7 +54,11 @@ def mkdir(path: "Path", mode: int = 511, parents=False, exist_ok=False):
         mkdir(path.parent, mode, parents)
 
 
-def open(path: "Path", mode: _ty.Literal["rb"] | _ty.Literal["wb"] | _ty.Literal["ab"], buffering=-1):
+def open(
+    path: "Path",
+    mode: _ty.Literal["rb"] | _ty.Literal["wb"] | _ty.Literal["ab"],
+    buffering=-1,
+):
     if mode not in ["rb", "wb", "ab"]:
         raise NotImplementedError(mode)
     if buffering != -1:
@@ -62,6 +67,7 @@ def open(path: "Path", mode: _ty.Literal["rb"] | _ty.Literal["wb"] | _ty.Literal
         return _io.BytesIO(_read(path))
     else:
         return _ApiFileHandle(path, mode == "ab")
+
 
 class _ApiFileHandle(_io.IOBase):
     def __init__(self, file: "Path", append: bool):
@@ -72,7 +78,7 @@ class _ApiFileHandle(_io.IOBase):
 
     def readable(self):
         return False
-    
+
     def seekable(self):
         return False
 
@@ -107,9 +113,9 @@ def _write(path: "Path", data: bytes, append=False, mode: int = None):
         data = data.read()
     elif not isinstance(data, bytes):
         data = bytes(data)
-    opts = {"append": not not append }
+    opts = {"append": not not append}
     if mode is not None:
-        opts['mode'] = int(mode, 8)
+        opts["mode"] = int(mode, 8)
     result = path._client.api.filesystem.put(
         path.as_posix(),
         opts,
