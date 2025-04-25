@@ -54,7 +54,7 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
         logger: logging.Logger = None,
         path_backend: "str|_ty.Sequence[str]" = "auto",
     ) -> None:
-        self._api = _TGT.parse(target or "localhost", sheme="auto")
+        self._api = _TGT.parse(target or "localhost", scheme="auto")
         self.path_backend = path_backend
 
         if self._api.scheme == "auto":

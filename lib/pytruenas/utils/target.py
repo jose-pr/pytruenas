@@ -14,6 +14,9 @@ class Target(_ty.NamedTuple):
 
     @classmethod
     def parse(cls, connectionstring: str, resolve_port=True, **defaults):
+        for default in defaults:
+            if default not in cls._fields:
+                raise ValueError(default)
         if "://" not in connectionstring:
             connectionstring = (
                 f"{defaults.get('scheme') or 'http'}://{connectionstring or ''}"

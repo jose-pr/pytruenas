@@ -7,9 +7,11 @@ if _ty.TYPE_CHECKING:
 
 import sys as _sys
 
+FORCE_LOCAL=False
+
 def _make_proxy(func:_ty.Callable):
     def _proxy(path: "Path", *args, _force_local=False, **kwargs):
-        if not path._client._api.is_local and not _force_local:
+        if not FORCE_LOCAL and not path._client._api.is_local and not _force_local:
             raise NotImplementedError()
         return func(_LocalPath(path._path), *args, **kwargs)
     return _proxy

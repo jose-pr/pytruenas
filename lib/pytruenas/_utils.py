@@ -100,7 +100,10 @@ except ImportError:
 
 nest_asyncio.apply()
 
-def async_to_sync(awaitable):
+_T = _ty.TypeVar('_T')
+
+
+def async_to_sync(awaitable: _ty.Awaitable[_T])->_T:
     try:
         loop = asyncio.get_event_loop()
     except RuntimeError:
