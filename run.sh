@@ -7,4 +7,4 @@ set -o allexport
 source "$PROJECT_DIR/.pyenv"
 set +o allexport
 
-python3 "$1"
+python3 "$@"
