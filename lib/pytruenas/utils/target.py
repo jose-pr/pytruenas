@@ -13,7 +13,7 @@ class Target(_ty.NamedTuple):
     path: str
 
     @classmethod
-    def parse(cls, connectionstring: str, **defaults):
+    def parse(cls, connectionstring: str, resolve_port=True, **defaults):
         if "://" not in connectionstring:
             connectionstring = (
                 f"{defaults.get('scheme') or 'http'}://{connectionstring or ''}"
@@ -26,7 +26,7 @@ class Target(_ty.NamedTuple):
         host = parts.hostname or defaults.get('host') or ''
         port = int(parts.port or defaults.get("port") or 0)
         try:
-            if port == 0:
+            if port == 0 and resolve_port:
                 port = _socket.getservbyname(scheme)
         except OSError:
             pass

@@ -52,17 +52,37 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
         *,
         shell: str = None,
         logger: logging.Logger = None,
+        path_backend: "str|_ty.Sequence[str]" = "auto",
     ) -> None:
-        self._api = _TGT.parse(
-            target or "localhost", scheme="ws" if not target else "wss"
-        )
+        self._api = _TGT.parse(target or "localhost", sheme="auto")
+        self.path_backend = path_backend
+
+        if self._api.scheme == "auto":
+            resp = _req.get(
+                _TGT(
+                    scheme="http",
+                    username=None,
+                    password=None,
+                    host=self._api.host,
+                    port=self._api.port,
+                    path="",
+                ).uri,
+                verify=False,
+            )
+
+            self._api = self._api._replace(
+                scheme=(
+                    "wss"
+                    if _TGT.parse(resp.url, scheme="http").scheme == "https"
+                    else "ws"
+                )
+            )
 
         if not self._api.path:
-            path = "/api/current"
             for path in ["/api/current", "/websocket"]:
                 resp = _req.get(
                     _TGT(
-                        self._api.scheme.replace("ws", "http"),
+                        scheme=self._api.scheme.replace("ws", "http"),
                         username=None,
                         password=None,
                         host=self._api.host,
@@ -96,7 +116,9 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
 
     def _openwss(self):
         return _conn.Client(
-            self._api.uri, verify_ssl=self.sslverify, py_exceptions=False
+            None if self._api.is_local and not self._api.port else self._api.uri,
+            verify_ssl=self.sslverify,
+            py_exceptions=False,
         )
 
     @property
@@ -263,6 +285,7 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
         return self._sftp
 
     def path(self, *path: PathLike, **kwargs):
+        kwargs['backend'] = kwargs.get('backend' or self.path_backend) 
         return Path(*path, **kwargs, client=self)
 
     def run(

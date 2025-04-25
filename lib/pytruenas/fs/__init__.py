@@ -17,7 +17,7 @@ from . import api
 from . import local
 from . import sftp
 
-ACCESSORS = {_n: _v for _n, _v in globals().items() if not _n.startswith("_")}
+BACKENDS = {_n: _v for _n, _v in globals().items() if not _n.startswith("_")}
 
 
 class Path(_Path):
@@ -25,14 +25,14 @@ class Path(_Path):
         self,
         *args: _pathlib.PurePath | str,
         client: "TrueNASClient",
-        methods: _ty.Sequence[str] | str = "auto",
+        backend: _ty.Sequence[str] | str = "auto",
     ):
-        methods = methods or "auto"
-        if methods == "auto":
-            methods = "local" if client._api.is_local else ("sftp", "api")
-        if isinstance(methods, str):
-            methods = (methods,)
-        self._methods = methods
+        backend = backend or "auto"
+        if backend == "auto":
+            backend = "local" if client._api.is_local else ("sftp", "api")
+        if isinstance(backend, str):
+            backend = (backend,)
+        self._backends = backend
         self._client = client
         self._path = _pathlib.PurePosixPath(*args)
 
@@ -44,7 +44,7 @@ class Path(_Path):
     def __repr__(self):
         _src = self._client._api
         uri = _Tgt(
-            scheme="+".join(self._methods),
+            scheme="+".join(self._backends),
             username="",
             password="",
             host=_src.host,
@@ -59,7 +59,10 @@ class Path(_Path):
         return self._path.as_posix()
 
     def _with_path(self, path):
-        return self.__class__(path, client=self._client, methods=self._methods)
+        return self.__class__(path, client=self._client, backend=self._backends)
+
+    def with_backend(self, *backend):
+        return self.__class__(self._path, client=self._client, backend=backend)
 
     def __truediv__(self, key):
         return self._with_path(self._path.__truediv__(key))
@@ -68,15 +71,14 @@ class Path(_Path):
         return self._with_path(self._path.__rtruediv__(key))
 
     def _fsmethod(self, name: str):
-        for method in self._methods:
+        for backend in self._backends:
             try:
-                fs = ACCESSORS[method]
-                _method = getattr(fs, name)
+                method = getattr(BACKENDS[backend], name)
 
-                def method(*args, **kwargs):
-                    return _method(self, *args, **kwargs)
+                def bounded_method(*args, **kwargs):
+                    return method(self, *args, **kwargs)
 
-                return method
+                return bounded_method
             except (AttributeError, NotImplementedError, KeyError):
                 pass
         return NotImplemented
@@ -130,6 +132,22 @@ class Path(_Path):
         if isinstance(mode, str):
             mode = int(mode, 8)
         return self._fsmethod("chmod")(mode, *args, **kwargs)
+
+    def chown(
+        self,
+        uid: int = None,
+        gid: int = None,
+        *args,
+        follow_symlinks: bool = True,
+        **kwargs,
+    ):
+        if uid == None:
+            uid = -1
+        if gid == None:
+            gid = -1
+        return self._fsmethod("chown")(
+            uid, gid, *args, follow_symlinks=follow_symlinks, **kwargs
+        )
 
     def open(
         self,
