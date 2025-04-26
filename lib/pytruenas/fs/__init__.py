@@ -47,7 +47,7 @@ class Path(_Path):
     @_ftools.cache
     def as_uri(self):
         return self.uri.uri
-    
+
     @_ftools.cached_property
     def uri(self):
         _src = self._client._api
@@ -63,12 +63,12 @@ class Path(_Path):
     @_ftools.cache
     def __fspath__(self):
         return self._path.as_posix()
-    
+
     def __eq__(self, value):
         if not isinstance(value, (Path, _pathlib.PurePath)):
             return False
         return value.as_uri() == self.as_uri()
-    
+
     def __hash__(self):
         return self.uri.__hash__()
 
@@ -142,6 +142,9 @@ class Path(_Path):
 
     def read(self):
         self.read_bytes()
+
+    def rmtree(self, ignore_errors=False, onerror=None, *args, **kwargs):
+        return self._fsmethod("rmtree")(ignore_errors, onerror, *args, **kwargs)
 
     def chmod(self, mode: int | str, *args, **kwargs):
         if isinstance(mode, str):
