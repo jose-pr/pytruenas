@@ -20,7 +20,7 @@ class Method(_ty.TypedDict):
 
 
 class MethodSchema(_schema.Object):
-    properties: "MethodProperties"
+    properties: "MethodProperties" #type:ignore
 
 
 MethodProperties = _ty.TypedDict(

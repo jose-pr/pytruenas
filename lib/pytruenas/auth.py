@@ -7,7 +7,11 @@ if _ty.TYPE_CHECKING:
 
 
 class _CredentialsMeta(type):
-    def __call__(cls, *args, **kwargs):
+    def __call__(
+        cls: "type[Credentials]",  # type:ignore
+        *args,
+        **kwargs
+    ):
         if cls is not Credentials:
             inst = cls.__new__(cls, *args, **kwargs)
             inst.__init__(*args, **kwargs)
@@ -47,7 +51,7 @@ class _CredentialsMeta(type):
         elif args:
             return BasicAuth(*args)
         else:
-            for scls in [scls.__name__ for scls in Credentials.__subclasses__()]:
+            for scls in [scls for scls in Credentials.__subclasses__()]:
                 try:
                     return scls(**kwargs)
                 except:
@@ -59,8 +63,11 @@ class _CredentialsMeta(type):
 class Credentials(metaclass=_CredentialsMeta):
     METHOD = None
 
-    def _args(self):
-        return NotImplementedError()
+    def __init__(self, *args, **kwargs) -> None:
+        pass
+
+    def _args(self) -> _ty.Iterable:
+        raise NotImplementedError()
 
     def login(self, client: "TrueNASClient"):
         if self.METHOD:
@@ -68,7 +75,7 @@ class Credentials(metaclass=_CredentialsMeta):
         return None
 
     @staticmethod
-    def from_env(env: _ty.Mapping = None):
+    def from_env(env: _ty.Mapping | None = None):
         if env is None:
             import os
 
@@ -76,7 +83,9 @@ class Credentials(metaclass=_CredentialsMeta):
         return Credentials(env.get("TN_CREDS"))
 
 
-class LocalAuth(Credentials): ...
+class LocalAuth(Credentials):
+    def _args(self):
+        return []
 
 
 class ApiKeyAuth(Credentials):
@@ -102,7 +111,9 @@ class TokenAuth(Credentials):
 class BasicAuth(Credentials):
     METHOD = "login"
 
-    def __init__(self, username: str, password: str, otp_token: str = None) -> None:
+    def __init__(
+        self, username: str, password: str, otp_token: str | None = None
+    ) -> None:
         self.username = username
         self.password = password
         self.otp_token = otp_token
