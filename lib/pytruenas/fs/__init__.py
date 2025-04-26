@@ -6,6 +6,7 @@ import functools as _ftools
 if _ty.TYPE_CHECKING:
     from .. import TrueNASClient
     from pathlib import PosixPath as _Path
+    import _typeshed
 else:
 
     class _Path: ...
@@ -36,15 +37,12 @@ class Path(_Path):
         self._client = client
         self._path = _pathlib.PurePosixPath(*args)
 
-    @_ftools.cache
-    def __str__(self):
+    def __str__(self) -> str:
         return self._path.as_posix()
 
-    @_ftools.cache
     def __repr__(self):
         return f"{self.__class__.__name__}({self.uri.uri})"
 
-    @_ftools.cache
     def as_uri(self):
         return self.uri.uri
 
@@ -61,7 +59,7 @@ class Path(_Path):
         )
 
     @_ftools.cache
-    def __fspath__(self):
+    def __fspath__(self):  # type:ignore
         return self._path.as_posix()
 
     def __eq__(self, value):
@@ -111,10 +109,10 @@ class Path(_Path):
             attr = self._fsmethod(name)
 
         if attr is NotImplemented:
-            _default = getattr(_pathlib.Path, name)
             raise NotImplementedError(name)
 
         if callable(attr):
+            attr = _ty.cast(_ty.Callable, attr)
 
             def _attr(*args, **kwargs):
                 val = attr(*args, **kwargs)
@@ -137,47 +135,49 @@ class Path(_Path):
     def write(self, data: bytes | str):
         encode = getattr(data, "encode", None)
         if callable(encode):
-            data = encode()
-        return self.write_bytes(data)
+            data = encode()  # type:ignore
+        return self.write_bytes(data)  # type:ignore
 
     def read(self):
         self.read_bytes()
 
-    def rmtree(self, ignore_errors=False, onerror=None, *args, **kwargs):
-        return self._fsmethod("rmtree")(ignore_errors, onerror, *args, **kwargs)
+    def rmtree(self, ignore_errors=False, onerror=None, *args, **kwargs) -> None:
+        return self._fsmethod("rmtree")(
+            ignore_errors, onerror, *args, **kwargs
+        )  # type:ignore
 
-    def chmod(self, mode: int | str, *args, **kwargs):
+    def chmod(self, mode: int | str, *args, **kwargs) -> None:
         if isinstance(mode, str):
             mode = int(mode, 8)
-        return self._fsmethod("chmod")(mode, *args, **kwargs)
+        return self._fsmethod("chmod")(mode, *args, **kwargs)  # type:ignore
 
     def chown(
         self,
-        uid: int = None,
-        gid: int = None,
+        uid: int | None = None,
+        gid: int | None = None,
         *args,
         follow_symlinks: bool = True,
         **kwargs,
-    ):
+    ) -> None:
         if uid == None:
             uid = -1
         if gid == None:
             gid = -1
         return self._fsmethod("chown")(
             uid, gid, *args, follow_symlinks=follow_symlinks, **kwargs
-        )
+        )  # type:ignore
 
-    def open(
+    def open(  # type:ignore
         self,
-        mode: str = "r",
+        mode: "_typeshed.OpenTextMode" = "r",
         buffering=-1,
-        encoding: str = None,
-        errors: str = None,
+        encoding: str | None = None,
+        errors: str | None = None,
         newline=None,
         *args,
         **kwargs,
-    ):
-        method = self._fsmethod("open")
+    ) -> _ty.IO:
+        method = _ty.cast(_ty.Callable[..., _ty.IO], self._fsmethod("open"))
         if method is NotImplemented:
             raise NotImplementedError("open")
         try:
@@ -197,7 +197,7 @@ def _makeproxy(name: str):
     def proxy(self: Path, *args, **kwargs):
         method = self._fsmethod(name)
         if method is not NotImplemented:
-            return method(*args, **kwargs)
+            return method(*args, **kwargs)  # type:ignore
 
         return defaultmethod(self, *args, **kwargs)
 
