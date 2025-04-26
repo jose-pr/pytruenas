@@ -1,41 +1,41 @@
 from pytruenas import Namespace as _NS
 from pytruenas.models import jsonschema as _jsonschema
 import typing as _ty 
-class PoolResilver(_NS):
+class Resilver(_NS):
     
     def config(self,
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> PoolResilverConfig:
+    ) -> ConfigReturn:
         """"""
         ...
     def update(self,
-        data:data,
+        data:UpdateData,
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> PoolResilverUpdate:
+    ) -> UpdateReturn:
         """Configure Pool Resilver Priority.
 
 If `begin` time is greater than `end` time it means it will rollover the day, e.g. begin = "19:00", end = "05:00" will increase pool resilver priority from 19:00 of one day until 05:00 of the next day.
 
 `weekday` follows crontab(5) values 0-7 (0 or 7 is Sun)."""
         ...
-PoolResilverConfig = _ty.TypedDict('PoolResilverConfig', {
+ConfigReturn = _ty.TypedDict('ConfigReturn', {
     'id': int,
     'begin': _ty.NotRequired[str],
     'end': _ty.NotRequired[str],
     'enabled': _ty.NotRequired[bool],
     'weekday': _ty.NotRequired[list[int]], 
 })
-data = _ty.TypedDict('data', {
+UpdateData = _ty.TypedDict('UpdateData', {
     'begin': _ty.NotRequired[str],
     'end': _ty.NotRequired[str],
     'enabled': _ty.NotRequired[bool],
     'weekday': _ty.NotRequired[list[int]], 
 })
-PoolResilverUpdate = _ty.TypedDict('PoolResilverUpdate', {
+UpdateReturn = _ty.TypedDict('UpdateReturn', {
     'id': int,
     'begin': _ty.NotRequired[str],
     'end': _ty.NotRequired[str],

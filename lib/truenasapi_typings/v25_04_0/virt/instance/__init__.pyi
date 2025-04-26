@@ -1,14 +1,14 @@
 from pytruenas import Namespace as _NS
 from pytruenas.models import jsonschema as _jsonschema
 import typing as _ty 
-class VirtInstance(_NS):
+class Instance(_NS):
     
     def create(self,
-        virt_instance_create:virt_instance_create,
+        virt_instance_create:CreateVirtInstanceCreate,
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> VirtInstanceCreate:
+    ) -> CreateReturn:
         """Create a new virtualized instance."""
         ...
     def delete(self,
@@ -21,7 +21,7 @@ class VirtInstance(_NS):
         ...
     def device_add(self,
         id:str,
-        device:Disk|GPU|Proxy|TPM|USB|NIC|PCI,
+        device:DeviceAddDisk|DeviceAddGPU|DeviceAddProxy|DeviceAddTPM|DeviceAddUSB|DeviceAddNIC|DeviceAddPCI,
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
@@ -42,12 +42,12 @@ class VirtInstance(_NS):
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> list[Disk|GPU|Proxy|TPM|USB|NIC|PCI]:
+    ) -> list[DeviceListDisk|DeviceListGPU|DeviceListProxy|DeviceListTPM|DeviceListUSB|DeviceListNIC|DeviceListPCI]:
         """List all devices associated to an instance."""
         ...
     def device_update(self,
         id:str,
-        device:Disk|GPU|Proxy|TPM|USB|NIC|PCI,
+        device:DeviceUpdateDisk|DeviceUpdateGPU|DeviceUpdateProxy|DeviceUpdateTPM|DeviceUpdateUSB|DeviceUpdateNIC|DeviceUpdatePCI,
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
@@ -56,17 +56,17 @@ class VirtInstance(_NS):
         ...
     def get_instance(self,
         id:str,
-        options:options={},
+        options:GetInstanceOptions={},
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> VirtInstanceGet_instance:
+    ) -> GetInstanceReturn:
         """Returns instance matching `id`. If `id` is not found, Validation error is raised.
 
 Please see `query` method documentation for `options`."""
         ...
     def image_choices(self,
-        virt_instances_image_choices:virt_instances_image_choices={'remote': 'LINUX_CONTAINERS'},
+        virt_instances_image_choices:ImageChoicesVirtInstancesImageChoices={'remote': 'LINUX_CONTAINERS'},
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
@@ -75,16 +75,16 @@ Please see `query` method documentation for `options`."""
         ...
     def query(self,
         filters:_jsonschema.JsonArray=[],
-        options:options={'relationships': True, 'extend': None, 'extend_context': None, 'prefix': None, 'extra': {}, 'order_by': [], 'select': [], 'count': False, 'get': False, 'offset': 0, 'limit': 0, 'force_sql_filters': False},
+        options:QueryOptions={'relationships': True, 'extend': None, 'extend_context': None, 'prefix': None, 'extra': {}, 'order_by': [], 'select': [], 'count': False, 'get': False, 'offset': 0, 'limit': 0, 'force_sql_filters': False},
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> list[VirtInstanceQueryResultItem]|VirtInstanceQueryResultItem|int:
+    ) -> list[QueryVirtInstanceQueryResultItem]|QueryVirtInstanceQueryResultItem|int:
         """Query all instances with `query-filters` and `query-options`."""
         ...
     def restart(self,
         id:str,
-        stop_args:stop_args={'timeout': -1, 'force': False},
+        stop_args:RestartStopArgs={'timeout': -1, 'force': False},
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
@@ -103,7 +103,7 @@ Timeout is how long it should wait for the instance to shutdown cleanly."""
         ...
     def stop(self,
         id:str,
-        stop_args:stop_args={'timeout': -1, 'force': False},
+        stop_args:StopStopArgs={'timeout': -1, 'force': False},
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
@@ -114,14 +114,14 @@ Timeout is how long it should wait for the instance to shutdown cleanly."""
         ...
     def update(self,
         id:str,
-        virt_instance_update:virt_instance_update,
+        virt_instance_update:UpdateVirtInstanceUpdate,
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> VirtInstanceUpdate:
+    ) -> UpdateReturn:
         """Update instance."""
         ...
-virt_instance_create = _ty.TypedDict('virt_instance_create', {
+CreateVirtInstanceCreate = _ty.TypedDict('CreateVirtInstanceCreate', {
     'name': str,
     'iso_volume': _ty.NotRequired[str|None],
     'source_type': _ty.NotRequired[_jsonschema.JsonValue],
@@ -143,7 +143,7 @@ virt_instance_create = _ty.TypedDict('virt_instance_create', {
     'volume': _ty.NotRequired[str|None],
     'vnc_password': _ty.NotRequired[str|None], 
 })
-VirtInstanceCreate = _ty.TypedDict('VirtInstanceCreate', {
+CreateReturn = _ty.TypedDict('CreateReturn', {
     'id': str,
     'name': str,
     'type': _ty.NotRequired[str],
@@ -164,7 +164,7 @@ VirtInstanceCreate = _ty.TypedDict('VirtInstanceCreate', {
     'root_disk_io_bus': _jsonschema.JsonValue,
     'storage_pool': str, 
 })
-Disk = _ty.TypedDict('Disk', {
+DeviceAddDisk = _ty.TypedDict('DeviceAddDisk', {
     'name': _ty.NotRequired[str|None],
     'description': _ty.NotRequired[str|None],
     'readonly': _ty.NotRequired[bool],
@@ -175,7 +175,7 @@ Disk = _ty.TypedDict('Disk', {
     'io_bus': _ty.NotRequired[_jsonschema.JsonValue],
     'storage_pool': _ty.NotRequired[str|None], 
 })
-GPU = _ty.TypedDict('GPU', {
+DeviceAddGPU = _ty.TypedDict('DeviceAddGPU', {
     'name': _ty.NotRequired[str|None],
     'description': _ty.NotRequired[str|None],
     'readonly': _ty.NotRequired[bool],
@@ -191,7 +191,7 @@ GPU = _ty.TypedDict('GPU', {
     'productid': _ty.NotRequired[str|None],
     'vendorid': _ty.NotRequired[str|None], 
 })
-Proxy = _ty.TypedDict('Proxy', {
+DeviceAddProxy = _ty.TypedDict('DeviceAddProxy', {
     'name': _ty.NotRequired[str|None],
     'description': _ty.NotRequired[str|None],
     'readonly': _ty.NotRequired[bool],
@@ -201,7 +201,7 @@ Proxy = _ty.TypedDict('Proxy', {
     'dest_proto': str,
     'dest_port': int, 
 })
-TPM = _ty.TypedDict('TPM', {
+DeviceAddTPM = _ty.TypedDict('DeviceAddTPM', {
     'name': _ty.NotRequired[str|None],
     'description': _ty.NotRequired[str|None],
     'readonly': _ty.NotRequired[bool],
@@ -209,7 +209,7 @@ TPM = _ty.TypedDict('TPM', {
     'path': _ty.NotRequired[str|None],
     'pathrm': _ty.NotRequired[str|None], 
 })
-USB = _ty.TypedDict('USB', {
+DeviceAddUSB = _ty.TypedDict('DeviceAddUSB', {
     'name': _ty.NotRequired[str|None],
     'description': _ty.NotRequired[str|None],
     'readonly': _ty.NotRequired[bool],
@@ -219,7 +219,7 @@ USB = _ty.TypedDict('USB', {
     'product_id': _ty.NotRequired[str|None],
     'vendor_id': _ty.NotRequired[str|None], 
 })
-NIC = _ty.TypedDict('NIC', {
+DeviceAddNIC = _ty.TypedDict('DeviceAddNIC', {
     'name': _ty.NotRequired[str|None],
     'description': _ty.NotRequired[str|None],
     'readonly': _ty.NotRequired[bool],
@@ -228,14 +228,156 @@ NIC = _ty.TypedDict('NIC', {
     'nic_type': _ty.NotRequired[str|None],
     'parent': _ty.NotRequired[str|None], 
 })
-PCI = _ty.TypedDict('PCI', {
+DeviceAddPCI = _ty.TypedDict('DeviceAddPCI', {
     'name': _ty.NotRequired[str|None],
     'description': _ty.NotRequired[str|None],
     'readonly': _ty.NotRequired[bool],
     'dev_type': str,
     'address': str, 
 })
-options = _ty.TypedDict('options', {
+DeviceListDisk = _ty.TypedDict('DeviceListDisk', {
+    'name': _ty.NotRequired[str|None],
+    'description': _ty.NotRequired[str|None],
+    'readonly': _ty.NotRequired[bool],
+    'dev_type': str,
+    'source': _ty.NotRequired[str|None],
+    'destination': _ty.NotRequired[str|None],
+    'boot_priority': _ty.NotRequired[int|None],
+    'io_bus': _ty.NotRequired[_jsonschema.JsonValue],
+    'storage_pool': _ty.NotRequired[str|None], 
+})
+DeviceListGPU = _ty.TypedDict('DeviceListGPU', {
+    'name': _ty.NotRequired[str|None],
+    'description': _ty.NotRequired[str|None],
+    'readonly': _ty.NotRequired[bool],
+    'dev_type': str,
+    'gpu_type': str,
+    'id': _ty.NotRequired[str|None],
+    'gid': _ty.NotRequired[int|None],
+    'uid': _ty.NotRequired[int|None],
+    'mode': _ty.NotRequired[str|None],
+    'mdev': _ty.NotRequired[str|None],
+    'mig_uuid': _ty.NotRequired[str|None],
+    'pci': _ty.NotRequired[str|None],
+    'productid': _ty.NotRequired[str|None],
+    'vendorid': _ty.NotRequired[str|None], 
+})
+DeviceListProxy = _ty.TypedDict('DeviceListProxy', {
+    'name': _ty.NotRequired[str|None],
+    'description': _ty.NotRequired[str|None],
+    'readonly': _ty.NotRequired[bool],
+    'dev_type': str,
+    'source_proto': str,
+    'source_port': int,
+    'dest_proto': str,
+    'dest_port': int, 
+})
+DeviceListTPM = _ty.TypedDict('DeviceListTPM', {
+    'name': _ty.NotRequired[str|None],
+    'description': _ty.NotRequired[str|None],
+    'readonly': _ty.NotRequired[bool],
+    'dev_type': str,
+    'path': _ty.NotRequired[str|None],
+    'pathrm': _ty.NotRequired[str|None], 
+})
+DeviceListUSB = _ty.TypedDict('DeviceListUSB', {
+    'name': _ty.NotRequired[str|None],
+    'description': _ty.NotRequired[str|None],
+    'readonly': _ty.NotRequired[bool],
+    'dev_type': str,
+    'bus': _ty.NotRequired[int|None],
+    'dev': _ty.NotRequired[int|None],
+    'product_id': _ty.NotRequired[str|None],
+    'vendor_id': _ty.NotRequired[str|None], 
+})
+DeviceListNIC = _ty.TypedDict('DeviceListNIC', {
+    'name': _ty.NotRequired[str|None],
+    'description': _ty.NotRequired[str|None],
+    'readonly': _ty.NotRequired[bool],
+    'dev_type': str,
+    'network': _ty.NotRequired[str|None],
+    'nic_type': _ty.NotRequired[str|None],
+    'parent': _ty.NotRequired[str|None], 
+})
+DeviceListPCI = _ty.TypedDict('DeviceListPCI', {
+    'name': _ty.NotRequired[str|None],
+    'description': _ty.NotRequired[str|None],
+    'readonly': _ty.NotRequired[bool],
+    'dev_type': str,
+    'address': str, 
+})
+DeviceUpdateDisk = _ty.TypedDict('DeviceUpdateDisk', {
+    'name': _ty.NotRequired[str|None],
+    'description': _ty.NotRequired[str|None],
+    'readonly': _ty.NotRequired[bool],
+    'dev_type': str,
+    'source': _ty.NotRequired[str|None],
+    'destination': _ty.NotRequired[str|None],
+    'boot_priority': _ty.NotRequired[int|None],
+    'io_bus': _ty.NotRequired[_jsonschema.JsonValue],
+    'storage_pool': _ty.NotRequired[str|None], 
+})
+DeviceUpdateGPU = _ty.TypedDict('DeviceUpdateGPU', {
+    'name': _ty.NotRequired[str|None],
+    'description': _ty.NotRequired[str|None],
+    'readonly': _ty.NotRequired[bool],
+    'dev_type': str,
+    'gpu_type': str,
+    'id': _ty.NotRequired[str|None],
+    'gid': _ty.NotRequired[int|None],
+    'uid': _ty.NotRequired[int|None],
+    'mode': _ty.NotRequired[str|None],
+    'mdev': _ty.NotRequired[str|None],
+    'mig_uuid': _ty.NotRequired[str|None],
+    'pci': _ty.NotRequired[str|None],
+    'productid': _ty.NotRequired[str|None],
+    'vendorid': _ty.NotRequired[str|None], 
+})
+DeviceUpdateProxy = _ty.TypedDict('DeviceUpdateProxy', {
+    'name': _ty.NotRequired[str|None],
+    'description': _ty.NotRequired[str|None],
+    'readonly': _ty.NotRequired[bool],
+    'dev_type': str,
+    'source_proto': str,
+    'source_port': int,
+    'dest_proto': str,
+    'dest_port': int, 
+})
+DeviceUpdateTPM = _ty.TypedDict('DeviceUpdateTPM', {
+    'name': _ty.NotRequired[str|None],
+    'description': _ty.NotRequired[str|None],
+    'readonly': _ty.NotRequired[bool],
+    'dev_type': str,
+    'path': _ty.NotRequired[str|None],
+    'pathrm': _ty.NotRequired[str|None], 
+})
+DeviceUpdateUSB = _ty.TypedDict('DeviceUpdateUSB', {
+    'name': _ty.NotRequired[str|None],
+    'description': _ty.NotRequired[str|None],
+    'readonly': _ty.NotRequired[bool],
+    'dev_type': str,
+    'bus': _ty.NotRequired[int|None],
+    'dev': _ty.NotRequired[int|None],
+    'product_id': _ty.NotRequired[str|None],
+    'vendor_id': _ty.NotRequired[str|None], 
+})
+DeviceUpdateNIC = _ty.TypedDict('DeviceUpdateNIC', {
+    'name': _ty.NotRequired[str|None],
+    'description': _ty.NotRequired[str|None],
+    'readonly': _ty.NotRequired[bool],
+    'dev_type': str,
+    'network': _ty.NotRequired[str|None],
+    'nic_type': _ty.NotRequired[str|None],
+    'parent': _ty.NotRequired[str|None], 
+})
+DeviceUpdatePCI = _ty.TypedDict('DeviceUpdatePCI', {
+    'name': _ty.NotRequired[str|None],
+    'description': _ty.NotRequired[str|None],
+    'readonly': _ty.NotRequired[bool],
+    'dev_type': str,
+    'address': str, 
+})
+GetInstanceOptions = _ty.TypedDict('GetInstanceOptions', {
     'relationships': _ty.NotRequired[bool],
     'extend': _ty.NotRequired[str|None],
     'extend_context': _ty.NotRequired[str|None],
@@ -249,7 +391,7 @@ options = _ty.TypedDict('options', {
     'limit': _ty.NotRequired[int],
     'force_sql_filters': _ty.NotRequired[bool], 
 })
-VirtInstanceGet_instance = _ty.TypedDict('VirtInstanceGet_instance', {
+GetInstanceReturn = _ty.TypedDict('GetInstanceReturn', {
     'id': str,
     'name': str,
     'type': _ty.NotRequired[str],
@@ -270,10 +412,24 @@ VirtInstanceGet_instance = _ty.TypedDict('VirtInstanceGet_instance', {
     'root_disk_io_bus': _jsonschema.JsonValue,
     'storage_pool': str, 
 })
-virt_instances_image_choices = _ty.TypedDict('virt_instances_image_choices', {
+ImageChoicesVirtInstancesImageChoices = _ty.TypedDict('ImageChoicesVirtInstancesImageChoices', {
     'remote': _ty.NotRequired[str], 
 })
-VirtInstanceQueryResultItem = _ty.TypedDict('VirtInstanceQueryResultItem', {
+QueryOptions = _ty.TypedDict('QueryOptions', {
+    'relationships': _ty.NotRequired[bool],
+    'extend': _ty.NotRequired[str|None],
+    'extend_context': _ty.NotRequired[str|None],
+    'prefix': _ty.NotRequired[str|None],
+    'extra': _ty.NotRequired[_jsonschema.JsonObject],
+    'order_by': _ty.NotRequired[list[str]],
+    'select': _ty.NotRequired[list[str|_jsonschema.JsonArray]],
+    'count': _ty.NotRequired[bool],
+    'get': _ty.NotRequired[bool],
+    'offset': _ty.NotRequired[int],
+    'limit': _ty.NotRequired[int],
+    'force_sql_filters': _ty.NotRequired[bool], 
+})
+QueryVirtInstanceQueryResultItem = _ty.TypedDict('QueryVirtInstanceQueryResultItem', {
     'id': _ty.NotRequired[str],
     'name': _ty.NotRequired[str],
     'type': _ty.NotRequired[str],
@@ -294,11 +450,15 @@ VirtInstanceQueryResultItem = _ty.TypedDict('VirtInstanceQueryResultItem', {
     'root_disk_io_bus': _ty.NotRequired[_jsonschema.JsonValue],
     'storage_pool': _ty.NotRequired[str], 
 })
-stop_args = _ty.TypedDict('stop_args', {
+RestartStopArgs = _ty.TypedDict('RestartStopArgs', {
     'timeout': _ty.NotRequired[int],
     'force': _ty.NotRequired[bool], 
 })
-virt_instance_update = _ty.TypedDict('virt_instance_update', {
+StopStopArgs = _ty.TypedDict('StopStopArgs', {
+    'timeout': _ty.NotRequired[int],
+    'force': _ty.NotRequired[bool], 
+})
+UpdateVirtInstanceUpdate = _ty.TypedDict('UpdateVirtInstanceUpdate', {
     'environment': _ty.NotRequired[_jsonschema.JsonObject|None],
     'autostart': _ty.NotRequired[bool|None],
     'cpu': _ty.NotRequired[str|None],
@@ -310,7 +470,7 @@ virt_instance_update = _ty.TypedDict('virt_instance_update', {
     'root_disk_size': _ty.NotRequired[int|None],
     'root_disk_io_bus': _ty.NotRequired[_jsonschema.JsonValue], 
 })
-VirtInstanceUpdate = _ty.TypedDict('VirtInstanceUpdate', {
+UpdateReturn = _ty.TypedDict('UpdateReturn', {
     'id': str,
     'name': str,
     'type': _ty.NotRequired[str],

@@ -1,7 +1,7 @@
 from pytruenas import Namespace as _NS
 from pytruenas.models import jsonschema as _jsonschema
 import typing as _ty 
-class EnclosureLabel(_NS):
+class Label(_NS):
     
     def set(self,
         id:str,

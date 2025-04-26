@@ -7,15 +7,15 @@ class Ftp(_NS):
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> FtpConfig:
+    ) -> ConfigReturn:
         """"""
         ...
     def update(self,
-        ftp_update:ftp_update,
+        ftp_update:UpdateFtpUpdate,
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> FtpUpdate:
+    ) -> UpdateReturn:
         """Update ftp service configuration.
 
 `clients` is an integer value which sets the maximum number of simultaneous clients allowed. It defaults to 32.
@@ -60,7 +60,7 @@ class Ftp(_NS):
 
 `options` is a string used to add proftpd(8) parameters not covered by ftp service."""
         ...
-FtpConfig = _ty.TypedDict('FtpConfig', {
+ConfigReturn = _ty.TypedDict('ConfigReturn', {
     'id': int,
     'port': int,
     'clients': int,
@@ -102,7 +102,7 @@ FtpConfig = _ty.TypedDict('FtpConfig', {
     'ssltls_certificate': int|None,
     'options': str, 
 })
-ftp_update = _ty.TypedDict('ftp_update', {
+UpdateFtpUpdate = _ty.TypedDict('UpdateFtpUpdate', {
     'port': _ty.NotRequired[int],
     'clients': _ty.NotRequired[int],
     'ipconnections': _ty.NotRequired[int],
@@ -143,7 +143,7 @@ ftp_update = _ty.TypedDict('ftp_update', {
     'ssltls_certificate': _ty.NotRequired[int|None],
     'options': _ty.NotRequired[str], 
 })
-FtpUpdate = _ty.TypedDict('FtpUpdate', {
+UpdateReturn = _ty.TypedDict('UpdateReturn', {
     'id': int,
     'port': int,
     'clients': int,

@@ -1,14 +1,14 @@
 from pytruenas import Namespace as _NS
 from pytruenas.models import jsonschema as _jsonschema
 import typing as _ty 
-class IscsiPortal(_NS):
+class Portal(_NS):
     
     def create(self,
-        iscsi_portal_create:iscsi_portal_create,
+        iscsi_portal_create:CreateIscsiPortalCreate,
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> IscsiPortalCreate:
+    ) -> CreateReturn:
         """Create a new iSCSI Portal."""
         ...
     def delete(self,
@@ -21,11 +21,11 @@ class IscsiPortal(_NS):
         ...
     def get_instance(self,
         id:int,
-        options:options={},
+        options:GetInstanceOptions={},
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> IscsiPortalGet_instance:
+    ) -> GetInstanceReturn:
         """Returns instance matching `id`. If `id` is not found, Validation error is raised.
 
 Please see `query` method documentation for `options`."""
@@ -39,33 +39,33 @@ Please see `query` method documentation for `options`."""
         ...
     def query(self,
         filters:_jsonschema.JsonArray=[],
-        options:options={'relationships': True, 'extend': None, 'extend_context': None, 'prefix': None, 'extra': {}, 'order_by': [], 'select': [], 'count': False, 'get': False, 'offset': 0, 'limit': 0, 'force_sql_filters': False},
+        options:QueryOptions={'relationships': True, 'extend': None, 'extend_context': None, 'prefix': None, 'extra': {}, 'order_by': [], 'select': [], 'count': False, 'get': False, 'offset': 0, 'limit': 0, 'force_sql_filters': False},
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> list[IscsiPortalQueryResultItem]|IscsiPortalQueryResultItem|int:
+    ) -> list[QueryIscsiPortalQueryResultItem]|QueryIscsiPortalQueryResultItem|int:
         """"""
         ...
     def update(self,
         id:int,
-        iscsi_portal_update:iscsi_portal_update,
+        iscsi_portal_update:UpdateIscsiPortalUpdate,
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> IscsiPortalUpdate:
+    ) -> UpdateReturn:
         """Update iSCSI Portal `id`."""
         ...
-iscsi_portal_create = _ty.TypedDict('iscsi_portal_create', {
+CreateIscsiPortalCreate = _ty.TypedDict('CreateIscsiPortalCreate', {
     'listen': _jsonschema.JsonArray,
     'comment': _ty.NotRequired[str], 
 })
-IscsiPortalCreate = _ty.TypedDict('IscsiPortalCreate', {
+CreateReturn = _ty.TypedDict('CreateReturn', {
     'id': int,
     'listen': _jsonschema.JsonArray,
     'tag': int,
     'comment': _ty.NotRequired[str], 
 })
-options = _ty.TypedDict('options', {
+GetInstanceOptions = _ty.TypedDict('GetInstanceOptions', {
     'relationships': _ty.NotRequired[bool],
     'extend': _ty.NotRequired[str|None],
     'extend_context': _ty.NotRequired[str|None],
@@ -79,23 +79,37 @@ options = _ty.TypedDict('options', {
     'limit': _ty.NotRequired[int],
     'force_sql_filters': _ty.NotRequired[bool], 
 })
-IscsiPortalGet_instance = _ty.TypedDict('IscsiPortalGet_instance', {
+GetInstanceReturn = _ty.TypedDict('GetInstanceReturn', {
     'id': int,
     'listen': _jsonschema.JsonArray,
     'tag': int,
     'comment': _ty.NotRequired[str], 
 })
-IscsiPortalQueryResultItem = _ty.TypedDict('IscsiPortalQueryResultItem', {
+QueryOptions = _ty.TypedDict('QueryOptions', {
+    'relationships': _ty.NotRequired[bool],
+    'extend': _ty.NotRequired[str|None],
+    'extend_context': _ty.NotRequired[str|None],
+    'prefix': _ty.NotRequired[str|None],
+    'extra': _ty.NotRequired[_jsonschema.JsonObject],
+    'order_by': _ty.NotRequired[list[str]],
+    'select': _ty.NotRequired[list[str|_jsonschema.JsonArray]],
+    'count': _ty.NotRequired[bool],
+    'get': _ty.NotRequired[bool],
+    'offset': _ty.NotRequired[int],
+    'limit': _ty.NotRequired[int],
+    'force_sql_filters': _ty.NotRequired[bool], 
+})
+QueryIscsiPortalQueryResultItem = _ty.TypedDict('QueryIscsiPortalQueryResultItem', {
     'id': _ty.NotRequired[int],
     'listen': _ty.NotRequired[_jsonschema.JsonArray],
     'tag': _ty.NotRequired[int],
     'comment': _ty.NotRequired[str], 
 })
-iscsi_portal_update = _ty.TypedDict('iscsi_portal_update', {
+UpdateIscsiPortalUpdate = _ty.TypedDict('UpdateIscsiPortalUpdate', {
     'listen': _ty.NotRequired[_jsonschema.JsonArray],
     'comment': _ty.NotRequired[str], 
 })
-IscsiPortalUpdate = _ty.TypedDict('IscsiPortalUpdate', {
+UpdateReturn = _ty.TypedDict('UpdateReturn', {
     'id': int,
     'listen': _jsonschema.JsonArray,
     'tag': int,

@@ -1,7 +1,7 @@
 from pytruenas import Namespace as _NS
 from pytruenas.models import jsonschema as _jsonschema
 import typing as _ty 
-class SystemGeneral(_NS):
+class General(_NS):
     
     def country_choices(self,
         _method:str|None=None,

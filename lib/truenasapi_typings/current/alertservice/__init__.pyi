@@ -4,11 +4,11 @@ import typing as _ty
 class Alertservice(_NS):
     
     def create(self,
-        alert_service_create:alert_service_create,
+        alert_service_create:CreateAlertServiceCreate,
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> AlertserviceCreate:
+    ) -> CreateReturn:
         """Create an Alert Service of specified `type`.
 
 If `enabled`, it sends alerts to the configured `type` of Alert Service."""
@@ -23,26 +23,26 @@ If `enabled`, it sends alerts to the configured `type` of Alert Service."""
         ...
     def get_instance(self,
         id:int,
-        options:options={},
+        options:GetInstanceOptions={},
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> AlertserviceGet_instance:
+    ) -> GetInstanceReturn:
         """Returns instance matching `id`. If `id` is not found, Validation error is raised.
 
 Please see `query` method documentation for `options`."""
         ...
     def query(self,
         filters:_jsonschema.JsonArray=[],
-        options:options={'relationships': True, 'extend': None, 'extend_context': None, 'prefix': None, 'extra': {}, 'order_by': [], 'select': [], 'count': False, 'get': False, 'offset': 0, 'limit': 0, 'force_sql_filters': False},
+        options:QueryOptions={'relationships': True, 'extend': None, 'extend_context': None, 'prefix': None, 'extra': {}, 'order_by': [], 'select': [], 'count': False, 'get': False, 'offset': 0, 'limit': 0, 'force_sql_filters': False},
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> list[AlertServiceQueryResultItem]|AlertServiceQueryResultItem|int:
+    ) -> list[QueryAlertServiceQueryResultItem]|QueryAlertServiceQueryResultItem|int:
         """"""
         ...
     def test(self,
-        alert_service_create:alert_service_create,
+        alert_service_create:TestAlertServiceCreate,
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
@@ -51,21 +51,21 @@ Please see `query` method documentation for `options`."""
         ...
     def update(self,
         id:int,
-        alert_service_update:alert_service_update,
+        alert_service_update:UpdateAlertServiceUpdate,
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> AlertserviceUpdate:
+    ) -> UpdateReturn:
         """Update Alert Service of `id`."""
         ...
-alert_service_create = _ty.TypedDict('alert_service_create', {
+CreateAlertServiceCreate = _ty.TypedDict('CreateAlertServiceCreate', {
     'name': str,
     'type': str,
     'attributes': _jsonschema.JsonObject,
     'level': str,
     'enabled': _ty.NotRequired[bool], 
 })
-AlertserviceCreate = _ty.TypedDict('AlertserviceCreate', {
+CreateReturn = _ty.TypedDict('CreateReturn', {
     'name': str,
     'type': str,
     'attributes': _jsonschema.JsonObject,
@@ -74,7 +74,7 @@ AlertserviceCreate = _ty.TypedDict('AlertserviceCreate', {
     'id': int,
     'type__title': str, 
 })
-options = _ty.TypedDict('options', {
+GetInstanceOptions = _ty.TypedDict('GetInstanceOptions', {
     'relationships': _ty.NotRequired[bool],
     'extend': _ty.NotRequired[str|None],
     'extend_context': _ty.NotRequired[str|None],
@@ -88,7 +88,7 @@ options = _ty.TypedDict('options', {
     'limit': _ty.NotRequired[int],
     'force_sql_filters': _ty.NotRequired[bool], 
 })
-AlertserviceGet_instance = _ty.TypedDict('AlertserviceGet_instance', {
+GetInstanceReturn = _ty.TypedDict('GetInstanceReturn', {
     'name': str,
     'type': str,
     'attributes': _jsonschema.JsonObject,
@@ -97,7 +97,21 @@ AlertserviceGet_instance = _ty.TypedDict('AlertserviceGet_instance', {
     'id': int,
     'type__title': str, 
 })
-AlertServiceQueryResultItem = _ty.TypedDict('AlertServiceQueryResultItem', {
+QueryOptions = _ty.TypedDict('QueryOptions', {
+    'relationships': _ty.NotRequired[bool],
+    'extend': _ty.NotRequired[str|None],
+    'extend_context': _ty.NotRequired[str|None],
+    'prefix': _ty.NotRequired[str|None],
+    'extra': _ty.NotRequired[_jsonschema.JsonObject],
+    'order_by': _ty.NotRequired[list[str]],
+    'select': _ty.NotRequired[list[str|_jsonschema.JsonArray]],
+    'count': _ty.NotRequired[bool],
+    'get': _ty.NotRequired[bool],
+    'offset': _ty.NotRequired[int],
+    'limit': _ty.NotRequired[int],
+    'force_sql_filters': _ty.NotRequired[bool], 
+})
+QueryAlertServiceQueryResultItem = _ty.TypedDict('QueryAlertServiceQueryResultItem', {
     'name': _ty.NotRequired[str],
     'type': _ty.NotRequired[str],
     'attributes': _ty.NotRequired[_jsonschema.JsonObject],
@@ -106,14 +120,21 @@ AlertServiceQueryResultItem = _ty.TypedDict('AlertServiceQueryResultItem', {
     'id': _ty.NotRequired[int],
     'type__title': _ty.NotRequired[str], 
 })
-alert_service_update = _ty.TypedDict('alert_service_update', {
+TestAlertServiceCreate = _ty.TypedDict('TestAlertServiceCreate', {
     'name': str,
     'type': str,
     'attributes': _jsonschema.JsonObject,
     'level': str,
     'enabled': _ty.NotRequired[bool], 
 })
-AlertserviceUpdate = _ty.TypedDict('AlertserviceUpdate', {
+UpdateAlertServiceUpdate = _ty.TypedDict('UpdateAlertServiceUpdate', {
+    'name': str,
+    'type': str,
+    'attributes': _jsonschema.JsonObject,
+    'level': str,
+    'enabled': _ty.NotRequired[bool], 
+})
+UpdateReturn = _ty.TypedDict('UpdateReturn', {
     'name': str,
     'type': str,
     'attributes': _jsonschema.JsonObject,

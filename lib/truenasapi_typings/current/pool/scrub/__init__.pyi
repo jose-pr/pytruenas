@@ -1,14 +1,14 @@
 from pytruenas import Namespace as _NS
 from pytruenas.models import jsonschema as _jsonschema
 import typing as _ty 
-class PoolScrub(_NS):
+class Scrub(_NS):
     
     def create(self,
-        data:data,
+        data:CreateData,
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> PoolScrubCreate:
+    ) -> CreateReturn:
         """Create a scrub task for a pool.
 
 `threshold` refers to the minimum amount of time in days has to be passed before a scrub can run again."""
@@ -23,22 +23,22 @@ class PoolScrub(_NS):
         ...
     def get_instance(self,
         id:int,
-        options:options={},
+        options:GetInstanceOptions={},
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> PoolScrubGet_instance:
+    ) -> GetInstanceReturn:
         """Returns instance matching `id`. If `id` is not found, Validation error is raised.
 
 Please see `query` method documentation for `options`."""
         ...
     def query(self,
         filters:_jsonschema.JsonArray=[],
-        options:options={'relationships': True, 'extend': None, 'extend_context': None, 'prefix': None, 'extra': {}, 'order_by': [], 'select': [], 'count': False, 'get': False, 'offset': 0, 'limit': 0, 'force_sql_filters': False},
+        options:QueryOptions={'relationships': True, 'extend': None, 'extend_context': None, 'prefix': None, 'extra': {}, 'order_by': [], 'select': [], 'count': False, 'get': False, 'offset': 0, 'limit': 0, 'force_sql_filters': False},
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> list[PoolScrubQueryResultItem]|PoolScrubQueryResultItem|int:
+    ) -> list[QueryPoolScrubQueryResultItem]|QueryPoolScrubQueryResultItem|int:
         """"""
         ...
     def run(self,
@@ -61,21 +61,21 @@ Please see `query` method documentation for `options`."""
         ...
     def update(self,
         id_:int,
-        data:data,
+        data:UpdateData,
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> PoolScrubUpdate:
+    ) -> UpdateReturn:
         """Update scrub task of `id`."""
         ...
-data = _ty.TypedDict('data', {
-    'pool': _ty.NotRequired[int],
+CreateData = _ty.TypedDict('CreateData', {
+    'pool': int,
     'threshold': _ty.NotRequired[int],
     'description': _ty.NotRequired[str],
     'schedule': _ty.NotRequired[_jsonschema.JsonValue],
     'enabled': _ty.NotRequired[bool], 
 })
-PoolScrubCreate = _ty.TypedDict('PoolScrubCreate', {
+CreateReturn = _ty.TypedDict('CreateReturn', {
     'pool': int,
     'threshold': _ty.NotRequired[int],
     'description': _ty.NotRequired[str],
@@ -84,7 +84,7 @@ PoolScrubCreate = _ty.TypedDict('PoolScrubCreate', {
     'id': int,
     'pool_name': str, 
 })
-options = _ty.TypedDict('options', {
+GetInstanceOptions = _ty.TypedDict('GetInstanceOptions', {
     'relationships': _ty.NotRequired[bool],
     'extend': _ty.NotRequired[str|None],
     'extend_context': _ty.NotRequired[str|None],
@@ -98,7 +98,7 @@ options = _ty.TypedDict('options', {
     'limit': _ty.NotRequired[int],
     'force_sql_filters': _ty.NotRequired[bool], 
 })
-PoolScrubGet_instance = _ty.TypedDict('PoolScrubGet_instance', {
+GetInstanceReturn = _ty.TypedDict('GetInstanceReturn', {
     'pool': int,
     'threshold': _ty.NotRequired[int],
     'description': _ty.NotRequired[str],
@@ -107,7 +107,21 @@ PoolScrubGet_instance = _ty.TypedDict('PoolScrubGet_instance', {
     'id': int,
     'pool_name': str, 
 })
-PoolScrubQueryResultItem = _ty.TypedDict('PoolScrubQueryResultItem', {
+QueryOptions = _ty.TypedDict('QueryOptions', {
+    'relationships': _ty.NotRequired[bool],
+    'extend': _ty.NotRequired[str|None],
+    'extend_context': _ty.NotRequired[str|None],
+    'prefix': _ty.NotRequired[str|None],
+    'extra': _ty.NotRequired[_jsonschema.JsonObject],
+    'order_by': _ty.NotRequired[list[str]],
+    'select': _ty.NotRequired[list[str|_jsonschema.JsonArray]],
+    'count': _ty.NotRequired[bool],
+    'get': _ty.NotRequired[bool],
+    'offset': _ty.NotRequired[int],
+    'limit': _ty.NotRequired[int],
+    'force_sql_filters': _ty.NotRequired[bool], 
+})
+QueryPoolScrubQueryResultItem = _ty.TypedDict('QueryPoolScrubQueryResultItem', {
     'pool': _ty.NotRequired[int],
     'threshold': _ty.NotRequired[int],
     'description': _ty.NotRequired[str],
@@ -116,7 +130,14 @@ PoolScrubQueryResultItem = _ty.TypedDict('PoolScrubQueryResultItem', {
     'id': _ty.NotRequired[int],
     'pool_name': _ty.NotRequired[str], 
 })
-PoolScrubUpdate = _ty.TypedDict('PoolScrubUpdate', {
+UpdateData = _ty.TypedDict('UpdateData', {
+    'pool': _ty.NotRequired[int],
+    'threshold': _ty.NotRequired[int],
+    'description': _ty.NotRequired[str],
+    'schedule': _ty.NotRequired[_jsonschema.JsonValue],
+    'enabled': _ty.NotRequired[bool], 
+})
+UpdateReturn = _ty.TypedDict('UpdateReturn', {
     'pool': int,
     'threshold': _ty.NotRequired[int],
     'description': _ty.NotRequired[str],

@@ -1,14 +1,14 @@
 from pytruenas import Namespace as _NS
 from pytruenas.models import jsonschema as _jsonschema
 import typing as _ty 
-class SystemNtpserver(_NS):
+class Ntpserver(_NS):
     
     def create(self,
-        ntp_server_create:ntp_server_create,
+        ntp_server_create:CreateNtpServerCreate,
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> SystemNtpserverCreate:
+    ) -> CreateReturn:
         """Add an NTP Server.
 
 `address` specifies the hostname/IP address of the NTP server.
@@ -35,34 +35,34 @@ class SystemNtpserver(_NS):
         ...
     def get_instance(self,
         id:int,
-        options:options={},
+        options:GetInstanceOptions={},
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> SystemNtpserverGet_instance:
+    ) -> GetInstanceReturn:
         """Returns instance matching `id`. If `id` is not found, Validation error is raised.
 
 Please see `query` method documentation for `options`."""
         ...
     def query(self,
         filters:_jsonschema.JsonArray=[],
-        options:options={'relationships': True, 'extend': None, 'extend_context': None, 'prefix': None, 'extra': {}, 'order_by': [], 'select': [], 'count': False, 'get': False, 'offset': 0, 'limit': 0, 'force_sql_filters': False},
+        options:QueryOptions={'relationships': True, 'extend': None, 'extend_context': None, 'prefix': None, 'extra': {}, 'order_by': [], 'select': [], 'count': False, 'get': False, 'offset': 0, 'limit': 0, 'force_sql_filters': False},
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> list[NTPServerQueryResultItem]|NTPServerQueryResultItem|int:
+    ) -> list[QueryNTPServerQueryResultItem]|QueryNTPServerQueryResultItem|int:
         """"""
         ...
     def update(self,
         id:int,
-        ntp_server_update:ntp_server_update,
+        ntp_server_update:UpdateNtpServerUpdate,
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> SystemNtpserverUpdate:
+    ) -> UpdateReturn:
         """Update NTP server of `id`."""
         ...
-ntp_server_create = _ty.TypedDict('ntp_server_create', {
+CreateNtpServerCreate = _ty.TypedDict('CreateNtpServerCreate', {
     'address': str,
     'burst': _ty.NotRequired[bool],
     'iburst': _ty.NotRequired[bool],
@@ -71,7 +71,7 @@ ntp_server_create = _ty.TypedDict('ntp_server_create', {
     'maxpoll': _ty.NotRequired[int],
     'force': _ty.NotRequired[bool], 
 })
-SystemNtpserverCreate = _ty.TypedDict('SystemNtpserverCreate', {
+CreateReturn = _ty.TypedDict('CreateReturn', {
     'id': int,
     'address': str,
     'burst': _ty.NotRequired[bool],
@@ -80,7 +80,7 @@ SystemNtpserverCreate = _ty.TypedDict('SystemNtpserverCreate', {
     'minpoll': _ty.NotRequired[int],
     'maxpoll': _ty.NotRequired[int], 
 })
-options = _ty.TypedDict('options', {
+GetInstanceOptions = _ty.TypedDict('GetInstanceOptions', {
     'relationships': _ty.NotRequired[bool],
     'extend': _ty.NotRequired[str|None],
     'extend_context': _ty.NotRequired[str|None],
@@ -94,7 +94,7 @@ options = _ty.TypedDict('options', {
     'limit': _ty.NotRequired[int],
     'force_sql_filters': _ty.NotRequired[bool], 
 })
-SystemNtpserverGet_instance = _ty.TypedDict('SystemNtpserverGet_instance', {
+GetInstanceReturn = _ty.TypedDict('GetInstanceReturn', {
     'id': int,
     'address': str,
     'burst': _ty.NotRequired[bool],
@@ -103,7 +103,21 @@ SystemNtpserverGet_instance = _ty.TypedDict('SystemNtpserverGet_instance', {
     'minpoll': _ty.NotRequired[int],
     'maxpoll': _ty.NotRequired[int], 
 })
-NTPServerQueryResultItem = _ty.TypedDict('NTPServerQueryResultItem', {
+QueryOptions = _ty.TypedDict('QueryOptions', {
+    'relationships': _ty.NotRequired[bool],
+    'extend': _ty.NotRequired[str|None],
+    'extend_context': _ty.NotRequired[str|None],
+    'prefix': _ty.NotRequired[str|None],
+    'extra': _ty.NotRequired[_jsonschema.JsonObject],
+    'order_by': _ty.NotRequired[list[str]],
+    'select': _ty.NotRequired[list[str|_jsonschema.JsonArray]],
+    'count': _ty.NotRequired[bool],
+    'get': _ty.NotRequired[bool],
+    'offset': _ty.NotRequired[int],
+    'limit': _ty.NotRequired[int],
+    'force_sql_filters': _ty.NotRequired[bool], 
+})
+QueryNTPServerQueryResultItem = _ty.TypedDict('QueryNTPServerQueryResultItem', {
     'id': _ty.NotRequired[int],
     'address': _ty.NotRequired[str],
     'burst': _ty.NotRequired[bool],
@@ -112,7 +126,7 @@ NTPServerQueryResultItem = _ty.TypedDict('NTPServerQueryResultItem', {
     'minpoll': _ty.NotRequired[int],
     'maxpoll': _ty.NotRequired[int], 
 })
-ntp_server_update = _ty.TypedDict('ntp_server_update', {
+UpdateNtpServerUpdate = _ty.TypedDict('UpdateNtpServerUpdate', {
     'address': _ty.NotRequired[str],
     'burst': _ty.NotRequired[bool],
     'iburst': _ty.NotRequired[bool],
@@ -121,7 +135,7 @@ ntp_server_update = _ty.TypedDict('ntp_server_update', {
     'maxpoll': _ty.NotRequired[int],
     'force': _ty.NotRequired[bool], 
 })
-SystemNtpserverUpdate = _ty.TypedDict('SystemNtpserverUpdate', {
+UpdateReturn = _ty.TypedDict('UpdateReturn', {
     'id': int,
     'address': str,
     'burst': _ty.NotRequired[bool],

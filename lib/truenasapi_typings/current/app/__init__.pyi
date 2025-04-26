@@ -1,18 +1,18 @@
 from pytruenas import Namespace as _NS
 from pytruenas.models import jsonschema as _jsonschema
 import typing as _ty
-from .image import AppImage
-from .ix_volume import AppIx_volume
-from .registry import AppRegistry 
+from .image import Image
+from .ix_volume import IxVolume
+from .registry import Registry 
 class App(_NS):
     
     def available(self,
         filters:_jsonschema.JsonArray=[],
-        options:options={'relationships': True, 'extend': None, 'extend_context': None, 'prefix': None, 'extra': {}, 'order_by': [], 'select': [], 'count': False, 'get': False, 'offset': 0, 'limit': 0, 'force_sql_filters': False},
+        options:AvailableOptions={'relationships': True, 'extend': None, 'extend_context': None, 'prefix': None, 'extra': {}, 'order_by': [], 'select': [], 'count': False, 'get': False, 'offset': 0, 'limit': 0, 'force_sql_filters': False},
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> list[AppAvailableResponseQueryResultItem]|AppAvailableResponseQueryResultItem|int:
+    ) -> list[AvailableAppAvailableResponseQueryResultItem]|AvailableAppAvailableResponseQueryResultItem|int:
         """Retrieve all available applications from all configured catalogs."""
         ...
     def available_space(self,
@@ -33,14 +33,14 @@ class App(_NS):
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> list[AppCertificate]:
+    ) -> list[CertificateAuthorityChoicesAppCertificate]:
         """Returns certificate authorities which can be used by applications."""
         ...
     def certificate_choices(self,
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> list[AppCertificate]:
+    ) -> list[CertificateChoicesAppCertificate]:
         """Returns certificates which can be used by applications."""
         ...
     def config(self,
@@ -61,7 +61,7 @@ class App(_NS):
         ...
     def container_ids(self,
         app_name:str,
-        options:options={'alive_only': True},
+        options:ContainerIdsOptions={'alive_only': True},
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
@@ -73,22 +73,22 @@ class App(_NS):
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> AppConvert_to_custom:
+    ) -> ConvertToCustomReturn:
         """Convert `app_name` to a custom app."""
         ...
     def create(self,
-        app_create:app_create,
+        app_create:CreateAppCreate,
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> AppCreate:
+    ) -> CreateReturn:
         """Create an app with `app_name` using `catalog_app` with `train` and `version`.
 
 TODO: Add support for advanced mode which will enable users to use their own compose files"""
         ...
     def delete(self,
         app_name:str,
-        options:options={'remove_images': True, 'remove_ix_volumes': False, 'force_remove_ix_volumes': False, 'force_remove_custom_app': False},
+        options:DeleteOptions={'remove_images': True, 'remove_ix_volumes': False, 'force_remove_ix_volumes': False, 'force_remove_custom_app': False},
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
@@ -101,11 +101,11 @@ TODO: Add support for advanced mode which will enable users to use their own com
         ...
     def get_instance(self,
         id:str,
-        options:options={},
+        options:GetInstanceOptions={},
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> AppGet_instance:
+    ) -> GetInstanceReturn:
         """Returns instance matching `id`. If `id` is not found, Validation error is raised.
 
 Please see `query` method documentation for `options`."""
@@ -126,11 +126,11 @@ Please see `query` method documentation for `options`."""
         ...
     def latest(self,
         filters:_jsonschema.JsonArray=[],
-        options:options={'relationships': True, 'extend': None, 'extend_context': None, 'prefix': None, 'extra': {}, 'order_by': [], 'select': [], 'count': False, 'get': False, 'offset': 0, 'limit': 0, 'force_sql_filters': False},
+        options:LatestOptions={'relationships': True, 'extend': None, 'extend_context': None, 'prefix': None, 'extra': {}, 'order_by': [], 'select': [], 'count': False, 'get': False, 'offset': 0, 'limit': 0, 'force_sql_filters': False},
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> list[AppAvailableResponseQueryResultItem]|AppAvailableResponseQueryResultItem|int:
+    ) -> list[LatestAppAvailableResponseQueryResultItem]|LatestAppAvailableResponseQueryResultItem|int:
         """Retrieve latest updated apps."""
         ...
     def outdated_docker_images(self,
@@ -143,7 +143,7 @@ Please see `query` method documentation for `options`."""
         ...
     def pull_images(self,
         app_name:str,
-        options:options={'redeploy': True},
+        options:PullImagesOptions={'redeploy': True},
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
@@ -152,11 +152,11 @@ Please see `query` method documentation for `options`."""
         ...
     def query(self,
         filters:_jsonschema.JsonArray=[],
-        options:options={'relationships': True, 'extend': None, 'extend_context': None, 'prefix': None, 'extra': {}, 'order_by': [], 'select': [], 'count': False, 'get': False, 'offset': 0, 'limit': 0, 'force_sql_filters': False},
+        options:QueryOptions={'relationships': True, 'extend': None, 'extend_context': None, 'prefix': None, 'extra': {}, 'order_by': [], 'select': [], 'count': False, 'get': False, 'offset': 0, 'limit': 0, 'force_sql_filters': False},
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> list[AppQueryResultItem]|AppQueryResultItem|int:
+    ) -> list[QueryAppQueryResultItem]|QueryAppQueryResultItem|int:
         """Query all apps with `query-filters` and `query-options`.
 
 `query-options.extra.host_ip` is a string which can be provided to override portal IP address if it is a wildcard.
@@ -170,16 +170,16 @@ Please see `query` method documentation for `options`."""
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> AppRedeploy:
+    ) -> RedeployReturn:
         """Redeploy `app_name` app."""
         ...
     def rollback(self,
         app_name:str,
-        options:options,
+        options:RollbackOptions,
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> AppRollback:
+    ) -> RollbackReturn:
         """Rollback `app_name` app to previous version."""
         ...
     def rollback_versions(self,
@@ -196,7 +196,7 @@ Please see `query` method documentation for `options`."""
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> list[AppAvailableResponse]:
+    ) -> list[SimilarAppAvailableResponse]:
         """Retrieve applications which are similar to `app_name`."""
         ...
     def start(self,
@@ -217,29 +217,29 @@ Please see `query` method documentation for `options`."""
         ...
     def update(self,
         app_name:str,
-        update:update={'values': '{}', 'custom_compose_config': '{}', 'custom_compose_config_string': ''},
+        update:UpdateUpdate={'values': '{}', 'custom_compose_config': '{}', 'custom_compose_config_string': ''},
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> AppUpdate:
+    ) -> UpdateReturn:
         """Update `app_name` app with new configuration."""
         ...
     def upgrade(self,
         app_name:str,
-        options:options={'app_version': 'latest', 'values': '{}', 'snapshot_hostpaths': False},
+        options:UpgradeOptions={'app_version': 'latest', 'values': '{}', 'snapshot_hostpaths': False},
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> AppUpgrade:
+    ) -> UpgradeReturn:
         """Upgrade `app_name` app to `app_version`."""
         ...
     def upgrade_summary(self,
         app_name:str,
-        options:options={'app_version': 'latest'},
+        options:UpgradeSummaryOptions={'app_version': 'latest'},
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> AppUpgrade_summary:
+    ) -> UpgradeSummaryReturn:
         """Retrieve upgrade summary for `app_name`."""
         ...
     def used_ports(self,
@@ -249,13 +249,24 @@ Please see `query` method documentation for `options`."""
     ) -> list[int]:
         """Returns ports in use by applications."""
         ...
-    image: AppImage
-    ix_volume: AppIx_volume
-    registry: AppRegistry
-options = _ty.TypedDict('options', {
-    'app_version': _ty.NotRequired[str], 
+    image: Image
+    ix_volume: IxVolume
+    registry: Registry
+AvailableOptions = _ty.TypedDict('AvailableOptions', {
+    'relationships': _ty.NotRequired[bool],
+    'extend': _ty.NotRequired[str|None],
+    'extend_context': _ty.NotRequired[str|None],
+    'prefix': _ty.NotRequired[str|None],
+    'extra': _ty.NotRequired[_jsonschema.JsonObject],
+    'order_by': _ty.NotRequired[list[str]],
+    'select': _ty.NotRequired[list[str|_jsonschema.JsonArray]],
+    'count': _ty.NotRequired[bool],
+    'get': _ty.NotRequired[bool],
+    'offset': _ty.NotRequired[int],
+    'limit': _ty.NotRequired[int],
+    'force_sql_filters': _ty.NotRequired[bool], 
 })
-AppAvailableResponseQueryResultItem = _ty.TypedDict('AppAvailableResponseQueryResultItem', {
+AvailableAppAvailableResponseQueryResultItem = _ty.TypedDict('AvailableAppAvailableResponseQueryResultItem', {
     'app_readme': _ty.NotRequired[str|None],
     'categories': _ty.NotRequired[list[str]],
     'description': _ty.NotRequired[str],
@@ -279,11 +290,18 @@ AppAvailableResponseQueryResultItem = _ty.TypedDict('AppAvailableResponseQueryRe
     'installed': _ty.NotRequired[bool],
     'train': _ty.NotRequired[str], 
 })
-AppCertificate = _ty.TypedDict('AppCertificate', {
+CertificateAuthorityChoicesAppCertificate = _ty.TypedDict('CertificateAuthorityChoicesAppCertificate', {
     'id': int,
     'name': str, 
 })
-AppConvert_to_custom = _ty.TypedDict('AppConvert_to_custom', {
+CertificateChoicesAppCertificate = _ty.TypedDict('CertificateChoicesAppCertificate', {
+    'id': int,
+    'name': str, 
+})
+ContainerIdsOptions = _ty.TypedDict('ContainerIdsOptions', {
+    'alive_only': _ty.NotRequired[bool], 
+})
+ConvertToCustomReturn = _ty.TypedDict('ConvertToCustomReturn', {
     'name': str,
     'id': str,
     'state': str,
@@ -301,7 +319,7 @@ AppConvert_to_custom = _ty.TypedDict('AppConvert_to_custom', {
     'version_details': _ty.NotRequired[_jsonschema.JsonObject|None],
     'config': _ty.NotRequired[_jsonschema.JsonObject|None], 
 })
-app_create = _ty.TypedDict('app_create', {
+CreateAppCreate = _ty.TypedDict('CreateAppCreate', {
     'custom_app': _ty.NotRequired[bool],
     'values': _ty.NotRequired[_jsonschema.JsonObject],
     'custom_compose_config': _ty.NotRequired[_jsonschema.JsonObject],
@@ -311,7 +329,7 @@ app_create = _ty.TypedDict('app_create', {
     'train': _ty.NotRequired[str],
     'version': _ty.NotRequired[str], 
 })
-AppCreate = _ty.TypedDict('AppCreate', {
+CreateReturn = _ty.TypedDict('CreateReturn', {
     'name': str,
     'id': str,
     'state': str,
@@ -329,7 +347,27 @@ AppCreate = _ty.TypedDict('AppCreate', {
     'version_details': _ty.NotRequired[_jsonschema.JsonObject|None],
     'config': _ty.NotRequired[_jsonschema.JsonObject|None], 
 })
-AppGet_instance = _ty.TypedDict('AppGet_instance', {
+DeleteOptions = _ty.TypedDict('DeleteOptions', {
+    'remove_images': _ty.NotRequired[bool],
+    'remove_ix_volumes': _ty.NotRequired[bool],
+    'force_remove_ix_volumes': _ty.NotRequired[bool],
+    'force_remove_custom_app': _ty.NotRequired[bool], 
+})
+GetInstanceOptions = _ty.TypedDict('GetInstanceOptions', {
+    'relationships': _ty.NotRequired[bool],
+    'extend': _ty.NotRequired[str|None],
+    'extend_context': _ty.NotRequired[str|None],
+    'prefix': _ty.NotRequired[str|None],
+    'extra': _ty.NotRequired[_jsonschema.JsonObject],
+    'order_by': _ty.NotRequired[list[str]],
+    'select': _ty.NotRequired[list[str|_jsonschema.JsonArray]],
+    'count': _ty.NotRequired[bool],
+    'get': _ty.NotRequired[bool],
+    'offset': _ty.NotRequired[int],
+    'limit': _ty.NotRequired[int],
+    'force_sql_filters': _ty.NotRequired[bool], 
+})
+GetInstanceReturn = _ty.TypedDict('GetInstanceReturn', {
     'name': str,
     'id': str,
     'state': str,
@@ -347,7 +385,62 @@ AppGet_instance = _ty.TypedDict('AppGet_instance', {
     'version_details': _ty.NotRequired[_jsonschema.JsonObject|None],
     'config': _ty.NotRequired[_jsonschema.JsonObject|None], 
 })
-AppQueryResultItem = _ty.TypedDict('AppQueryResultItem', {
+LatestOptions = _ty.TypedDict('LatestOptions', {
+    'relationships': _ty.NotRequired[bool],
+    'extend': _ty.NotRequired[str|None],
+    'extend_context': _ty.NotRequired[str|None],
+    'prefix': _ty.NotRequired[str|None],
+    'extra': _ty.NotRequired[_jsonschema.JsonObject],
+    'order_by': _ty.NotRequired[list[str]],
+    'select': _ty.NotRequired[list[str|_jsonschema.JsonArray]],
+    'count': _ty.NotRequired[bool],
+    'get': _ty.NotRequired[bool],
+    'offset': _ty.NotRequired[int],
+    'limit': _ty.NotRequired[int],
+    'force_sql_filters': _ty.NotRequired[bool], 
+})
+LatestAppAvailableResponseQueryResultItem = _ty.TypedDict('LatestAppAvailableResponseQueryResultItem', {
+    'app_readme': _ty.NotRequired[str|None],
+    'categories': _ty.NotRequired[list[str]],
+    'description': _ty.NotRequired[str],
+    'healthy': _ty.NotRequired[bool],
+    'healthy_error': _ty.NotRequired[str|None],
+    'home': _ty.NotRequired[str],
+    'location': _ty.NotRequired[str],
+    'latest_version': _ty.NotRequired[str|None],
+    'latest_app_version': _ty.NotRequired[str|None],
+    'latest_human_version': _ty.NotRequired[str|None],
+    'last_update': _ty.NotRequired[str|None],
+    'name': _ty.NotRequired[str],
+    'recommended': _ty.NotRequired[bool],
+    'title': _ty.NotRequired[str],
+    'maintainers': _ty.NotRequired[_jsonschema.JsonArray],
+    'tags': _ty.NotRequired[list[str]],
+    'screenshots': _ty.NotRequired[list[str]],
+    'sources': _ty.NotRequired[list[str]],
+    'icon_url': _ty.NotRequired[str|None],
+    'catalog': _ty.NotRequired[str],
+    'installed': _ty.NotRequired[bool],
+    'train': _ty.NotRequired[str], 
+})
+PullImagesOptions = _ty.TypedDict('PullImagesOptions', {
+    'redeploy': _ty.NotRequired[bool], 
+})
+QueryOptions = _ty.TypedDict('QueryOptions', {
+    'relationships': _ty.NotRequired[bool],
+    'extend': _ty.NotRequired[str|None],
+    'extend_context': _ty.NotRequired[str|None],
+    'prefix': _ty.NotRequired[str|None],
+    'extra': _ty.NotRequired[_jsonschema.JsonObject],
+    'order_by': _ty.NotRequired[list[str]],
+    'select': _ty.NotRequired[list[str|_jsonschema.JsonArray]],
+    'count': _ty.NotRequired[bool],
+    'get': _ty.NotRequired[bool],
+    'offset': _ty.NotRequired[int],
+    'limit': _ty.NotRequired[int],
+    'force_sql_filters': _ty.NotRequired[bool], 
+})
+QueryAppQueryResultItem = _ty.TypedDict('QueryAppQueryResultItem', {
     'name': _ty.NotRequired[str],
     'id': _ty.NotRequired[str],
     'state': _ty.NotRequired[str],
@@ -365,7 +458,7 @@ AppQueryResultItem = _ty.TypedDict('AppQueryResultItem', {
     'version_details': _ty.NotRequired[_jsonschema.JsonObject|None],
     'config': _ty.NotRequired[_jsonschema.JsonObject|None], 
 })
-AppRedeploy = _ty.TypedDict('AppRedeploy', {
+RedeployReturn = _ty.TypedDict('RedeployReturn', {
     'name': str,
     'id': str,
     'state': str,
@@ -383,7 +476,11 @@ AppRedeploy = _ty.TypedDict('AppRedeploy', {
     'version_details': _ty.NotRequired[_jsonschema.JsonObject|None],
     'config': _ty.NotRequired[_jsonschema.JsonObject|None], 
 })
-AppRollback = _ty.TypedDict('AppRollback', {
+RollbackOptions = _ty.TypedDict('RollbackOptions', {
+    'app_version': str,
+    'rollback_snapshot': _ty.NotRequired[bool], 
+})
+RollbackReturn = _ty.TypedDict('RollbackReturn', {
     'name': str,
     'id': str,
     'state': str,
@@ -401,7 +498,7 @@ AppRollback = _ty.TypedDict('AppRollback', {
     'version_details': _ty.NotRequired[_jsonschema.JsonObject|None],
     'config': _ty.NotRequired[_jsonschema.JsonObject|None], 
 })
-AppAvailableResponse = _ty.TypedDict('AppAvailableResponse', {
+SimilarAppAvailableResponse = _ty.TypedDict('SimilarAppAvailableResponse', {
     'app_readme': str|None,
     'categories': list[str],
     'description': str,
@@ -425,12 +522,12 @@ AppAvailableResponse = _ty.TypedDict('AppAvailableResponse', {
     'installed': bool,
     'train': str, 
 })
-update = _ty.TypedDict('update', {
+UpdateUpdate = _ty.TypedDict('UpdateUpdate', {
     'values': _ty.NotRequired[_jsonschema.JsonObject],
     'custom_compose_config': _ty.NotRequired[_jsonschema.JsonObject],
     'custom_compose_config_string': _ty.NotRequired[str], 
 })
-AppUpdate = _ty.TypedDict('AppUpdate', {
+UpdateReturn = _ty.TypedDict('UpdateReturn', {
     'name': str,
     'id': str,
     'state': str,
@@ -448,7 +545,12 @@ AppUpdate = _ty.TypedDict('AppUpdate', {
     'version_details': _ty.NotRequired[_jsonschema.JsonObject|None],
     'config': _ty.NotRequired[_jsonschema.JsonObject|None], 
 })
-AppUpgrade = _ty.TypedDict('AppUpgrade', {
+UpgradeOptions = _ty.TypedDict('UpgradeOptions', {
+    'app_version': _ty.NotRequired[str],
+    'values': _ty.NotRequired[_jsonschema.JsonObject],
+    'snapshot_hostpaths': _ty.NotRequired[bool], 
+})
+UpgradeReturn = _ty.TypedDict('UpgradeReturn', {
     'name': str,
     'id': str,
     'state': str,
@@ -466,7 +568,10 @@ AppUpgrade = _ty.TypedDict('AppUpgrade', {
     'version_details': _ty.NotRequired[_jsonschema.JsonObject|None],
     'config': _ty.NotRequired[_jsonschema.JsonObject|None], 
 })
-AppUpgrade_summary = _ty.TypedDict('AppUpgrade_summary', {
+UpgradeSummaryOptions = _ty.TypedDict('UpgradeSummaryOptions', {
+    'app_version': _ty.NotRequired[str], 
+})
+UpgradeSummaryReturn = _ty.TypedDict('UpgradeSummaryReturn', {
     'latest_version': str,
     'latest_human_version': str,
     'upgrade_version': str,

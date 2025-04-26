@@ -1,26 +1,26 @@
 from pytruenas import Namespace as _NS
 from pytruenas.models import jsonschema as _jsonschema
 import typing as _ty 
-class BootEnvironment(_NS):
+class Environment(_NS):
     
     def activate(self,
-        boot_environment_activate:boot_environment_activate,
+        boot_environment_activate:ActivateBootEnvironmentActivate,
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> BootEnvironmentActivate:
+    ) -> ActivateReturn:
         """"""
         ...
     def clone(self,
-        boot_environment_clone:boot_environment_clone,
+        boot_environment_clone:CloneBootEnvironmentClone,
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> BootEnvironmentClone:
+    ) -> CloneReturn:
         """"""
         ...
     def destroy(self,
-        boot_environment_destroy:boot_environment_destroy,
+        boot_environment_destroy:DestroyBootEnvironmentDestroy,
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
@@ -28,26 +28,26 @@ class BootEnvironment(_NS):
         """"""
         ...
     def keep(self,
-        boot_environment_destroy:boot_environment_destroy,
+        boot_environment_destroy:KeepBootEnvironmentDestroy,
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> BootEnvironmentKeep:
+    ) -> KeepReturn:
         """"""
         ...
     def query(self,
         filters:_jsonschema.JsonArray=[],
-        options:options={'relationships': True, 'extend': None, 'extend_context': None, 'prefix': None, 'extra': {}, 'order_by': [], 'select': [], 'count': False, 'get': False, 'offset': 0, 'limit': 0, 'force_sql_filters': False},
+        options:QueryOptions={'relationships': True, 'extend': None, 'extend_context': None, 'prefix': None, 'extra': {}, 'order_by': [], 'select': [], 'count': False, 'get': False, 'offset': 0, 'limit': 0, 'force_sql_filters': False},
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> list[BootEnvironmentQueryResultItem]|BootEnvironmentQueryResultItem|int:
+    ) -> list[QueryBootEnvironmentQueryResultItem]|QueryBootEnvironmentQueryResultItem|int:
         """"""
         ...
-boot_environment_activate = _ty.TypedDict('boot_environment_activate', {
+ActivateBootEnvironmentActivate = _ty.TypedDict('ActivateBootEnvironmentActivate', {
     'id': str, 
 })
-BootEnvironmentActivate = _ty.TypedDict('BootEnvironmentActivate', {
+ActivateReturn = _ty.TypedDict('ActivateReturn', {
     'id': str,
     'dataset': str,
     'active': bool,
@@ -58,11 +58,11 @@ BootEnvironmentActivate = _ty.TypedDict('BootEnvironmentActivate', {
     'keep': bool,
     'can_activate': bool, 
 })
-boot_environment_clone = _ty.TypedDict('boot_environment_clone', {
+CloneBootEnvironmentClone = _ty.TypedDict('CloneBootEnvironmentClone', {
     'id': str,
     'target': str, 
 })
-BootEnvironmentClone = _ty.TypedDict('BootEnvironmentClone', {
+CloneReturn = _ty.TypedDict('CloneReturn', {
     'id': str,
     'dataset': str,
     'active': bool,
@@ -73,11 +73,14 @@ BootEnvironmentClone = _ty.TypedDict('BootEnvironmentClone', {
     'keep': bool,
     'can_activate': bool, 
 })
-boot_environment_destroy = _ty.TypedDict('boot_environment_destroy', {
+DestroyBootEnvironmentDestroy = _ty.TypedDict('DestroyBootEnvironmentDestroy', {
+    'id': str, 
+})
+KeepBootEnvironmentDestroy = _ty.TypedDict('KeepBootEnvironmentDestroy', {
     'id': str,
     'value': bool, 
 })
-BootEnvironmentKeep = _ty.TypedDict('BootEnvironmentKeep', {
+KeepReturn = _ty.TypedDict('KeepReturn', {
     'id': str,
     'dataset': str,
     'active': bool,
@@ -88,7 +91,7 @@ BootEnvironmentKeep = _ty.TypedDict('BootEnvironmentKeep', {
     'keep': bool,
     'can_activate': bool, 
 })
-options = _ty.TypedDict('options', {
+QueryOptions = _ty.TypedDict('QueryOptions', {
     'relationships': _ty.NotRequired[bool],
     'extend': _ty.NotRequired[str|None],
     'extend_context': _ty.NotRequired[str|None],
@@ -102,7 +105,7 @@ options = _ty.TypedDict('options', {
     'limit': _ty.NotRequired[int],
     'force_sql_filters': _ty.NotRequired[bool], 
 })
-BootEnvironmentQueryResultItem = _ty.TypedDict('BootEnvironmentQueryResultItem', {
+QueryBootEnvironmentQueryResultItem = _ty.TypedDict('QueryBootEnvironmentQueryResultItem', {
     'id': _ty.NotRequired[str],
     'dataset': _ty.NotRequired[str],
     'active': _ty.NotRequired[bool],

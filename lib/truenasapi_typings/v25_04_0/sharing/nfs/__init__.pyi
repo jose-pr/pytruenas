@@ -1,14 +1,14 @@
 from pytruenas import Namespace as _NS
 from pytruenas.models import jsonschema as _jsonschema
 import typing as _ty 
-class SharingNfs(_NS):
+class Nfs(_NS):
     
     def create(self,
-        data:data,
+        data:CreateData,
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> SharingNfsCreate:
+    ) -> CreateReturn:
         """Create a NFS Share.
 
 `path` local path to be exported.
@@ -31,35 +31,35 @@ class SharingNfs(_NS):
         ...
     def get_instance(self,
         id:int,
-        options:options={},
+        options:GetInstanceOptions={},
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> SharingNfsGet_instance:
+    ) -> GetInstanceReturn:
         """Returns instance matching `id`. If `id` is not found, Validation error is raised.
 
 Please see `query` method documentation for `options`."""
         ...
     def query(self,
         filters:_jsonschema.JsonArray=[],
-        options:options={'relationships': True, 'extend': None, 'extend_context': None, 'prefix': None, 'extra': {}, 'order_by': [], 'select': [], 'count': False, 'get': False, 'offset': 0, 'limit': 0, 'force_sql_filters': False},
+        options:QueryOptions={'relationships': True, 'extend': None, 'extend_context': None, 'prefix': None, 'extra': {}, 'order_by': [], 'select': [], 'count': False, 'get': False, 'offset': 0, 'limit': 0, 'force_sql_filters': False},
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> list[NfsShareQueryResultItem]|NfsShareQueryResultItem|int:
+    ) -> list[QueryNfsShareQueryResultItem]|QueryNfsShareQueryResultItem|int:
         """"""
         ...
     def update(self,
         id:int,
-        data:data,
+        data:UpdateData,
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> SharingNfsUpdate:
+    ) -> UpdateReturn:
         """Update NFS Share of `id`."""
         ...
-data = _ty.TypedDict('data', {
-    'path': _ty.NotRequired[str],
+CreateData = _ty.TypedDict('CreateData', {
+    'path': str,
     'aliases': _ty.NotRequired[list[str]],
     'comment': _ty.NotRequired[str],
     'networks': _ty.NotRequired[list[str]],
@@ -73,7 +73,7 @@ data = _ty.TypedDict('data', {
     'enabled': _ty.NotRequired[bool],
     'expose_snapshots': _ty.NotRequired[bool], 
 })
-SharingNfsCreate = _ty.TypedDict('SharingNfsCreate', {
+CreateReturn = _ty.TypedDict('CreateReturn', {
     'id': int,
     'path': str,
     'aliases': _ty.NotRequired[list[str]],
@@ -90,7 +90,7 @@ SharingNfsCreate = _ty.TypedDict('SharingNfsCreate', {
     'locked': bool|None,
     'expose_snapshots': _ty.NotRequired[bool], 
 })
-options = _ty.TypedDict('options', {
+GetInstanceOptions = _ty.TypedDict('GetInstanceOptions', {
     'relationships': _ty.NotRequired[bool],
     'extend': _ty.NotRequired[str|None],
     'extend_context': _ty.NotRequired[str|None],
@@ -104,7 +104,7 @@ options = _ty.TypedDict('options', {
     'limit': _ty.NotRequired[int],
     'force_sql_filters': _ty.NotRequired[bool], 
 })
-SharingNfsGet_instance = _ty.TypedDict('SharingNfsGet_instance', {
+GetInstanceReturn = _ty.TypedDict('GetInstanceReturn', {
     'id': int,
     'path': str,
     'aliases': _ty.NotRequired[list[str]],
@@ -121,7 +121,21 @@ SharingNfsGet_instance = _ty.TypedDict('SharingNfsGet_instance', {
     'locked': bool|None,
     'expose_snapshots': _ty.NotRequired[bool], 
 })
-NfsShareQueryResultItem = _ty.TypedDict('NfsShareQueryResultItem', {
+QueryOptions = _ty.TypedDict('QueryOptions', {
+    'relationships': _ty.NotRequired[bool],
+    'extend': _ty.NotRequired[str|None],
+    'extend_context': _ty.NotRequired[str|None],
+    'prefix': _ty.NotRequired[str|None],
+    'extra': _ty.NotRequired[_jsonschema.JsonObject],
+    'order_by': _ty.NotRequired[list[str]],
+    'select': _ty.NotRequired[list[str|_jsonschema.JsonArray]],
+    'count': _ty.NotRequired[bool],
+    'get': _ty.NotRequired[bool],
+    'offset': _ty.NotRequired[int],
+    'limit': _ty.NotRequired[int],
+    'force_sql_filters': _ty.NotRequired[bool], 
+})
+QueryNfsShareQueryResultItem = _ty.TypedDict('QueryNfsShareQueryResultItem', {
     'id': _ty.NotRequired[int],
     'path': _ty.NotRequired[str],
     'aliases': _ty.NotRequired[list[str]],
@@ -138,7 +152,22 @@ NfsShareQueryResultItem = _ty.TypedDict('NfsShareQueryResultItem', {
     'locked': _ty.NotRequired[bool|None],
     'expose_snapshots': _ty.NotRequired[bool], 
 })
-SharingNfsUpdate = _ty.TypedDict('SharingNfsUpdate', {
+UpdateData = _ty.TypedDict('UpdateData', {
+    'path': _ty.NotRequired[str],
+    'aliases': _ty.NotRequired[list[str]],
+    'comment': _ty.NotRequired[str],
+    'networks': _ty.NotRequired[list[str]],
+    'hosts': _ty.NotRequired[list[str]],
+    'ro': _ty.NotRequired[bool],
+    'maproot_user': _ty.NotRequired[str|None],
+    'maproot_group': _ty.NotRequired[str|None],
+    'mapall_user': _ty.NotRequired[str|None],
+    'mapall_group': _ty.NotRequired[str|None],
+    'security': _ty.NotRequired[list[str]],
+    'enabled': _ty.NotRequired[bool],
+    'expose_snapshots': _ty.NotRequired[bool], 
+})
+UpdateReturn = _ty.TypedDict('UpdateReturn', {
     'id': int,
     'path': str,
     'aliases': _ty.NotRequired[list[str]],

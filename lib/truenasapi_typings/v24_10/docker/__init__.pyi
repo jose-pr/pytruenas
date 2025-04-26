@@ -1,7 +1,7 @@
 from pytruenas import Namespace as _NS
 from pytruenas.models import jsonschema as _jsonschema
 import typing as _ty
-from .network import DockerNetwork 
+from .network import Network 
 class Docker(_NS):
     
     def backup(self,
@@ -16,7 +16,7 @@ class Docker(_NS):
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> DockerConfig:
+    ) -> ConfigReturn:
         """"""
         ...
     def delete_backup(self,
@@ -53,19 +53,19 @@ class Docker(_NS):
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> DockerStatus:
+    ) -> StatusReturn:
         """Returns the status of the docker service."""
         ...
     def update(self,
-        docker_update:docker_update,
+        docker_update:UpdateDockerUpdate,
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> DockerUpdate:
+    ) -> UpdateReturn:
         """Update Docker service configuration."""
         ...
-    network: DockerNetwork
-DockerConfig = _ty.TypedDict('DockerConfig', {
+    network: Network
+ConfigReturn = _ty.TypedDict('ConfigReturn', {
     'id': int,
     'enable_image_updates': bool,
     'dataset': str|None,
@@ -74,18 +74,18 @@ DockerConfig = _ty.TypedDict('DockerConfig', {
     'address_pools': list[_jsonschema.JsonObject],
     'cidr_v6': str, 
 })
-DockerStatus = _ty.TypedDict('DockerStatus', {
+StatusReturn = _ty.TypedDict('StatusReturn', {
     'description': str,
     'status': str, 
 })
-docker_update = _ty.TypedDict('docker_update', {
+UpdateDockerUpdate = _ty.TypedDict('UpdateDockerUpdate', {
     'enable_image_updates': _ty.NotRequired[bool],
     'pool': _ty.NotRequired[str|None],
     'nvidia': _ty.NotRequired[bool],
     'address_pools': _ty.NotRequired[_jsonschema.JsonArray],
     'cidr_v6': _ty.NotRequired[str], 
 })
-DockerUpdate = _ty.TypedDict('DockerUpdate', {
+UpdateReturn = _ty.TypedDict('UpdateReturn', {
     'id': int,
     'enable_image_updates': bool,
     'dataset': str|None,

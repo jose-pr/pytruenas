@@ -1,14 +1,14 @@
 from pytruenas import Namespace as _NS
 from pytruenas.models import jsonschema as _jsonschema
 import typing as _ty 
-class IscsiAuth(_NS):
+class Auth(_NS):
     
     def create(self,
-        data:data,
+        data:CreateData,
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> IscsiAuthCreate:
+    ) -> CreateReturn:
         """Create an iSCSI Authorized Access.
 
 `tag` should be unique among all configured iSCSI Authorized Accesses.
@@ -27,42 +27,42 @@ class IscsiAuth(_NS):
         ...
     def get_instance(self,
         id:int,
-        options:options={},
+        options:GetInstanceOptions={},
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> IscsiAuthGet_instance:
+    ) -> GetInstanceReturn:
         """Returns instance matching `id`. If `id` is not found, Validation error is raised.
 
 Please see `query` method documentation for `options`."""
         ...
     def query(self,
         filters:_jsonschema.JsonArray=[],
-        options:options={'relationships': True, 'extend': None, 'extend_context': None, 'prefix': None, 'extra': {}, 'order_by': [], 'select': [], 'count': False, 'get': False, 'offset': 0, 'limit': 0, 'force_sql_filters': False},
+        options:QueryOptions={'relationships': True, 'extend': None, 'extend_context': None, 'prefix': None, 'extra': {}, 'order_by': [], 'select': [], 'count': False, 'get': False, 'offset': 0, 'limit': 0, 'force_sql_filters': False},
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> list[IscsiAuthQueryResultItem]|IscsiAuthQueryResultItem|int:
+    ) -> list[QueryIscsiAuthQueryResultItem]|QueryIscsiAuthQueryResultItem|int:
         """"""
         ...
     def update(self,
         id:int,
-        data:data,
+        data:UpdateData,
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> IscsiAuthUpdate:
+    ) -> UpdateReturn:
         """Update iSCSI Authorized Access of `id`."""
         ...
-data = _ty.TypedDict('data', {
-    'tag': _ty.NotRequired[int],
-    'user': _ty.NotRequired[str],
-    'secret': _ty.NotRequired[str],
+CreateData = _ty.TypedDict('CreateData', {
+    'tag': int,
+    'user': str,
+    'secret': str,
     'peeruser': _ty.NotRequired[str],
     'peersecret': _ty.NotRequired[str],
     'discovery_auth': _ty.NotRequired[str], 
 })
-IscsiAuthCreate = _ty.TypedDict('IscsiAuthCreate', {
+CreateReturn = _ty.TypedDict('CreateReturn', {
     'id': int,
     'tag': int,
     'user': str,
@@ -71,7 +71,7 @@ IscsiAuthCreate = _ty.TypedDict('IscsiAuthCreate', {
     'peersecret': _ty.NotRequired[str],
     'discovery_auth': _ty.NotRequired[str], 
 })
-options = _ty.TypedDict('options', {
+GetInstanceOptions = _ty.TypedDict('GetInstanceOptions', {
     'relationships': _ty.NotRequired[bool],
     'extend': _ty.NotRequired[str|None],
     'extend_context': _ty.NotRequired[str|None],
@@ -85,7 +85,7 @@ options = _ty.TypedDict('options', {
     'limit': _ty.NotRequired[int],
     'force_sql_filters': _ty.NotRequired[bool], 
 })
-IscsiAuthGet_instance = _ty.TypedDict('IscsiAuthGet_instance', {
+GetInstanceReturn = _ty.TypedDict('GetInstanceReturn', {
     'id': int,
     'tag': int,
     'user': str,
@@ -94,7 +94,21 @@ IscsiAuthGet_instance = _ty.TypedDict('IscsiAuthGet_instance', {
     'peersecret': _ty.NotRequired[str],
     'discovery_auth': _ty.NotRequired[str], 
 })
-IscsiAuthQueryResultItem = _ty.TypedDict('IscsiAuthQueryResultItem', {
+QueryOptions = _ty.TypedDict('QueryOptions', {
+    'relationships': _ty.NotRequired[bool],
+    'extend': _ty.NotRequired[str|None],
+    'extend_context': _ty.NotRequired[str|None],
+    'prefix': _ty.NotRequired[str|None],
+    'extra': _ty.NotRequired[_jsonschema.JsonObject],
+    'order_by': _ty.NotRequired[list[str]],
+    'select': _ty.NotRequired[list[str|_jsonschema.JsonArray]],
+    'count': _ty.NotRequired[bool],
+    'get': _ty.NotRequired[bool],
+    'offset': _ty.NotRequired[int],
+    'limit': _ty.NotRequired[int],
+    'force_sql_filters': _ty.NotRequired[bool], 
+})
+QueryIscsiAuthQueryResultItem = _ty.TypedDict('QueryIscsiAuthQueryResultItem', {
     'id': _ty.NotRequired[int],
     'tag': _ty.NotRequired[int],
     'user': _ty.NotRequired[str],
@@ -103,7 +117,15 @@ IscsiAuthQueryResultItem = _ty.TypedDict('IscsiAuthQueryResultItem', {
     'peersecret': _ty.NotRequired[str],
     'discovery_auth': _ty.NotRequired[str], 
 })
-IscsiAuthUpdate = _ty.TypedDict('IscsiAuthUpdate', {
+UpdateData = _ty.TypedDict('UpdateData', {
+    'tag': _ty.NotRequired[int],
+    'user': _ty.NotRequired[str],
+    'secret': _ty.NotRequired[str],
+    'peeruser': _ty.NotRequired[str],
+    'peersecret': _ty.NotRequired[str],
+    'discovery_auth': _ty.NotRequired[str], 
+})
+UpdateReturn = _ty.TypedDict('UpdateReturn', {
     'id': int,
     'tag': int,
     'user': str,

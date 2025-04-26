@@ -1,14 +1,14 @@
 from pytruenas import Namespace as _NS
 from pytruenas.models import jsonschema as _jsonschema
 import typing as _ty 
-class Api_key(_NS):
+class ApiKey(_NS):
     
     def create(self,
-        api_key_create:api_key_create,
+        api_key_create:CreateApiKeyCreate,
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> Api_keyCreate:
+    ) -> CreateReturn:
         """Creates API Key.
 
 `name` is a user-readable name for key."""
@@ -23,11 +23,11 @@ class Api_key(_NS):
         ...
     def get_instance(self,
         id:int,
-        options:options={},
+        options:GetInstanceOptions={},
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> Api_keyGet_instance:
+    ) -> GetInstanceReturn:
         """Returns instance matching `id`. If `id` is not found, Validation error is raised.
 
 Please see `query` method documentation for `options`."""
@@ -36,35 +36,35 @@ Please see `query` method documentation for `options`."""
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> list[ApiKeyEntry]:
+    ) -> list[MyKeysApiKeyEntry]:
         """Get the existing API keys for the currently-authenticated user"""
         ...
     def query(self,
         filters:_jsonschema.JsonArray=[],
-        options:options={'relationships': True, 'extend': None, 'extend_context': None, 'prefix': None, 'extra': {}, 'order_by': [], 'select': [], 'count': False, 'get': False, 'offset': 0, 'limit': 0, 'force_sql_filters': False},
+        options:QueryOptions={'relationships': True, 'extend': None, 'extend_context': None, 'prefix': None, 'extra': {}, 'order_by': [], 'select': [], 'count': False, 'get': False, 'offset': 0, 'limit': 0, 'force_sql_filters': False},
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> list[ApiKeyQueryResultItem]|ApiKeyQueryResultItem|int:
+    ) -> list[QueryApiKeyQueryResultItem]|QueryApiKeyQueryResultItem|int:
         """"""
         ...
     def update(self,
         id:int,
-        api_key_update:api_key_update,
+        api_key_update:UpdateApiKeyUpdate,
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> ApiKeyEntryWithKey|ApiKeyEntry:
+    ) -> UpdateApiKeyEntryWithKey|UpdateApiKeyEntry:
         """Update API Key `id`.
 
 Specify `reset: true` to reset this API Key."""
         ...
-api_key_create = _ty.TypedDict('api_key_create', {
+CreateApiKeyCreate = _ty.TypedDict('CreateApiKeyCreate', {
     'name': str,
     'username': str|str,
     'expires_at': _ty.NotRequired[str|None], 
 })
-Api_keyCreate = _ty.TypedDict('Api_keyCreate', {
+CreateReturn = _ty.TypedDict('CreateReturn', {
     'id': int,
     'name': str,
     'username': str|str,
@@ -76,7 +76,7 @@ Api_keyCreate = _ty.TypedDict('Api_keyCreate', {
     'revoked': bool,
     'key': str, 
 })
-options = _ty.TypedDict('options', {
+GetInstanceOptions = _ty.TypedDict('GetInstanceOptions', {
     'relationships': _ty.NotRequired[bool],
     'extend': _ty.NotRequired[str|None],
     'extend_context': _ty.NotRequired[str|None],
@@ -90,7 +90,7 @@ options = _ty.TypedDict('options', {
     'limit': _ty.NotRequired[int],
     'force_sql_filters': _ty.NotRequired[bool], 
 })
-Api_keyGet_instance = _ty.TypedDict('Api_keyGet_instance', {
+GetInstanceReturn = _ty.TypedDict('GetInstanceReturn', {
     'id': int,
     'name': str,
     'username': str|str,
@@ -101,7 +101,7 @@ Api_keyGet_instance = _ty.TypedDict('Api_keyGet_instance', {
     'local': bool,
     'revoked': bool, 
 })
-ApiKeyEntry = _ty.TypedDict('ApiKeyEntry', {
+MyKeysApiKeyEntry = _ty.TypedDict('MyKeysApiKeyEntry', {
     'id': int,
     'name': str,
     'username': str|str,
@@ -112,7 +112,21 @@ ApiKeyEntry = _ty.TypedDict('ApiKeyEntry', {
     'local': bool,
     'revoked': bool, 
 })
-ApiKeyQueryResultItem = _ty.TypedDict('ApiKeyQueryResultItem', {
+QueryOptions = _ty.TypedDict('QueryOptions', {
+    'relationships': _ty.NotRequired[bool],
+    'extend': _ty.NotRequired[str|None],
+    'extend_context': _ty.NotRequired[str|None],
+    'prefix': _ty.NotRequired[str|None],
+    'extra': _ty.NotRequired[_jsonschema.JsonObject],
+    'order_by': _ty.NotRequired[list[str]],
+    'select': _ty.NotRequired[list[str|_jsonschema.JsonArray]],
+    'count': _ty.NotRequired[bool],
+    'get': _ty.NotRequired[bool],
+    'offset': _ty.NotRequired[int],
+    'limit': _ty.NotRequired[int],
+    'force_sql_filters': _ty.NotRequired[bool], 
+})
+QueryApiKeyQueryResultItem = _ty.TypedDict('QueryApiKeyQueryResultItem', {
     'id': _ty.NotRequired[int],
     'name': _ty.NotRequired[str],
     'username': _ty.NotRequired[str|str],
@@ -123,12 +137,12 @@ ApiKeyQueryResultItem = _ty.TypedDict('ApiKeyQueryResultItem', {
     'local': _ty.NotRequired[bool],
     'revoked': _ty.NotRequired[bool], 
 })
-api_key_update = _ty.TypedDict('api_key_update', {
+UpdateApiKeyUpdate = _ty.TypedDict('UpdateApiKeyUpdate', {
     'name': _ty.NotRequired[str],
     'expires_at': _ty.NotRequired[str|None],
     'reset': _ty.NotRequired[bool], 
 })
-ApiKeyEntryWithKey = _ty.TypedDict('ApiKeyEntryWithKey', {
+UpdateApiKeyEntryWithKey = _ty.TypedDict('UpdateApiKeyEntryWithKey', {
     'id': int,
     'name': str,
     'username': str|str,
@@ -139,4 +153,15 @@ ApiKeyEntryWithKey = _ty.TypedDict('ApiKeyEntryWithKey', {
     'local': bool,
     'revoked': bool,
     'key': str, 
+})
+UpdateApiKeyEntry = _ty.TypedDict('UpdateApiKeyEntry', {
+    'id': int,
+    'name': str,
+    'username': str|str,
+    'user_identifier': int|str,
+    'keyhash': str,
+    'created_at': str,
+    'expires_at': _ty.NotRequired[str|None],
+    'local': bool,
+    'revoked': bool, 
 })

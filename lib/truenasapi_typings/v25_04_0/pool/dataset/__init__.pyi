@@ -1,7 +1,7 @@
 from pytruenas import Namespace as _NS
 from pytruenas.models import jsonschema as _jsonschema
 import typing as _ty 
-class PoolDataset(_NS):
+class Dataset(_NS):
     
     def details(self,
         _method:str|None=None,

@@ -4,7 +4,7 @@ import typing as _ty
 class Config(_NS):
     
     def reset(self,
-        options:options={'reboot': True},
+        options:ResetOptions={'reboot': True},
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
@@ -14,7 +14,7 @@ class Config(_NS):
 If `reboot` is true this job will reboot the system after its completed with a delay of 10 seconds."""
         ...
     def save(self,
-        options:options={'secretseed': False, 'pool_keys': False, 'root_authorized_keys': False},
+        options:SaveOptions={'secretseed': False, 'pool_keys': False, 'root_authorized_keys': False},
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
@@ -32,7 +32,10 @@ If none of these options are set, the tar file is not generated and the database
     ) -> None:
         """Accepts a configuration file via job pipe."""
         ...
-options = _ty.TypedDict('options', {
+ResetOptions = _ty.TypedDict('ResetOptions', {
+    'reboot': _ty.NotRequired[bool], 
+})
+SaveOptions = _ty.TypedDict('SaveOptions', {
     'secretseed': _ty.NotRequired[bool],
     'pool_keys': _ty.NotRequired[bool],
     'root_authorized_keys': _ty.NotRequired[bool], 

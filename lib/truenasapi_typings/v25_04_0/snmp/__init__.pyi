@@ -7,22 +7,22 @@ class Snmp(_NS):
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> SnmpConfig:
+    ) -> ConfigReturn:
         """"""
         ...
     def update(self,
-        snmp_update:snmp_update,
+        snmp_update:UpdateSnmpUpdate,
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> SnmpUpdate:
+    ) -> UpdateReturn:
         """Update SNMP Service Configuration.
 
 --- Rules --- Enabling v3: requires v3_username, v3_authtype and v3_password Disabling v3: By itself will retain the v3 user settings and config in the 'private' config, but remove the entry in the public config to block v3 access by that user. Disabling v3 and clearing the v3_username: This will do the actions described in 'Disabling v3' and take the extra step to remove the user from the 'private' config.
 
 The 'v3_*' settings are valid and enforced only when 'v3' is enabled"""
         ...
-SnmpConfig = _ty.TypedDict('SnmpConfig', {
+ConfigReturn = _ty.TypedDict('ConfigReturn', {
     'location': str,
     'contact': str|str,
     'traps': bool,
@@ -38,7 +38,7 @@ SnmpConfig = _ty.TypedDict('SnmpConfig', {
     'zilstat': bool,
     'id': int, 
 })
-snmp_update = _ty.TypedDict('snmp_update', {
+UpdateSnmpUpdate = _ty.TypedDict('UpdateSnmpUpdate', {
     'location': _ty.NotRequired[str],
     'contact': _ty.NotRequired[str|str],
     'traps': _ty.NotRequired[bool],
@@ -53,7 +53,7 @@ snmp_update = _ty.TypedDict('snmp_update', {
     'options': _ty.NotRequired[str],
     'zilstat': _ty.NotRequired[bool], 
 })
-SnmpUpdate = _ty.TypedDict('SnmpUpdate', {
+UpdateReturn = _ty.TypedDict('UpdateReturn', {
     'location': str,
     'contact': str|str,
     'traps': bool,

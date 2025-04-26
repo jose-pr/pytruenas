@@ -14,7 +14,7 @@ class Smb(_NS):
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> SmbConfig:
+    ) -> ConfigReturn:
         """"""
         ...
     def unixcharset_choices(self,
@@ -25,11 +25,11 @@ class Smb(_NS):
         """"""
         ...
     def update(self,
-        smb_update:smb_update,
+        smb_update:UpdateSmbUpdate,
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> SmbUpdate:
+    ) -> UpdateReturn:
         """Update SMB Service Configuration.
 
 `netbiosname` defaults to the original hostname of the system.
@@ -54,7 +54,7 @@ The group specified as the SMB `admin_group` will be automatically added as a fo
 
 `smb_options` smb.conf parameters that are not covered by the above supported configuration options may be added as an smb_option. Not all options are tested or supported, and behavior of smb_options may change between releases. Stability of smb.conf options is not guaranteed."""
         ...
-SmbConfig = _ty.TypedDict('SmbConfig', {
+ConfigReturn = _ty.TypedDict('ConfigReturn', {
     'id': int,
     'netbiosname': str,
     'netbiosalias': list[str],
@@ -77,7 +77,7 @@ SmbConfig = _ty.TypedDict('SmbConfig', {
     'smb_options': str,
     'debug': bool, 
 })
-smb_update = _ty.TypedDict('smb_update', {
+UpdateSmbUpdate = _ty.TypedDict('UpdateSmbUpdate', {
     'netbiosname': _ty.NotRequired[str],
     'netbiosalias': _ty.NotRequired[list[str]],
     'workgroup': _ty.NotRequired[str],
@@ -99,7 +99,7 @@ smb_update = _ty.TypedDict('smb_update', {
     'smb_options': _ty.NotRequired[str],
     'debug': _ty.NotRequired[bool], 
 })
-SmbUpdate = _ty.TypedDict('SmbUpdate', {
+UpdateReturn = _ty.TypedDict('UpdateReturn', {
     'id': int,
     'netbiosname': str,
     'netbiosalias': list[str],

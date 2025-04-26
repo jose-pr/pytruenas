@@ -4,7 +4,7 @@ import typing as _ty
 class Auth(_NS):
     
     def generate_onetime_password(self,
-        generate_single_use_password:generate_single_use_password,
+        generate_single_use_password:GenerateOnetimePasswordGenerateSingleUsePassword,
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
@@ -41,11 +41,11 @@ NOTE: this endpoint is not supported when server security requires replay-resist
         """Authenticate session using username and password. `otp_token` must be specified if two factor authentication is enabled."""
         ...
     def login_ex(self,
-        login_data:AuthApiKeyPlain|AuthPasswordPlain|AuthTokenPlain|AuthOTPToken,
+        login_data:LoginExAuthApiKeyPlain|LoginExAuthPasswordPlain|LoginExAuthTokenPlain|LoginExAuthOTPToken,
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> AuthRespSuccess|AuthRespAuthErr|AuthRespExpired|AuthRespOTPRequired|AuthRespAuthRedirect:
+    ) -> LoginExAuthRespSuccess|LoginExAuthRespAuthErr|LoginExAuthRespExpired|LoginExAuthRespOTPRequired|LoginExAuthRespAuthRedirect:
         """Authenticate using one of a variety of mechanisms
 
 NOTE: mechanisms with a _PLAIN suffix indicate that they involve passing plain-text passwords or password-equivalent strings and should not be used on untrusted / insecure transport. Available mechanisms will be expanded in future releases.
@@ -91,11 +91,11 @@ EXPIRED The specified credential is expired and not suitable for authentication.
 REDIRECT Authentication must be performed on different server."""
         ...
     def login_ex_continue(self,
-        login_data:login_data,
+        login_data:LoginExContinueLoginData,
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> AuthRespSuccess|AuthRespAuthErr|AuthRespExpired|AuthRespOTPRequired|AuthRespAuthRedirect:
+    ) -> LoginExContinueAuthRespSuccess|LoginExContinueAuthRespAuthErr|LoginExContinueAuthRespExpired|LoginExContinueAuthRespOTPRequired|LoginExContinueAuthRespAuthRedirect:
         """Continue in-progress authentication attempt. This endpoint should be called to continue an auth.login_ex attempt that returned OTP_REQUIRED.
 
 This is a convenience wrapper around auth.login_ex for API consumers.
@@ -139,7 +139,7 @@ returns: JSON object containing the following keys:
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> AuthMe:
+    ) -> MeReturn:
         """Returns currently logged-in user."""
         ...
     def mechanism_choices(self,
@@ -151,11 +151,11 @@ returns: JSON object containing the following keys:
         ...
     def sessions(self,
         filters:_jsonschema.JsonArray=[],
-        options:options={'relationships': True, 'extend': None, 'extend_context': None, 'prefix': None, 'extra': {}, 'order_by': [], 'select': [], 'count': False, 'get': False, 'offset': 0, 'limit': 0, 'force_sql_filters': False},
+        options:SessionsOptions={'relationships': True, 'extend': None, 'extend_context': None, 'prefix': None, 'extra': {}, 'order_by': [], 'select': [], 'count': False, 'get': False, 'offset': 0, 'limit': 0, 'force_sql_filters': False},
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> list[AuthSessionQueryResultItem]|AuthSessionQueryResultItem|int:
+    ) -> list[SessionsAuthSessionQueryResultItem]|SessionsAuthSessionQueryResultItem|int:
         """Returns list of active auth sessions.
 
 Example of return value:
@@ -198,56 +198,75 @@ e.g. Setting key="foo" value="var" will result in {"attributes": {"foo": "bar"}}
     ) -> bool:
         """Terminates session `id`."""
         ...
-generate_single_use_password = _ty.TypedDict('generate_single_use_password', {
+GenerateOnetimePasswordGenerateSingleUsePassword = _ty.TypedDict('GenerateOnetimePasswordGenerateSingleUsePassword', {
     'username': str, 
 })
-AuthApiKeyPlain = _ty.TypedDict('AuthApiKeyPlain', {
+LoginExAuthApiKeyPlain = _ty.TypedDict('LoginExAuthApiKeyPlain', {
     'mechanism': str,
     'username': str,
     'api_key': str,
     'login_options': _ty.NotRequired[_jsonschema.JsonValue], 
 })
-AuthPasswordPlain = _ty.TypedDict('AuthPasswordPlain', {
+LoginExAuthPasswordPlain = _ty.TypedDict('LoginExAuthPasswordPlain', {
     'mechanism': str,
     'username': str,
     'password': str,
     'login_options': _ty.NotRequired[_jsonschema.JsonValue], 
 })
-AuthTokenPlain = _ty.TypedDict('AuthTokenPlain', {
+LoginExAuthTokenPlain = _ty.TypedDict('LoginExAuthTokenPlain', {
     'mechanism': str,
     'token': str,
     'login_options': _ty.NotRequired[_jsonschema.JsonValue], 
 })
-AuthOTPToken = _ty.TypedDict('AuthOTPToken', {
+LoginExAuthOTPToken = _ty.TypedDict('LoginExAuthOTPToken', {
     'mechanism': str,
     'otp_token': str,
     'login_options': _ty.NotRequired[_jsonschema.JsonValue], 
 })
-AuthRespSuccess = _ty.TypedDict('AuthRespSuccess', {
+LoginExAuthRespSuccess = _ty.TypedDict('LoginExAuthRespSuccess', {
     'response_type': str,
     'user_info': _jsonschema.JsonValue|None,
     'authenticator': str, 
 })
-AuthRespAuthErr = _ty.TypedDict('AuthRespAuthErr', {
+LoginExAuthRespAuthErr = _ty.TypedDict('LoginExAuthRespAuthErr', {
     'response_type': str, 
 })
-AuthRespExpired = _ty.TypedDict('AuthRespExpired', {
+LoginExAuthRespExpired = _ty.TypedDict('LoginExAuthRespExpired', {
     'response_type': str, 
 })
-AuthRespOTPRequired = _ty.TypedDict('AuthRespOTPRequired', {
+LoginExAuthRespOTPRequired = _ty.TypedDict('LoginExAuthRespOTPRequired', {
     'response_type': str,
     'username': str, 
 })
-AuthRespAuthRedirect = _ty.TypedDict('AuthRespAuthRedirect', {
+LoginExAuthRespAuthRedirect = _ty.TypedDict('LoginExAuthRespAuthRedirect', {
     'response_type': str,
     'urls': list[str], 
 })
-login_data = _ty.TypedDict('login_data', {
+LoginExContinueLoginData = _ty.TypedDict('LoginExContinueLoginData', {
     'mechanism': str,
     'otp_token': str,
     'login_options': _ty.NotRequired[_jsonschema.JsonValue], 
 })
-AuthMe = _ty.TypedDict('AuthMe', {
+LoginExContinueAuthRespSuccess = _ty.TypedDict('LoginExContinueAuthRespSuccess', {
+    'response_type': str,
+    'user_info': _jsonschema.JsonValue|None,
+    'authenticator': str, 
+})
+LoginExContinueAuthRespAuthErr = _ty.TypedDict('LoginExContinueAuthRespAuthErr', {
+    'response_type': str, 
+})
+LoginExContinueAuthRespExpired = _ty.TypedDict('LoginExContinueAuthRespExpired', {
+    'response_type': str, 
+})
+LoginExContinueAuthRespOTPRequired = _ty.TypedDict('LoginExContinueAuthRespOTPRequired', {
+    'response_type': str,
+    'username': str, 
+})
+LoginExContinueAuthRespAuthRedirect = _ty.TypedDict('LoginExContinueAuthRespAuthRedirect', {
+    'response_type': str,
+    'urls': list[str], 
+})
+MeReturn = _ty.TypedDict('MeReturn', {
     'pw_name': str,
     'pw_gecos': str,
     'pw_dir': str,
@@ -263,7 +282,7 @@ AuthMe = _ty.TypedDict('AuthMe', {
     'privilege': _jsonschema.JsonObject,
     'account_attributes': list[str], 
 })
-options = _ty.TypedDict('options', {
+SessionsOptions = _ty.TypedDict('SessionsOptions', {
     'relationships': _ty.NotRequired[bool],
     'extend': _ty.NotRequired[str|None],
     'extend_context': _ty.NotRequired[str|None],
@@ -277,7 +296,7 @@ options = _ty.TypedDict('options', {
     'limit': _ty.NotRequired[int],
     'force_sql_filters': _ty.NotRequired[bool], 
 })
-AuthSessionQueryResultItem = _ty.TypedDict('AuthSessionQueryResultItem', {
+SessionsAuthSessionQueryResultItem = _ty.TypedDict('SessionsAuthSessionQueryResultItem', {
     'id': _ty.NotRequired[str],
     'current': _ty.NotRequired[bool],
     'internal': _ty.NotRequired[bool],

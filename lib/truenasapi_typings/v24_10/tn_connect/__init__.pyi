@@ -1,13 +1,13 @@
 from pytruenas import Namespace as _NS
 from pytruenas.models import jsonschema as _jsonschema
 import typing as _ty 
-class Tn_connect(_NS):
+class TnConnect(_NS):
     
     def config(self,
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> Tn_connectConfig:
+    ) -> ConfigReturn:
         """"""
         ...
     def generate_claim_token(self,
@@ -36,14 +36,14 @@ Before this endpoint is called, tn_connect must be enabled and a claim token mus
         """Returns IP choices which can be used with TrueNAS Connect."""
         ...
     def update(self,
-        tn_connect_update:tn_connect_update,
+        tn_connect_update:UpdateTnConnectUpdate,
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> Tn_connectUpdate:
+    ) -> UpdateReturn:
         """Update TrueNAS Connect configuration."""
         ...
-Tn_connectConfig = _ty.TypedDict('Tn_connectConfig', {
+ConfigReturn = _ty.TypedDict('ConfigReturn', {
     'id': int,
     'enabled': bool,
     'registration_details': _jsonschema.JsonObject,
@@ -56,7 +56,7 @@ Tn_connectConfig = _ty.TypedDict('Tn_connectConfig', {
     'tnc_base_url': str,
     'heartbeat_url': str, 
 })
-tn_connect_update = _ty.TypedDict('tn_connect_update', {
+UpdateTnConnectUpdate = _ty.TypedDict('UpdateTnConnectUpdate', {
     'enabled': _ty.NotRequired[bool],
     'ips': _ty.NotRequired[list[str]],
     'account_service_base_url': _ty.NotRequired[str],
@@ -64,7 +64,7 @@ tn_connect_update = _ty.TypedDict('tn_connect_update', {
     'tnc_base_url': _ty.NotRequired[str],
     'heartbeat_url': _ty.NotRequired[str], 
 })
-Tn_connectUpdate = _ty.TypedDict('Tn_connectUpdate', {
+UpdateReturn = _ty.TypedDict('UpdateReturn', {
     'id': int,
     'enabled': bool,
     'registration_details': _jsonschema.JsonObject,

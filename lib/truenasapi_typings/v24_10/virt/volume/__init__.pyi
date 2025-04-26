@@ -1,14 +1,14 @@
 from pytruenas import Namespace as _NS
 from pytruenas.models import jsonschema as _jsonschema
 import typing as _ty 
-class VirtVolume(_NS):
+class Volume(_NS):
     
     def create(self,
-        virt_volume_create:virt_volume_create,
+        virt_volume_create:CreateVirtVolumeCreate,
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> VirtVolumeCreate:
+    ) -> CreateReturn:
         """"""
         ...
     def delete(self,
@@ -21,56 +21,56 @@ class VirtVolume(_NS):
         ...
     def get_instance(self,
         id:str,
-        options:options={},
+        options:GetInstanceOptions={},
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> VirtVolumeGet_instance:
+    ) -> GetInstanceReturn:
         """Returns instance matching `id`. If `id` is not found, Validation error is raised.
 
 Please see `query` method documentation for `options`."""
         ...
     def import_iso(self,
-        virt_volume_import_iso:virt_volume_import_iso,
+        virt_volume_import_iso:ImportIsoVirtVolumeImportIso,
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> VirtVolumeImport_iso:
+    ) -> ImportIsoReturn:
         """"""
         ...
     def import_zvol(self,
-        virt_volume_import_iso:virt_volume_import_iso,
+        virt_volume_import_iso:ImportZvolVirtVolumeImportIso,
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> VirtVolumeImport_zvol:
+    ) -> ImportZvolReturn:
         """"""
         ...
     def query(self,
         filters:_jsonschema.JsonArray=[],
-        options:options={'relationships': True, 'extend': None, 'extend_context': None, 'prefix': None, 'extra': {}, 'order_by': [], 'select': [], 'count': False, 'get': False, 'offset': 0, 'limit': 0, 'force_sql_filters': False},
+        options:QueryOptions={'relationships': True, 'extend': None, 'extend_context': None, 'prefix': None, 'extra': {}, 'order_by': [], 'select': [], 'count': False, 'get': False, 'offset': 0, 'limit': 0, 'force_sql_filters': False},
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> list[VirtVolumeQueryResultItem]|VirtVolumeQueryResultItem|int:
+    ) -> list[QueryVirtVolumeQueryResultItem]|QueryVirtVolumeQueryResultItem|int:
         """"""
         ...
     def update(self,
         id:str,
-        virt_volume_update:virt_volume_update,
+        virt_volume_update:UpdateVirtVolumeUpdate,
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> VirtVolumeUpdate:
+    ) -> UpdateReturn:
         """"""
         ...
-virt_volume_create = _ty.TypedDict('virt_volume_create', {
+CreateVirtVolumeCreate = _ty.TypedDict('CreateVirtVolumeCreate', {
     'name': str,
     'content_type': _ty.NotRequired[str],
     'size': _ty.NotRequired[int],
     'storage_pool': _ty.NotRequired[str|None], 
 })
-VirtVolumeCreate = _ty.TypedDict('VirtVolumeCreate', {
+CreateReturn = _ty.TypedDict('CreateReturn', {
     'id': str,
     'name': str,
     'storage_pool': str,
@@ -80,7 +80,7 @@ VirtVolumeCreate = _ty.TypedDict('VirtVolumeCreate', {
     'config': _jsonschema.JsonObject,
     'used_by': list[str], 
 })
-options = _ty.TypedDict('options', {
+GetInstanceOptions = _ty.TypedDict('GetInstanceOptions', {
     'relationships': _ty.NotRequired[bool],
     'extend': _ty.NotRequired[str|None],
     'extend_context': _ty.NotRequired[str|None],
@@ -94,7 +94,7 @@ options = _ty.TypedDict('options', {
     'limit': _ty.NotRequired[int],
     'force_sql_filters': _ty.NotRequired[bool], 
 })
-VirtVolumeGet_instance = _ty.TypedDict('VirtVolumeGet_instance', {
+GetInstanceReturn = _ty.TypedDict('GetInstanceReturn', {
     'id': str,
     'name': str,
     'storage_pool': str,
@@ -104,11 +104,27 @@ VirtVolumeGet_instance = _ty.TypedDict('VirtVolumeGet_instance', {
     'config': _jsonschema.JsonObject,
     'used_by': list[str], 
 })
-virt_volume_import_iso = _ty.TypedDict('virt_volume_import_iso', {
+ImportIsoVirtVolumeImportIso = _ty.TypedDict('ImportIsoVirtVolumeImportIso', {
+    'name': str,
+    'iso_location': _ty.NotRequired[str|None],
+    'upload_iso': _ty.NotRequired[bool],
+    'storage_pool': _ty.NotRequired[str|None], 
+})
+ImportIsoReturn = _ty.TypedDict('ImportIsoReturn', {
+    'id': str,
+    'name': str,
+    'storage_pool': str,
+    'content_type': str,
+    'created_at': str,
+    'type': str,
+    'config': _jsonschema.JsonObject,
+    'used_by': list[str], 
+})
+ImportZvolVirtVolumeImportIso = _ty.TypedDict('ImportZvolVirtVolumeImportIso', {
     'to_import': _jsonschema.JsonArray,
     'clone': _ty.NotRequired[bool], 
 })
-VirtVolumeImport_iso = _ty.TypedDict('VirtVolumeImport_iso', {
+ImportZvolReturn = _ty.TypedDict('ImportZvolReturn', {
     'id': str,
     'name': str,
     'storage_pool': str,
@@ -118,17 +134,21 @@ VirtVolumeImport_iso = _ty.TypedDict('VirtVolumeImport_iso', {
     'config': _jsonschema.JsonObject,
     'used_by': list[str], 
 })
-VirtVolumeImport_zvol = _ty.TypedDict('VirtVolumeImport_zvol', {
-    'id': str,
-    'name': str,
-    'storage_pool': str,
-    'content_type': str,
-    'created_at': str,
-    'type': str,
-    'config': _jsonschema.JsonObject,
-    'used_by': list[str], 
+QueryOptions = _ty.TypedDict('QueryOptions', {
+    'relationships': _ty.NotRequired[bool],
+    'extend': _ty.NotRequired[str|None],
+    'extend_context': _ty.NotRequired[str|None],
+    'prefix': _ty.NotRequired[str|None],
+    'extra': _ty.NotRequired[_jsonschema.JsonObject],
+    'order_by': _ty.NotRequired[list[str]],
+    'select': _ty.NotRequired[list[str|_jsonschema.JsonArray]],
+    'count': _ty.NotRequired[bool],
+    'get': _ty.NotRequired[bool],
+    'offset': _ty.NotRequired[int],
+    'limit': _ty.NotRequired[int],
+    'force_sql_filters': _ty.NotRequired[bool], 
 })
-VirtVolumeQueryResultItem = _ty.TypedDict('VirtVolumeQueryResultItem', {
+QueryVirtVolumeQueryResultItem = _ty.TypedDict('QueryVirtVolumeQueryResultItem', {
     'id': _ty.NotRequired[str],
     'name': _ty.NotRequired[str],
     'storage_pool': _ty.NotRequired[str],
@@ -138,10 +158,10 @@ VirtVolumeQueryResultItem = _ty.TypedDict('VirtVolumeQueryResultItem', {
     'config': _ty.NotRequired[_jsonschema.JsonObject],
     'used_by': _ty.NotRequired[list[str]], 
 })
-virt_volume_update = _ty.TypedDict('virt_volume_update', {
+UpdateVirtVolumeUpdate = _ty.TypedDict('UpdateVirtVolumeUpdate', {
     'size': _ty.NotRequired[int], 
 })
-VirtVolumeUpdate = _ty.TypedDict('VirtVolumeUpdate', {
+UpdateReturn = _ty.TypedDict('UpdateReturn', {
     'id': str,
     'name': str,
     'storage_pool': str,
