@@ -1,7 +1,7 @@
 from pytruenas import Namespace as _NS
 import typing as _ty 
 class Auth(_NS):
-    
+        
     def generate_onetime_password(self,
         generate_single_use_password,
         _method:str|None=None,

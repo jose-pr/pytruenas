@@ -86,7 +86,7 @@ class Option:
         opts_ = {}
         for opt in opts:
             if hasattr(opt, "_options_"):
-                opt._options_(opts_)
+                _ty.cast(Option, opt)._options_(opts_)
             elif isinstance(opt, _ty.Mapping):
                 opts_.update(opt)
             elif isinstance(opt, (list, tuple)):

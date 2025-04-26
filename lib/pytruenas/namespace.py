@@ -15,7 +15,7 @@ if _ty.TYPE_CHECKING:
 _ERRNO_PATTERN = _re.compile(r"^\[([^]]*)\]\s*(.*)")
 
 
-def ioerror(error: _conn.ClientException):
+def ioerror(error: _conn.ClientException) -> Exception:
     match = _ERRNO_PATTERN.match(error.error)
     if match:
         name = match[1]
@@ -24,12 +24,17 @@ def ioerror(error: _conn.ClientException):
         errno = getattr(_errno, name, None)
         if error is not None:
 
-            error = IOError(errno, msg)
+            return IOError(errno, msg)
 
     return error
 
 
-class DbAction(_enum.StrEnum):
+_T = _ty.TypeVar("_T", bound=dict[str, object])
+
+_DBSelector: _ty.TypeAlias = "int | str | _ty.Sequence[str] | None | _q._Exclude"
+
+
+class DbAction(_enum.StrEnum, _ty.Generic[_T]):
     CREATE = "create"
     UPDATE = "update"
     UPSERT = "upsert"
@@ -37,10 +42,10 @@ class DbAction(_enum.StrEnum):
     def execute(
         __action,
         __namespace: "Namespace",
-        __selector: int | str | _ty.Sequence[str] = None,
+        __selector: _DBSelector = None,
         *__opts: dict | _q.Option,
         **__fields,
-    ) -> dict[str]:
+    ) -> _T:
         opts = _q.Option.options(*__opts)
         idkey = opts.get("idkey") or "id"
         fields = {name: val for name, val in __fields.items() if val is not _q.EXCLUDE}
@@ -64,7 +69,7 @@ class DbAction(_enum.StrEnum):
         if _id is None and selectors:
             current = __namespace._get(**selectors)
             if current:
-                _id = current[idkey]
+                _id = _ty.cast(int, current[idkey])
         else:
             current = None
 
@@ -99,7 +104,7 @@ class DbAction(_enum.StrEnum):
         if isinstance(result, int) and (wait is None or wait):
             result = __namespace._client.api.core.job_wait(result, job=True)
 
-        return result
+        return _ty.cast(_T, result)
 
 
 class Namespace:
@@ -110,7 +115,7 @@ class Namespace:
         self._namespace = ".".join([n for n in name if n])
 
     @cache
-    def __repr__(self) -> str:
+    def __repr__(self) -> str:  # type:ignore
         return f"{self.__class__.__name__}({self._client._api}/{self._namespace.replace('.','/')})"
 
     def __str__(self) -> str:
@@ -120,7 +125,7 @@ class Namespace:
         self,
         *args,
         _tries=1,
-        _method: str|None = None,
+        _method: str | None = None,
         _ioerror=False,
         _filetransfer: bool | bytes = False,
         **kwds,
@@ -137,7 +142,7 @@ class Namespace:
             )
         elif _utils.isbytelike(_filetransfer) or hasattr(_filetransfer, "read"):
             return self._client.upload(
-                _filetransfer,
+                _ty.cast(bytes, _filetransfer),
                 method,
                 *args,
                 _ioerror=_ioerror,
@@ -148,7 +153,9 @@ class Namespace:
 
         while _tries > 0:
             try:
-                self._client.logger.trace(f"Calling method: {method} args: {args}")
+                self._client.logger.trace(  # type:ignore
+                    f"Calling method: {method} args: {args}"
+                )
                 return self._client.websocket.call(method, *args, **kwds)
             except _conn.ClientException as e:
                 if e.errno == _errno.ECONNABORTED and _tries:
@@ -178,27 +185,29 @@ class Namespace:
     def __getitem__(self, name: str) -> "Namespace":
         return Namespace(self._client, self._namespace, name)
 
-    def _query(self, *__opts: dict | _q.Option, **filter) -> list[dict[str]]:
+    def _query(self, *__opts: dict | _q.Option, **filter):
         opts = _q.Option.options(*__opts)
         filter = _q.filter_from_kwargs(**filter)
-        return self.query(filter, opts)
+        return _ty.cast(list[dict[str, object]], self.query(filter, opts))
 
     def _get(
-        self, __id_or_filter: _ty.Mapping | int | str = None, **__filter
-    ) -> dict[str]:
+        self,
+        __id_or_filter: _ty.Mapping | int | str | None | _q._Exclude = None,
+        **__filter,
+    ) -> dict[str, object] | None:
         if isinstance(__id_or_filter, _ty.Mapping):
             id = None
             filter = {**__id_or_filter}
             filter.update(__filter)
         else:
-            id = __id_or_filter
+            id = __id_or_filter if __id_or_filter is not _q.EXCLUDE else None
             filter = __filter
         if id is not None and filter:
             raise ValueError(__filter)
 
         if id is not None:
             try:
-                return self.get_instance(id, _ioerror=True)
+                return _ty.cast(dict[str, object], self.get_instance(id, _ioerror=True))
             except FileNotFoundError as e:
                 return None
 
@@ -208,24 +217,23 @@ class Namespace:
 
     def _upsert(
         self,
-        __selector: int | str | _ty.Sequence[str] = None,
+        __selector: _DBSelector = None,
         *__opts: dict | _q.Option,
         **__fields,
-    ) -> dict[str]:
+    ):
         return DbAction.UPSERT.execute(self, __selector, *__opts, **__fields)
 
     def _update(
         self,
-        __selector: int | str | _ty.Sequence[str] = None,
+        __selector: _DBSelector = None,
         *__opts: dict | _q.Option,
         **__fields,
-    ) -> dict[str]:
+    ):
         return DbAction.UPDATE.execute(self, __selector, *__opts, **__fields)
 
     def _create(
         self,
-        __selector: int | str | _ty.Sequence[str] = None,
         *__opts: dict | _q.Option,
         **__fields,
-    ) -> dict[str]:
-        return DbAction.CREATE.execute(self, __selector, *__opts, **__fields)
+    ):
+        return DbAction.CREATE.execute(self, _q.EXCLUDE, *__opts, **__fields)

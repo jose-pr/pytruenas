@@ -20,7 +20,7 @@ STAT_FIELDS: tuple[str] = tuple(
 def classname(name: "str") -> str:
     std = _re.sub(r"[-\s_]+", "_", name)
     std = std.replace("+", "Plus").replace("!", "Not").replace("*", "All")
-    std = _re.sub("\W|^(?=\d)", "_", std)
+    std = _re.sub(r"\W|^(?=\d)", "_", std)
     if std == "":
         std = "_"
     std = std[0].upper() + _re.sub(
@@ -31,7 +31,7 @@ def classname(name: "str") -> str:
 
 def propname(name: str) -> str:
     std = _re.sub(r"[-\s_]+", "_", name)
-    std = _re.sub("\W|^(?=\d)", "_", std)
+    std = _re.sub(r"\W|^(?=\d)", "_", std)
     std = std[0].lower() + _re.sub("[A-Z]", lambda m: m.group(0)[1:].lower(), std[1:])
     return std
 
@@ -39,7 +39,7 @@ def propname(name: str) -> str:
 def str_(txt: "bytes|str") -> str:
     if isinstance(txt, str):
         return txt
-    return txt.decode()
+    return _ty.cast(bytes, txt).decode()
 
 
 def bytes_(txt: "bytes|str") -> bytes:

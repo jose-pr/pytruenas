@@ -37,7 +37,7 @@ class _QualNamed:
         qualname = self.qualname
         return (
             qualname[0].upper()
-            + _re.sub("\.[a-z]", lambda m: m.group(0)[1:].upper(), qualname)[1:] #type:ignore
+            + _re.sub(r"\.[a-z]", lambda m: m.group(0)[1:].upper(), qualname)[1:]
         )
 
     @property
