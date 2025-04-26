@@ -34,7 +34,7 @@ _T = _ty.TypeVar("_T", bound=dict[str, object])
 _DBSelector: _ty.TypeAlias = "int | str | _ty.Sequence[str] | None | _q._Exclude"
 
 
-class DbAction(_enum.StrEnum, _ty.Generic[_T]):
+class DbAction(_ty.Generic[_T], _enum.StrEnum):
     CREATE = "create"
     UPDATE = "update"
     UPSERT = "upsert"
@@ -228,7 +228,7 @@ class Namespace:
         self,
         __selector: _DBSelector = None,
         __callback: (
-            _ty.Callable[[DbAction, str | int, dict[str, object]]] | None
+            _ty.Callable[[DbAction, str | int, dict[str, object]], None] | None
         ) = None,
         *__opts: dict | _q.Option,
         **__fields,
