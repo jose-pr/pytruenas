@@ -150,7 +150,7 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
     def upload(
         self, file: str | bytes, method: str, *params, token=None, wait=True, **kwargs
     ):
-        client: "TrueNASClient[Current]" = # type:ignore
+        client: "TrueNASClient[Current]" = self #type:ignore
 
         scheme = "https" if client._api.scheme == "wss" else "http"
         target = client._api._replace(scheme=scheme, path="/_upload", port=0)
