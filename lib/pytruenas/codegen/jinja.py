@@ -1,7 +1,6 @@
 from jinja2 import Environment, FileSystemLoader
 from pathlib import Path as _P
-import typing as _ty
-from . import Renderer as _NSCodegen, Namespace
+from . import Renderer as _NSCodegen
 
 _DEFAULT_TEMPLATE = _P(__file__).parent / "ns_template.pyi.j2"
 
