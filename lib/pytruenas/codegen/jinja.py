@@ -2,13 +2,14 @@ from jinja2 import Environment, FileSystemLoader
 from pathlib import Path as _P
 from . import Renderer as _NSCodegen
 
-_DEFAULT_TEMPLATE = _P(__file__).parent / "ns_template.pyi.j2"
+BASEPATH = _P(__file__).parent
 
-_DEFAULT_ENV = Environment(loader=FileSystemLoader(_DEFAULT_TEMPLATE.parent))
+_DEFAULT_ENV = Environment(loader=FileSystemLoader(BASEPATH))
 
 
-class NamespaceRenderer(_NSCodegen):
-    template = _DEFAULT_ENV.get_template(_DEFAULT_TEMPLATE.name)
+class Renderer(_NSCodegen):
+    def __init__(self, template: str):
+        self.template = _DEFAULT_ENV.get_template(template + ".j2")
 
     def render(self, **ctx) -> str:
         return self.template.render(**ctx)

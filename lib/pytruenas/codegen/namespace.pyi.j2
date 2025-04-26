@@ -1,5 +1,8 @@
 from pytruenas import Namespace as _NS
+from pytruenas.models import jsonschema as _jsonschema
 import typing as _ty
+
+{%- set typeddicts = {} -%}
 
 {%- for qn in ns.namespaces() %}
 from {{ qn.module.removeprefix(ns.module) if ns.module else '.' + qn.module }} import {{ qn.classname }}
@@ -8,9 +11,9 @@ class {{ ns.classname }}(_NS):
     {% for qn in ns.methods() %}
     def {{ qn.methodname }}(self,
         {%- for param in qn.parameters() %}
-        {{param.argument_declaration()}}, 
+        {{param.argument_declaration(typeddicts)}}, 
         {%- endfor %}
-    ) -> {{ qn.classname }}:
+    ) -> {{ qn.returns().type_def(typeddicts) }}:
         """{{ qn.doc }}"""
         ...
     {%- endfor %} 
@@ -19,7 +22,10 @@ class {{ ns.classname }}(_NS):
     {%- endfor %} 
 
 
-{%- for qn in ns.methods() %}
-class {{ qn.classname }}(_ty.TypedDict):
-    ...
+{%- for name, properties in typeddicts.items() %}
+{{ name }} = _ty.TypedDict('{{ name }}', {
+{%- for prop, typedef in properties.items() %}
+    '{{ prop }}': {{typedef}},
 {%- endfor %} 
+})
+{%- endfor %}

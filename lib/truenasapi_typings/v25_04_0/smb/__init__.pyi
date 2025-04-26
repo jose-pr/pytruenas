@@ -1,4 +1,5 @@
 from pytruenas import Namespace as _NS
+from pytruenas.models import jsonschema as _jsonschema
 import typing as _ty 
 class Smb(_NS):
     
@@ -6,7 +7,7 @@ class Smb(_NS):
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> SmbBindip_choices:
+    ) -> _jsonschema.JsonObject:
         """List of valid choices for IP addresses to which to bind the SMB service. Addresses assigned by DHCP are excluded from the results."""
         ...
     def config(self,
@@ -20,11 +21,11 @@ class Smb(_NS):
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> SmbUnixcharset_choices:
+    ) -> _jsonschema.JsonObject:
         """"""
         ...
     def update(self,
-        smb_update,
+        smb_update:smb_update,
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
@@ -53,11 +54,71 @@ The group specified as the SMB `admin_group` will be automatically added as a fo
 
 `smb_options` smb.conf parameters that are not covered by the above supported configuration options may be added as an smb_option. Not all options are tested or supported, and behavior of smb_options may change between releases. Stability of smb.conf options is not guaranteed."""
         ...
-class SmbBindip_choices(_ty.TypedDict):
-    ...
-class SmbConfig(_ty.TypedDict):
-    ...
-class SmbUnixcharset_choices(_ty.TypedDict):
-    ...
-class SmbUpdate(_ty.TypedDict):
-    ... 
+SmbConfig = _ty.TypedDict('SmbConfig', {
+    'id': int,
+    'netbiosname': str,
+    'netbiosalias': list[str],
+    'workgroup': str,
+    'description': str,
+    'enable_smb1': bool,
+    'unixcharset': str,
+    'localmaster': bool,
+    'syslog': bool,
+    'aapl_extensions': bool,
+    'admin_group': str|None,
+    'guest': str,
+    'filemask': str|str,
+    'dirmask': str|str,
+    'ntlmv1_auth': bool,
+    'multichannel': bool,
+    'encryption': str,
+    'bindip': list[str],
+    'server_sid': str|None,
+    'smb_options': str,
+    'debug': bool, 
+})
+smb_update = _ty.TypedDict('smb_update', {
+    'netbiosname': _ty.NotRequired[str],
+    'netbiosalias': _ty.NotRequired[list[str]],
+    'workgroup': _ty.NotRequired[str],
+    'description': _ty.NotRequired[str],
+    'enable_smb1': _ty.NotRequired[bool],
+    'unixcharset': _ty.NotRequired[str],
+    'localmaster': _ty.NotRequired[bool],
+    'syslog': _ty.NotRequired[bool],
+    'aapl_extensions': _ty.NotRequired[bool],
+    'admin_group': _ty.NotRequired[str|None],
+    'guest': _ty.NotRequired[str],
+    'filemask': _ty.NotRequired[str|str],
+    'dirmask': _ty.NotRequired[str|str],
+    'ntlmv1_auth': _ty.NotRequired[bool],
+    'multichannel': _ty.NotRequired[bool],
+    'encryption': _ty.NotRequired[str],
+    'bindip': _ty.NotRequired[list[str]],
+    'server_sid': _ty.NotRequired[str|None],
+    'smb_options': _ty.NotRequired[str],
+    'debug': _ty.NotRequired[bool], 
+})
+SmbUpdate = _ty.TypedDict('SmbUpdate', {
+    'id': int,
+    'netbiosname': str,
+    'netbiosalias': list[str],
+    'workgroup': str,
+    'description': str,
+    'enable_smb1': bool,
+    'unixcharset': str,
+    'localmaster': bool,
+    'syslog': bool,
+    'aapl_extensions': bool,
+    'admin_group': str|None,
+    'guest': str,
+    'filemask': str|str,
+    'dirmask': str|str,
+    'ntlmv1_auth': bool,
+    'multichannel': bool,
+    'encryption': str,
+    'bindip': list[str],
+    'server_sid': str|None,
+    'smb_options': str,
+    'debug': bool, 
+})

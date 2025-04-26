@@ -1,9 +1,10 @@
 from pytruenas import Namespace as _NS
+from pytruenas.models import jsonschema as _jsonschema
 import typing as _ty 
 class Cronjob(_NS):
     
     def create(self,
-        data,
+        data:data,
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
@@ -13,16 +14,16 @@ class Cronjob(_NS):
 `stderr` and `stdout` are boolean values which if `true`, represent that we would like to suppress standard error / standard output respectively."""
         ...
     def delete(self,
-        id,
+        id:int,
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> CronjobDelete:
+    ) -> bool:
         """Delete cronjob of `id`."""
         ...
     def get_instance(self,
-        id,
-        options,
+        id:int,
+        options:options={},
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
@@ -32,41 +33,92 @@ class Cronjob(_NS):
 Please see `query` method documentation for `options`."""
         ...
     def query(self,
-        filters,
-        options,
+        filters:_jsonschema.JsonArray=[],
+        options:options={'relationships': True, 'extend': None, 'extend_context': None, 'prefix': None, 'extra': {}, 'order_by': [], 'select': [], 'count': False, 'get': False, 'offset': 0, 'limit': 0, 'force_sql_filters': False},
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> CronjobQuery:
+    ) -> list[CronJobQueryResultItem]|CronJobQueryResultItem|int:
         """"""
         ...
     def run(self,
-        id,
-        skip_disabled,
+        id:int,
+        skip_disabled:bool=False,
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> CronjobRun:
+    ) -> None:
         """Job to run cronjob task of `id`."""
         ...
     def update(self,
-        id,
-        data,
+        id:int,
+        data:data,
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
     ) -> CronjobUpdate:
         """Update cronjob of `id`."""
         ...
-class CronjobCreate(_ty.TypedDict):
-    ...
-class CronjobDelete(_ty.TypedDict):
-    ...
-class CronjobGet_instance(_ty.TypedDict):
-    ...
-class CronjobQuery(_ty.TypedDict):
-    ...
-class CronjobRun(_ty.TypedDict):
-    ...
-class CronjobUpdate(_ty.TypedDict):
-    ... 
+data = _ty.TypedDict('data', {
+    'enabled': _ty.NotRequired[bool],
+    'stderr': _ty.NotRequired[bool],
+    'stdout': _ty.NotRequired[bool],
+    'schedule': _ty.NotRequired[_jsonschema.JsonValue],
+    'command': _ty.NotRequired[str],
+    'description': _ty.NotRequired[str],
+    'user': _ty.NotRequired[str], 
+})
+CronjobCreate = _ty.TypedDict('CronjobCreate', {
+    'enabled': _ty.NotRequired[bool],
+    'stderr': _ty.NotRequired[bool],
+    'stdout': _ty.NotRequired[bool],
+    'schedule': _ty.NotRequired[_jsonschema.JsonValue],
+    'command': str,
+    'description': _ty.NotRequired[str],
+    'user': str,
+    'id': int, 
+})
+options = _ty.TypedDict('options', {
+    'relationships': _ty.NotRequired[bool],
+    'extend': _ty.NotRequired[str|None],
+    'extend_context': _ty.NotRequired[str|None],
+    'prefix': _ty.NotRequired[str|None],
+    'extra': _ty.NotRequired[_jsonschema.JsonObject],
+    'order_by': _ty.NotRequired[list[str]],
+    'select': _ty.NotRequired[list[str|_jsonschema.JsonArray]],
+    'count': _ty.NotRequired[bool],
+    'get': _ty.NotRequired[bool],
+    'offset': _ty.NotRequired[int],
+    'limit': _ty.NotRequired[int],
+    'force_sql_filters': _ty.NotRequired[bool], 
+})
+CronjobGet_instance = _ty.TypedDict('CronjobGet_instance', {
+    'enabled': _ty.NotRequired[bool],
+    'stderr': _ty.NotRequired[bool],
+    'stdout': _ty.NotRequired[bool],
+    'schedule': _ty.NotRequired[_jsonschema.JsonValue],
+    'command': str,
+    'description': _ty.NotRequired[str],
+    'user': str,
+    'id': int, 
+})
+CronJobQueryResultItem = _ty.TypedDict('CronJobQueryResultItem', {
+    'enabled': _ty.NotRequired[bool],
+    'stderr': _ty.NotRequired[bool],
+    'stdout': _ty.NotRequired[bool],
+    'schedule': _ty.NotRequired[_jsonschema.JsonValue],
+    'command': _ty.NotRequired[str],
+    'description': _ty.NotRequired[str],
+    'user': _ty.NotRequired[str],
+    'id': _ty.NotRequired[int], 
+})
+CronjobUpdate = _ty.TypedDict('CronjobUpdate', {
+    'enabled': _ty.NotRequired[bool],
+    'stderr': _ty.NotRequired[bool],
+    'stdout': _ty.NotRequired[bool],
+    'schedule': _ty.NotRequired[_jsonschema.JsonValue],
+    'command': str,
+    'description': _ty.NotRequired[str],
+    'user': str,
+    'id': int, 
+})

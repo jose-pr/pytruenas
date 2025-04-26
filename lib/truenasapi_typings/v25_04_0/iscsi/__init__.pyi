@@ -1,4 +1,5 @@
 from pytruenas import Namespace as _NS
+from pytruenas.models import jsonschema as _jsonschema
 import typing as _ty
 from .auth import IscsiAuth
 from .extent import IscsiExtent
@@ -15,4 +16,4 @@ class Iscsi(_NS):
     initiator: IscsiInitiator
     portal: IscsiPortal
     target: IscsiTarget
-    targetextent: IscsiTargetextent 
+    targetextent: IscsiTargetextent

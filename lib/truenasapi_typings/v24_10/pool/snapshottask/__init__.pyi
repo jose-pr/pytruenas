@@ -1,9 +1,10 @@
 from pytruenas import Namespace as _NS
+from pytruenas.models import jsonschema as _jsonschema
 import typing as _ty 
 class PoolSnapshottask(_NS):
     
     def create(self,
-        data,
+        data:data,
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
@@ -13,25 +14,25 @@ class PoolSnapshottask(_NS):
 Create a Periodic Snapshot Task that will take snapshots of specified `dataset` at specified `schedule`. Recursive snapshots can be created if `recursive` flag is enabled. You can `exclude` specific child datasets or zvols from the snapshot. Snapshots will be automatically destroyed after a certain amount of time, specified by `lifetime_value` and `lifetime_unit`. If multiple periodic tasks create snapshots at the same time (for example hourly and daily at 00:00) the snapshot will be kept until the last of these tasks reaches its expiry time. Snapshots will be named according to `naming_schema` which is a `strftime`-like template for snapshot name and must contain `%Y`, `%m`, `%d`, `%H` and `%M`."""
         ...
     def delete(self,
-        id,
-        options,
+        id:int,
+        options:options,
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> PoolSnapshottaskDelete:
+    ) -> bool:
         """Delete a Periodic Snapshot Task with specific `id`"""
         ...
     def delete_will_change_retention_for(self,
-        id,
+        id:int,
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> PoolSnapshottaskDelete_will_change_retention_for:
+    ) -> _jsonschema.JsonObject:
         """Returns a list of snapshots which will change the retention if periodic snapshot task `id` is deleted."""
         ...
     def get_instance(self,
-        id,
-        options,
+        id:int,
+        options:options={},
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
@@ -44,36 +45,36 @@ Please see `query` method documentation for `options`."""
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> PoolSnapshottaskMax_count:
+    ) -> int:
         """Returns a maximum amount of snapshots (per-dataset) the system can sustain."""
         ...
     def max_total_count(self,
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> PoolSnapshottaskMax_total_count:
+    ) -> int:
         """Returns a maximum amount of snapshots (total) the system can sustain."""
         ...
     def query(self,
-        filters,
-        options,
+        filters:_jsonschema.JsonArray=[],
+        options:options={'relationships': True, 'extend': None, 'extend_context': None, 'prefix': None, 'extra': {}, 'order_by': [], 'select': [], 'count': False, 'get': False, 'offset': 0, 'limit': 0, 'force_sql_filters': False},
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> PoolSnapshottaskQuery:
+    ) -> list[PoolSnapshotTaskQueryResultItem]|PoolSnapshotTaskQueryResultItem|int:
         """"""
         ...
     def run(self,
-        id,
+        id:int,
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> PoolSnapshottaskRun:
+    ) -> None:
         """Execute a Periodic Snapshot Task of `id`."""
         ...
     def update(self,
-        id,
-        data,
+        id:int,
+        data:data,
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
@@ -83,31 +84,92 @@ Please see `query` method documentation for `options`."""
 See the documentation for `create` method for information on payload contents"""
         ...
     def update_will_change_retention_for(self,
-        id,
-        data,
+        id:int,
+        data:data,
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> PoolSnapshottaskUpdate_will_change_retention_for:
+    ) -> _jsonschema.JsonObject:
         """Returns a list of snapshots which will change the retention if periodic snapshot task `id` is updated with `data`."""
         ...
-class PoolSnapshottaskCreate(_ty.TypedDict):
-    ...
-class PoolSnapshottaskDelete(_ty.TypedDict):
-    ...
-class PoolSnapshottaskDelete_will_change_retention_for(_ty.TypedDict):
-    ...
-class PoolSnapshottaskGet_instance(_ty.TypedDict):
-    ...
-class PoolSnapshottaskMax_count(_ty.TypedDict):
-    ...
-class PoolSnapshottaskMax_total_count(_ty.TypedDict):
-    ...
-class PoolSnapshottaskQuery(_ty.TypedDict):
-    ...
-class PoolSnapshottaskRun(_ty.TypedDict):
-    ...
-class PoolSnapshottaskUpdate(_ty.TypedDict):
-    ...
-class PoolSnapshottaskUpdate_will_change_retention_for(_ty.TypedDict):
-    ... 
+data = _ty.TypedDict('data', {
+    'dataset': _ty.NotRequired[str],
+    'recursive': _ty.NotRequired[bool],
+    'lifetime_value': _ty.NotRequired[int],
+    'lifetime_unit': _ty.NotRequired[str],
+    'enabled': _ty.NotRequired[bool],
+    'exclude': _ty.NotRequired[list[str]],
+    'naming_schema': _ty.NotRequired[str],
+    'allow_empty': _ty.NotRequired[bool],
+    'schedule': _ty.NotRequired[_jsonschema.JsonValue], 
+})
+PoolSnapshottaskCreate = _ty.TypedDict('PoolSnapshottaskCreate', {
+    'dataset': str,
+    'recursive': _ty.NotRequired[bool],
+    'lifetime_value': _ty.NotRequired[int],
+    'lifetime_unit': _ty.NotRequired[str],
+    'enabled': _ty.NotRequired[bool],
+    'exclude': _ty.NotRequired[list[str]],
+    'naming_schema': _ty.NotRequired[str],
+    'allow_empty': _ty.NotRequired[bool],
+    'schedule': _ty.NotRequired[_jsonschema.JsonValue],
+    'id': int,
+    'vmware_sync': bool,
+    'state': _jsonschema.JsonValue, 
+})
+options = _ty.TypedDict('options', {
+    'relationships': _ty.NotRequired[bool],
+    'extend': _ty.NotRequired[str|None],
+    'extend_context': _ty.NotRequired[str|None],
+    'prefix': _ty.NotRequired[str|None],
+    'extra': _ty.NotRequired[_jsonschema.JsonObject],
+    'order_by': _ty.NotRequired[list[str]],
+    'select': _ty.NotRequired[list[str|_jsonschema.JsonArray]],
+    'count': _ty.NotRequired[bool],
+    'get': _ty.NotRequired[bool],
+    'offset': _ty.NotRequired[int],
+    'limit': _ty.NotRequired[int],
+    'force_sql_filters': _ty.NotRequired[bool], 
+})
+PoolSnapshottaskGet_instance = _ty.TypedDict('PoolSnapshottaskGet_instance', {
+    'dataset': str,
+    'recursive': _ty.NotRequired[bool],
+    'lifetime_value': _ty.NotRequired[int],
+    'lifetime_unit': _ty.NotRequired[str],
+    'enabled': _ty.NotRequired[bool],
+    'exclude': _ty.NotRequired[list[str]],
+    'naming_schema': _ty.NotRequired[str],
+    'allow_empty': _ty.NotRequired[bool],
+    'schedule': _ty.NotRequired[_jsonschema.JsonValue],
+    'id': int,
+    'vmware_sync': bool,
+    'state': _jsonschema.JsonValue, 
+})
+PoolSnapshotTaskQueryResultItem = _ty.TypedDict('PoolSnapshotTaskQueryResultItem', {
+    'dataset': _ty.NotRequired[str],
+    'recursive': _ty.NotRequired[bool],
+    'lifetime_value': _ty.NotRequired[int],
+    'lifetime_unit': _ty.NotRequired[str],
+    'enabled': _ty.NotRequired[bool],
+    'exclude': _ty.NotRequired[list[str]],
+    'naming_schema': _ty.NotRequired[str],
+    'allow_empty': _ty.NotRequired[bool],
+    'schedule': _ty.NotRequired[_jsonschema.JsonValue],
+    'id': _ty.NotRequired[int],
+    'vmware_sync': _ty.NotRequired[bool],
+    'state': _ty.NotRequired[_jsonschema.JsonValue], 
+})
+PoolSnapshottaskUpdate = _ty.TypedDict('PoolSnapshottaskUpdate', {
+    'dataset': str,
+    'recursive': _ty.NotRequired[bool],
+    'lifetime_value': _ty.NotRequired[int],
+    'lifetime_unit': _ty.NotRequired[str],
+    'enabled': _ty.NotRequired[bool],
+    'exclude': _ty.NotRequired[list[str]],
+    'naming_schema': _ty.NotRequired[str],
+    'allow_empty': _ty.NotRequired[bool],
+    'schedule': _ty.NotRequired[_jsonschema.JsonValue],
+    'id': int,
+    'vmware_sync': bool,
+    'state': _jsonschema.JsonValue, 
+})

@@ -1,9 +1,10 @@
 from pytruenas import Namespace as _NS
+from pytruenas.models import jsonschema as _jsonschema
 import typing as _ty 
 class IscsiTarget(_NS):
     
     def create(self,
-        iscsi_target_create,
+        iscsi_target_create:iscsi_target_create,
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
@@ -15,20 +16,20 @@ class IscsiTarget(_NS):
 `auth_networks` is a list of IP/CIDR addresses which are allowed to use this initiator. If all networks are to be allowed, this field should be left empty."""
         ...
     def delete(self,
-        id,
-        force,
-        delete_extents,
+        id:int,
+        force:bool=False,
+        delete_extents:bool=False,
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> IscsiTargetDelete:
+    ) -> bool:
         """Delete iSCSI Target of `id`.
 
 Deleting an iSCSI Target makes sure we delete all Associated Targets which use `id` iSCSI Target."""
         ...
     def get_instance(self,
-        id,
-        options,
+        id:int,
+        options:options={},
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
@@ -38,17 +39,17 @@ Deleting an iSCSI Target makes sure we delete all Associated Targets which use `
 Please see `query` method documentation for `options`."""
         ...
     def query(self,
-        filters,
-        options,
+        filters:_jsonschema.JsonArray=[],
+        options:options={'relationships': True, 'extend': None, 'extend_context': None, 'prefix': None, 'extra': {}, 'order_by': [], 'select': [], 'count': False, 'get': False, 'offset': 0, 'limit': 0, 'force_sql_filters': False},
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> IscsiTargetQuery:
+    ) -> list[IscsiTargetQueryResultItem]|IscsiTargetQueryResultItem|int:
         """"""
         ...
     def update(self,
-        id,
-        iscsi_target_update,
+        id:int,
+        iscsi_target_update:iscsi_target_update,
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
@@ -56,23 +57,81 @@ Please see `query` method documentation for `options`."""
         """Update iSCSI Target of `id`."""
         ...
     def validate_name(self,
-        name,
-        existing_id,
+        name:str,
+        existing_id:int|None=None,
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> IscsiTargetValidate_name:
+    ) -> str|None:
         """Returns validation error for iSCSI target name :param name: name to be validated :param existing_id: id of an existing iSCSI target that will receive this name (or `None` if a new target is being created) :return: error message (or `None` if there is no error)"""
         ...
-class IscsiTargetCreate(_ty.TypedDict):
-    ...
-class IscsiTargetDelete(_ty.TypedDict):
-    ...
-class IscsiTargetGet_instance(_ty.TypedDict):
-    ...
-class IscsiTargetQuery(_ty.TypedDict):
-    ...
-class IscsiTargetUpdate(_ty.TypedDict):
-    ...
-class IscsiTargetValidate_name(_ty.TypedDict):
-    ... 
+iscsi_target_create = _ty.TypedDict('iscsi_target_create', {
+    'name': str,
+    'alias': _ty.NotRequired[str|None],
+    'mode': _ty.NotRequired[str],
+    'groups': _ty.NotRequired[_jsonschema.JsonArray],
+    'auth_networks': _ty.NotRequired[list[str]],
+    'iscsi_parameters': _ty.NotRequired[_jsonschema.JsonValue|None], 
+})
+IscsiTargetCreate = _ty.TypedDict('IscsiTargetCreate', {
+    'id': int,
+    'name': str,
+    'alias': _ty.NotRequired[str|None],
+    'mode': _ty.NotRequired[str],
+    'groups': _ty.NotRequired[_jsonschema.JsonArray],
+    'auth_networks': _ty.NotRequired[list[str]],
+    'rel_tgt_id': int,
+    'iscsi_parameters': _ty.NotRequired[_jsonschema.JsonValue|None], 
+})
+options = _ty.TypedDict('options', {
+    'relationships': _ty.NotRequired[bool],
+    'extend': _ty.NotRequired[str|None],
+    'extend_context': _ty.NotRequired[str|None],
+    'prefix': _ty.NotRequired[str|None],
+    'extra': _ty.NotRequired[_jsonschema.JsonObject],
+    'order_by': _ty.NotRequired[list[str]],
+    'select': _ty.NotRequired[list[str|_jsonschema.JsonArray]],
+    'count': _ty.NotRequired[bool],
+    'get': _ty.NotRequired[bool],
+    'offset': _ty.NotRequired[int],
+    'limit': _ty.NotRequired[int],
+    'force_sql_filters': _ty.NotRequired[bool], 
+})
+IscsiTargetGet_instance = _ty.TypedDict('IscsiTargetGet_instance', {
+    'id': int,
+    'name': str,
+    'alias': _ty.NotRequired[str|None],
+    'mode': _ty.NotRequired[str],
+    'groups': _ty.NotRequired[_jsonschema.JsonArray],
+    'auth_networks': _ty.NotRequired[list[str]],
+    'rel_tgt_id': int,
+    'iscsi_parameters': _ty.NotRequired[_jsonschema.JsonValue|None], 
+})
+IscsiTargetQueryResultItem = _ty.TypedDict('IscsiTargetQueryResultItem', {
+    'id': _ty.NotRequired[int],
+    'name': _ty.NotRequired[str],
+    'alias': _ty.NotRequired[str|None],
+    'mode': _ty.NotRequired[str],
+    'groups': _ty.NotRequired[_jsonschema.JsonArray],
+    'auth_networks': _ty.NotRequired[list[str]],
+    'rel_tgt_id': _ty.NotRequired[int],
+    'iscsi_parameters': _ty.NotRequired[_jsonschema.JsonValue|None], 
+})
+iscsi_target_update = _ty.TypedDict('iscsi_target_update', {
+    'name': _ty.NotRequired[str],
+    'alias': _ty.NotRequired[str|None],
+    'mode': _ty.NotRequired[str],
+    'groups': _ty.NotRequired[_jsonschema.JsonArray],
+    'auth_networks': _ty.NotRequired[list[str]],
+    'iscsi_parameters': _ty.NotRequired[_jsonschema.JsonValue|None], 
+})
+IscsiTargetUpdate = _ty.TypedDict('IscsiTargetUpdate', {
+    'id': int,
+    'name': str,
+    'alias': _ty.NotRequired[str|None],
+    'mode': _ty.NotRequired[str],
+    'groups': _ty.NotRequired[_jsonschema.JsonArray],
+    'auth_networks': _ty.NotRequired[list[str]],
+    'rel_tgt_id': int,
+    'iscsi_parameters': _ty.NotRequired[_jsonschema.JsonValue|None], 
+})

@@ -1,4 +1,5 @@
 from pytruenas import Namespace as _NS
+from pytruenas.models import jsonschema as _jsonschema
 import typing as _ty
 from .acme import Acme
 from .alert import Alert
@@ -83,4 +84,4 @@ class V24.10(_NS):
     tn_connect: Tn_connect
     truenas: Truenas
     user: User
-    virt: Virt 
+    virt: Virt

@@ -1,9 +1,10 @@
 from pytruenas import Namespace as _NS
+from pytruenas.models import jsonschema as _jsonschema
 import typing as _ty 
 class PoolScrub(_NS):
     
     def create(self,
-        data,
+        data:data,
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
@@ -13,16 +14,16 @@ class PoolScrub(_NS):
 `threshold` refers to the minimum amount of time in days has to be passed before a scrub can run again."""
         ...
     def delete(self,
-        id_,
+        id_:int,
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> PoolScrubDelete:
+    ) -> bool:
         """Delete scrub task of `id`."""
         ...
     def get_instance(self,
-        id,
-        options,
+        id:int,
+        options:options={},
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
@@ -32,52 +33,95 @@ class PoolScrub(_NS):
 Please see `query` method documentation for `options`."""
         ...
     def query(self,
-        filters,
-        options,
+        filters:_jsonschema.JsonArray=[],
+        options:options={'relationships': True, 'extend': None, 'extend_context': None, 'prefix': None, 'extra': {}, 'order_by': [], 'select': [], 'count': False, 'get': False, 'offset': 0, 'limit': 0, 'force_sql_filters': False},
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> PoolScrubQuery:
+    ) -> list[PoolScrubQueryResultItem]|PoolScrubQueryResultItem|int:
         """"""
         ...
     def run(self,
-        name,
-        threshold,
+        name:str,
+        threshold:int=35,
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> PoolScrubRun:
+    ) -> None:
         """Initiate a scrub of a pool `name` if last scrub was performed more than `threshold` days before."""
         ...
     def scrub(self,
-        name,
-        action,
+        name:str,
+        action:str=START,
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> PoolScrubScrub:
+    ) -> None:
         """Start/Stop/Pause a scrub on pool `name`."""
         ...
     def update(self,
-        id_,
-        data,
+        id_:int,
+        data:data,
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
     ) -> PoolScrubUpdate:
         """Update scrub task of `id`."""
         ...
-class PoolScrubCreate(_ty.TypedDict):
-    ...
-class PoolScrubDelete(_ty.TypedDict):
-    ...
-class PoolScrubGet_instance(_ty.TypedDict):
-    ...
-class PoolScrubQuery(_ty.TypedDict):
-    ...
-class PoolScrubRun(_ty.TypedDict):
-    ...
-class PoolScrubScrub(_ty.TypedDict):
-    ...
-class PoolScrubUpdate(_ty.TypedDict):
-    ... 
+data = _ty.TypedDict('data', {
+    'pool': _ty.NotRequired[int],
+    'threshold': _ty.NotRequired[int],
+    'description': _ty.NotRequired[str],
+    'schedule': _ty.NotRequired[_jsonschema.JsonValue],
+    'enabled': _ty.NotRequired[bool], 
+})
+PoolScrubCreate = _ty.TypedDict('PoolScrubCreate', {
+    'pool': int,
+    'threshold': _ty.NotRequired[int],
+    'description': _ty.NotRequired[str],
+    'schedule': _ty.NotRequired[_jsonschema.JsonValue],
+    'enabled': _ty.NotRequired[bool],
+    'id': int,
+    'pool_name': str, 
+})
+options = _ty.TypedDict('options', {
+    'relationships': _ty.NotRequired[bool],
+    'extend': _ty.NotRequired[str|None],
+    'extend_context': _ty.NotRequired[str|None],
+    'prefix': _ty.NotRequired[str|None],
+    'extra': _ty.NotRequired[_jsonschema.JsonObject],
+    'order_by': _ty.NotRequired[list[str]],
+    'select': _ty.NotRequired[list[str|_jsonschema.JsonArray]],
+    'count': _ty.NotRequired[bool],
+    'get': _ty.NotRequired[bool],
+    'offset': _ty.NotRequired[int],
+    'limit': _ty.NotRequired[int],
+    'force_sql_filters': _ty.NotRequired[bool], 
+})
+PoolScrubGet_instance = _ty.TypedDict('PoolScrubGet_instance', {
+    'pool': int,
+    'threshold': _ty.NotRequired[int],
+    'description': _ty.NotRequired[str],
+    'schedule': _ty.NotRequired[_jsonschema.JsonValue],
+    'enabled': _ty.NotRequired[bool],
+    'id': int,
+    'pool_name': str, 
+})
+PoolScrubQueryResultItem = _ty.TypedDict('PoolScrubQueryResultItem', {
+    'pool': _ty.NotRequired[int],
+    'threshold': _ty.NotRequired[int],
+    'description': _ty.NotRequired[str],
+    'schedule': _ty.NotRequired[_jsonschema.JsonValue],
+    'enabled': _ty.NotRequired[bool],
+    'id': _ty.NotRequired[int],
+    'pool_name': _ty.NotRequired[str], 
+})
+PoolScrubUpdate = _ty.TypedDict('PoolScrubUpdate', {
+    'pool': int,
+    'threshold': _ty.NotRequired[int],
+    'description': _ty.NotRequired[str],
+    'schedule': _ty.NotRequired[_jsonschema.JsonValue],
+    'enabled': _ty.NotRequired[bool],
+    'id': int,
+    'pool_name': str, 
+})

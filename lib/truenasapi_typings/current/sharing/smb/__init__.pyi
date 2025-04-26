@@ -1,9 +1,10 @@
 from pytruenas import Namespace as _NS
+from pytruenas.models import jsonschema as _jsonschema
 import typing as _ty 
 class SharingSmb(_NS):
     
     def getacl(self,
-        smb_getacl,
+        smb_getacl:smb_getacl,
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
@@ -14,11 +15,11 @@ class SharingSmb(_NS):
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> SharingSmbPresets:
+    ) -> _jsonschema.JsonObject:
         """Retrieve pre-defined configuration sets for specific use-cases. These parameter combinations are often non-obvious, but beneficial in these scenarios."""
         ...
     def setacl(self,
-        smb_setacl,
+        smb_setacl:smb_setacl,
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
@@ -37,9 +38,18 @@ class SharingSmb(_NS):
 
 `ae_type` can be ALLOWED or DENIED."""
         ...
-class SharingSmbGetacl(_ty.TypedDict):
-    ...
-class SharingSmbPresets(_ty.TypedDict):
-    ...
-class SharingSmbSetacl(_ty.TypedDict):
-    ... 
+smb_getacl = _ty.TypedDict('smb_getacl', {
+    'share_name': str, 
+})
+SharingSmbGetacl = _ty.TypedDict('SharingSmbGetacl', {
+    'share_name': str,
+    'share_acl': _ty.NotRequired[_jsonschema.JsonArray], 
+})
+smb_setacl = _ty.TypedDict('smb_setacl', {
+    'share_name': str,
+    'share_acl': _ty.NotRequired[_jsonschema.JsonArray], 
+})
+SharingSmbSetacl = _ty.TypedDict('SharingSmbSetacl', {
+    'share_name': str,
+    'share_acl': _ty.NotRequired[_jsonschema.JsonArray], 
+})
