@@ -161,6 +161,8 @@ def rename(path: "Path", target):
 def rmdir(path: "Path"):
     return _syncsftp(path._client.sftp.rmdir, path)
 
+def rmtree(path: "Path", ignore_errors=False, onerror=None):
+    return _syncsftp(path._client.sftp.rmtree, path, ignore_errors, onerror)
 
 def resolve(path: "Path", strict=False):
     sftpfile = _syncsftp(
