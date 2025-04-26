@@ -1,8 +1,12 @@
-from pytruenas import Namespace as _NS 
+from pytruenas import Namespace as _NS
+import typing as _ty 
 class SharingNfs(_NS):
     
     def create(self,
         data,
+        _method:str|None=None,
+        _ioerror:bool=False,
+        _filetransfer:bool|bytes=False,
     ) -> SharingNfsCreate:
         """Create a NFS Share.
 
@@ -18,12 +22,18 @@ class SharingNfs(_NS):
         ...
     def delete(self,
         id,
+        _method:str|None=None,
+        _ioerror:bool=False,
+        _filetransfer:bool|bytes=False,
     ) -> SharingNfsDelete:
         """Delete NFS Share of `id`."""
         ...
     def get_instance(self,
         id,
         options,
+        _method:str|None=None,
+        _ioerror:bool=False,
+        _filetransfer:bool|bytes=False,
     ) -> SharingNfsGet_instance:
         """Returns instance matching `id`. If `id` is not found, Validation error is raised.
 
@@ -32,22 +42,28 @@ Please see `query` method documentation for `options`."""
     def query(self,
         filters,
         options,
+        _method:str|None=None,
+        _ioerror:bool=False,
+        _filetransfer:bool|bytes=False,
     ) -> SharingNfsQuery:
         """"""
         ...
     def update(self,
         id,
         data,
+        _method:str|None=None,
+        _ioerror:bool=False,
+        _filetransfer:bool|bytes=False,
     ) -> SharingNfsUpdate:
         """Update NFS Share of `id`."""
         ...
-class SharingNfsCreate:
+class SharingNfsCreate(_ty.TypedDict):
     ...
-class SharingNfsDelete:
+class SharingNfsDelete(_ty.TypedDict):
     ...
-class SharingNfsGet_instance:
+class SharingNfsGet_instance(_ty.TypedDict):
     ...
-class SharingNfsQuery:
+class SharingNfsQuery(_ty.TypedDict):
     ...
-class SharingNfsUpdate:
+class SharingNfsUpdate(_ty.TypedDict):
     ... 

@@ -37,7 +37,7 @@ class _QualNamed:
         qualname = self.qualname
         return (
             qualname[0].upper()
-            + _re.sub("\.[a-z]", lambda m: m.group(0)[1:].upper(), qualname)[1:]
+            + _re.sub("\.[a-z]", lambda m: m.group(0)[1:].upper(), qualname)[1:] #type:ignore
         )
 
     @property
@@ -46,12 +46,25 @@ class _QualNamed:
 
 
 class Parameter:
-    def __init__(self, schema: _schema.Schema):
+    def __init__(
+        self,
+        schema: _schema.Schema | None = None,
+        name="",
+        type="",
+        default: str = ...,  # type:ignore
+    ):
         self.schema = schema
-        self.name = schema["title"]
+        self.name = name or schema["title"]  # type:ignore
+        self.type = type
+        self.default = default
 
     def argument_declaration(self):
-        return self.name
+        decl = self.name
+        if self.type:
+            decl += f":{self.type}"
+        if self.default != ...:
+            decl += f"={self.default}"
+        return decl
 
 
 class Method(_QualNamed):
@@ -59,25 +72,50 @@ class Method(_QualNamed):
         self.definition = method
 
     @property
-    def qualname(self):
+    def qualname(self):  # type:ignore
         return self.definition["name"]
 
     @property
     def doc(self):
         doc = self.definition["doc"] or ""
-        return doc.split('.. examples', maxsplit=1)[0].strip()
+        return doc.split(".. examples", maxsplit=1)[0].strip()
 
-    def parameters(self) -> dict[str]:
+    def parameters(self) -> list[Parameter]:
         callparams = self.definition["schemas"]["properties"]["Call parameters"]
         items = callparams["prefixItems"]
         params = []
         for item in items:
             params.append(Parameter(item))
+        params.extend(
+            [
+                Parameter(
+                    {},  # type:ignore
+                    name="_method",
+                    type="str|None",
+                    default="None",
+                ),
+                Parameter(
+                    {},  # type:ignore
+                    name="_ioerror",
+                    type="bool",
+                    default="False",
+                ),
+                Parameter(
+                    {},  # type:ignore
+                    name="_filetransfer",
+                    type="bool|bytes",
+                    default="False",
+                ),
+            ]
+        )
         return params
 
     def returns(self):
         returns = self.definition["schemas"]["properties"]["Return value"]
         return None
+
+
+_ClassInfo: _ty.TypeAlias = "type | tuple[_ClassInfo, ...]"
 
 
 class Namespace(_QualNamed):
@@ -95,7 +133,7 @@ class Namespace(_QualNamed):
     def modpath(self):
         return _P(self.module.replace(".", "/"))
 
-    def query(self, type: type | _ty.Iterable[type]):
+    def query(self, type: _ClassInfo):
         return sorted(
             [qn for qn in self.childs if isinstance(qn, type)],
             key=lambda qn: qn.qualname,

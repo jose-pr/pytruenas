@@ -1,8 +1,12 @@
-from pytruenas import Namespace as _NS 
+from pytruenas import Namespace as _NS
+import typing as _ty 
 class IscsiExtent(_NS):
     
     def create(self,
         iscsi_extent_create,
+        _method:str|None=None,
+        _ioerror:bool=False,
+        _filetransfer:bool|bytes=False,
     ) -> IscsiExtentCreate:
         """Create an iSCSI Extent.
 
@@ -20,18 +24,27 @@ With `type` being set to DISK, a valid ZFS volume is required.
         id,
         remove,
         force,
+        _method:str|None=None,
+        _ioerror:bool=False,
+        _filetransfer:bool|bytes=False,
     ) -> IscsiExtentDelete:
         """Delete iSCSI Extent of `id`.
 
 If `id` iSCSI Extent's `type` was configured to FILE, `remove` can be set to remove the configured file."""
         ...
     def disk_choices(self,
+        _method:str|None=None,
+        _ioerror:bool=False,
+        _filetransfer:bool|bytes=False,
     ) -> IscsiExtentDisk_choices:
         """Return a dict of available zvols that can be used when creating an extent."""
         ...
     def get_instance(self,
         id,
         options,
+        _method:str|None=None,
+        _ioerror:bool=False,
+        _filetransfer:bool|bytes=False,
     ) -> IscsiExtentGet_instance:
         """Returns instance matching `id`. If `id` is not found, Validation error is raised.
 
@@ -40,24 +53,30 @@ Please see `query` method documentation for `options`."""
     def query(self,
         filters,
         options,
+        _method:str|None=None,
+        _ioerror:bool=False,
+        _filetransfer:bool|bytes=False,
     ) -> IscsiExtentQuery:
         """"""
         ...
     def update(self,
         id,
         iscsi_extent_update,
+        _method:str|None=None,
+        _ioerror:bool=False,
+        _filetransfer:bool|bytes=False,
     ) -> IscsiExtentUpdate:
         """Update iSCSI Extent of `id`."""
         ...
-class IscsiExtentCreate:
+class IscsiExtentCreate(_ty.TypedDict):
     ...
-class IscsiExtentDelete:
+class IscsiExtentDelete(_ty.TypedDict):
     ...
-class IscsiExtentDisk_choices:
+class IscsiExtentDisk_choices(_ty.TypedDict):
     ...
-class IscsiExtentGet_instance:
+class IscsiExtentGet_instance(_ty.TypedDict):
     ...
-class IscsiExtentQuery:
+class IscsiExtentQuery(_ty.TypedDict):
     ...
-class IscsiExtentUpdate:
+class IscsiExtentUpdate(_ty.TypedDict):
     ... 

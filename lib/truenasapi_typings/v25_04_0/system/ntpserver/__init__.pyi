@@ -1,8 +1,12 @@
-from pytruenas import Namespace as _NS 
+from pytruenas import Namespace as _NS
+import typing as _ty 
 class SystemNtpserver(_NS):
     
     def create(self,
         ntp_server_create,
+        _method:str|None=None,
+        _ioerror:bool=False,
+        _filetransfer:bool|bytes=False,
     ) -> SystemNtpserverCreate:
         """Add an NTP Server.
 
@@ -22,12 +26,18 @@ class SystemNtpserver(_NS):
         ...
     def delete(self,
         id,
+        _method:str|None=None,
+        _ioerror:bool=False,
+        _filetransfer:bool|bytes=False,
     ) -> SystemNtpserverDelete:
         """Delete NTP server of `id`."""
         ...
     def get_instance(self,
         id,
         options,
+        _method:str|None=None,
+        _ioerror:bool=False,
+        _filetransfer:bool|bytes=False,
     ) -> SystemNtpserverGet_instance:
         """Returns instance matching `id`. If `id` is not found, Validation error is raised.
 
@@ -36,22 +46,28 @@ Please see `query` method documentation for `options`."""
     def query(self,
         filters,
         options,
+        _method:str|None=None,
+        _ioerror:bool=False,
+        _filetransfer:bool|bytes=False,
     ) -> SystemNtpserverQuery:
         """"""
         ...
     def update(self,
         id,
         ntp_server_update,
+        _method:str|None=None,
+        _ioerror:bool=False,
+        _filetransfer:bool|bytes=False,
     ) -> SystemNtpserverUpdate:
         """Update NTP server of `id`."""
         ...
-class SystemNtpserverCreate:
+class SystemNtpserverCreate(_ty.TypedDict):
     ...
-class SystemNtpserverDelete:
+class SystemNtpserverDelete(_ty.TypedDict):
     ...
-class SystemNtpserverGet_instance:
+class SystemNtpserverGet_instance(_ty.TypedDict):
     ...
-class SystemNtpserverQuery:
+class SystemNtpserverQuery(_ty.TypedDict):
     ...
-class SystemNtpserverUpdate:
+class SystemNtpserverUpdate(_ty.TypedDict):
     ... 

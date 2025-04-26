@@ -1,12 +1,19 @@
-from pytruenas import Namespace as _NS 
+from pytruenas import Namespace as _NS
+import typing as _ty 
 class Snmp(_NS):
     
     def config(self,
+        _method:str|None=None,
+        _ioerror:bool=False,
+        _filetransfer:bool|bytes=False,
     ) -> SnmpConfig:
         """"""
         ...
     def update(self,
         snmp_update,
+        _method:str|None=None,
+        _ioerror:bool=False,
+        _filetransfer:bool|bytes=False,
     ) -> SnmpUpdate:
         """Update SNMP Service Configuration.
 
@@ -14,7 +21,7 @@ class Snmp(_NS):
 
 The 'v3_*' settings are valid and enforced only when 'v3' is enabled"""
         ...
-class SnmpConfig:
+class SnmpConfig(_ty.TypedDict):
     ...
-class SnmpUpdate:
+class SnmpUpdate(_ty.TypedDict):
     ... 

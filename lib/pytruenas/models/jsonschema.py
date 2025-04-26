@@ -6,12 +6,12 @@ class Schema(_ty.TypedDict):
     title: _ty.NotRequired[str]
 
 class Object(Schema):
-    type: _ty.Literal["object"]
+    type: _ty.Literal["object"] #type:ignore
     properties: dict[str, Schema]
     required: _ty.NotRequired[list[str]]
 
 
 class Array(Schema):
-    type: _ty.Literal["array"]
+    type: _ty.Literal["array"] #type:ignore
     prefixItems: list[Schema]
     items: bool

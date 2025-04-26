@@ -1,12 +1,19 @@
-from pytruenas import Namespace as _NS 
+from pytruenas import Namespace as _NS
+import typing as _ty 
 class Ftp(_NS):
     
     def config(self,
+        _method:str|None=None,
+        _ioerror:bool=False,
+        _filetransfer:bool|bytes=False,
     ) -> FtpConfig:
         """"""
         ...
     def update(self,
         ftp_update,
+        _method:str|None=None,
+        _ioerror:bool=False,
+        _filetransfer:bool|bytes=False,
     ) -> FtpUpdate:
         """Update ftp service configuration.
 
@@ -52,7 +59,7 @@ class Ftp(_NS):
 
 `options` is a string used to add proftpd(8) parameters not covered by ftp service."""
         ...
-class FtpConfig:
+class FtpConfig(_ty.TypedDict):
     ...
-class FtpUpdate:
+class FtpUpdate(_ty.TypedDict):
     ... 

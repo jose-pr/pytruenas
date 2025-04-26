@@ -1,8 +1,12 @@
-from pytruenas import Namespace as _NS 
+from pytruenas import Namespace as _NS
+import typing as _ty 
 class Auth(_NS):
     
     def generate_onetime_password(self,
         generate_single_use_password,
+        _method:str|None=None,
+        _ioerror:bool=False,
+        _filetransfer:bool|bytes=False,
     ) -> AuthGenerate_onetime_password:
         """Generate a password for the specified username that may be used only a single time to authenticate to TrueNAS. This may be used by server administrators to allow users authenticate and then set a proper password and two-factor authentication token."""
         ...
@@ -11,6 +15,9 @@ class Auth(_NS):
         attrs,
         match_origin,
         single_use,
+        _method:str|None=None,
+        _ioerror:bool=False,
+        _filetransfer:bool|bytes=False,
     ) -> AuthGenerate_token:
         """Generate a token to be used for authentication.
 
@@ -26,11 +33,17 @@ NOTE: this endpoint is not supported when server security requires replay-resist
         username,
         password,
         otp_token,
+        _method:str|None=None,
+        _ioerror:bool=False,
+        _filetransfer:bool|bytes=False,
     ) -> AuthLogin:
         """Authenticate session using username and password. `otp_token` must be specified if two factor authentication is enabled."""
         ...
     def login_ex(self,
         login_data,
+        _method:str|None=None,
+        _ioerror:bool=False,
+        _filetransfer:bool|bytes=False,
     ) -> AuthLogin_ex:
         """Authenticate using one of a variety of mechanisms
 
@@ -78,6 +91,9 @@ REDIRECT Authentication must be performed on different server."""
         ...
     def login_ex_continue(self,
         login_data,
+        _method:str|None=None,
+        _ioerror:bool=False,
+        _filetransfer:bool|bytes=False,
     ) -> AuthLogin_ex_continue:
         """Continue in-progress authentication attempt. This endpoint should be called to continue an auth.login_ex attempt that returned OTP_REQUIRED.
 
@@ -97,29 +113,47 @@ returns: JSON object containing the following keys:
         ...
     def login_with_api_key(self,
         api_key,
+        _method:str|None=None,
+        _ioerror:bool=False,
+        _filetransfer:bool|bytes=False,
     ) -> AuthLogin_with_api_key:
         """Authenticate session using API Key."""
         ...
     def login_with_token(self,
         token,
+        _method:str|None=None,
+        _ioerror:bool=False,
+        _filetransfer:bool|bytes=False,
     ) -> AuthLogin_with_token:
         """Authenticate session using token generated with `auth.generate_token`."""
         ...
     def logout(self,
+        _method:str|None=None,
+        _ioerror:bool=False,
+        _filetransfer:bool|bytes=False,
     ) -> AuthLogout:
         """Deauthenticates an app and if a token exists, removes that from the session."""
         ...
     def me(self,
+        _method:str|None=None,
+        _ioerror:bool=False,
+        _filetransfer:bool|bytes=False,
     ) -> AuthMe:
         """Returns currently logged-in user."""
         ...
     def mechanism_choices(self,
+        _method:str|None=None,
+        _ioerror:bool=False,
+        _filetransfer:bool|bytes=False,
     ) -> AuthMechanism_choices:
         """Get list of available authentication mechanisms available for auth.login_ex"""
         ...
     def sessions(self,
         filters,
         options,
+        _method:str|None=None,
+        _ioerror:bool=False,
+        _filetransfer:bool|bytes=False,
     ) -> AuthSessions:
         """Returns list of active auth sessions.
 
@@ -140,45 +174,54 @@ If you want to exclude all internal connections from the list, call this method 
     def set_attribute(self,
         key,
         value,
+        _method:str|None=None,
+        _ioerror:bool=False,
+        _filetransfer:bool|bytes=False,
     ) -> AuthSet_attribute:
         """Set current user's `attributes` dictionary `key` to `value`.
 
 e.g. Setting key="foo" value="var" will result in {"attributes": {"foo": "bar"}}"""
         ...
     def terminate_other_sessions(self,
+        _method:str|None=None,
+        _ioerror:bool=False,
+        _filetransfer:bool|bytes=False,
     ) -> AuthTerminate_other_sessions:
         """Terminates all other sessions (except the current one)."""
         ...
     def terminate_session(self,
         id,
+        _method:str|None=None,
+        _ioerror:bool=False,
+        _filetransfer:bool|bytes=False,
     ) -> AuthTerminate_session:
         """Terminates session `id`."""
         ...
-class AuthGenerate_onetime_password:
+class AuthGenerate_onetime_password(_ty.TypedDict):
     ...
-class AuthGenerate_token:
+class AuthGenerate_token(_ty.TypedDict):
     ...
-class AuthLogin:
+class AuthLogin(_ty.TypedDict):
     ...
-class AuthLogin_ex:
+class AuthLogin_ex(_ty.TypedDict):
     ...
-class AuthLogin_ex_continue:
+class AuthLogin_ex_continue(_ty.TypedDict):
     ...
-class AuthLogin_with_api_key:
+class AuthLogin_with_api_key(_ty.TypedDict):
     ...
-class AuthLogin_with_token:
+class AuthLogin_with_token(_ty.TypedDict):
     ...
-class AuthLogout:
+class AuthLogout(_ty.TypedDict):
     ...
-class AuthMe:
+class AuthMe(_ty.TypedDict):
     ...
-class AuthMechanism_choices:
+class AuthMechanism_choices(_ty.TypedDict):
     ...
-class AuthSessions:
+class AuthSessions(_ty.TypedDict):
     ...
-class AuthSet_attribute:
+class AuthSet_attribute(_ty.TypedDict):
     ...
-class AuthTerminate_other_sessions:
+class AuthTerminate_other_sessions(_ty.TypedDict):
     ...
-class AuthTerminate_session:
+class AuthTerminate_session(_ty.TypedDict):
     ... 

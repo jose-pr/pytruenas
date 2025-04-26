@@ -1,20 +1,33 @@
-from pytruenas import Namespace as _NS 
+from pytruenas import Namespace as _NS
+import typing as _ty 
 class Smb(_NS):
     
     def bindip_choices(self,
+        _method:str|None=None,
+        _ioerror:bool=False,
+        _filetransfer:bool|bytes=False,
     ) -> SmbBindip_choices:
         """List of valid choices for IP addresses to which to bind the SMB service. Addresses assigned by DHCP are excluded from the results."""
         ...
     def config(self,
+        _method:str|None=None,
+        _ioerror:bool=False,
+        _filetransfer:bool|bytes=False,
     ) -> SmbConfig:
         """"""
         ...
     def unixcharset_choices(self,
+        _method:str|None=None,
+        _ioerror:bool=False,
+        _filetransfer:bool|bytes=False,
     ) -> SmbUnixcharset_choices:
         """"""
         ...
     def update(self,
         smb_update,
+        _method:str|None=None,
+        _ioerror:bool=False,
+        _filetransfer:bool|bytes=False,
     ) -> SmbUpdate:
         """Update SMB Service Configuration.
 
@@ -40,11 +53,11 @@ The group specified as the SMB `admin_group` will be automatically added as a fo
 
 `smb_options` smb.conf parameters that are not covered by the above supported configuration options may be added as an smb_option. Not all options are tested or supported, and behavior of smb_options may change between releases. Stability of smb.conf options is not guaranteed."""
         ...
-class SmbBindip_choices:
+class SmbBindip_choices(_ty.TypedDict):
     ...
-class SmbConfig:
+class SmbConfig(_ty.TypedDict):
     ...
-class SmbUnixcharset_choices:
+class SmbUnixcharset_choices(_ty.TypedDict):
     ...
-class SmbUpdate:
+class SmbUpdate(_ty.TypedDict):
     ... 

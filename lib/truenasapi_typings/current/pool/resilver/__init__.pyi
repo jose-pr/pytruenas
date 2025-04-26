@@ -1,12 +1,19 @@
-from pytruenas import Namespace as _NS 
+from pytruenas import Namespace as _NS
+import typing as _ty 
 class PoolResilver(_NS):
     
     def config(self,
+        _method:str|None=None,
+        _ioerror:bool=False,
+        _filetransfer:bool|bytes=False,
     ) -> PoolResilverConfig:
         """"""
         ...
     def update(self,
         data,
+        _method:str|None=None,
+        _ioerror:bool=False,
+        _filetransfer:bool|bytes=False,
     ) -> PoolResilverUpdate:
         """Configure Pool Resilver Priority.
 
@@ -14,7 +21,7 @@ If `begin` time is greater than `end` time it means it will rollover the day, e.
 
 `weekday` follows crontab(5) values 0-7 (0 or 7 is Sun)."""
         ...
-class PoolResilverConfig:
+class PoolResilverConfig(_ty.TypedDict):
     ...
-class PoolResilverUpdate:
+class PoolResilverUpdate(_ty.TypedDict):
     ... 

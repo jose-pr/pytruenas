@@ -1,12 +1,19 @@
-from pytruenas import Namespace as _NS 
+from pytruenas import Namespace as _NS
+import typing as _ty 
 class VirtDevice(_NS):
     
     def disk_choices(self,
+        _method:str|None=None,
+        _ioerror:bool=False,
+        _filetransfer:bool|bytes=False,
     ) -> VirtDeviceDisk_choices:
         """Returns disk choices available for device type "DISK" for virtual machines. This includes both available virt volumes and zvol choices. Disk choices for containers depend on the mounted file tree (paths)."""
         ...
     def export_disk_image(self,
         virt_device_export_disk_image,
+        _method:str|None=None,
+        _ioerror:bool=False,
+        _filetransfer:bool|bytes=False,
     ) -> VirtDeviceExport_disk_image:
         """Exports a zvol to a formatted VM disk image.
 
@@ -20,11 +27,17 @@ As of this implementation it supports the following {format} options :
         ...
     def gpu_choices(self,
         gpu_type,
+        _method:str|None=None,
+        _ioerror:bool=False,
+        _filetransfer:bool|bytes=False,
     ) -> VirtDeviceGpu_choices:
         """Provide choices for GPU devices."""
         ...
     def import_disk_image(self,
         virt_device_import_disk_image,
+        _method:str|None=None,
+        _ioerror:bool=False,
+        _filetransfer:bool|bytes=False,
     ) -> VirtDeviceImport_disk_image:
         """Imports a specified disk image.
 
@@ -38,28 +51,37 @@ As of this implementation it supports:
         ...
     def nic_choices(self,
         nic_type,
+        _method:str|None=None,
+        _ioerror:bool=False,
+        _filetransfer:bool|bytes=False,
     ) -> VirtDeviceNic_choices:
         """Returns choices for NIC device."""
         ...
     def pci_choices(self,
+        _method:str|None=None,
+        _ioerror:bool=False,
+        _filetransfer:bool|bytes=False,
     ) -> VirtDevicePci_choices:
         """Returns choices for PCI devices valid for VM virt instances."""
         ...
     def usb_choices(self,
+        _method:str|None=None,
+        _ioerror:bool=False,
+        _filetransfer:bool|bytes=False,
     ) -> VirtDeviceUsb_choices:
         """Provide choices for USB devices."""
         ...
-class VirtDeviceDisk_choices:
+class VirtDeviceDisk_choices(_ty.TypedDict):
     ...
-class VirtDeviceExport_disk_image:
+class VirtDeviceExport_disk_image(_ty.TypedDict):
     ...
-class VirtDeviceGpu_choices:
+class VirtDeviceGpu_choices(_ty.TypedDict):
     ...
-class VirtDeviceImport_disk_image:
+class VirtDeviceImport_disk_image(_ty.TypedDict):
     ...
-class VirtDeviceNic_choices:
+class VirtDeviceNic_choices(_ty.TypedDict):
     ...
-class VirtDevicePci_choices:
+class VirtDevicePci_choices(_ty.TypedDict):
     ...
-class VirtDeviceUsb_choices:
+class VirtDeviceUsb_choices(_ty.TypedDict):
     ... 

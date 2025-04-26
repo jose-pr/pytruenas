@@ -1,17 +1,27 @@
-from pytruenas import Namespace as _NS 
+from pytruenas import Namespace as _NS
+import typing as _ty 
 class SharingSmb(_NS):
     
     def getacl(self,
         smb_getacl,
+        _method:str|None=None,
+        _ioerror:bool=False,
+        _filetransfer:bool|bytes=False,
     ) -> SharingSmbGetacl:
         """"""
         ...
     def presets(self,
+        _method:str|None=None,
+        _ioerror:bool=False,
+        _filetransfer:bool|bytes=False,
     ) -> SharingSmbPresets:
         """Retrieve pre-defined configuration sets for specific use-cases. These parameter combinations are often non-obvious, but beneficial in these scenarios."""
         ...
     def setacl(self,
         smb_setacl,
+        _method:str|None=None,
+        _ioerror:bool=False,
+        _filetransfer:bool|bytes=False,
     ) -> SharingSmbSetacl:
         """Set an ACL on `share_name`. This only impacts access through the SMB protocol.
 
@@ -27,9 +37,9 @@ class SharingSmb(_NS):
 
 `ae_type` can be ALLOWED or DENIED."""
         ...
-class SharingSmbGetacl:
+class SharingSmbGetacl(_ty.TypedDict):
     ...
-class SharingSmbPresets:
+class SharingSmbPresets(_ty.TypedDict):
     ...
-class SharingSmbSetacl:
+class SharingSmbSetacl(_ty.TypedDict):
     ... 
