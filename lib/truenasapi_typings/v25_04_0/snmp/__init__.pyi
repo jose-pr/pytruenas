@@ -1,4 +1,5 @@
 from pytruenas import Namespace as _NS
+from pytruenas.models import jsonschema as _jsonschema
 import typing as _ty 
 class Snmp(_NS):
     
@@ -10,7 +11,7 @@ class Snmp(_NS):
         """"""
         ...
     def update(self,
-        snmp_update,
+        snmp_update:snmp_update,
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
@@ -21,7 +22,50 @@ class Snmp(_NS):
 
 The 'v3_*' settings are valid and enforced only when 'v3' is enabled"""
         ...
-class SnmpConfig(_ty.TypedDict):
-    ...
-class SnmpUpdate(_ty.TypedDict):
-    ... 
+SnmpConfig = _ty.TypedDict('SnmpConfig', {
+    'location': str,
+    'contact': str|str,
+    'traps': bool,
+    'v3': bool,
+    'community': _ty.NotRequired[str],
+    'v3_username': str,
+    'v3_authtype': str,
+    'v3_password': str,
+    'v3_privproto': _jsonschema.JsonValue|None,
+    'v3_privpassphrase': _ty.NotRequired[str|None],
+    'loglevel': int,
+    'options': str,
+    'zilstat': bool,
+    'id': int, 
+})
+snmp_update = _ty.TypedDict('snmp_update', {
+    'location': _ty.NotRequired[str],
+    'contact': _ty.NotRequired[str|str],
+    'traps': _ty.NotRequired[bool],
+    'v3': _ty.NotRequired[bool],
+    'community': _ty.NotRequired[str],
+    'v3_username': _ty.NotRequired[str],
+    'v3_authtype': _ty.NotRequired[str],
+    'v3_password': _ty.NotRequired[str],
+    'v3_privproto': _ty.NotRequired[_jsonschema.JsonValue|None],
+    'v3_privpassphrase': _ty.NotRequired[str|None],
+    'loglevel': _ty.NotRequired[int],
+    'options': _ty.NotRequired[str],
+    'zilstat': _ty.NotRequired[bool], 
+})
+SnmpUpdate = _ty.TypedDict('SnmpUpdate', {
+    'location': str,
+    'contact': str|str,
+    'traps': bool,
+    'v3': bool,
+    'community': _ty.NotRequired[str],
+    'v3_username': str,
+    'v3_authtype': str,
+    'v3_password': str,
+    'v3_privproto': _jsonschema.JsonValue|None,
+    'v3_privpassphrase': _ty.NotRequired[str|None],
+    'loglevel': int,
+    'options': str,
+    'zilstat': bool,
+    'id': int, 
+})

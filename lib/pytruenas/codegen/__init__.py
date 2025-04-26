@@ -1,5 +1,3 @@
-import json
-from enum import Enum as _Enum
 from pathlib import Path as _P
 import re as _re
 import keyword as _kw
@@ -46,25 +44,30 @@ class _QualNamed:
 
 
 class Parameter:
-    def __init__(
-        self,
-        schema: _schema.Schema | None = None,
-        name="",
-        type="",
-        default: str = ...,  # type:ignore
-    ):
-        self.schema = schema
-        self.name = name or schema["title"]  # type:ignore
-        self.type = type
-        self.default = default
+    def __init__(self, schema: _schema.Schema | None | str = None, **kwargs):
 
-    def argument_declaration(self):
+        if isinstance(schema, str):
+            schema = {
+                "type": schema  # type:ignore
+            }
+
+        self.schema = _ty.cast(_schema.Schema, schema or {})
+        self.schema.update(kwargs)  # type:ignore
+
+    def argument_declaration(self, typeddicts: dict[str, object]):
         decl = self.name
-        if self.type:
-            decl += f":{self.type}"
-        if self.default != ...:
-            decl += f"={self.default}"
+        decl += f":{self.type_def(typeddicts)}"
+        default = self.schema.get("default", ...)
+        if default != ...:
+            decl += f"={default}"
         return decl
+
+    def type_def(self, typeddicts: dict[str, object]):
+        return _schema.Schema.python_declaration(self.schema, typeddicts)
+
+    @property
+    def name(self):
+        return self.schema["title"]  # type:ignore
 
 
 class Method(_QualNamed):
@@ -82,7 +85,7 @@ class Method(_QualNamed):
 
     def parameters(self) -> list[Parameter]:
         callparams = self.definition["schemas"]["properties"]["Call parameters"]
-        items = callparams["prefixItems"]
+        items = callparams["prefixItems"]  # type:ignore
         params = []
         for item in items:
             params.append(Parameter(item))
@@ -90,20 +93,20 @@ class Method(_QualNamed):
             [
                 Parameter(
                     {},  # type:ignore
-                    name="_method",
-                    type="str|None",
+                    title="_method",
+                    anyOf=["string", "null"],
                     default="None",
                 ),
                 Parameter(
                     {},  # type:ignore
-                    name="_ioerror",
-                    type="bool",
+                    title="_ioerror",
+                    type="boolean",
                     default="False",
                 ),
                 Parameter(
                     {},  # type:ignore
-                    name="_filetransfer",
-                    type="bool|bytes",
+                    title="_filetransfer",
+                    anyOf=["boolean", "!bytes"],
                     default="False",
                 ),
             ]
@@ -112,7 +115,7 @@ class Method(_QualNamed):
 
     def returns(self):
         returns = self.definition["schemas"]["properties"]["Return value"]
-        return None
+        return Parameter(returns, title=self.classname)
 
 
 _ClassInfo: _ty.TypeAlias = "type | tuple[_ClassInfo, ...]"
@@ -157,6 +160,7 @@ class RootNamespace(Namespace):
 
 
 class Renderer:
+    def __init__(self, template: str): ...
     def render(
         self,
         **ctx,
@@ -194,7 +198,7 @@ class Codegen:
         root.mkdir(exist_ok=True, parents=True)
         from . import jinja
 
-        renderer = jinja.NamespaceRenderer()
+        renderer = jinja.Renderer("namespace.pyi")
         for ns in sorted(namespaces, key=lambda ns: ns.qualname):
             ns_path = root / ns.modpath / _INIT
             ns_path.parent.mkdir(exist_ok=True, parents=True)

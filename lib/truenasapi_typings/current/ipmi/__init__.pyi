@@ -1,4 +1,5 @@
 from pytruenas import Namespace as _NS
+from pytruenas.models import jsonschema as _jsonschema
 import typing as _ty 
 class Ipmi(_NS):
     
@@ -6,8 +7,6 @@ class Ipmi(_NS):
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> IpmiIs_loaded:
+    ) -> bool:
         """Returns a boolean value indicating if /dev/ipmi0 is loaded."""
         ...
-class IpmiIs_loaded(_ty.TypedDict):
-    ... 

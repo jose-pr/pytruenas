@@ -1,13 +1,14 @@
 from pytruenas import Namespace as _NS
+from pytruenas.models import jsonschema as _jsonschema
 import typing as _ty 
 class Catalog(_NS):
     
     def apps(self,
-        catalog_apps_options,
+        catalog_apps_options:catalog_apps_options,
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> CatalogApps:
+    ) -> _jsonschema.JsonObject:
         """Retrieve apps details for `label` catalog.
 
 `options.cache` is a boolean which when set will try to get apps details for `label` catalog from cache if available.
@@ -26,8 +27,8 @@ class Catalog(_NS):
         """"""
         ...
     def get_app_details(self,
-        app_name,
-        app_version_details,
+        app_name:str,
+        app_version_details:app_version_details,
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
@@ -38,33 +39,66 @@ class Catalog(_NS):
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> CatalogSync:
+    ) -> None:
         """Sync truenas catalog to retrieve latest changes from upstream."""
         ...
     def trains(self,
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> CatalogTrains:
+    ) -> list[str]:
         """Retrieve available trains."""
         ...
     def update(self,
-        catalog_update,
+        catalog_update:catalog_update,
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
     ) -> CatalogUpdate:
         """Update catalog preferences."""
         ...
-class CatalogApps(_ty.TypedDict):
-    ...
-class CatalogConfig(_ty.TypedDict):
-    ...
-class CatalogGet_app_details(_ty.TypedDict):
-    ...
-class CatalogSync(_ty.TypedDict):
-    ...
-class CatalogTrains(_ty.TypedDict):
-    ...
-class CatalogUpdate(_ty.TypedDict):
-    ... 
+catalog_apps_options = _ty.TypedDict('catalog_apps_options', {
+    'cache': _ty.NotRequired[bool],
+    'cache_only': _ty.NotRequired[bool],
+    'retrieve_all_trains': _ty.NotRequired[bool],
+    'trains': _ty.NotRequired[list[str]], 
+})
+CatalogConfig = _ty.TypedDict('CatalogConfig', {
+    'id': str,
+    'label': str,
+    'preferred_trains': list[str],
+    'location': str, 
+})
+app_version_details = _ty.TypedDict('app_version_details', {
+    'train': str, 
+})
+CatalogGet_app_details = _ty.TypedDict('CatalogGet_app_details', {
+    'app_readme': str|None,
+    'categories': list[str],
+    'description': str,
+    'healthy': bool,
+    'healthy_error': _ty.NotRequired[str|None],
+    'home': str,
+    'location': str,
+    'latest_version': str|None,
+    'latest_app_version': str|None,
+    'latest_human_version': str|None,
+    'last_update': str|None,
+    'name': str,
+    'recommended': bool,
+    'title': str,
+    'maintainers': _jsonschema.JsonArray,
+    'tags': list[str],
+    'screenshots': list[str],
+    'sources': list[str],
+    'icon_url': _ty.NotRequired[str|None], 
+})
+catalog_update = _ty.TypedDict('catalog_update', {
+    'preferred_trains': _ty.NotRequired[list[str]], 
+})
+CatalogUpdate = _ty.TypedDict('CatalogUpdate', {
+    'id': str,
+    'label': str,
+    'preferred_trains': list[str],
+    'location': str, 
+})

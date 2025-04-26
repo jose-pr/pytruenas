@@ -1,4 +1,5 @@
 from pytruenas import Namespace as _NS
+from pytruenas.models import jsonschema as _jsonschema
 import typing as _ty
 from .general import SystemGeneral
 from .ntpserver import SystemNtpserver
@@ -7,23 +8,23 @@ from .security import SystemSecurity
 class System(_NS):
     
     def reboot(self,
-        reason,
-        options,
+        reason:str,
+        options:options={'delay': None},
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> SystemReboot:
+    ) -> None:
         """Reboots the operating system.
 
 Emits an "added" event of name "system" and id "reboot"."""
         ...
     def shutdown(self,
-        reason,
-        options,
+        reason:str,
+        options:options={'delay': None},
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> SystemShutdown:
+    ) -> None:
         """Shuts down the operating system.
 
 An "added" event of name "system" and id "shutdown" is emitted when shutdown is initiated."""
@@ -32,7 +33,6 @@ An "added" event of name "system" and id "shutdown" is emitted when shutdown is 
     ntpserver: SystemNtpserver
     reboot: SystemReboot
     security: SystemSecurity
-class SystemReboot(_ty.TypedDict):
-    ...
-class SystemShutdown(_ty.TypedDict):
-    ... 
+options = _ty.TypedDict('options', {
+    'delay': _ty.NotRequired[int|None], 
+})

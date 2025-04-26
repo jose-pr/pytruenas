@@ -1,4 +1,5 @@
 from pytruenas import Namespace as _NS
+from pytruenas.models import jsonschema as _jsonschema
 import typing as _ty 
 class Nfs(_NS):
     
@@ -6,7 +7,7 @@ class Nfs(_NS):
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> NfsBindip_choices:
+    ) -> _jsonschema.JsonObject:
         """Returns ip choices for NFS service to use"""
         ...
     def config(self,
@@ -17,7 +18,7 @@ class Nfs(_NS):
         """"""
         ...
     def update(self,
-        nfs_update,
+        nfs_update:nfs_update,
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
@@ -66,9 +67,56 @@ class Nfs(_NS):
 
             INPUT: Enable/Disable Default: Disable"""
         ...
-class NfsBindip_choices(_ty.TypedDict):
-    ...
-class NfsConfig(_ty.TypedDict):
-    ...
-class NfsUpdate(_ty.TypedDict):
-    ... 
+NfsConfig = _ty.TypedDict('NfsConfig', {
+    'id': int,
+    'servers': int|None,
+    'allow_nonroot': bool,
+    'protocols': list[str],
+    'v4_krb': bool,
+    'v4_domain': str,
+    'bindip': _ty.NotRequired[list[str]],
+    'mountd_port': int|None,
+    'rpcstatd_port': int|None,
+    'rpclockd_port': int|None,
+    'mountd_log': bool,
+    'statd_lockd_log': bool,
+    'v4_krb_enabled': bool,
+    'userd_manage_gids': bool,
+    'keytab_has_nfs_spn': bool,
+    'managed_nfsd': bool,
+    'rdma': bool, 
+})
+nfs_update = _ty.TypedDict('nfs_update', {
+    'servers': _ty.NotRequired[int|None],
+    'allow_nonroot': _ty.NotRequired[bool],
+    'protocols': _ty.NotRequired[list[str]],
+    'v4_krb': _ty.NotRequired[bool],
+    'v4_domain': _ty.NotRequired[str],
+    'bindip': _ty.NotRequired[list[str]],
+    'mountd_port': _ty.NotRequired[int|None],
+    'rpcstatd_port': _ty.NotRequired[int|None],
+    'rpclockd_port': _ty.NotRequired[int|None],
+    'mountd_log': _ty.NotRequired[bool],
+    'statd_lockd_log': _ty.NotRequired[bool],
+    'userd_manage_gids': _ty.NotRequired[bool],
+    'rdma': _ty.NotRequired[bool], 
+})
+NfsUpdate = _ty.TypedDict('NfsUpdate', {
+    'id': int,
+    'servers': int|None,
+    'allow_nonroot': bool,
+    'protocols': list[str],
+    'v4_krb': bool,
+    'v4_domain': str,
+    'bindip': _ty.NotRequired[list[str]],
+    'mountd_port': int|None,
+    'rpcstatd_port': int|None,
+    'rpclockd_port': int|None,
+    'mountd_log': bool,
+    'statd_lockd_log': bool,
+    'v4_krb_enabled': bool,
+    'userd_manage_gids': bool,
+    'keytab_has_nfs_spn': bool,
+    'managed_nfsd': bool,
+    'rdma': bool, 
+})

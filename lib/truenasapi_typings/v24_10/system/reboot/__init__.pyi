@@ -1,4 +1,5 @@
 from pytruenas import Namespace as _NS
+from pytruenas.models import jsonschema as _jsonschema
 import typing as _ty 
 class SystemReboot(_NS):
     
@@ -9,5 +10,7 @@ class SystemReboot(_NS):
     ) -> SystemRebootInfo:
         """"""
         ...
-class SystemRebootInfo(_ty.TypedDict):
-    ... 
+SystemRebootInfo = _ty.TypedDict('SystemRebootInfo', {
+    'boot_id': str,
+    'reboot_required_reasons': _jsonschema.JsonArray, 
+})

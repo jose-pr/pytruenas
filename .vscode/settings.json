@@ -1,3 +1,4 @@
 {
-    "python.analysis.extraPaths": ["./lib"]
+    "python.analysis.extraPaths": ["./lib"],
+    "python.analysis.typeCheckingMode": "standard"
 }

@@ -1,24 +1,25 @@
 from pytruenas import Namespace as _NS
+from pytruenas.models import jsonschema as _jsonschema
 import typing as _ty 
 class Auth(_NS):
-        
+    
     def generate_onetime_password(self,
-        generate_single_use_password,
+        generate_single_use_password:generate_single_use_password,
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> AuthGenerate_onetime_password:
+    ) -> str:
         """Generate a password for the specified username that may be used only a single time to authenticate to TrueNAS. This may be used by server administrators to allow users authenticate and then set a proper password and two-factor authentication token."""
         ...
     def generate_token(self,
-        ttl,
-        attrs,
-        match_origin,
-        single_use,
+        ttl:int|None=600,
+        attrs:_jsonschema.JsonObject={},
+        match_origin:bool=True,
+        single_use:bool=False,
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> AuthGenerate_token:
+    ) -> str:
         """Generate a token to be used for authentication.
 
 `ttl` stands for Time To Live, in seconds. The token will be invalidated if the connection has been inactive for a time greater than this.
@@ -30,21 +31,21 @@ class Auth(_NS):
 NOTE: this endpoint is not supported when server security requires replay-resistant authentication as part of GPOS STIG requirements."""
         ...
     def login(self,
-        username,
-        password,
-        otp_token,
+        username:str,
+        password:str,
+        otp_token:str|None=None,
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> AuthLogin:
+    ) -> bool:
         """Authenticate session using username and password. `otp_token` must be specified if two factor authentication is enabled."""
         ...
     def login_ex(self,
-        login_data,
+        login_data:AuthApiKeyPlain|AuthPasswordPlain|AuthTokenPlain|AuthOTPToken,
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> AuthLogin_ex:
+    ) -> AuthRespSuccess|AuthRespAuthErr|AuthRespExpired|AuthRespOTPRequired|AuthRespAuthRedirect:
         """Authenticate using one of a variety of mechanisms
 
 NOTE: mechanisms with a _PLAIN suffix indicate that they involve passing plain-text passwords or password-equivalent strings and should not be used on untrusted / insecure transport. Available mechanisms will be expanded in future releases.
@@ -90,11 +91,11 @@ EXPIRED The specified credential is expired and not suitable for authentication.
 REDIRECT Authentication must be performed on different server."""
         ...
     def login_ex_continue(self,
-        login_data,
+        login_data:login_data,
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> AuthLogin_ex_continue:
+    ) -> AuthRespSuccess|AuthRespAuthErr|AuthRespExpired|AuthRespOTPRequired|AuthRespAuthRedirect:
         """Continue in-progress authentication attempt. This endpoint should be called to continue an auth.login_ex attempt that returned OTP_REQUIRED.
 
 This is a convenience wrapper around auth.login_ex for API consumers.
@@ -112,26 +113,26 @@ returns: JSON object containing the following keys:
     AUTH_ERR - invalid OTP token submitted too many times."""
         ...
     def login_with_api_key(self,
-        api_key,
+        api_key:str,
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> AuthLogin_with_api_key:
+    ) -> bool:
         """Authenticate session using API Key."""
         ...
     def login_with_token(self,
-        token,
+        token:str,
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> AuthLogin_with_token:
+    ) -> bool:
         """Authenticate session using token generated with `auth.generate_token`."""
         ...
     def logout(self,
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> AuthLogout:
+    ) -> bool:
         """Deauthenticates an app and if a token exists, removes that from the session."""
         ...
     def me(self,
@@ -145,16 +146,16 @@ returns: JSON object containing the following keys:
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> AuthMechanism_choices:
+    ) -> list[str]:
         """Get list of available authentication mechanisms available for auth.login_ex"""
         ...
     def sessions(self,
-        filters,
-        options,
+        filters:_jsonschema.JsonArray=[],
+        options:options={'relationships': True, 'extend': None, 'extend_context': None, 'prefix': None, 'extra': {}, 'order_by': [], 'select': [], 'count': False, 'get': False, 'offset': 0, 'limit': 0, 'force_sql_filters': False},
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> AuthSessions:
+    ) -> list[AuthSessionQueryResultItem]|AuthSessionQueryResultItem|int:
         """Returns list of active auth sessions.
 
 Example of return value:
@@ -172,12 +173,12 @@ If you want to exclude all internal connections from the list, call this method 
 ]"""
         ...
     def set_attribute(self,
-        key,
-        value,
+        key:str,
+        value:_jsonschema.JsonValue,
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> AuthSet_attribute:
+    ) -> None:
         """Set current user's `attributes` dictionary `key` to `value`.
 
 e.g. Setting key="foo" value="var" will result in {"attributes": {"foo": "bar"}}"""
@@ -186,42 +187,103 @@ e.g. Setting key="foo" value="var" will result in {"attributes": {"foo": "bar"}}
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> AuthTerminate_other_sessions:
+    ) -> bool:
         """Terminates all other sessions (except the current one)."""
         ...
     def terminate_session(self,
-        id,
+        id:str,
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> AuthTerminate_session:
+    ) -> bool:
         """Terminates session `id`."""
         ...
-class AuthGenerate_onetime_password(_ty.TypedDict):
-    ...
-class AuthGenerate_token(_ty.TypedDict):
-    ...
-class AuthLogin(_ty.TypedDict):
-    ...
-class AuthLogin_ex(_ty.TypedDict):
-    ...
-class AuthLogin_ex_continue(_ty.TypedDict):
-    ...
-class AuthLogin_with_api_key(_ty.TypedDict):
-    ...
-class AuthLogin_with_token(_ty.TypedDict):
-    ...
-class AuthLogout(_ty.TypedDict):
-    ...
-class AuthMe(_ty.TypedDict):
-    ...
-class AuthMechanism_choices(_ty.TypedDict):
-    ...
-class AuthSessions(_ty.TypedDict):
-    ...
-class AuthSet_attribute(_ty.TypedDict):
-    ...
-class AuthTerminate_other_sessions(_ty.TypedDict):
-    ...
-class AuthTerminate_session(_ty.TypedDict):
-    ... 
+generate_single_use_password = _ty.TypedDict('generate_single_use_password', {
+    'username': str, 
+})
+AuthApiKeyPlain = _ty.TypedDict('AuthApiKeyPlain', {
+    'mechanism': str,
+    'username': str,
+    'api_key': str,
+    'login_options': _ty.NotRequired[_jsonschema.JsonValue], 
+})
+AuthPasswordPlain = _ty.TypedDict('AuthPasswordPlain', {
+    'mechanism': str,
+    'username': str,
+    'password': str,
+    'login_options': _ty.NotRequired[_jsonschema.JsonValue], 
+})
+AuthTokenPlain = _ty.TypedDict('AuthTokenPlain', {
+    'mechanism': str,
+    'token': str,
+    'login_options': _ty.NotRequired[_jsonschema.JsonValue], 
+})
+AuthOTPToken = _ty.TypedDict('AuthOTPToken', {
+    'mechanism': str,
+    'otp_token': str,
+    'login_options': _ty.NotRequired[_jsonschema.JsonValue], 
+})
+AuthRespSuccess = _ty.TypedDict('AuthRespSuccess', {
+    'response_type': str,
+    'user_info': _jsonschema.JsonValue|None,
+    'authenticator': str, 
+})
+AuthRespAuthErr = _ty.TypedDict('AuthRespAuthErr', {
+    'response_type': str, 
+})
+AuthRespExpired = _ty.TypedDict('AuthRespExpired', {
+    'response_type': str, 
+})
+AuthRespOTPRequired = _ty.TypedDict('AuthRespOTPRequired', {
+    'response_type': str,
+    'username': str, 
+})
+AuthRespAuthRedirect = _ty.TypedDict('AuthRespAuthRedirect', {
+    'response_type': str,
+    'urls': list[str], 
+})
+login_data = _ty.TypedDict('login_data', {
+    'mechanism': str,
+    'otp_token': str,
+    'login_options': _ty.NotRequired[_jsonschema.JsonValue], 
+})
+AuthMe = _ty.TypedDict('AuthMe', {
+    'pw_name': str,
+    'pw_gecos': str,
+    'pw_dir': str,
+    'pw_shell': str,
+    'pw_uid': int,
+    'pw_gid': int,
+    'grouplist': list[int]|None,
+    'sid': str|None,
+    'source': str,
+    'local': bool,
+    'attributes': _jsonschema.JsonObject,
+    'two_factor_config': _jsonschema.JsonObject,
+    'privilege': _jsonschema.JsonObject,
+    'account_attributes': list[str], 
+})
+options = _ty.TypedDict('options', {
+    'relationships': _ty.NotRequired[bool],
+    'extend': _ty.NotRequired[str|None],
+    'extend_context': _ty.NotRequired[str|None],
+    'prefix': _ty.NotRequired[str|None],
+    'extra': _ty.NotRequired[_jsonschema.JsonObject],
+    'order_by': _ty.NotRequired[list[str]],
+    'select': _ty.NotRequired[list[str|_jsonschema.JsonArray]],
+    'count': _ty.NotRequired[bool],
+    'get': _ty.NotRequired[bool],
+    'offset': _ty.NotRequired[int],
+    'limit': _ty.NotRequired[int],
+    'force_sql_filters': _ty.NotRequired[bool], 
+})
+AuthSessionQueryResultItem = _ty.TypedDict('AuthSessionQueryResultItem', {
+    'id': _ty.NotRequired[str],
+    'current': _ty.NotRequired[bool],
+    'internal': _ty.NotRequired[bool],
+    'origin': _ty.NotRequired[str],
+    'credentials': _ty.NotRequired[str],
+    'credentials_data': _ty.NotRequired[_jsonschema.JsonValue|_jsonschema.JsonValue|_jsonschema.JsonValue|_jsonschema.JsonValue],
+    'created_at': _ty.NotRequired[str],
+    'secure_transport': _ty.NotRequired[bool], 
+})

@@ -1,4 +1,5 @@
 from pytruenas import Namespace as _NS
+from pytruenas.models import jsonschema as _jsonschema
 import typing as _ty 
 class PoolDataset(_NS):
     
@@ -6,18 +7,14 @@ class PoolDataset(_NS):
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> PoolDatasetDetails:
+    ) -> list[_jsonschema.JsonObject]:
         """Retrieve all dataset(s) details outlining any services/tasks which might be consuming them."""
         ...
     def snapshot_count(self,
-        dataset,
+        dataset:str,
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> PoolDatasetSnapshot_count:
+    ) -> int:
         """Returns snapshot count for specified `dataset`."""
         ...
-class PoolDatasetDetails(_ty.TypedDict):
-    ...
-class PoolDatasetSnapshot_count(_ty.TypedDict):
-    ... 
