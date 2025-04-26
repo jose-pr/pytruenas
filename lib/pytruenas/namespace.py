@@ -43,11 +43,12 @@ class DbAction(_enum.StrEnum, _ty.Generic[_T]):
         __action,
         __namespace: "Namespace",
         __selector: _DBSelector = None,
-        *__opts: dict | _q.Option,
+        *__opts: dict | _q.Option | tuple[str,object],
         **__fields,
     ) -> _T:
         opts = _q.Option.options(*__opts)
         idkey = opts.get("idkey") or "id"
+        callback = opts.get("callback") or None
         fields = {name: val for name, val in __fields.items() if val is not _q.EXCLUDE}
 
         if isinstance(__selector, str) or not isinstance(__selector, _ty.Iterable):
@@ -75,6 +76,7 @@ class DbAction(_enum.StrEnum, _ty.Generic[_T]):
 
         if _id is None and not selectors:
             result = __namespace.update(fields)
+            action = DbAction.UPDATE
         elif _id not in (None, _q.EXCLUDE):
             if __action not in (DbAction.UPDATE, DbAction.UPSERT):
                 raise FileExistsError(_id)
@@ -93,18 +95,25 @@ class DbAction(_enum.StrEnum, _ty.Generic[_T]):
                 result = __namespace._get(_id)
             elif result is None:
                 result = __namespace._get(_id) if not current else current
+            action = DbAction.UPDATE
         else:
             if __action not in (DbAction.CREATE, DbAction.UPSERT):
                 raise FileNotFoundError(selectors)
             exclude = (idkey, *(opts.get("create_exclude") or []))
             fields = {name: val for name, val in fields.items() if name not in exclude}
             result = __namespace.create(fields)
+            action = DbAction.CREATE
 
         wait = opts.get("wait", True)
         if isinstance(result, int) and (wait is None or wait):
             result = __namespace._client.api.core.job_wait(result, job=True)
 
-        return _ty.cast(_T, result)
+        result = _ty.cast(_T, result)
+
+        if callable(callback):
+            callback(action, _id, result)
+
+        return result
 
 
 class Namespace:
@@ -218,10 +227,15 @@ class Namespace:
     def _upsert(
         self,
         __selector: _DBSelector = None,
+        __callback: (
+            _ty.Callable[[DbAction, str | int, dict[str, object]]] | None
+        ) = None,
         *__opts: dict | _q.Option,
         **__fields,
     ):
-        return DbAction.UPSERT.execute(self, __selector, *__opts, **__fields)
+        return DbAction.UPSERT.execute(
+            self, __selector, ("callback", __callback), *__opts, **__fields
+        )
 
     def _update(
         self,
