@@ -2,6 +2,7 @@ import typing as _ty
 from os import stat_result as _stat
 import io as _io
 import asyncssh as _ssh
+import asyncssh.sftp as _sftp
 import os as _os
 
 if _ty.TYPE_CHECKING:
@@ -13,41 +14,46 @@ from .. import _utils
 _STATMAP = {"st_mode": "permissions"}
 
 
-def _sftpfailure(path: "Path", failure: "_ssh.SFTPFailure", filetype: int):
+def _sftpfailure(
+    path: "Path", failure: "_sftp.SFTPFailure", filetype: int  # type:ignore
+):
     if filetype == _ssh.FILEXFER_TYPE_UNKNOWN:
         return FileNotFoundError(path)
 
 
-_C = _ty.ParamSpec("C")
-_T = _ty.TypeVar("T")
+_C = _ty.ParamSpec("_C")
+_T = _ty.TypeVar("_T")
 
 
 def _syncsftp(
     commamd: _ty.Callable[_C, _ty.Awaitable[_T]],
     *args: _C.args,
-    sftpfailure=None,
-    sftpfailure_follow_symlinks=True,
-    sftpfailure_path_pos=0,
+    sftpfailure=None,  # type:ignore
+    sftpfailure_follow_symlinks=True,  # type:ignore
+    sftpfailure_path_pos=0,  # type:ignore
     **kwargs: _C.kwargs,
 ) -> _T:
-    path: Path = args[sftpfailure_path_pos]
+    path: "Path" = _ty.cast("Path", args[sftpfailure_path_pos])
 
-    args = [_os.fspath(arg) if hasattr(arg, "__fspath__") else arg for arg in args]
+    args = [
+        _os.fspath(arg) if hasattr(arg, "__fspath__") else arg  # type:ignore
+        for arg in args
+    ]
 
     try:
         return _utils.async_to_sync(commamd(*args, **kwargs))
-    except _ssh.SFTPFileAlreadyExists:
+    except _sftp.SFTPFileAlreadyExists:
         raise FileExistsError(path)
-    except (_ssh.SFTPNoSuchPath, _ssh.SFTPNoSuchFile):
+    except (_sftp.SFTPNoSuchPath, _sftp.SFTPNoSuchFile):
         raise FileNotFoundError(path)
-    except _ssh.SFTPFailure as failure:
+    except _sftp.SFTPFailure as failure:
         try:
             if sftpfailure_follow_symlinks:
                 stat = _utils.async_to_sync(path._client.sftp.stat(path._path))
             else:
                 stat = _utils.async_to_sync(path._client.sftp.lstat(path._path))
             filetype = stat.type
-        except (_ssh.SFTPNoSuchPath, _ssh.SFTPNoSuchFile):
+        except (_sftp.SFTPNoSuchPath, _sftp.SFTPNoSuchFile):
             filetype = _ssh.FILEXFER_TYPE_UNKNOWN
         sftpfailure = sftpfailure or _sftpfailure
         error = sftpfailure(path, failure, filetype)
@@ -71,9 +77,9 @@ def chown(
     follow_symlinks: bool = True,
 ):
     if uid == -1:
-        uid = None
+        uid = None  # type:ignore
     if gid == -1:
-        gid = None
+        gid = None  # type:ignore
     if not follow_symlinks:
         raise NotImplementedError("not follow_symlinks")
     return _syncsftp(path._client.sftp.chown, path, uid, gid)
@@ -127,7 +133,7 @@ def iterdir(path: "Path"):
         yield path / file
 
 
-def _mkdir_sftpfailure(path: "Path", failure: "_ssh.SFTPFailure", filetype: int):
+def _mkdir_sftpfailure(path: "Path", failure: "_sftp.SFTPFailure", filetype: int):
     error = _sftpfailure(path, failure, filetype)
     if error:
         return error
@@ -161,8 +167,15 @@ def rename(path: "Path", target):
 def rmdir(path: "Path"):
     return _syncsftp(path._client.sftp.rmdir, path)
 
-def rmtree(path: "Path", ignore_errors=False, onerror=None):
-    return _syncsftp(path._client.sftp.rmtree, path, ignore_errors, onerror)
+
+def rmtree(path: "Path", ignore_errors=False, onerror: _ty.Callable | None = None):
+    return _syncsftp(
+        path._client.sftp.rmtree,
+        path,
+        ignore_errors,
+        _ty.cast("_sftp._SFTPOnErrorHandler", onerror),
+    )
+
 
 def resolve(path: "Path", strict=False):
     sftpfile = _syncsftp(
@@ -194,7 +207,9 @@ def stat(path: "Path", *, follow_symlinks=True):
         stat = _syncsftp(path._client.sftp.lstat, path)
     return _stat(
         [
-            getattr(stat, _STATMAP.get(field, field.removeprefix("st_")), None)
+            getattr(
+                stat, _STATMAP.get(field, field.removeprefix("st_")), None
+            )  # type:ignore
             for field in _utils.STAT_FIELDS
         ]
     )
@@ -215,7 +230,7 @@ def unlink(path: "Path", missing_ok=False):
 
 
 class _AsynToSyncFileHandle(_io.IOBase):
-    def __init__(self, fh: _ssh.SFTPClientFile):
+    def __init__(self, fh: _sftp.SFTPClientFile):
         super().__init__()
         self.fh = fh
 
@@ -247,4 +262,5 @@ class _AsynToSyncFileHandle(_io.IOBase):
         return _utils.async_to_sync(self.fh.read(size))
 
     def truncate(self, size=None):
-        return _utils.async_to_sync(self.fh.truncate(size))
+        _utils.async_to_sync(self.fh.truncate(size))
+        return _ty.cast(int, _utils.async_to_sync(self.fh.stat()).size)
