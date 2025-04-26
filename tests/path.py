@@ -1,4 +1,6 @@
 #!/bin/python3
+# type: ignore
+
 from pytruenas import TrueNASClient, Credentials, fs
 import os, sys
 import logging
