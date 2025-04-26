@@ -26,17 +26,29 @@ def _syncsftp(
     commamd: _ty.Callable[_C, _ty.Awaitable[_T]],
     *args: _C.args,
     sftpfailure=None,
+    sftpfailure_follow_symlinks=True,
+    sftpfailure_path_pos=0,
     **kwargs: _C.kwargs,
 ) -> _T:
-    path: Path = args[0]
+    path: Path = args[sftpfailure_path_pos]
+
+    args = [_os.fspath(arg) if hasattr(arg, "__fspath__") else arg for arg in args]
+
     try:
-        return _utils.async_to_sync(commamd(path._path, *args[1:], **kwargs))
+        return _utils.async_to_sync(commamd(*args, **kwargs))
     except _ssh.SFTPFileAlreadyExists:
         raise FileExistsError(path)
     except (_ssh.SFTPNoSuchPath, _ssh.SFTPNoSuchFile):
         raise FileNotFoundError(path)
     except _ssh.SFTPFailure as failure:
-        filetype = path._client.sftp._type(path._path)
+        try:
+            if sftpfailure_follow_symlinks:
+                stat = _utils.async_to_sync(path._client.sftp.stat(path._path))
+            else:
+                stat = _utils.async_to_sync(path._client.sftp.lstat(path._path))
+            filetype = stat.type
+        except (_ssh.SFTPNoSuchPath, _ssh.SFTPNoSuchFile):
+            filetype = _ssh.FILEXFER_TYPE_UNKNOWN
         sftpfailure = sftpfailure or _sftpfailure
         error = sftpfailure(path, failure, filetype)
         if not error:
@@ -44,9 +56,31 @@ def _syncsftp(
         raise error
 
 
-def iterdir(path: "Path"):
-    for file in _syncsftp(path._client.sftp.listdir, path):
-        yield path / file
+def chmod(path: "Path", mode: int, *, follow_symlinks=True):
+    if follow_symlinks:
+        return _syncsftp(path._client.sftp.chmod, path, mode)
+    else:
+        raise NotImplementedError("lchmod")
+
+
+def chown(
+    path: "Path",
+    uid: int,
+    gid: int,
+    *,
+    follow_symlinks: bool = True,
+):
+    if uid == -1:
+        uid = None
+    if gid == -1:
+        gid = None
+    if not follow_symlinks:
+        raise NotImplementedError("not follow_symlinks")
+    return _syncsftp(path._client.sftp.chown, path, uid, gid)
+
+
+def exists(path: "Path"):
+    return _syncsftp(path._client.sftp.exists, path)
 
 
 def is_block_device(path: "Path"):
@@ -81,50 +115,16 @@ def is_socket(path: "Path"):
 
 def is_symlink(path: "Path"):
     try:
-        type = _syncsftp(path._client.sftp.lstat, path).type
-        return type == _ssh.FILEXFER_TYPE_SYMLINK
-    except FileNotFoundError as e:
+        return (
+            _syncsftp(path._client.sftp.lstat, path).type == _ssh.FILEXFER_TYPE_SYMLINK
+        )
+    except FileNotFoundError as _e:
         return False
 
 
-def exists(path: "Path"):
-    return _syncsftp(path._client.sftp.exists, path)
-
-
-def stat(path: "Path", *, follow_symlinks=True):
-    if follow_symlinks:
-        stat = _syncsftp(path._client.sftp.stat, path)
-    else:
-        stat = _syncsftp(path._client.sftp.lstat, path)
-    return _stat(
-        [
-            getattr(stat, _STATMAP.get(field, field.removeprefix("st_")), None)
-            for field in _utils.STAT_FIELDS
-        ]
-    )
-
-
-def chmod(path: "Path", mode: int, *, follow_symlinks=True):
-    if follow_symlinks:
-        return _syncsftp(path._client.sftp.chmod, path)
-    else:
-        raise NotImplementedError("lchmod")
-
-
-def chown(
-    path: "Path",
-    uid: int,
-    gid: int,
-    *,
-    follow_symlinks: bool = True,
-):
-    if uid == -1:
-        uid = None
-    if gid == -1:
-        gid = None
-    if not follow_symlinks:
-        raise NotImplementedError("not follow_symlinks")
-    return _syncsftp(path._client.sftp.chown, path, uid, gid)
+def iterdir(path: "Path"):
+    for file in _syncsftp(path._client.sftp.listdir, path):
+        yield path / file
 
 
 def _mkdir_sftpfailure(path: "Path", failure: "_ssh.SFTPFailure", filetype: int):
@@ -150,30 +150,25 @@ def mkdir(path: "Path", mode: int = 511, parents=False, exist_ok=False):
         mkdir(path.parent, mode, parents)
 
 
-def unlink(path: "Path", missing_ok=False):
-    try:
-        return _syncsftp(path._client.sftp.unlink, path)
-    except FileNotFoundError as e:
-        if not missing_ok:
-            raise e
+def readlink(path: "Path"):
+    return path._with_path(_syncsftp(path._client.sftp.readlink, path))
+
+
+def rename(path: "Path", target):
+    return _syncsftp(path._client.sftp.rename, path, target)
 
 
 def rmdir(path: "Path"):
     return _syncsftp(path._client.sftp.rmdir, path)
 
 
-def rename(path: "Path", target):
-    return _syncsftp(path._client.sftp.rename, path, _os.fspath(target))
-
-
-def readlink(path: "Path"):
-    return _syncsftp(path._client.sftp.readlink, path)
-
-
-def symlink_to(path: "Path", target: "Path"):
-    return _syncsftp(
-        path._client.sftp.symlink, path._with_path(target), _os.fspath(path)
+def resolve(path: "Path", strict=False):
+    sftpfile = _syncsftp(
+        path._client.sftp.realpath, path, check=_ssh.FXRP_STAT_IF_EXISTS
     )
+    if strict and sftpfile.attrs.type == _ssh.FILEXFER_TYPE_UNKNOWN:
+        raise FileNotFoundError(path)
+    return path._with_path(sftpfile.filename)
 
 
 def open(
@@ -188,6 +183,33 @@ def open(
 
     file = _syncsftp(path._client.sftp.open, path, mode)
     return _AsynToSyncFileHandle(file)
+
+
+def stat(path: "Path", *, follow_symlinks=True):
+    if follow_symlinks:
+        stat = _syncsftp(path._client.sftp.stat, path)
+    else:
+        stat = _syncsftp(path._client.sftp.lstat, path)
+    return _stat(
+        [
+            getattr(stat, _STATMAP.get(field, field.removeprefix("st_")), None)
+            for field in _utils.STAT_FIELDS
+        ]
+    )
+
+
+def symlink_to(path: "Path", target: "Path", target_is_directory=False):
+    return _syncsftp(
+        path._client.sftp.symlink, path._with_path(target), path, sftpfailure_path_pos=1
+    )
+
+
+def unlink(path: "Path", missing_ok=False):
+    try:
+        return _syncsftp(path._client.sftp.unlink, path)
+    except FileNotFoundError as e:
+        if not missing_ok:
+            raise e
 
 
 class _AsynToSyncFileHandle(_io.IOBase):
