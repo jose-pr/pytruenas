@@ -5,11 +5,11 @@ import typing as _ty
 {%- set typeddicts = {} -%}
 
 {%- for qn in ns.namespaces() %}
-from {{ qn.module.removeprefix(ns.module) if ns.module else '.' + qn.module }} import {{ qn.classname }}
+from .{{ qn.pyname.relative_to(ns.pyname) }} import {{ qn.pyname.camelcase(-1) }}
 {%- endfor %} 
-class {{ ns.classname }}(_NS):
+class {{ ns.pyname.camelcase(-1) }}(_NS):
     {% for qn in ns.methods() %}
-    def {{ qn.methodname }}(self,
+    def {{ qn.pyname.name }}(self,
         {%- for param in qn.parameters() %}
         {{param.argument_declaration(typeddicts)}}, 
         {%- endfor %}
@@ -18,7 +18,7 @@ class {{ ns.classname }}(_NS):
         ...
     {%- endfor %} 
     {%- for qn in ns.namespaces() %}
-    {{ qn.methodname }}: {{ qn.classname }}
+    {{ qn.pyname.name }}: {{ qn.pyname.camelcase(-1) }}
     {%- endfor %} 
 
 

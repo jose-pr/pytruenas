@@ -1,6 +1,7 @@
 from jinja2 import Environment, FileSystemLoader
 from pathlib import Path as _P
 from . import Renderer as _NSCodegen
+from ..utils import casing as _casing
 
 BASEPATH = _P(__file__).parent
 
@@ -12,4 +13,4 @@ class Renderer(_NSCodegen):
         self.template = _DEFAULT_ENV.get_template(template + ".j2")
 
     def render(self, **ctx) -> str:
-        return self.template.render(**ctx)
+        return self.template.render(**ctx, casing=_casing)
