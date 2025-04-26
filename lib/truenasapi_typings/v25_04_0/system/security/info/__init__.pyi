@@ -1,7 +1,7 @@
 from pytruenas import Namespace as _NS
 from pytruenas.models import jsonschema as _jsonschema
 import typing as _ty 
-class SystemSecurityInfo(_NS):
+class Info(_NS):
     
     def fips_available(self,
         _method:str|None=None,

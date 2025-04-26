@@ -1,7 +1,7 @@
 from pytruenas import Namespace as _NS
 from pytruenas.models import jsonschema as _jsonschema
 import typing as _ty 
-class Cloud_backup(_NS):
+class CloudBackup(_NS):
     
     def abort(self,
         id:int,
@@ -12,11 +12,11 @@ class Cloud_backup(_NS):
         """Abort a running cloud backup task."""
         ...
     def create(self,
-        cloud_backup:cloud_backup,
+        cloud_backup:CreateCloudBackup,
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> Cloud_backupCreate:
+    ) -> CreateReturn:
         """Create a new cloud backup task"""
         ...
     def delete(self,
@@ -38,11 +38,11 @@ class Cloud_backup(_NS):
         ...
     def get_instance(self,
         id:int,
-        options:options={},
+        options:GetInstanceOptions={},
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> Cloud_backupGet_instance:
+    ) -> GetInstanceReturn:
         """Returns instance matching `id`. If `id` is not found, Validation error is raised.
 
 Please see `query` method documentation for `options`."""
@@ -54,7 +54,7 @@ Please see `query` method documentation for `options`."""
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> list[CloudBackupSnapshotItem]:
+    ) -> list[ListSnapshotDirectoryCloudBackupSnapshotItem]:
         """List files in the directory `path` of the `snapshot_id` created by the cloud backup job `id`."""
         ...
     def list_snapshots(self,
@@ -62,16 +62,16 @@ Please see `query` method documentation for `options`."""
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> list[CloudBackupSnapshot]:
+    ) -> list[ListSnapshotsCloudBackupSnapshot]:
         """List existing snapshots for the cloud backup job `id`."""
         ...
     def query(self,
         filters:_jsonschema.JsonArray=[],
-        options:options={'relationships': True, 'extend': None, 'extend_context': None, 'prefix': None, 'extra': {}, 'order_by': [], 'select': [], 'count': False, 'get': False, 'offset': 0, 'limit': 0, 'force_sql_filters': False},
+        options:QueryOptions={'relationships': True, 'extend': None, 'extend_context': None, 'prefix': None, 'extra': {}, 'order_by': [], 'select': [], 'count': False, 'get': False, 'offset': 0, 'limit': 0, 'force_sql_filters': False},
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> list[CloudBackupQueryResultItem]|CloudBackupQueryResultItem|int:
+    ) -> list[QueryCloudBackupQueryResultItem]|QueryCloudBackupQueryResultItem|int:
         """"""
         ...
     def restore(self,
@@ -79,7 +79,7 @@ Please see `query` method documentation for `options`."""
         snapshot_id:str,
         subfolder:str,
         destination_path:str,
-        options:options={'exclude': [], 'include': []},
+        options:RestoreOptions={'exclude': [], 'include': []},
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
@@ -88,7 +88,7 @@ Please see `query` method documentation for `options`."""
         ...
     def sync(self,
         id:int,
-        options:options,
+        options:SyncOptions,
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
@@ -104,14 +104,14 @@ Please see `query` method documentation for `options`."""
         ...
     def update(self,
         id:int,
-        data:data,
+        data:UpdateData,
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> Cloud_backupUpdate:
+    ) -> UpdateReturn:
         """Update the cloud backup entry `id` with `data`."""
         ...
-cloud_backup = _ty.TypedDict('cloud_backup', {
+CreateCloudBackup = _ty.TypedDict('CreateCloudBackup', {
     'description': _ty.NotRequired[str],
     'path': str,
     'credentials': int,
@@ -129,7 +129,7 @@ cloud_backup = _ty.TypedDict('cloud_backup', {
     'transfer_setting': _ty.NotRequired[str],
     'absolute_paths': _ty.NotRequired[bool], 
 })
-Cloud_backupCreate = _ty.TypedDict('Cloud_backupCreate', {
+CreateReturn = _ty.TypedDict('CreateReturn', {
     'description': _ty.NotRequired[str],
     'path': str,
     'credentials': _jsonschema.JsonValue,
@@ -150,10 +150,21 @@ Cloud_backupCreate = _ty.TypedDict('Cloud_backupCreate', {
     'job': _jsonschema.JsonObject|None,
     'locked': bool, 
 })
-options = _ty.TypedDict('options', {
-    'dry_run': _ty.NotRequired[bool], 
+GetInstanceOptions = _ty.TypedDict('GetInstanceOptions', {
+    'relationships': _ty.NotRequired[bool],
+    'extend': _ty.NotRequired[str|None],
+    'extend_context': _ty.NotRequired[str|None],
+    'prefix': _ty.NotRequired[str|None],
+    'extra': _ty.NotRequired[_jsonschema.JsonObject],
+    'order_by': _ty.NotRequired[list[str]],
+    'select': _ty.NotRequired[list[str|_jsonschema.JsonArray]],
+    'count': _ty.NotRequired[bool],
+    'get': _ty.NotRequired[bool],
+    'offset': _ty.NotRequired[int],
+    'limit': _ty.NotRequired[int],
+    'force_sql_filters': _ty.NotRequired[bool], 
 })
-Cloud_backupGet_instance = _ty.TypedDict('Cloud_backupGet_instance', {
+GetInstanceReturn = _ty.TypedDict('GetInstanceReturn', {
     'description': _ty.NotRequired[str],
     'path': str,
     'credentials': _jsonschema.JsonValue,
@@ -174,20 +185,34 @@ Cloud_backupGet_instance = _ty.TypedDict('Cloud_backupGet_instance', {
     'job': _jsonschema.JsonObject|None,
     'locked': bool, 
 })
-CloudBackupSnapshotItem = _ty.TypedDict('CloudBackupSnapshotItem', {
+ListSnapshotDirectoryCloudBackupSnapshotItem = _ty.TypedDict('ListSnapshotDirectoryCloudBackupSnapshotItem', {
     'name': str,
     'path': str,
     'type': str,
     'size': int|None,
     'mtime': str, 
 })
-CloudBackupSnapshot = _ty.TypedDict('CloudBackupSnapshot', {
+ListSnapshotsCloudBackupSnapshot = _ty.TypedDict('ListSnapshotsCloudBackupSnapshot', {
     'id': str,
     'hostname': str,
     'time': str,
     'paths': list[str], 
 })
-CloudBackupQueryResultItem = _ty.TypedDict('CloudBackupQueryResultItem', {
+QueryOptions = _ty.TypedDict('QueryOptions', {
+    'relationships': _ty.NotRequired[bool],
+    'extend': _ty.NotRequired[str|None],
+    'extend_context': _ty.NotRequired[str|None],
+    'prefix': _ty.NotRequired[str|None],
+    'extra': _ty.NotRequired[_jsonschema.JsonObject],
+    'order_by': _ty.NotRequired[list[str]],
+    'select': _ty.NotRequired[list[str|_jsonschema.JsonArray]],
+    'count': _ty.NotRequired[bool],
+    'get': _ty.NotRequired[bool],
+    'offset': _ty.NotRequired[int],
+    'limit': _ty.NotRequired[int],
+    'force_sql_filters': _ty.NotRequired[bool], 
+})
+QueryCloudBackupQueryResultItem = _ty.TypedDict('QueryCloudBackupQueryResultItem', {
     'description': _ty.NotRequired[str],
     'path': _ty.NotRequired[str],
     'credentials': _ty.NotRequired[_jsonschema.JsonValue],
@@ -208,7 +233,14 @@ CloudBackupQueryResultItem = _ty.TypedDict('CloudBackupQueryResultItem', {
     'job': _ty.NotRequired[_jsonschema.JsonObject|None],
     'locked': _ty.NotRequired[bool], 
 })
-data = _ty.TypedDict('data', {
+RestoreOptions = _ty.TypedDict('RestoreOptions', {
+    'exclude': _ty.NotRequired[list[str]],
+    'include': _ty.NotRequired[list[str]], 
+})
+SyncOptions = _ty.TypedDict('SyncOptions', {
+    'dry_run': _ty.NotRequired[bool], 
+})
+UpdateData = _ty.TypedDict('UpdateData', {
     'description': _ty.NotRequired[str],
     'path': _ty.NotRequired[str],
     'credentials': _ty.NotRequired[int],
@@ -225,7 +257,7 @@ data = _ty.TypedDict('data', {
     'keep_last': _ty.NotRequired[int],
     'transfer_setting': _ty.NotRequired[str], 
 })
-Cloud_backupUpdate = _ty.TypedDict('Cloud_backupUpdate', {
+UpdateReturn = _ty.TypedDict('UpdateReturn', {
     'description': _ty.NotRequired[str],
     'path': str,
     'credentials': _jsonschema.JsonValue,

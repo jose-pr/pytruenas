@@ -4,7 +4,7 @@ import typing as _ty
 class Group(_NS):
     
     def create(self,
-        group_create:group_create,
+        group_create:CreateGroupCreate,
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
@@ -13,7 +13,7 @@ class Group(_NS):
         ...
     def delete(self,
         id:int,
-        options:options={'delete_users': False},
+        options:DeleteOptions={'delete_users': False},
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
@@ -23,22 +23,22 @@ class Group(_NS):
 The `delete_users` option deletes all users that have this group as their primary group."""
         ...
     def get_group_obj(self,
-        get_group_obj:get_group_obj,
+        get_group_obj:GetGroupObjGetGroupObj,
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> GroupGet_group_obj:
+    ) -> GetGroupObjReturn:
         """Returns dictionary containing information from struct grp for the group specified by either the `groupname` or `gid`.
 
 If `sid_info` is specified then addition SMB / domain information is returned for the group."""
         ...
     def get_instance(self,
         id:int,
-        options:options={},
+        options:GetInstanceOptions={},
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> GroupGet_instance:
+    ) -> GetInstanceReturn:
         """Returns instance matching `id`. If `id` is not found, Validation error is raised.
 
 Please see `query` method documentation for `options`."""
@@ -61,23 +61,23 @@ Please see `query` method documentation for `options`."""
         ...
     def query(self,
         filters:_jsonschema.JsonArray=[],
-        options:options={'relationships': True, 'extend': None, 'extend_context': None, 'prefix': None, 'extra': {}, 'order_by': [], 'select': [], 'count': False, 'get': False, 'offset': 0, 'limit': 0, 'force_sql_filters': False},
+        options:QueryOptions={'relationships': True, 'extend': None, 'extend_context': None, 'prefix': None, 'extra': {}, 'order_by': [], 'select': [], 'count': False, 'get': False, 'offset': 0, 'limit': 0, 'force_sql_filters': False},
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> list[GroupQueryResultItem]|GroupQueryResultItem|int:
+    ) -> list[QueryGroupQueryResultItem]|QueryGroupQueryResultItem|int:
         """Query groups with `query-filters` and `query-options`."""
         ...
     def update(self,
         id:int,
-        group_update:group_update,
+        group_update:UpdateGroupUpdate,
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
     ) -> int:
         """Update attributes of an existing group."""
         ...
-group_create = _ty.TypedDict('group_create', {
+CreateGroupCreate = _ty.TypedDict('CreateGroupCreate', {
     'gid': _ty.NotRequired[int|None],
     'name': str,
     'sudo_commands': _ty.NotRequired[list[str]],
@@ -86,7 +86,23 @@ group_create = _ty.TypedDict('group_create', {
     'userns_idmap': _ty.NotRequired[str|int|None],
     'users': _ty.NotRequired[list[int]], 
 })
-options = _ty.TypedDict('options', {
+DeleteOptions = _ty.TypedDict('DeleteOptions', {
+    'delete_users': _ty.NotRequired[bool], 
+})
+GetGroupObjGetGroupObj = _ty.TypedDict('GetGroupObjGetGroupObj', {
+    'groupname': _ty.NotRequired[str|None],
+    'gid': _ty.NotRequired[int|None],
+    'sid_info': _ty.NotRequired[bool], 
+})
+GetGroupObjReturn = _ty.TypedDict('GetGroupObjReturn', {
+    'gr_name': str,
+    'gr_gid': int,
+    'gr_mem': list[str],
+    'sid': _ty.NotRequired[str|None],
+    'source': str,
+    'local': bool, 
+})
+GetInstanceOptions = _ty.TypedDict('GetInstanceOptions', {
     'relationships': _ty.NotRequired[bool],
     'extend': _ty.NotRequired[str|None],
     'extend_context': _ty.NotRequired[str|None],
@@ -100,20 +116,7 @@ options = _ty.TypedDict('options', {
     'limit': _ty.NotRequired[int],
     'force_sql_filters': _ty.NotRequired[bool], 
 })
-get_group_obj = _ty.TypedDict('get_group_obj', {
-    'groupname': _ty.NotRequired[str|None],
-    'gid': _ty.NotRequired[int|None],
-    'sid_info': _ty.NotRequired[bool], 
-})
-GroupGet_group_obj = _ty.TypedDict('GroupGet_group_obj', {
-    'gr_name': str,
-    'gr_gid': int,
-    'gr_mem': list[str],
-    'sid': _ty.NotRequired[str|None],
-    'source': str,
-    'local': bool, 
-})
-GroupGet_instance = _ty.TypedDict('GroupGet_instance', {
+GetInstanceReturn = _ty.TypedDict('GetInstanceReturn', {
     'id': int,
     'gid': int,
     'name': str,
@@ -129,7 +132,21 @@ GroupGet_instance = _ty.TypedDict('GroupGet_instance', {
     'roles': list[str],
     'users': _ty.NotRequired[list[int]], 
 })
-GroupQueryResultItem = _ty.TypedDict('GroupQueryResultItem', {
+QueryOptions = _ty.TypedDict('QueryOptions', {
+    'relationships': _ty.NotRequired[bool],
+    'extend': _ty.NotRequired[str|None],
+    'extend_context': _ty.NotRequired[str|None],
+    'prefix': _ty.NotRequired[str|None],
+    'extra': _ty.NotRequired[_jsonschema.JsonObject],
+    'order_by': _ty.NotRequired[list[str]],
+    'select': _ty.NotRequired[list[str|_jsonschema.JsonArray]],
+    'count': _ty.NotRequired[bool],
+    'get': _ty.NotRequired[bool],
+    'offset': _ty.NotRequired[int],
+    'limit': _ty.NotRequired[int],
+    'force_sql_filters': _ty.NotRequired[bool], 
+})
+QueryGroupQueryResultItem = _ty.TypedDict('QueryGroupQueryResultItem', {
     'id': _ty.NotRequired[int],
     'gid': _ty.NotRequired[int],
     'name': _ty.NotRequired[str],
@@ -145,7 +162,7 @@ GroupQueryResultItem = _ty.TypedDict('GroupQueryResultItem', {
     'roles': _ty.NotRequired[list[str]],
     'users': _ty.NotRequired[list[int]], 
 })
-group_update = _ty.TypedDict('group_update', {
+UpdateGroupUpdate = _ty.TypedDict('UpdateGroupUpdate', {
     'name': _ty.NotRequired[str],
     'sudo_commands': _ty.NotRequired[list[str]],
     'sudo_commands_nopasswd': _ty.NotRequired[list[str]],

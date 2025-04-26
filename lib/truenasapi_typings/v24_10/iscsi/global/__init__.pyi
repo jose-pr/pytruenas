@@ -1,7 +1,7 @@
 from pytruenas import Namespace as _NS
 from pytruenas.models import jsonschema as _jsonschema
 import typing as _ty 
-class IscsiGlobal(_NS):
+class Global(_NS):
     
     def alua_enabled(self,
         _method:str|None=None,
@@ -21,7 +21,7 @@ class IscsiGlobal(_NS):
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> IscsiGlobalConfig:
+    ) -> ConfigReturn:
         """"""
         ...
     def iser_enabled(self,
@@ -33,22 +33,22 @@ class IscsiGlobal(_NS):
         ...
     def sessions(self,
         query_filters:_jsonschema.JsonArray=[],
-        query_options:query_options={'relationships': True, 'extend': None, 'extend_context': None, 'prefix': None, 'extra': {}, 'order_by': [], 'select': [], 'count': False, 'get': False, 'offset': 0, 'limit': 0, 'force_sql_filters': False},
+        query_options:SessionsQueryOptions={'relationships': True, 'extend': None, 'extend_context': None, 'prefix': None, 'extra': {}, 'order_by': [], 'select': [], 'count': False, 'get': False, 'offset': 0, 'limit': 0, 'force_sql_filters': False},
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> list[IscsiSessionQueryResultItem]|IscsiSessionQueryResultItem|int:
+    ) -> list[SessionsIscsiSessionQueryResultItem]|SessionsIscsiSessionQueryResultItem|int:
         """Get a list of currently running iSCSI sessions. This includes initiator and target names and the unique connection IDs."""
         ...
     def update(self,
-        iscsi_update:iscsi_update,
+        iscsi_update:UpdateIscsiUpdate,
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> IscsiGlobalUpdate:
+    ) -> UpdateReturn:
         """`alua` is a no-op for FreeNAS."""
         ...
-IscsiGlobalConfig = _ty.TypedDict('IscsiGlobalConfig', {
+ConfigReturn = _ty.TypedDict('ConfigReturn', {
     'id': int,
     'basename': str,
     'isns_servers': list[str],
@@ -57,7 +57,7 @@ IscsiGlobalConfig = _ty.TypedDict('IscsiGlobalConfig', {
     'alua': bool,
     'iser': bool, 
 })
-query_options = _ty.TypedDict('query_options', {
+SessionsQueryOptions = _ty.TypedDict('SessionsQueryOptions', {
     'relationships': _ty.NotRequired[bool],
     'extend': _ty.NotRequired[str|None],
     'extend_context': _ty.NotRequired[str|None],
@@ -71,7 +71,7 @@ query_options = _ty.TypedDict('query_options', {
     'limit': _ty.NotRequired[int],
     'force_sql_filters': _ty.NotRequired[bool], 
 })
-IscsiSessionQueryResultItem = _ty.TypedDict('IscsiSessionQueryResultItem', {
+SessionsIscsiSessionQueryResultItem = _ty.TypedDict('SessionsIscsiSessionQueryResultItem', {
     'initiator': _ty.NotRequired[str],
     'initiator_addr': _ty.NotRequired[str],
     'initiator_alias': _ty.NotRequired[str|None],
@@ -88,7 +88,7 @@ IscsiSessionQueryResultItem = _ty.TypedDict('IscsiSessionQueryResultItem', {
     'iser': _ty.NotRequired[bool],
     'offload': _ty.NotRequired[bool], 
 })
-iscsi_update = _ty.TypedDict('iscsi_update', {
+UpdateIscsiUpdate = _ty.TypedDict('UpdateIscsiUpdate', {
     'basename': _ty.NotRequired[str],
     'isns_servers': _ty.NotRequired[list[str]],
     'listen_port': _ty.NotRequired[int],
@@ -96,7 +96,7 @@ iscsi_update = _ty.TypedDict('iscsi_update', {
     'alua': _ty.NotRequired[bool],
     'iser': _ty.NotRequired[bool], 
 })
-IscsiGlobalUpdate = _ty.TypedDict('IscsiGlobalUpdate', {
+UpdateReturn = _ty.TypedDict('UpdateReturn', {
     'id': int,
     'basename': str,
     'isns_servers': list[str],

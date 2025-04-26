@@ -15,14 +15,14 @@ class Alert(_NS):
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> list[Alert]:
+    ) -> list[ListAlert]:
         """List all types of alerts including active/dismissed currently in the system."""
         ...
     def list_categories(self,
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> list[AlertCategory]:
+    ) -> list[ListCategoriesAlertCategory]:
         """List all types of alerts which the system can issue."""
         ...
     def list_policies(self,
@@ -40,7 +40,7 @@ class Alert(_NS):
     ) -> None:
         """Restore `id` alert which had been dismissed."""
         ...
-Alert = _ty.TypedDict('Alert', {
+ListAlert = _ty.TypedDict('ListAlert', {
     'uuid': str,
     'source': str,
     'klass': str,
@@ -57,7 +57,7 @@ Alert = _ty.TypedDict('Alert', {
     'formatted': str|None,
     'one_shot': bool, 
 })
-AlertCategory = _ty.TypedDict('AlertCategory', {
+ListCategoriesAlertCategory = _ty.TypedDict('ListCategoriesAlertCategory', {
     'id': str,
     'title': str,
     'classes': _jsonschema.JsonArray, 

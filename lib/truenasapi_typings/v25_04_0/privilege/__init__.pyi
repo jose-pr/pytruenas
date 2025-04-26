@@ -4,11 +4,11 @@ import typing as _ty
 class Privilege(_NS):
     
     def create(self,
-        privilege_create:privilege_create,
+        privilege_create:CreatePrivilegeCreate,
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> PrivilegeCreate:
+    ) -> CreateReturn:
         """Creates a privilege.
 
 `name` is a name for privilege (must be unique).
@@ -31,31 +31,31 @@ class Privilege(_NS):
         ...
     def get_instance(self,
         id:int,
-        options:options={},
+        options:GetInstanceOptions={},
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> PrivilegeGet_instance:
+    ) -> GetInstanceReturn:
         """Returns instance matching `id`. If `id` is not found, Validation error is raised.
 
 Please see `query` method documentation for `options`."""
         ...
     def query(self,
         filters:_jsonschema.JsonArray=[],
-        options:options={'relationships': True, 'extend': None, 'extend_context': None, 'prefix': None, 'extra': {}, 'order_by': [], 'select': [], 'count': False, 'get': False, 'offset': 0, 'limit': 0, 'force_sql_filters': False},
+        options:QueryOptions={'relationships': True, 'extend': None, 'extend_context': None, 'prefix': None, 'extra': {}, 'order_by': [], 'select': [], 'count': False, 'get': False, 'offset': 0, 'limit': 0, 'force_sql_filters': False},
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> list[PrivilegeQueryResultItem]|PrivilegeQueryResultItem|int:
+    ) -> list[QueryPrivilegeQueryResultItem]|QueryPrivilegeQueryResultItem|int:
         """"""
         ...
     def roles(self,
         filters:_jsonschema.JsonArray=[],
-        options:options={'relationships': True, 'extend': None, 'extend_context': None, 'prefix': None, 'extra': {}, 'order_by': [], 'select': [], 'count': False, 'get': False, 'offset': 0, 'limit': 0, 'force_sql_filters': False},
+        options:RolesOptions={'relationships': True, 'extend': None, 'extend_context': None, 'prefix': None, 'extra': {}, 'order_by': [], 'select': [], 'count': False, 'get': False, 'offset': 0, 'limit': 0, 'force_sql_filters': False},
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> list[PrivilegeRoleQueryResultItem]|PrivilegeRoleQueryResultItem|int:
+    ) -> list[RolesPrivilegeRoleQueryResultItem]|RolesPrivilegeRoleQueryResultItem|int:
         """Get all available roles.
 
 Each entry contains the following keys:
@@ -68,21 +68,21 @@ Each entry contains the following keys:
         ...
     def update(self,
         id:int,
-        privilege_update:privilege_update,
+        privilege_update:UpdatePrivilegeUpdate,
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> PrivilegeUpdate:
+    ) -> UpdateReturn:
         """Update the privilege `id`."""
         ...
-privilege_create = _ty.TypedDict('privilege_create', {
+CreatePrivilegeCreate = _ty.TypedDict('CreatePrivilegeCreate', {
     'name': str,
     'local_groups': _ty.NotRequired[list[int]],
     'ds_groups': _ty.NotRequired[list[int|str]],
     'roles': _ty.NotRequired[list[str]],
     'web_shell': bool, 
 })
-PrivilegeCreate = _ty.TypedDict('PrivilegeCreate', {
+CreateReturn = _ty.TypedDict('CreateReturn', {
     'id': int,
     'builtin_name': str|None,
     'name': str,
@@ -91,7 +91,7 @@ PrivilegeCreate = _ty.TypedDict('PrivilegeCreate', {
     'roles': _ty.NotRequired[list[str]],
     'web_shell': bool, 
 })
-options = _ty.TypedDict('options', {
+GetInstanceOptions = _ty.TypedDict('GetInstanceOptions', {
     'relationships': _ty.NotRequired[bool],
     'extend': _ty.NotRequired[str|None],
     'extend_context': _ty.NotRequired[str|None],
@@ -105,7 +105,7 @@ options = _ty.TypedDict('options', {
     'limit': _ty.NotRequired[int],
     'force_sql_filters': _ty.NotRequired[bool], 
 })
-PrivilegeGet_instance = _ty.TypedDict('PrivilegeGet_instance', {
+GetInstanceReturn = _ty.TypedDict('GetInstanceReturn', {
     'id': int,
     'builtin_name': str|None,
     'name': str,
@@ -114,7 +114,21 @@ PrivilegeGet_instance = _ty.TypedDict('PrivilegeGet_instance', {
     'roles': _ty.NotRequired[list[str]],
     'web_shell': bool, 
 })
-PrivilegeQueryResultItem = _ty.TypedDict('PrivilegeQueryResultItem', {
+QueryOptions = _ty.TypedDict('QueryOptions', {
+    'relationships': _ty.NotRequired[bool],
+    'extend': _ty.NotRequired[str|None],
+    'extend_context': _ty.NotRequired[str|None],
+    'prefix': _ty.NotRequired[str|None],
+    'extra': _ty.NotRequired[_jsonschema.JsonObject],
+    'order_by': _ty.NotRequired[list[str]],
+    'select': _ty.NotRequired[list[str|_jsonschema.JsonArray]],
+    'count': _ty.NotRequired[bool],
+    'get': _ty.NotRequired[bool],
+    'offset': _ty.NotRequired[int],
+    'limit': _ty.NotRequired[int],
+    'force_sql_filters': _ty.NotRequired[bool], 
+})
+QueryPrivilegeQueryResultItem = _ty.TypedDict('QueryPrivilegeQueryResultItem', {
     'id': _ty.NotRequired[int],
     'builtin_name': _ty.NotRequired[str|None],
     'name': _ty.NotRequired[str],
@@ -123,21 +137,35 @@ PrivilegeQueryResultItem = _ty.TypedDict('PrivilegeQueryResultItem', {
     'roles': _ty.NotRequired[list[str]],
     'web_shell': _ty.NotRequired[bool], 
 })
-PrivilegeRoleQueryResultItem = _ty.TypedDict('PrivilegeRoleQueryResultItem', {
+RolesOptions = _ty.TypedDict('RolesOptions', {
+    'relationships': _ty.NotRequired[bool],
+    'extend': _ty.NotRequired[str|None],
+    'extend_context': _ty.NotRequired[str|None],
+    'prefix': _ty.NotRequired[str|None],
+    'extra': _ty.NotRequired[_jsonschema.JsonObject],
+    'order_by': _ty.NotRequired[list[str]],
+    'select': _ty.NotRequired[list[str|_jsonschema.JsonArray]],
+    'count': _ty.NotRequired[bool],
+    'get': _ty.NotRequired[bool],
+    'offset': _ty.NotRequired[int],
+    'limit': _ty.NotRequired[int],
+    'force_sql_filters': _ty.NotRequired[bool], 
+})
+RolesPrivilegeRoleQueryResultItem = _ty.TypedDict('RolesPrivilegeRoleQueryResultItem', {
     'name': _ty.NotRequired[str],
     'title': _ty.NotRequired[str],
     'includes': _ty.NotRequired[list[str]],
     'builtin': _ty.NotRequired[bool],
     'stig': _ty.NotRequired[_jsonschema.JsonValue|None], 
 })
-privilege_update = _ty.TypedDict('privilege_update', {
+UpdatePrivilegeUpdate = _ty.TypedDict('UpdatePrivilegeUpdate', {
     'name': _ty.NotRequired[str],
     'local_groups': _ty.NotRequired[list[int]],
     'ds_groups': _ty.NotRequired[list[int|str]],
     'roles': _ty.NotRequired[list[str]],
     'web_shell': _ty.NotRequired[bool], 
 })
-PrivilegeUpdate = _ty.TypedDict('PrivilegeUpdate', {
+UpdateReturn = _ty.TypedDict('UpdateReturn', {
     'id': int,
     'builtin_name': str|None,
     'name': str,

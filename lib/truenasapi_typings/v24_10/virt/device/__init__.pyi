@@ -1,7 +1,7 @@
 from pytruenas import Namespace as _NS
 from pytruenas.models import jsonschema as _jsonschema
 import typing as _ty 
-class VirtDevice(_NS):
+class Device(_NS):
     
     def disk_choices(self,
         _method:str|None=None,
@@ -11,7 +11,7 @@ class VirtDevice(_NS):
         """Returns disk choices available for device type "DISK" for virtual machines. This includes both available virt volumes and zvol choices. Disk choices for containers depend on the mounted file tree (paths)."""
         ...
     def export_disk_image(self,
-        virt_device_export_disk_image:virt_device_export_disk_image,
+        virt_device_export_disk_image:ExportDiskImageVirtDeviceExportDiskImage,
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
@@ -35,7 +35,7 @@ As of this implementation it supports the following {format} options :
         """Provide choices for GPU devices."""
         ...
     def import_disk_image(self,
-        virt_device_import_disk_image:virt_device_import_disk_image,
+        virt_device_import_disk_image:ImportDiskImageVirtDeviceImportDiskImage,
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
@@ -72,12 +72,12 @@ As of this implementation it supports:
     ) -> _jsonschema.JsonObject:
         """Provide choices for USB devices."""
         ...
-virt_device_export_disk_image = _ty.TypedDict('virt_device_export_disk_image', {
+ExportDiskImageVirtDeviceExportDiskImage = _ty.TypedDict('ExportDiskImageVirtDeviceExportDiskImage', {
     'format': str,
     'directory': str,
     'zvol': str, 
 })
-virt_device_import_disk_image = _ty.TypedDict('virt_device_import_disk_image', {
+ImportDiskImageVirtDeviceImportDiskImage = _ty.TypedDict('ImportDiskImageVirtDeviceImportDiskImage', {
     'diskimg': str,
     'zvol': str, 
 })

@@ -4,7 +4,7 @@ import typing as _ty
 class Catalog(_NS):
     
     def apps(self,
-        catalog_apps_options:catalog_apps_options,
+        catalog_apps_options:AppsCatalogAppsOptions,
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
@@ -23,16 +23,16 @@ class Catalog(_NS):
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> CatalogConfig:
+    ) -> ConfigReturn:
         """"""
         ...
     def get_app_details(self,
         app_name:str,
-        app_version_details:app_version_details,
+        app_version_details:GetAppDetailsAppVersionDetails,
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> CatalogGet_app_details:
+    ) -> GetAppDetailsReturn:
         """Retrieve information of `app_name` `app_version_details.catalog` catalog app."""
         ...
     def sync(self,
@@ -50,29 +50,29 @@ class Catalog(_NS):
         """Retrieve available trains."""
         ...
     def update(self,
-        catalog_update:catalog_update,
+        catalog_update:UpdateCatalogUpdate,
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> CatalogUpdate:
+    ) -> UpdateReturn:
         """Update catalog preferences."""
         ...
-catalog_apps_options = _ty.TypedDict('catalog_apps_options', {
+AppsCatalogAppsOptions = _ty.TypedDict('AppsCatalogAppsOptions', {
     'cache': _ty.NotRequired[bool],
     'cache_only': _ty.NotRequired[bool],
     'retrieve_all_trains': _ty.NotRequired[bool],
     'trains': _ty.NotRequired[list[str]], 
 })
-CatalogConfig = _ty.TypedDict('CatalogConfig', {
+ConfigReturn = _ty.TypedDict('ConfigReturn', {
     'id': str,
     'label': str,
     'preferred_trains': list[str],
     'location': str, 
 })
-app_version_details = _ty.TypedDict('app_version_details', {
+GetAppDetailsAppVersionDetails = _ty.TypedDict('GetAppDetailsAppVersionDetails', {
     'train': str, 
 })
-CatalogGet_app_details = _ty.TypedDict('CatalogGet_app_details', {
+GetAppDetailsReturn = _ty.TypedDict('GetAppDetailsReturn', {
     'app_readme': str|None,
     'categories': list[str],
     'description': str,
@@ -93,10 +93,10 @@ CatalogGet_app_details = _ty.TypedDict('CatalogGet_app_details', {
     'sources': list[str],
     'icon_url': _ty.NotRequired[str|None], 
 })
-catalog_update = _ty.TypedDict('catalog_update', {
+UpdateCatalogUpdate = _ty.TypedDict('UpdateCatalogUpdate', {
     'preferred_trains': _ty.NotRequired[list[str]], 
 })
-CatalogUpdate = _ty.TypedDict('CatalogUpdate', {
+UpdateReturn = _ty.TypedDict('UpdateReturn', {
     'id': str,
     'label': str,
     'preferred_trains': list[str],

@@ -1,15 +1,15 @@
 from pytruenas import Namespace as _NS
 from pytruenas.models import jsonschema as _jsonschema
 import typing as _ty
-from .general import SystemGeneral
-from .ntpserver import SystemNtpserver
-from .reboot import SystemReboot
-from .security import SystemSecurity 
+from .general import General
+from .ntpserver import Ntpserver
+from .reboot import Reboot
+from .security import Security 
 class System(_NS):
     
     def reboot(self,
         reason:str,
-        options:options={'delay': None},
+        options:RebootOptions={'delay': None},
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
@@ -20,7 +20,7 @@ Emits an "added" event of name "system" and id "reboot"."""
         ...
     def shutdown(self,
         reason:str,
-        options:options={'delay': None},
+        options:ShutdownOptions={'delay': None},
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
@@ -29,10 +29,13 @@ Emits an "added" event of name "system" and id "reboot"."""
 
 An "added" event of name "system" and id "shutdown" is emitted when shutdown is initiated."""
         ...
-    general: SystemGeneral
-    ntpserver: SystemNtpserver
-    reboot: SystemReboot
-    security: SystemSecurity
-options = _ty.TypedDict('options', {
+    general: General
+    ntpserver: Ntpserver
+    reboot: Reboot
+    security: Security
+RebootOptions = _ty.TypedDict('RebootOptions', {
+    'delay': _ty.NotRequired[int|None], 
+})
+ShutdownOptions = _ty.TypedDict('ShutdownOptions', {
     'delay': _ty.NotRequired[int|None], 
 })

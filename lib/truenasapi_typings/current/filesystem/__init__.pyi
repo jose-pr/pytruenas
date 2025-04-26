@@ -1,11 +1,11 @@
 from pytruenas import Namespace as _NS
 from pytruenas.models import jsonschema as _jsonschema
 import typing as _ty
-from .acltemplate import FilesystemAcltemplate 
+from .acltemplate import Acltemplate 
 class Filesystem(_NS):
     
     def chown(self,
-        filesystem_chown:filesystem_chown,
+        filesystem_chown:ChownFilesystemChown,
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
@@ -33,7 +33,7 @@ If `traverse` and `recursive` are specified, then the chown operation will trave
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> FilesystemGet_zfs_attributes:
+    ) -> GetZfsAttributesReturn:
         """Get the current ZFS attributes for the file at the given path"""
         ...
     def getacl(self,
@@ -43,7 +43,7 @@ If `traverse` and `recursive` are specified, then the chown operation will trave
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> NFS4ACLResult|POSIXACLResult|DISABLED_ACLResult:
+    ) -> GetaclNFS4ACLResult|GetaclPOSIXACLResult|GetaclDISABLEDACLResult:
         """Return ACL of a given path. This may return a POSIX1e ACL or a NFSv4 ACL. The acl type is indicated by the `acltype` key.
 
 `simplified` - effect of this depends on ACL type on underlying filesystem. In the case of NFSv4 ACLs simplified permissions and flags are returned for ACL entries where applicable. NFSv4 errata below. In the case of POSIX1E ACls, this setting has no impact on returned ACL.
@@ -67,11 +67,11 @@ If the permisssions do not fit within one of the pre-defined simplified permissi
     def listdir(self,
         path:str,
         query_filters:_jsonschema.JsonArray=[],
-        query_options:query_options={'relationships': True, 'extend': None, 'extend_context': None, 'prefix': None, 'extra': {}, 'order_by': [], 'select': [], 'count': False, 'get': False, 'offset': 0, 'limit': 0, 'force_sql_filters': False},
+        query_options:ListdirQueryOptions={'relationships': True, 'extend': None, 'extend_context': None, 'prefix': None, 'extra': {}, 'order_by': [], 'select': [], 'count': False, 'get': False, 'offset': 0, 'limit': 0, 'force_sql_filters': False},
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> list[FilesystemDirQueryResultItem]|FilesystemDirQueryResultItem|int:
+    ) -> list[ListdirFilesystemDirQueryResultItem]|ListdirFilesystemDirQueryResultItem|int:
         """Get the contents of a directory.
 
 The select option may be used to optimize listdir performance. Metadata-related fields that are not selected will not be retrieved from the filesystem.
@@ -83,11 +83,11 @@ NOTE: an empty list for select (default) is treated as requesting all informatio
 Each entry of the list consists of: name(str): name of the file path(str): absolute path of the entry realpath(str): absolute real path of the entry (if SYMLINK) type(str): DIRECTORY | FILE | SYMLINK | OTHER size(int): size of the entry allocation_size(int): on-disk size of entry mode(int): file mode/permission uid(int): user id of entry owner gid(int): group id of entry owner acl(bool): extended ACL is present on file is_mountpoint(bool): path is a mountpoint is_ctldir(bool): path is within special .zfs directory attributes(list): list of statx file attributes that apply to the file. See statx(2) manpage for more details. xattrs(list): list of extended attribute names. zfs_attrs(list): list of ZFS file attributes on file"""
         ...
     def mkdir(self,
-        filesystem_mkdir:filesystem_mkdir,
+        filesystem_mkdir:MkdirFilesystemMkdir,
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> FilesystemMkdir:
+    ) -> MkdirReturn:
         """Create a directory at the specified path.
 
 The following options are supported:
@@ -98,7 +98,7 @@ NOTE: if chmod error is skipped, the resulting `mode` key in mkdir response will
         ...
     def put(self,
         path:str,
-        options:options={'append': False, 'mode': None},
+        options:PutOptions={'append': False, 'mode': None},
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
@@ -106,11 +106,11 @@ NOTE: if chmod error is skipped, the resulting `mode` key in mkdir response will
         """Job to put contents to `path`."""
         ...
     def set_zfs_attributes(self,
-        set_zfs_file_attributes:set_zfs_file_attributes,
+        set_zfs_file_attributes:SetZfsAttributesSetZfsFileAttributes,
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> FilesystemSet_zfs_attributes:
+    ) -> SetZfsAttributesReturn:
         """Set special ZFS-related file flags on the specified path
 
 `readonly` - this maps to READONLY MS-DOS attribute. When set, file may not be written to (toggling does not impact existing file opens).
@@ -132,11 +132,11 @@ NOTE: if chmod error is skipped, the resulting `mode` key in mkdir response will
 `sparse` - maps to SPARSE MS-DOS attribute. Is presented to SMB clients, but has no impact on local filesystem."""
         ...
     def setacl(self,
-        filesystem_acl:filesystem_acl,
+        filesystem_acl:SetaclFilesystemAcl,
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> NFS4ACLResult|POSIXACLResult|DISABLED_ACLResult:
+    ) -> SetaclNFS4ACLResult|SetaclPOSIXACLResult|SetaclDISABLEDACLResult:
         """Set ACL of a given path. Takes the following parameters: `path` full path to directory or file.
 
 `dacl` ACL entries. Formatting depends on the underlying `acltype`. NFS4ACL requires NFSv4 entries. POSIX1e requires POSIX1e entries.
@@ -192,7 +192,7 @@ Notes about posix1e ACL entry fields:
 `perms` - object containing posix permissions."""
         ...
     def setperm(self,
-        filesystem_setperm:filesystem_setperm,
+        filesystem_setperm:SetpermFilesystemSetperm,
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
@@ -222,7 +222,7 @@ If no `mode` is set, and `stripacl` is True, then non-trivial ACLs will be conve
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> FilesystemStat:
+    ) -> StatReturn:
         """Return filesystem information for a given path.
 
 `realpath(str)`: absolute real path of the entry (if SYMLINK)
@@ -268,13 +268,13 @@ If no `mode` is set, and `stripacl` is True, then non-trivial ACLs will be conve
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> FilesystemStatfs:
+    ) -> StatfsReturn:
         """Return stats from the filesystem of a given path.
 
 Raises: CallError(ENOENT) - Path not found"""
         ...
-    acltemplate: FilesystemAcltemplate
-filesystem_chown = _ty.TypedDict('filesystem_chown', {
+    acltemplate: Acltemplate
+ChownFilesystemChown = _ty.TypedDict('ChownFilesystemChown', {
     'path': str,
     'uid': _ty.NotRequired[int|None],
     'user': _ty.NotRequired[str|None],
@@ -282,7 +282,7 @@ filesystem_chown = _ty.TypedDict('filesystem_chown', {
     'group': _ty.NotRequired[str|None],
     'options': _ty.NotRequired[_jsonschema.JsonValue], 
 })
-FilesystemGet_zfs_attributes = _ty.TypedDict('FilesystemGet_zfs_attributes', {
+GetZfsAttributesReturn = _ty.TypedDict('GetZfsAttributesReturn', {
     'readonly': _ty.NotRequired[bool|None],
     'hidden': _ty.NotRequired[bool|None],
     'system': _ty.NotRequired[bool|None],
@@ -293,7 +293,7 @@ FilesystemGet_zfs_attributes = _ty.TypedDict('FilesystemGet_zfs_attributes', {
     'offline': _ty.NotRequired[bool|None],
     'sparse': _ty.NotRequired[bool|None], 
 })
-NFS4ACLResult = _ty.TypedDict('NFS4ACLResult', {
+GetaclNFS4ACLResult = _ty.TypedDict('GetaclNFS4ACLResult', {
     'path': str,
     'user': str|None,
     'group': str|None,
@@ -304,7 +304,7 @@ NFS4ACLResult = _ty.TypedDict('NFS4ACLResult', {
     'aclflags': _jsonschema.JsonValue,
     'trivial': bool, 
 })
-POSIXACLResult = _ty.TypedDict('POSIXACLResult', {
+GetaclPOSIXACLResult = _ty.TypedDict('GetaclPOSIXACLResult', {
     'path': str,
     'user': str|None,
     'group': str|None,
@@ -314,7 +314,7 @@ POSIXACLResult = _ty.TypedDict('POSIXACLResult', {
     'acl': _jsonschema.JsonArray,
     'trivial': bool, 
 })
-DISABLED_ACLResult = _ty.TypedDict('DISABLED_ACLResult', {
+GetaclDISABLEDACLResult = _ty.TypedDict('GetaclDISABLEDACLResult', {
     'path': str,
     'user': str|None,
     'group': str|None,
@@ -324,7 +324,7 @@ DISABLED_ACLResult = _ty.TypedDict('DISABLED_ACLResult', {
     'acl': None,
     'trivial': bool, 
 })
-query_options = _ty.TypedDict('query_options', {
+ListdirQueryOptions = _ty.TypedDict('ListdirQueryOptions', {
     'relationships': _ty.NotRequired[bool],
     'extend': _ty.NotRequired[str|None],
     'extend_context': _ty.NotRequired[str|None],
@@ -338,7 +338,7 @@ query_options = _ty.TypedDict('query_options', {
     'limit': _ty.NotRequired[int],
     'force_sql_filters': _ty.NotRequired[bool], 
 })
-FilesystemDirQueryResultItem = _ty.TypedDict('FilesystemDirQueryResultItem', {
+ListdirFilesystemDirQueryResultItem = _ty.TypedDict('ListdirFilesystemDirQueryResultItem', {
     'name': _ty.NotRequired[str],
     'path': _ty.NotRequired[str],
     'realpath': _ty.NotRequired[str],
@@ -356,11 +356,11 @@ FilesystemDirQueryResultItem = _ty.TypedDict('FilesystemDirQueryResultItem', {
     'xattrs': _ty.NotRequired[list[str]],
     'zfs_attrs': _ty.NotRequired[list[str]|None], 
 })
-filesystem_mkdir = _ty.TypedDict('filesystem_mkdir', {
+MkdirFilesystemMkdir = _ty.TypedDict('MkdirFilesystemMkdir', {
     'path': str,
     'options': _ty.NotRequired[_jsonschema.JsonValue], 
 })
-FilesystemMkdir = _ty.TypedDict('FilesystemMkdir', {
+MkdirReturn = _ty.TypedDict('MkdirReturn', {
     'name': str,
     'path': str,
     'realpath': str,
@@ -378,15 +378,15 @@ FilesystemMkdir = _ty.TypedDict('FilesystemMkdir', {
     'xattrs': list[str],
     'zfs_attrs': list[str]|None, 
 })
-options = _ty.TypedDict('options', {
+PutOptions = _ty.TypedDict('PutOptions', {
     'append': _ty.NotRequired[bool],
     'mode': _ty.NotRequired[int|None], 
 })
-set_zfs_file_attributes = _ty.TypedDict('set_zfs_file_attributes', {
+SetZfsAttributesSetZfsFileAttributes = _ty.TypedDict('SetZfsAttributesSetZfsFileAttributes', {
     'path': str,
     'zfs_file_attributes': _jsonschema.JsonValue, 
 })
-FilesystemSet_zfs_attributes = _ty.TypedDict('FilesystemSet_zfs_attributes', {
+SetZfsAttributesReturn = _ty.TypedDict('SetZfsAttributesReturn', {
     'readonly': _ty.NotRequired[bool|None],
     'hidden': _ty.NotRequired[bool|None],
     'system': _ty.NotRequired[bool|None],
@@ -397,7 +397,7 @@ FilesystemSet_zfs_attributes = _ty.TypedDict('FilesystemSet_zfs_attributes', {
     'offline': _ty.NotRequired[bool|None],
     'sparse': _ty.NotRequired[bool|None], 
 })
-filesystem_acl = _ty.TypedDict('filesystem_acl', {
+SetaclFilesystemAcl = _ty.TypedDict('SetaclFilesystemAcl', {
     'path': str,
     'dacl': _jsonschema.JsonArray|_jsonschema.JsonArray,
     'options': _ty.NotRequired[_jsonschema.JsonValue],
@@ -408,7 +408,38 @@ filesystem_acl = _ty.TypedDict('filesystem_acl', {
     'group': _ty.NotRequired[str|None],
     'acltype': _ty.NotRequired[str|None], 
 })
-filesystem_setperm = _ty.TypedDict('filesystem_setperm', {
+SetaclNFS4ACLResult = _ty.TypedDict('SetaclNFS4ACLResult', {
+    'path': str,
+    'user': str|None,
+    'group': str|None,
+    'uid': int|None,
+    'gid': int|None,
+    'acltype': str,
+    'acl': _jsonschema.JsonArray,
+    'aclflags': _jsonschema.JsonValue,
+    'trivial': bool, 
+})
+SetaclPOSIXACLResult = _ty.TypedDict('SetaclPOSIXACLResult', {
+    'path': str,
+    'user': str|None,
+    'group': str|None,
+    'uid': int|None,
+    'gid': int|None,
+    'acltype': str,
+    'acl': _jsonschema.JsonArray,
+    'trivial': bool, 
+})
+SetaclDISABLEDACLResult = _ty.TypedDict('SetaclDISABLEDACLResult', {
+    'path': str,
+    'user': str|None,
+    'group': str|None,
+    'uid': int|None,
+    'gid': int|None,
+    'acltype': str,
+    'acl': None,
+    'trivial': bool, 
+})
+SetpermFilesystemSetperm = _ty.TypedDict('SetpermFilesystemSetperm', {
     'path': str,
     'uid': _ty.NotRequired[int|None],
     'user': _ty.NotRequired[str|None],
@@ -417,7 +448,7 @@ filesystem_setperm = _ty.TypedDict('filesystem_setperm', {
     'mode': _ty.NotRequired[str|None],
     'options': _ty.NotRequired[_jsonschema.JsonValue], 
 })
-FilesystemStat = _ty.TypedDict('FilesystemStat', {
+StatReturn = _ty.TypedDict('StatReturn', {
     'realpath': str,
     'type': str,
     'size': int,
@@ -440,7 +471,7 @@ FilesystemStat = _ty.TypedDict('FilesystemStat', {
     'user': str|None,
     'group': str|None, 
 })
-FilesystemStatfs = _ty.TypedDict('FilesystemStatfs', {
+StatfsReturn = _ty.TypedDict('StatfsReturn', {
     'flags': list[str|_jsonschema.JsonValue],
     'fsid': str,
     'fstype': str|_jsonschema.JsonValue,

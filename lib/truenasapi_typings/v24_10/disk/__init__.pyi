@@ -8,10 +8,10 @@ class Disk(_NS):
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> list[Alert]:
+    ) -> list[TemperatureAlertsAlert]:
         """Returns existing temperature alerts for specified disk `names.`"""
         ...
-Alert = _ty.TypedDict('Alert', {
+TemperatureAlertsAlert = _ty.TypedDict('TemperatureAlertsAlert', {
     'uuid': str,
     'source': str,
     'klass': str,

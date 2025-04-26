@@ -1,10 +1,10 @@
 from pytruenas import Namespace as _NS
 from pytruenas.models import jsonschema as _jsonschema
 import typing as _ty
-from .dataset import PoolDataset
-from .resilver import PoolResilver
-from .scrub import PoolScrub
-from .snapshottask import PoolSnapshottask 
+from .dataset import Dataset
+from .resilver import Resilver
+from .scrub import Scrub
+from .snapshottask import Snapshottask 
 class Pool(_NS):
     
     def ddt_prefetch(self,
@@ -16,7 +16,7 @@ class Pool(_NS):
         """Prefetch DDT entries in pool `pool_name`."""
         ...
     def ddt_prune(self,
-        options:options,
+        options:DdtPruneOptions,
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
@@ -27,11 +27,11 @@ class Pool(_NS):
 
 `days` is the number of days to prune DDT entries."""
         ...
-    dataset: PoolDataset
-    resilver: PoolResilver
-    scrub: PoolScrub
-    snapshottask: PoolSnapshottask
-options = _ty.TypedDict('options', {
+    dataset: Dataset
+    resilver: Resilver
+    scrub: Scrub
+    snapshottask: Snapshottask
+DdtPruneOptions = _ty.TypedDict('DdtPruneOptions', {
     'pool_name': str,
     'percentage': _ty.NotRequired[int|None],
     'days': _ty.NotRequired[int|None], 

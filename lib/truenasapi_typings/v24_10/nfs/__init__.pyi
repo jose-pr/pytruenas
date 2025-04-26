@@ -14,15 +14,15 @@ class Nfs(_NS):
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> NfsConfig:
+    ) -> ConfigReturn:
         """"""
         ...
     def update(self,
-        nfs_update:nfs_update,
+        nfs_update:UpdateNfsUpdate,
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> NfsUpdate:
+    ) -> UpdateReturn:
         """Update NFS Service Configuration.
 
 `servers` - Represents number of servers to create. By default, the number of nfsd is determined by the capabilities of the system. To specify the number of nfsd, set a value between 1 and 256. 'Unset' the field to return to default. This field will always report the number of nfsd to start.
@@ -67,7 +67,7 @@ class Nfs(_NS):
 
             INPUT: Enable/Disable Default: Disable"""
         ...
-NfsConfig = _ty.TypedDict('NfsConfig', {
+ConfigReturn = _ty.TypedDict('ConfigReturn', {
     'id': int,
     'servers': int|None,
     'allow_nonroot': bool,
@@ -86,7 +86,7 @@ NfsConfig = _ty.TypedDict('NfsConfig', {
     'managed_nfsd': bool,
     'rdma': bool, 
 })
-nfs_update = _ty.TypedDict('nfs_update', {
+UpdateNfsUpdate = _ty.TypedDict('UpdateNfsUpdate', {
     'servers': _ty.NotRequired[int|None],
     'allow_nonroot': _ty.NotRequired[bool],
     'protocols': _ty.NotRequired[list[str]],
@@ -101,7 +101,7 @@ nfs_update = _ty.TypedDict('nfs_update', {
     'userd_manage_gids': _ty.NotRequired[bool],
     'rdma': _ty.NotRequired[bool], 
 })
-NfsUpdate = _ty.TypedDict('NfsUpdate', {
+UpdateReturn = _ty.TypedDict('UpdateReturn', {
     'id': int,
     'servers': int|None,
     'allow_nonroot': bool,

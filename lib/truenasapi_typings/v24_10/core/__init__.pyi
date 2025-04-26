@@ -11,7 +11,7 @@ class Core(_NS):
         """Utility method which just returns "pong". Can be used to keep connection/authtoken alive instead of using "ping" protocol message."""
         ...
     def set_options(self,
-        options:options,
+        options:SetOptionsOptions,
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
@@ -34,6 +34,6 @@ class Core(_NS):
     ) -> None:
         """"""
         ...
-options = _ty.TypedDict('options', {
+SetOptionsOptions = _ty.TypedDict('SetOptionsOptions', {
     'py_exceptions': _ty.NotRequired[bool], 
 })

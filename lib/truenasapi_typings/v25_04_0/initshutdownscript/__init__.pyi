@@ -4,11 +4,11 @@ import typing as _ty
 class Initshutdownscript(_NS):
     
     def create(self,
-        data:data,
+        data:CreateData,
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> InitshutdownscriptCreate:
+    ) -> CreateReturn:
         """Create an initshutdown script task.
 
 `type` indicates if a command or script should be executed at `when`.
@@ -29,43 +29,43 @@ There are three choices for `when`:
         ...
     def get_instance(self,
         id:int,
-        options:options={},
+        options:GetInstanceOptions={},
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> InitshutdownscriptGet_instance:
+    ) -> GetInstanceReturn:
         """Returns instance matching `id`. If `id` is not found, Validation error is raised.
 
 Please see `query` method documentation for `options`."""
         ...
     def query(self,
         filters:_jsonschema.JsonArray=[],
-        options:options={'relationships': True, 'extend': None, 'extend_context': None, 'prefix': None, 'extra': {}, 'order_by': [], 'select': [], 'count': False, 'get': False, 'offset': 0, 'limit': 0, 'force_sql_filters': False},
+        options:QueryOptions={'relationships': True, 'extend': None, 'extend_context': None, 'prefix': None, 'extra': {}, 'order_by': [], 'select': [], 'count': False, 'get': False, 'offset': 0, 'limit': 0, 'force_sql_filters': False},
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> list[InitShutdownScriptQueryResultItem]|InitShutdownScriptQueryResultItem|int:
+    ) -> list[QueryInitShutdownScriptQueryResultItem]|QueryInitShutdownScriptQueryResultItem|int:
         """"""
         ...
     def update(self,
         id:int,
-        data:data,
+        data:UpdateData,
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> InitshutdownscriptUpdate:
+    ) -> UpdateReturn:
         """Update initshutdown script task of `id`."""
         ...
-data = _ty.TypedDict('data', {
-    'type': _ty.NotRequired[str],
+CreateData = _ty.TypedDict('CreateData', {
+    'type': str,
     'command': _ty.NotRequired[str|None],
     'script': _ty.NotRequired[str|None],
-    'when': _ty.NotRequired[str],
+    'when': str,
     'enabled': _ty.NotRequired[bool],
     'timeout': _ty.NotRequired[int],
     'comment': _ty.NotRequired[str], 
 })
-InitshutdownscriptCreate = _ty.TypedDict('InitshutdownscriptCreate', {
+CreateReturn = _ty.TypedDict('CreateReturn', {
     'type': str,
     'command': _ty.NotRequired[str|None],
     'script': _ty.NotRequired[str|None],
@@ -75,7 +75,7 @@ InitshutdownscriptCreate = _ty.TypedDict('InitshutdownscriptCreate', {
     'comment': _ty.NotRequired[str],
     'id': int, 
 })
-options = _ty.TypedDict('options', {
+GetInstanceOptions = _ty.TypedDict('GetInstanceOptions', {
     'relationships': _ty.NotRequired[bool],
     'extend': _ty.NotRequired[str|None],
     'extend_context': _ty.NotRequired[str|None],
@@ -89,7 +89,7 @@ options = _ty.TypedDict('options', {
     'limit': _ty.NotRequired[int],
     'force_sql_filters': _ty.NotRequired[bool], 
 })
-InitshutdownscriptGet_instance = _ty.TypedDict('InitshutdownscriptGet_instance', {
+GetInstanceReturn = _ty.TypedDict('GetInstanceReturn', {
     'type': str,
     'command': _ty.NotRequired[str|None],
     'script': _ty.NotRequired[str|None],
@@ -99,7 +99,21 @@ InitshutdownscriptGet_instance = _ty.TypedDict('InitshutdownscriptGet_instance',
     'comment': _ty.NotRequired[str],
     'id': int, 
 })
-InitShutdownScriptQueryResultItem = _ty.TypedDict('InitShutdownScriptQueryResultItem', {
+QueryOptions = _ty.TypedDict('QueryOptions', {
+    'relationships': _ty.NotRequired[bool],
+    'extend': _ty.NotRequired[str|None],
+    'extend_context': _ty.NotRequired[str|None],
+    'prefix': _ty.NotRequired[str|None],
+    'extra': _ty.NotRequired[_jsonschema.JsonObject],
+    'order_by': _ty.NotRequired[list[str]],
+    'select': _ty.NotRequired[list[str|_jsonschema.JsonArray]],
+    'count': _ty.NotRequired[bool],
+    'get': _ty.NotRequired[bool],
+    'offset': _ty.NotRequired[int],
+    'limit': _ty.NotRequired[int],
+    'force_sql_filters': _ty.NotRequired[bool], 
+})
+QueryInitShutdownScriptQueryResultItem = _ty.TypedDict('QueryInitShutdownScriptQueryResultItem', {
     'type': _ty.NotRequired[str],
     'command': _ty.NotRequired[str|None],
     'script': _ty.NotRequired[str|None],
@@ -109,7 +123,16 @@ InitShutdownScriptQueryResultItem = _ty.TypedDict('InitShutdownScriptQueryResult
     'comment': _ty.NotRequired[str],
     'id': _ty.NotRequired[int], 
 })
-InitshutdownscriptUpdate = _ty.TypedDict('InitshutdownscriptUpdate', {
+UpdateData = _ty.TypedDict('UpdateData', {
+    'type': _ty.NotRequired[str],
+    'command': _ty.NotRequired[str|None],
+    'script': _ty.NotRequired[str|None],
+    'when': _ty.NotRequired[str],
+    'enabled': _ty.NotRequired[bool],
+    'timeout': _ty.NotRequired[int],
+    'comment': _ty.NotRequired[str], 
+})
+UpdateReturn = _ty.TypedDict('UpdateReturn', {
     'type': str,
     'command': _ty.NotRequired[str|None],
     'script': _ty.NotRequired[str|None],

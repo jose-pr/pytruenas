@@ -5,13 +5,13 @@ from .acme import Acme
 from .alert import Alert
 from .alertclasses import Alertclasses
 from .alertservice import Alertservice
-from .api_key import Api_key
+from .api_key import ApiKey
 from .app import App
 from .auth import Auth
 from .boot import Boot
 from .catalog import Catalog
 from .certificate import Certificate
-from .cloud_backup import Cloud_backup
+from .cloud_backup import CloudBackup
 from .cloudsync import Cloudsync
 from .config import Config
 from .core import Core
@@ -27,7 +27,7 @@ from .group import Group
 from .initshutdownscript import Initshutdownscript
 from .ipmi import Ipmi
 from .iscsi import Iscsi
-from .k8s_to_docker import K8s_to_docker
+from .k8s_to_docker import K8sToDocker
 from .keychaincredential import Keychaincredential
 from .nfs import Nfs
 from .pool import Pool
@@ -38,7 +38,7 @@ from .smb import Smb
 from .snmp import Snmp
 from .staticroute import Staticroute
 from .system import System
-from .tn_connect import Tn_connect
+from .tn_connect import TnConnect
 from .truenas import Truenas
 from .user import User
 from .virt import Virt 
@@ -48,13 +48,13 @@ class Current(_NS):
     alert: Alert
     alertclasses: Alertclasses
     alertservice: Alertservice
-    api_key: Api_key
+    api_key: ApiKey
     app: App
     auth: Auth
     boot: Boot
     catalog: Catalog
     certificate: Certificate
-    cloud_backup: Cloud_backup
+    cloud_backup: CloudBackup
     cloudsync: Cloudsync
     config: Config
     core: Core
@@ -70,7 +70,7 @@ class Current(_NS):
     initshutdownscript: Initshutdownscript
     ipmi: Ipmi
     iscsi: Iscsi
-    k8s_to_docker: K8s_to_docker
+    k8s_to_docker: K8sToDocker
     keychaincredential: Keychaincredential
     nfs: Nfs
     pool: Pool
@@ -81,7 +81,7 @@ class Current(_NS):
     snmp: Snmp
     staticroute: Staticroute
     system: System
-    tn_connect: Tn_connect
+    tn_connect: TnConnect
     truenas: Truenas
     user: User
     virt: Virt

@@ -1,19 +1,19 @@
 from pytruenas import Namespace as _NS
 from pytruenas.models import jsonschema as _jsonschema
 import typing as _ty
-from .auth import IscsiAuth
-from .extent import IscsiExtent
-from .global_ import IscsiGlobal
-from .initiator import IscsiInitiator
-from .portal import IscsiPortal
-from .target import IscsiTarget
-from .targetextent import IscsiTargetextent 
+from .auth import Auth
+from .extent import Extent
+from .global import Global
+from .initiator import Initiator
+from .portal import Portal
+from .target import Target
+from .targetextent import Targetextent 
 class Iscsi(_NS):
     
-    auth: IscsiAuth
-    extent: IscsiExtent
-    global_: IscsiGlobal
-    initiator: IscsiInitiator
-    portal: IscsiPortal
-    target: IscsiTarget
-    targetextent: IscsiTargetextent
+    auth: Auth
+    extent: Extent
+    global: Global
+    initiator: Initiator
+    portal: Portal
+    target: Target
+    targetextent: Targetextent

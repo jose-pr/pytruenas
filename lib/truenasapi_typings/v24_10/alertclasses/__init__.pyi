@@ -7,25 +7,25 @@ class Alertclasses(_NS):
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> AlertclassesConfig:
+    ) -> ConfigReturn:
         """"""
         ...
     def update(self,
-        data:data,
+        data:UpdateData,
         _method:str|None=None,
         _ioerror:bool=False,
         _filetransfer:bool|bytes=False,
-    ) -> AlertclassesUpdate:
+    ) -> UpdateReturn:
         """Update default Alert settings."""
         ...
-AlertclassesConfig = _ty.TypedDict('AlertclassesConfig', {
+ConfigReturn = _ty.TypedDict('ConfigReturn', {
     'id': int,
     'classes': _jsonschema.JsonObject, 
 })
-data = _ty.TypedDict('data', {
+UpdateData = _ty.TypedDict('UpdateData', {
     'classes': _ty.NotRequired[_jsonschema.JsonObject], 
 })
-AlertclassesUpdate = _ty.TypedDict('AlertclassesUpdate', {
+UpdateReturn = _ty.TypedDict('UpdateReturn', {
     'id': int,
     'classes': _jsonschema.JsonObject, 
 })
