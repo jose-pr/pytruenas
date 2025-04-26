@@ -1,8 +1,12 @@
-from pytruenas import Namespace as _NS 
+from pytruenas import Namespace as _NS
+import typing as _ty 
 class FilesystemAcltemplate(_NS):
     
     def by_path(self,
         filesystem_acl,
+        _method:str|None=None,
+        _ioerror:bool=False,
+        _filetransfer:bool|bytes=False,
     ) -> FilesystemAcltemplateBy_path:
         """Retrieve list of available ACL templates for a given `path`.
 
@@ -12,17 +16,26 @@ Supports `query-filters` and `query-options`. `format-options` gives additional 
         ...
     def create(self,
         acltemplate_create,
+        _method:str|None=None,
+        _ioerror:bool=False,
+        _filetransfer:bool|bytes=False,
     ) -> FilesystemAcltemplateCreate:
         """Create a new filesystem ACL template."""
         ...
     def delete(self,
         id,
+        _method:str|None=None,
+        _ioerror:bool=False,
+        _filetransfer:bool|bytes=False,
     ) -> FilesystemAcltemplateDelete:
         """"""
         ...
     def get_instance(self,
         id,
         options,
+        _method:str|None=None,
+        _ioerror:bool=False,
+        _filetransfer:bool|bytes=False,
     ) -> FilesystemAcltemplateGet_instance:
         """Returns instance matching `id`. If `id` is not found, Validation error is raised.
 
@@ -31,24 +44,30 @@ Please see `query` method documentation for `options`."""
     def query(self,
         filters,
         options,
+        _method:str|None=None,
+        _ioerror:bool=False,
+        _filetransfer:bool|bytes=False,
     ) -> FilesystemAcltemplateQuery:
         """"""
         ...
     def update(self,
         id,
         acltemplate_update,
+        _method:str|None=None,
+        _ioerror:bool=False,
+        _filetransfer:bool|bytes=False,
     ) -> FilesystemAcltemplateUpdate:
         """update filesystem ACL template with `id`."""
         ...
-class FilesystemAcltemplateBy_path:
+class FilesystemAcltemplateBy_path(_ty.TypedDict):
     ...
-class FilesystemAcltemplateCreate:
+class FilesystemAcltemplateCreate(_ty.TypedDict):
     ...
-class FilesystemAcltemplateDelete:
+class FilesystemAcltemplateDelete(_ty.TypedDict):
     ...
-class FilesystemAcltemplateGet_instance:
+class FilesystemAcltemplateGet_instance(_ty.TypedDict):
     ...
-class FilesystemAcltemplateQuery:
+class FilesystemAcltemplateQuery(_ty.TypedDict):
     ...
-class FilesystemAcltemplateUpdate:
+class FilesystemAcltemplateUpdate(_ty.TypedDict):
     ... 

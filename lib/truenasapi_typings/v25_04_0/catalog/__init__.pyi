@@ -1,8 +1,12 @@
-from pytruenas import Namespace as _NS 
+from pytruenas import Namespace as _NS
+import typing as _ty 
 class Catalog(_NS):
     
     def apps(self,
         catalog_apps_options,
+        _method:str|None=None,
+        _ioerror:bool=False,
+        _filetransfer:bool|bytes=False,
     ) -> CatalogApps:
         """Retrieve apps details for `label` catalog.
 
@@ -15,37 +19,52 @@ class Catalog(_NS):
 `options.trains` is a list of train name(s) which will allow selective filtering to retrieve only information of desired trains in a catalog. If `options.retrieve_all_trains` is set, it has precedence over `options.train`."""
         ...
     def config(self,
+        _method:str|None=None,
+        _ioerror:bool=False,
+        _filetransfer:bool|bytes=False,
     ) -> CatalogConfig:
         """"""
         ...
     def get_app_details(self,
         app_name,
         app_version_details,
+        _method:str|None=None,
+        _ioerror:bool=False,
+        _filetransfer:bool|bytes=False,
     ) -> CatalogGet_app_details:
         """Retrieve information of `app_name` `app_version_details.catalog` catalog app."""
         ...
     def sync(self,
+        _method:str|None=None,
+        _ioerror:bool=False,
+        _filetransfer:bool|bytes=False,
     ) -> CatalogSync:
         """Sync truenas catalog to retrieve latest changes from upstream."""
         ...
     def trains(self,
+        _method:str|None=None,
+        _ioerror:bool=False,
+        _filetransfer:bool|bytes=False,
     ) -> CatalogTrains:
         """Retrieve available trains."""
         ...
     def update(self,
         catalog_update,
+        _method:str|None=None,
+        _ioerror:bool=False,
+        _filetransfer:bool|bytes=False,
     ) -> CatalogUpdate:
         """Update catalog preferences."""
         ...
-class CatalogApps:
+class CatalogApps(_ty.TypedDict):
     ...
-class CatalogConfig:
+class CatalogConfig(_ty.TypedDict):
     ...
-class CatalogGet_app_details:
+class CatalogGet_app_details(_ty.TypedDict):
     ...
-class CatalogSync:
+class CatalogSync(_ty.TypedDict):
     ...
-class CatalogTrains:
+class CatalogTrains(_ty.TypedDict):
     ...
-class CatalogUpdate:
+class CatalogUpdate(_ty.TypedDict):
     ... 

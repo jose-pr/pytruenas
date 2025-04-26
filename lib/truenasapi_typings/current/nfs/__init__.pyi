@@ -1,16 +1,26 @@
-from pytruenas import Namespace as _NS 
+from pytruenas import Namespace as _NS
+import typing as _ty 
 class Nfs(_NS):
     
     def bindip_choices(self,
+        _method:str|None=None,
+        _ioerror:bool=False,
+        _filetransfer:bool|bytes=False,
     ) -> NfsBindip_choices:
         """Returns ip choices for NFS service to use"""
         ...
     def config(self,
+        _method:str|None=None,
+        _ioerror:bool=False,
+        _filetransfer:bool|bytes=False,
     ) -> NfsConfig:
         """"""
         ...
     def update(self,
         nfs_update,
+        _method:str|None=None,
+        _ioerror:bool=False,
+        _filetransfer:bool|bytes=False,
     ) -> NfsUpdate:
         """Update NFS Service Configuration.
 
@@ -56,9 +66,9 @@ class Nfs(_NS):
 
             INPUT: Enable/Disable Default: Disable"""
         ...
-class NfsBindip_choices:
+class NfsBindip_choices(_ty.TypedDict):
     ...
-class NfsConfig:
+class NfsConfig(_ty.TypedDict):
     ...
-class NfsUpdate:
+class NfsUpdate(_ty.TypedDict):
     ... 

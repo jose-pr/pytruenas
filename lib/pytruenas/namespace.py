@@ -120,7 +120,7 @@ class Namespace:
         self,
         *args,
         _tries=1,
-        _method: str = None,
+        _method: str|None = None,
         _ioerror=False,
         _filetransfer: bool | bytes = False,
         **kwds,

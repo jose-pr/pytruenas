@@ -1,4 +1,6 @@
 from pytruenas import Namespace as _NS
+import typing as _ty
+
 {%- for qn in ns.namespaces() %}
 from {{ qn.module.removeprefix(ns.module) if ns.module else '.' + qn.module }} import {{ qn.classname }}
 {%- endfor %} 
@@ -18,6 +20,6 @@ class {{ ns.classname }}(_NS):
 
 
 {%- for qn in ns.methods() %}
-class {{ qn.classname }}:
+class {{ qn.classname }}(_ty.TypedDict):
     ...
 {%- endfor %} 

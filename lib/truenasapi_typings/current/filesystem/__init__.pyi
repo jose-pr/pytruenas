@@ -1,9 +1,13 @@
 from pytruenas import Namespace as _NS
+import typing as _ty
 from .acltemplate import FilesystemAcltemplate 
 class Filesystem(_NS):
     
     def chown(self,
         filesystem_chown,
+        _method:str|None=None,
+        _ioerror:bool=False,
+        _filetransfer:bool|bytes=False,
     ) -> FilesystemChown:
         """Change owner or group of file at `path`.
 
@@ -17,11 +21,17 @@ If `traverse` and `recursive` are specified, then the chown operation will trave
         ...
     def get(self,
         path,
+        _method:str|None=None,
+        _ioerror:bool=False,
+        _filetransfer:bool|bytes=False,
     ) -> FilesystemGet:
         """Job to get contents of `path`."""
         ...
     def get_zfs_attributes(self,
         path,
+        _method:str|None=None,
+        _ioerror:bool=False,
+        _filetransfer:bool|bytes=False,
     ) -> FilesystemGet_zfs_attributes:
         """Get the current ZFS attributes for the file at the given path"""
         ...
@@ -29,6 +39,9 @@ If `traverse` and `recursive` are specified, then the chown operation will trave
         path,
         simplified,
         resolve_ids,
+        _method:str|None=None,
+        _ioerror:bool=False,
+        _filetransfer:bool|bytes=False,
     ) -> FilesystemGetacl:
         """Return ACL of a given path. This may return a POSIX1e ACL or a NFSv4 ACL. The acl type is indicated by the `acltype` key.
 
@@ -54,6 +67,9 @@ If the permisssions do not fit within one of the pre-defined simplified permissi
         path,
         query_filters,
         query_options,
+        _method:str|None=None,
+        _ioerror:bool=False,
+        _filetransfer:bool|bytes=False,
     ) -> FilesystemListdir:
         """Get the contents of a directory.
 
@@ -67,6 +83,9 @@ Each entry of the list consists of: name(str): name of the file path(str): absol
         ...
     def mkdir(self,
         filesystem_mkdir,
+        _method:str|None=None,
+        _ioerror:bool=False,
+        _filetransfer:bool|bytes=False,
     ) -> FilesystemMkdir:
         """Create a directory at the specified path.
 
@@ -79,11 +98,17 @@ NOTE: if chmod error is skipped, the resulting `mode` key in mkdir response will
     def put(self,
         path,
         options,
+        _method:str|None=None,
+        _ioerror:bool=False,
+        _filetransfer:bool|bytes=False,
     ) -> FilesystemPut:
         """Job to put contents to `path`."""
         ...
     def set_zfs_attributes(self,
         set_zfs_file_attributes,
+        _method:str|None=None,
+        _ioerror:bool=False,
+        _filetransfer:bool|bytes=False,
     ) -> FilesystemSet_zfs_attributes:
         """Set special ZFS-related file flags on the specified path
 
@@ -107,6 +132,9 @@ NOTE: if chmod error is skipped, the resulting `mode` key in mkdir response will
         ...
     def setacl(self,
         filesystem_acl,
+        _method:str|None=None,
+        _ioerror:bool=False,
+        _filetransfer:bool|bytes=False,
     ) -> FilesystemSetacl:
         """Set ACL of a given path. Takes the following parameters: `path` full path to directory or file.
 
@@ -164,6 +192,9 @@ Notes about posix1e ACL entry fields:
         ...
     def setperm(self,
         filesystem_setperm,
+        _method:str|None=None,
+        _ioerror:bool=False,
+        _filetransfer:bool|bytes=False,
     ) -> FilesystemSetperm:
         """Set unix permissions on given `path`.
 
@@ -187,6 +218,9 @@ If no `mode` is set, and `stripacl` is True, then non-trivial ACLs will be conve
         ...
     def stat(self,
         path,
+        _method:str|None=None,
+        _ioerror:bool=False,
+        _filetransfer:bool|bytes=False,
     ) -> FilesystemStat:
         """Return filesystem information for a given path.
 
@@ -230,33 +264,36 @@ If no `mode` is set, and `stripacl` is True, then non-trivial ACLs will be conve
         ...
     def statfs(self,
         path,
+        _method:str|None=None,
+        _ioerror:bool=False,
+        _filetransfer:bool|bytes=False,
     ) -> FilesystemStatfs:
         """Return stats from the filesystem of a given path.
 
 Raises: CallError(ENOENT) - Path not found"""
         ...
     acltemplate: FilesystemAcltemplate
-class FilesystemChown:
+class FilesystemChown(_ty.TypedDict):
     ...
-class FilesystemGet:
+class FilesystemGet(_ty.TypedDict):
     ...
-class FilesystemGet_zfs_attributes:
+class FilesystemGet_zfs_attributes(_ty.TypedDict):
     ...
-class FilesystemGetacl:
+class FilesystemGetacl(_ty.TypedDict):
     ...
-class FilesystemListdir:
+class FilesystemListdir(_ty.TypedDict):
     ...
-class FilesystemMkdir:
+class FilesystemMkdir(_ty.TypedDict):
     ...
-class FilesystemPut:
+class FilesystemPut(_ty.TypedDict):
     ...
-class FilesystemSet_zfs_attributes:
+class FilesystemSet_zfs_attributes(_ty.TypedDict):
     ...
-class FilesystemSetacl:
+class FilesystemSetacl(_ty.TypedDict):
     ...
-class FilesystemSetperm:
+class FilesystemSetperm(_ty.TypedDict):
     ...
-class FilesystemStat:
+class FilesystemStat(_ty.TypedDict):
     ...
-class FilesystemStatfs:
+class FilesystemStatfs(_ty.TypedDict):
     ... 

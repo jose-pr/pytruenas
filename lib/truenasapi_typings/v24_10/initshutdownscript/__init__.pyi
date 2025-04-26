@@ -1,8 +1,12 @@
-from pytruenas import Namespace as _NS 
+from pytruenas import Namespace as _NS
+import typing as _ty 
 class Initshutdownscript(_NS):
     
     def create(self,
         data,
+        _method:str|None=None,
+        _ioerror:bool=False,
+        _filetransfer:bool|bytes=False,
     ) -> InitshutdownscriptCreate:
         """Create an initshutdown script task.
 
@@ -16,12 +20,18 @@ There are three choices for `when`:
         ...
     def delete(self,
         id,
+        _method:str|None=None,
+        _ioerror:bool=False,
+        _filetransfer:bool|bytes=False,
     ) -> InitshutdownscriptDelete:
         """Delete init/shutdown task of `id`."""
         ...
     def get_instance(self,
         id,
         options,
+        _method:str|None=None,
+        _ioerror:bool=False,
+        _filetransfer:bool|bytes=False,
     ) -> InitshutdownscriptGet_instance:
         """Returns instance matching `id`. If `id` is not found, Validation error is raised.
 
@@ -30,22 +40,28 @@ Please see `query` method documentation for `options`."""
     def query(self,
         filters,
         options,
+        _method:str|None=None,
+        _ioerror:bool=False,
+        _filetransfer:bool|bytes=False,
     ) -> InitshutdownscriptQuery:
         """"""
         ...
     def update(self,
         id,
         data,
+        _method:str|None=None,
+        _ioerror:bool=False,
+        _filetransfer:bool|bytes=False,
     ) -> InitshutdownscriptUpdate:
         """Update initshutdown script task of `id`."""
         ...
-class InitshutdownscriptCreate:
+class InitshutdownscriptCreate(_ty.TypedDict):
     ...
-class InitshutdownscriptDelete:
+class InitshutdownscriptDelete(_ty.TypedDict):
     ...
-class InitshutdownscriptGet_instance:
+class InitshutdownscriptGet_instance(_ty.TypedDict):
     ...
-class InitshutdownscriptQuery:
+class InitshutdownscriptQuery(_ty.TypedDict):
     ...
-class InitshutdownscriptUpdate:
+class InitshutdownscriptUpdate(_ty.TypedDict):
     ... 

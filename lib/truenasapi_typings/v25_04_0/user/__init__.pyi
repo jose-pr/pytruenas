@@ -1,14 +1,21 @@
-from pytruenas import Namespace as _NS 
+from pytruenas import Namespace as _NS
+import typing as _ty 
 class User(_NS):
     
     def create(self,
         user_create,
+        _method:str|None=None,
+        _ioerror:bool=False,
+        _filetransfer:bool|bytes=False,
     ) -> UserCreate:
         """Create a new user."""
         ...
     def delete(self,
         id,
         options,
+        _method:str|None=None,
+        _ioerror:bool=False,
+        _filetransfer:bool|bytes=False,
     ) -> UserDelete:
         """Delete user `id`.
 
@@ -17,23 +24,35 @@ The `delete_group` option deletes the user primary group if it is not being used
     def get_instance(self,
         id,
         options,
+        _method:str|None=None,
+        _ioerror:bool=False,
+        _filetransfer:bool|bytes=False,
     ) -> UserGet_instance:
         """Returns instance matching `id`. If `id` is not found, Validation error is raised.
 
 Please see `query` method documentation for `options`."""
         ...
     def get_next_uid(self,
+        _method:str|None=None,
+        _ioerror:bool=False,
+        _filetransfer:bool|bytes=False,
     ) -> UserGet_next_uid:
         """Get the next available/free uid."""
         ...
     def get_user_obj(self,
         get_user_obj,
+        _method:str|None=None,
+        _ioerror:bool=False,
+        _filetransfer:bool|bytes=False,
     ) -> UserGet_user_obj:
         """Returns dictionary containing information from struct passwd for the user specified by either the username or uid. Bypasses user cache.
 
 NOTE: results will not include nested groups for Active Directory users."""
         ...
     def has_local_administrator_set_up(self,
+        _method:str|None=None,
+        _ioerror:bool=False,
+        _filetransfer:bool|bytes=False,
     ) -> UserHas_local_administrator_set_up:
         """Return whether a local administrator with a valid password exists.
 
@@ -42,6 +61,9 @@ This is used when the system is installed without a password and must be set on 
     def query(self,
         filters,
         options,
+        _method:str|None=None,
+        _ioerror:bool=False,
+        _filetransfer:bool|bytes=False,
     ) -> UserQuery:
         """Query users with `query-filters` and `query-options`.
 
@@ -50,6 +72,9 @@ If users provided by Active Directory or LDAP are not desired, then "local", "="
     def renew_2fa_secret(self,
         username,
         twofactor_options,
+        _method:str|None=None,
+        _ioerror:bool=False,
+        _filetransfer:bool|bytes=False,
     ) -> UserRenew_2fa_secret:
         """Renew `username` user's two-factor authentication secret.
 
@@ -57,6 +82,9 @@ NOTE: This username must match the authenticated username unless authenticated c
         ...
     def set_password(self,
         set_password_data,
+        _method:str|None=None,
+        _ioerror:bool=False,
+        _filetransfer:bool|bytes=False,
     ) -> UserSet_password:
         """Set the password of the specified `username` to the `new_password` specified in payload.
 
@@ -70,11 +98,17 @@ NOTE: users authenticated with a one-time password will be able to change the pa
         username,
         password,
         options,
+        _method:str|None=None,
+        _ioerror:bool=False,
+        _filetransfer:bool|bytes=False,
     ) -> UserSetup_local_administrator:
         """Set up local administrator (this method does not require authentication if local administrator is not already set up)."""
         ...
     def shell_choices(self,
         group_ids,
+        _method:str|None=None,
+        _ioerror:bool=False,
+        _filetransfer:bool|bytes=False,
     ) -> UserShell_choices:
         """Return the available shell choices to be used in `user.create` and `user.update`.
 
@@ -82,38 +116,44 @@ NOTE: users authenticated with a one-time password will be able to change the pa
         ...
     def unset_2fa_secret(self,
         username,
+        _method:str|None=None,
+        _ioerror:bool=False,
+        _filetransfer:bool|bytes=False,
     ) -> UserUnset_2fa_secret:
         """Unset two-factor authentication secret for `username`."""
         ...
     def update(self,
         id,
         user_update,
+        _method:str|None=None,
+        _ioerror:bool=False,
+        _filetransfer:bool|bytes=False,
     ) -> UserUpdate:
         """Update attributes of an existing user."""
         ...
-class UserCreate:
+class UserCreate(_ty.TypedDict):
     ...
-class UserDelete:
+class UserDelete(_ty.TypedDict):
     ...
-class UserGet_instance:
+class UserGet_instance(_ty.TypedDict):
     ...
-class UserGet_next_uid:
+class UserGet_next_uid(_ty.TypedDict):
     ...
-class UserGet_user_obj:
+class UserGet_user_obj(_ty.TypedDict):
     ...
-class UserHas_local_administrator_set_up:
+class UserHas_local_administrator_set_up(_ty.TypedDict):
     ...
-class UserQuery:
+class UserQuery(_ty.TypedDict):
     ...
-class UserRenew_2fa_secret:
+class UserRenew_2fa_secret(_ty.TypedDict):
     ...
-class UserSet_password:
+class UserSet_password(_ty.TypedDict):
     ...
-class UserSetup_local_administrator:
+class UserSetup_local_administrator(_ty.TypedDict):
     ...
-class UserShell_choices:
+class UserShell_choices(_ty.TypedDict):
     ...
-class UserUnset_2fa_secret:
+class UserUnset_2fa_secret(_ty.TypedDict):
     ...
-class UserUpdate:
+class UserUpdate(_ty.TypedDict):
     ... 

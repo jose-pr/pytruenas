@@ -1,4 +1,5 @@
 from pytruenas import Namespace as _NS
+import typing as _ty
 from .device import VirtDevice
 from .global_ import VirtGlobal
 from .instance import VirtInstance

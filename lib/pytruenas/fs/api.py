@@ -6,17 +6,23 @@ from .. import _utils
 
 if _ty.TYPE_CHECKING:
     from . import Path
+    import _typeshed
 
 
 def stat(path: "Path"):
-    stat: dict = path._client.api.filesystem.stat(path.as_posix(), _ioerror=True)
-    return _stat([stat.get(field.removeprefix("st_")) for field in _utils.STAT_FIELDS])
+    stat = path._client.api.filesystem.stat(path.as_posix(), _ioerror=True)
+    return _stat(
+        [
+            stat.get(field.removeprefix("st_"))
+            for field in _utils.STAT_FIELDS  # type:ignore
+        ]
+    )
 
 
 def chown(
     path: "Path",
-    uid: int,
-    gid: int,
+    uid: int | None,
+    gid: int | None,
     *,
     follow_symlinks: bool = True,
     recursive=False,
@@ -29,7 +35,7 @@ def chown(
 
     if not follow_symlinks:
         raise NotImplementedError("not follow_symlinks")
-    result = path._client.api.filesystem.chown(
+    path._client.api.filesystem.chown(
         {
             "options": {"recursive": recursive, "traverse": traverse},
             "uid": uid,
@@ -103,25 +109,31 @@ class _ApiFileHandle(_io.IOBase):
 
 def _read(path: "Path"):
     data = path._client.api.filesystem.get(
-        path.as_posix(), _filetransfer=True, wait=True, _ioerror=True
+        path.as_posix(), _filetransfer=True, _ioerror=True
     )
-    return data
+    return _ty.cast(bytes, data)
 
 
-def _write(path: "Path", data: bytes, append=False, mode: int = None):
+def _write(
+    path: "Path",
+    data: "_typeshed.ReadableBuffer|_ty.IO|bytes",
+    append=False,
+    mode: int | None = None,
+):
     if hasattr(data, "read"):
-        data = data.read()
+        _data: bytes = _ty.cast(_ty.IO, data).read()
     elif not isinstance(data, bytes):
-        data = bytes(data)
-    opts = {"append": not not append}
+        _data = bytes(data)
+    else:
+        _data = data
+    opts: dict = {"append": not not append}
     if mode is not None:
-        opts["mode"] = int(mode, 8)
+        opts["mode"] = mode
     result = path._client.api.filesystem.put(
         path.as_posix(),
         opts,
-        _filetransfer=data,
+        _filetransfer=_data,
         _ioerror=True,
-        wait=True,
     )
     if result:
-        return len(data)
+        return len(_data)
