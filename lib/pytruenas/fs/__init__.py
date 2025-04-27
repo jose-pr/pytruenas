@@ -206,3 +206,6 @@ def _makeproxy(name: str):
 
 for _method in ["read_bytes", "read_text", "write_bytes", "write_text", "stat"]:
     setattr(Path, _method, _makeproxy(_method))
+
+#import os as _os
+#_os.PathLike.register(Path)

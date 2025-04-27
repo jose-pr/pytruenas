@@ -2,6 +2,7 @@
 # type: ignore
 
 from pytruenas import TrueNASClient, Credentials, fs
+import pathlib
 import os, sys
 import logging
 
@@ -21,7 +22,7 @@ client.logger.setLevel(logging.DEBUG)
 fs.local.FORCE_LOCAL = True
 datapool = client.path("/mnt/data", backend="local")
 testfiles = datapool / "testfiles"
-print(repr(testfiles))
+print(repr(testfiles), isinstance(testfiles, pathlib.PurePath))
 
 testfiles.mkdir(exist_ok=True)
 

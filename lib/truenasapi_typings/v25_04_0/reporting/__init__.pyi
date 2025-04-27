@@ -4,6 +4,12 @@ import typing as _ty
 from .exporters import Exporters 
 class Reporting(_NS):
     
+    def _update(self,
+        __selector:_jsonschema.JsonValue=None,
+        **fields:_ty.Unpack[ReportingUpdate],
+    ) -> UpdateReturn:
+        """"""
+        ...
     def config(self,
         _method:str|None=None,
         _ioerror:bool=False,
@@ -86,6 +92,11 @@ For the time period of the graph either `unit` and `page` OR `start` and `end` s
         """`tier1_days` can be set to specify for how many days we want to store reporting history which in netdata terms specifies the number of days netdata should be storing data in tier1 storage."""
         ...
     exporters: Exporters
+ReportingUpdate = _ty.TypedDict('ReportingUpdate', {
+    'tier0_days': _ty.NotRequired[int],
+    'tier1_days': _ty.NotRequired[int],
+    'tier1_update_interval': _ty.NotRequired[int], 
+})
 ConfigReturn = _ty.TypedDict('ConfigReturn', {
     'id': int,
     'tier0_days': int,

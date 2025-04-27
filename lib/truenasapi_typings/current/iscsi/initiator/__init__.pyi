@@ -3,6 +3,23 @@ from pytruenas.models import jsonschema as _jsonschema
 import typing as _ty 
 class Initiator(_NS):
     
+    def _create(self,
+        **fields:_ty.Unpack[IscsiInitiatorCreate],
+    ) -> CreateReturn:
+        """"""
+        ...
+    def _update(self,
+        __selector:int|_ty.Sequence[str],
+        **fields:_ty.Unpack[IscsiInitiatorUpdate],
+    ) -> UpdateReturn:
+        """"""
+        ...
+    def _upsert(self,
+        __selector:int|_ty.Sequence[str],
+        **fields:_ty.Unpack[IscsiInitiatorUpdate],
+    ) -> UpdateReturn:
+        """"""
+        ...
     def create(self,
         iscsi_initiator_create:CreateIscsiInitiatorCreate,
         _method:str|None=None,
@@ -50,6 +67,15 @@ Please see `query` method documentation for `options`."""
     ) -> UpdateReturn:
         """Update iSCSI initiator of `id`."""
         ...
+IscsiInitiatorCreate = _ty.TypedDict('IscsiInitiatorCreate', {
+    'initiators': _ty.NotRequired[list[str]],
+    'comment': _ty.NotRequired[str], 
+})
+IscsiInitiatorUpdate = _ty.TypedDict('IscsiInitiatorUpdate', {
+    'id': _ty.NotRequired[int],
+    'initiators': _ty.NotRequired[list[str]],
+    'comment': _ty.NotRequired[str], 
+})
 CreateIscsiInitiatorCreate = _ty.TypedDict('CreateIscsiInitiatorCreate', {
     'initiators': _ty.NotRequired[list[str]],
     'comment': _ty.NotRequired[str], 

@@ -3,6 +3,23 @@ from pytruenas.models import jsonschema as _jsonschema
 import typing as _ty 
 class Credentials(_NS):
     
+    def _create(self,
+        **fields:_ty.Unpack[CloudSyncCredentialsCreate],
+    ) -> CreateReturn:
+        """"""
+        ...
+    def _update(self,
+        __selector:int|_ty.Sequence[str],
+        **fields:_ty.Unpack[CloudSyncCredentialsUpdate],
+    ) -> UpdateReturn:
+        """"""
+        ...
+    def _upsert(self,
+        __selector:int|_ty.Sequence[str],
+        **fields:_ty.Unpack[CloudSyncCredentialsUpdate],
+    ) -> UpdateReturn:
+        """"""
+        ...
     def create(self,
         cloud_sync_credentials_create:CreateCloudSyncCredentialsCreate,
         _method:str|None=None,
@@ -58,6 +75,14 @@ Please see `query` method documentation for `options`."""
     ) -> VerifyReturn:
         """Verify if `attributes` provided for `provider` are authorized by the `provider`."""
         ...
+CloudSyncCredentialsCreate = _ty.TypedDict('CloudSyncCredentialsCreate', {
+    'name': str,
+    'provider': _jsonschema.JsonValue|_jsonschema.JsonValue|_jsonschema.JsonValue|_jsonschema.JsonValue|_jsonschema.JsonValue|_jsonschema.JsonValue|_jsonschema.JsonValue|_jsonschema.JsonValue|_jsonschema.JsonValue|_jsonschema.JsonValue|_jsonschema.JsonValue|_jsonschema.JsonValue|_jsonschema.JsonValue|_jsonschema.JsonValue|_jsonschema.JsonValue|_jsonschema.JsonValue|_jsonschema.JsonValue|_jsonschema.JsonValue|_jsonschema.JsonValue, 
+})
+CloudSyncCredentialsUpdate = _ty.TypedDict('CloudSyncCredentialsUpdate', {
+    'name': _ty.NotRequired[str],
+    'provider': _ty.NotRequired[_jsonschema.JsonValue|_jsonschema.JsonValue|_jsonschema.JsonValue|_jsonschema.JsonValue|_jsonschema.JsonValue|_jsonschema.JsonValue|_jsonschema.JsonValue|_jsonschema.JsonValue|_jsonschema.JsonValue|_jsonschema.JsonValue|_jsonschema.JsonValue|_jsonschema.JsonValue|_jsonschema.JsonValue|_jsonschema.JsonValue|_jsonschema.JsonValue|_jsonschema.JsonValue|_jsonschema.JsonValue|_jsonschema.JsonValue|_jsonschema.JsonValue], 
+})
 CreateCloudSyncCredentialsCreate = _ty.TypedDict('CreateCloudSyncCredentialsCreate', {
     'name': str,
     'provider': _jsonschema.JsonValue|_jsonschema.JsonValue|_jsonschema.JsonValue|_jsonschema.JsonValue|_jsonschema.JsonValue|_jsonschema.JsonValue|_jsonschema.JsonValue|_jsonschema.JsonValue|_jsonschema.JsonValue|_jsonschema.JsonValue|_jsonschema.JsonValue|_jsonschema.JsonValue|_jsonschema.JsonValue|_jsonschema.JsonValue|_jsonschema.JsonValue|_jsonschema.JsonValue|_jsonschema.JsonValue|_jsonschema.JsonValue|_jsonschema.JsonValue, 

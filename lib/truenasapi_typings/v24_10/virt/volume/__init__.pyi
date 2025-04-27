@@ -3,6 +3,23 @@ from pytruenas.models import jsonschema as _jsonschema
 import typing as _ty 
 class Volume(_NS):
     
+    def _create(self,
+        **fields:_ty.Unpack[VirtVolumeCreate],
+    ) -> CreateReturn:
+        """"""
+        ...
+    def _update(self,
+        __selector:str|_ty.Sequence[str],
+        **fields:_ty.Unpack[VirtVolumeUpdate],
+    ) -> UpdateReturn:
+        """"""
+        ...
+    def _upsert(self,
+        __selector:str|_ty.Sequence[str],
+        **fields:_ty.Unpack[VirtVolumeUpdate],
+    ) -> UpdateReturn:
+        """"""
+        ...
     def create(self,
         virt_volume_create:CreateVirtVolumeCreate,
         _method:str|None=None,
@@ -64,6 +81,15 @@ Please see `query` method documentation for `options`."""
     ) -> UpdateReturn:
         """"""
         ...
+VirtVolumeCreate = _ty.TypedDict('VirtVolumeCreate', {
+    'name': str,
+    'content_type': _ty.NotRequired[str],
+    'size': _ty.NotRequired[int],
+    'storage_pool': _ty.NotRequired[str|None], 
+})
+VirtVolumeUpdate = _ty.TypedDict('VirtVolumeUpdate', {
+    'size': _ty.NotRequired[int], 
+})
 CreateVirtVolumeCreate = _ty.TypedDict('CreateVirtVolumeCreate', {
     'name': str,
     'content_type': _ty.NotRequired[str],

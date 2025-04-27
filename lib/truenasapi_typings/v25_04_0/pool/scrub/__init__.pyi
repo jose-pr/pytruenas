@@ -3,6 +3,17 @@ from pytruenas.models import jsonschema as _jsonschema
 import typing as _ty 
 class Scrub(_NS):
     
+    def _create(self,
+        **fields:_ty.Unpack[Data],
+    ) -> CreateReturn:
+        """"""
+        ...
+    def _update(self,
+        __selector:_jsonschema.JsonValue=None,
+        **fields:_ty.Unpack[Data],
+    ) -> UpdateReturn:
+        """"""
+        ...
     def create(self,
         data:CreateData,
         _method:str|None=None,
@@ -68,6 +79,13 @@ Please see `query` method documentation for `options`."""
     ) -> UpdateReturn:
         """Update scrub task of `id`."""
         ...
+Data = _ty.TypedDict('Data', {
+    'pool': _ty.NotRequired[int],
+    'threshold': _ty.NotRequired[int],
+    'description': _ty.NotRequired[str],
+    'schedule': _ty.NotRequired[_jsonschema.JsonValue],
+    'enabled': _ty.NotRequired[bool], 
+})
 CreateData = _ty.TypedDict('CreateData', {
     'pool': int,
     'threshold': _ty.NotRequired[int],

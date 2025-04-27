@@ -3,6 +3,23 @@ from pytruenas.models import jsonschema as _jsonschema
 import typing as _ty 
 class Initshutdownscript(_NS):
     
+    def _create(self,
+        **fields:_ty.Unpack[Data],
+    ) -> CreateReturn:
+        """"""
+        ...
+    def _update(self,
+        __selector:int|_ty.Sequence[str],
+        **fields:_ty.Unpack[Data],
+    ) -> UpdateReturn:
+        """"""
+        ...
+    def _upsert(self,
+        __selector:int|_ty.Sequence[str],
+        **fields:_ty.Unpack[Data],
+    ) -> UpdateReturn:
+        """"""
+        ...
     def create(self,
         data:CreateData,
         _method:str|None=None,
@@ -56,6 +73,15 @@ Please see `query` method documentation for `options`."""
     ) -> UpdateReturn:
         """Update initshutdown script task of `id`."""
         ...
+Data = _ty.TypedDict('Data', {
+    'type': _ty.NotRequired[str],
+    'command': _ty.NotRequired[str|None],
+    'script': _ty.NotRequired[str|None],
+    'when': _ty.NotRequired[str],
+    'enabled': _ty.NotRequired[bool],
+    'timeout': _ty.NotRequired[int],
+    'comment': _ty.NotRequired[str], 
+})
 CreateData = _ty.TypedDict('CreateData', {
     'type': str,
     'command': _ty.NotRequired[str|None],

@@ -3,6 +3,23 @@ from pytruenas.models import jsonschema as _jsonschema
 import typing as _ty 
 class Extent(_NS):
     
+    def _create(self,
+        **fields:_ty.Unpack[IscsiExtentCreate],
+    ) -> CreateReturn:
+        """"""
+        ...
+    def _update(self,
+        __selector:int|_ty.Sequence[str],
+        **fields:_ty.Unpack[IscsiExtentUpdate],
+    ) -> UpdateReturn:
+        """"""
+        ...
+    def _upsert(self,
+        __selector:int|_ty.Sequence[str],
+        **fields:_ty.Unpack[IscsiExtentUpdate],
+    ) -> UpdateReturn:
+        """"""
+        ...
     def create(self,
         iscsi_extent_create:CreateIscsiExtentCreate,
         _method:str|None=None,
@@ -69,6 +86,40 @@ Please see `query` method documentation for `options`."""
     ) -> UpdateReturn:
         """Update iSCSI Extent of `id`."""
         ...
+IscsiExtentCreate = _ty.TypedDict('IscsiExtentCreate', {
+    'name': str,
+    'type': _ty.NotRequired[str],
+    'disk': _ty.NotRequired[str|None],
+    'serial': _ty.NotRequired[str|None],
+    'path': _ty.NotRequired[str|None],
+    'filesize': _ty.NotRequired[str|int],
+    'blocksize': _ty.NotRequired[int],
+    'pblocksize': _ty.NotRequired[bool],
+    'avail_threshold': _ty.NotRequired[int|None],
+    'comment': _ty.NotRequired[str],
+    'insecure_tpc': _ty.NotRequired[bool],
+    'xen': _ty.NotRequired[bool],
+    'rpm': _ty.NotRequired[str],
+    'ro': _ty.NotRequired[bool],
+    'enabled': _ty.NotRequired[bool], 
+})
+IscsiExtentUpdate = _ty.TypedDict('IscsiExtentUpdate', {
+    'name': _ty.NotRequired[str],
+    'type': _ty.NotRequired[str],
+    'disk': _ty.NotRequired[str|None],
+    'serial': _ty.NotRequired[str|None],
+    'path': _ty.NotRequired[str|None],
+    'filesize': _ty.NotRequired[str|int],
+    'blocksize': _ty.NotRequired[int],
+    'pblocksize': _ty.NotRequired[bool],
+    'avail_threshold': _ty.NotRequired[int|None],
+    'comment': _ty.NotRequired[str],
+    'insecure_tpc': _ty.NotRequired[bool],
+    'xen': _ty.NotRequired[bool],
+    'rpm': _ty.NotRequired[str],
+    'ro': _ty.NotRequired[bool],
+    'enabled': _ty.NotRequired[bool], 
+})
 CreateIscsiExtentCreate = _ty.TypedDict('CreateIscsiExtentCreate', {
     'name': str,
     'type': _ty.NotRequired[str],

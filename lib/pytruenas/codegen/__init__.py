@@ -1,6 +1,7 @@
 from pathlib import Path as _P
 import shutil
 import typing as _ty
+import functools as _ftools
 from ..models import apidump as _api, jsonschema as _schema
 from ..utils import qualname as _qn
 
@@ -26,7 +27,10 @@ class Parameter:
 
     def argument_declaration(self, typeddicts: dict[str, object]):
         decl = self.name
-        decl += f":{self.type_def(typeddicts)}"
+        typedef = self.type_def(typeddicts)
+        if self.name.startswith("**"):
+            typedef = f"_ty.Unpack[{typedef}]"
+        decl += f":{typedef}"
         default = self.schema.get("default", ...)
         if default != ...:
             decl += f"={default}"
@@ -48,7 +52,7 @@ class PyDeclaration:
     def qualname(self) -> _qn.DotQualNamed:
         raise NotImplementedError()
 
-    @property
+    @_ftools.cached_property
     def pyname(self):
         return _qn.PythonName(self.qualname)
 
@@ -63,13 +67,28 @@ class PyDeclaration:
             return self.qualname == value
         return False
 
+    def clear_cache(self):
+        for name, attr in type(self).__dict__.items():
+            if isinstance(attr, _ftools.cached_property):
+                if name in self.__dict__:
+                    del self.__dict__[name]
+
 
 class Method(PyDeclaration):
     def __init__(self, method: _api.Method):
         self.definition = method
 
     @property
-    def qualname(self):
+    def definition(self):
+        return self._definition
+
+    @definition.setter
+    def definition(self, value: _api.Method):
+        self._definition = value
+        self.clear_cache()
+
+    @_ftools.cached_property
+    def qualname(self):  # type:ignore
         return _qn.DotQualNamed(self.definition["name"])
 
     @property
@@ -77,40 +96,44 @@ class Method(PyDeclaration):
         doc = self.definition["doc"] or ""
         return doc.split(".. examples", maxsplit=1)[0].strip()
 
+    @_ftools.cached_property
     def parameters(self) -> list[Parameter]:
-        namespace = self.qualname
         callparams = self.definition["schemas"]["properties"]["Call parameters"]
         items = callparams["prefixItems"]  # type:ignore
         params = []
         for item in items:
             params.append(Parameter(item, self.pyname.relative_to(self.pyname.parent)))
-        params.extend(
-            [
-                Parameter(
-                    {},
-                    self.pyname,
-                    title="_method",
-                    anyOf=["string", "null"],
-                    default="None",
-                ),
-                Parameter(
-                    {},
-                    self.pyname,
-                    title="_ioerror",
-                    type="boolean",
-                    default="False",
-                ),
-                Parameter(
-                    {},
-                    self.pyname,
-                    title="_filetransfer",
-                    anyOf=["boolean", "!bytes"],
-                    default="False",
-                ),
-            ]
-        )
+
+        # _ty.Sequence[str] | None | _q._Exclude
+        if not self.pyname.name.startswith("_"):
+            params.extend(
+                [
+                    Parameter(
+                        {},
+                        self.pyname,
+                        title="_method",
+                        anyOf=["string", "null"],
+                        default="None",
+                    ),
+                    Parameter(
+                        {},
+                        self.pyname,
+                        title="_ioerror",
+                        type="boolean",
+                        default="False",
+                    ),
+                    Parameter(
+                        {},
+                        self.pyname,
+                        title="_filetransfer",
+                        anyOf=["boolean", "!bytes"],
+                        default="False",
+                    ),
+                ]
+            )
         return params
 
+    @_ftools.cached_property
     def returns(self):
         returns = self.definition["schemas"]["properties"]["Return value"]
         return Parameter(
@@ -142,17 +165,114 @@ class Namespace(PyDeclaration):
         return self.declarations(Namespace)
 
     def methods(self):
-        return self.declarations(Method)
+        return _ty.cast(list[Method], self.declarations(Method))
 
+    def init(self):
+        for method in self.methods():
+            if method.qualname.name == "update":
+                fields = method.parameters[-4]
+                idtype = None
+                for param in method.parameters:
+                    if param.name == "id":
+                        idtype = {
+                            "anyOf": [
+                                param.schema.get("type", "!str|int"),
+                                "!_ty.Sequence[str]",
+                            ]
+                        }
+                update = Method(
+                    {
+                        "name": "_update",
+                        "roles": method.definition["roles"],
+                        "doc": "",
+                        "schemas": {
+                            "type": "object",
+                            "properties": {
+                                "Call parameters": {
+                                    "type": "array",
+                                    "prefixItems": [
+                                        {
+                                            "title": "__selector",
+                                            **(idtype or {}),
+                                            "default": (
+                                                ... if idtype is not None else None
+                                            ),
+                                        },
+                                        {
+                                            **fields.schema,
+                                            "title": "**fields",
+                                            "_name": fields.name,  # type:ignore
+                                        },
+                                    ],
+                                    "items": True,
+                                },
+                                "Return value": "!UpdateReturn",
+                            },
+                        },
+                    }
+                )
+                self.childs.append(update)
+                if idtype:
+                    upsert = Method(
+                        {
+                            "name": "_upsert",
+                            "roles": method.definition["roles"],
+                            "doc": "",
+                            "schemas": {
+                                "type": "object",
+                                "properties": {
+                                    "Call parameters": {
+                                        "type": "array",
+                                        "prefixItems": [
+                                            {
+                                                "title": "__selector",
+                                                **(idtype or {}),
+                                                "default": (
+                                                    ... if idtype is not None else None
+                                                ),
+                                            },
+                                            {
+                                                **fields.schema,
+                                                "title": "**fields",
+                                                "_name": fields.name,  # type:ignore
+                                            },
+                                        ],
+                                        "items": True,
+                                    },
+                                    "Return value": "!UpdateReturn",
+                                },
+                            },
+                        }
+                    )
+                    self.childs.append(upsert)
 
-class RootNamespace(Namespace):
-    def __init__(self, rootname: str):
-        self.rootname = rootname
-        super().__init__(_qn.DotQualNamed())
-
-    @property
-    def classname(self):
-        return self.rootname.capitalize()
+            elif method.qualname.name == "create":
+                fields = method.parameters[-4]
+                update = Method(
+                    {
+                        "name": "_create",
+                        "roles": method.definition["roles"],
+                        "doc": "",
+                        "schemas": {
+                            "type": "object",
+                            "properties": {
+                                "Call parameters": {
+                                    "type": "array",
+                                    "prefixItems": [
+                                        {
+                                            **fields.schema,
+                                            "title": "**fields",
+                                            "_name": fields.name,  # type:ignore
+                                        },
+                                    ],
+                                    "items": True,
+                                },
+                                "Return value": "!CreateReturn",
+                            },
+                        },
+                    }
+                )
+                self.childs.append(update)
 
 
 class Renderer:
@@ -198,13 +318,14 @@ class Codegen:
 
         renderer = jinja.Renderer("namespace.pyi")
         for ns in sorted(namespaces, key=lambda ns: ns.qualname):
-            ns_path = root / ns.pyname.relative_to(version).as_path() / _INIT
+            ns_path = ns.pyname.relative_to(version).as_path(root) / _INIT
             ns_path.parent.mkdir(exist_ok=True, parents=True)
             with (ns_path).open("w") as ns_index:
                 for decl in [*declarations, *namespaces]:
                     decl: PyDeclaration
                     if decl.qualname.parent == ns and ns != decl:
                         ns.childs.append(decl)
+                ns.init()
                 ns_index.write(
                     renderer.render(ns=ns, path=ns_path, modpath=ns_path.parent)
                 )

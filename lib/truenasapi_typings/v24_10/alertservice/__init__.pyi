@@ -3,6 +3,23 @@ from pytruenas.models import jsonschema as _jsonschema
 import typing as _ty 
 class Alertservice(_NS):
     
+    def _create(self,
+        **fields:_ty.Unpack[AlertServiceCreate],
+    ) -> CreateReturn:
+        """"""
+        ...
+    def _update(self,
+        __selector:int|_ty.Sequence[str],
+        **fields:_ty.Unpack[AlertServiceUpdate],
+    ) -> UpdateReturn:
+        """"""
+        ...
+    def _upsert(self,
+        __selector:int|_ty.Sequence[str],
+        **fields:_ty.Unpack[AlertServiceUpdate],
+    ) -> UpdateReturn:
+        """"""
+        ...
     def create(self,
         alert_service_create:CreateAlertServiceCreate,
         _method:str|None=None,
@@ -58,6 +75,20 @@ Please see `query` method documentation for `options`."""
     ) -> UpdateReturn:
         """Update Alert Service of `id`."""
         ...
+AlertServiceCreate = _ty.TypedDict('AlertServiceCreate', {
+    'name': str,
+    'type': str,
+    'attributes': _jsonschema.JsonObject,
+    'level': str,
+    'enabled': _ty.NotRequired[bool], 
+})
+AlertServiceUpdate = _ty.TypedDict('AlertServiceUpdate', {
+    'name': str,
+    'type': str,
+    'attributes': _jsonschema.JsonObject,
+    'level': str,
+    'enabled': _ty.NotRequired[bool], 
+})
 CreateAlertServiceCreate = _ty.TypedDict('CreateAlertServiceCreate', {
     'name': str,
     'type': str,

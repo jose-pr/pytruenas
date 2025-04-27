@@ -3,6 +3,23 @@ from pytruenas.models import jsonschema as _jsonschema
 import typing as _ty 
 class Snapshottask(_NS):
     
+    def _create(self,
+        **fields:_ty.Unpack[Data],
+    ) -> CreateReturn:
+        """"""
+        ...
+    def _update(self,
+        __selector:int|_ty.Sequence[str],
+        **fields:_ty.Unpack[Data],
+    ) -> UpdateReturn:
+        """"""
+        ...
+    def _upsert(self,
+        __selector:int|_ty.Sequence[str],
+        **fields:_ty.Unpack[Data],
+    ) -> UpdateReturn:
+        """"""
+        ...
     def create(self,
         data:CreateData,
         _method:str|None=None,
@@ -92,6 +109,18 @@ See the documentation for `create` method for information on payload contents"""
     ) -> _jsonschema.JsonObject:
         """Returns a list of snapshots which will change the retention if periodic snapshot task `id` is updated with `data`."""
         ...
+Data = _ty.TypedDict('Data', {
+    'dataset': _ty.NotRequired[str],
+    'recursive': _ty.NotRequired[bool],
+    'lifetime_value': _ty.NotRequired[int],
+    'lifetime_unit': _ty.NotRequired[str],
+    'enabled': _ty.NotRequired[bool],
+    'exclude': _ty.NotRequired[list[str]],
+    'naming_schema': _ty.NotRequired[str],
+    'allow_empty': _ty.NotRequired[bool],
+    'schedule': _ty.NotRequired[_jsonschema.JsonValue],
+    'fixate_removal_date': _ty.NotRequired[bool], 
+})
 CreateData = _ty.TypedDict('CreateData', {
     'dataset': str,
     'recursive': _ty.NotRequired[bool],

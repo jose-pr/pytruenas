@@ -3,6 +3,23 @@ from pytruenas.models import jsonschema as _jsonschema
 import typing as _ty 
 class Nfs(_NS):
     
+    def _create(self,
+        **fields:_ty.Unpack[Data],
+    ) -> CreateReturn:
+        """"""
+        ...
+    def _update(self,
+        __selector:int|_ty.Sequence[str],
+        **fields:_ty.Unpack[Data],
+    ) -> UpdateReturn:
+        """"""
+        ...
+    def _upsert(self,
+        __selector:int|_ty.Sequence[str],
+        **fields:_ty.Unpack[Data],
+    ) -> UpdateReturn:
+        """"""
+        ...
     def create(self,
         data:CreateData,
         _method:str|None=None,
@@ -58,6 +75,21 @@ Please see `query` method documentation for `options`."""
     ) -> UpdateReturn:
         """Update NFS Share of `id`."""
         ...
+Data = _ty.TypedDict('Data', {
+    'path': _ty.NotRequired[str],
+    'aliases': _ty.NotRequired[list[str]],
+    'comment': _ty.NotRequired[str],
+    'networks': _ty.NotRequired[list[str]],
+    'hosts': _ty.NotRequired[list[str]],
+    'ro': _ty.NotRequired[bool],
+    'maproot_user': _ty.NotRequired[str|None],
+    'maproot_group': _ty.NotRequired[str|None],
+    'mapall_user': _ty.NotRequired[str|None],
+    'mapall_group': _ty.NotRequired[str|None],
+    'security': _ty.NotRequired[list[str]],
+    'enabled': _ty.NotRequired[bool],
+    'expose_snapshots': _ty.NotRequired[bool], 
+})
 CreateData = _ty.TypedDict('CreateData', {
     'path': str,
     'aliases': _ty.NotRequired[list[str]],

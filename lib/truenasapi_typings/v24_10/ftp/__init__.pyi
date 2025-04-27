@@ -3,6 +3,12 @@ from pytruenas.models import jsonschema as _jsonschema
 import typing as _ty 
 class Ftp(_NS):
     
+    def _update(self,
+        __selector:_jsonschema.JsonValue=None,
+        **fields:_ty.Unpack[FtpUpdate],
+    ) -> UpdateReturn:
+        """"""
+        ...
     def config(self,
         _method:str|None=None,
         _ioerror:bool=False,
@@ -60,6 +66,47 @@ class Ftp(_NS):
 
 `options` is a string used to add proftpd(8) parameters not covered by ftp service."""
         ...
+FtpUpdate = _ty.TypedDict('FtpUpdate', {
+    'port': _ty.NotRequired[int],
+    'clients': _ty.NotRequired[int],
+    'ipconnections': _ty.NotRequired[int],
+    'loginattempt': _ty.NotRequired[int],
+    'timeout': _ty.NotRequired[int],
+    'timeout_notransfer': _ty.NotRequired[int],
+    'onlyanonymous': _ty.NotRequired[bool],
+    'anonpath': _ty.NotRequired[str|None],
+    'onlylocal': _ty.NotRequired[bool],
+    'banner': _ty.NotRequired[str],
+    'filemask': _ty.NotRequired[str],
+    'dirmask': _ty.NotRequired[str],
+    'fxp': _ty.NotRequired[bool],
+    'resume': _ty.NotRequired[bool],
+    'defaultroot': _ty.NotRequired[bool],
+    'ident': _ty.NotRequired[bool],
+    'reversedns': _ty.NotRequired[bool],
+    'masqaddress': _ty.NotRequired[str],
+    'passiveportsmin': _ty.NotRequired[int],
+    'passiveportsmax': _ty.NotRequired[int],
+    'localuserbw': _ty.NotRequired[int],
+    'localuserdlbw': _ty.NotRequired[int],
+    'anonuserbw': _ty.NotRequired[int],
+    'anonuserdlbw': _ty.NotRequired[int],
+    'tls': _ty.NotRequired[bool],
+    'tls_policy': _ty.NotRequired[str],
+    'tls_opt_allow_client_renegotiations': _ty.NotRequired[bool],
+    'tls_opt_allow_dot_login': _ty.NotRequired[bool],
+    'tls_opt_allow_per_user': _ty.NotRequired[bool],
+    'tls_opt_common_name_required': _ty.NotRequired[bool],
+    'tls_opt_enable_diags': _ty.NotRequired[bool],
+    'tls_opt_export_cert_data': _ty.NotRequired[bool],
+    'tls_opt_no_empty_fragments': _ty.NotRequired[bool],
+    'tls_opt_no_session_reuse_required': _ty.NotRequired[bool],
+    'tls_opt_stdenvvars': _ty.NotRequired[bool],
+    'tls_opt_dns_name_required': _ty.NotRequired[bool],
+    'tls_opt_ip_address_required': _ty.NotRequired[bool],
+    'ssltls_certificate': _ty.NotRequired[int|None],
+    'options': _ty.NotRequired[str], 
+})
 ConfigReturn = _ty.TypedDict('ConfigReturn', {
     'id': int,
     'port': int,

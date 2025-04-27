@@ -3,6 +3,23 @@ from pytruenas.models import jsonschema as _jsonschema
 import typing as _ty 
 class Auth(_NS):
     
+    def _create(self,
+        **fields:_ty.Unpack[Data],
+    ) -> CreateReturn:
+        """"""
+        ...
+    def _update(self,
+        __selector:int|_ty.Sequence[str],
+        **fields:_ty.Unpack[Data],
+    ) -> UpdateReturn:
+        """"""
+        ...
+    def _upsert(self,
+        __selector:int|_ty.Sequence[str],
+        **fields:_ty.Unpack[Data],
+    ) -> UpdateReturn:
+        """"""
+        ...
     def create(self,
         data:CreateData,
         _method:str|None=None,
@@ -54,6 +71,14 @@ Please see `query` method documentation for `options`."""
     ) -> UpdateReturn:
         """Update iSCSI Authorized Access of `id`."""
         ...
+Data = _ty.TypedDict('Data', {
+    'tag': _ty.NotRequired[int],
+    'user': _ty.NotRequired[str],
+    'secret': _ty.NotRequired[str],
+    'peeruser': _ty.NotRequired[str],
+    'peersecret': _ty.NotRequired[str],
+    'discovery_auth': _ty.NotRequired[str], 
+})
 CreateData = _ty.TypedDict('CreateData', {
     'tag': int,
     'user': str,

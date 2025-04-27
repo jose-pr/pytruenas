@@ -3,6 +3,23 @@ from pytruenas.models import jsonschema as _jsonschema
 import typing as _ty 
 class Group(_NS):
     
+    def _create(self,
+        **fields:_ty.Unpack[GroupCreate],
+    ) -> CreateReturn:
+        """"""
+        ...
+    def _update(self,
+        __selector:int|_ty.Sequence[str],
+        **fields:_ty.Unpack[GroupUpdate],
+    ) -> UpdateReturn:
+        """"""
+        ...
+    def _upsert(self,
+        __selector:int|_ty.Sequence[str],
+        **fields:_ty.Unpack[GroupUpdate],
+    ) -> UpdateReturn:
+        """"""
+        ...
     def create(self,
         group_create:CreateGroupCreate,
         _method:str|None=None,
@@ -77,6 +94,23 @@ Please see `query` method documentation for `options`."""
     ) -> int:
         """Update attributes of an existing group."""
         ...
+GroupCreate = _ty.TypedDict('GroupCreate', {
+    'gid': _ty.NotRequired[int|None],
+    'name': str,
+    'sudo_commands': _ty.NotRequired[list[str]],
+    'sudo_commands_nopasswd': _ty.NotRequired[list[str]],
+    'smb': _ty.NotRequired[bool],
+    'userns_idmap': _ty.NotRequired[str|int|None],
+    'users': _ty.NotRequired[list[int]], 
+})
+GroupUpdate = _ty.TypedDict('GroupUpdate', {
+    'name': _ty.NotRequired[str],
+    'sudo_commands': _ty.NotRequired[list[str]],
+    'sudo_commands_nopasswd': _ty.NotRequired[list[str]],
+    'smb': _ty.NotRequired[bool],
+    'userns_idmap': _ty.NotRequired[str|int|None],
+    'users': _ty.NotRequired[list[int]], 
+})
 CreateGroupCreate = _ty.TypedDict('CreateGroupCreate', {
     'gid': _ty.NotRequired[int|None],
     'name': str,

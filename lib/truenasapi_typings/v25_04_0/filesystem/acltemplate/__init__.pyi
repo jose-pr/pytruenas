@@ -3,6 +3,23 @@ from pytruenas.models import jsonschema as _jsonschema
 import typing as _ty 
 class Acltemplate(_NS):
     
+    def _create(self,
+        **fields:_ty.Unpack[AcltemplateCreate],
+    ) -> CreateReturn:
+        """"""
+        ...
+    def _update(self,
+        __selector:int|_ty.Sequence[str],
+        **fields:_ty.Unpack[AcltemplateUpdate],
+    ) -> UpdateReturn:
+        """"""
+        ...
+    def _upsert(self,
+        __selector:int|_ty.Sequence[str],
+        **fields:_ty.Unpack[AcltemplateUpdate],
+    ) -> UpdateReturn:
+        """"""
+        ...
     def by_path(self,
         filesystem_acl:ByPathFilesystemAcl,
         _method:str|None=None,
@@ -60,6 +77,18 @@ Please see `query` method documentation for `options`."""
     ) -> UpdateReturn:
         """update filesystem ACL template with `id`."""
         ...
+AcltemplateCreate = _ty.TypedDict('AcltemplateCreate', {
+    'name': str,
+    'acltype': str,
+    'acl': _jsonschema.JsonArray|_jsonschema.JsonArray,
+    'comment': _ty.NotRequired[str], 
+})
+AcltemplateUpdate = _ty.TypedDict('AcltemplateUpdate', {
+    'name': _ty.NotRequired[str],
+    'acltype': _ty.NotRequired[str],
+    'acl': _ty.NotRequired[_jsonschema.JsonArray|_jsonschema.JsonArray],
+    'comment': _ty.NotRequired[str], 
+})
 ByPathFilesystemAcl = _ty.TypedDict('ByPathFilesystemAcl', {
     'path': _ty.NotRequired[str],
     'query-filters': _ty.NotRequired[_jsonschema.JsonArray],

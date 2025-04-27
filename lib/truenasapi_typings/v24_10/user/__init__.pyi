@@ -3,6 +3,23 @@ from pytruenas.models import jsonschema as _jsonschema
 import typing as _ty 
 class User(_NS):
     
+    def _create(self,
+        **fields:_ty.Unpack[UserCreate],
+    ) -> CreateReturn:
+        """"""
+        ...
+    def _update(self,
+        __selector:int|_ty.Sequence[str],
+        **fields:_ty.Unpack[UserUpdate],
+    ) -> UpdateReturn:
+        """"""
+        ...
+    def _upsert(self,
+        __selector:int|_ty.Sequence[str],
+        **fields:_ty.Unpack[UserUpdate],
+    ) -> UpdateReturn:
+        """"""
+        ...
     def create(self,
         user_create:CreateUserCreate,
         _method:str|None=None,
@@ -132,6 +149,50 @@ NOTE: users authenticated with a one-time password will be able to change the pa
     ) -> UpdateReturn:
         """Update attributes of an existing user."""
         ...
+UserCreate = _ty.TypedDict('UserCreate', {
+    'uid': _ty.NotRequired[int|None],
+    'username': str|str,
+    'home': _ty.NotRequired[str],
+    'shell': _ty.NotRequired[str],
+    'full_name': str,
+    'smb': _ty.NotRequired[bool],
+    'userns_idmap': _ty.NotRequired[str|int|None],
+    'group': _ty.NotRequired[int|None],
+    'groups': _ty.NotRequired[list[int]],
+    'password_disabled': _ty.NotRequired[bool],
+    'ssh_password_enabled': _ty.NotRequired[bool],
+    'sshpubkey': _ty.NotRequired[str|None],
+    'locked': _ty.NotRequired[bool],
+    'sudo_commands': _ty.NotRequired[list[str]],
+    'sudo_commands_nopasswd': _ty.NotRequired[list[str]],
+    'email': _ty.NotRequired[str|None],
+    'group_create': _ty.NotRequired[bool],
+    'home_create': _ty.NotRequired[bool],
+    'home_mode': _ty.NotRequired[str],
+    'password': _ty.NotRequired[str|None],
+    'random_password': _ty.NotRequired[bool], 
+})
+UserUpdate = _ty.TypedDict('UserUpdate', {
+    'username': _ty.NotRequired[str|str],
+    'home': _ty.NotRequired[str],
+    'shell': _ty.NotRequired[str],
+    'full_name': _ty.NotRequired[str],
+    'smb': _ty.NotRequired[bool],
+    'userns_idmap': _ty.NotRequired[str|int|None],
+    'group': _ty.NotRequired[int|None],
+    'groups': _ty.NotRequired[list[int]],
+    'password_disabled': _ty.NotRequired[bool],
+    'ssh_password_enabled': _ty.NotRequired[bool],
+    'sshpubkey': _ty.NotRequired[str|None],
+    'locked': _ty.NotRequired[bool],
+    'sudo_commands': _ty.NotRequired[list[str]],
+    'sudo_commands_nopasswd': _ty.NotRequired[list[str]],
+    'email': _ty.NotRequired[str|None],
+    'home_create': _ty.NotRequired[bool],
+    'home_mode': _ty.NotRequired[str],
+    'password': _ty.NotRequired[str|None],
+    'random_password': _ty.NotRequired[bool], 
+})
 CreateUserCreate = _ty.TypedDict('CreateUserCreate', {
     'uid': _ty.NotRequired[int|None],
     'username': str|str,

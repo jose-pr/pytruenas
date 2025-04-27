@@ -3,6 +3,23 @@ from pytruenas.models import jsonschema as _jsonschema
 import typing as _ty 
 class Keychaincredential(_NS):
     
+    def _create(self,
+        **fields:_ty.Unpack[KeychainCredentialCreateSSHKeyPairEntry|KeychainCredentialCreateSSHCredentialsEntry],
+    ) -> CreateReturn:
+        """"""
+        ...
+    def _update(self,
+        __selector:int|_ty.Sequence[str],
+        **fields:_ty.Unpack[KeychainCredentialUpdateSSHKeyPairEntry|KeychainCredentialUpdateSSHCredentialsEntry],
+    ) -> UpdateReturn:
+        """"""
+        ...
+    def _upsert(self,
+        __selector:int|_ty.Sequence[str],
+        **fields:_ty.Unpack[KeychainCredentialUpdateSSHKeyPairEntry|KeychainCredentialUpdateSSHCredentialsEntry],
+    ) -> UpdateReturn:
+        """"""
+        ...
     def create(self,
         keychain_credential_create:CreateKeychainCredentialCreateSSHKeyPairEntry|CreateKeychainCredentialCreateSSHCredentialsEntry,
         _method:str|None=None,
@@ -98,6 +115,24 @@ Please note that you can't change `type`. You must specify full `attributes` val
     ) -> list[UsedByUsedKeychainCredential]:
         """Returns list of objects that use this credential."""
         ...
+KeychainCredentialCreateSSHKeyPairEntry = _ty.TypedDict('KeychainCredentialCreateSSHKeyPairEntry', {
+    'name': str,
+    'type': str,
+    'attributes': _jsonschema.JsonValue, 
+})
+KeychainCredentialCreateSSHCredentialsEntry = _ty.TypedDict('KeychainCredentialCreateSSHCredentialsEntry', {
+    'name': str,
+    'type': str,
+    'attributes': _jsonschema.JsonValue, 
+})
+KeychainCredentialUpdateSSHKeyPairEntry = _ty.TypedDict('KeychainCredentialUpdateSSHKeyPairEntry', {
+    'name': _ty.NotRequired[str],
+    'attributes': _ty.NotRequired[_jsonschema.JsonValue], 
+})
+KeychainCredentialUpdateSSHCredentialsEntry = _ty.TypedDict('KeychainCredentialUpdateSSHCredentialsEntry', {
+    'name': _ty.NotRequired[str],
+    'attributes': _ty.NotRequired[_jsonschema.JsonValue], 
+})
 CreateKeychainCredentialCreateSSHKeyPairEntry = _ty.TypedDict('CreateKeychainCredentialCreateSSHKeyPairEntry', {
     'name': str,
     'type': str,

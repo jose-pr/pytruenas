@@ -3,6 +3,23 @@ from pytruenas.models import jsonschema as _jsonschema
 import typing as _ty 
 class Targetextent(_NS):
     
+    def _create(self,
+        **fields:_ty.Unpack[IscsiTargetToExtentCreate],
+    ) -> CreateReturn:
+        """"""
+        ...
+    def _update(self,
+        __selector:int|_ty.Sequence[str],
+        **fields:_ty.Unpack[IscsiTargetToExtentUpdate],
+    ) -> UpdateReturn:
+        """"""
+        ...
+    def _upsert(self,
+        __selector:int|_ty.Sequence[str],
+        **fields:_ty.Unpack[IscsiTargetToExtentUpdate],
+    ) -> UpdateReturn:
+        """"""
+        ...
     def create(self,
         iscsi_target_to_extent_create:CreateIscsiTargetToExtentCreate,
         _method:str|None=None,
@@ -51,6 +68,17 @@ Please see `query` method documentation for `options`."""
     ) -> UpdateReturn:
         """Update Associated Target of `id`."""
         ...
+IscsiTargetToExtentCreate = _ty.TypedDict('IscsiTargetToExtentCreate', {
+    'target': int,
+    'lunid': _ty.NotRequired[int|None],
+    'extent': int, 
+})
+IscsiTargetToExtentUpdate = _ty.TypedDict('IscsiTargetToExtentUpdate', {
+    'id': _ty.NotRequired[int],
+    'target': _ty.NotRequired[int],
+    'lunid': _ty.NotRequired[int],
+    'extent': _ty.NotRequired[int], 
+})
 CreateIscsiTargetToExtentCreate = _ty.TypedDict('CreateIscsiTargetToExtentCreate', {
     'target': int,
     'lunid': _ty.NotRequired[int|None],

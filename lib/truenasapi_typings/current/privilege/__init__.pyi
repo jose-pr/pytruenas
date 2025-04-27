@@ -3,6 +3,23 @@ from pytruenas.models import jsonschema as _jsonschema
 import typing as _ty 
 class Privilege(_NS):
     
+    def _create(self,
+        **fields:_ty.Unpack[PrivilegeCreate],
+    ) -> CreateReturn:
+        """"""
+        ...
+    def _update(self,
+        __selector:int|_ty.Sequence[str],
+        **fields:_ty.Unpack[PrivilegeUpdate],
+    ) -> UpdateReturn:
+        """"""
+        ...
+    def _upsert(self,
+        __selector:int|_ty.Sequence[str],
+        **fields:_ty.Unpack[PrivilegeUpdate],
+    ) -> UpdateReturn:
+        """"""
+        ...
     def create(self,
         privilege_create:CreatePrivilegeCreate,
         _method:str|None=None,
@@ -75,6 +92,20 @@ Each entry contains the following keys:
     ) -> UpdateReturn:
         """Update the privilege `id`."""
         ...
+PrivilegeCreate = _ty.TypedDict('PrivilegeCreate', {
+    'name': str,
+    'local_groups': _ty.NotRequired[list[int]],
+    'ds_groups': _ty.NotRequired[list[int|str]],
+    'roles': _ty.NotRequired[list[str]],
+    'web_shell': bool, 
+})
+PrivilegeUpdate = _ty.TypedDict('PrivilegeUpdate', {
+    'name': _ty.NotRequired[str],
+    'local_groups': _ty.NotRequired[list[int]],
+    'ds_groups': _ty.NotRequired[list[int|str]],
+    'roles': _ty.NotRequired[list[str]],
+    'web_shell': _ty.NotRequired[bool], 
+})
 CreatePrivilegeCreate = _ty.TypedDict('CreatePrivilegeCreate', {
     'name': str,
     'local_groups': _ty.NotRequired[list[int]],

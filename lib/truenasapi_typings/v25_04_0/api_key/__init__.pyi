@@ -3,6 +3,23 @@ from pytruenas.models import jsonschema as _jsonschema
 import typing as _ty 
 class ApiKey(_NS):
     
+    def _create(self,
+        **fields:_ty.Unpack[ApiKeyCreate],
+    ) -> CreateReturn:
+        """"""
+        ...
+    def _update(self,
+        __selector:int|_ty.Sequence[str],
+        **fields:_ty.Unpack[ApiKeyUpdate],
+    ) -> UpdateReturn:
+        """"""
+        ...
+    def _upsert(self,
+        __selector:int|_ty.Sequence[str],
+        **fields:_ty.Unpack[ApiKeyUpdate],
+    ) -> UpdateReturn:
+        """"""
+        ...
     def create(self,
         api_key_create:CreateApiKeyCreate,
         _method:str|None=None,
@@ -59,6 +76,16 @@ Please see `query` method documentation for `options`."""
 
 Specify `reset: true` to reset this API Key."""
         ...
+ApiKeyCreate = _ty.TypedDict('ApiKeyCreate', {
+    'name': str,
+    'username': str|str,
+    'expires_at': _ty.NotRequired[str|None], 
+})
+ApiKeyUpdate = _ty.TypedDict('ApiKeyUpdate', {
+    'name': _ty.NotRequired[str],
+    'expires_at': _ty.NotRequired[str|None],
+    'reset': _ty.NotRequired[bool], 
+})
 CreateApiKeyCreate = _ty.TypedDict('CreateApiKeyCreate', {
     'name': str,
     'username': str|str,

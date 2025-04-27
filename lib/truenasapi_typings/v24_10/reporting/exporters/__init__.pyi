@@ -3,6 +3,23 @@ from pytruenas.models import jsonschema as _jsonschema
 import typing as _ty 
 class Exporters(_NS):
     
+    def _create(self,
+        **fields:_ty.Unpack[ReportingExporterCreate],
+    ) -> CreateReturn:
+        """"""
+        ...
+    def _update(self,
+        __selector:int|_ty.Sequence[str],
+        **fields:_ty.Unpack[ReportingExporterUpdate],
+    ) -> UpdateReturn:
+        """"""
+        ...
+    def _upsert(self,
+        __selector:int|_ty.Sequence[str],
+        **fields:_ty.Unpack[ReportingExporterUpdate],
+    ) -> UpdateReturn:
+        """"""
+        ...
     def create(self,
         reporting_exporter_create:CreateReportingExporterCreate,
         _method:str|None=None,
@@ -55,6 +72,16 @@ Please see `query` method documentation for `options`."""
     ) -> UpdateReturn:
         """Update Reporting Exporter of `id`."""
         ...
+ReportingExporterCreate = _ty.TypedDict('ReportingExporterCreate', {
+    'enabled': bool,
+    'attributes': _jsonschema.JsonValue,
+    'name': str, 
+})
+ReportingExporterUpdate = _ty.TypedDict('ReportingExporterUpdate', {
+    'enabled': _ty.NotRequired[bool],
+    'attributes': _ty.NotRequired[_jsonschema.JsonValue],
+    'name': _ty.NotRequired[str], 
+})
 CreateReportingExporterCreate = _ty.TypedDict('CreateReportingExporterCreate', {
     'enabled': bool,
     'attributes': _jsonschema.JsonValue,
