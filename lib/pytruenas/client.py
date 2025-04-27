@@ -10,6 +10,7 @@ import json as _js
 import sys as _sys
 import os as _os
 import pwd as _pwd
+import operator as _opers
 
 warnings.filterwarnings(action="ignore", module=".*asyncssh.*")
 
@@ -36,8 +37,8 @@ if _ty.TYPE_CHECKING:
     from truenasapi_typings.current import Current
 
     ApiVersion = _ty.TypeVar(
-        "ApiVersion", bound=Namespace, default=Current # type:ignore
-    )  
+        "ApiVersion", bound=Namespace, default=Current  # type:ignore
+    )
 else:
     ApiVersion = _ty.TypeVar(
         "ApiVersion",
@@ -55,10 +56,10 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
         *,
         shell: str | None = None,
         logger: logging.Logger | None = None,
-        path_backend: "str|_ty.Sequence[str]" = "auto",
+        fsbackend: "str|_ty.Sequence[str]" = "auto",
     ) -> None:
         self._api = _TGT.parse(target or "localhost", scheme="auto")
-        self.path_backend = path_backend
+        self.fsbackend = fsbackend
 
         if self._api.scheme == "auto":
             resp = _req.get(
@@ -134,9 +135,9 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
                 self.login()
             else:
                 self._conn = self._openwss()
-        return _ty.cast( _conn.JSONRPCClient, self._conn)
+        return _ty.cast(_conn.JSONRPCClient, self._conn)
 
-    def login(self, creds: _auth.Credentials|None = None):
+    def login(self, creds: _auth.Credentials | None = None):
         if self._conn and not self._conn._closed.is_set():
             self._conn.close()
         self._conn = self._openwss()
@@ -150,7 +151,7 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
     def upload(
         self, file: str | bytes, method: str, *params, token=None, wait=True, **kwargs
     ):
-        client: "TrueNASClient[Current]" = self #type:ignore
+        client: "TrueNASClient[Current]" = self  # type:ignore
 
         scheme = "https" if client._api.scheme == "wss" else "http"
         target = client._api._replace(scheme=scheme, path="/_upload", port=0)
@@ -177,18 +178,18 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
         self,
         method: str,
         *args,
-        filename: str |None = None,
+        filename: str | None = None,
         buffered=False,
         wait=True,
         **kwargs,
     ):
-        client: "TrueNASClient[Current]" = self # type:ignore
+        client: "TrueNASClient[Current]" = self  # type:ignore
 
         scheme = "https" if client._api.scheme == "wss" else "http"
 
         jobid, link = client.api.core.download(
             method, args, filename or "download", **kwargs
-        ) # type:ignore
+        )  # type:ignore
 
         target = client._api._replace(scheme=scheme, path=link, port=0)
 
@@ -214,19 +215,22 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
         )
         return api
 
-    def install_sshcreds(self, name: str|None = None, private_key: str|None = None):
-        client: "TrueNASClient[Current]" = self # type:ignore
+    def install_sshcreds(self, name: str | None = None, private_key: str | None = None):
+        client: "TrueNASClient[Current]" = self  # type:ignore
         name = name or "pytruenas"
         keypair = client.api.keychaincredential._get(type="SSH_KEY_PAIR", name=name)
         if not keypair and not private_key:
             private_key = client.api.keychaincredential.generate_ssh_key_pair()[
                 "private_key"
-            ] # type:ignore
+            ]  # type:ignore
         elif not private_key:
-            private_key = keypair["attributes"]["private_key"] #type: ignore
+            private_key = keypair["attributes"]["private_key"]  # type: ignore
 
         pubkey = (
-            _ssh.import_private_key(private_key).export_public_key().decode().strip() # type:ignore
+            _ssh.import_private_key(private_key)  # type:ignore
+            .export_public_key()
+            .decode()
+            .strip()
         )
 
         keypair = client.api.keychaincredential._upsert(
@@ -236,7 +240,9 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
             attributes={"private_key": private_key, "public_key": pubkey},
         )
         root = client.api.user._get(username="root")
-        rootauthkeys:list[str] = (root.get("sshpubkey") or "").splitlines() # type:ignore
+        rootauthkeys: list[str] = (
+            root.get("sshpubkey") or ""  # type:ignore
+        ).splitlines()  # type:ignore
 
         if pubkey not in rootauthkeys:
             rootauthkeys.append(pubkey)
@@ -246,7 +252,7 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
         if not client.shell.username or not client.shell.password:
             client.shell = client.shell._replace(
                 username="client_keys|root",
-                password=keypair["attributes"]["private_key"], #type: ignore
+                password=keypair["attributes"]["private_key"],  # type: ignore
             )
 
     @property
@@ -268,7 +274,7 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
                 connect_opts[logintype] = creds
             username = username or "root"
             self._ssh = _utils.async_to_sync(
-                _ssh.connect(# type:ignore
+                _ssh.connect(  # type:ignore
                     self.shell.host,
                     port=self.shell.port or 22,
                     username=username,
@@ -290,8 +296,8 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
         return self._sftp
 
     def path(self, *path: PathLike, **kwargs):
-        kwargs["backend"] = kwargs.get("backend" or self.path_backend)
-        return Path(*path, **kwargs, client=self) # type:ignore
+        kwargs["backend"] = kwargs.get("backend" or self.fsbackend)
+        return Path(*path, **kwargs, client=self)  # type:ignore
 
     def run(
         self,
@@ -309,7 +315,7 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
         errors: str | None = None,
         input: Input | None = None,
         timeout: float | None = None,
-        loglevel: int = logging.TRACE, # type:ignore
+        loglevel: int = logging.TRACE,  # type:ignore
     ) -> subprocess.CompletedProcess:
 
         if not executable:
@@ -320,7 +326,7 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
                     if self._api.is_local:
                         executable = _pwd.getpwnam("root").pw_shell
                     else:
-                        executable = self.api.user._get(username="root")["shell"] #type: ignore
+                        executable = self.api.user._get(username="root")["shell"]  # type: ignore
                 except Exception as e:
                     self.logger.warning(
                         "Count not get default shell for root, using bash as default"
@@ -330,13 +336,14 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
         script = []
         for cmd in cmds:
             if not isinstance(cmd, (tuple, list)):
-                if isinstance(cmd, PurePath):
+                if isinstance(cmd, (PurePath, Path)):
                     cmd = shlex.quote(cmd.as_posix())
+                elif isinstance(cmd, _os.PathLike):
+                    cmd = shlex.quote(_os.fspath(cmd))
                 else:
                     cmd = str(cmd)
             else:
-                cmd = [a.as_posix() if isinstance(a, PurePath) else str(a) for a in cmd]
-                cmd = shlex.join(cmd)
+                cmd = " ".join(_shellquote(c) for c in cmd)
             script.append(cmd)
 
         if cwd:
@@ -426,4 +433,18 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
                 )
             case _:
                 raise NotImplementedError(self.shell.scheme)
-        return _ty.cast(subprocess.CompletedProcess,  result)
+        return _ty.cast(subprocess.CompletedProcess, result)
+
+
+def _shellquote(c: object):
+    if isinstance(c, _os.PathLike):
+        if hasattr(c, "as_posix"):
+            c = c.as_posix()  # type:ignore
+        else:
+            c = _os.fspath(c)
+        c = shlex.quote(c)  # type:ignore
+    elif isinstance(c, bytes):
+        c = c.decode()
+    else:
+        c = shlex.quote(str(c))
+    return c
