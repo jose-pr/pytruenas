@@ -3,6 +3,23 @@ from pytruenas.models import jsonschema as _jsonschema
 import typing as _ty 
 class Ntpserver(_NS):
     
+    def _create(self,
+        **fields:_ty.Unpack[NtpServerCreate],
+    ) -> CreateReturn:
+        """"""
+        ...
+    def _update(self,
+        __selector:int|_ty.Sequence[str],
+        **fields:_ty.Unpack[NtpServerUpdate],
+    ) -> UpdateReturn:
+        """"""
+        ...
+    def _upsert(self,
+        __selector:int|_ty.Sequence[str],
+        **fields:_ty.Unpack[NtpServerUpdate],
+    ) -> UpdateReturn:
+        """"""
+        ...
     def create(self,
         ntp_server_create:CreateNtpServerCreate,
         _method:str|None=None,
@@ -62,6 +79,24 @@ Please see `query` method documentation for `options`."""
     ) -> UpdateReturn:
         """Update NTP server of `id`."""
         ...
+NtpServerCreate = _ty.TypedDict('NtpServerCreate', {
+    'address': str,
+    'burst': _ty.NotRequired[bool],
+    'iburst': _ty.NotRequired[bool],
+    'prefer': _ty.NotRequired[bool],
+    'minpoll': _ty.NotRequired[int],
+    'maxpoll': _ty.NotRequired[int],
+    'force': _ty.NotRequired[bool], 
+})
+NtpServerUpdate = _ty.TypedDict('NtpServerUpdate', {
+    'address': _ty.NotRequired[str],
+    'burst': _ty.NotRequired[bool],
+    'iburst': _ty.NotRequired[bool],
+    'prefer': _ty.NotRequired[bool],
+    'minpoll': _ty.NotRequired[int],
+    'maxpoll': _ty.NotRequired[int],
+    'force': _ty.NotRequired[bool], 
+})
 CreateNtpServerCreate = _ty.TypedDict('CreateNtpServerCreate', {
     'address': str,
     'burst': _ty.NotRequired[bool],

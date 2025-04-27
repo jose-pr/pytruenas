@@ -3,6 +3,12 @@ from pytruenas.models import jsonschema as _jsonschema
 import typing as _ty 
 class TnConnect(_NS):
     
+    def _update(self,
+        __selector:_jsonschema.JsonValue=None,
+        **fields:_ty.Unpack[TnConnectUpdate],
+    ) -> UpdateReturn:
+        """"""
+        ...
     def config(self,
         _method:str|None=None,
         _ioerror:bool=False,
@@ -43,6 +49,14 @@ Before this endpoint is called, tn_connect must be enabled and a claim token mus
     ) -> UpdateReturn:
         """Update TrueNAS Connect configuration."""
         ...
+TnConnectUpdate = _ty.TypedDict('TnConnectUpdate', {
+    'enabled': _ty.NotRequired[bool],
+    'ips': _ty.NotRequired[list[str]],
+    'account_service_base_url': _ty.NotRequired[str],
+    'leca_service_base_url': _ty.NotRequired[str],
+    'tnc_base_url': _ty.NotRequired[str],
+    'heartbeat_url': _ty.NotRequired[str], 
+})
 ConfigReturn = _ty.TypedDict('ConfigReturn', {
     'id': int,
     'enabled': bool,

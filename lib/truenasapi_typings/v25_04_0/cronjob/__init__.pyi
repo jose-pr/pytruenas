@@ -3,6 +3,23 @@ from pytruenas.models import jsonschema as _jsonschema
 import typing as _ty 
 class Cronjob(_NS):
     
+    def _create(self,
+        **fields:_ty.Unpack[Data],
+    ) -> CreateReturn:
+        """"""
+        ...
+    def _update(self,
+        __selector:int|_ty.Sequence[str],
+        **fields:_ty.Unpack[Data],
+    ) -> UpdateReturn:
+        """"""
+        ...
+    def _upsert(self,
+        __selector:int|_ty.Sequence[str],
+        **fields:_ty.Unpack[Data],
+    ) -> UpdateReturn:
+        """"""
+        ...
     def create(self,
         data:CreateData,
         _method:str|None=None,
@@ -59,6 +76,15 @@ Please see `query` method documentation for `options`."""
     ) -> UpdateReturn:
         """Update cronjob of `id`."""
         ...
+Data = _ty.TypedDict('Data', {
+    'enabled': _ty.NotRequired[bool],
+    'stderr': _ty.NotRequired[bool],
+    'stdout': _ty.NotRequired[bool],
+    'schedule': _ty.NotRequired[_jsonschema.JsonValue],
+    'command': _ty.NotRequired[str],
+    'description': _ty.NotRequired[str],
+    'user': _ty.NotRequired[str], 
+})
 CreateData = _ty.TypedDict('CreateData', {
     'enabled': _ty.NotRequired[bool],
     'stderr': _ty.NotRequired[bool],

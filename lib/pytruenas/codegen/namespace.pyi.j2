@@ -10,10 +10,10 @@ from .{{ qn.pyname.relative_to(ns.pyname) }} import {{ qn.pyname.camelcase(-1) }
 class {{ ns.pyname.camelcase(-1) }}(_NS):
     {% for qn in ns.methods() %}
     def {{ qn.pyname.name }}(self,
-        {%- for param in qn.parameters() %}
+        {%- for param in qn.parameters %}
         {{param.argument_declaration(typeddicts)}}, 
         {%- endfor %}
-    ) -> {{ qn.returns().type_def(typeddicts) }}:
+    ) -> {{ qn.returns.type_def(typeddicts) }}:
         """{{ qn.doc }}"""
         ...
     {%- endfor %} 

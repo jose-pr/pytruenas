@@ -3,6 +3,12 @@ from pytruenas.models import jsonschema as _jsonschema
 import typing as _ty 
 class Catalog(_NS):
     
+    def _update(self,
+        __selector:_jsonschema.JsonValue=None,
+        **fields:_ty.Unpack[CatalogUpdate],
+    ) -> UpdateReturn:
+        """"""
+        ...
     def apps(self,
         catalog_apps_options:AppsCatalogAppsOptions,
         _method:str|None=None,
@@ -57,6 +63,9 @@ class Catalog(_NS):
     ) -> UpdateReturn:
         """Update catalog preferences."""
         ...
+CatalogUpdate = _ty.TypedDict('CatalogUpdate', {
+    'preferred_trains': _ty.NotRequired[list[str]], 
+})
 AppsCatalogAppsOptions = _ty.TypedDict('AppsCatalogAppsOptions', {
     'cache': _ty.NotRequired[bool],
     'cache_only': _ty.NotRequired[bool],

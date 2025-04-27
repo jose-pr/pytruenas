@@ -3,6 +3,12 @@ from pytruenas.models import jsonschema as _jsonschema
 import typing as _ty 
 class Nfs(_NS):
     
+    def _update(self,
+        __selector:_jsonschema.JsonValue=None,
+        **fields:_ty.Unpack[NfsUpdate],
+    ) -> UpdateReturn:
+        """"""
+        ...
     def bindip_choices(self,
         _method:str|None=None,
         _ioerror:bool=False,
@@ -67,6 +73,21 @@ class Nfs(_NS):
 
             INPUT: Enable/Disable Default: Disable"""
         ...
+NfsUpdate = _ty.TypedDict('NfsUpdate', {
+    'servers': _ty.NotRequired[int|None],
+    'allow_nonroot': _ty.NotRequired[bool],
+    'protocols': _ty.NotRequired[list[str]],
+    'v4_krb': _ty.NotRequired[bool],
+    'v4_domain': _ty.NotRequired[str],
+    'bindip': _ty.NotRequired[list[str]],
+    'mountd_port': _ty.NotRequired[int|None],
+    'rpcstatd_port': _ty.NotRequired[int|None],
+    'rpclockd_port': _ty.NotRequired[int|None],
+    'mountd_log': _ty.NotRequired[bool],
+    'statd_lockd_log': _ty.NotRequired[bool],
+    'userd_manage_gids': _ty.NotRequired[bool],
+    'rdma': _ty.NotRequired[bool], 
+})
 ConfigReturn = _ty.TypedDict('ConfigReturn', {
     'id': int,
     'servers': int|None,

@@ -3,6 +3,23 @@ from pytruenas.models import jsonschema as _jsonschema
 import typing as _ty 
 class Registry(_NS):
     
+    def _create(self,
+        **fields:_ty.Unpack[AppRegistryCreate],
+    ) -> CreateReturn:
+        """"""
+        ...
+    def _update(self,
+        __selector:int|_ty.Sequence[str],
+        **fields:_ty.Unpack[Data],
+    ) -> UpdateReturn:
+        """"""
+        ...
+    def _upsert(self,
+        __selector:int|_ty.Sequence[str],
+        **fields:_ty.Unpack[Data],
+    ) -> UpdateReturn:
+        """"""
+        ...
     def create(self,
         app_registry_create:CreateAppRegistryCreate,
         _method:str|None=None,
@@ -48,6 +65,20 @@ Please see `query` method documentation for `options`."""
     ) -> UpdateReturn:
         """Update an app registry entry."""
         ...
+AppRegistryCreate = _ty.TypedDict('AppRegistryCreate', {
+    'name': str,
+    'description': _ty.NotRequired[str|None],
+    'username': str,
+    'password': str,
+    'uri': _ty.NotRequired[str], 
+})
+Data = _ty.TypedDict('Data', {
+    'name': _ty.NotRequired[str],
+    'description': _ty.NotRequired[str|None],
+    'username': _ty.NotRequired[str],
+    'password': _ty.NotRequired[str],
+    'uri': _ty.NotRequired[str], 
+})
 CreateAppRegistryCreate = _ty.TypedDict('CreateAppRegistryCreate', {
     'name': str,
     'description': _ty.NotRequired[str|None],

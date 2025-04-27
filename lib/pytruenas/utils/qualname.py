@@ -1,7 +1,7 @@
-from . import casing as _casing
-
 import keyword as _kw
 import typing as _ty
+import functools as _ftools
+import pathlib as _pathlib
 
 
 def pysafe(name: str, separator: str = "."):
@@ -10,8 +10,14 @@ def pysafe(name: str, separator: str = "."):
     )
 
 
-def camelspace(name: str, separator: str = "."):
-    return separator.join([p.capitalize() for p in pysafe(name).split(separator)])
+def camelcase(name: str, separators: _ty.Sequence[str] | str | None = None):
+    if name:
+        separators = separators or (".", "_", "-")
+        if isinstance(separators, str):
+            separators = (separators,)
+        for sep in separators:
+            name = "".join([part[0].upper() + part[1:] for part in name.split(sep)])
+    return name
 
 
 class QualName:
@@ -20,13 +26,13 @@ class QualName:
     def parts(self) -> _ty.Sequence[str]:
         raise NotImplementedError()
 
-    @property
+    @_ftools.cached_property
     def name(self):
         return self.parts[-1]
 
-    @property
+    @_ftools.cached_property
     def parent(self):
-        return self.qualjoin(self.parts[:-1])
+        return self[:-1]
 
     @classmethod
     def _qualparts(cls, *parts: "str|_ty.Iterable[str]|QualName"):
@@ -64,6 +70,12 @@ class QualName:
     def __truediv__(self, key):
         return self.qualjoin(self, key)
 
+    def __getitem__(self, idx):
+        return self.qualjoin(self.parts[idx])
+
+    def __iter__(self):
+        return iter(self.parts)
+
     def relative_to(self, name: "QualName"):
         parts = [*self.parts]
         other = name.parts
@@ -79,7 +91,13 @@ class QualName:
 
         return self.qualjoin(*parts[idx + 1 :])
 
-    def camelcase(self, start=0, end: int | None = None):
+    def camelcase(
+        self,
+        start=0,
+        end: int | None = None,
+        *,
+        separators: str | _ty.Sequence[str] | None = None,
+    ):
         parts = self.parts
         camelcased = "".join(
             [
@@ -87,17 +105,14 @@ class QualName:
                 for part in parts[start : len(parts) if end is None else end]
             ]
         )
-        if camelcased:
-            for sep in [".", "_", "-"]:
-                camelcased = "".join([part[0].upper() + part[1:] for part in camelcased.split(sep)])
-        return camelcased
+        return camelcase(camelcased, separators=separators)
 
 
 class DotQualNamed(QualName, str):
     SEPARATOR: str = "."
 
-    @property
-    def parts(self):
+    @_ftools.cached_property
+    def parts(self):  # type:ignore
         return self._qualsplit(self)
 
     @classmethod
@@ -112,6 +127,9 @@ class DotQualNamed(QualName, str):
         return cls(cls.SEPARATOR.join(parts))
 
 
+_P = _ty.TypeVar("_P", bound=_pathlib.PurePath)
+
+
 class PythonName(DotQualNamed):
 
     @classmethod
@@ -122,5 +140,8 @@ class PythonName(DotQualNamed):
 
         return PythonName(name)
 
-    def as_path(self):
-        return "/".join(self.parts)
+    def as_path(self, root: str | _P = "/") -> _P:
+        if not hasattr(root, "joinpath"):
+            root = _ty.cast(_P, _pathlib.PurePosixPath(root))
+
+        return _ty.cast(_P, root).joinpath(*self.parts)

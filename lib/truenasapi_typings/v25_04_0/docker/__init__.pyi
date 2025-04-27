@@ -4,6 +4,12 @@ import typing as _ty
 from .network import Network 
 class Docker(_NS):
     
+    def _update(self,
+        __selector:_jsonschema.JsonValue=None,
+        **fields:_ty.Unpack[DockerUpdate],
+    ) -> UpdateReturn:
+        """"""
+        ...
     def backup(self,
         backup_name:str|None=None,
         _method:str|None=None,
@@ -65,6 +71,13 @@ class Docker(_NS):
         """Update Docker service configuration."""
         ...
     network: Network
+DockerUpdate = _ty.TypedDict('DockerUpdate', {
+    'enable_image_updates': _ty.NotRequired[bool],
+    'pool': _ty.NotRequired[str|None],
+    'nvidia': _ty.NotRequired[bool],
+    'address_pools': _ty.NotRequired[_jsonschema.JsonArray],
+    'cidr_v6': _ty.NotRequired[str], 
+})
 ConfigReturn = _ty.TypedDict('ConfigReturn', {
     'id': int,
     'enable_image_updates': bool,

@@ -26,7 +26,7 @@ print(data["name"])
 ssh_service = client.api.service._update(("service",), service="ssh", enable=True)
 print(ssh_service)
 
-
+client.api.acme.dns.authenticator._update()
 netconfig = client.api.network.configuration.config()
 netconfig = client.api.network.configuration._update(hostname=netconfig["hostname"])
 hostname: str = netconfig["hostname"]

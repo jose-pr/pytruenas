@@ -3,6 +3,12 @@ from pytruenas.models import jsonschema as _jsonschema
 import typing as _ty 
 class Global(_NS):
     
+    def _update(self,
+        __selector:_jsonschema.JsonValue=None,
+        **fields:_ty.Unpack[IscsiUpdate],
+    ) -> UpdateReturn:
+        """"""
+        ...
     def alua_enabled(self,
         _method:str|None=None,
         _ioerror:bool=False,
@@ -48,6 +54,14 @@ class Global(_NS):
     ) -> UpdateReturn:
         """`alua` is a no-op for FreeNAS."""
         ...
+IscsiUpdate = _ty.TypedDict('IscsiUpdate', {
+    'basename': _ty.NotRequired[str],
+    'isns_servers': _ty.NotRequired[list[str]],
+    'listen_port': _ty.NotRequired[int],
+    'pool_avail_threshold': _ty.NotRequired[int|None],
+    'alua': _ty.NotRequired[bool],
+    'iser': _ty.NotRequired[bool], 
+})
 ConfigReturn = _ty.TypedDict('ConfigReturn', {
     'id': int,
     'basename': str,

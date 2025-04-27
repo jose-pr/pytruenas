@@ -8,7 +8,7 @@ JsonObject: _ty.TypeAlias = "dict[str, JsonValue]"
 JsonArray: _ty.TypeAlias = "list[JsonValue]"
 
 
-class Schema(_ty.TypedDict):
+class Schema(_ty.TypedDict, total=False):
     title: _ty.NotRequired[str]
     description: _ty.NotRequired[str]
     default: _ty.NotRequired[object | None]
@@ -21,7 +21,9 @@ class Schema(_ty.TypedDict):
         else:
             return BaseType
 
-    def python_declaration(self, typeddicts: dict[str, object], namespace: _qn.PythonName):
+    def python_declaration(
+        self, typeddicts: dict[str, object], namespace: _qn.PythonName
+    ):
         if isinstance(self, str):
             self = _ty.cast(Schema, {"type": self})
         return Schema.get_type(self).python_declaration(
@@ -34,7 +36,9 @@ class Schema(_ty.TypedDict):
 class BaseType(Schema):
     type: _ty.NotRequired[str]
 
-    def python_declaration(self, typeddicts: dict[str, object], namespace: _qn.PythonName):
+    def python_declaration(
+        self, typeddicts: dict[str, object], namespace: _qn.PythonName
+    ):
         type = self.get("type", "any")
         if isinstance(type, str) and type.startswith("!"):
             return type.removeprefix("!")
@@ -134,7 +138,7 @@ class String(BaseType):
 class Object(BaseType):
     type: _ty.Literal["object"] = "object"  # type:ignore
     properties: dict[str, Schema]
-    additional_properties: bool
+    additional_properties: _ty.NotRequired[bool]
     required: _ty.NotRequired[list[str]]
 
     def python_declaration(
@@ -146,7 +150,7 @@ class Object(BaseType):
 
         required = self.get("required", [])
         extras = self.get("additional_properties", None)
-        title = self.get("title")
+        title = self.get('_name', self.get("title"))
         if not title:
             raise ValueError(self)
         name = (namespace / title).camelcase()
@@ -180,12 +184,13 @@ class Any(BaseType):
 
 class Array(BaseType):
     type: _ty.Literal["array"] = "array"  # type:ignore
-    items: Schema
+    items: Schema | bool
+    prefixItems: list[Schema]
 
     def python_declaration(
         self, typeddicts: dict[str, object], namespace: _qn.PythonName
     ):  # type:ignore
-        items = self["items"]
+        items = _ty.cast(Schema, self["items"])
         if not items:
             return "_jsonschema.JsonArray"
         return f"list[{Schema.python_declaration(items, typeddicts, namespace)}]"

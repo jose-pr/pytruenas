@@ -3,6 +3,23 @@ from pytruenas.models import jsonschema as _jsonschema
 import typing as _ty 
 class Authenticator(_NS):
     
+    def _create(self,
+        **fields:_ty.Unpack[DnsAuthenticatorCreate],
+    ) -> CreateReturn:
+        """"""
+        ...
+    def _update(self,
+        __selector:int|_ty.Sequence[str],
+        **fields:_ty.Unpack[DnsAuthenticatorUpdate],
+    ) -> UpdateReturn:
+        """"""
+        ...
+    def _upsert(self,
+        __selector:int|_ty.Sequence[str],
+        **fields:_ty.Unpack[DnsAuthenticatorUpdate],
+    ) -> UpdateReturn:
+        """"""
+        ...
     def authenticator_schemas(self,
         _method:str|None=None,
         _ioerror:bool=False,
@@ -57,6 +74,14 @@ Please see `query` method documentation for `options`."""
     ) -> UpdateReturn:
         """Update DNS Authenticator of `id`"""
         ...
+DnsAuthenticatorCreate = _ty.TypedDict('DnsAuthenticatorCreate', {
+    'attributes': _jsonschema.JsonValue|_jsonschema.JsonValue|_jsonschema.JsonValue|_jsonschema.JsonValue|_jsonschema.JsonValue,
+    'name': str, 
+})
+DnsAuthenticatorUpdate = _ty.TypedDict('DnsAuthenticatorUpdate', {
+    'attributes': _ty.NotRequired[_jsonschema.JsonValue|_jsonschema.JsonValue|_jsonschema.JsonValue|_jsonschema.JsonValue|_jsonschema.JsonValue],
+    'name': _ty.NotRequired[str], 
+})
 AuthenticatorSchemasACMEDNSAuthenticatorSchema = _ty.TypedDict('AuthenticatorSchemasACMEDNSAuthenticatorSchema', {
     'key': str,
     'schema': _jsonschema.JsonValue, 

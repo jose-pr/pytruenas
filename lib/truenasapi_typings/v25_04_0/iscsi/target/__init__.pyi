@@ -3,6 +3,23 @@ from pytruenas.models import jsonschema as _jsonschema
 import typing as _ty 
 class Target(_NS):
     
+    def _create(self,
+        **fields:_ty.Unpack[IscsiTargetCreate],
+    ) -> CreateReturn:
+        """"""
+        ...
+    def _update(self,
+        __selector:int|_ty.Sequence[str],
+        **fields:_ty.Unpack[IscsiTargetUpdate],
+    ) -> UpdateReturn:
+        """"""
+        ...
+    def _upsert(self,
+        __selector:int|_ty.Sequence[str],
+        **fields:_ty.Unpack[IscsiTargetUpdate],
+    ) -> UpdateReturn:
+        """"""
+        ...
     def create(self,
         iscsi_target_create:CreateIscsiTargetCreate,
         _method:str|None=None,
@@ -65,6 +82,22 @@ Please see `query` method documentation for `options`."""
     ) -> str|None:
         """Returns validation error for iSCSI target name :param name: name to be validated :param existing_id: id of an existing iSCSI target that will receive this name (or `None` if a new target is being created) :return: error message (or `None` if there is no error)"""
         ...
+IscsiTargetCreate = _ty.TypedDict('IscsiTargetCreate', {
+    'name': str,
+    'alias': _ty.NotRequired[str|None],
+    'mode': _ty.NotRequired[str],
+    'groups': _ty.NotRequired[_jsonschema.JsonArray],
+    'auth_networks': _ty.NotRequired[list[str]],
+    'iscsi_parameters': _ty.NotRequired[_jsonschema.JsonValue|None], 
+})
+IscsiTargetUpdate = _ty.TypedDict('IscsiTargetUpdate', {
+    'name': _ty.NotRequired[str],
+    'alias': _ty.NotRequired[str|None],
+    'mode': _ty.NotRequired[str],
+    'groups': _ty.NotRequired[_jsonschema.JsonArray],
+    'auth_networks': _ty.NotRequired[list[str]],
+    'iscsi_parameters': _ty.NotRequired[_jsonschema.JsonValue|None], 
+})
 CreateIscsiTargetCreate = _ty.TypedDict('CreateIscsiTargetCreate', {
     'name': str,
     'alias': _ty.NotRequired[str|None],

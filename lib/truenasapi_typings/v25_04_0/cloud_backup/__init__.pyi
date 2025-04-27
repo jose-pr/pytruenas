@@ -3,6 +3,23 @@ from pytruenas.models import jsonschema as _jsonschema
 import typing as _ty 
 class CloudBackup(_NS):
     
+    def _create(self,
+        **fields:_ty.Unpack[CloudBackup],
+    ) -> CreateReturn:
+        """"""
+        ...
+    def _update(self,
+        __selector:int|_ty.Sequence[str],
+        **fields:_ty.Unpack[Data],
+    ) -> UpdateReturn:
+        """"""
+        ...
+    def _upsert(self,
+        __selector:int|_ty.Sequence[str],
+        **fields:_ty.Unpack[Data],
+    ) -> UpdateReturn:
+        """"""
+        ...
     def abort(self,
         id:int,
         _method:str|None=None,
@@ -111,6 +128,41 @@ Please see `query` method documentation for `options`."""
     ) -> UpdateReturn:
         """Update the cloud backup entry `id` with `data`."""
         ...
+CloudBackup = _ty.TypedDict('CloudBackup', {
+    'description': _ty.NotRequired[str],
+    'path': str,
+    'credentials': int,
+    'attributes': _jsonschema.JsonObject,
+    'schedule': _ty.NotRequired[_jsonschema.JsonValue],
+    'pre_script': _ty.NotRequired[str],
+    'post_script': _ty.NotRequired[str],
+    'snapshot': _ty.NotRequired[bool],
+    'include': _ty.NotRequired[list[str]],
+    'exclude': _ty.NotRequired[list[str]],
+    'args': _ty.NotRequired[str],
+    'enabled': _ty.NotRequired[bool],
+    'password': str,
+    'keep_last': int,
+    'transfer_setting': _ty.NotRequired[str],
+    'absolute_paths': _ty.NotRequired[bool], 
+})
+Data = _ty.TypedDict('Data', {
+    'description': _ty.NotRequired[str],
+    'path': _ty.NotRequired[str],
+    'credentials': _ty.NotRequired[int],
+    'attributes': _ty.NotRequired[_jsonschema.JsonObject],
+    'schedule': _ty.NotRequired[_jsonschema.JsonValue],
+    'pre_script': _ty.NotRequired[str],
+    'post_script': _ty.NotRequired[str],
+    'snapshot': _ty.NotRequired[bool],
+    'include': _ty.NotRequired[list[str]],
+    'exclude': _ty.NotRequired[list[str]],
+    'args': _ty.NotRequired[str],
+    'enabled': _ty.NotRequired[bool],
+    'password': _ty.NotRequired[str],
+    'keep_last': _ty.NotRequired[int],
+    'transfer_setting': _ty.NotRequired[str], 
+})
 CreateCloudBackup = _ty.TypedDict('CreateCloudBackup', {
     'description': _ty.NotRequired[str],
     'path': str,

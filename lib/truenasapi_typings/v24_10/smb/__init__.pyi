@@ -3,6 +3,12 @@ from pytruenas.models import jsonschema as _jsonschema
 import typing as _ty 
 class Smb(_NS):
     
+    def _update(self,
+        __selector:_jsonschema.JsonValue=None,
+        **fields:_ty.Unpack[SmbUpdate],
+    ) -> UpdateReturn:
+        """"""
+        ...
     def bindip_choices(self,
         _method:str|None=None,
         _ioerror:bool=False,
@@ -54,6 +60,28 @@ The group specified as the SMB `admin_group` will be automatically added as a fo
 
 `smb_options` smb.conf parameters that are not covered by the above supported configuration options may be added as an smb_option. Not all options are tested or supported, and behavior of smb_options may change between releases. Stability of smb.conf options is not guaranteed."""
         ...
+SmbUpdate = _ty.TypedDict('SmbUpdate', {
+    'netbiosname': _ty.NotRequired[str],
+    'netbiosalias': _ty.NotRequired[list[str]],
+    'workgroup': _ty.NotRequired[str],
+    'description': _ty.NotRequired[str],
+    'enable_smb1': _ty.NotRequired[bool],
+    'unixcharset': _ty.NotRequired[str],
+    'localmaster': _ty.NotRequired[bool],
+    'syslog': _ty.NotRequired[bool],
+    'aapl_extensions': _ty.NotRequired[bool],
+    'admin_group': _ty.NotRequired[str|None],
+    'guest': _ty.NotRequired[str],
+    'filemask': _ty.NotRequired[str|str],
+    'dirmask': _ty.NotRequired[str|str],
+    'ntlmv1_auth': _ty.NotRequired[bool],
+    'multichannel': _ty.NotRequired[bool],
+    'encryption': _ty.NotRequired[str],
+    'bindip': _ty.NotRequired[list[str]],
+    'server_sid': _ty.NotRequired[str|None],
+    'smb_options': _ty.NotRequired[str],
+    'debug': _ty.NotRequired[bool], 
+})
 ConfigReturn = _ty.TypedDict('ConfigReturn', {
     'id': int,
     'netbiosname': str,

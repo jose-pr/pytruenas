@@ -6,6 +6,17 @@ from .ix_volume import IxVolume
 from .registry import Registry 
 class App(_NS):
     
+    def _create(self,
+        **fields:_ty.Unpack[AppCreate],
+    ) -> CreateReturn:
+        """"""
+        ...
+    def _update(self,
+        __selector:_jsonschema.JsonValue=None,
+        **fields:_ty.Unpack[Update]={'values': '{}', 'custom_compose_config': '{}', 'custom_compose_config_string': ''},
+    ) -> UpdateReturn:
+        """"""
+        ...
     def available(self,
         filters:_jsonschema.JsonArray=[],
         options:AvailableOptions={'relationships': True, 'extend': None, 'extend_context': None, 'prefix': None, 'extra': {}, 'order_by': [], 'select': [], 'count': False, 'get': False, 'offset': 0, 'limit': 0, 'force_sql_filters': False},
@@ -252,6 +263,21 @@ Please see `query` method documentation for `options`."""
     image: Image
     ix_volume: IxVolume
     registry: Registry
+AppCreate = _ty.TypedDict('AppCreate', {
+    'custom_app': _ty.NotRequired[bool],
+    'values': _ty.NotRequired[_jsonschema.JsonObject],
+    'custom_compose_config': _ty.NotRequired[_jsonschema.JsonObject],
+    'custom_compose_config_string': _ty.NotRequired[str],
+    'catalog_app': _ty.NotRequired[str|None],
+    'app_name': str,
+    'train': _ty.NotRequired[str],
+    'version': _ty.NotRequired[str], 
+})
+Update = _ty.TypedDict('Update', {
+    'values': _ty.NotRequired[_jsonschema.JsonObject],
+    'custom_compose_config': _ty.NotRequired[_jsonschema.JsonObject],
+    'custom_compose_config_string': _ty.NotRequired[str], 
+})
 AvailableOptions = _ty.TypedDict('AvailableOptions', {
     'relationships': _ty.NotRequired[bool],
     'extend': _ty.NotRequired[str|None],

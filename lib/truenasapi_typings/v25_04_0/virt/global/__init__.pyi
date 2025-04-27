@@ -3,6 +3,12 @@ from pytruenas.models import jsonschema as _jsonschema
 import typing as _ty 
 class Global(_NS):
     
+    def _update(self,
+        __selector:_jsonschema.JsonValue=None,
+        **fields:_ty.Unpack[VirtGlobalUpdate],
+    ) -> UpdateReturn:
+        """"""
+        ...
     def bridge_choices(self,
         _method:str|None=None,
         _ioerror:bool=False,
@@ -46,6 +52,13 @@ Empty means it will be managed/created automatically."""
 
 `bridge` which bridge interface to use by default. None means it will automatically create one."""
         ...
+VirtGlobalUpdate = _ty.TypedDict('VirtGlobalUpdate', {
+    'pool': _ty.NotRequired[str|None],
+    'bridge': _ty.NotRequired[str|None],
+    'storage_pools': _ty.NotRequired[list[str]|None],
+    'v4_network': _ty.NotRequired[str|None],
+    'v6_network': _ty.NotRequired[str|None], 
+})
 ConfigReturn = _ty.TypedDict('ConfigReturn', {
     'id': int,
     'pool': _ty.NotRequired[str|None],

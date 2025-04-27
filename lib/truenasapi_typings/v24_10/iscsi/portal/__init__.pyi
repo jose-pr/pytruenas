@@ -3,6 +3,23 @@ from pytruenas.models import jsonschema as _jsonschema
 import typing as _ty 
 class Portal(_NS):
     
+    def _create(self,
+        **fields:_ty.Unpack[IscsiPortalCreate],
+    ) -> CreateReturn:
+        """"""
+        ...
+    def _update(self,
+        __selector:int|_ty.Sequence[str],
+        **fields:_ty.Unpack[IscsiPortalUpdate],
+    ) -> UpdateReturn:
+        """"""
+        ...
+    def _upsert(self,
+        __selector:int|_ty.Sequence[str],
+        **fields:_ty.Unpack[IscsiPortalUpdate],
+    ) -> UpdateReturn:
+        """"""
+        ...
     def create(self,
         iscsi_portal_create:CreateIscsiPortalCreate,
         _method:str|None=None,
@@ -55,6 +72,14 @@ Please see `query` method documentation for `options`."""
     ) -> UpdateReturn:
         """Update iSCSI Portal `id`."""
         ...
+IscsiPortalCreate = _ty.TypedDict('IscsiPortalCreate', {
+    'listen': _jsonschema.JsonArray,
+    'comment': _ty.NotRequired[str], 
+})
+IscsiPortalUpdate = _ty.TypedDict('IscsiPortalUpdate', {
+    'listen': _ty.NotRequired[_jsonschema.JsonArray],
+    'comment': _ty.NotRequired[str], 
+})
 CreateIscsiPortalCreate = _ty.TypedDict('CreateIscsiPortalCreate', {
     'listen': _jsonschema.JsonArray,
     'comment': _ty.NotRequired[str], 

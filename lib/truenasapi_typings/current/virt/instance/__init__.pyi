@@ -3,6 +3,23 @@ from pytruenas.models import jsonschema as _jsonschema
 import typing as _ty 
 class Instance(_NS):
     
+    def _create(self,
+        **fields:_ty.Unpack[VirtInstanceCreate],
+    ) -> CreateReturn:
+        """"""
+        ...
+    def _update(self,
+        __selector:str|_ty.Sequence[str],
+        **fields:_ty.Unpack[VirtInstanceUpdate],
+    ) -> UpdateReturn:
+        """"""
+        ...
+    def _upsert(self,
+        __selector:str|_ty.Sequence[str],
+        **fields:_ty.Unpack[VirtInstanceUpdate],
+    ) -> UpdateReturn:
+        """"""
+        ...
     def create(self,
         virt_instance_create:CreateVirtInstanceCreate,
         _method:str|None=None,
@@ -121,6 +138,40 @@ Timeout is how long it should wait for the instance to shutdown cleanly."""
     ) -> UpdateReturn:
         """Update instance."""
         ...
+VirtInstanceCreate = _ty.TypedDict('VirtInstanceCreate', {
+    'name': str,
+    'iso_volume': _ty.NotRequired[str|None],
+    'source_type': _ty.NotRequired[_jsonschema.JsonValue],
+    'storage_pool': _ty.NotRequired[str|None],
+    'image': _ty.NotRequired[str|None],
+    'root_disk_size': _ty.NotRequired[int],
+    'root_disk_io_bus': _ty.NotRequired[str],
+    'remote': _ty.NotRequired[str],
+    'instance_type': _ty.NotRequired[str],
+    'environment': _ty.NotRequired[_jsonschema.JsonObject|None],
+    'autostart': _ty.NotRequired[bool|None],
+    'cpu': _ty.NotRequired[str|None],
+    'devices': _ty.NotRequired[list[_jsonschema.JsonValue|_jsonschema.JsonValue|_jsonschema.JsonValue|_jsonschema.JsonValue|_jsonschema.JsonValue|_jsonschema.JsonValue|_jsonschema.JsonValue]|None],
+    'memory': _ty.NotRequired[int|None],
+    'secure_boot': _ty.NotRequired[bool],
+    'enable_vnc': _ty.NotRequired[bool],
+    'vnc_port': _ty.NotRequired[int|None],
+    'zvol_path': _ty.NotRequired[str|None],
+    'volume': _ty.NotRequired[str|None],
+    'vnc_password': _ty.NotRequired[str|None], 
+})
+VirtInstanceUpdate = _ty.TypedDict('VirtInstanceUpdate', {
+    'environment': _ty.NotRequired[_jsonschema.JsonObject|None],
+    'autostart': _ty.NotRequired[bool|None],
+    'cpu': _ty.NotRequired[str|None],
+    'memory': _ty.NotRequired[int|None],
+    'vnc_port': _ty.NotRequired[int|None],
+    'enable_vnc': _ty.NotRequired[bool],
+    'vnc_password': _ty.NotRequired[str|None],
+    'secure_boot': _ty.NotRequired[bool],
+    'root_disk_size': _ty.NotRequired[int|None],
+    'root_disk_io_bus': _ty.NotRequired[_jsonschema.JsonValue], 
+})
 CreateVirtInstanceCreate = _ty.TypedDict('CreateVirtInstanceCreate', {
     'name': str,
     'iso_volume': _ty.NotRequired[str|None],
