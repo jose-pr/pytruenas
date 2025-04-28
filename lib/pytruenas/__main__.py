@@ -36,35 +36,46 @@ verbosehelp = ", ".join([aliases[0] for aliases in VERBOSE_LEVELS.values()])
 
 logger = logging.getLogger(str(MODULE))
 
-parser = argparse.ArgumentParser(
-    "PyTrueNAS", "Utility tool to manage and configure TrueNAS systems", add_help=False
-)
-parser.add_argument("--config", "-c", help="Config file to use", type=Path)
-shared_actions = []
-shared_actions.extend(
-    [
-        parser.add_argument(
-            "-v",
-            "--verbose",
-            action="count",
-            default=0,
-            help=verbosehelp,
-        ),
-        parser.add_argument("--sslverify", action="store_true"),
-        parser.add_argument("targets", nargs="*", default=["localhost"]),
-    ]
-)
+
+def mkparser(pre=False):
+    parser = argparse.ArgumentParser(
+        "PyTrueNAS",
+        "Utility tool to manage and configure TrueNAS systems",
+        add_help=not pre,
+    )
+    parser.add_argument("--config", "-c", help="Config file to use", type=Path)
+    shared_actions = []
+    shared_actions.extend(
+        [
+            parser.add_argument(
+                "-v",
+                "--verbose",
+                action="count",
+                default=0,
+                help=verbosehelp,
+            ),
+        ]
+    )
+    if not pre:
+        cmdaction = parser.add_subparsers(
+            title="command", dest="command_name", required=True
+        )
+        shared_actions.extend(
+            [
+                parser.add_argument("--sslverify", action="store_true"),
+                parser.add_argument("targets", nargs="*", default=["localhost"]),
+            ]
+        )
+    else:
+        cmdaction = parser.add_argument("command_name", nargs="?")
+
+    return parser, shared_actions, typing.cast(argparse._SubParsersAction, cmdaction)
+
 
 if __name__ == "__main__":
-    args, argv = typing.cast(tuple[PyTrueNASArgs, list[str]], parser.parse_known_args())
-    parser.add_help = True
-    parser.add_argument(
-        "-h",
-        "--help",
-        action="help",
-        default=argparse.SUPPRESS,
-        help=gettext("show this help message and exit"),
-    )
+    parser, shared_actions, _ = mkparser(True)
+    args, _ = typing.cast(tuple[PyTrueNASArgs, list[str]], parser.parse_known_args())
+    parser, shared_actions, action = mkparser(False)
 
     level = min(
         args.verbose or list(VERBOSE_LEVELS.keys()).index(logging.INFO),
@@ -76,7 +87,6 @@ if __name__ == "__main__":
 
     config = args.config or "./pytruenas.yaml"
     cmds_paths = [Path(__file__).parent / "cmd"]
-    action = parser.add_subparsers(title="command", dest="command_name", required=True)
 
     for path in cmds_paths:
         for path in path.iterdir():
@@ -89,9 +99,8 @@ if __name__ == "__main__":
                 name.replace("_", "-"), help=cmd.help, description=cmd.description
             )
             cmd.register(cmd_parser, shared_actions)
-
-    if argv and argv[0]:
-        cmdname = argv[0]
+    if args.command_name:
+        cmdname = args.command_name
         if "/" in cmdname:
             path = Path(cmdname)
             name = path.stem
