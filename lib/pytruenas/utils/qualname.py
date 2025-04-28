@@ -1,23 +1,10 @@
-import keyword as _kw
 import typing as _ty
 import functools as _ftools
 import pathlib as _pathlib
 
+from . import text as _text
 
-def pysafe(name: str, separator: str = "."):
-    return separator.join(
-        [(f"{n}_" if _kw.iskeyword(n) else n) for n in name.split(separator)]
-    )
-
-
-def camelcase(name: str, separators: _ty.Sequence[str] | str | None = None):
-    if name:
-        separators = separators or (".", "_", "-")
-        if isinstance(separators, str):
-            separators = (separators,)
-        for sep in separators:
-            name = "".join([part[0].upper() + part[1:] for part in name.split(sep)])
-    return name
+_P = _ty.TypeVar("_P", bound=_pathlib.PurePath)
 
 
 class QualName:
@@ -105,7 +92,13 @@ class QualName:
                 for part in parts[start : len(parts) if end is None else end]
             ]
         )
-        return camelcase(camelcased, separators=separators)
+        return _text.camelcase(camelcased, separators=separators)
+
+    def as_path(self, root: str | _P = "/") -> _P:
+        if not hasattr(root, "joinpath"):
+            root = _ty.cast(_P, _pathlib.PurePosixPath(root))
+
+        return _ty.cast(_P, root).joinpath(*self.parts)
 
 
 class DotQualNamed(QualName, str):
@@ -127,21 +120,12 @@ class DotQualNamed(QualName, str):
         return cls(cls.SEPARATOR.join(parts))
 
 
-_P = _ty.TypeVar("_P", bound=_pathlib.PurePath)
-
-
 class PythonName(DotQualNamed):
 
     @classmethod
     def new(cls, *parts: str | QualName, sanitize: bool = True):
         name = cls.qualjoin(*parts)
         if sanitize:
-            name = pysafe(name)
+            name = _text.pysafe(name)
 
         return PythonName(name)
-
-    def as_path(self, root: str | _P = "/") -> _P:
-        if not hasattr(root, "joinpath"):
-            root = _ty.cast(_P, _pathlib.PurePosixPath(root))
-
-        return _ty.cast(_P, root).joinpath(*self.parts)
