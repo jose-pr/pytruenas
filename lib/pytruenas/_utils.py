@@ -17,6 +17,7 @@ STAT_FIELDS: tuple[str] = tuple(
     _re.findall(r"(st_[^=]*)=", str(_path.Path(__file__).stat()))
 )
 
+
 def classname(name: "str") -> str:
     std = _re.sub(r"[-\s_]+", "_", name)
     std = std.replace("+", "Plus").replace("!", "Not").replace("*", "All")
@@ -72,7 +73,11 @@ def diff(base: _Map, against: _Map):
 
 import logging
 
-def add_logging_level(name:str, level:int, force=False):
+if not hasattr(logging, "getLevelNamesMapping"):
+    logging.getLevelNamesMapping = lambda: logging._nameToLevel.copy()
+
+
+def add_logging_level(name: str, level: int, force=False):
     name = name.upper()
     if hasattr(logging, name) and not force:
         return
@@ -91,19 +96,20 @@ def add_logging_level(name:str, level:int, force=False):
 
     setattr(logging, name, log_root)
 
+
 import asyncio
 
 try:
-    import nest_asyncio #type:ignore
+    import nest_asyncio  # type:ignore
 except ImportError:
     from .vendor import nest_asyncio
 
 nest_asyncio.apply()
 
-_T = _ty.TypeVar('_T')
+_T = _ty.TypeVar("_T")
 
 
-def async_to_sync(awaitable: _ty.Awaitable[_T])->_T:
+def async_to_sync(awaitable: _ty.Awaitable[_T]) -> _T:
     try:
         loop = asyncio.get_event_loop()
     except RuntimeError:
@@ -112,5 +118,6 @@ def async_to_sync(awaitable: _ty.Awaitable[_T])->_T:
 
     return loop.run_until_complete(awaitable)
 
+
 def isbytelike(obj):
-    return  isinstance(obj, (memoryview, bytes, bytearray))
+    return isinstance(obj, (memoryview, bytes, bytearray))

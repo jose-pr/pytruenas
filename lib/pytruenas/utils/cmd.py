@@ -16,6 +16,7 @@ class PyTrueNASArgs(_argparse.Namespace):
     targets: list[str]
     command_name: str
     sslverify: bool
+    verbose: int
 
 
 class _CmdModule(_Module):
@@ -38,16 +39,16 @@ class Cmd:
 
         if self.module.__name__ != str(qualname):
             _sys.modules[str(qualname)] = self.module
-        print(self.qualname, self.module)
 
 
     def run(self, client: _Client, args: PyTrueNASArgs):
         self.module.run(client, args, self.logger)
 
-    def register(self, parser: _argparse.ArgumentParser):
-        parser.add_argument("--sslverify", action="store_true")
-        parser.add_argument("targets", nargs="*", default=["localhost"])
+    def register(self, parser: _argparse.ArgumentParser, shared: _ty.Sequence[_argparse.Action]):
+        for action in shared:
+            parser._add_action(action)
         parser.set_defaults(cmd=self)
+
 
     @property
     def description(self):
