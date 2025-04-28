@@ -174,19 +174,19 @@ class Path(_Path):
                 self.unlink()
             else:
                 return
-        return self._fsmethod("symlink_to")(
+        self.__getattr__("symlink_to")(
             target, target_is_directory, *args, **kwargs
         )  # type:ignore
 
     def rmtree(self, ignore_errors=False, onerror=None, *args, **kwargs) -> None:
-        return self._fsmethod("rmtree")(
+        return self.__getattr__("rmtree")(
             ignore_errors, onerror, *args, **kwargs
         )  # type:ignore
 
     def chmod(self, mode: int | str, *args, **kwargs) -> None:
         if isinstance(mode, str):
             mode = int(mode, 8)
-        return self._fsmethod("chmod")(mode, *args, **kwargs)  # type:ignore
+        return self.__getattr__("chmod")(mode, *args, **kwargs)  # type:ignore
 
     def chown(
         self,
@@ -200,7 +200,7 @@ class Path(_Path):
             uid = -1
         if gid == None:
             gid = -1
-        return self._fsmethod("chown")(
+        return self.__getattr__("chown")(
             uid, gid, *args, follow_symlinks=follow_symlinks, **kwargs
         )  # type:ignore
 
