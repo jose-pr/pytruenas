@@ -188,20 +188,22 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
         scheme = "https" if client._api.scheme == "wss" else "http"
 
         jobid, link = client.api.core.download(
-            method, args, filename or "download", **kwargs
+            method, args, filename or "download", buffered, **kwargs
         )  # type:ignore
 
         target = client._api._replace(scheme=scheme, path=link, port=0)
 
         if wait:
-
             if buffered:
+
                 client.api.core.job_wait(jobid, job=True)
 
             resp = _req.get(
                 target.uri,
                 verify=client.sslverify,
+                
             )
+            resp.raise_for_status()
             return resp.content
 
         return jobid
