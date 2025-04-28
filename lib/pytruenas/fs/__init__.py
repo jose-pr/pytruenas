@@ -241,7 +241,7 @@ def _makeproxy(name: str):
     return proxy
 
 
-for _method in ["read_bytes", "read_text", "write_bytes", "write_text", "stat"]:
+for _method in ["read_bytes", "read_text", "write_bytes", "write_text", "exists"]:
     setattr(Path, _method, _makeproxy(_method))
 
 import os as _os

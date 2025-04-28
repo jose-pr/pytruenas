@@ -2,6 +2,19 @@ import keyword as _kw
 import typing as _ty
 import re as _re
 
+try:
+    from gettext import gettext, ngettext  # type:ignore
+except ImportError:
+
+    def gettext(message):
+        return message
+
+    def ngettext(singular, plural, n):
+        if n == 1:
+            return singular
+        else:
+            return plural
+
 
 def pysafe(text: str, separator: str = "."):
     return separator.join(
