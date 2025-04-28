@@ -131,7 +131,7 @@ def _write(
         opts["mode"] = mode
     result = path._client.api.filesystem.put(
         path.as_posix(),
-        opts,
+        opts,  # type:ignore
         _filetransfer=_data,
         _ioerror=True,
     )

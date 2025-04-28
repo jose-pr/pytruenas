@@ -19,6 +19,7 @@ from . import local
 from . import sftp
 
 BACKENDS = {_n: _v for _n, _v in globals().items() if not _n.startswith("_")}
+_FTYPE = _ty.Literal["file", "link", "directory"]
 
 
 class Path(_Path):
@@ -141,6 +142,42 @@ class Path(_Path):
     def read(self):
         self.read_bytes()
 
+    def symlink_to(
+        self,
+        target: "Path",
+        target_is_directory=False,
+        *args,
+        force: bool | _FTYPE | _ty.Sequence[_FTYPE] = False,
+        **kwargs,
+    ):
+        if force and self.exists():
+            if force is True:
+                _force = _ty.get_args(_FTYPE)
+            elif isinstance(force, str):
+                _force = (force,)
+            else:
+                _force = []
+            if not self.is_symlink():
+                raise_ = False
+                if self.is_dir():
+                    raise_ = "directory" not in _force
+                elif self.is_file():
+                    raise_ = "file" not in _force
+                else:
+                    raise_ = True
+                if raise_:
+                    raise FileExistsError(self)
+                self.rmtree()
+            elif self.readlink() != target:
+                if "link" not in _force:
+                    raise FileExistsError(target)
+                self.unlink()
+            else:
+                return
+        return self._fsmethod("symlink_to")(
+            target, target_is_directory, *args, **kwargs
+        )  # type:ignore
+
     def rmtree(self, ignore_errors=False, onerror=None, *args, **kwargs) -> None:
         return self._fsmethod("rmtree")(
             ignore_errors, onerror, *args, **kwargs
@@ -208,4 +245,5 @@ for _method in ["read_bytes", "read_text", "write_bytes", "write_text", "stat"]:
     setattr(Path, _method, _makeproxy(_method))
 
 import os as _os
+
 _os.PathLike.register(Path)
