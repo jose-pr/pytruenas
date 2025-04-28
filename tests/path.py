@@ -5,6 +5,7 @@ from pytruenas import TrueNASClient, Credentials, fs
 import pathlib
 import os, sys
 import logging
+import typing
 
 import urllib3
 
@@ -18,6 +19,8 @@ tn_host = os.environ.get("TN_HOST")
 tn_creds = Credentials.from_env()
 client = TrueNASClient(tn_host, tn_creds, sslverify=False)
 client.logger.setLevel(logging.DEBUG)
+
+print(typing.get_args(fs._FTYPE))
 
 fs.local.FORCE_LOCAL = True
 datapool = client.path("/mnt/data", backend="local")
