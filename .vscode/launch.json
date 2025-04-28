@@ -14,8 +14,7 @@
                 "PYTHONPATH": "${workspaceFolder}/lib"
             },
             "args": [
-                "example_cmds.example", 
-                "--help"
+                "./lib/example_cmds/runpath_example", 
             ],
             "envFile": "${workspaceFolder}/.pyenv"
         },
