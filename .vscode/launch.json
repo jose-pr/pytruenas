@@ -31,7 +31,8 @@
                 "-vvvvv",
                 "example_cmds.runpath", 
             ],
-            "envFile": "${workspaceFolder}/.pyenv"
+            "envFile": "${workspaceFolder}/.pyenv",
+            "justMyCode": false
         },
         {
             "name": "Python Debugger: Current File",

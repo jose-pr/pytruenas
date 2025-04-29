@@ -10,10 +10,12 @@ import importlib.util as _importutils
 import typing as _ty
 import sys as _sys
 import fnmatch as _fnmatch
+from ..utils import logging as _logging
 
 
 class PyTrueNASArgs(_argparse.Namespace):
-    config: _Path
+    configpath: _Path
+    config: dict
     cmdspath: list[str]
     cmd: "Cmd"
     targets: list[str]
@@ -35,7 +37,9 @@ class _CmdModule(_Module, CmdProtocol[_A, _C]):
     def success(self, client: _C, args: _A, logger: _Logger): ...
     def finally_(self, client: _C, args: _A, logger: _Logger): ...
 
-    def register(self, parser: _argparse.ArgumentParser):
+    def register(
+        self, parser: _argparse.ArgumentParser, args: PyTrueNASArgs, logger: _Logger
+    ):
         pass
 
 
@@ -152,7 +156,9 @@ class RunPathCmd(_CmdModule[_RA, _C]):
                         raise e from None
                 done.append(step.__name__)
 
-    def register(self, parser: _argparse.ArgumentParser):
+    def register(
+        self, parser: _argparse.ArgumentParser, args: PyTrueNASArgs, logger: _Logger
+    ):
         parser.add_argument(
             "--rcopts",
             "-o",
@@ -169,9 +175,8 @@ class Cmd:
     ) -> None:
         self.qualname = qualname
         if isinstance(module, _Path):
-            if module.is_dir():
+            if module.is_dir() and not (module / "__init__.py").exists():
                 self.module = RunPathCmd(module, qualname)
-
             else:
                 self.module = _ty.cast(
                     _CmdModule, import_from_path(self.qualname, module)
@@ -203,22 +208,29 @@ class Cmd:
             self.module, "finally_", None
         ) or (lambda c, a, l: ...)
         client = None
+        logger = self.logger
         try:
-            client = self.module.init(target, args, self.logger)
-            self.module.run(client, args, self.logger)
-            self.module.success(client, args, self.logger)
+            client = self.module.init(target, args, logger)
+            self.module.run(client, args, logger)
+            self.module.success(client, args, logger)
         finally:
-            self.module.finally_(client, args, self.logger)
+            self.module.finally_(client, args, logger)
 
-    def register(
-        self, parser: _argparse.ArgumentParser, shared: _ty.Sequence[_argparse.Action]
-    ):
+    def register(self, parser: _argparse.ArgumentParser, args: PyTrueNASArgs):
+        logger = self.logger
+        logger.setLevel(args.verbose)
+
         if hasattr(self.module, "register"):
-            self.module.register(parser)
-        for action in shared:
-            parser._add_action(action)
+            self.module.register(parser, args, logger)
         parser.add_argument("--sslverify", action="store_true")
         parser.add_argument("targets", nargs="*", default=["localhost"])
+        parser.add_argument(
+            "-v",
+            "--verbose",
+            action="count",
+            default=0,
+            help=_logging.VERBOSE_HELP,
+        )
         parser.set_defaults(cmd=self)
 
     @property
