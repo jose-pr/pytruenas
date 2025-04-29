@@ -2,7 +2,7 @@ import typing as _ty
 from os import stat_result as _stat
 import io as _io
 
-from .. import _utils
+from ..utils import io as _ioutils
 
 if _ty.TYPE_CHECKING:
     from . import Path
@@ -14,7 +14,7 @@ def stat(path: "Path"):
     return _stat(
         [
             stat.get(field.removeprefix("st_"))
-            for field in _utils.STAT_FIELDS  # type:ignore
+            for field in _ioutils.STAT_FIELDS  # type:ignore
         ]
     )
 
@@ -92,7 +92,7 @@ class _ApiFileHandle(_io.IOBase):
         return True
 
     def write(self, data):
-        if not _utils.isbytelike(data):
+        if not _ioutils.isbytelike(data):
             raise TypeError("argument must be a bytes-like object")
         self._buffer.extend(data)
         return len(data)

@@ -95,3 +95,25 @@ class Option:
             else:
                 raise ValueError(opt)
         return opts_
+
+
+def merge(*partials: _ty.Mapping, **partial):
+    merged = {}
+    for partial in [*partials, partial]:
+        if partial:
+            merged.update(partial)
+    return merged
+
+
+class _Missing: ...
+
+
+MISSING = _Missing
+
+
+def diff(base: _ty.Mapping, against: _ty.Mapping):
+    d = {}
+    for k, v in against.items():
+        if base.get(k, MISSING) != v:
+            d[k] = v
+    return d
