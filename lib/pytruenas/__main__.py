@@ -15,6 +15,9 @@ handler.setFormatter(logging.DefaultFormatter())
 import urllib3
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+logging.getLogger("requests").setLevel(logging.WARNING)
+logging.getLogger("urllib3").setLevel(logging.WARNING)
+logging.getLogger("websocket").setLevel(logging.WARNING)
 
 
 MODULE = PythonName(Path(__file__).parent.name)
