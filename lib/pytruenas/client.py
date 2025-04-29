@@ -104,7 +104,7 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
                 creds = f"{self._api.username}:{self._api.password}"
             self._api = self._api._replace(username="", password="")
         self._creds = _auth.Credentials(creds)
-        self._conn: _conn.JSONRPCClient | None = None
+        self._conn: _conn.Client | None = None
         self._ssh: _ssh.SSHClientConnection | None = None  # type:ignore
         self._sftp: _ssh.SFTPClient | None = None  # type:ignore
         self.sslverify = sslverify
@@ -119,13 +119,10 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
         self.logger = logging.getLogger(logger) if isinstance(logger, str) else logger
 
     def _openwss(self):
-        return _ty.cast(
-            _conn.JSONRPCClient,
-            _conn.Client(
-                None if self._api.is_local and not self._api.port else self._api.uri,
-                verify_ssl=self.sslverify,
-                py_exceptions=False,
-            ),
+        return _conn.Client(
+            None if self._api.is_local and not self._api.port else self._api.uri,
+            verify_ssl=self.sslverify,
+            py_exceptions=False,
         )
 
     @property
@@ -135,7 +132,7 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
                 self.login()
             else:
                 self._conn = self._openwss()
-        return _ty.cast(_conn.JSONRPCClient, self._conn)
+        return self._conn
 
     def login(self, creds: _auth.Credentials | None = None):
         if self._conn and not self._conn._closed.is_set():
@@ -201,7 +198,6 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
             resp = _req.get(
                 target.uri,
                 verify=client.sslverify,
-                
             )
             resp.raise_for_status()
             return resp.content

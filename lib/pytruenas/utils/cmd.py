@@ -58,6 +58,7 @@ class RcOptions(_argparse.Namespace):
     def parse(cls, opts: _ty.Sequence[str]):
         parsed: dict[str, None | bool] = {"enabled": None, "strict": None}
         for opt in opts:
+            opt = opt.strip()
             parsed[opt.removeprefix("!")] = not opt.startswith("!")
         return cls(**parsed)
 
@@ -123,9 +124,11 @@ class RunPathCmd(_CmdModule[_RA, _C]):
     def run(self, client: _C, args: _RA, logger: _Logger):
         rcopts: list[tuple[str, RcOptions]] = []
         for pattern in args.rcopts:
-            disable = pattern.startswith(" ! ")
+            disable = pattern.startswith("!")
             if disable:
-                pattern = pattern[1:] + ": !enabled"
+                pattern = pattern[1:] + ":!enabled"
+            elif ':' not in pattern:
+                pattern += ":enabled"
             pattern, *opts = pattern.split(":")
             opts = RcOptions.parse(opts)
             logger.debug(f"Fi1ter pattern:{pattern} opts :{opts}")
