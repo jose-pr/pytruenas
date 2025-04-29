@@ -5,7 +5,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "PyTrueNAS",
+            "name": "Runpath Path",
             "type": "debugpy",
             "request": "launch",
             "module": "pytruenas",
@@ -14,7 +14,22 @@
                 "PYTHONPATH": "${workspaceFolder}/lib"
             },
             "args": [
-                "./lib/example_cmds/runpath_example", 
+                "./lib/example_cmds/runpath", 
+            ],
+            "envFile": "${workspaceFolder}/.pyenv"
+        },
+        {
+            "name": "Runpath Qualname",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "pytruenas",
+            "cwd": "${workspaceFolder}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/lib"
+            },
+            "args": [
+                "-vvvvv",
+                "example_cmds.runpath", 
             ],
             "envFile": "${workspaceFolder}/.pyenv"
         },

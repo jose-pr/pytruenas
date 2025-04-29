@@ -168,7 +168,7 @@ class Path(_Path):
                 if raise_:
                     raise FileExistsError(self)
                 self.rmtree()
-            elif self.readlink() != target:
+            elif _os.fspath(self.readlink()) != _os.fspath(target):
                 if "link" not in _force:
                     raise FileExistsError(target)
                 self.unlink()

@@ -19,7 +19,7 @@ class QualName:
 
     @_ftools.cached_property
     def parent(self):
-        return self[:-1]
+        return self.qualjoin(self.parts[:-1])
 
     @classmethod
     def _qualparts(cls, *parts: "str|_ty.Iterable[str]|QualName"):
@@ -56,12 +56,6 @@ class QualName:
 
     def __truediv__(self, key):
         return self.qualjoin(self, key)
-
-    def __getitem__(self, idx):
-        return self.qualjoin(self.parts[idx])
-
-    def __iter__(self):
-        return iter(self.parts)
 
     def relative_to(self, name: "QualName"):
         parts = [*self.parts]
