@@ -1,17 +1,17 @@
 import argparse
 from pathlib import Path
 import typing
-from pytruenas import TrueNASClient, _utils
-from pytruenas.utils.text import gettext, expand
+from pytruenas.utils.text import expand
 from pytruenas.utils.cmd import Cmd, PyTrueNASArgs
 from pytruenas.utils.qualname import PythonName
-import logging
+from pytruenas.utils import logging
 import sys
+import os
+import importlib.util as _import
 
-_utils.add_logging_level("trace", logging.DEBUG - 5)
 handler = logging.StreamHandler(sys.stderr)
 logging.getLogger().addHandler(handler)
-
+handler.setFormatter(logging.DefaultFormatter())
 import urllib3
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -34,7 +34,7 @@ VERBOSE_LEVELS = dict(sorted(VERBOSE_LEVELS.items(), key=lambda l: l[0], reverse
 verbosehelp = ", ".join([aliases[0] for aliases in VERBOSE_LEVELS.values()])
 
 
-logger = logging.getLogger(str(MODULE))
+logger = logging.getLogger(MODULE)
 
 
 def mkparser(pre=False):
@@ -44,6 +44,13 @@ def mkparser(pre=False):
         add_help=not pre,
     )
     parser.add_argument("--config", "-c", help="Config file to use", type=Path)
+    parser.add_argument(
+        "--cmdspath",
+        help="paths to search for commands",
+        default=[],
+        type=lambda x: x.split(":"),
+        action="extend",
+    )
     shared_actions = []
     shared_actions.extend(
         [
@@ -59,12 +66,6 @@ def mkparser(pre=False):
     if not pre:
         cmdaction = parser.add_subparsers(
             title="command", dest="command_name", required=True
-        )
-        shared_actions.extend(
-            [
-                parser.add_argument("--sslverify", action="store_true"),
-                parser.add_argument("targets", nargs="*", default=["localhost"]),
-            ]
         )
     else:
         cmdaction = parser.add_argument("command_name", nargs="?")
@@ -82,14 +83,36 @@ if __name__ == "__main__":
         len(VERBOSE_LEVELS) - 1,
     )
     level = list(VERBOSE_LEVELS.keys())[level]
-    logger.setLevel(level)
+    logging.getLogger().setLevel(level)
     logger.debug(f"Logging level set at: {', '.join(VERBOSE_LEVELS[level])}")
 
     config = args.config or "./pytruenas.yaml"
-    cmds_paths = [Path(__file__).parent / "cmd"]
+
+    cmds_paths = [
+        *(os.environ.get("PYTRUENAS_PATH", None) or "pytruenas.cmd").split(":"),
+        *args.cmdspath,
+    ]
 
     for path in cmds_paths:
-        for path in path.iterdir():
+        paths: list[Path] = []
+        if "/" not in path:
+            try:
+                spec = _import.find_spec(path)
+                if not spec:
+                    continue
+                submodules = spec.submodule_search_locations
+                if submodules:
+                    for path in submodules:
+                        paths.extend(Path(path).iterdir())
+            except:
+                logger.debug(f"Could not load commands from {path}")
+                continue
+        else:
+            path = Path(path)
+            if path.exists() and path.is_dir():
+                paths.extend(path.iterdir())
+
+        for path in paths:
             name = path.stem
 
             if name.startswith("__"):
@@ -119,12 +142,11 @@ if __name__ == "__main__":
             cmd.register(cmd_parser, shared_actions)
 
     args = typing.cast(PyTrueNASArgs, parser.parse_args())
-    targets = []
+    targets:list[str] = []
     for template in args.targets:
         targets.extend(expand(template))
 
     logger.info(f"Running {args.command_name} on {targets}")
 
     for target in targets:
-        client = TrueNASClient(target, sslverify=args.sslverify)
-        args.cmd.run(client, args)
+        args.cmd.run(target, args)

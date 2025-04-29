@@ -6,11 +6,10 @@ import os as _os
 
 
 def import_from_path(qualname: _PyName, path: _Path):
-    qualname_ = str(qualname)
-    spec = _import.spec_from_file_location(qualname_, path)
+    spec = _import.spec_from_file_location(qualname, path)
     if spec is None:
         raise ImportError(name=qualname, path=_os.fspath(path))
     module = _import.module_from_spec(spec)
-    _sys.modules[qualname_] = module
+    _sys.modules[qualname] = module
     spec.loader.exec_module(module)  # type:ignore
     return module

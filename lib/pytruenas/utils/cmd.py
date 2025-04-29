@@ -6,12 +6,15 @@ from ..client import TrueNASClient as _Client
 from logging import Logger as _Logger, getLogger as _getlogger
 from types import ModuleType as _Module
 from importlib import import_module as _import
+import importlib.util as _importutils
 import typing as _ty
 import sys as _sys
+import fnmatch as _fnmatch
 
 
 class PyTrueNASArgs(_argparse.Namespace):
     config: _Path
+    cmdspath: list[str]
     cmd: "Cmd"
     targets: list[str]
     command_name: str
@@ -19,23 +22,58 @@ class PyTrueNASArgs(_argparse.Namespace):
     verbose: int
 
 
-class CmdProtocol(_ty.Protocol):
-    def run(self, client: _Client, args: PyTrueNASArgs, logger: _Logger): ...
+_A = _ty.TypeVar("_A", bound=PyTrueNASArgs)
+_C = _ty.TypeVar("_C", bound=_Client)
 
 
-class _CmdModule(_Module, CmdProtocol):
+class CmdProtocol(_ty.Protocol, _ty.Generic[_A, _C]):  # type:ignore
+    def run(self, client: _C, args: _A, logger: _Logger): ...
+
+
+class _CmdModule(_Module, CmdProtocol[_A, _C]):
+    def init(self, tanget: str, args: _A, loggen: _Logger) -> _C: ...
+    def success(self, client: _C, args: _A, logger: _Logger): ...
+    def finally_(self, client: _C, args: _A, logger: _Logger): ...
+
     def register(self, parser: _argparse.ArgumentParser):
         pass
 
 
-class RunPathStep(_Module, CmdProtocol):
+class RunPathArgs(PyTrueNASArgs):
+    rcopts: list[str]
+
+
+_RA = _ty.TypeVar("_RA", bound=RunPathArgs)
+
+
+class RcOptions(_argparse.Namespace):
+    enabled: bool | None
+    strict: bool | None
+
+    @classmethod
+    def parse(cls, opts: _ty.Sequence[str]):
+        parsed: dict[str, None | bool] = {"enabled": None, "strict": None}
+        for opt in opts:
+            parsed[opt.removeprefix("!")] = not opt.startswith("!")
+        return cls(**parsed)
+
+    def update(self, rcopt: "RcOptions"):
+        for attr in ["enabled", "strict"]:
+            val = getattr(rcopt, attr, None)
+            if val is not None:
+                setattr(self, attr, val)
+
+
+class RunPathStep(_Module, CmdProtocol[_RA, _C]):
+    RCOPTS: "RcOptions"
     PRIORITY: int
+    REQUIRED: list[_PyName]
 
 
-class RunPathCmd(_CmdModule):
+class RunPathCmd(_CmdModule[_RA, _C]):
 
     def __init__(self, path: _Path, qualname: _PyName) -> None:
-        super().__init__(str(qualname), doc="")
+        super().__init__(qualname, doc="")
         self.qualname = qualname
         main = path / "__main__.py"
         if main.exists():
@@ -43,7 +81,7 @@ class RunPathCmd(_CmdModule):
 
         self.steps: list[RunPathStep] = []
 
-        maxpriority = 0
+        nextpri = 1_000
 
         for path in sorted(path.iterdir()):
             name = path.name
@@ -54,25 +92,75 @@ class RunPathCmd(_CmdModule):
             name = path.stem
             if "." in name:
                 continue
-            parts = name.split("-")
+
+            disable = name.startswith("!")
+            if disable:
+                name = name[1:] + ":!enable"
+
+            name, *opts = name.split(":")
+            opts = RcOptions.parse(opts)
+            parts = name.split("-", maxsplit=1)
+
             if len(parts) == 1:
-                priority = maxpriority + 1
+                priority = nextpri
                 name = parts[0]
             else:
                 priority = int(parts[0])
                 name = parts[1]
-            maxpriority = max(priority, maxpriority)
+
+            nextpri = max(priority, nextpri + 1)
             step = _ty.cast(RunPathStep, import_from_path(self.qualname / name, path))
+            step.RCOPTS = opts
             step.PRIORITY = priority
+            step.REQUIRED = getattr(step, "REQUIRED", None) or []
             self.steps.append(step)
         self.steps = sorted(self.steps, key=lambda s: s.PRIORITY)
 
-    def run(self, client: _Client, args: PyTrueNASArgs, logger: _Logger):
+    def run(self, client: _C, args: _RA, logger: _Logger):
+        rcopts: list[tuple[str, RcOptions]] = []
+        for pattern in args.rcopts:
+            disable = pattern.startswith(" ! ")
+            if disable:
+                pattern = pattern[1:] + ": !enabled"
+            pattern, *opts = pattern.split(":")
+            opts = RcOptions.parse(opts)
+            logger.debug(f"Fi1ter pattern:{pattern} opts :{opts}")
+            rcopts.append((pattern, opts))
+
+        done = []
         for step in self.steps:
-            step.run(client, args, _getlogger(step.__name__))
+            if step.__name__ in done:
+                continue
+            qualname = _PyName(step.__name__)
+            rcopt = RcOptions(enabled=True, strict=True)
+            rcopt.update(step.RCOPTS)
+            for pattern, opts in rcopts:
+                if _fnmatch.fnmatchcase(
+                    qualname if "." in pattern else qualname.name, pattern
+                ):
+                    rcopt.update(opts)
+
+            if rcopt.enabled:
+                logger.info(f"Running step {step.__name__}")
+                try:
+                    step.run(client, args, logger)
+                except Exception as e:
+                    logger.error(
+                        f"Encountered an error while running: {step.__name__}\n{e}"
+                    )
+                    if rcopt.strict:
+                        raise e from None
+                done.append(step.__name__)
 
     def register(self, parser: _argparse.ArgumentParser):
-        parser.add_argument('-s', '--steps', help='Filter Steps', default='*')
+        parser.add_argument(
+            "--rcopts",
+            "-o",
+            help="Options for runpath steps, example: !*,step1 -> Disable all except step1",
+            default=[],
+            type=lambda x: x.split(","),
+            action="extend",
+        )
 
 
 class Cmd:
@@ -89,23 +177,48 @@ class Cmd:
                     _CmdModule, import_from_path(self.qualname, module)
                 )
         elif not module:
-            self.module = _ty.cast(_CmdModule, _import(str(qualname)))
+            spec = _importutils.find_spec(qualname)
+            if not spec:
+                raise ImportError(name=qualname)
+            if not spec.origin and spec.submodule_search_locations:
+                self.module = RunPathCmd(
+                    _Path(spec.submodule_search_locations[0]), qualname
+                )
+            else:
+                self.module = _ty.cast(_CmdModule, _import(qualname))
         else:
             self.module = module
 
-        if self.module.__name__ != str(qualname):
-            _sys.modules[str(qualname)] = self.module
+        if self.module.__name__ != qualname:
+            _sys.modules[qualname] = self.module
 
-    def run(self, client: _Client, args: PyTrueNASArgs):
-        self.module.run(client, args, self.logger)
+    def run(self, target: str, args: PyTrueNASArgs):
+        self.module.init = getattr(self.module, "init", None) or (  # type:ignore
+            lambda t, a, l: _Client(t, sslverify=args.sslverify)
+        )
+        self.module.success = getattr(self.module, "success", None) or (  # type:ignore
+            lambda c, a, l: ...
+        )
+        self.module.finally_ = getattr(  # type:ignore
+            self.module, "finally_", None
+        ) or (lambda c, a, l: ...)
+        client = None
+        try:
+            client = self.module.init(target, args, self.logger)
+            self.module.run(client, args, self.logger)
+            self.module.success(client, args, self.logger)
+        finally:
+            self.module.finally_(client, args, self.logger)
 
     def register(
         self, parser: _argparse.ArgumentParser, shared: _ty.Sequence[_argparse.Action]
     ):
-        if hasattr(self.module, 'register'):
+        if hasattr(self.module, "register"):
             self.module.register(parser)
         for action in shared:
             parser._add_action(action)
+        parser.add_argument("--sslverify", action="store_true")
+        parser.add_argument("targets", nargs="*", default=["localhost"])
         parser.set_defaults(cmd=self)
 
     @property
@@ -118,4 +231,4 @@ class Cmd:
 
     @property
     def logger(self):
-        return _getlogger(str(self.qualname))
+        return _getlogger(self.qualname)
