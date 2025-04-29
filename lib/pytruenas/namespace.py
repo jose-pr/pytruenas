@@ -6,8 +6,8 @@ import time as _time
 import re as _re
 import enum as _enum
 
-from . import _conn, _utils
-from .utils import query as _q
+from . import _conn
+from .utils import query as _q, io as _ioutils
 
 if _ty.TYPE_CHECKING:
     from . import TrueNASClient
@@ -149,7 +149,7 @@ class Namespace:
                 _ioerror=_ioerror,
                 **kwds,
             )
-        elif _utils.isbytelike(_filetransfer) or hasattr(_filetransfer, "read"):
+        elif _ioutils.isbytelike(_filetransfer) or hasattr(_filetransfer, "read"):
             return self._client.upload(
                 _ty.cast(bytes, _filetransfer),
                 method,

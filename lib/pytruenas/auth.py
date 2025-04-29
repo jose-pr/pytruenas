@@ -1,7 +1,5 @@
 import typing as _ty
-
-from . import _utils
-
+from .utils import text as _text
 if _ty.TYPE_CHECKING:
     from . import TrueNASClient
 
@@ -28,7 +26,7 @@ class _CredentialsMeta(type):
                 return cred
             if isinstance(cred, (list, tuple)):
                 return BasicAuth(*cred)
-            cred = _utils.str_(cred)
+            cred = _text.str_(cred)
             if ":" in cred:
                 # : is not valid char in key or token assume is user/pass
                 usr, pwd = cred.split(":", maxsplit=1)

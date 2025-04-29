@@ -9,7 +9,7 @@ if _ty.TYPE_CHECKING:
     from . import Path
 
 
-from .. import _utils
+from ..utils import async_ as _async, io as _ioutils
 
 _STATMAP = {"st_mode": "permissions"}
 
@@ -41,7 +41,7 @@ def _syncsftp(
     ]
 
     try:
-        return _utils.async_to_sync(commamd(*args, **kwargs))
+        return _async.async_to_sync(commamd(*args, **kwargs))
     except _sftp.SFTPFileAlreadyExists:
         raise FileExistsError(path)
     except (_sftp.SFTPNoSuchPath, _sftp.SFTPNoSuchFile):
@@ -49,9 +49,9 @@ def _syncsftp(
     except _sftp.SFTPFailure as failure:
         try:
             if sftpfailure_follow_symlinks:
-                stat = _utils.async_to_sync(path._client.sftp.stat(path._path))
+                stat = _async.async_to_sync(path._client.sftp.stat(path._path))
             else:
-                stat = _utils.async_to_sync(path._client.sftp.lstat(path._path))
+                stat = _async.async_to_sync(path._client.sftp.lstat(path._path))
             filetype = stat.type
         except (_sftp.SFTPNoSuchPath, _sftp.SFTPNoSuchFile):
             filetype = _ssh.FILEXFER_TYPE_UNKNOWN
@@ -210,7 +210,7 @@ def stat(path: "Path", *, follow_symlinks=True):
             getattr(
                 stat, _STATMAP.get(field, field.removeprefix("st_")), None
             )  # type:ignore
-            for field in _utils.STAT_FIELDS
+            for field in _ioutils.STAT_FIELDS
         ]
     )
 
@@ -244,23 +244,23 @@ class _AsynToSyncFileHandle(_io.IOBase):
         return True
 
     def write(self, data):
-        return _utils.async_to_sync(self.fh.write(data))
+        return _async.async_to_sync(self.fh.write(data))
 
     def flush(self):
         pass
 
     def close(self):
-        return _utils.async_to_sync(self.fh.close())
+        return _async.async_to_sync(self.fh.close())
 
     def seek(self, offset, whence=0):
-        return _utils.async_to_sync(self.fh.seek(offset, whence))
+        return _async.async_to_sync(self.fh.seek(offset, whence))
 
     def tell(self):
-        return _utils.async_to_sync(self.fh.tell())
+        return _async.async_to_sync(self.fh.tell())
 
     def read(self, size: int = -1):
-        return _utils.async_to_sync(self.fh.read(size))
+        return _async.async_to_sync(self.fh.read(size))
 
     def truncate(self, size=None):
-        _utils.async_to_sync(self.fh.truncate(size))
-        return _ty.cast(int, _utils.async_to_sync(self.fh.stat()).size)
+        _async.async_to_sync(self.fh.truncate(size))
+        return _ty.cast(int, _async.async_to_sync(self.fh.stat()).size)

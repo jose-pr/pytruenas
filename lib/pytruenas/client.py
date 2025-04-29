@@ -10,7 +10,6 @@ import json as _js
 import sys as _sys
 import os as _os
 import pwd as _pwd
-import operator as _opers
 
 warnings.filterwarnings(action="ignore", module=".*asyncssh.*")
 
@@ -23,7 +22,8 @@ except ImportError:
 import shlex
 
 
-from . import _conn, _utils
+from . import _conn
+from .utils import async_ as _async, io as _ioutils
 from .utils.target import Target as _TGT
 from . import auth as _auth
 from .namespace import Namespace
@@ -275,7 +275,7 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
                     creds = creds.encode()
                 connect_opts[logintype] = creds
             username = username or "root"
-            self._ssh = _utils.async_to_sync(
+            self._ssh = _async.async_to_sync(
                 _ssh.connect(  # type:ignore
                     self.shell.host,
                     port=self.shell.port or 22,
@@ -294,7 +294,7 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
             or self._sftp._handler._writer._chan._close_event.is_set()
         ):
             self.logger.debug("Openning SFTP channel")
-            self._sftp = _utils.async_to_sync(self.ssh.start_sftp_client())
+            self._sftp = _async.async_to_sync(self.ssh.start_sftp_client())
         return self._sftp
 
     def path(self, *path: PathLike, **kwargs):
@@ -372,7 +372,7 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
             if stdin is not None:
                 raise ValueError("stdin")
 
-        if _utils.isbytelike(stdin) or isinstance(stdin, str):
+        if _ioutils.isbytelike(stdin) or isinstance(stdin, str):
             input = _ty.cast(bytes, stdin)
             stdin = None
 
@@ -419,7 +419,7 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
                 if input:
                     stdin = _io.BytesIO(input)
 
-                result = _utils.async_to_sync(
+                result = _async.async_to_sync(
                     self.ssh.run(
                         command,
                         bufsize=bufsize,
