@@ -16,9 +16,9 @@ handler.setFormatter(logging.DefaultFormatter())
 import urllib3
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-logging.getLogger("requests").setLevel(logging.WARNING)
-logging.getLogger("urllib3").setLevel(logging.WARNING)
-logging.getLogger("websocket").setLevel(logging.WARNING)
+
+for pkg in ["requests", "urllib3", "websocket", "httpx"]:
+    logging.getLogger(pkg).setLevel(logging.WARNING)
 
 
 MODULE = PythonName(Path(__file__).parent.name)
@@ -60,10 +60,24 @@ if __name__ == "__main__":
     registeredcmds = cmdaction.choices
     cmdaction.choices = None  # type:ignore
     _origcall = cmdaction.__class__.__call__
+    cmdaction_called = False
 
-    def cmdaction_call(self, parser, namespace, values, option_string=None):
+    def cmdaction_call(
+        self: argparse.Action,
+        parser: argparse.ArgumentParser,
+        namespace: argparse.Namespace,
+        values,
+        option_string=None,
+    ):
+        global cmdaction_called
+        cmdaction_called = True
         parser_name = values[0]
+        arg_strings = values[1:]
+
         setattr(namespace, self.dest, parser_name)
+        subnamespace, arg_strings = parser.parse_known_args(arg_strings, None)
+        for key, value in vars(subnamespace).items():
+            setattr(namespace, key, value)
 
     cmdaction.__class__.__call__ = cmdaction_call
 
