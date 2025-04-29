@@ -8,6 +8,7 @@ from pytruenas.utils import logging
 import sys
 import os
 import importlib.util as _import
+import yaml
 
 handler = logging.StreamHandler(sys.stderr)
 logging.getLogger().addHandler(handler)
@@ -23,30 +24,20 @@ logging.getLogger("websocket").setLevel(logging.WARNING)
 MODULE = PythonName(Path(__file__).parent.name)
 CMDS_MODULE = MODULE / "cmd"
 
-VERBOSE_LEVELS = {}
-
-for name, level in logging.getLevelNamesMapping().items():
-    if not level:
-        continue
-    aliases: list[str] = VERBOSE_LEVELS.setdefault(level, [])
-    if name not in aliases:
-        aliases.append(name)
-
-VERBOSE_LEVELS = dict(sorted(VERBOSE_LEVELS.items(), key=lambda l: l[0], reverse=True))
-
-verbosehelp = ", ".join([aliases[0] for aliases in VERBOSE_LEVELS.values()])
+logging.initverbose()
 
 
 logger = logging.getLogger(MODULE)
 
 
-def mkparser(pre=False):
+if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         "PyTrueNAS",
         "Utility tool to manage and configure TrueNAS systems",
-        add_help=not pre,
+        add_help=False,
+        conflict_handler="resolve",
     )
-    parser.add_argument("--config", "-c", help="Config file to use", type=Path)
+    parser.add_argument("--configpath", "-c", help="Config file to use", type=Path)
     parser.add_argument(
         "--cmdspath",
         help="paths to search for commands",
@@ -54,47 +45,61 @@ def mkparser(pre=False):
         type=lambda x: x.split(":"),
         action="extend",
     )
-    shared_actions = []
-    shared_actions.extend(
-        [
-            parser.add_argument(
-                "-v",
-                "--verbose",
-                action="count",
-                default=0,
-                help=verbosehelp,
-            ),
-        ]
+
+    parser.add_argument(
+        "-v",
+        "--verbose",
+        action="count",
+        default=0,
+        help=logging.VERBOSE_HELP,
     )
-    if not pre:
-        cmdaction = parser.add_subparsers(
-            title="command", dest="command_name", required=True
-        )
-    else:
-        cmdaction = parser.add_argument("command_name", nargs="?")
 
-    return parser, shared_actions, typing.cast(argparse._SubParsersAction, cmdaction)
+    cmdaction = parser.add_subparsers(
+        title="command", dest="command_name", required=False
+    )
+    registeredcmds = cmdaction.choices
+    cmdaction.choices = None  # type:ignore
+    _origcall = cmdaction.__class__.__call__
 
+    def cmdaction_call(self, parser, namespace, values, option_string=None):
+        parser_name = values[0]
+        setattr(namespace, self.dest, parser_name)
 
-if __name__ == "__main__":
-    parser, shared_actions, _ = mkparser(True)
+    cmdaction.__class__.__call__ = cmdaction_call
+
     args, _ = typing.cast(tuple[PyTrueNASArgs, list[str]], parser.parse_known_args())
-    parser, shared_actions, action = mkparser(False)
-
-    level = min(
-        args.verbose or list(VERBOSE_LEVELS.keys()).index(logging.INFO),
-        len(VERBOSE_LEVELS) - 1,
+    parser.add_argument(
+        "-h",
+        "--help",
+        action="help",
+        default=argparse.SUPPRESS,
+        help=("show this help message and exit"),
     )
-    level = list(VERBOSE_LEVELS.keys())[level]
-    logging.getLogger().setLevel(level)
-    logger.debug(f"Logging level set at: {', '.join(VERBOSE_LEVELS[level])}")
+    cmdaction.__class__.__call__ = _origcall
+    cmdaction.required = True
+    cmdaction.choices = registeredcmds
 
-    config = args.config or "./pytruenas.yaml"
+    loglevel = min(
+        args.verbose or list(logging.VERBOSE_LEVELS.keys()).index(logging.INFO),
+        len(logging.VERBOSE_LEVELS) - 1,
+    )
+    loglevel = list(logging.VERBOSE_LEVELS.keys())[loglevel]
+    logging.getLogger().setLevel(loglevel)
+    args.verbose = loglevel
 
-    cmds_paths = [
+    logger.debug(f"Logging level set at: {', '.join(logging.VERBOSE_LEVELS[loglevel])}")
+
+    configpath = Path(args.configpath or "./pytruenas.yaml")
+    if configpath.exists():
+        config: dict = yaml.safe_load(configpath.read_text())
+    else:
+        config = {}
+    args.config = config
+
+    cmds_paths: list[str] = [
         *(os.environ.get("PYTRUENAS_PATH", None) or "pytruenas.cmd").split(":"),
         *args.cmdspath,
-    ]
+    ] + (config.get("cmdpaths") or [])
 
     for path in cmds_paths:
         paths: list[Path] = []
@@ -121,31 +126,36 @@ if __name__ == "__main__":
             if name.startswith("__"):
                 continue
             cmd = Cmd(CMDS_MODULE / name, path)
-            cmd_parser = action.add_parser(
+            cmd_parser = cmdaction.add_parser(
                 name.replace("_", "-"), help=cmd.help, description=cmd.description
             )
-            cmd.register(cmd_parser, shared_actions)
+            cmd.register(cmd_parser, args)
     if args.command_name:
         cmdname = args.command_name
-        if "/" in cmdname:
-            path = Path(cmdname)
-            name = path.stem
-            cmd = Cmd(CMDS_MODULE / name, path)
-            cmd_parser = action.add_parser(
-                cmdname, help=cmd.help, description=cmd.description
-            )
-            cmd.register(cmd_parser, shared_actions)
+        try:
+            if "/" in cmdname:
+                path = Path(cmdname)
+                name = path.stem
+                cmd = Cmd(CMDS_MODULE / name, path)
+                cmd_parser = cmdaction.add_parser(
+                    cmdname, help=cmd.help, description=cmd.description
+                )
+                cmd.register(cmd_parser, args)
 
-        elif "." in cmdname:
-            qualname = PythonName(cmdname)
-            cmd = Cmd(qualname, None)
-            cmd_parser = action.add_parser(
-                cmdname, help=cmd.help, description=cmd.description
-            )
-            cmd.register(cmd_parser, shared_actions)
+            elif "." in cmdname:
+                qualname = PythonName(cmdname)
+                cmd = Cmd(qualname, None)
+                cmd_parser = cmdaction.add_parser(
+                    cmdname, help=cmd.help, description=cmd.description
+                )
+                cmd.register(cmd_parser, args)
+        except ImportError as e:
+            logger.error(f"Could not load {cmdname}")
 
     args = typing.cast(PyTrueNASArgs, parser.parse_args())
-    targets:list[str] = []
+    args.verbose = loglevel
+    args.config = config
+    targets: list[str] = []
     for template in args.targets:
         targets.extend(expand(template))
 

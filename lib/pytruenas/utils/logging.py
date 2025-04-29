@@ -75,3 +75,20 @@ try:
 except ImportError:
 
     pass
+
+VERBOSE_LEVELS = {}
+VERBOSE_HELP= ''
+
+def initverbose():
+    global VERBOSE_LEVELS, VERBOSE_HELP
+
+    for name, loglevel in getLevelNamesMapping().items():
+        if not loglevel:
+            continue
+        aliases: list[str] = VERBOSE_LEVELS.setdefault(loglevel, [])
+        if name not in aliases:
+            aliases.append(name)
+
+    VERBOSE_LEVELS = dict(sorted(VERBOSE_LEVELS.items(), key=lambda l: l[0], reverse=True))
+
+    VERBOSE_HELP = ", ".join([aliases[0] for aliases in VERBOSE_LEVELS.values()])
