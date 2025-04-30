@@ -11,9 +11,9 @@ import typing as _ty
 import sys as _sys
 import fnmatch as _fnmatch
 from ..utils import logging as _logging
+from . import cli as _cli
 
-
-class PyTrueNASArgs(_argparse.Namespace):
+class PyTrueNASArgs(_cli.LoggingArgs):
     configpath: _Path
     config: dict
     cmdspath: list[str]
@@ -21,7 +21,6 @@ class PyTrueNASArgs(_argparse.Namespace):
     targets: list[str]
     command_name: str
     sslverify: bool
-    verbose: int
 
 
 _A = _ty.TypeVar("_A", bound=PyTrueNASArgs)
@@ -227,13 +226,7 @@ class Cmd:
             self.module.register(parser, args, logger)
         parser.add_argument("--sslverify", action="store_true")
         parser.add_argument("targets", nargs="*", default=["localhost"])
-        parser.add_argument(
-            "-v",
-            "--verbose",
-            action="count",
-            default=0,
-            help=_logging.VERBOSE_HELP,
-        )
+        _cli.add_logging_args(parser)
         parser.set_defaults(cmd=self)
 
     @property

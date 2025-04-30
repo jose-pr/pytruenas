@@ -65,7 +65,7 @@ try:
             CRITICAL: _color.Fore.RED + _color.Back.WHITE,
         }
 
-        def format(self, record):
+        def format(self, record:LogRecord):
             color = self.COLORS.get(record.levelno, None)
             if color:
                 record.levelname = f"{color}{record.levelname:^{self.levelsize}}{_color.Style.RESET_ALL}"
@@ -76,7 +76,7 @@ except ImportError:
 
     pass
 
-VERBOSE_LEVELS = {}
+VERBOSE_LEVELS:dict[int,list[str]] = {}
 VERBOSE_HELP= ''
 
 def initverbose():
@@ -92,3 +92,9 @@ def initverbose():
     VERBOSE_LEVELS = dict(sorted(VERBOSE_LEVELS.items(), key=lambda l: l[0], reverse=True))
 
     VERBOSE_HELP = ", ".join([aliases[0] for aliases in VERBOSE_LEVELS.values()])
+
+import sys as _sys
+def init_stderr_logging(name = None):
+    handler = StreamHandler(_sys.stderr)
+    getLogger(name).addHandler(handler)
+    handler.setFormatter(DefaultFormatter())
