@@ -1,6 +1,7 @@
 import argparse
 from pathlib import Path
 import typing
+from pytruenas.utils import cli
 from pytruenas.utils.text import expand
 from pytruenas.utils.cmd import Cmd, PyTrueNASArgs
 from pytruenas.utils.qualname import PythonName
@@ -9,10 +10,6 @@ import sys
 import os
 import importlib.util as _import
 import yaml
-
-handler = logging.StreamHandler(sys.stderr)
-logging.getLogger().addHandler(handler)
-handler.setFormatter(logging.DefaultFormatter())
 import urllib3
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -20,15 +17,13 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 for pkg in ["requests", "urllib3", "websocket", "httpx"]:
     logging.getLogger(pkg).setLevel(logging.WARNING)
 
+logging.init_stderr_logging()
+
 
 MODULE = PythonName(Path(__file__).parent.name)
 CMDS_MODULE = MODULE / "cmd"
 
-logging.initverbose()
-
-
 logger = logging.getLogger(MODULE)
-
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
@@ -37,6 +32,7 @@ if __name__ == "__main__":
         add_help=False,
         conflict_handler="resolve",
     )
+    cli.add_logging_args(parser)
     parser.add_argument("--configpath", "-c", help="Config file to use", type=Path)
     parser.add_argument(
         "--cmdspath",
@@ -46,64 +42,22 @@ if __name__ == "__main__":
         action="extend",
     )
 
-    parser.add_argument(
-        "-v",
-        "--verbose",
-        action="count",
-        default=0,
-        help=logging.VERBOSE_HELP,
-    )
-
     cmdaction = parser.add_subparsers(
         title="command", dest="command_name", required=False
     )
-    registeredcmds = cmdaction.choices
-    cmdaction.choices = None  # type:ignore
-    _origcall = cmdaction.__class__.__call__
-    cmdaction_called = False
 
-    def cmdaction_call(
-        self: argparse.Action,
-        parser: argparse.ArgumentParser,
-        namespace: argparse.Namespace,
-        values,
-        option_string=None,
-    ):
-        global cmdaction_called
-        cmdaction_called = True
-        parser_name = values[0]
-        arg_strings = values[1:]
+    args = typing.cast(PyTrueNASArgs, cli.prerun_parse(parser))
 
-        setattr(namespace, self.dest, parser_name)
-        subnamespace, arg_strings = parser.parse_known_args(arg_strings, None)
-        for key, value in vars(subnamespace).items():
-            setattr(namespace, key, value)
+    cli.add_help_argument(parser)
 
-    cmdaction.__class__.__call__ = cmdaction_call
+    for name, level in cli.LoggingArgs.set_loglevels(args).items():
+        logger.debug(
+            f"Logging level for '{name}' set at: {', '.join(logging.VERBOSE_LEVELS[level])}"
+        )
 
-    args, _ = typing.cast(tuple[PyTrueNASArgs, list[str]], parser.parse_known_args())
-    parser.add_argument(
-        "-h",
-        "--help",
-        action="help",
-        default=argparse.SUPPRESS,
-        help=("show this help message and exit"),
+    configpath = Path(
+        args.configpath or os.environ.get("PYTRUENAS_CFG") or "./pytruenas.yaml"
     )
-    cmdaction.__class__.__call__ = _origcall
-    cmdaction.required = True
-    cmdaction.choices = registeredcmds
-
-    loglevel = min(
-        args.verbose or list(logging.VERBOSE_LEVELS.keys()).index(logging.INFO),
-        len(logging.VERBOSE_LEVELS) - 1,
-    )
-    loglevel = list(logging.VERBOSE_LEVELS.keys())[loglevel]
-    logging.getLogger().setLevel(loglevel)
-    args.verbose = loglevel
-
-    logger.debug(f"Logging level set at: {', '.join(logging.VERBOSE_LEVELS[loglevel])}")
-
-    configpath = Path(args.configpath or "./pytruenas.yaml")
     if configpath.exists():
         config: dict = yaml.safe_load(configpath.read_text())
     else:
@@ -167,7 +121,6 @@ if __name__ == "__main__":
             logger.error(f"Could not load {cmdname}")
 
     args = typing.cast(PyTrueNASArgs, parser.parse_args())
-    args.verbose = loglevel
     args.config = config
     targets: list[str] = []
     for template in args.targets:
