@@ -14,12 +14,10 @@ from ..utils import logging as _logging
 from . import cli as _cli
 
 class PyTrueNASArgs(_cli.LoggingArgs):
-    configpath: _Path
     config: dict
     cmdspath: list[str]
     cmd: "Cmd"
     targets: list[str]
-    command_name: str
     sslverify: bool
 
 
@@ -177,6 +175,8 @@ class Cmd:
     ) -> None:
         self.qualname = qualname
         if isinstance(module, _Path):
+            while qualname in _sys.modules:
+                qualname = qualname.parent / (qualname.name + "_")
             if module.is_dir() and not (module / "__init__.py").exists():
                 self.module = RunPathCmd(module, qualname)
             else:
@@ -224,10 +224,9 @@ class Cmd:
 
         if hasattr(self.module, "register"):
             self.module.register(parser, args, logger)
-        parser.add_argument("--sslverify", action="store_true")
+        parser.add_argument('--sslverify', action='store_true', default=False)
         parser.add_argument("targets", nargs="*", default=["localhost"])
-        _cli.add_logging_args(parser)
-        parser.set_defaults(cmd=self)
+        parser.set_defaults(_cmd=self)
 
     @property
     def description(self):

@@ -15,6 +15,25 @@
             },
             "args": [
                 "./lib/example_cmds/runpath", 
+                "-vvvvvvv"
+            ],
+            "envFile": "${workspaceFolder}/.pyenv"
+        },
+        {
+            "name": "Query",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "pytruenas",
+            "cwd": "${workspaceFolder}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/lib"
+            },
+            "args": [
+                "query", 
+                "-q",
+                "username=root",
+                "user",
+                "-vvvvvvvv"
             ],
             "envFile": "${workspaceFolder}/.pyenv"
         },
