@@ -8,6 +8,12 @@ class Initshutdownscript(_NS):
     ) -> CreateReturn:
         """"""
         ...
+    def _get(self,
+        __id_or_filter:int|_ty.Sequence[str]|None=None,
+        **fields:_ty.Unpack[Get],
+    ) -> GetInstanceReturn|None:
+        """"""
+        ...
     def _update(self,
         __selector:int|_ty.Sequence[str],
         **fields:_ty.Unpack[Data],
@@ -81,6 +87,16 @@ Data = _ty.TypedDict('Data', {
     'enabled': _ty.NotRequired[bool],
     'timeout': _ty.NotRequired[int],
     'comment': _ty.NotRequired[str], 
+})
+Get = _ty.TypedDict('Get', {
+    'type': _ty.NotRequired[str],
+    'command': _ty.NotRequired[str|None],
+    'script': _ty.NotRequired[str|None],
+    'when': _ty.NotRequired[str],
+    'enabled': _ty.NotRequired[bool],
+    'timeout': _ty.NotRequired[int],
+    'comment': _ty.NotRequired[str],
+    'id': _ty.NotRequired[int], 
 })
 CreateData = _ty.TypedDict('CreateData', {
     'type': str,

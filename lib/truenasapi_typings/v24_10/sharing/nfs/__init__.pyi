@@ -8,6 +8,12 @@ class Nfs(_NS):
     ) -> CreateReturn:
         """"""
         ...
+    def _get(self,
+        __id_or_filter:int|_ty.Sequence[str]|None=None,
+        **fields:_ty.Unpack[Get],
+    ) -> GetInstanceReturn|None:
+        """"""
+        ...
     def _update(self,
         __selector:int|_ty.Sequence[str],
         **fields:_ty.Unpack[Data],
@@ -88,6 +94,23 @@ Data = _ty.TypedDict('Data', {
     'mapall_group': _ty.NotRequired[str|None],
     'security': _ty.NotRequired[list[str]],
     'enabled': _ty.NotRequired[bool],
+    'expose_snapshots': _ty.NotRequired[bool], 
+})
+Get = _ty.TypedDict('Get', {
+    'id': _ty.NotRequired[int],
+    'path': _ty.NotRequired[str],
+    'aliases': _ty.NotRequired[list[str]],
+    'comment': _ty.NotRequired[str],
+    'networks': _ty.NotRequired[list[str]],
+    'hosts': _ty.NotRequired[list[str]],
+    'ro': _ty.NotRequired[bool],
+    'maproot_user': _ty.NotRequired[str|None],
+    'maproot_group': _ty.NotRequired[str|None],
+    'mapall_user': _ty.NotRequired[str|None],
+    'mapall_group': _ty.NotRequired[str|None],
+    'security': _ty.NotRequired[list[str]],
+    'enabled': _ty.NotRequired[bool],
+    'locked': _ty.NotRequired[bool|None],
     'expose_snapshots': _ty.NotRequired[bool], 
 })
 CreateData = _ty.TypedDict('CreateData', {

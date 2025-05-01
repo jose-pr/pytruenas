@@ -8,6 +8,12 @@ class Authenticator(_NS):
     ) -> CreateReturn:
         """"""
         ...
+    def _get(self,
+        __id_or_filter:int|_ty.Sequence[str]|None=None,
+        **fields:_ty.Unpack[Get],
+    ) -> GetInstanceReturn|None:
+        """"""
+        ...
     def _update(self,
         __selector:int|_ty.Sequence[str],
         **fields:_ty.Unpack[DnsAuthenticatorUpdate],
@@ -77,6 +83,11 @@ Please see `query` method documentation for `options`."""
 DnsAuthenticatorCreate = _ty.TypedDict('DnsAuthenticatorCreate', {
     'attributes': _jsonschema.JsonValue|_jsonschema.JsonValue|_jsonschema.JsonValue|_jsonschema.JsonValue|_jsonschema.JsonValue,
     'name': str, 
+})
+Get = _ty.TypedDict('Get', {
+    'id': _ty.NotRequired[int],
+    'attributes': _ty.NotRequired[_jsonschema.JsonValue|_jsonschema.JsonValue|_jsonschema.JsonValue|_jsonschema.JsonValue|_jsonschema.JsonValue],
+    'name': _ty.NotRequired[str], 
 })
 DnsAuthenticatorUpdate = _ty.TypedDict('DnsAuthenticatorUpdate', {
     'attributes': _ty.NotRequired[_jsonschema.JsonValue|_jsonschema.JsonValue|_jsonschema.JsonValue|_jsonschema.JsonValue|_jsonschema.JsonValue],

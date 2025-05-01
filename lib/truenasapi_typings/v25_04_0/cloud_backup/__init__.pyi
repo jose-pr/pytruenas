@@ -8,6 +8,12 @@ class CloudBackup(_NS):
     ) -> CreateReturn:
         """"""
         ...
+    def _get(self,
+        __id_or_filter:int|_ty.Sequence[str]|None=None,
+        **fields:_ty.Unpack[Get],
+    ) -> GetInstanceReturn|None:
+        """"""
+        ...
     def _update(self,
         __selector:int|_ty.Sequence[str],
         **fields:_ty.Unpack[Data],
@@ -145,6 +151,27 @@ CloudBackup = _ty.TypedDict('CloudBackup', {
     'keep_last': int,
     'transfer_setting': _ty.NotRequired[str],
     'absolute_paths': _ty.NotRequired[bool], 
+})
+Get = _ty.TypedDict('Get', {
+    'description': _ty.NotRequired[str],
+    'path': _ty.NotRequired[str],
+    'credentials': _ty.NotRequired[_jsonschema.JsonValue],
+    'attributes': _ty.NotRequired[_jsonschema.JsonObject],
+    'schedule': _ty.NotRequired[_jsonschema.JsonValue],
+    'pre_script': _ty.NotRequired[str],
+    'post_script': _ty.NotRequired[str],
+    'snapshot': _ty.NotRequired[bool],
+    'include': _ty.NotRequired[list[str]],
+    'exclude': _ty.NotRequired[list[str]],
+    'args': _ty.NotRequired[str],
+    'enabled': _ty.NotRequired[bool],
+    'password': _ty.NotRequired[str],
+    'keep_last': _ty.NotRequired[int],
+    'transfer_setting': _ty.NotRequired[str],
+    'absolute_paths': _ty.NotRequired[bool],
+    'id': _ty.NotRequired[int],
+    'job': _ty.NotRequired[_jsonschema.JsonObject|None],
+    'locked': _ty.NotRequired[bool], 
 })
 Data = _ty.TypedDict('Data', {
     'description': _ty.NotRequired[str],

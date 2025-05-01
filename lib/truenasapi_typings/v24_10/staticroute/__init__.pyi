@@ -8,6 +8,12 @@ class Staticroute(_NS):
     ) -> CreateReturn:
         """"""
         ...
+    def _get(self,
+        __id_or_filter:int|_ty.Sequence[str]|None=None,
+        **fields:_ty.Unpack[Get],
+    ) -> GetInstanceReturn|None:
+        """"""
+        ...
     def _update(self,
         __selector:int|_ty.Sequence[str],
         **fields:_ty.Unpack[Data],
@@ -73,6 +79,12 @@ Data = _ty.TypedDict('Data', {
     'destination': _ty.NotRequired[str],
     'gateway': _ty.NotRequired[str],
     'description': _ty.NotRequired[str], 
+})
+Get = _ty.TypedDict('Get', {
+    'destination': _ty.NotRequired[str],
+    'gateway': _ty.NotRequired[str],
+    'description': _ty.NotRequired[str],
+    'id': _ty.NotRequired[int], 
 })
 CreateData = _ty.TypedDict('CreateData', {
     'destination': str,

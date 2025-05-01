@@ -8,6 +8,12 @@ class Registry(_NS):
     ) -> CreateReturn:
         """"""
         ...
+    def _get(self,
+        __id_or_filter:int|_ty.Sequence[str]|None=None,
+        **fields:_ty.Unpack[Get],
+    ) -> GetInstanceReturn|None:
+        """"""
+        ...
     def _update(self,
         __selector:int|_ty.Sequence[str],
         **fields:_ty.Unpack[Data],
@@ -70,6 +76,14 @@ AppRegistryCreate = _ty.TypedDict('AppRegistryCreate', {
     'description': _ty.NotRequired[str|None],
     'username': str,
     'password': str,
+    'uri': _ty.NotRequired[str], 
+})
+Get = _ty.TypedDict('Get', {
+    'id': _ty.NotRequired[int],
+    'name': _ty.NotRequired[str],
+    'description': _ty.NotRequired[str|None],
+    'username': _ty.NotRequired[str],
+    'password': _ty.NotRequired[str],
     'uri': _ty.NotRequired[str], 
 })
 Data = _ty.TypedDict('Data', {

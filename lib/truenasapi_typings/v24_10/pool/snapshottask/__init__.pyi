@@ -8,6 +8,12 @@ class Snapshottask(_NS):
     ) -> CreateReturn:
         """"""
         ...
+    def _get(self,
+        __id_or_filter:int|_ty.Sequence[str]|None=None,
+        **fields:_ty.Unpack[Get],
+    ) -> GetInstanceReturn|None:
+        """"""
+        ...
     def _update(self,
         __selector:int|_ty.Sequence[str],
         **fields:_ty.Unpack[Data],
@@ -120,6 +126,20 @@ Data = _ty.TypedDict('Data', {
     'allow_empty': _ty.NotRequired[bool],
     'schedule': _ty.NotRequired[_jsonschema.JsonValue],
     'fixate_removal_date': _ty.NotRequired[bool], 
+})
+Get = _ty.TypedDict('Get', {
+    'dataset': _ty.NotRequired[str],
+    'recursive': _ty.NotRequired[bool],
+    'lifetime_value': _ty.NotRequired[int],
+    'lifetime_unit': _ty.NotRequired[str],
+    'enabled': _ty.NotRequired[bool],
+    'exclude': _ty.NotRequired[list[str]],
+    'naming_schema': _ty.NotRequired[str],
+    'allow_empty': _ty.NotRequired[bool],
+    'schedule': _ty.NotRequired[_jsonschema.JsonValue],
+    'id': _ty.NotRequired[int],
+    'vmware_sync': _ty.NotRequired[bool],
+    'state': _ty.NotRequired[_jsonschema.JsonValue], 
 })
 CreateData = _ty.TypedDict('CreateData', {
     'dataset': str,

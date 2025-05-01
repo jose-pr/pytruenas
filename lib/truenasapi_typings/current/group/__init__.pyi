@@ -8,6 +8,12 @@ class Group(_NS):
     ) -> CreateReturn:
         """"""
         ...
+    def _get(self,
+        __id_or_filter:int|_ty.Sequence[str]|None=None,
+        **fields:_ty.Unpack[Get],
+    ) -> GetInstanceReturn|None:
+        """"""
+        ...
     def _update(self,
         __selector:int|_ty.Sequence[str],
         **fields:_ty.Unpack[GroupUpdate],
@@ -101,6 +107,22 @@ GroupCreate = _ty.TypedDict('GroupCreate', {
     'sudo_commands_nopasswd': _ty.NotRequired[list[str]],
     'smb': _ty.NotRequired[bool],
     'userns_idmap': _ty.NotRequired[str|int|None],
+    'users': _ty.NotRequired[list[int]], 
+})
+Get = _ty.TypedDict('Get', {
+    'id': _ty.NotRequired[int],
+    'gid': _ty.NotRequired[int],
+    'name': _ty.NotRequired[str],
+    'builtin': _ty.NotRequired[bool],
+    'sudo_commands': _ty.NotRequired[list[str]],
+    'sudo_commands_nopasswd': _ty.NotRequired[list[str]],
+    'smb': _ty.NotRequired[bool],
+    'userns_idmap': _ty.NotRequired[str|int|None],
+    'group': _ty.NotRequired[str],
+    'id_type_both': _ty.NotRequired[bool],
+    'local': _ty.NotRequired[bool],
+    'sid': _ty.NotRequired[str|None],
+    'roles': _ty.NotRequired[list[str]],
     'users': _ty.NotRequired[list[int]], 
 })
 GroupUpdate = _ty.TypedDict('GroupUpdate', {

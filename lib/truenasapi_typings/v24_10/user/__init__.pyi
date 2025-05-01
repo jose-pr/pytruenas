@@ -8,6 +8,12 @@ class User(_NS):
     ) -> CreateReturn:
         """"""
         ...
+    def _get(self,
+        __id_or_filter:int|_ty.Sequence[str]|None=None,
+        **fields:_ty.Unpack[Get],
+    ) -> GetInstanceReturn|None:
+        """"""
+        ...
     def _update(self,
         __selector:int|_ty.Sequence[str],
         **fields:_ty.Unpack[UserUpdate],
@@ -171,6 +177,35 @@ UserCreate = _ty.TypedDict('UserCreate', {
     'home_mode': _ty.NotRequired[str],
     'password': _ty.NotRequired[str|None],
     'random_password': _ty.NotRequired[bool], 
+})
+Get = _ty.TypedDict('Get', {
+    'id': _ty.NotRequired[int],
+    'uid': _ty.NotRequired[int],
+    'username': _ty.NotRequired[str|str],
+    'unixhash': _ty.NotRequired[str|None],
+    'smbhash': _ty.NotRequired[str|None],
+    'home': _ty.NotRequired[str],
+    'shell': _ty.NotRequired[str],
+    'full_name': _ty.NotRequired[str],
+    'builtin': _ty.NotRequired[bool],
+    'smb': _ty.NotRequired[bool],
+    'userns_idmap': _ty.NotRequired[str|int|None],
+    'group': _ty.NotRequired[_jsonschema.JsonObject],
+    'groups': _ty.NotRequired[list[int]],
+    'password_disabled': _ty.NotRequired[bool],
+    'ssh_password_enabled': _ty.NotRequired[bool],
+    'sshpubkey': _ty.NotRequired[str|None],
+    'locked': _ty.NotRequired[bool],
+    'sudo_commands': _ty.NotRequired[list[str]],
+    'sudo_commands_nopasswd': _ty.NotRequired[list[str]],
+    'email': _ty.NotRequired[str|None],
+    'id_type_both': _ty.NotRequired[bool],
+    'local': _ty.NotRequired[bool],
+    'immutable': _ty.NotRequired[bool],
+    'twofactor_auth_configured': _ty.NotRequired[bool],
+    'sid': _ty.NotRequired[str|None],
+    'roles': _ty.NotRequired[list[str]],
+    'api_keys': _ty.NotRequired[list[int]], 
 })
 UserUpdate = _ty.TypedDict('UserUpdate', {
     'username': _ty.NotRequired[str|str],

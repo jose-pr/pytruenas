@@ -8,6 +8,12 @@ class Auth(_NS):
     ) -> CreateReturn:
         """"""
         ...
+    def _get(self,
+        __id_or_filter:int|_ty.Sequence[str]|None=None,
+        **fields:_ty.Unpack[Get],
+    ) -> GetInstanceReturn|None:
+        """"""
+        ...
     def _update(self,
         __selector:int|_ty.Sequence[str],
         **fields:_ty.Unpack[Data],
@@ -72,6 +78,15 @@ Please see `query` method documentation for `options`."""
         """Update iSCSI Authorized Access of `id`."""
         ...
 Data = _ty.TypedDict('Data', {
+    'tag': _ty.NotRequired[int],
+    'user': _ty.NotRequired[str],
+    'secret': _ty.NotRequired[str],
+    'peeruser': _ty.NotRequired[str],
+    'peersecret': _ty.NotRequired[str],
+    'discovery_auth': _ty.NotRequired[str], 
+})
+Get = _ty.TypedDict('Get', {
+    'id': _ty.NotRequired[int],
     'tag': _ty.NotRequired[int],
     'user': _ty.NotRequired[str],
     'secret': _ty.NotRequired[str],

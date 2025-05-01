@@ -273,6 +273,52 @@ class Namespace(PyDeclaration):
                     }
                 )
                 self.childs.append(update)
+            elif method.qualname.name == "get_instance":
+                for param in method.parameters:
+                    if param.name == "id":
+                        idtype = {
+                            "anyOf": [
+                                param.schema.get("type", "!str|int"),
+                                "!_ty.Sequence[str]",
+                                "!None",
+                            ]
+                        }
+                props = {}
+                for name, schema in method.returns.schema["properties"].items():
+                    schema = {**schema}
+                    schema["required"] = False
+                    props[name] = schema
+                update = Method(
+                    {
+                        "name": "_get",
+                        "roles": method.definition["roles"],
+                        "doc": "",
+                        "schemas": {
+                            "type": "object",
+                            "properties": {
+                                "Call parameters": {
+                                    "type": "array",
+                                    "prefixItems": [
+                                        {
+                                            "title": "__id_or_filter",
+                                            **(idtype or {}),
+                                            "default": None,
+                                        },
+                                        {
+                                            "type": "object",
+                                            "properties": props,
+                                            "title": "**fields",
+                                            "_name": "get",  # type:ignore
+                                        },
+                                    ],
+                                    "items": True,
+                                },
+                                "Return value": "!GetInstanceReturn|None",
+                            },
+                        },
+                    }
+                )
+                self.childs.append(update)
 
 
 class Renderer:

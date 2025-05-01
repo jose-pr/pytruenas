@@ -8,6 +8,12 @@ class ApiKey(_NS):
     ) -> CreateReturn:
         """"""
         ...
+    def _get(self,
+        __id_or_filter:int|_ty.Sequence[str]|None=None,
+        **fields:_ty.Unpack[Get],
+    ) -> GetInstanceReturn|None:
+        """"""
+        ...
     def _update(self,
         __selector:int|_ty.Sequence[str],
         **fields:_ty.Unpack[ApiKeyUpdate],
@@ -80,6 +86,17 @@ ApiKeyCreate = _ty.TypedDict('ApiKeyCreate', {
     'name': str,
     'username': str|str,
     'expires_at': _ty.NotRequired[str|None], 
+})
+Get = _ty.TypedDict('Get', {
+    'id': _ty.NotRequired[int],
+    'name': _ty.NotRequired[str],
+    'username': _ty.NotRequired[str|str],
+    'user_identifier': _ty.NotRequired[int|str],
+    'keyhash': _ty.NotRequired[str],
+    'created_at': _ty.NotRequired[str],
+    'expires_at': _ty.NotRequired[str|None],
+    'local': _ty.NotRequired[bool],
+    'revoked': _ty.NotRequired[bool], 
 })
 ApiKeyUpdate = _ty.TypedDict('ApiKeyUpdate', {
     'name': _ty.NotRequired[str],

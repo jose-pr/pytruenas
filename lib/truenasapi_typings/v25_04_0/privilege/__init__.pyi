@@ -8,6 +8,12 @@ class Privilege(_NS):
     ) -> CreateReturn:
         """"""
         ...
+    def _get(self,
+        __id_or_filter:int|_ty.Sequence[str]|None=None,
+        **fields:_ty.Unpack[Get],
+    ) -> GetInstanceReturn|None:
+        """"""
+        ...
     def _update(self,
         __selector:int|_ty.Sequence[str],
         **fields:_ty.Unpack[PrivilegeUpdate],
@@ -98,6 +104,15 @@ PrivilegeCreate = _ty.TypedDict('PrivilegeCreate', {
     'ds_groups': _ty.NotRequired[list[int|str]],
     'roles': _ty.NotRequired[list[str]],
     'web_shell': bool, 
+})
+Get = _ty.TypedDict('Get', {
+    'id': _ty.NotRequired[int],
+    'builtin_name': _ty.NotRequired[str|None],
+    'name': _ty.NotRequired[str],
+    'local_groups': _ty.NotRequired[list[_jsonschema.JsonValue|_jsonschema.JsonValue]],
+    'ds_groups': _ty.NotRequired[list[_jsonschema.JsonValue|_jsonschema.JsonValue]],
+    'roles': _ty.NotRequired[list[str]],
+    'web_shell': _ty.NotRequired[bool], 
 })
 PrivilegeUpdate = _ty.TypedDict('PrivilegeUpdate', {
     'name': _ty.NotRequired[str],
