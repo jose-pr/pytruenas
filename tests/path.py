@@ -25,11 +25,11 @@ print(typing.get_args(fs._FTYPE))
 fs.local.FORCE_LOCAL = True
 datapool = client.path("/mnt/data", backend="local")
 testfiles = datapool / "testfiles"
-print(repr(testfiles), isinstance(testfiles, pathlib.PurePath))
-
 testfiles.mkdir(exist_ok=True)
 
 client.install_sshcreds()
+print('Data Pool Is Mount', datapool.with_backend('sftp').is_mount())
+print('Directory Is Mount', testfiles.with_backend('sftp').is_mount())
 
 for backend in fs.BACKENDS:
     testfile = testfiles.with_backend(backend) / backend

@@ -13,10 +13,12 @@ import fnmatch as _fnmatch
 from ..utils import logging as _logging
 from . import cli as _cli
 
+
 class PyTrueNASArgs(_cli.LoggingArgs):
     config: dict
     cmdspath: list[str]
     cmd: "Cmd"
+    target: str
     targets: list[str]
     sslverify: bool
 
@@ -30,7 +32,7 @@ class CmdProtocol(_ty.Protocol, _ty.Generic[_A, _C]):  # type:ignore
 
 
 class _CmdModule(_Module, CmdProtocol[_A, _C]):
-    def init(self, tanget: str, args: _A, loggen: _Logger) -> _C: ...
+    def init(self, args: _A, loggen: _Logger) -> _C: ...
     def success(self, client: _C, args: _A, logger: _Logger): ...
     def finally_(self, client: _C, args: _A, logger: _Logger): ...
 
@@ -75,9 +77,12 @@ class RunPathStep(_Module, CmdProtocol[_RA, _C]):
 class RunPathCmd(_CmdModule[_RA, _C]):
 
     def __init__(self, path: _Path, qualname: _PyName) -> None:
-        super().__init__(qualname, doc="")
         self.qualname = qualname
         main = path / "__main__.py"
+        self.__file__ = str(main.resolve())
+        self.__name__ = qualname
+        super().__init__(qualname, doc="")
+
         if main.exists():
             exec(main.read_bytes(), self.__dict__)
 
@@ -124,7 +129,7 @@ class RunPathCmd(_CmdModule[_RA, _C]):
             disable = pattern.startswith("!")
             if disable:
                 pattern = pattern[1:] + ":!enabled"
-            elif ':' not in pattern:
+            elif ":" not in pattern:
                 pattern += ":enabled"
             pattern, *opts = pattern.split(":")
             opts = RcOptions.parse(opts)
@@ -199,20 +204,22 @@ class Cmd:
         if self.module.__name__ != qualname:
             _sys.modules[qualname] = self.module
 
-    def run(self, target: str, args: PyTrueNASArgs):
-        self.module.init = getattr(self.module, "init", None) or (  # type:ignore
-            lambda t, a, l: _Client(t, sslverify=args.sslverify)
-        )
-        self.module.success = getattr(self.module, "success", None) or (  # type:ignore
-            lambda c, a, l: ...
-        )
-        self.module.finally_ = getattr(  # type:ignore
-            self.module, "finally_", None
-        ) or (lambda c, a, l: ...)
+        if not getattr(self.module, "init", None):
+            self.module.init = lambda a, l: _Client(  # type:ignore
+                a.target, sslverify=a.sslverify
+            )
+
+        if not getattr(self.module, "success", None):
+            self.module.success = lambda c, a, l: ...  # type:ignore
+
+        if not getattr(self.module, "finally_", None):
+            self.module.finally_ = lambda c, a, l: ...  # type:ignore
+
+    def run(self, args: PyTrueNASArgs):
         client = None
         logger = self.logger
         try:
-            client = self.module.init(target, args, logger)
+            client = self.module.init(args, logger)
             self.module.run(client, args, logger)
             self.module.success(client, args, logger)
         finally:
@@ -224,7 +231,7 @@ class Cmd:
 
         if hasattr(self.module, "register"):
             self.module.register(parser, args, logger)
-        parser.add_argument('--sslverify', action='store_true', default=False)
+        parser.add_argument("--sslverify", action="store_true", default=False)
         parser.add_argument("targets", nargs="*", default=["localhost"])
         parser.set_defaults(_cmd=self)
 

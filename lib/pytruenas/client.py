@@ -132,7 +132,7 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
                 self.login()
             else:
                 self._conn = self._openwss()
-        return self._conn
+        return _ty.cast(_conn.Client, self._conn)
 
     def login(self, creds: _auth.Credentials | None = None):
         if self._conn and not self._conn._closed.is_set():

@@ -148,9 +148,11 @@ class Path(_Path):
         target_is_directory=False,
         *args,
         force: bool | _FTYPE | _ty.Sequence[_FTYPE] = False,
+        onremove: _ty.Callable[[_ty.Self, str], bool] | None = None,
         **kwargs,
     ):
         if force and self.exists():
+            onremove = onremove or (lambda x, t: True)
             if force is True:
                 _force = _ty.get_args(_FTYPE)
             elif isinstance(force, str):
@@ -158,20 +160,21 @@ class Path(_Path):
             else:
                 _force = []
             if not self.is_symlink():
-                raise_ = False
                 if self.is_dir():
-                    raise_ = "directory" not in _force
+                    ty = "directory"
                 elif self.is_file():
-                    raise_ = "file" not in _force
+                    ty = "file"
                 else:
-                    raise_ = True
-                if raise_:
+                    ty = "unknown"
+                if ty not in _force:
                     raise FileExistsError(self)
-                self.rmtree()
+                if onremove(self, ty):
+                    self.rmtree()
             elif _os.fspath(self.readlink()) != _os.fspath(target):
                 if "link" not in _force:
                     raise FileExistsError(target)
-                self.unlink()
+                if onremove(self, "link"):
+                    self.unlink()
             else:
                 return
         self.__getattr__("symlink_to")(
