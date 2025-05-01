@@ -58,17 +58,25 @@ class LoggingArgs(_argparse.Namespace):
     loglevels: dict[str, int]
     verbose: int
 
-    def set_loglevels(self):
+    def verbose_as_loglevel(self):
+        loglevel = (
+            list(_logging.VERBOSE_LEVELS.keys()).index(_logging.INFO)
+            if self.verbose == _logging.NOTSET
+            else self.verbose
+        )
         loglevel = min(
-            self.verbose or list(_logging.VERBOSE_LEVELS.keys()).index(_logging.INFO),
+            loglevel,
             len(_logging.VERBOSE_LEVELS) - 1,
         )
-        loglevel = list(_logging.VERBOSE_LEVELS.keys())[loglevel]
-        self.loglevels.setdefault("", loglevel)
-        for name, level in self.loglevels.items():
+        return list(_logging.VERBOSE_LEVELS.keys())[loglevel]
+
+    def set_loglevels(self):
+        loglevels = self.loglevels.copy()
+        loglevels.setdefault("", LoggingArgs.verbose_as_loglevel(self))
+        for name, level in loglevels.items():
             _logging.getLogger(name).setLevel(level)
 
-        return self.loglevels
+        return loglevels
 
 
 _SUBPARSERACTION_CALL = _argparse._SubParsersAction.__call__
