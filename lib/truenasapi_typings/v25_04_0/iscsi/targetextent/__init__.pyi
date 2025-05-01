@@ -8,6 +8,12 @@ class Targetextent(_NS):
     ) -> CreateReturn:
         """"""
         ...
+    def _get(self,
+        __id_or_filter:int|_ty.Sequence[str]|None=None,
+        **fields:_ty.Unpack[Get],
+    ) -> GetInstanceReturn|None:
+        """"""
+        ...
     def _update(self,
         __selector:int|_ty.Sequence[str],
         **fields:_ty.Unpack[IscsiTargetToExtentUpdate],
@@ -72,6 +78,12 @@ IscsiTargetToExtentCreate = _ty.TypedDict('IscsiTargetToExtentCreate', {
     'target': int,
     'lunid': _ty.NotRequired[int|None],
     'extent': int, 
+})
+Get = _ty.TypedDict('Get', {
+    'id': _ty.NotRequired[int],
+    'target': _ty.NotRequired[int],
+    'lunid': _ty.NotRequired[int],
+    'extent': _ty.NotRequired[int], 
 })
 IscsiTargetToExtentUpdate = _ty.TypedDict('IscsiTargetToExtentUpdate', {
     'id': _ty.NotRequired[int],

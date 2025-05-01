@@ -8,6 +8,12 @@ class Alertservice(_NS):
     ) -> CreateReturn:
         """"""
         ...
+    def _get(self,
+        __id_or_filter:int|_ty.Sequence[str]|None=None,
+        **fields:_ty.Unpack[Get],
+    ) -> GetInstanceReturn|None:
+        """"""
+        ...
     def _update(self,
         __selector:int|_ty.Sequence[str],
         **fields:_ty.Unpack[AlertServiceUpdate],
@@ -81,6 +87,15 @@ AlertServiceCreate = _ty.TypedDict('AlertServiceCreate', {
     'attributes': _jsonschema.JsonObject,
     'level': str,
     'enabled': _ty.NotRequired[bool], 
+})
+Get = _ty.TypedDict('Get', {
+    'name': _ty.NotRequired[str],
+    'type': _ty.NotRequired[str],
+    'attributes': _ty.NotRequired[_jsonschema.JsonObject],
+    'level': _ty.NotRequired[str],
+    'enabled': _ty.NotRequired[bool],
+    'id': _ty.NotRequired[int],
+    'type__title': _ty.NotRequired[str], 
 })
 AlertServiceUpdate = _ty.TypedDict('AlertServiceUpdate', {
     'name': str,

@@ -8,6 +8,12 @@ class Portal(_NS):
     ) -> CreateReturn:
         """"""
         ...
+    def _get(self,
+        __id_or_filter:int|_ty.Sequence[str]|None=None,
+        **fields:_ty.Unpack[Get],
+    ) -> GetInstanceReturn|None:
+        """"""
+        ...
     def _update(self,
         __selector:int|_ty.Sequence[str],
         **fields:_ty.Unpack[IscsiPortalUpdate],
@@ -74,6 +80,12 @@ Please see `query` method documentation for `options`."""
         ...
 IscsiPortalCreate = _ty.TypedDict('IscsiPortalCreate', {
     'listen': _jsonschema.JsonArray,
+    'comment': _ty.NotRequired[str], 
+})
+Get = _ty.TypedDict('Get', {
+    'id': _ty.NotRequired[int],
+    'listen': _ty.NotRequired[_jsonschema.JsonArray],
+    'tag': _ty.NotRequired[int],
     'comment': _ty.NotRequired[str], 
 })
 IscsiPortalUpdate = _ty.TypedDict('IscsiPortalUpdate', {

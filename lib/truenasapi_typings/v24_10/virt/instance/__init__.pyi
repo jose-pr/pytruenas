@@ -8,6 +8,12 @@ class Instance(_NS):
     ) -> CreateReturn:
         """"""
         ...
+    def _get(self,
+        __id_or_filter:str|_ty.Sequence[str]|None=None,
+        **fields:_ty.Unpack[Get],
+    ) -> GetInstanceReturn|None:
+        """"""
+        ...
     def _update(self,
         __selector:str|_ty.Sequence[str],
         **fields:_ty.Unpack[VirtInstanceUpdate],
@@ -159,6 +165,27 @@ VirtInstanceCreate = _ty.TypedDict('VirtInstanceCreate', {
     'zvol_path': _ty.NotRequired[str|None],
     'volume': _ty.NotRequired[str|None],
     'vnc_password': _ty.NotRequired[str|None], 
+})
+Get = _ty.TypedDict('Get', {
+    'id': _ty.NotRequired[str],
+    'name': _ty.NotRequired[str],
+    'type': _ty.NotRequired[str],
+    'status': _ty.NotRequired[str],
+    'cpu': _ty.NotRequired[str|None],
+    'memory': _ty.NotRequired[int|None],
+    'autostart': _ty.NotRequired[bool],
+    'environment': _ty.NotRequired[_jsonschema.JsonObject],
+    'aliases': _ty.NotRequired[_jsonschema.JsonArray],
+    'image': _ty.NotRequired[_jsonschema.JsonValue],
+    'userns_idmap': _ty.NotRequired[_jsonschema.JsonValue|None],
+    'raw': _ty.NotRequired[_jsonschema.JsonObject|None],
+    'vnc_enabled': _ty.NotRequired[bool],
+    'vnc_port': _ty.NotRequired[int|None],
+    'vnc_password': _ty.NotRequired[str|None],
+    'secure_boot': _ty.NotRequired[bool|None],
+    'root_disk_size': _ty.NotRequired[int|None],
+    'root_disk_io_bus': _ty.NotRequired[_jsonschema.JsonValue],
+    'storage_pool': _ty.NotRequired[str], 
 })
 VirtInstanceUpdate = _ty.TypedDict('VirtInstanceUpdate', {
     'environment': _ty.NotRequired[_jsonschema.JsonObject|None],

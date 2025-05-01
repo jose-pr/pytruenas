@@ -8,6 +8,12 @@ class Initiator(_NS):
     ) -> CreateReturn:
         """"""
         ...
+    def _get(self,
+        __id_or_filter:int|_ty.Sequence[str]|None=None,
+        **fields:_ty.Unpack[Get],
+    ) -> GetInstanceReturn|None:
+        """"""
+        ...
     def _update(self,
         __selector:int|_ty.Sequence[str],
         **fields:_ty.Unpack[IscsiInitiatorUpdate],
@@ -68,6 +74,11 @@ Please see `query` method documentation for `options`."""
         """Update iSCSI initiator of `id`."""
         ...
 IscsiInitiatorCreate = _ty.TypedDict('IscsiInitiatorCreate', {
+    'initiators': _ty.NotRequired[list[str]],
+    'comment': _ty.NotRequired[str], 
+})
+Get = _ty.TypedDict('Get', {
+    'id': _ty.NotRequired[int],
     'initiators': _ty.NotRequired[list[str]],
     'comment': _ty.NotRequired[str], 
 })

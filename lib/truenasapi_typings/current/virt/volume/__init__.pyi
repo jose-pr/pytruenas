@@ -8,6 +8,12 @@ class Volume(_NS):
     ) -> CreateReturn:
         """"""
         ...
+    def _get(self,
+        __id_or_filter:str|_ty.Sequence[str]|None=None,
+        **fields:_ty.Unpack[Get],
+    ) -> GetInstanceReturn|None:
+        """"""
+        ...
     def _update(self,
         __selector:str|_ty.Sequence[str],
         **fields:_ty.Unpack[VirtVolumeUpdate],
@@ -86,6 +92,16 @@ VirtVolumeCreate = _ty.TypedDict('VirtVolumeCreate', {
     'content_type': _ty.NotRequired[str],
     'size': _ty.NotRequired[int],
     'storage_pool': _ty.NotRequired[str|None], 
+})
+Get = _ty.TypedDict('Get', {
+    'id': _ty.NotRequired[str],
+    'name': _ty.NotRequired[str],
+    'storage_pool': _ty.NotRequired[str],
+    'content_type': _ty.NotRequired[str],
+    'created_at': _ty.NotRequired[str],
+    'type': _ty.NotRequired[str],
+    'config': _ty.NotRequired[_jsonschema.JsonObject],
+    'used_by': _ty.NotRequired[list[str]], 
 })
 VirtVolumeUpdate = _ty.TypedDict('VirtVolumeUpdate', {
     'size': _ty.NotRequired[int], 

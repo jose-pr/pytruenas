@@ -11,6 +11,12 @@ class App(_NS):
     ) -> CreateReturn:
         """"""
         ...
+    def _get(self,
+        __id_or_filter:str|_ty.Sequence[str]|None=None,
+        **fields:_ty.Unpack[Get],
+    ) -> GetInstanceReturn|None:
+        """"""
+        ...
     def _update(self,
         __selector:_jsonschema.JsonValue=None,
         **fields:_ty.Unpack[Update]={'values': '{}', 'custom_compose_config': '{}', 'custom_compose_config_string': ''},
@@ -272,6 +278,24 @@ AppCreate = _ty.TypedDict('AppCreate', {
     'app_name': str,
     'train': _ty.NotRequired[str],
     'version': _ty.NotRequired[str], 
+})
+Get = _ty.TypedDict('Get', {
+    'name': _ty.NotRequired[str],
+    'id': _ty.NotRequired[str],
+    'state': _ty.NotRequired[str],
+    'upgrade_available': _ty.NotRequired[bool],
+    'latest_version': _ty.NotRequired[str|None],
+    'image_updates_available': _ty.NotRequired[bool],
+    'custom_app': _ty.NotRequired[bool],
+    'migrated': _ty.NotRequired[bool],
+    'human_version': _ty.NotRequired[str],
+    'version': _ty.NotRequired[str],
+    'metadata': _ty.NotRequired[_jsonschema.JsonObject],
+    'active_workloads': _ty.NotRequired[_jsonschema.JsonValue],
+    'notes': _ty.NotRequired[str|None],
+    'portals': _ty.NotRequired[_jsonschema.JsonObject],
+    'version_details': _ty.NotRequired[_jsonschema.JsonObject|None],
+    'config': _ty.NotRequired[_jsonschema.JsonObject|None], 
 })
 Update = _ty.TypedDict('Update', {
     'values': _ty.NotRequired[_jsonschema.JsonObject],

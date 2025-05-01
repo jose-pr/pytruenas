@@ -8,6 +8,12 @@ class Extent(_NS):
     ) -> CreateReturn:
         """"""
         ...
+    def _get(self,
+        __id_or_filter:int|_ty.Sequence[str]|None=None,
+        **fields:_ty.Unpack[Get],
+    ) -> GetInstanceReturn|None:
+        """"""
+        ...
     def _update(self,
         __selector:int|_ty.Sequence[str],
         **fields:_ty.Unpack[IscsiExtentUpdate],
@@ -102,6 +108,27 @@ IscsiExtentCreate = _ty.TypedDict('IscsiExtentCreate', {
     'rpm': _ty.NotRequired[str],
     'ro': _ty.NotRequired[bool],
     'enabled': _ty.NotRequired[bool], 
+})
+Get = _ty.TypedDict('Get', {
+    'id': _ty.NotRequired[int],
+    'name': _ty.NotRequired[str],
+    'type': _ty.NotRequired[str],
+    'disk': _ty.NotRequired[str|None],
+    'serial': _ty.NotRequired[str|None],
+    'path': _ty.NotRequired[str|None],
+    'filesize': _ty.NotRequired[str|int],
+    'blocksize': _ty.NotRequired[int],
+    'pblocksize': _ty.NotRequired[bool],
+    'avail_threshold': _ty.NotRequired[int|None],
+    'comment': _ty.NotRequired[str],
+    'naa': _ty.NotRequired[str],
+    'insecure_tpc': _ty.NotRequired[bool],
+    'xen': _ty.NotRequired[bool],
+    'rpm': _ty.NotRequired[str],
+    'ro': _ty.NotRequired[bool],
+    'enabled': _ty.NotRequired[bool],
+    'vendor': _ty.NotRequired[str],
+    'locked': _ty.NotRequired[bool|None], 
 })
 IscsiExtentUpdate = _ty.TypedDict('IscsiExtentUpdate', {
     'name': _ty.NotRequired[str],

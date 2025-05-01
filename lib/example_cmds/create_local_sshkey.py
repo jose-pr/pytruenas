@@ -39,3 +39,14 @@ def run(client: TrueNASClient, args: PyTrueNASArgs, logger: Logger):
         name=keypair_name,
         attributes={"private_key": private_key, "public_key": pubkey},
     )
+    root = client.api.user._get(username='root') or {}
+    authkeys = (root.get("sshpubkey") or '').splitlines()
+    if pubkey not in authkeys:
+        authkeys.append(pubkey)
+        logger.info(f"Adding key to {root['username']}")
+        client.api.user._update(root['id'], sshpubkey='\n'.join(authkeys))
+    else:
+        logger.info(f"User {root['username']} already has the key in its authorizedkeys")
+
+
+    print(private_key)

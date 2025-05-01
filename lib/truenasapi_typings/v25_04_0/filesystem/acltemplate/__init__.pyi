@@ -8,6 +8,12 @@ class Acltemplate(_NS):
     ) -> CreateReturn:
         """"""
         ...
+    def _get(self,
+        __id_or_filter:int|_ty.Sequence[str]|None=None,
+        **fields:_ty.Unpack[Get],
+    ) -> GetInstanceReturn|None:
+        """"""
+        ...
     def _update(self,
         __selector:int|_ty.Sequence[str],
         **fields:_ty.Unpack[AcltemplateUpdate],
@@ -81,6 +87,14 @@ AcltemplateCreate = _ty.TypedDict('AcltemplateCreate', {
     'name': str,
     'acltype': str,
     'acl': _jsonschema.JsonArray|_jsonschema.JsonArray,
+    'comment': _ty.NotRequired[str], 
+})
+Get = _ty.TypedDict('Get', {
+    'id': _ty.NotRequired[int],
+    'builtin': _ty.NotRequired[bool],
+    'name': _ty.NotRequired[str],
+    'acltype': _ty.NotRequired[str],
+    'acl': _ty.NotRequired[_jsonschema.JsonArray|_jsonschema.JsonArray],
     'comment': _ty.NotRequired[str], 
 })
 AcltemplateUpdate = _ty.TypedDict('AcltemplateUpdate', {

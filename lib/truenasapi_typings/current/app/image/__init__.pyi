@@ -3,6 +3,12 @@ from pytruenas.models import jsonschema as _jsonschema
 import typing as _ty 
 class Image(_NS):
     
+    def _get(self,
+        __id_or_filter:str|_ty.Sequence[str]|None=None,
+        **fields:_ty.Unpack[Get],
+    ) -> GetInstanceReturn|None:
+        """"""
+        ...
     def delete(self,
         image_id:str,
         options:DeleteOptions={'force': False},
@@ -55,6 +61,18 @@ Please see `query` method documentation for `options`."""
 
 `query-options.extra.parse_tags` is a boolean which when set will have normalized tags to be retrieved."""
         ...
+Get = _ty.TypedDict('Get', {
+    'id': _ty.NotRequired[str],
+    'repo_tags': _ty.NotRequired[list[str]],
+    'repo_digests': _ty.NotRequired[list[str]],
+    'size': _ty.NotRequired[int],
+    'dangling': _ty.NotRequired[bool],
+    'update_available': _ty.NotRequired[bool],
+    'created': _ty.NotRequired[str],
+    'author': _ty.NotRequired[str],
+    'comment': _ty.NotRequired[str],
+    'parsed_repo_tags': _ty.NotRequired[_jsonschema.JsonArray|None], 
+})
 DeleteOptions = _ty.TypedDict('DeleteOptions', {
     'force': _ty.NotRequired[bool], 
 })

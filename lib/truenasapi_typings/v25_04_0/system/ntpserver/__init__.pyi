@@ -8,6 +8,12 @@ class Ntpserver(_NS):
     ) -> CreateReturn:
         """"""
         ...
+    def _get(self,
+        __id_or_filter:int|_ty.Sequence[str]|None=None,
+        **fields:_ty.Unpack[Get],
+    ) -> GetInstanceReturn|None:
+        """"""
+        ...
     def _update(self,
         __selector:int|_ty.Sequence[str],
         **fields:_ty.Unpack[NtpServerUpdate],
@@ -87,6 +93,15 @@ NtpServerCreate = _ty.TypedDict('NtpServerCreate', {
     'minpoll': _ty.NotRequired[int],
     'maxpoll': _ty.NotRequired[int],
     'force': _ty.NotRequired[bool], 
+})
+Get = _ty.TypedDict('Get', {
+    'id': _ty.NotRequired[int],
+    'address': _ty.NotRequired[str],
+    'burst': _ty.NotRequired[bool],
+    'iburst': _ty.NotRequired[bool],
+    'prefer': _ty.NotRequired[bool],
+    'minpoll': _ty.NotRequired[int],
+    'maxpoll': _ty.NotRequired[int], 
 })
 NtpServerUpdate = _ty.TypedDict('NtpServerUpdate', {
     'address': _ty.NotRequired[str],

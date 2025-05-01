@@ -8,6 +8,12 @@ class Target(_NS):
     ) -> CreateReturn:
         """"""
         ...
+    def _get(self,
+        __id_or_filter:int|_ty.Sequence[str]|None=None,
+        **fields:_ty.Unpack[Get],
+    ) -> GetInstanceReturn|None:
+        """"""
+        ...
     def _update(self,
         __selector:int|_ty.Sequence[str],
         **fields:_ty.Unpack[IscsiTargetUpdate],
@@ -88,6 +94,16 @@ IscsiTargetCreate = _ty.TypedDict('IscsiTargetCreate', {
     'mode': _ty.NotRequired[str],
     'groups': _ty.NotRequired[_jsonschema.JsonArray],
     'auth_networks': _ty.NotRequired[list[str]],
+    'iscsi_parameters': _ty.NotRequired[_jsonschema.JsonValue|None], 
+})
+Get = _ty.TypedDict('Get', {
+    'id': _ty.NotRequired[int],
+    'name': _ty.NotRequired[str],
+    'alias': _ty.NotRequired[str|None],
+    'mode': _ty.NotRequired[str],
+    'groups': _ty.NotRequired[_jsonschema.JsonArray],
+    'auth_networks': _ty.NotRequired[list[str]],
+    'rel_tgt_id': _ty.NotRequired[int],
     'iscsi_parameters': _ty.NotRequired[_jsonschema.JsonValue|None], 
 })
 IscsiTargetUpdate = _ty.TypedDict('IscsiTargetUpdate', {

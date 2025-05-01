@@ -3,6 +3,12 @@ from pytruenas.models import jsonschema as _jsonschema
 import typing as _ty 
 class Network(_NS):
     
+    def _get(self,
+        __id_or_filter:str|int|_ty.Sequence[str]|None=None,
+        **fields:_ty.Unpack[Get],
+    ) -> GetInstanceReturn|None:
+        """"""
+        ...
     def get_instance(self,
         id:str|None,
         options:GetInstanceOptions={},
@@ -23,6 +29,16 @@ Please see `query` method documentation for `options`."""
     ) -> list[QueryDockerNetworkQueryResultItem]|QueryDockerNetworkQueryResultItem|int:
         """Query all docker networks"""
         ...
+Get = _ty.TypedDict('Get', {
+    'ipam': _ty.NotRequired[_jsonschema.JsonObject|None],
+    'labels': _ty.NotRequired[_jsonschema.JsonObject|None],
+    'created': _ty.NotRequired[str|None],
+    'driver': _ty.NotRequired[str|None],
+    'id': _ty.NotRequired[str|None],
+    'name': _ty.NotRequired[str|None],
+    'scope': _ty.NotRequired[str|None],
+    'short_id': _ty.NotRequired[str|None], 
+})
 GetInstanceOptions = _ty.TypedDict('GetInstanceOptions', {
     'relationships': _ty.NotRequired[bool],
     'extend': _ty.NotRequired[str|None],

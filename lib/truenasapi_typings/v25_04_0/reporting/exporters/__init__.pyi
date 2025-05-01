@@ -8,6 +8,12 @@ class Exporters(_NS):
     ) -> CreateReturn:
         """"""
         ...
+    def _get(self,
+        __id_or_filter:int|_ty.Sequence[str]|None=None,
+        **fields:_ty.Unpack[Get],
+    ) -> GetInstanceReturn|None:
+        """"""
+        ...
     def _update(self,
         __selector:int|_ty.Sequence[str],
         **fields:_ty.Unpack[ReportingExporterUpdate],
@@ -76,6 +82,12 @@ ReportingExporterCreate = _ty.TypedDict('ReportingExporterCreate', {
     'enabled': bool,
     'attributes': _jsonschema.JsonValue,
     'name': str, 
+})
+Get = _ty.TypedDict('Get', {
+    'id': _ty.NotRequired[int],
+    'enabled': _ty.NotRequired[bool],
+    'attributes': _ty.NotRequired[_jsonschema.JsonValue],
+    'name': _ty.NotRequired[str], 
 })
 ReportingExporterUpdate = _ty.TypedDict('ReportingExporterUpdate', {
     'enabled': _ty.NotRequired[bool],

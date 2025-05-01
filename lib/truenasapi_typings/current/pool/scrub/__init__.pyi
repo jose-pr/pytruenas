@@ -8,6 +8,12 @@ class Scrub(_NS):
     ) -> CreateReturn:
         """"""
         ...
+    def _get(self,
+        __id_or_filter:int|_ty.Sequence[str]|None=None,
+        **fields:_ty.Unpack[Get],
+    ) -> GetInstanceReturn|None:
+        """"""
+        ...
     def _update(self,
         __selector:_jsonschema.JsonValue=None,
         **fields:_ty.Unpack[Data],
@@ -85,6 +91,15 @@ Data = _ty.TypedDict('Data', {
     'description': _ty.NotRequired[str],
     'schedule': _ty.NotRequired[_jsonschema.JsonValue],
     'enabled': _ty.NotRequired[bool], 
+})
+Get = _ty.TypedDict('Get', {
+    'pool': _ty.NotRequired[int],
+    'threshold': _ty.NotRequired[int],
+    'description': _ty.NotRequired[str],
+    'schedule': _ty.NotRequired[_jsonschema.JsonValue],
+    'enabled': _ty.NotRequired[bool],
+    'id': _ty.NotRequired[int],
+    'pool_name': _ty.NotRequired[str], 
 })
 CreateData = _ty.TypedDict('CreateData', {
     'pool': int,
