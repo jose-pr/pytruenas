@@ -227,7 +227,6 @@ class Cmd:
 
     def register(self, parser: _argparse.ArgumentParser, args: PyTrueNASArgs):
         logger = self.logger
-        logger.setLevel(args.verbose)
 
         if hasattr(self.module, "register"):
             self.module.register(parser, args, logger)
