@@ -71,7 +71,7 @@ def main(
     #
     urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
     for name, level in cli.LoggingArgs.set_loglevels(args).items():
-        logger.info(
+        logger.debug(
             f"Logging level for '{name}' set at: {', '.join(logging.VERBOSE_LEVELS[level])}"
         )
 

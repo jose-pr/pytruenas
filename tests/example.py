@@ -50,7 +50,6 @@ keypair = client.api.keychaincredential._upsert(
 
 try:
     client.api.keychaincredential._create(
-        ("name", "type"),
         type="SSH_KEY_PAIR",
         name=keypair_name,
         attributes={"private_key": private_key, "public_key": pubkey},
