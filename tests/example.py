@@ -26,7 +26,6 @@ print(data["name"])
 ssh_service = client.api.service._update(("service",), service="ssh", enable=True)
 print(ssh_service)
 
-client.api.acme.dns.authenticator._update()
 netconfig = client.api.network.configuration.config()
 netconfig = client.api.network.configuration._update(hostname=netconfig["hostname"])
 hostname: str = netconfig["hostname"]
@@ -43,6 +42,7 @@ pubkey = _ssh.import_private_key(private_key).export_public_key().decode().strip
 
 keypair = client.api.keychaincredential._upsert(
     ("name", "!type"),
+    ("force", True),
     type="SSH_KEY_PAIR",
     name=keypair_name,
     attributes={"private_key": private_key, "public_key": pubkey},

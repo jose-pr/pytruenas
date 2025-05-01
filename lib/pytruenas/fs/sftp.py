@@ -114,6 +114,15 @@ def is_file(path: "Path"):
     return type == _ssh.FILEXFER_TYPE_REGULAR
 
 
+def is_mount(path: "Path"):
+    return (
+        _syncsftp(
+            path._client.ssh.run, f'mountpoint -q "{path.as_posix()}"', check=False
+        ).exit_status
+        == 0
+    )
+
+
 def is_socket(path: "Path"):
     type = _syncsftp(path._client.sftp._type, path)
     return type == _ssh.FILEXFER_TYPE_SOCKET

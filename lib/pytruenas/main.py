@@ -16,6 +16,7 @@ DEFAULT_LOGLEVELS = {
     "urllib3": logging.WARNING,
     "websocket": logging.WARNING,
     "httpx": logging.WARNING,
+    "asyncssh": logging.WARNING
 }
 
 
@@ -164,4 +165,5 @@ def main(
     del args._cmd  # type:ignore
 
     for target in targets:
-        args.cmd.run(target, args)
+        args.target = target
+        args.cmd.run(args)

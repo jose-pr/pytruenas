@@ -43,7 +43,7 @@ class DbAction(_ty.Generic[_T], _enum.StrEnum):
         __action,
         __namespace: "Namespace",
         __selector: _DBSelector = None,
-        *__opts: dict | _q.Option | tuple[str,object],
+        *__opts: dict | _q.Option | tuple[str, object],
         **__fields,
     ) -> _T:
         opts = _q.Option.options(*__opts)
@@ -74,9 +74,17 @@ class DbAction(_ty.Generic[_T], _enum.StrEnum):
         else:
             current = None
 
+        force: bool = opts.get("force", False)
+        action = None
         if _id is None and not selectors:
-            result = __namespace.update(fields)
-            action = DbAction.UPDATE
+            if not force:
+                result = _ty.cast(dict[str, object], __namespace.config())
+                fields = _q.diff(result, fields)
+            else:
+                result = None
+            if fields:
+                result = __namespace.update(fields)
+                action = DbAction.UPDATE
         elif _id not in (None, _q.EXCLUDE):
             if __action not in (DbAction.UPDATE, DbAction.UPSERT):
                 raise FileExistsError(_id)
@@ -86,8 +94,15 @@ class DbAction(_ty.Generic[_T], _enum.StrEnum):
                 for name, val in fields.items()
                 if name not in exclude and selectors.get(name) not in (val, _q.EXCLUDE)
             }
+
+            if not force:
+                if not current:
+                    current = _ty.cast(dict[str, object], __namespace._get(_id))
+                fields = _q.diff(current, fields)
+
             if fields:
                 result = __namespace.update(_id, fields)
+                action = DbAction.UPDATE
             else:
                 result = None
 
@@ -95,13 +110,18 @@ class DbAction(_ty.Generic[_T], _enum.StrEnum):
                 result = __namespace._get(_id)
             elif result is None:
                 result = __namespace._get(_id) if not current else current
-            action = DbAction.UPDATE
         else:
             if __action not in (DbAction.CREATE, DbAction.UPSERT):
                 raise FileNotFoundError(selectors)
             exclude = (idkey, *(opts.get("create_exclude") or []))
             fields = {name: val for name, val in fields.items() if name not in exclude}
-            result = __namespace.create(fields)
+            try:
+                result = __namespace.create(fields)
+            except _conn.ValidationErrors as e:
+                if "already exists" in e.error:
+                    raise FileExistsError(e.error)
+                else:
+                    raise e
             action = DbAction.CREATE
 
         wait = opts.get("wait", True)
@@ -228,26 +248,34 @@ class Namespace:
         self,
         __selector: _DBSelector = None,
         __callback: (
-            _ty.Callable[[DbAction, str | int, dict[str, object]], None] | None
+            _ty.Callable[[DbAction, str | int, dict[str, object]], None]
+            | None
+            | dict
+            | _q.Option
+            | _ty.Tuple[str, object]
         ) = None,
-        *__opts: dict | _q.Option,
+        *__opts: dict | _q.Option | _ty.Tuple[str, object],
         **__fields,
     ):
-        return DbAction.UPSERT.execute(
-            self, __selector, ("callback", __callback), *__opts, **__fields
-        )
+        opts = [*__opts]
+        if callable(__callback):
+            opts.append(("callback", __callback))
+        elif __callback:
+            opts.append(__callback)
+
+        return DbAction.UPSERT.execute(self, __selector, *opts, **__fields)
 
     def _update(
         self,
         __selector: _DBSelector = None,
-        *__opts: dict | _q.Option,
+        *__opts: dict | _q.Option | _ty.Tuple[str, object],
         **__fields,
     ):
         return DbAction.UPDATE.execute(self, __selector, *__opts, **__fields)
 
     def _create(
         self,
-        *__opts: dict | _q.Option,
+        *__opts: dict | _q.Option | _ty.Tuple[str, object],
         **__fields,
     ):
         return DbAction.CREATE.execute(self, _q.EXCLUDE, *__opts, **__fields)
