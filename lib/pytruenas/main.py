@@ -16,7 +16,7 @@ DEFAULT_LOGLEVELS = {
     "urllib3": logging.WARNING,
     "websocket": logging.WARNING,
     "httpx": logging.WARNING,
-    "asyncssh": logging.WARNING
+    "asyncssh": logging.WARNING,
 }
 
 
