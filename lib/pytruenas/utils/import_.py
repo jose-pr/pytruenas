@@ -1,8 +1,9 @@
 import importlib.util as _import
-import sys as _sys
-from .qualname import PythonName as _PyName
-from pathlib import Path as _Path
 import os as _os
+import sys as _sys
+from pathlib import Path as _Path
+
+from .qualname import PythonName as _PyName
 
 
 def import_from_path(qualname: _PyName, path: _Path):

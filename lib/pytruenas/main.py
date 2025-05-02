@@ -1,15 +1,16 @@
 import argparse
-from pathlib import Path
+import importlib.util as _import
+import os
 import typing as _ty
-from .utils import cli
-from .utils.text import expand
+from pathlib import Path
+
+import urllib3
+import yaml
+
+from .utils import cli, logging
 from .utils.cmd import Cmd, PyTrueNASArgs
 from .utils.qualname import PythonName
-from .utils import logging
-import os
-import importlib.util as _import
-import yaml
-import urllib3
+from .utils.text import expand
 
 DEFAULT_LOGLEVELS = {
     "requests": logging.WARNING,

@@ -1,6 +1,6 @@
 import keyword as _kw
-import typing as _ty
 import re as _re
+import typing as _ty
 
 try:
     from gettext import gettext, ngettext  # type:ignore
@@ -16,38 +16,40 @@ except ImportError:
             return plural
 
 
-
 def str_(txt: "bytes|str") -> str:
     if isinstance(txt, str):
         return txt
     return _ty.cast(bytes, txt).decode()
 
-def snakecase(name: str) -> str: #WIP
+
+def snakecase(name: str) -> str:  # WIP
     std = _re.sub(r"[-\s_]+", "_", name)
     std = _re.sub(r"\W|^(?=\d)", "_", std)
     std = std[0].lower() + _re.sub("[A-Z]", lambda m: m.group(0)[1:].lower(), std[1:])
     return std
 
-PYREPLACE = {
-    '+': 'plus',
-    "!": 'not',
-    '*': 'all'
-}
+
+PYREPLACE = {"+": "plus", "!": "not", "*": "all"}
+
 
 def pysafe(text: str, separator: str = "."):
-    text = separator.join(
-        [(f"{n}_" if _kw.iskeyword(n) else n) for n in text.split(separator)]
-    ).replace('-','_').replace(' ','_')
+    text = (
+        separator.join(
+            [(f"{n}_" if _kw.iskeyword(n) else n) for n in text.split(separator)]
+        )
+        .replace("-", "_")
+        .replace(" ", "_")
+    )
     for symbol, replacement in PYREPLACE.items():
         if text == symbol:
             return replacement
         if text.startswith(symbol):
-            text = replacement +'_'+ text.removeprefix(symbol)
+            text = replacement + "_" + text.removeprefix(symbol)
         if text.endswith(symbol):
-            text = text.removeprefix(symbol) + '_' + replacement
+            text = text.removeprefix(symbol) + "_" + replacement
         text = text.replace(symbol, replacement)
 
-    return text or '_'
+    return text or "_"
 
 
 def camelcase(text: str, separators: _ty.Sequence[str] | str | None = None):

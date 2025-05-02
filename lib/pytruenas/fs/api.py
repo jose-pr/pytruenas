@@ -1,12 +1,13 @@
+import io as _io
 import typing as _ty
 from os import stat_result as _stat
-import io as _io
 
 from ..utils import io as _ioutils
 
 if _ty.TYPE_CHECKING:
-    from . import Path
     import _typeshed
+
+    from . import Path
 
 
 def stat(path: "Path"):

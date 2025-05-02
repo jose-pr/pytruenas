@@ -2,10 +2,10 @@ import logging as _logging
 import sys as _sys
 import typing as _ty
 
-
 if _ty.TYPE_CHECKING:
-    import colorama as __coloroma
     from logging import *  # type:ignore
+
+    import colorama as __coloroma
 
 try:
     import colorama as _color  # type: ignore

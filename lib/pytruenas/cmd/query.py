@@ -2,12 +2,13 @@
 Get the supported api definitions from a TrueNAS host
 """
 
-from pytruenas import TrueNASClient
-from pytruenas.utils.cmd import PyTrueNASArgs
-from logging import Logger
 import argparse
-
 import json
+from logging import Logger
+
+from pytruenas.utils.cmd import PyTrueNASArgs
+
+from pytruenas import TrueNASClient
 
 
 class Args(PyTrueNASArgs):

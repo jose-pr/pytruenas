@@ -1,8 +1,10 @@
-from pathlib import Path as _P
+import functools as _ftools
 import shutil
 import typing as _ty
-import functools as _ftools
-from ..models import apidump as _api, jsonschema as _schema
+from pathlib import Path as _P
+
+from ..models import apidump as _api
+from ..models import jsonschema as _schema
 from ..utils import qualname as _qn
 
 

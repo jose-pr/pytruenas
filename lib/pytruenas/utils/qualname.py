@@ -1,6 +1,6 @@
-import typing as _ty
 import functools as _ftools
 import pathlib as _pathlib
+import typing as _ty
 
 from . import text as _text
 
