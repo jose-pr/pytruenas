@@ -12,37 +12,92 @@ class _Missing: ...
 
 
 _type = type
+MissingType = _type[_Missing]
 
 
-class _Field(_argparse.Namespace):
+class Argument(_ty.Protocol):
+    @classmethod
+    def _argbuilder_(
+        cls,
+        name: str,
+        type: _type,  # type: ignore
+        docstring: str,
+        default: None | object | MissingType,
+    ):
+        help = docstring
+        flags = ("--" + name.replace("_", "-"),)
+        if help.startswith("\\"):
+            flags, help = help[1:].split("\\", maxsplit=1)
+            flags = flags.split(",")
+        required = None
+        origin = _ty.get_origin(type)
+        args = _ty.get_args(type)
+        if origin:
+            if origin is _ty.Union and _types.NoneType in args:
+                args = [a for a in args if a is not _types.NoneType]
+                required = False
+                if len(args) == 1:
+                    type = args[0]
+            if origin is _ty.Union or origin is _types.UnionType and len(args) > 1:
+
+                def type(text: str):
+                    for ty in args:
+                        try:
+                            return ty(text)
+                        except:
+                            pass
+                    raise ValueError(text, args)
+
+        return ArgumentBuilder(
+            name=name,
+            flags=flags,
+            type=type,
+            default=default,
+            help=help,
+            required=required,
+        )
+
+
+def is_argument(ty: type) -> _ty.TypeGuard[Argument]:
+    builder_factory = getattr(ty, "_argbuilder_", None)
+    return callable(builder_factory)
+
+
+class ArgumentBuilder(_argparse.Namespace):
     name: str
-    type: _type | str | _type[_Missing] = _Missing
-    default: None | object | _type[_Missing] = _Missing
-    docstring: str = _Missing  # type:ignore
+    flags: list[str]
+    type: _type | str
+    default: None | object | MissingType
+    help: str
     required: bool | None = None
+    action: str | _type[_argparse.Action] | None = None
 
-    def add_to_parser(self, parser: _argparse.ArgumentParser):
-        name = ["--" + self.name.replace("_", "-")]
-        opts = []
-        parser_kwargs = {}
-
-        if self.docstring.startswith("\\"):
-            *opts, help = self.docstring[1:].split("\\")
-            parser_kwargs["help"] = help
+    def _kwargs(self):
+        kwargs = {}
+        if self.required is not None:
+            kwargs["required"] = self.required
 
         if self.default is not _Missing:
-            parser_kwargs["default"] = self.default
+            kwargs["default"] = self.default
 
-        for opt in opts:
-            if ":" not in opt:
-                name = opt.split(",")
-                continue
-            opt.split(":")
-        parser.add_argument(*name, **parser_kwargs)
+        if self.action:
+            kwargs["action"] = self.action
+
+        return kwargs
+
+    def add_to_parser(self, parser: _argparse.ArgumentParser):
+
+        return parser.add_argument(
+            *self.flags,
+            dest=self.name,
+            help=self.help,
+            type=self.type,
+            **self._kwargs(),
+        )
 
 
-def _get_fields(cls):
-    fields = {name: _Field(type=hint) for name, hint in _ty.get_type_hints(cls).items()}
+def _get_clsargs_docstrings(cls):
+    docstrings: dict[str, str] = {}
     bases = [cls]
     while bases:
         for base in bases:
@@ -51,7 +106,7 @@ def _get_fields(cls):
             except TypeError:
                 continue
             tree = _ty.cast(_ast.ClassDef, _ast.parse(source).body[0])
-            field = None
+            argument = None
             for node in tree.body:
                 if isinstance(node, (_ast.Assign, _ast.AnnAssign)):
                     if hasattr(node, "targets"):
@@ -59,48 +114,62 @@ def _get_fields(cls):
                     else:
                         target = node.target  # type:ignore
                     if not isinstance(target, _ast.Name):
-                        field = None
+                        argument = None
                     else:
-                        field = fields.setdefault(target.id, _Field())
+                        argument = target.id
                     continue
                 elif (
                     isinstance(node, _ast.Expr)
-                    and field
+                    and argument
                     and isinstance(node.value, _ast.Constant)
                     and isinstance(node.value.value, str)
                 ):
-                    field.docstring = node.value.value
-                field = None
+                    if argument not in docstrings:
+                        docstrings[argument] = node.value.value
+                argument = None
 
         bases = base.__bases__  # type:ignore
 
-    for name, field in fields.items():
-        default = getattr(cls, name, _Missing)
-        if default is not _Missing:
-            setattr(field, name, default)
-        if field.docstring is _Missing:
-            field.docstring = ""
-        field.name = name
-        if field.type is not _Missing:
-            origin = _ty.get_origin(field.type)
-            args = _ty.get_args(field.type)
-            if origin:
-                if origin is _ty.Union and _types.NoneType in args:
-                    args = [a for a in args if a is not _types.NoneType]
-                    field.required = False
-            if field.required is not None:
-                field.type = (
-                    args[0] if len(args) == 1 else _ty.Union(args)  # type:ignore
-                )
-
-    return fields
+    return docstrings
 
 
 class Args(_argparse.Namespace):
     @classmethod
-    def _args_(cls, parser: _argparse.ArgumentParser):
-        for name, field in _get_fields(cls).items():
-            print(name, field)  # WIP
+    def _getargs_(cls):
+        typehints = _ty.get_type_hints(cls)
+        docstrings = _get_clsargs_docstrings(cls)
+        args: list[ArgumentBuilder] = []
+        for name, type in typehints.items():
+            if is_argument(type):
+                builder = type._argbuilder_
+            else:
+                builder = Argument._argbuilder_
+
+            args.append(
+                builder(
+                    name,
+                    _ty.cast(_type, type),
+                    docstrings.get(name, ""),
+                    getattr(cls, name, _Missing),
+                )
+            )
+        return args
+
+    @classmethod
+    def build_parser(
+        cls, subparser: _argparse._SubParsersAction | None = None, **kwargs
+    ):
+        if subparser:
+            method = subparser.add_parser
+        else:
+            method = _argparse.ArgumentParser
+
+        parser = method(cls.__name__, usage=cls.__doc__ or "", **kwargs)
+
+        for arg in cls._getargs_():
+            arg.add_to_parser(parser)
+
+        return parser
 
 
 class UpdateAction(_argparse.Action):
@@ -153,9 +222,25 @@ def add_logging_args(
     )
 
 
+class LogLevels(dict[str, int], Argument):
+
+    @classmethod
+    def _argbuilder_(
+        cls,
+        name: str,
+        type: type,
+        docstring: str,
+        default: _types.NoneType | object | type[_Missing],
+    ):
+        type = parse_loglevels  # type:ignore
+        arg = super()._argbuilder_(name, type, docstring, {})
+        arg.action = UpdateAction
+        return arg
+
+
 class LoggingArgs(Args):
-    loglevels: dict[str, int]
-    """Log Levels"""
+    loglevels: LogLevels
+    """\\--loglevel\\Log Levels"""
 
     verbose: int = 0
 
@@ -177,7 +262,7 @@ class LoggingArgs(Args):
         for name, level in loglevels.items():
             _logging.getLogger(name).setLevel(level)
 
-        return loglevels
+        return _ty.cast(LogLevels, loglevels)
 
 
 _SUBPARSERACTION_CALL = _argparse._SubParsersAction.__call__

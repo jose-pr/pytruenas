@@ -1,23 +1,23 @@
-from pytruenas.utils import text
-from pytruenas.utils.cmd import PyTrueNASArgs
 import argparse
 import typing
 
-for letter in text.range('a', 'f'):
-    print(letter)
+from pytruenas.utils import text
+from pytruenas.utils.cmd import PyTrueNASArgs
 
-for letter in text.range('1', '10'):
-    print(letter)
-
-
-for t in text.expand("test[1-15:x].[text[c-h]]"):
-    print(t)
-
-test = argparse.ArgumentParser('test')
 
 class TestArgs(PyTrueNASArgs):
-    test_opt_arg: typing.Optional[str]
-TestArgs._args_(test)
+    """Test Argument Parser"""
 
-print(isinstance(typing.Optional[str], type(typing.Optional)))
+    untyped = None
+    test_opt_arg: typing.Optional[str]
+    number_or_string: int | str
+    """\\--test,-t\\"""
+
+
+for arg in TestArgs._getargs_():
+    print(arg)
+
+parser = TestArgs.build_parser()
+args = parser.parse_args()
+print(args)
 pass
