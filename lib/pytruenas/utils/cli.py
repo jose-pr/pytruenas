@@ -1,7 +1,105 @@
 import copy as _copy
 import argparse as _argparse
 import typing as _ty
+import types as _types
 from . import logging as _logging
+import ast as _ast
+import inspect as _inspect
+
+
+class _Missing: ...
+
+
+_type = type
+
+
+class _Field(_argparse.Namespace):
+    name: str
+    type: _type | str | _type[_Missing] = _Missing
+    default: None | object | _type[_Missing] = _Missing
+    docstring: str = _Missing  # type:ignore
+    required: bool | None = None
+
+    def add_to_parser(self, parser: _argparse.ArgumentParser):
+        name = ["--" + self.name.replace("_", "-")]
+        opts = []
+        parser_kwargs = {}
+
+        if self.docstring.startswith("\\"):
+            *opts, help = self.docstring[1:].split("\\")
+            parser_kwargs["help"] = help
+
+        if self.default is not _Missing:
+            parser_kwargs["default"] = self.default
+
+        for opt in opts:
+            if ":" not in opt:
+                name = opt.split(",")
+                continue
+            opt.split(":")
+        parser.add_argument(*name, **parser_kwargs)
+
+
+def _get_fields(cls):
+    fields = {name: _Field(type=hint) for name, hint in _ty.get_type_hints(cls).items()}
+    bases = [cls]
+    while bases:
+        for base in bases:
+            try:
+                source = _inspect.getsource(base)
+            except TypeError:
+                continue
+            tree = _ty.cast(_ast.ClassDef, _ast.parse(source).body[0])
+            field = None
+            for node in tree.body:
+                if isinstance(node, (_ast.Assign, _ast.AnnAssign)):
+                    if hasattr(node, "targets"):
+                        target = node.targets[0]  # type:ignore
+                    else:
+                        target = node.target  # type:ignore
+                    if not isinstance(target, _ast.Name):
+                        field = None
+                    else:
+                        field = fields.setdefault(target.id, _Field())
+                    continue
+                elif (
+                    isinstance(node, _ast.Expr)
+                    and field
+                    and isinstance(node.value, _ast.Constant)
+                    and isinstance(node.value.value, str)
+                ):
+                    field.docstring = node.value.value
+                field = None
+
+        bases = base.__bases__  # type:ignore
+
+    for name, field in fields.items():
+        default = getattr(cls, name, _Missing)
+        if default is not _Missing:
+            setattr(field, name, default)
+        if field.docstring is _Missing:
+            field.docstring = ""
+        field.name = name
+        if field.type is not _Missing:
+            origin = _ty.get_origin(field.type)
+            args = _ty.get_args(field.type)
+            if origin:
+                if origin is _ty.Union and _types.NoneType in args:
+                    args = [a for a in args if a is not _types.NoneType]
+                    field.required = False
+            if field.required is not None:
+                field.type = (
+                    args[0] if len(args) == 1 else _ty.Union(args)  # type:ignore
+                )
+
+    return fields
+
+
+class Args(_argparse.Namespace):
+    @classmethod
+    def _args_(cls, parser: _argparse.ArgumentParser):
+        for name, field in _get_fields(cls).items():
+            print(name, field)  # WIP
 
 
 class UpdateAction(_argparse.Action):
@@ -54,9 +152,11 @@ def add_logging_args(
     )
 
 
-class LoggingArgs(_argparse.Namespace):
+class LoggingArgs(Args):
     loglevels: dict[str, int]
-    verbose: int
+    """Log Levels"""
+
+    verbose: int = 0
 
     def verbose_as_loglevel(self):
         loglevel = (
