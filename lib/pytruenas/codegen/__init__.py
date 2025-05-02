@@ -284,7 +284,9 @@ class Namespace(PyDeclaration):
                             ]
                         }
                 props = {}
-                for name, schema in method.returns.schema["properties"].items():
+                for name, schema in method.returns.schema[
+                    "properties"
+                ].items():  # type:ignore
                     schema = {**schema}
                     schema["required"] = False
                     props[name] = schema
@@ -301,7 +303,7 @@ class Namespace(PyDeclaration):
                                     "prefixItems": [
                                         {
                                             "title": "__id_or_filter",
-                                            **(idtype or {}),
+                                            **(idtype or {}),  # type:ignore
                                             "default": None,
                                         },
                                         {

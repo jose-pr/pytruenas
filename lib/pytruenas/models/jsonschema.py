@@ -150,7 +150,7 @@ class Object(BaseType):
 
         required = self.get("required", [])
         extras = self.get("additional_properties", None)
-        title = self.get('_name', self.get("title"))
+        title = self.get("_name", self.get("title"))
         if not title:
             raise ValueError(self)
         name = (namespace / title).camelcase()
