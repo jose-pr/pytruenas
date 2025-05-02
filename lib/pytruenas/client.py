@@ -1,25 +1,23 @@
-from functools import cached_property
-import logging
-import subprocess
-from pathlib import PurePath, PurePosixPath
+import functools as _ftools
+import logging as _logging
+import subprocess as _localprocess
+import pathlib as _path
 import typing as _ty
 import io as _io
-import warnings
+import warnings as _warn
 import requests as _req
 import json as _js
 import sys as _sys
 import os as _os
-import pwd as _pwd
 
-warnings.filterwarnings(action="ignore", module=".*asyncssh.*")
 
 import asyncssh as _ssh
 
 try:
-    import pwd
+    import pwd as _pwd
 except ImportError:
-    pass
-import shlex
+    _pwd = None
+import shlex as _shlex
 
 
 from . import _conn
@@ -29,8 +27,11 @@ from . import auth as _auth
 from .namespace import Namespace
 from .fs import Path
 
+_warn.filterwarnings(action="ignore", module=".*asyncssh.*")
+
+
 FileHandle = None | int | _ty.IO
-PathLike = str | PurePath
+PathLike = str | _path.PurePath
 Input = bytes | str
 
 if _ty.TYPE_CHECKING:
@@ -55,7 +56,7 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
         sslverify=True,
         *,
         shell: str | None = None,
-        logger: logging.Logger | None = None,
+        logger: _logging.Logger | None = None,
         fsbackend: "str|_ty.Sequence[str]" = "auto",
     ) -> None:
         self._api = _TGT.parse(target or "localhost", scheme="auto")
@@ -115,8 +116,8 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
             host=self._api.host,
         )
         if not logger:
-            logger = logging.getLogger("pytruenas")
-        self.logger = logging.getLogger(logger) if isinstance(logger, str) else logger
+            logger = _logging.getLogger("pytruenas")
+        self.logger = _logging.getLogger(logger) if isinstance(logger, str) else logger
 
     def _openwss(self):
         return _conn.Client(
@@ -141,7 +142,7 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
         creds = creds or self._creds
         creds.login(self)  # type:ignore
 
-    @cached_property
+    @_ftools.cached_property
     def api(self) -> "ApiVersion":
         return Namespace(self)  # type:ignore
 
@@ -313,15 +314,15 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
         errors: str | None = None,
         input: Input | None = None,
         timeout: float | None = None,
-        loglevel: int = logging.TRACE,  # type:ignore
-    ) -> subprocess.CompletedProcess:
+        loglevel: int = _logging.TRACE,  # type:ignore
+    ) -> _localprocess.CompletedProcess:
 
         if not executable:
             if self.shell.path:
                 executable = self.shell.path
             else:
                 try:
-                    if self._api.is_local:
+                    if self._api.is_local and _pwd:
                         executable = _pwd.getpwnam("root").pw_shell
                     else:
                         executable = self.api.user._get(username="root")["shell"]  # type: ignore
@@ -334,10 +335,10 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
         script = []
         for cmd in cmds:
             if not isinstance(cmd, (tuple, list)):
-                if isinstance(cmd, (PurePath, Path)):
-                    cmd = shlex.quote(cmd.as_posix())
+                if isinstance(cmd, (_path.PurePath, Path)):
+                    cmd = _shlex.quote(cmd.as_posix())
                 elif isinstance(cmd, _os.PathLike):
-                    cmd = shlex.quote(_os.fspath(cmd))
+                    cmd = _shlex.quote(_os.fspath(cmd))
                 else:
                     cmd = str(cmd)
             else:
@@ -345,7 +346,7 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
             script.append(cmd)
 
         if cwd:
-            cwd = PurePosixPath(cwd).as_posix()
+            cwd = _path.PurePosixPath(cwd).as_posix()
 
         script = ";".join(script)
         if loglevel:
@@ -355,14 +356,14 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
 
         match (capture_output or ""):
             case "stdout":
-                stdout = subprocess.PIPE
+                stdout = _localprocess.PIPE
             case "stderr":
-                stderr = subprocess.PIPE
+                stderr = _localprocess.PIPE
             case True:
                 if not stderr:
-                    stderr = subprocess.PIPE
+                    stderr = _localprocess.PIPE
                 if not stdout:
-                    stdout = subprocess.PIPE
+                    stdout = _localprocess.PIPE
 
         if input:
             if stdin is not None:
@@ -388,7 +389,7 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
                         input = stdin.read()
                         stdin = None
 
-                result = subprocess.run(
+                result = _localprocess.run(
                     command,
                     bufsize=bufsize,
                     input=input,
@@ -403,11 +404,11 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
                     timeout=timeout,
                 )
             case "ssh":
-                command = shlex.join(command)
+                command = _shlex.join(command)
                 if cwd:
-                    command = f"{shlex.join(['cd', cwd])}; {command}"
+                    command = f"{_shlex.join(['cd', cwd])}; {command}"
 
-                if stdout in (None, subprocess.STDOUT, _sys.stdout):
+                if stdout in (None, _localprocess.STDOUT, _sys.stdout):
                     stdout = open(_os.dup(_sys.stdout.fileno()), _sys.stdout.mode)
                 if stderr in (None, _sys.stderr):
                     stderr = open(_os.dup(_sys.stderr.fileno()), _sys.stderr.mode)
@@ -431,7 +432,7 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
                 )
             case _:
                 raise NotImplementedError(self.shell.scheme)
-        return _ty.cast(subprocess.CompletedProcess, result)
+        return _ty.cast(_localprocess.CompletedProcess, result)
 
 
 def _shellquote(c: object):
@@ -440,9 +441,9 @@ def _shellquote(c: object):
             c = c.as_posix()  # type:ignore
         else:
             c = _os.fspath(c)
-        c = shlex.quote(c)  # type:ignore
+        c = _shlex.quote(c)  # type:ignore
     elif isinstance(c, bytes):
         c = c.decode()
     else:
-        c = shlex.quote(str(c))
+        c = _shlex.quote(str(c))
     return c
