@@ -20,7 +20,7 @@ import shlex as _shlex
 
 from . import _conn
 from . import auth as _auth
-from .fs import Path
+from . import fs as _fs
 from .namespace import Namespace
 from .utils import async_ as _async
 from .utils import io as _ioutils
@@ -30,7 +30,6 @@ _warn.filterwarnings(action="ignore", module=".*asyncssh.*")
 
 
 FileHandle = None | int | _ty.IO
-PathLike = str | _path.PurePath
 Input = bytes | str
 
 if _ty.TYPE_CHECKING:
@@ -294,7 +293,7 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
             self._sftp = _async.async_to_sync(self.ssh.start_sftp_client())
         return self._sftp
 
-    def path(self, *path: PathLike, **kwargs):
+    def path(self, *path: _fs.PathLike, **kwargs):
         kwargs["backend"] = kwargs.get("backend" or self.fsbackend)
         return Path(*path, **kwargs, client=self)  # type:ignore
 
@@ -306,7 +305,7 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
         stdin: FileHandle = None,
         stdout: FileHandle = None,
         stderr: FileHandle = None,
-        cwd: PathLike | None = None,
+        cwd: _fs.PathLike | None = None,
         env: _ty.Mapping | None = None,
         capture_output: str | bool = True,
         check: bool = True,
@@ -335,7 +334,7 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
         script = []
         for cmd in cmds:
             if not isinstance(cmd, (tuple, list)):
-                if isinstance(cmd, (_path.PurePath, Path)):
+                if _fs.is_path(cmd):
                     cmd = _shlex.quote(cmd.as_posix())
                 elif isinstance(cmd, _os.PathLike):
                     cmd = _shlex.quote(_os.fspath(cmd))

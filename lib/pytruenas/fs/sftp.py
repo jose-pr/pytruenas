@@ -193,7 +193,7 @@ def resolve(path: "Path", strict=False):
     )
     if strict and sftpfile.attrs.type == _ssh.FILEXFER_TYPE_UNKNOWN:
         raise FileNotFoundError(path)
-    return path._with_path(sftpfile.filename)
+    return path._with_path(sftpfile.filename)  # type:ignore
 
 
 def open(
@@ -262,7 +262,7 @@ class _AsynToSyncFileHandle(_io.IOBase):
     def close(self):
         return _async.async_to_sync(self.fh.close())
 
-    def seek(self, offset, whence=0):
+    def seek(self, offset: int, whence=0):
         return _async.async_to_sync(self.fh.seek(offset, whence))
 
     def tell(self):
@@ -271,6 +271,6 @@ class _AsynToSyncFileHandle(_io.IOBase):
     def read(self, size: int = -1):
         return _async.async_to_sync(self.fh.read(size))
 
-    def truncate(self, size=None):
+    def truncate(self, size: int | None = None):
         _async.async_to_sync(self.fh.truncate(size))
         return _ty.cast(int, _async.async_to_sync(self.fh.stat()).size)

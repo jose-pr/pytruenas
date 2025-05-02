@@ -27,3 +27,8 @@ for _attr in dir(_LocalPath):
 
 def chown(path: "Path", uid: int, gid: int, *, follow_symlinks: bool = True):
     return _os.chown(path._path, uid, gid, follow_symlinks=follow_symlinks)
+
+
+def iterdir(path: "Path"):
+    for file in _LocalPath(path).iterdir():
+        yield path._with_path(file)
