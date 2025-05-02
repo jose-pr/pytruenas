@@ -1,13 +1,11 @@
 import functools as _ftools
 import io as _io
 import json as _js
-import logging as _logging
 import os as _os
 import pathlib as _path
 import subprocess as _localprocess
 import sys as _sys
 import typing as _ty
-import warnings as _warn
 
 import asyncssh as _ssh
 import requests as _req
@@ -24,10 +22,8 @@ from . import fs as _fs
 from .namespace import Namespace
 from .utils import async_ as _async
 from .utils import io as _ioutils
+from .utils import logging as _logging
 from .utils.target import Target as _TGT
-
-_warn.filterwarnings(action="ignore", module=".*asyncssh.*")
-
 
 FileHandle = None | int | _ty.IO
 Input = bytes | str
@@ -295,7 +291,7 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
 
     def path(self, *path: _fs.PathLike, **kwargs):
         kwargs["backend"] = kwargs.get("backend" or self.fsbackend)
-        return Path(*path, **kwargs, client=self)  # type:ignore
+        return _fs.Path(*path, **kwargs, client=self)  # type:ignore
 
     def run(
         self,
@@ -305,7 +301,7 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
         stdin: FileHandle = None,
         stdout: FileHandle = None,
         stderr: FileHandle = None,
-        cwd: _fs.PathLike | None = None,
+        cwd: "_fs.PathLike | None" = None,
         env: _ty.Mapping | None = None,
         capture_output: str | bool = True,
         check: bool = True,

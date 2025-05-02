@@ -7,6 +7,8 @@ if _ty.TYPE_CHECKING:
 
     import colorama as __coloroma
 
+    TRACE: int
+
 try:
     import colorama as _color  # type: ignore
 
@@ -48,7 +50,7 @@ def add_logging_level(name: str, level: int, force=False, color: str | None = No
     setattr(_logging, name, level)
     _logging.addLevelName(level, name)
 
-    def log_logger(self: Logger, message, *args, **kwargs):
+    def log_logger(self: _logging.Logger, message: str, *args, **kwargs):
         if self.isEnabledFor(level):
             self._log(level, message, args, **kwargs)
 
@@ -116,9 +118,11 @@ def initverbose():
 
 
 def init_stderr_logging(name=None, level: int | None = None):
-    add_logging_level("TRACE", _logging.DEBUG - 5, color=_asicode(36))
     handler = _logging.StreamHandler(_sys.stderr)
     logger = _logging.getLogger(name)
     logger.addHandler(handler)
     handler.setFormatter(DefaultFormatter())
     return logger
+
+
+add_logging_level("TRACE", _logging.DEBUG - 5, color=_asicode(36))
