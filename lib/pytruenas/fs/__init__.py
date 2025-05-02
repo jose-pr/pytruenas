@@ -17,14 +17,22 @@ else:
 from ..utils.target import Target as _Tgt
 from . import api, local, sftp
 
+PurePathProtocol: _ty.TypeAlias = "_pathlib.PurePath | Path"
+PathProtocol: _ty.TypeAlias = "_pathlib.Path | Path"
+PathLike: _ty.TypeAlias = "str | PurePathProtocol"
+
 BACKENDS = {_n: _v for _n, _v in globals().items() if not _n.startswith("_")}
 _FTYPE = _ty.Literal["file", "link", "directory"]
+
+
+def is_path(obj: object) -> _ty.TypeGuard[PathProtocol]:
+    return isinstance(obj, (_pathlib.Path, Path))
 
 
 class Path(_Path):
     def __init__(
         self,
-        *args: _pathlib.PurePath | str,
+        *args: PathLike,
         client: "TrueNASClient",
         backend: _ty.Sequence[str] | str = "auto",
     ):
@@ -70,16 +78,16 @@ class Path(_Path):
     def __hash__(self):
         return self.uri.__hash__()
 
-    def _with_path(self, path):
+    def _with_path(self, path: PathLike):
         return self.__class__(path, client=self._client, backend=self._backends)
 
-    def with_backend(self, *backend):
+    def with_backend(self, *backend: str):
         return self.__class__(self._path, client=self._client, backend=backend)
 
-    def __truediv__(self, key):
+    def __truediv__(self, key: PathLike):  # type: ignore
         return self._with_path(self._path.__truediv__(key))
 
-    def __rtruediv__(self, key):
+    def __rtruediv__(self, key: PathLike):  # type: ignore
         return self._with_path(self._path.__rtruediv__(key))
 
     def _fsmethod(self, name: str):

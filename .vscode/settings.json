@@ -10,8 +10,9 @@
         "./lib"
     ],
     "python.analysis.exclude": [
-        "/usr/lib",
-        "/lib"
+        "/**/site-packages/**/*.py",
+        "/usr/lib/**",
+        "/lib/**"
     ],
     "python.analysis.typeCheckingMode": "standard",
     "isort.args": [
@@ -22,6 +23,5 @@
         "--profile",
         "black"
     ],
-    "isort.check": true,
-    "isort.showNotification": "always"
+    "isort.check": true
 }
