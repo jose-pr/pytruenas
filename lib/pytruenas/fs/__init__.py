@@ -17,12 +17,12 @@ else:
 from ..utils.target import Target as _Tgt
 from . import api, local, sftp
 
+BACKENDS = {_n: _v for _n, _v in globals().items() if not _n.startswith("_")}
+_FTYPE = _ty.Literal["file", "link", "directory"]
+
 PurePathProtocol: _ty.TypeAlias = "_pathlib.PurePath | Path"
 PathProtocol: _ty.TypeAlias = "_pathlib.Path | Path"
 PathLike: _ty.TypeAlias = "str | PurePathProtocol"
-
-BACKENDS = {_n: _v for _n, _v in globals().items() if not _n.startswith("_")}
-_FTYPE = _ty.Literal["file", "link", "directory"]
 
 
 def is_path(obj: object) -> _ty.TypeGuard[PathProtocol]:
