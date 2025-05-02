@@ -1,4 +1,27 @@
 {
-    "python.analysis.extraPaths": ["./lib"],
-    "python.analysis.typeCheckingMode": "standard"
+    "[python]": {
+        "editor.defaultFormatter": "ms-python.black-formatter",
+        "editor.formatOnSave": true,
+        "editor.codeActionsOnSave": {
+            "source.organizeImports": "explicit"
+        },
+    },
+    "python.analysis.extraPaths": [
+        "./lib"
+    ],
+    "python.analysis.exclude": [
+        "/usr/lib",
+        "/lib"
+    ],
+    "python.analysis.typeCheckingMode": "standard",
+    "isort.args": [
+        "--sg",
+        "/**/site-packages/**/*.py",
+        "--sg",
+        "/usr/lib/**/*.py",
+        "--profile",
+        "black"
+    ],
+    "isort.check": true,
+    "isort.showNotification": "always"
 }

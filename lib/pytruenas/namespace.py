@@ -1,13 +1,13 @@
-from functools import cache
-import typing as _ty
-import errno as _errno
-import time as _time
-
-import re as _re
 import enum as _enum
+import errno as _errno
+import re as _re
+import time as _time
+import typing as _ty
+from functools import cache
 
 from . import _conn
-from .utils import query as _q, io as _ioutils
+from .utils import io as _ioutils
+from .utils import query as _q
 
 if _ty.TYPE_CHECKING:
     from . import TrueNASClient

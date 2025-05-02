@@ -1,22 +1,21 @@
+import functools as _ftools
+import io as _io
 import pathlib as _pathlib
 import typing as _ty
-import io as _io
-import functools as _ftools
 
 if _ty.TYPE_CHECKING:
-    from .. import TrueNASClient
     from pathlib import PosixPath as _Path
+
     import _typeshed
+
+    from .. import TrueNASClient
 else:
 
     class _Path: ...
 
 
 from ..utils.target import Target as _Tgt
-
-from . import api
-from . import local
-from . import sftp
+from . import api, local, sftp
 
 BACKENDS = {_n: _v for _n, _v in globals().items() if not _n.startswith("_")}
 _FTYPE = _ty.Literal["file", "link", "directory"]

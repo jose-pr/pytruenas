@@ -1,15 +1,16 @@
+import io as _io
+import os as _os
 import typing as _ty
 from os import stat_result as _stat
-import io as _io
+
 import asyncssh as _ssh
 import asyncssh.sftp as _sftp
-import os as _os
 
 if _ty.TYPE_CHECKING:
     from . import Path
 
-
-from ..utils import async_ as _async, io as _ioutils
+from ..utils import async_ as _async
+from ..utils import io as _ioutils
 
 _STATMAP = {"st_mode": "permissions"}
 

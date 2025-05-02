@@ -1,6 +1,6 @@
+import os as _os
 import typing as _ty
 from pathlib import Path as _LocalPath
-import os as _os
 
 if _ty.TYPE_CHECKING:
     from . import Path

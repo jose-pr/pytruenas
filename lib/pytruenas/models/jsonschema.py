@@ -1,6 +1,6 @@
 import typing as _ty
-from ..utils import qualname as _qn
 
+from ..utils import qualname as _qn
 
 JsonNumber: _ty.TypeAlias = float | int
 JsonValue: _ty.TypeAlias = "str|int|float|bool|None|JsonArray|JsonObject"

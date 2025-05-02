@@ -1,17 +1,17 @@
 import argparse as _argparse
-from pathlib import Path as _Path
-from .import_ import import_from_path
-from .qualname import PythonName as _PyName
-from ..client import TrueNASClient as _Client
-from logging import Logger as _Logger, getLogger as _getlogger
-from types import ModuleType as _Module
-from importlib import import_module as _import
-import importlib.util as _importutils
-import typing as _ty
-import sys as _sys
 import fnmatch as _fnmatch
+import importlib.util as _importutils
+import sys as _sys
+import typing as _ty
+from importlib import import_module as _import
+from pathlib import Path as _Path
+from types import ModuleType as _Module
+
+from ..client import TrueNASClient as _Client
 from ..utils import logging as _logging
 from . import cli as _cli
+from .import_ import import_from_path
+from .qualname import PythonName as _PyName
 
 
 class PyTrueNASArgs(_cli.LoggingArgs):
@@ -28,16 +28,19 @@ _C = _ty.TypeVar("_C", bound=_Client)
 
 
 class CmdProtocol(_ty.Protocol, _ty.Generic[_A, _C]):  # type:ignore
-    def run(self, client: _C, args: _A, logger: _Logger): ...
+    def run(self, client: _C, args: _A, logger: _logging.Logger): ...
 
 
 class _CmdModule(_Module, CmdProtocol[_A, _C]):
-    def init(self, args: _A, loggen: _Logger) -> _C: ...
-    def success(self, client: _C, args: _A, logger: _Logger): ...
-    def finally_(self, client: _C, args: _A, logger: _Logger): ...
+    def init(self, args: _A, loggen: _logging.Logger) -> _C: ...
+    def success(self, client: _C, args: _A, logger: _logging.Logger): ...
+    def finally_(self, client: _C, args: _A, logger: _logging.Logger): ...
 
     def register(
-        self, parser: _argparse.ArgumentParser, args: PyTrueNASArgs, logger: _Logger
+        self,
+        parser: _argparse.ArgumentParser,
+        args: PyTrueNASArgs,
+        logger: _logging.Logger,
     ):
         pass
 
@@ -123,7 +126,7 @@ class RunPathCmd(_CmdModule[_RA, _C]):
             self.steps.append(step)
         self.steps = sorted(self.steps, key=lambda s: s.PRIORITY)
 
-    def run(self, client: _C, args: _RA, logger: _Logger):
+    def run(self, client: _C, args: _RA, logger: _logging.Logger):
         rcopts: list[tuple[str, RcOptions]] = []
         for pattern in args.rcopts:
             disable = pattern.startswith("!")
@@ -162,7 +165,10 @@ class RunPathCmd(_CmdModule[_RA, _C]):
                 done.append(step.__name__)
 
     def register(
-        self, parser: _argparse.ArgumentParser, args: PyTrueNASArgs, logger: _Logger
+        self,
+        parser: _argparse.ArgumentParser,
+        args: PyTrueNASArgs,
+        logger: _logging.Logger,
     ):
         parser.add_argument(
             "--rcopts",
@@ -244,4 +250,4 @@ class Cmd:
 
     @property
     def logger(self):
-        return _getlogger(self.qualname)
+        return _logging.getLogger(self.qualname)
