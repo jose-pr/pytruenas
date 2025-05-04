@@ -1,11 +1,9 @@
-import argparse
 import importlib.util as _import
-import os
+import sys as _sys
 import typing as _ty
 from pathlib import Path
 
 import urllib3
-import yaml
 
 from .utils import cli, logging
 from .utils.cmd import Cmd, PyTrueNASArgs
@@ -39,30 +37,18 @@ def main(
     #
     # Build argument parser
     #
-    baseparser = argparse.ArgumentParser(
-        pretty_name or name,
-        description or "Utility tool to manage and configure TrueNAS systems",
-        add_help=True,
-        conflict_handler="resolve",
+    baseparser = PyTrueNASArgs.build_parser(None, add_help=True)
+    parser = PyTrueNASArgs.build_parser(
+        name=pretty_name or name,
+        add_help=False,
+        description=description,
+        parents=(baseparser,),
     )
-    cli.add_logging_args(baseparser, default_loglevels)
-    baseparser.add_argument(
-        "--config",
-        "-c",
-        help="Config file to use",
-        type=Path,
-        default=Path(os.environ.get("PYTRUENAS_CFG") or "./pytruenas.yaml"),
+    action = parser._actions.pop(
+        parser._actions.index(PyTrueNASArgs._action_targets)  # type:ignore
     )
-    baseparser.add_argument(
-        "--cmdspath",
-        help="paths to search for commands",
-        default=[],
-        type=lambda x: x.split(":"),
-        action="extend",
-    )
-
-    parser = argparse.ArgumentParser(parents=(baseparser,), add_help=False)
     cmdaction = parser.add_subparsers(title="command", dest="cmd", required=True)
+    parser._actions.append(action)
 
     # Do a dry run with no error for missing command, pick up a custom command if it exists
     args = _ty.cast(PyTrueNASArgs, cli.prerun_parse(parser, argv))
@@ -76,24 +62,14 @@ def main(
             f"Logging level for '{name}' set at: {', '.join(logging.VERBOSE_LEVELS[level])}"
         )
 
-    #
-    # Load base configuration that may affect where to load commands from and other settings
-    #
-    configpath = _ty.cast(Path, args.config)
-    if configpath.exists():
-        config: dict = yaml.safe_load(configpath.read_text())
-    else:
-        config = {}
-    args.config = config
-    args.config["default_loglevels"] = default_loglevels
+    config = args.config
+    config["default_loglevels"] = default_loglevels
 
     #
     #  Load Commands either from a path or from python modules
     #
-    cmds_paths: list[str] = [
-        *(os.environ.get("PYTRUENAS_PATH", None) or "pytruenas.cmd").split(":"),
-        *args.cmdspath,
-    ] + (config.get("commandspath") or [])
+    cmds_paths: list[str] = args.cmdspath + (config.get("commandspath") or [])
+    _searched = []
     for path in cmds_paths:
         paths: list[Path] = []
         if "/" not in path:
@@ -114,6 +90,10 @@ def main(
                 paths.extend(path.iterdir())
 
         for path in paths:
+            if path in _searched:
+                continue
+            else:
+                _searched.append(path)
             name = path.stem
 
             if name.startswith("__"):
@@ -125,6 +105,7 @@ def main(
                 description=cmd.description,
                 parents=(baseparser,),
                 add_help=False,
+                conflict_handler="resolve",
             )
             cmd.register(cmd_parser, args)
     cmdpaths: dict[str, str] = {args.cmd: args.cmd}  # type:ignore
@@ -151,6 +132,7 @@ def main(
                 add_help=False,
             )
             cmd.register(cmd_parser, args)
+
         except ImportError as e:
             logger.error(f"Could not load {cmdname}")
 

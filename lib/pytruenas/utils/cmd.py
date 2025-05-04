@@ -1,6 +1,7 @@
 import argparse as _argparse
 import fnmatch as _fnmatch
 import importlib.util as _importutils
+import os as _os
 import sys as _sys
 import typing as _ty
 from importlib import import_module as _import
@@ -9,18 +10,57 @@ from types import ModuleType as _Module
 
 from ..client import TrueNASClient as _Client
 from ..utils import logging as _logging
+from ..utils import text as _text
 from . import cli as _cli
 from .import_ import import_from_path
 from .qualname import PythonName as _PyName
 
 
+def StrList(separator: str, **kwargs):
+    return _cli.NS(type=lambda x: x.split(separator), action="extend", kwargs=kwargs)
+
+
+def ExpandText(**kwargs):
+    def ty(text: str):
+        return _text.expand(text)
+
+    kwargs["nargs"] = "*"
+
+    return _cli.NS(action="extend", type=ty, kwargs=kwargs)
+
+
 class PyTrueNASArgs(_cli.LoggingArgs):
-    config: dict
-    cmdspath: list[str]
-    cmd: "Cmd"
-    target: str
-    targets: list[str]
+    "Utility tool to manage and configure TrueNAS systems"
+
+    config: _cli.Arg[
+        dict,
+        _cli.NS(
+            type=_Path,
+            default=_os.environ.get("PYTRUENAS_CFG") or "./pytruenas.yaml",
+        ),
+    ]
+    "Config file to use"
+    ["--config", "-c"]  # type:ignore
+    cmdspath: _cli.Arg[list[str], StrList(":")] = (
+        _os.environ.get("PYTRUENAS_PATH", None) or "pytruenas.cmd"
+    ).split(":")
+    target: _cli.Arg[str, _argparse.SUPPRESS]
+    targets: _cli.Arg[list[str], ExpandText()] = []
+    ("targets",)  # type:ignore
     sslverify: bool
+
+    def __init__(self, *, config: _Path, targets: list[str], **kwargs) -> None:
+        import yaml
+
+        if isinstance(config, _Path):
+            if config.exists():
+                _config: dict = yaml.safe_load(config.read_text())
+            else:
+                _config = {}
+        else:
+            _config = config or {}
+        targets = targets or ["localhost"]
+        super().__init__(config=_config, targets=targets, **kwargs)
 
 
 _A = _ty.TypeVar("_A", bound=PyTrueNASArgs)
@@ -171,8 +211,7 @@ class RunPathCmd(_CmdModule[_RA, _C]):
         logger: _logging.Logger,
     ):
         parser.add_argument(
-            "--rcopts",
-            "-o",
+            "-O",
             help="Options for runpath steps, example: !*,step1 -> Disable all except step1",
             default=[],
             type=lambda x: x.split(","),
@@ -233,11 +272,12 @@ class Cmd:
 
     def register(self, parser: _argparse.ArgumentParser, args: PyTrueNASArgs):
         logger = self.logger
-
+        action = parser._actions.pop(
+            parser._actions.index(PyTrueNASArgs._action_targets)  # type:ignore
+        )
         if hasattr(self.module, "register"):
             self.module.register(parser, args, logger)
-        parser.add_argument("--sslverify", action="store_true", default=False)
-        parser.add_argument("targets", nargs="*", default=["localhost"])
+        parser._actions.append(action)
         parser.set_defaults(_cmd=self)
 
     @property
