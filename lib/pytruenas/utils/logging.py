@@ -118,8 +118,11 @@ def initverbose():
 
 
 def init_stderr_logging(name=None, level: int | None = None):
+    initverbose()
     handler = _logging.StreamHandler(_sys.stderr)
     logger = _logging.getLogger(name)
+    if level:
+        logger.setLevel(level)
     logger.addHandler(handler)
     handler.setFormatter(DefaultFormatter())
     return logger
