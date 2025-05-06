@@ -57,42 +57,48 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
         self.fsbackend = fsbackend
 
         if self._api.scheme == "auto":
-            resp = _req.get(
-                _TGT(
-                    scheme="http",
-                    username="",
-                    password="",
-                    host=self._api.host,
-                    port=self._api.port,
-                    path="",
-                ).uri,
-                verify=False,
-            )
-
-            self._api = self._api._replace(
-                scheme=(
-                    "wss"
-                    if _TGT.parse(resp.url, scheme="http").scheme == "https"
-                    else "ws"
-                )
-            )
-
-        if not self._api.path:
-            for path in ["/api/current", "/websocket"]:
+            if self._api.is_local and not self._api.port:
+                self._api = self._api._replace(scheme="ws")
+            else:
                 resp = _req.get(
                     _TGT(
-                        scheme=self._api.scheme.replace("ws", "http"),
+                        scheme="http",
                         username="",
                         password="",
                         host=self._api.host,
                         port=self._api.port,
-                        path=path,
+                        path="",
                     ).uri,
                     verify=False,
                 )
-                if resp.status_code == 400:
-                    self._api = self._api._replace(path=path)
-                    break
+
+                self._api = self._api._replace(
+                    scheme=(
+                        "wss"
+                        if _TGT.parse(resp.url, scheme="http").scheme == "https"
+                        else "ws"
+                    )
+                )
+
+        if not self._api.path:
+            if self._api.is_local and not self._api.port:
+                self._api = self._api._replace(path="/websocket")
+            else:
+                for path in ["/api/current", "/websocket"]:
+                    resp = _req.get(
+                        _TGT(
+                            scheme=self._api.scheme.replace("ws", "http"),
+                            username="",
+                            password="",
+                            host=self._api.host,
+                            port=self._api.port,
+                            path=path,
+                        ).uri,
+                        verify=False,
+                    )
+                    if resp.status_code == 400:
+                        self._api = self._api._replace(path=path)
+                        break
 
         if self._api.username or self._api.password:
             if not creds:
@@ -233,19 +239,16 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
             name=name,
             attributes={"private_key": private_key, "public_key": pubkey},
         )
-        root = client.api.user._get(username="root")
-        rootauthkeys: list[str] = (
-            root.get("sshpubkey") or ""  # type:ignore
-        ).splitlines()  # type:ignore
+        username = client.api.auth.me()["pw_name"]
+        user = client.api.user._get(username=username) or {}
+        authorizedkeys: list[str] = (user.get("sshpubkey") or "").splitlines()
 
-        if pubkey not in rootauthkeys:
-            rootauthkeys.append(pubkey)
-            client.api.user._upsert(
-                "username", username="root", sshpubkey="\n".join(rootauthkeys)
-            )
+        if pubkey not in authorizedkeys:
+            authorizedkeys.append(pubkey)
+            client.api.user._upsert(user["id"], sshpubkey="\n".join(authorizedkeys))
         if not client.shell.username or not client.shell.password:
             client.shell = client.shell._replace(
-                username="client_keys|root",
+                username=f"client_keys|{username}",
                 password=keypair["attributes"]["private_key"],  # type: ignore
             )
 
