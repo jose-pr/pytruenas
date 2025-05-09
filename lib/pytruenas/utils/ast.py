@@ -37,7 +37,7 @@ NOT_DEFINED = NotDefined()
 
 
 @_data
-class ArgDeclaration:
+class ClsArgDeclaration:
     default: object
     type: type
     annotations: list
@@ -48,7 +48,7 @@ class ArgDeclaration:
 def get_clsargs(cls: type):
     typehints = _ty.get_type_hints(cls, include_extras=True)
     constants = get_clsargs_constants(cls)
-    args: dict[str, ArgDeclaration] = {}
+    args: dict[str, ClsArgDeclaration] = {}
     for name, type in typehints.items():
         annotations = []
         if hasattr(type, "__metadata__"):
@@ -61,7 +61,7 @@ def get_clsargs(cls: type):
             argcontant = argcontant[1:]
         else:
             docstring = ""
-        args[name] = ArgDeclaration(
+        args[name] = ClsArgDeclaration(
             type=type,
             default=getattr(cls, name, NOT_DEFINED),
             annotations=annotations,
