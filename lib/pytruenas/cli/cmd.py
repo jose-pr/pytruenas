@@ -11,22 +11,9 @@ from types import ModuleType as _Module
 from ..client import TrueNASClient as _Client
 from ..utils import logging as _logging
 from ..utils import text as _text
-from . import cli as _cli
-from .import_ import import_from_path
-from .qualname import PythonName as _PyName
-
-
-def StrList(separator: str, **kwargs):
-    return _cli.NS(type=lambda x: x.split(separator), action="extend", kwargs=kwargs)
-
-
-def ExpandText(**kwargs):
-    def ty(text: str):
-        return _text.expand(text)
-
-    kwargs["nargs"] = "*"
-
-    return _cli.NS(action="extend", type=ty, kwargs=kwargs)
+from ..utils.import_ import import_from_path
+from ..utils.qualname import PythonName as _PyName
+from . import utils as _cli
 
 
 class PyTrueNASArgs(_cli.LoggingArgs):
@@ -40,13 +27,17 @@ class PyTrueNASArgs(_cli.LoggingArgs):
         ),
     ]
     "Config file to use"
-    ["--config", "-c"]  # type:ignore
-    cmdspath: _cli.Arg[list[str], StrList(":")] = (
+    ["--config", "-c"]
+
+    cmdspath: _cli.Arg[list[str], _cli.Extend(":")] = (
         _os.environ.get("PYTRUENAS_PATH", None) or "pytruenas.cmd"
     ).split(":")
+
     target: _cli.Arg[str, _argparse.SUPPRESS]
-    targets: _cli.Arg[list[str], ExpandText()] = []
-    ("targets",)  # type:ignore
+
+    targets: _cli.Arg[list[str], _cli.Extend(_text.expand, nargs="*")]
+    ("targets",)
+
     sslverify: bool
 
     def __init__(self, *, config: _Path, targets: list[str], **kwargs) -> None:
@@ -86,7 +77,8 @@ class _CmdModule(_Module, CmdProtocol[_A, _C]):
 
 
 class RunPathArgs(PyTrueNASArgs):
-    rcopts: list[str]
+    rcopts: _cli.Arg[list[str], _cli.Extend(",")]
+    "Options for runpath steps, example: !*,step1 -> Disable all except step1"
 
 
 _RA = _ty.TypeVar("_RA", bound=RunPathArgs)
@@ -109,6 +101,19 @@ class RcOptions(_argparse.Namespace):
             val = getattr(rcopt, attr, None)
             if val is not None:
                 setattr(self, attr, val)
+
+    @classmethod
+    def from_matchstring(cls, text: str):
+        text = text.strip()
+        disable = text.startswith("!")
+        strict = not text.endswith("?")
+        if not strict:
+            text = text[:-1] + ":!strict"
+        if disable:
+            text = text[1:] + ":!enable"
+        text, *opts = text.split(":")
+        opts = cls.parse(opts)
+        return text, opts
 
 
 class RunPathStep(_Module, CmdProtocol[_RA, _C]):
@@ -143,12 +148,8 @@ class RunPathCmd(_CmdModule[_RA, _C]):
             if "." in name:
                 continue
 
-            disable = name.startswith("!")
-            if disable:
-                name = name[1:] + ":!enable"
+            name, opts = RcOptions.from_matchstring(name)
 
-            name, *opts = name.split(":")
-            opts = RcOptions.parse(opts)
             parts = name.split("-", maxsplit=1)
 
             if len(parts) == 1:
@@ -169,20 +170,13 @@ class RunPathCmd(_CmdModule[_RA, _C]):
     def run(self, client: _C, args: _RA, logger: _logging.Logger):
         rcopts: list[tuple[str, RcOptions]] = []
         for pattern in args.rcopts:
-            disable = pattern.startswith("!")
-            if disable:
-                pattern = pattern[1:] + ":!enabled"
-            elif ":" not in pattern:
-                pattern += ":enabled"
-            pattern, *opts = pattern.split(":")
-            opts = RcOptions.parse(opts)
+            pattern, opts = RcOptions.from_matchstring(pattern)
             logger.debug(f"Fi1ter pattern:{pattern} opts :{opts}")
             rcopts.append((pattern, opts))
 
         done = []
-        for step in self.steps:
-            if step.__name__ in done:
-                continue
+
+        def run(step: RunPathStep, force: bool):
             qualname = _PyName(step.__name__)
             rcopt = RcOptions(enabled=True, strict=True)
             rcopt.update(step.RCOPTS)
@@ -192,7 +186,19 @@ class RunPathCmd(_CmdModule[_RA, _C]):
                 ):
                     rcopt.update(opts)
 
-            if rcopt.enabled:
+            if rcopt.enabled or force:
+                for dep in step.REQUIRED:
+                    if dep not in done:
+                        run(
+                            next(
+                                filter(
+                                    lambda s: s.__name__ == self.qualname / dep,
+                                    self.steps,
+                                )
+                            ),
+                            True,
+                        )
+
                 logger.info(f"Running step {step.__name__}")
                 try:
                     step.run(client, args, logger)
@@ -204,19 +210,18 @@ class RunPathCmd(_CmdModule[_RA, _C]):
                         raise e from None
                 done.append(step.__name__)
 
+        for step in self.steps:
+            if step.__name__ in done:
+                continue
+            run(step, False)
+
     def register(
         self,
         parser: _argparse.ArgumentParser,
         args: PyTrueNASArgs,
         logger: _logging.Logger,
     ):
-        parser.add_argument(
-            "-O",
-            help="Options for runpath steps, example: !*,step1 -> Disable all except step1",
-            default=[],
-            type=lambda x: x.split(","),
-            action="extend",
-        )
+        RunPathArgs.initparser(parser)
 
 
 class Cmd:
@@ -272,12 +277,11 @@ class Cmd:
 
     def register(self, parser: _argparse.ArgumentParser, args: PyTrueNASArgs):
         logger = self.logger
-        action = parser._actions.pop(
-            parser._actions.index(PyTrueNASArgs._action_targets)  # type:ignore
-        )
         if hasattr(self.module, "register"):
             self.module.register(parser, args, logger)
-        parser._actions.append(action)
+        order = {k.dest: i for i, k in enumerate(parser._actions)}
+        order["targets"] = len(order)
+        parser._actions.sort(key=lambda x: order[x.dest])
         parser.set_defaults(_cmd=self)
 
     @property

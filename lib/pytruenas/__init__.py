@@ -4,7 +4,7 @@ _warn.filterwarnings(action="ignore", module=".*asyncssh.*")
 
 from ._conn import ClientException, ValidationErrors
 from .auth import *
+from .cli import PyTrueNASArgs
 from .client import TrueNASClient
 from .fs import Path
-from .main import PyTrueNASArgs
 from .namespace import Namespace

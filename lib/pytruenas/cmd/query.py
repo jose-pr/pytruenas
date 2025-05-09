@@ -6,9 +6,8 @@ import argparse
 import json
 from logging import Logger
 
-from pytruenas.utils.cmd import PyTrueNASArgs
-
 from pytruenas import TrueNASClient
+from pytruenas.cli import PyTrueNASArgs
 
 
 class Args(PyTrueNASArgs):

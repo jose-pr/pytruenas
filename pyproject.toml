@@ -1,0 +1,4 @@
+[tool.pyright]
+reportPrivateImportUsage=false
+reportUnusedExpression = false
+ignore = ['**/vendor']

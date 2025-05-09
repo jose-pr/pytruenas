@@ -19,6 +19,7 @@ import shlex as _shlex
 from . import _conn
 from . import auth as _auth
 from . import fs as _fs
+from . import shell as _shell
 from .namespace import Namespace
 from .utils import async_ as _async
 from .utils import io as _ioutils
@@ -53,6 +54,9 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
         logger: _logging.Logger | None = None,
         fsbackend: "str|_ty.Sequence[str]" = "auto",
     ) -> None:
+        if not logger:
+            logger = _logging.getLogger("pytruenas")
+        self.logger = _logging.getLogger(logger) if isinstance(logger, str) else logger
         self._api = _TGT.parse(target or "localhost", scheme="auto")
         self.fsbackend = fsbackend
 
@@ -110,14 +114,18 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
         self._sftp: _ssh.SFTPClient | None = None  # type:ignore
         self.sslverify = sslverify
         self.autologin = autologin
-        self.shell = _TGT.parse(
+
+        shell_ = _TGT.parse(
             shell or "",
             scheme="local" if self._api.is_local else "ssh",
             host=self._api.host,
         )
-        if not logger:
-            logger = _logging.getLogger("pytruenas")
-        self.logger = _logging.getLogger(logger) if isinstance(logger, str) else logger
+        if shell_.scheme == "ssh":
+            self.shell = _shell.SSHShell(shell_, self.logger)
+        elif shell_.scheme == "local":
+            self.shell = _shell.LocalShell(shell_.path, self.logger)
+        else:
+            raise ValueError(shell)
 
     def _openwss(self):
         return _conn.Client(
@@ -246,50 +254,28 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
         if pubkey not in authorizedkeys:
             authorizedkeys.append(pubkey)
             client.api.user._upsert(user["id"], sshpubkey="\n".join(authorizedkeys))
-        if not client.shell.username or not client.shell.password:
-            client.shell = client.shell._replace(
-                username=f"client_keys|{username}",
-                password=keypair["attributes"]["private_key"],  # type: ignore
-            )
 
-    @property
-    def ssh(self):
-        if not self._ssh or self._ssh._close_event.is_set():
-            self.logger.debug("Openning SSH connection")
-
-            connect_opts = {}
-            username = ""
-            if self.shell.username:
-                if "|" in self.shell.username:
-                    logintype, username = self.shell.username.split("|", maxsplit=1)
-                else:
-                    logintype = "password"
-                    username = "root"
-                creds = self.shell.password
-                if logintype == "client_keys" and isinstance(creds, str):
-                    creds = creds.encode()
-                connect_opts[logintype] = creds
-            username = username or "root"
-            self._ssh = _async.async_to_sync(
-                _ssh.connect(  # type:ignore
-                    self.shell.host,
-                    port=self.shell.port or 22,
-                    username=username,
-                    known_hosts=None,
-                    **connect_opts,
+        shell = self.shell
+        if isinstance(shell, _shell.SSHShell):
+            if not shell.target.username or not shell.target.password:
+                shell.target = shell.target._replace(
+                    username=f"client_keys|{username}",
+                    password=keypair["attributes"]["private_key"],  # type: ignore
                 )
-            )
-        return self._ssh
 
     @property
     def sftp(self):
+        shell = self.shell
+        if not isinstance(shell, _shell.SSHShell):
+            raise TypeError(shell)
+
         if (
             not self._sftp
             or not self._sftp._handler._writer
             or self._sftp._handler._writer._chan._close_event.is_set()
         ):
             self.logger.debug("Openning SFTP channel")
-            self._sftp = _async.async_to_sync(self.ssh.start_sftp_client())
+            self._sftp = _async.async_to_sync(shell.conn.start_sftp_client())
         return self._sftp
 
     def path(self, *path: _fs.PathLike, **kwargs):
@@ -300,8 +286,7 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
         self,
         *cmds,
         bufsize: int = -1,
-        executable: str | None = None,
-        stdin: FileHandle = None,
+        stdin: FileHandle | Input = None,
         stdout: FileHandle = None,
         stderr: FileHandle = None,
         cwd: "_fs.PathLike | None" = None,
@@ -310,138 +295,22 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
         check: bool = True,
         encoding: str | None = None,
         errors: str | None = None,
-        input: Input | None = None,
         timeout: float | None = None,
         loglevel: int = _logging.TRACE,  # type:ignore
     ) -> _localprocess.CompletedProcess:
 
-        if not executable:
-            if self.shell.path:
-                executable = self.shell.path
-            else:
-                try:
-                    if self._api.is_local and _pwd:
-                        executable = _pwd.getpwnam("root").pw_shell
-                    else:
-                        executable = self.api.user._get(username="root")["shell"]  # type: ignore
-                except Exception as e:
-                    self.logger.warning(
-                        "Count not get default shell for root, using bash as default"
-                    )
-                    executable = "/bin/bash"
-
-        script = []
-        for cmd in cmds:
-            if not isinstance(cmd, (tuple, list)):
-                if _fs.is_path(cmd):
-                    cmd = _shlex.quote(cmd.as_posix())
-                elif isinstance(cmd, _os.PathLike):
-                    cmd = _shlex.quote(_os.fspath(cmd))
-                else:
-                    cmd = str(cmd)
-            else:
-                cmd = " ".join(_shellquote(c) for c in cmd)
-            script.append(cmd)
-
-        if cwd:
-            cwd = _path.PurePosixPath(cwd).as_posix()
-
-        script = ";".join(script)
-        if loglevel:
-            self.logger.log(loglevel, f"Running Command: {script}")
-
-        command = [executable, "-c", script]
-
-        match (capture_output or ""):
-            case "stdout":
-                stdout = _localprocess.PIPE
-            case "stderr":
-                stderr = _localprocess.PIPE
-            case True:
-                if not stderr:
-                    stderr = _localprocess.PIPE
-                if not stdout:
-                    stdout = _localprocess.PIPE
-
-        if input:
-            if stdin is not None:
-                raise ValueError("stdin")
-
-        if _ioutils.isbytelike(stdin) or isinstance(stdin, str):
-            input = _ty.cast(bytes, stdin)
-            stdin = None
-
-        if isinstance(input, str):
-            input = input.encode()
-
-        match self.shell.scheme:
-            case "local":
-                if stdin and not isinstance(stdin, int):
-                    try:
-                        readme = stdin.fileno() == -1
-                    except (OSError, AttributeError):
-                        if not hasattr(stdin, "read"):
-                            raise TypeError(stdin)
-                        readme = True
-                    if readme:
-                        input = stdin.read()
-                        stdin = None
-
-                result = _localprocess.run(
-                    command,
-                    bufsize=bufsize,
-                    input=input,
-                    stdin=stdin,
-                    stdout=stdout,
-                    stderr=stderr,
-                    cwd=cwd,
-                    env=env,
-                    check=check,
-                    encoding=encoding,
-                    errors=errors,
-                    timeout=timeout,
-                )
-            case "ssh":
-                command = _shlex.join(command)
-                if cwd:
-                    command = f"{_shlex.join(['cd', cwd])}; {command}"
-
-                if stdout in (None, _localprocess.STDOUT, _sys.stdout):
-                    stdout = open(_os.dup(_sys.stdout.fileno()), _sys.stdout.mode)
-                if stderr in (None, _sys.stderr):
-                    stderr = open(_os.dup(_sys.stderr.fileno()), _sys.stderr.mode)
-
-                if input:
-                    stdin = _io.BytesIO(input)
-
-                result = _async.async_to_sync(
-                    self.ssh.run(
-                        command,
-                        bufsize=bufsize,
-                        stdin=stdin,
-                        stdout=stdout,
-                        stderr=stderr,
-                        env=env,
-                        check=check,
-                        encoding=encoding,
-                        errors=errors,
-                        timeout=timeout,
-                    )
-                )
-            case _:
-                raise NotImplementedError(self.shell.scheme)
-        return _ty.cast(_localprocess.CompletedProcess, result)
-
-
-def _shellquote(c: object):
-    if isinstance(c, _os.PathLike):
-        if hasattr(c, "as_posix"):
-            c = c.as_posix()  # type:ignore
-        else:
-            c = _os.fspath(c)
-        c = _shlex.quote(c)  # type:ignore
-    elif isinstance(c, bytes):
-        c = c.decode()
-    else:
-        c = _shlex.quote(str(c))
-    return c
+        return self.shell.run(
+            *cmds,
+            bufsize=bufsize,
+            stdin=stdin,
+            stdout=stdout,
+            stderr=stderr,
+            cwd=cwd,
+            env=env,
+            capture_output=capture_output,
+            check=check,
+            encoding=encoding,
+            errors=errors,
+            timeout=timeout,
+            loglevel=loglevel,
+        )

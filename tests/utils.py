@@ -1,8 +1,5 @@
-import argparse
-import typing
-
-from pytruenas.utils import logging, text
-from pytruenas.utils.cmd import PyTrueNASArgs
+from pytruenas.cli import PyTrueNASArgs
+from pytruenas.utils import logging
 
 logging.init_stderr_logging(level=logging.DEBUG)
 

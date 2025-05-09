@@ -1,37 +1,38 @@
-import importlib.util as _import
-import sys as _sys
 import typing as _ty
-from pathlib import Path
+from pathlib import Path as _Path
 
-import urllib3
-
-from .utils import cli, logging
-from .utils.cmd import Cmd, PyTrueNASArgs
-from .utils.qualname import PythonName
-from .utils.text import expand
+from ..utils import logging as _logging
+from ..utils.qualname import PythonName as _PyName
+from . import utils
+from .cmd import Cmd, PyTrueNASArgs
+from .utils import *
 
 DEFAULT_LOGLEVELS = {
-    "requests": logging.WARNING,
-    "urllib3": logging.WARNING,
-    "websocket": logging.WARNING,
-    "httpx": logging.WARNING,
-    "asyncssh": logging.WARNING,
+    "requests": _logging.WARNING,
+    "urllib3": _logging.WARNING,
+    "websocket": _logging.WARNING,
+    "httpx": _logging.WARNING,
+    "asyncssh": _logging.WARNING,
 }
-
-
-MODULE = PythonName(Path(__file__).parent.name)
+MODULE = _PyName(_Path(__file__).parent.parent.name)
 
 
 def main(
-    name: PythonName | str | None = None,
+    name: _PyName | str | None = None,
     description: str | None = None,
     pretty_name=None,
     default_loglevels=DEFAULT_LOGLEVELS,
-    base_commands_qualname: PythonName | None = None,
+    base_commands_qualname: _PyName | None = None,
     argv: _ty.Sequence[str] | None = None,
 ):
-    name = PythonName(name or MODULE)
-    logger = logging.getLogger(name)
+    import importlib.util as _import
+
+    import urllib3
+
+    from ..utils.text import expand
+
+    name = _PyName(name or MODULE)
+    logger = _logging.getLogger(name)
     base_commands_qualname = name / "cmd"
 
     #
@@ -44,22 +45,21 @@ def main(
         description=description,
         parents=(baseparser,),
     )
-    action = parser._actions.pop(
-        parser._actions.index(PyTrueNASArgs._action_targets)  # type:ignore
-    )
     cmdaction = parser.add_subparsers(title="command", dest="cmd", required=True)
-    parser._actions.append(action)
+    order = {k.dest: i for i, k in enumerate(parser._actions)}
+    order["targets"] = len(order)
+    parser._actions.sort(key=lambda x: order[x.dest])
 
     # Do a dry run with no error for missing command, pick up a custom command if it exists
-    args = _ty.cast(PyTrueNASArgs, cli.prerun_parse(parser, argv))
+    args = _ty.cast(PyTrueNASArgs, utils.prerun_parse(parser, argv))
 
     #
     # Configuring logs and warnings
     #
     urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-    for name, level in cli.LoggingArgs.set_loglevels(args).items():
+    for name, level in utils.LoggingArgs.set_loglevels(args).items():
         logger.debug(
-            f"Logging level for '{name}' set at: {', '.join(logging.VERBOSE_LEVELS[level])}"
+            f"Logging level for '{name}' set at: {', '.join(_logging.VERBOSE_LEVELS[level])}"
         )
 
     config = args.config
@@ -71,7 +71,7 @@ def main(
     cmds_paths: list[str] = args.cmdspath + (config.get("commandspath") or [])
     _searched = []
     for path in cmds_paths:
-        paths: list[Path] = []
+        paths: list[_Path] = []
         if "/" not in path:
             try:
                 spec = _import.find_spec(path)
@@ -80,12 +80,12 @@ def main(
                 submodules = spec.submodule_search_locations
                 if submodules:
                     for path in submodules:
-                        paths.extend(Path(path).iterdir())
+                        paths.extend(_Path(path).iterdir())
             except:
                 logger.debug(f"Could not load commands from {path}")
                 continue
         else:
-            path = Path(path)
+            path = _Path(path)
             if path.exists() and path.is_dir():
                 paths.extend(path.iterdir())
 
@@ -116,10 +116,10 @@ def main(
             continue
 
         if "/" in path:
-            module = Path(path)
+            module = _Path(path)
             qualname = base_commands_qualname / module.stem
         else:
-            qualname = PythonName(path)
+            qualname = _PyName(path)
             module = None
 
         try:
@@ -144,7 +144,7 @@ def main(
 
     logger.info(f"Running {args.cmd} on {targets}")
     args.cmd = args._cmd
-    args.loglevels = cli.LoggingArgs.set_loglevels(args)
+    args.loglevels = utils.LoggingArgs.set_loglevels(args)
     del args._cmd  # type:ignore
 
     for target in targets:

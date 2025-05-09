@@ -1,11 +1,14 @@
+# type:ignore
 """
 Create a local ssh keypair for the host and add it to root authorizedkeys
 """
 
-from pytruenas import TrueNASClient
-from pytruenas.utils.cmd import PyTrueNASArgs
 from logging import Logger
+
 import asyncssh as _ssh
+
+from pytruenas import TrueNASClient
+from pytruenas.cli import PyTrueNASArgs
 
 
 def run(client: TrueNASClient, args: PyTrueNASArgs, logger: Logger):
@@ -19,9 +22,7 @@ def run(client: TrueNASClient, args: PyTrueNASArgs, logger: Logger):
     logger.info(f"Get the current if any SSH Key Pair named: {keypair_name}")
     keypair = client.api.keychaincredential._get(type="SSH_KEY_PAIR", name=keypair_name)
     if not keypair:
-        logger.info(
-            f"Generating a SSH Key Pair as it currently doesnt exists"
-        )
+        logger.info(f"Generating a SSH Key Pair as it currently doesnt exists")
 
         private_key = client.api.keychaincredential.generate_ssh_key_pair()[
             "private_key"
@@ -39,14 +40,15 @@ def run(client: TrueNASClient, args: PyTrueNASArgs, logger: Logger):
         name=keypair_name,
         attributes={"private_key": private_key, "public_key": pubkey},
     )
-    root = client.api.user._get(username='root') or {}
-    authkeys = (root.get("sshpubkey") or '').splitlines()
+    root = client.api.user._get(username="root") or {}
+    authkeys = (root.get("sshpubkey") or "").splitlines()
     if pubkey not in authkeys:
         authkeys.append(pubkey)
         logger.info(f"Adding key to {root['username']}")
-        client.api.user._update(root['id'], sshpubkey='\n'.join(authkeys))
+        client.api.user._update(root["id"], sshpubkey="\n".join(authkeys))
     else:
-        logger.info(f"User {root['username']} already has the key in its authorizedkeys")
-
+        logger.info(
+            f"User {root['username']} already has the key in its authorizedkeys"
+        )
 
     print(private_key)
