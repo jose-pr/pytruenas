@@ -31,7 +31,7 @@ class Argument(_ty.Protocol, metaclass=ArgumentMeta):
     def _argbuilder_(
         cls,
         name: str,
-        decl: _astutils.ArgDeclaration,
+        decl: _astutils.ClsArgDeclaration,
         factory: Factory | None = None,
     ):
         help = decl.docstring or ""
@@ -89,7 +89,7 @@ class Argument(_ty.Protocol, metaclass=ArgumentMeta):
             def _argbuilder_(
                 cls,
                 name: str,
-                decl: _astutils.ArgDeclaration,
+                decl: _astutils.ClsArgDeclaration,
                 factory: Factory | None = _factory,
             ):
                 builder = super()._argbuilder_(name, decl, factory or _factory)
