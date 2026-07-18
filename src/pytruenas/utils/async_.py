@@ -1,69 +1,88 @@
 """Run an awaitable to completion from synchronous code.
 
-``asyncssh`` is fully async, but ``pytruenas`` presents a synchronous API, so
-each SSH/SFTP operation is driven to completion here. ``nest_asyncio`` (pulled
-in by the optional ``ssh`` extra) is applied when available so this works even
-when called from inside an already-running event loop; without it, the plain
-``run_until_complete`` path still works for the common (no running loop) case.
+``asyncssh`` is fully async, but ``pytruenas`` presents a synchronous API, so the
+direct-asyncssh operations (``client.ssh``/``client.sftp``/``client.run`` over
+SSH) are driven to completion here.
+
+The bridge is a single **shared background event loop** running in a daemon
+thread; each call submits its coroutine with ``run_coroutine_threadsafe`` and
+blocks on the result. This works whether or not the *calling* thread already has
+a running loop (the coroutine runs on the dedicated background loop, not the
+caller's), so no ``nest_asyncio`` re-entrancy hack is needed -- and it avoids the
+deprecated ``asyncio.get_event_loop()``/policy APIs (slated for removal in 3.16).
+asyncssh objects created through this bridge are bound to this loop, so all
+subsequent operations on them must also go through here. Mirrors the approach
+``pathlib_next``'s asyncssh SFTP backend uses.
 """
 
-import asyncio
+import asyncio as _asyncio
+import os as _os
+import sys as _sys
+import threading as _threading
 import typing as _ty
 
 _T = _ty.TypeVar("_T")
 
-#: Whether ``nest_asyncio.apply()`` has been run. Deferred until a nested run is
-#: actually needed: ``apply()`` eagerly patches ``asyncio`` (incl. the event-loop
-#: policy, whose accessor is deprecated and slated for removal in 3.16), so doing
-#: it at import time emits a DeprecationWarning on every import even when no
-#: nested run ever happens. Applying it lazily keeps the common no-nesting path
-#: warning-free.
-_nest_asyncio_applied = False
+#: Default: no bridge-level timeout (block until the awaitable completes),
+#: matching the original ``run_until_complete`` behavior. pytruenas drives
+#: potentially long-running operations through here (e.g. ``client.run`` of a
+#: backup/copy), and callers that want a bound pass ``timeout=`` -- or, for SSH
+#: commands, asyncssh's own per-command ``timeout=`` (``client.run`` forwards it).
+_DEFAULT_TIMEOUT = None
+
+_loop: "_asyncio.AbstractEventLoop | None" = None
+_loop_pid: "int | None" = None
+_loop_lock = _threading.Lock()
 
 
-def _ensure_nest_asyncio() -> bool:
-    """Apply ``nest_asyncio`` on first need; return True if it is available."""
-    global _nest_asyncio_applied
-    try:
-        import nest_asyncio
-    except ImportError:
-        return False
-    if not _nest_asyncio_applied:
-        nest_asyncio.apply()
-        _nest_asyncio_applied = True
-    return True
+def _new_loop() -> "_asyncio.AbstractEventLoop":
+    if _sys.platform == "win32":
+        # SelectorEventLoop, not the Windows-default Proactor loop: this bridge
+        # only makes plain-TCP SSH client connections (no subprocess pipes),
+        # and Proactor's pipe transports emit a benign-but-noisy
+        # "Exception ignored in _ProactorBasePipeTransport.__del__" on GC.
+        return _asyncio.SelectorEventLoop()
+    return _asyncio.new_event_loop()
 
 
-#: Reused loop for the common "no loop running in this thread" path, created
-#: lazily. Avoids ``asyncio.get_event_loop()`` (deprecated when there is no
-#: current loop; the underlying policy API is slated for removal in 3.16).
-_LOOP: "asyncio.AbstractEventLoop | None" = None
+def _ensure_loop() -> "_asyncio.AbstractEventLoop":
+    global _loop, _loop_pid
+    pid = _os.getpid()
+    with _loop_lock:
+        if _loop is not None and not _loop.is_closed() and _loop_pid == pid:
+            return _loop
+        # First call, or a fork()'d child that inherited a now-dead loop thread.
+        loop = _new_loop()
+        thread = _threading.Thread(
+            target=loop.run_forever, name="pytruenas-asyncssh-loop", daemon=True
+        )
+        thread.start()
+        _loop, _loop_pid = loop, pid
+        return loop
 
 
-def async_to_sync(awaitable: "_ty.Awaitable[_T]") -> "_T":
-    """Drive ``awaitable`` to completion from synchronous code.
+def async_to_sync(
+    awaitable: "_ty.Awaitable[_T]", *, timeout: "float | None" = _DEFAULT_TIMEOUT
+) -> "_T":
+    """Drive ``awaitable`` to completion on the shared background loop.
 
-    If a loop is already running in this thread, reuse it (``nest_asyncio``, when
-    installed, makes ``run_until_complete`` re-entrant so this works from inside
-    an ``async`` caller). Otherwise run on a lazily-created, thread-owned loop --
-    without ``asyncio.get_event_loop()`` (deprecated; policy API slated for
-    removal in Python 3.16).
+    Safe to call from any thread and from inside an already-running event loop
+    (the coroutine runs on the dedicated background loop, not the caller's).
+    Blocks up to ``timeout`` seconds; ``None`` waits indefinitely.
     """
-    global _LOOP
-    try:
-        running = asyncio.get_running_loop()
-    except RuntimeError:
-        running = None
+    loop = _ensure_loop()
+    future = _asyncio.run_coroutine_threadsafe(_ensure_coro(awaitable), loop)
+    return future.result(timeout)
 
-    if running is not None:
-        # A loop is already running in this thread; a nested run_until_complete
-        # needs nest_asyncio (the ssh extra). Apply it lazily now -- only here,
-        # so the common no-nesting path never triggers its deprecated policy
-        # patch. Without nest_asyncio installed, run_until_complete raises the
-        # usual "This event loop is already running", same as before.
-        _ensure_nest_asyncio()
-        return running.run_until_complete(awaitable)
 
-    if _LOOP is None or _LOOP.is_closed():
-        _LOOP = asyncio.new_event_loop()
-    return _LOOP.run_until_complete(awaitable)
+def _ensure_coro(awaitable: "_ty.Awaitable[_T]") -> "_ty.Coroutine[_ty.Any, _ty.Any, _T]":
+    """Adapt any awaitable to a coroutine (``run_coroutine_threadsafe`` requires
+    a genuine coroutine object; asyncssh's ``@async_context_manager`` awaitables
+    and futures are not)."""
+    if _asyncio.iscoroutine(awaitable):
+        return awaitable
+
+    async def _wrap() -> "_T":
+        return await awaitable
+
+    return _wrap()
