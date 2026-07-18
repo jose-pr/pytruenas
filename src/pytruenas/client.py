@@ -130,7 +130,6 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
         self._creds = _auth.Credentials(creds)
         self._conn: _conn.Client | None = None
         self._ssh: _ssh.SSHClientConnection | None = None  # type:ignore
-        self._sftp: _ssh.SFTPClient | None = None  # type:ignore
         self.sslverify = sslverify
         self.autologin = autologin
         self.shell = _TGT.parse(
@@ -308,17 +307,6 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
                 )
             )
         return self._ssh
-
-    @property
-    def sftp(self):
-        if (
-            not self._sftp
-            or not self._sftp._handler._writer
-            or self._sftp._handler._writer._chan._close_event.is_set()
-        ):
-            self.logger.debug("Openning SFTP channel")
-            self._sftp = _async.async_to_sync(self.ssh.start_sftp_client())
-        return self._sftp
 
     def path(self, *path: PathLike, backend: "str | None" = None):
         from .fs import path as _make_path
