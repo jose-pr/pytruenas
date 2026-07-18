@@ -5,9 +5,10 @@ CLAUDE*
 .claude/
 
 # Virtualenvs
-.venv/
+.venv*/
 venv/
 env/
+.env/
 
 # Byte-compiled / optimized
 __pycache__/
