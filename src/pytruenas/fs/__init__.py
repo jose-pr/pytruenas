@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import pathlib as _pathlib
 import typing as _ty
 import io as _io
@@ -14,12 +16,26 @@ else:
 
 from ..utils.target import Target as _Tgt
 
-from . import api
-from . import local
-from . import sftp
-
-BACKENDS = {_n: _v for _n, _v in globals().items() if not _n.startswith("_")}
+#: Known filesystem backends. Imported lazily by :func:`_get_backend` so that a
+#: backend's optional dependency (e.g. ``asyncssh`` for ``sftp``) is only
+#: required when that backend is actually used, not merely when ``fs`` is
+#: imported.
+_BACKEND_NAMES = ("api", "local", "sftp")
+_BACKENDS: "dict[str, object]" = {}
 _FTYPE = _ty.Literal["file", "link", "directory"]
+
+
+def _get_backend(name: str):
+    """Import and cache the backend module named ``name`` (or raise KeyError)."""
+    if name not in _BACKEND_NAMES:
+        raise KeyError(name)
+    module = _BACKENDS.get(name)
+    if module is None:
+        from importlib import import_module
+
+        module = import_module(f".{name}", __name__)
+        _BACKENDS[name] = module
+    return module
 
 
 class Path(_Path):
@@ -88,14 +104,16 @@ class Path(_Path):
     def _fsmethod(self, name: str):
         for backend in self._backends:
             try:
-                method = getattr(BACKENDS[backend], name)
+                method = getattr(_get_backend(backend), name)
+            except (AttributeError, NotImplementedError, KeyError, ImportError):
+                # Backend missing, lacks this op, or its optional dependency is
+                # not installed: try the next backend in the chain.
+                continue
 
-                def bounded_method(*args, **kwargs):
-                    return method(self, *args, **kwargs)
+            def bounded_method(*args, _method=method, **kwargs):
+                return _method(self, *args, **kwargs)
 
-                return bounded_method
-            except (AttributeError, NotImplementedError, KeyError):
-                pass
+            return bounded_method
         return NotImplemented
 
     @_ftools.cache
@@ -142,7 +160,7 @@ class Path(_Path):
         return self.write_bytes(data)  # type:ignore
 
     def read(self):
-        self.read_bytes()
+        return self.read_bytes()
 
     def symlink_to(
         self,

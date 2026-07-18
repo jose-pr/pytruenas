@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import typing as _ty
 from pathlib import Path as _LocalPath
 import os as _os

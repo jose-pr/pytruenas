@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import typing as _ty
 from .utils import io as _ioutils
 if _ty.TYPE_CHECKING:

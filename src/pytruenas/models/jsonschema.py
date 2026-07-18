@@ -1,11 +1,13 @@
+from __future__ import annotations
+
 import typing as _ty
 from duho import qualname as _qn
 
 
-JsonNumber: _ty.TypeAlias = float | int
-JsonValue: _ty.TypeAlias = "str|int|float|bool|None|JsonArray|JsonObject"
-JsonObject: _ty.TypeAlias = "dict[str, JsonValue]"
-JsonArray: _ty.TypeAlias = "list[JsonValue]"
+JsonNumber = _ty.Union[float, int]
+JsonValue = "str|int|float|bool|None|JsonArray|JsonObject"
+JsonObject = "dict[str, JsonValue]"
+JsonArray = "list[JsonValue]"
 
 
 class Schema(_ty.TypedDict, total=False):
@@ -50,7 +52,7 @@ class BaseType(Schema):
         ...
 
 
-TypeDeclaration: _ty.TypeAlias = BaseType | str
+TypeDeclaration = _ty.Union[BaseType, str]
 
 
 class AnyOf(Schema):

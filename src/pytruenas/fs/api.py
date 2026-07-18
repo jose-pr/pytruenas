@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import typing as _ty
 from os import stat_result as _stat
 import io as _io
