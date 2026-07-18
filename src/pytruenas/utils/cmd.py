@@ -73,8 +73,8 @@ class PyTrueNASArgs(LoggingArgs):
     ("--sslverify",)  # type: ignore
 
     targets: "Arg[list[str], Extend(',')]" = []
-    "Target hosts (comma-separated; supports [A-Z]/[0-9] range expansion)"
-    ("targets",)  # type: ignore
+    "Target host(s): repeat -t, or comma-separate; supports [A-Z]/[0-9] range expansion"
+    ("-t", "--target")  # type: ignore
 
     parallel: int = 1
     "Number of targets to operate on concurrently"
@@ -90,10 +90,22 @@ class PyTrueNASArgs(LoggingArgs):
         return config or {}
 
     def _expanded_targets_(self) -> "list[str]":
-        """Return the target list with range patterns expanded (default localhost)."""
+        """Return the target list with range patterns expanded (default localhost).
+
+        Flattens defensively: depending on how the ``Extend`` action accumulates,
+        a value may arrive as a nested list, so any list items are flattened to
+        strings before range expansion.
+        """
         from duho import expand
 
-        raw = self.targets or ["localhost"]
+        def _flatten(values):
+            for value in values:
+                if isinstance(value, (list, tuple)):
+                    yield from _flatten(value)
+                else:
+                    yield value
+
+        raw = list(_flatten(self.targets)) or ["localhost"]
         expanded: "list[str]" = []
         for target in raw:
             expanded.extend(expand(target))
