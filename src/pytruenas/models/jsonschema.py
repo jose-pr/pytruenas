@@ -2,12 +2,33 @@ from __future__ import annotations
 
 import typing as _ty
 from duho import qualname as _qn
+from duho import text as _text
 
 
 JsonNumber = _ty.Union[float, int]
 JsonValue = "str|int|float|bool|None|JsonArray|JsonObject"
 JsonObject = "dict[str, JsonValue]"
 JsonArray = "list[JsonValue]"
+
+
+def _typeddict_name(namespace: "_qn.PythonName", title: str) -> str:
+    """Build a valid CamelCase TypedDict name from ``namespace`` + ``title``.
+
+    ``title`` may contain spaces/dashes/dots (real dumps have titles like
+    ``"Filesystem Count"`` or ``"query-options"``); those all become word
+    boundaries, and empty parts are dropped (so a ``pysafe`` trailing ``_`` does
+    not crash camelcasing -- see the ``duho.text.camelcase`` trailing-separator
+    bug). The namespace prefix keeps names unique across sibling namespaces.
+    """
+    raw = "/".join([*namespace.parts, title])
+    parts = []
+    for chunk in raw.replace(".", " ").replace("_", " ").replace("-", " ").replace("/", " ").split():
+        parts.append(chunk[:1].upper() + chunk[1:])
+    name = "".join(parts) or "Anon"
+    # Ensure a valid identifier start (a title beginning with a digit, etc.).
+    if not (name[0].isalpha() or name[0] == "_"):
+        name = "_" + name
+    return name
 
 
 class Schema(_ty.TypedDict, total=False):
@@ -151,23 +172,18 @@ class Object(BaseType):
             return "_jsonschema.JsonObject"
 
         required = self.get("required", [])
-        extras = self.get("additional_properties", None)
-        title = self.get('_name', self.get("title"))
+        title = self.get("_name", self.get("title"))
         if not title:
-            raise ValueError(self)
-        name = (namespace / title).camelcase()
+            # An anonymous inline object with properties: derive a stable name
+            # from the property set so codegen never crashes on a missing title.
+            title = "obj_" + "_".join(sorted(properties)[:3])
+        name = _typeddict_name(namespace, title)
 
-        if extras:
-            pass
         typedict = {}
         for prop, defintion in properties.items():
             typedef = Schema.python_declaration(defintion, typeddicts, namespace)
             if required and prop not in required:
                 typedef = f"_ty.NotRequired[{typedef}]"
-            default = defintion.get("default", ...)
-            if default != ...:
-                pass
-
             typedict[prop] = typedef
 
         typeddicts[name] = typedict

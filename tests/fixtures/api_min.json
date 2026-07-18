@@ -1,0 +1,132 @@
+{
+  "versions": [
+    {
+      "version": "v25.04.0",
+      "methods": [
+        {
+          "name": "user.query",
+          "roles": ["READONLY"],
+          "doc": "Query users.\n\n.. examples(websocket)::\n\n  ignore me",
+          "schemas": {
+            "type": "object",
+            "properties": {
+              "Call parameters": {
+                "type": "array",
+                "prefixItems": [
+                  {"title": "query-filters", "type": "array", "default": "[]"},
+                  {"title": "query-options", "type": "object", "properties": {
+                    "limit": {"type": "integer"},
+                    "offset": {"type": "integer"}
+                  }, "title": "query-options"}
+                ],
+                "items": true
+              },
+              "Return value": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "title": "user_entry",
+                  "required": ["id", "username"],
+                  "properties": {
+                    "id": {"type": "integer"},
+                    "username": {"type": "string"},
+                    "full_name": {"type": "string"},
+                    "groups": {"type": "array", "items": {"type": "integer"}},
+                    "smb": {"type": "boolean", "default": true},
+                    "shell": {"anyOf": [{"type": "string"}, {"type": "null"}]}
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "user.create",
+          "roles": ["FULL_ADMIN"],
+          "doc": "Create a user.",
+          "schemas": {
+            "type": "object",
+            "properties": {
+              "Call parameters": {
+                "type": "array",
+                "prefixItems": [
+                  {"title": "user_create", "type": "object", "required": ["username"], "properties": {
+                    "username": {"type": "string"},
+                    "full_name": {"type": "string"},
+                    "group_create": {"type": "boolean", "default": true}
+                  }}
+                ],
+                "items": true
+              },
+              "Return value": {"type": "integer"}
+            }
+          }
+        },
+        {
+          "name": "user.update",
+          "roles": ["FULL_ADMIN"],
+          "doc": "Update a user.",
+          "schemas": {
+            "type": "object",
+            "properties": {
+              "Call parameters": {
+                "type": "array",
+                "prefixItems": [
+                  {"title": "id", "type": "integer"},
+                  {"title": "user_update", "type": "object", "properties": {
+                    "full_name": {"type": "string"},
+                    "shell": {"type": "string"}
+                  }}
+                ],
+                "items": true
+              },
+              "Return value": {"type": "integer"}
+            }
+          }
+        },
+        {
+          "name": "user.get_instance",
+          "roles": ["READONLY"],
+          "doc": "Get a user by id.",
+          "schemas": {
+            "type": "object",
+            "properties": {
+              "Call parameters": {
+                "type": "array",
+                "prefixItems": [
+                  {"title": "id", "type": "integer"}
+                ],
+                "items": true
+              },
+              "Return value": {
+                "type": "object",
+                "title": "user_entry",
+                "required": ["id", "username"],
+                "properties": {
+                  "id": {"type": "integer"},
+                  "username": {"type": "string"}
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "system.info",
+          "roles": ["READONLY"],
+          "doc": "System info.",
+          "schemas": {
+            "type": "object",
+            "properties": {
+              "Call parameters": {"type": "array", "prefixItems": [], "items": true},
+              "Return value": {"type": "object", "title": "system_info", "properties": {
+                "version": {"type": "string"},
+                "uptime_seconds": {"type": "number"}
+              }}
+            }
+          }
+        }
+      ],
+      "events": []
+    }
+  ]
+}

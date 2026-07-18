@@ -1,31 +1,37 @@
+from __future__ import annotations
+
 from pytruenas import Namespace as _NS
 from pytruenas.models import jsonschema as _jsonschema
 import typing as _ty
 
 {%- set typeddicts = {} -%}
 
-{%- for qn in ns.namespaces() %}
-from .{{ qn.pyname.relative_to(ns.pyname) }} import {{ qn.pyname.camelcase(-1) }}
-{%- endfor %} 
-class {{ ns.pyname.camelcase(-1) }}(_NS):
+{% for qn in ns.namespaces() %}
+from .{{ qn.pyname.relative_to(ns.pyname) }} import {{ qn.classname }}
+{%- endfor %}
+
+
+class {{ ns.classname }}(_NS):
     {% for qn in ns.methods() %}
     def {{ qn.pyname.name }}(self,
-        {%- for param in qn.parameters %}
-        {{param.argument_declaration(typeddicts)}}, 
+        {%- for decl in qn.declared_parameters(typeddicts) %}
+        {{ decl }},
         {%- endfor %}
     ) -> {{ qn.returns.type_def(typeddicts) }}:
-        """{{ qn.doc }}"""
+        """{{ docstring(qn.doc) }}"""
         ...
-    {%- endfor %} 
+    {%- endfor %}
     {%- for qn in ns.namespaces() %}
-    {{ qn.pyname.name }}: {{ qn.pyname.camelcase(-1) }}
-    {%- endfor %} 
+    {{ qn.pyname.name }}: {{ qn.classname }}
+    {%- endfor %}
+    {%- if not ns.methods() and not ns.namespaces() %}
+    pass
+    {%- endif %}
 
-
-{%- for name, properties in typeddicts.items() %}
+{% for name, properties in typeddicts.items() %}
 {{ name }} = _ty.TypedDict('{{ name }}', {
 {%- for prop, typedef in properties.items() %}
-    '{{ prop }}': {{typedef}},
-{%- endfor %} 
-})
+    {{ prop | tojson }}: {{ typedef }},
 {%- endfor %}
+})
+{% endfor %}
