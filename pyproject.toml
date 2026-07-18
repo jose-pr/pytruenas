@@ -40,12 +40,13 @@ dependencies = [
 # Config-file support for the CLI (YAML targets/config).
 config = ["pyyaml"]
 # Remote shell + SFTP filesystem leg (asyncssh via pathlib_next's sftp-async).
-ssh = ["asyncssh", "pathlib_next[sftp-async]>=0.8.2"]
+# nest_asyncio lets async_to_sync work from inside an already-running event loop.
+ssh = ["asyncssh", "nest_asyncio", "pathlib_next[sftp-async]>=0.8.2"]
 # Typings generator (`pytruenas generate-typings`).
 codegen = ["jinja2"]
 # Host-side operations helpers (packaging, network adapter discovery).
 host = ["ifaddr"]
-dev = ["build", "hatchling", "pytest", "pytest-cov", "twine", "pyyaml", "asyncssh", "jinja2"]
+dev = ["build", "hatchling", "pytest", "pytest-cov", "twine", "pyyaml", "asyncssh", "nest_asyncio", "jinja2"]
 docs = ["mkdocs", "mkdocs-material", "mkdocstrings[python]"]
 
 [project.scripts]
