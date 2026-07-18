@@ -1,8 +1,10 @@
 """Run an awaitable to completion from synchronous code.
 
 ``asyncssh`` is fully async, but ``pytruenas`` presents a synchronous API, so the
-direct-asyncssh operations (``client.ssh``/``client.sftp``/``client.run`` over
-SSH) are driven to completion here.
+direct-asyncssh operations (``client.ssh`` and ``client.run`` over SSH -- remote
+shell commands, which have no middleware-API equivalent) are driven to completion
+here. SFTP is NOT among them: the filesystem layer uses pathlib_next's own
+``SftpPath`` (with its own async bridge), not this one.
 
 The bridge is a single **shared background event loop** running in a daemon
 thread; each call submits its coroutine with ``run_coroutine_threadsafe`` and
