@@ -1,6 +1,4 @@
-"""
-Get the supported api definitions from a TrueNAS host
-"""
+"""Dump the full API definition of a TrueNAS host as JSON."""
 from pytruenas import TrueNASClient
 from pytruenas.utils.cmd import PyTrueNASArgs as PyTrueNASCmd
 from logging import Logger
