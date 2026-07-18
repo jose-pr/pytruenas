@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import typing as _ty
 from os import stat_result as _stat
 import io as _io
@@ -146,11 +148,9 @@ def _mkdir_sftpfailure(path: "Path", failure: "_sftp.SFTPFailure", filetype: int
     error = _sftpfailure(path, failure, filetype)
     if error:
         return error
-    match filetype:
-        case _ssh.FILEXFER_TYPE_DIRECTORY:
-            return FileExistsError(path)
-        case _:
-            return NotADirectoryError(path)
+    if filetype == _ssh.FILEXFER_TYPE_DIRECTORY:
+        return FileExistsError(path)
+    return NotADirectoryError(path)
 
 
 def mkdir(path: "Path", mode: int = 511, parents=False, exist_ok=False):

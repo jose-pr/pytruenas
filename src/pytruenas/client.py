@@ -380,16 +380,16 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
 
         command = [executable, "-c", script]
 
-        match (capture_output or ""):
-            case "stdout":
-                stdout = subprocess.PIPE
-            case "stderr":
+        _capture = capture_output or ""
+        if _capture == "stdout":
+            stdout = subprocess.PIPE
+        elif _capture == "stderr":
+            stderr = subprocess.PIPE
+        elif _capture is True:
+            if not stderr:
                 stderr = subprocess.PIPE
-            case True:
-                if not stderr:
-                    stderr = subprocess.PIPE
-                if not stdout:
-                    stdout = subprocess.PIPE
+            if not stdout:
+                stdout = subprocess.PIPE
 
         if input:
             if stdin is not None:
@@ -402,62 +402,61 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
         if isinstance(input, str):
             input = input.encode()
 
-        match self.shell.scheme:
-            case "local":
-                if stdin and not isinstance(stdin, int):
-                    try:
-                        readme = stdin.fileno() == -1
-                    except (OSError, AttributeError):
-                        if not hasattr(stdin, "read"):
-                            raise TypeError(stdin)
-                        readme = True
-                    if readme:
-                        input = stdin.read()
-                        stdin = None
+        if self.shell.scheme == "local":
+            if stdin and not isinstance(stdin, int):
+                try:
+                    readme = stdin.fileno() == -1
+                except (OSError, AttributeError):
+                    if not hasattr(stdin, "read"):
+                        raise TypeError(stdin)
+                    readme = True
+                if readme:
+                    input = stdin.read()
+                    stdin = None
 
-                result = subprocess.run(
+            result = subprocess.run(
+                command,
+                bufsize=bufsize,
+                input=input,
+                stdin=stdin,
+                stdout=stdout,
+                stderr=stderr,
+                cwd=cwd,
+                env=env,
+                check=check,
+                encoding=encoding,
+                errors=errors,
+                timeout=timeout,
+            )
+        elif self.shell.scheme == "ssh":
+            command = shlex.join(command)
+            if cwd:
+                command = f"{shlex.join(['cd', cwd])}; {command}"
+
+            if stdout in (None, subprocess.STDOUT, _sys.stdout):
+                stdout = open(_os.dup(_sys.stdout.fileno()), _sys.stdout.mode)
+            if stderr in (None, _sys.stderr):
+                stderr = open(_os.dup(_sys.stderr.fileno()), _sys.stderr.mode)
+
+            if input:
+                stdin = _io.BytesIO(input)
+
+            result = _async.async_to_sync(
+                self.ssh.run(
                     command,
                     bufsize=bufsize,
-                    input=input,
                     stdin=stdin,
                     stdout=stdout,
                     stderr=stderr,
-                    cwd=cwd,
                     env=env,
                     check=check,
                     encoding=encoding,
                     errors=errors,
                     timeout=timeout,
                 )
-            case "ssh":
-                command = shlex.join(command)
-                if cwd:
-                    command = f"{shlex.join(['cd', cwd])}; {command}"
-
-                if stdout in (None, subprocess.STDOUT, _sys.stdout):
-                    stdout = open(_os.dup(_sys.stdout.fileno()), _sys.stdout.mode)
-                if stderr in (None, _sys.stderr):
-                    stderr = open(_os.dup(_sys.stderr.fileno()), _sys.stderr.mode)
-
-                if input:
-                    stdin = _io.BytesIO(input)
-
-                result = _async.async_to_sync(
-                    self.ssh.run(
-                        command,
-                        bufsize=bufsize,
-                        stdin=stdin,
-                        stdout=stdout,
-                        stderr=stderr,
-                        env=env,
-                        check=check,
-                        encoding=encoding,
-                        errors=errors,
-                        timeout=timeout,
-                    )
-                )
-            case _:
-                raise NotImplementedError(self.shell.scheme)
+            )
+        else:
+            raise NotImplementedError(self.shell.scheme)
         return _ty.cast(subprocess.CompletedProcess, result)
 
 

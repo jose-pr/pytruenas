@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from pathlib import Path as _P
 import shutil
 import typing as _ty
@@ -141,7 +143,7 @@ class Method(PyDeclaration):
         )
 
 
-_ClassInfo: _ty.TypeAlias = "type | tuple[_ClassInfo, ...]"
+_ClassInfo = "type | tuple[_ClassInfo, ...]"
 
 
 class Namespace(PyDeclaration):

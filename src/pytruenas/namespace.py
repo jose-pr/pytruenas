@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from functools import cache
 import typing as _ty
 import errno as _errno
@@ -29,12 +31,18 @@ def ioerror(error: _conn.ClientException) -> Exception:
     return error
 
 
-_T = _ty.TypeVar("_T", bound=dict[str, object])
+_T = _ty.TypeVar("_T", bound="dict[str, object]")
 
-_DBSelector: _ty.TypeAlias = "int | str | _ty.Sequence[str] | None | _q._Exclude"
+_DBSelector = "int | str | _ty.Sequence[str] | None | _q._Exclude"
 
 
-class DbAction(_ty.Generic[_T], _enum.StrEnum):
+class DbAction(str, _enum.Enum):
+    """The database mutation an ``_upsert``/``_update``/``_create`` resolves to.
+
+    A ``str`` enum (``StrEnum`` is 3.11+, so this uses the 3.9-compatible
+    ``(str, Enum)`` form) whose members double as the action name.
+    """
+
     CREATE = "create"
     UPDATE = "update"
     UPSERT = "upsert"
