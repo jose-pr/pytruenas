@@ -72,7 +72,7 @@ class SystemdUnit(TruenasSystemFile):
         *,
         after="network.target auditd.service",
         wantedby="multi-user.target",
-        conf: dict[str, dict[str]] = {},
+        conf: "dict[str, dict] | None" = None,
     ) -> None:
         if "." not in name:
             name = name + ".service"

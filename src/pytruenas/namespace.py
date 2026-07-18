@@ -197,7 +197,7 @@ class Namespace:
             except _conn.ClientException as e:
                 if e.errno == _errno.ECONNABORTED and _tries:
                     self._client.logger.warning(
-                        f"Websocket connection was closed, trying again with new connection"
+                        "Websocket connection was closed, trying again with new connection"
                     )
                     _tries -= 1
                     self._conn = None
@@ -247,7 +247,7 @@ class Namespace:
         if id is not None:
             try:
                 return _ty.cast(dict[str, object], self.get_instance(id, _ioerror=True))
-            except FileNotFoundError as e:
+            except FileNotFoundError:
                 return None
 
         result = self._query({"limit": 1}, **filter)
