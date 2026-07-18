@@ -13,7 +13,9 @@ typings generator, and a small CLI for scripting host configuration.
 ## Install
 
 ```sh
-pip install pytruenas
+pip install pytruenas          # once published to PyPI
+# or, from a checkout:
+pip install .
 ```
 
 Optional extras:
