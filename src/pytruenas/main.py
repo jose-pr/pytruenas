@@ -19,7 +19,7 @@ import logging as _pylogging
 import os as _os
 import typing as _ty
 
-from duho import Cli, app, parse_globals
+from duho import AUTO, Cli, app, parse_globals
 from duho import logging as _logging
 from duho.discovery import ModuleCommand, discover_commands
 from duho.fanout import run_targets
@@ -42,7 +42,10 @@ _BUILTIN_COMMANDS = "pytruenas.cmd"
 class PyTrueNAS(PyTrueNASArgs, Cli):
     """Utility tool to manage and configure TrueNAS systems."""
 
-    _version_ = "0.1.0"
+    # Resolve --version from the installed package metadata (single source of
+    # truth: pyproject's version), rather than duplicating the literal here.
+    _version_ = AUTO
+    _distribution_ = "pytruenas"
 
 
 def _discover(argv: "_ty.Sequence[str] | None") -> "list":
