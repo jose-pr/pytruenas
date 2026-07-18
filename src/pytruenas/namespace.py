@@ -211,8 +211,10 @@ class Namespace:
         def __getattr__(self, name: str) -> "Namespace":
             if isinstance(name, str) and not name.startswith("_"):
                 return self[name.removesuffix("_")]
-            else:
-                super().__getattribute__(name)
+            # A private/dunder miss is a real AttributeError, not a namespace --
+            # ``__getattribute__`` raises it (the previous code dropped the
+            # ``return``/``raise`` and silently returned None).
+            return super().__getattribute__(name)
 
     else:
 
