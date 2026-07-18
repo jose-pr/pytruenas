@@ -100,3 +100,17 @@ def test_truenaspath_rename_without_sftp_raises():
     p = TruenasPath("truenas://nas/f", backend=TnasWsBackend(client))
     with pytest.raises(NotImplementedError):
         p.rename("/g")
+
+
+def test_truenaspath_resolve_falls_back_when_sftp_lacks_op():
+    # pathlib_next's SftpPath has no resolve(); _try_sftp must surface that as
+    # NotImplementedError so resolve() falls back to returning self, not crash
+    # with AttributeError.
+    client = _client()
+    client.shell.host = "nas"
+    client.shell.port = 22
+    client.shell.username = "root"
+    client.shell.password = None
+    p = TruenasPath("truenas://nas/a/b", backend=TnasWsBackend(client))
+    resolved = p.resolve()
+    assert resolved.path == "/a/b"  # returned self, no AttributeError
