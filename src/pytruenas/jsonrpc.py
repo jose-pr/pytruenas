@@ -31,7 +31,6 @@ import socket as _socket
 import ssl as _ssl
 import threading as _threading
 import typing as _ty
-import urllib.parse as _urlparse
 import uuid as _uuid
 from datetime import date as _date
 from datetime import datetime as _datetime

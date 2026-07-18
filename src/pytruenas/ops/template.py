@@ -3,7 +3,6 @@ from __future__ import annotations
 import logging as _logging
 from pathlib import Path as LocalPath
 from pathlib_next import Path
-import shutil
 
 LOGGER = _logging.getLogger()
 
@@ -41,9 +40,9 @@ class BaseTemplate:
 
     def render(self, context) -> str: ...
 
-    def apply(self, target: TemplateTarget, context={}):
+    def apply(self, target: TemplateTarget, context=None):
         LOGGER.info(f"Applying {self} to {target}")
-        rendered = self.render(context)
+        rendered = self.render(context if context is not None else {})
         modified = target.write(rendered)
         if modified:
             LOGGER.info(f"Target: {target} modified")

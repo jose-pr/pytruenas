@@ -341,9 +341,9 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
                         executable = _pwd.getpwnam("root").pw_shell
                     else:
                         executable = self.api.user._get(username="root")["shell"]  # type: ignore
-                except Exception as e:
+                except Exception:
                     self.logger.warning(
-                        "Count not get default shell for root, using bash as default"
+                        "Could not get default shell for root, using bash as default"
                     )
                     executable = "/bin/bash"
 

@@ -8,6 +8,7 @@ version = "0.1.0"
 authors = [{ name = "Jose A." }]
 description = "A typed, Pythonic client and CLI for the TrueNAS middleware API"
 readme = "README.md"
+keywords = ["truenas", "middleware", "jsonrpc", "websocket", "sysadmin", "cli"]
 requires-python = ">=3.9"
 license = { file = "LICENSE" }
 classifiers = [

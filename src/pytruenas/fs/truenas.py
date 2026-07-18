@@ -18,21 +18,12 @@ from __future__ import annotations
 
 import typing as _ty
 
-from .tnasws import TnasWsBackend as _TnasWsBackend
 from .tnasws import TnasWsPath as _TnasWsPath
 
 if _ty.TYPE_CHECKING:
     from .. import TrueNASClient
 
 _FTYPE = _ty.Literal["file", "link", "directory"]
-
-#: Operations delegated to the SFTP leg first (falling back to the websocket leg).
-#: Everything else runs on the websocket leg directly (stat/open/read/write/mkdir/
-#: chown are all first-class there). These are the ops SFTP does better or that the
-#: ``filesystem.*`` API does not offer (delete, symlink, rename, resolve).
-_SFTP_FIRST = frozenset(
-    {"unlink", "rmdir", "rename", "symlink_to", "readlink", "resolve", "rm"}
-)
 
 
 def _sftp_path_cls():
@@ -53,7 +44,8 @@ class TruenasPath(_TnasWsPath):
 
     Subclasses :class:`~pytruenas.fs.tnasws.TnasWsPath` so the always-available
     websocket backend is the base behaviour; the SFTP-preferred operations
-    (:data:`_SFTP_FIRST`) are overridden to try SFTP first. Carries the same
+    (unlink/rmdir/rename/symlink_to/readlink/resolve) are overridden to try SFTP
+    first. Carries the same
     ``TnasWsBackend`` (holding the client); the SFTP leg is built lazily from the
     client's shell/ssh configuration.
     """

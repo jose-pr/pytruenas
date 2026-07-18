@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import typing as _ty
 from duho import qualname as _qn
-from duho import text as _text
 
 
 JsonNumber = _ty.Union[float, int]

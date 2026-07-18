@@ -24,7 +24,6 @@ from logging import Logger as _Logger
 from pathlib import Path as _Path
 
 from duho import Arg, Extend, LoggingArgs, NS
-from duho import logging as _logging
 
 from . import io as _ioutils  # noqa: F401
 
