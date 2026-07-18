@@ -71,19 +71,35 @@ class TruenasPath(_TnasWsPath):
             return None
         port = getattr(shell, "port", 0) or 22
         # Reuse the client's asyncssh connect options (key/password) so the SFTP
-        # leg authenticates the same way the client's own ssh channel does.
+        # leg authenticates the same way the client's own ssh channel does. Let
+        # pathlib_next auto-select its SFTP backend (asyncssh or paramiko); if
+        # NEITHER is installed (the ssh extra wasn't installed) building it
+        # raises ImportError -- treat that as "no SFTP leg" so callers fall back
+        # to the websocket leg rather than crashing.
         connect_opts = _connect_opts_from_shell(shell)
-        from pathlib_next.uri.schemes.sftp import AsyncsshSftpBackend
+        try:
+            from pathlib_next.uri.schemes.sftp import AsyncsshSftpBackend
 
-        backend = AsyncsshSftpBackend(connect_opts=connect_opts)
+            backend = AsyncsshSftpBackend(connect_opts=connect_opts)
+        except ImportError:
+            return None
         return sftp_cls(f"sftp://{host}:{port}{self.path}", backend=backend)
 
     def _try_sftp(self, op: str, *args, **kwargs):
-        """Run ``op`` on the SFTP leg; raise ``_NoSftp`` if there is no SFTP leg."""
+        """Run ``op`` on the SFTP leg.
+
+        Raises ``_NoSftp`` if there is no SFTP leg, and ``NotImplementedError`` if
+        the SFTP path type does not implement ``op`` at all (pathlib_next's
+        ``SftpPath`` has no ``resolve``, for instance) -- callers treat both as
+        "fall back to the websocket leg".
+        """
         sftp = self._sftp()
         if sftp is None:
             raise _NoSftp()
-        return getattr(sftp, op)(*args, **kwargs)
+        method = getattr(sftp, op, None)
+        if method is None:
+            raise NotImplementedError(f"SFTP backend has no {op!r}")
+        return method(*args, **kwargs)
 
     # -- delegated operations ---------------------------------------------
 
