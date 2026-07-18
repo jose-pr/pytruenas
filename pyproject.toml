@@ -28,7 +28,7 @@ classifiers = [
     "Typing :: Typed",
 ]
 dependencies = [
-    "duho",
+    "duho>=0.3.0",
     "pathlib_next",
     "requests",
     "websocket-client",
