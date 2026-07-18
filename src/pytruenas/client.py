@@ -161,7 +161,7 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
         if self._conn and not self._conn._closed.is_set():
             try:
                 self._conn.close()
-            except:
+            except Exception:
                 pass
         self._conn = self._openwss()
         creds = creds or self._creds

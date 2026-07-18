@@ -64,8 +64,16 @@ class BasicTemplate(TextTemplate):
 
 
 def render_basic_template(template: str, context: object | dict):
+    if context is None:
+        return template
     if not isinstance(context, dict):
-        context = (context or {}).__dict__
+        # A non-dict, non-None context: use its attribute namespace. ``vars()``
+        # raises TypeError for objects without ``__dict__`` -- treat those as no
+        # substitutions rather than crashing.
+        try:
+            context = vars(context)
+        except TypeError:
+            return template
     for prop, val in context.items():
         template = template.replace(f"%{{{prop.upper()}}}", str(val))
         template = template.replace(f"%{{{prop}}}", str(val))

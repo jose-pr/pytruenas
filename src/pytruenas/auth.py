@@ -40,21 +40,22 @@ class _CredentialsMeta(type):
                 return BasicAuth(usr, pwd, token)
             else:
                 #
-                # From what i can see an apikey format is <id>-<64 alpha/numeric chars>
+                # An api key looks like <id>-<64 alphanumeric chars>; anything
+                # else that is a bare string (no ':') is treated as a token.
                 #
                 try:
                     i, k = cred.split("-", maxsplit=1)
-                    if i.isnumeric() and k.isalnum() and len(k) == 64:
-                        return ApiKeyAuth(cred)
-                except:
-                    return TokenAuth(cred)
+                    is_api_key = i.isnumeric() and k.isalnum() and len(k) == 64
+                except Exception:
+                    is_api_key = False
+                return ApiKeyAuth(cred) if is_api_key else TokenAuth(cred)
         elif args:
             return BasicAuth(*args)
         else:
-            for scls in [scls for scls in Credentials.__subclasses__()]:
+            for scls in Credentials.__subclasses__():
                 try:
                     return scls(**kwargs)
-                except:
+                except Exception:
                     pass
 
         raise ValueError("Credentials not supported", kwargs)
