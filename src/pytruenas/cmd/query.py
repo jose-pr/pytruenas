@@ -16,13 +16,17 @@ class Args(PyTrueNASArgs):
 
 
 def register(parser: argparse.ArgumentParser, args: PyTrueNASArgs, logger: Logger):
+    # NOTE: not -q -- duho's LoggingArgs owns -q (quiet), and duho.app builds each
+    # subcommand parser with parents=[root], so global short flags are inherited
+    # and would collide.
     parser.add_argument(
-        "-q",
-        "--query",
+        "-f",
+        "--filter",
+        dest="query",
         action="append",
         default=[],
         metavar="KEY=VALUE",
-        help="Filter on a field (repeatable), e.g. -q username=root",
+        help="Filter on a field (repeatable), e.g. -f username=root",
     )
     parser.add_argument("namespace", help="API namespace, e.g. user or pool.dataset")
 

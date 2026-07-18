@@ -1,29 +1,28 @@
 """The ``pytruenas`` command-line application.
 
-Builds a subcommand app from discovered command modules, parses global options
-into :class:`~pytruenas.utils.cmd.PyTrueNASArgs`, then runs the selected command
-against every target -- optionally several targets concurrently -- giving each
-run its own connected :class:`~pytruenas.TrueNASClient` and a per-target logger.
+Thin driver over :func:`duho.app`: ``app`` owns command discovery, parser build,
+per-command ``register``, config/env layering, parsing and logging setup; the one
+piece it hands off is *dispatch*, which pytruenas overrides to run the selected
+command against every ``-t/--target`` -- concurrently, via :mod:`duho.fanout` --
+giving each target its own connected :class:`~pytruenas.TrueNASClient`.
 
-Argument parsing and command discovery come from :mod:`duho`; the multi-target
-fan-out and the client/logger threading are ``pytruenas``-specific.
+A pytruenas command module exposes ``run(client, args, logger)`` (client-first,
+called once per target) plus optional ``register``/``init``/``success``/
+``finally_`` hooks. That client-first contract is why dispatch calls the module's
+``run`` itself rather than duho's ``run_command`` (which passes only ``args``).
 """
 
 from __future__ import annotations
 
-import argparse as _argparse
 import datetime as _dt
 import logging as _pylogging
 import os as _os
-import socket as _socket
-import sys as _sys
 import typing as _ty
-from concurrent.futures import ThreadPoolExecutor
-from pathlib import Path as _Path
 
-from duho import Cli
+from duho import Cli, app, parse_globals
 from duho import logging as _logging
 from duho.discovery import ModuleCommand, discover_commands
+from duho.fanout import run_targets
 
 from .client import TrueNASClient
 from .utils.cmd import PyTrueNASArgs
@@ -36,7 +35,7 @@ DEFAULT_LOGLEVELS = {
     "asyncssh": _pylogging.WARNING,
 }
 
-#: Package-relative import path to the built-in command modules.
+#: Package import path to the built-in command modules.
 _BUILTIN_COMMANDS = "pytruenas.cmd"
 
 
@@ -46,74 +45,75 @@ class PyTrueNAS(PyTrueNASArgs, Cli):
     _version_ = "0.1.0"
 
 
-def _command_modules(extra_paths: "_ty.Sequence[str]") -> "dict[str, ModuleCommand]":
-    """Discover command modules (built-ins first, then configured paths).
+def _discover(argv: "_ty.Sequence[str] | None") -> "list":
+    """Resolve the command set: built-ins, then env/CLI/config-provided paths.
 
-    Later sources override earlier ones on a name clash so a user command can
-    shadow a built-in of the same name.
+    Uses :func:`duho.parse_globals` to read the config-file / ``--cmdspath`` /
+    ``PYTRUENAS_PATH`` globals *before* the full subcommand parser is built. Later
+    sources win on a name clash (a user command shadows a built-in), then the list
+    is de-duplicated by subcommand name preserving that precedence.
     """
-    sources: "list[str]" = [
-        _BUILTIN_COMMANDS,
-        *(_os.environ.get("PYTRUENAS_PATH", "").split(_os.pathsep) if _os.environ.get("PYTRUENAS_PATH") else []),
-        *extra_paths,
-    ]
-    commands: "dict[str, ModuleCommand]" = {}
+    globals_ = parse_globals(PyTrueNAS, argv)
+    config = globals_._config_dict_()
+    sources: "list[str]" = [_BUILTIN_COMMANDS]
+    if _os.environ.get("PYTRUENAS_PATH"):
+        sources += _os.environ["PYTRUENAS_PATH"].split(_os.pathsep)
+    sources += list(globals_.cmdspath or [])
+    sources += list(config.get("commandspath") or [])
+
+    by_name: "dict[str, object]" = {}
     for source in sources:
         if not source:
             continue
         for command in discover_commands(source):
-            if isinstance(command, ModuleCommand):
-                commands[command._parsername_] = command
-    return commands
+            name = getattr(command, "_parsername_", None) or getattr(command, "__name__", None)
+            if name:
+                by_name[name] = command  # later source wins
+    return list(by_name.values())
 
 
-def _target_label(target: str) -> str:
-    """A short '<host>|local|remote' label for per-target logger names."""
-    host = target.split("@", 1)[1] if "@" in target else target
-    host = host.split("/", 1)[0] or "localhost"
-    if host in ("localhost", "127.0.0.1", ""):
-        return f"{_socket.gethostname()}|local"
-    return f"{host}|remote"
-
-
-def _run_one_target(
+def _run_module_on_target(
     command: "ModuleCommand",
     args: "PyTrueNAS",
     target: str,
-    root_logger: "_pylogging.Logger",
-) -> None:
-    """Run ``command`` against a single ``target`` with its own client + logger."""
-    label = _target_label(target)
-    logger = _pylogging.getLogger(f"{root_logger.name} [{label}]")
-    logger.setLevel(root_logger.level)
+    logger: "_pylogging.Logger",
+) -> int:
+    """Run one module command against one target; return an exit code.
 
-    if args.logto and args.logto != "-":
-        now = _dt.datetime.now()
-        handler: _pylogging.Handler = _pylogging.FileHandler(
-            args.logto.format(target=target, isodate=now.isoformat())
-        )
-    else:
-        handler = _pylogging.StreamHandler(_sys.stderr)
-    handler.setFormatter(_logging.DefaultFormatter())
-    logger.addHandler(handler)
-
+    Builds the client (module ``init`` if present, else a plain
+    :class:`TrueNASClient`) and runs the module lifecycle ``run`` +
+    ``success``/``finally_``. Records are already ``[target]``-prefixed by
+    ``duho.fanout`` (a ``TargetPrefixFilter`` installed for the fan-out), so no
+    per-target logger/handler naming is needed here. When ``--logto`` is a path
+    template a per-target :class:`~logging.FileHandler` is attached for the run
+    (fanout tags the message but does not route files).
+    """
     module = command.module
     init = getattr(module, "init", None)
     success = getattr(module, "success", None)
     finally_ = getattr(module, "finally_", None)
 
+    file_handler = None
+    if args.logto and args.logto != "-":
+        now = _dt.datetime.now()
+        file_handler = _pylogging.FileHandler(
+            args.logto.format(target=target, isodate=now.isoformat())
+        )
+        file_handler.setFormatter(_logging.DefaultFormatter())
+        logger.addHandler(file_handler)
+
     logger.info("Started: %s", target)
     client = None
+    result = 0
     try:
         if callable(init):
             client = init(args, logger)
         if client is None:
             client = TrueNASClient(target, sslverify=args.sslverify)
-        module.run(client, args, logger)
+        rc = module.run(client, args, logger)
+        result = 0 if rc is None else int(rc)
         if callable(success):
             success(client, args, logger)
-    except Exception:
-        logger.error("Failed: %s", target, exc_info=True)
     finally:
         if callable(finally_):
             try:
@@ -121,7 +121,37 @@ def _run_one_target(
             except Exception:
                 logger.error("Cleanup failed: %s", target, exc_info=True)
         logger.info("Finished: %s", target)
-        logger.removeHandler(handler)
+        if file_handler is not None:
+            logger.removeHandler(file_handler)
+            file_handler.close()
+    return result
+
+
+def _dispatch(command: object, instance: "PyTrueNAS") -> int:
+    """duho ``app`` dispatch seam: fan the selected command over the targets.
+
+    For a module command (every built-in), run it once per ``-t/--target`` via
+    :func:`duho.fanout.run_targets` (thread pool sized by ``--parallel``, per-target
+    ``[target]`` log prefixing, worst exit code wins). A class command (none today)
+    falls back to duho's own single dispatch.
+    """
+    logger = instance._logger_
+    for name, level in DEFAULT_LOGLEVELS.items():
+        _pylogging.getLogger(name).setLevel(level)
+
+    if not isinstance(command, ModuleCommand):
+        from duho import run_command
+
+        return run_command(_ty.cast(_ty.Any, command), instance)
+
+    targets = instance._expanded_targets_()
+    logger.info("Running '%s' on %d target(s)", command._parsername_, len(targets))
+    return run_targets(
+        lambda target: _run_module_on_target(command, instance, target, logger),
+        targets,
+        max_workers=max(1, instance.parallel),
+        logger=logger,
+    )
 
 
 def main(
@@ -130,53 +160,11 @@ def main(
 ) -> int:
     """Build the app, parse ``argv``, and run the selected command per target."""
     name = name or "pytruenas"
-    root_logger = _pylogging.getLogger(name)
-    if not _pylogging.getLogger().handlers:
-        _logging.init_stderr_logging()
-
-    # A pre-parse of just the global options resolves config-driven command
-    # search paths before the full subcommand parser is built.
-    pre_parser = PyTrueNAS._parser_(add_help=False)
-    pre_parser.add_argument("_command", nargs="?")
-    pre_args, _ = pre_parser.parse_known_args(argv)
-    config = pre_args._config_dict_()
-    extra_paths = list(pre_args.cmdspath or []) + list(config.get("commandspath") or [])
-
-    commands = _command_modules(extra_paths)
-
-    parser = PyTrueNAS._parser_(name=name, description=PyTrueNAS.__doc__)
-    subparsers = parser.add_subparsers(title="command", dest="_command", required=True)
-    for cmd_name, command in sorted(commands.items()):
-        sub = subparsers.add_parser(
-            cmd_name.replace("_", "-"),
-            help=command.help,
-            description=command.description,
-            add_help=True,
-        )
-        register = getattr(command.module, "register", None)
-        if callable(register):
-            register(sub, pre_args, root_logger)
-
-    args = parser.parse_args(argv)
-    args._set_loglevels_()
-    for logger_name, level in DEFAULT_LOGLEVELS.items():
-        _pylogging.getLogger(logger_name).setLevel(level)
-
-    selected = getattr(args, "_command", None)
-    command = commands.get(selected) or commands.get((selected or "").replace("-", "_"))
-    if command is None:
-        parser.error(f"unknown command: {selected}")
-        return 2
-
-    targets = args._expanded_targets_()
-    root_logger.info("Running '%s' on %d target(s)", selected, len(targets))
-
-    parallel = max(1, args.parallel)
-    if parallel == 1 or len(targets) == 1:
-        for target in targets:
-            _run_one_target(command, args, target, root_logger)
-    else:
-        with ThreadPoolExecutor(max_workers=parallel) as pool:
-            for target in targets:
-                pool.submit(_run_one_target, command, args, target, root_logger)
-    return 0
+    return app(
+        PyTrueNAS,
+        commands=_discover(argv),
+        argv=argv,
+        name=name,
+        description=PyTrueNAS.__doc__,
+        dispatch=_dispatch,
+    )

@@ -20,9 +20,11 @@ _MISSING = _Missing()
 def _camelcase(name: str) -> str:
     """CamelCase a single identifier, tolerating empty/trailing segments.
 
-    ``duho.text.camelcase`` crashes on a trailing separator (``"global_"`` ->
-    ``IndexError``); this splits on the same separators and skips empty parts so
-    ``pysafe`` output like ``global_`` becomes ``Global``.
+    Splits on ``.``/``_``/``-`` and drops empty parts, so a ``pysafe`` output like
+    ``global_`` becomes ``Global``. duho 0.3.0 fixed ``text.camelcase``'s
+    trailing-separator crash, so this is now belt-and-suspenders on that front;
+    it is kept because it is a one-liner and the empty-part handling is exactly
+    what the codegen names (which may carry pysafe suffixes) rely on.
     """
     result = name
     for sep in (".", "_", "-"):
