@@ -27,7 +27,7 @@ from .utils import async_ as _async, io as _ioutils
 from .utils.target import Target as _TGT
 from . import auth as _auth
 from .namespace import Namespace
-from .fs import Path
+from pathlib_next import Path
 
 FileHandle = _ty.Union[None, int, _ty.IO]
 PathLike = _ty.Union[str, PurePath]
@@ -320,9 +320,10 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
             self._sftp = _async.async_to_sync(self.ssh.start_sftp_client())
         return self._sftp
 
-    def path(self, *path: PathLike, **kwargs):
-        kwargs["backend"] = kwargs.get("backend") or self.fsbackend
-        return Path(*path, **kwargs, client=self)  # type:ignore
+    def path(self, *path: PathLike, backend: "str | None" = None):
+        from .fs import path as _make_path
+
+        return _make_path(self, *path, backend=backend or self.fsbackend)
 
     def run(
         self,
