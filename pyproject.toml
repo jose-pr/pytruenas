@@ -29,7 +29,9 @@ classifiers = [
 ]
 dependencies = [
     "duho>=0.3.0",
-    "pathlib_next",
+    # >=0.8.2: SftpPath importable/usable without paramiko (asyncssh-only). The
+    # 'uri' extra (uritools) is needed by TnasWsPath/TruenasPath, which are UriPaths.
+    "pathlib_next[uri]>=0.8.2",
     "requests",
     "websocket-client",
 ]
@@ -37,8 +39,8 @@ dependencies = [
 [project.optional-dependencies]
 # Config-file support for the CLI (YAML targets/config).
 config = ["pyyaml"]
-# Remote shell / SFTP filesystem backend.
-ssh = ["asyncssh"]
+# Remote shell + SFTP filesystem leg (asyncssh via pathlib_next's sftp-async).
+ssh = ["asyncssh", "pathlib_next[sftp-async]>=0.8.2"]
 # Typings generator (`pytruenas generate-typings`).
 codegen = ["jinja2"]
 # Host-side operations helpers (packaging, network adapter discovery).

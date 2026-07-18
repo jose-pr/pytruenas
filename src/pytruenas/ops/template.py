@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging as _logging
 from pathlib import Path as LocalPath
-from pytruenas.fs import Path
+from pathlib_next import Path
 import shutil
 
 LOGGER = _logging.getLogger()
