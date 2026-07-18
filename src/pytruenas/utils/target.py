@@ -1,7 +1,6 @@
 import typing as _ty
 import urllib.parse as _urlparse
 import socket as _socket
-import functools as _func
 
 
 class Target(_ty.NamedTuple):
@@ -44,8 +43,10 @@ class Target(_ty.NamedTuple):
             scheme, username, password, host, port, path, parts.query, parts.fragment
         )
 
+    # NOTE: these were ``@property @lru_cache``; that keeps every Target alive in
+    # a module-global cache (a leak) for a trivial concat/lookup. Plain
+    # properties -- the work is cheap and Targets are short-lived.
     @property
-    @_func.lru_cache
     def uri(self):
         uri = self.scheme + "://"
         if self.username or self.password:
@@ -59,12 +60,10 @@ class Target(_ty.NamedTuple):
         return uri
 
     @property
-    @_func.lru_cache
     def is_local(self):
         return self.host.lower() in ["", "localhost", "127.0.0.1"]
 
     @property
-    @_func.lru_cache
     def qsl(self):
         query: dict[str, list[str]] = {}
         for k, v in _urlparse.parse_qsl(self.query):
