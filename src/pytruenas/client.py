@@ -388,8 +388,13 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
             input = _ty.cast(bytes, stdin)
             stdin = None
 
-        if isinstance(input, str):
+        # subprocess encodes str input itself when `encoding`/`errors` are set;
+        # pre-encoding to bytes there makes it call .encode() on bytes and crash.
+        # Only hand it bytes when we are NOT giving it a text mode.
+        if isinstance(input, str) and not (encoding or errors):
             input = input.encode()
+        elif isinstance(input, bytes) and (encoding or errors):
+            input = input.decode(encoding or "utf-8", errors or "strict")
 
         if self.shell.scheme == "local":
             if stdin and not isinstance(stdin, int):
