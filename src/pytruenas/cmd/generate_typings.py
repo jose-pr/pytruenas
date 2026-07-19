@@ -13,7 +13,7 @@ from logging import Logger
 from pathlib import Path
 
 from pytruenas import TrueNASClient, codegen
-from pytruenas.utils.cmd import PyTrueNASArgs
+from pytruenas.utils.cmd import PyTrueNASArgs, register_targets
 
 
 class Args(PyTrueNASArgs):
@@ -41,6 +41,8 @@ def register(parser: argparse.ArgumentParser, args: PyTrueNASArgs, logger: Logge
         default=None,
         help="Path to cache the API dump JSON (read if present, written if not)",
     )
+    # Targets are the trailing positionals.
+    register_targets(parser)
 
 
 def run(client: TrueNASClient, args: Args, logger: Logger):

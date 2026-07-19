@@ -3,7 +3,7 @@
 Thin driver over :func:`duho.app`: ``app`` owns command discovery, parser build,
 per-command ``register``, config/env layering, parsing and logging setup; the one
 piece it hands off is *dispatch*, which pytruenas overrides to run the selected
-command against every ``-t/--target`` -- concurrently, via :mod:`duho.fanout` --
+command against every target positional -- concurrently, via :mod:`duho.fanout` --
 giving each target its own connected :class:`~pytruenas.TrueNASClient`.
 
 A pytruenas command module exposes ``run(client, args, logger)`` (client-first,
@@ -133,7 +133,7 @@ def _run_module_on_target(
 def _dispatch(command: object, instance: "PyTrueNAS") -> int:
     """duho ``app`` dispatch seam: fan the selected command over the targets.
 
-    For a module command (every built-in), run it once per ``-t/--target`` via
+    For a module command (every built-in), run it once per target positional via
     :func:`duho.fanout.run_targets` (thread pool sized by ``--parallel``, per-target
     ``[target]`` log prefixing, worst exit code wins). A class command (none today)
     falls back to duho's own single dispatch.

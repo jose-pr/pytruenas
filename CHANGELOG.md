@@ -6,6 +6,13 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Changed
+- **CLI targets are now trailing positional arguments, not `-t/--target`.**
+  A command's own positionals come first, then the target host(s):
+  `pytruenas query user nas1 nas2`, `pytruenas dump-api nas1,nas2`. Comma lists
+  and `[A-Z]`/`[0-9]` range patterns still expand; no target means `localhost`.
+  The `-t`/`--target` flag has been removed.
+
 ### Fixed
 - `client.run()` with a `str` `input` together with a text `encoding`/`errors`
   no longer crashes. It used to pre-encode the string to bytes *and* hand the

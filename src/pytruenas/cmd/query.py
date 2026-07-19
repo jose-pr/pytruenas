@@ -7,7 +7,7 @@ import json
 from logging import Logger
 
 from pytruenas import TrueNASClient
-from pytruenas.utils.cmd import PyTrueNASArgs
+from pytruenas.utils.cmd import PyTrueNASArgs, register_targets
 
 
 class Args(PyTrueNASArgs):
@@ -29,6 +29,8 @@ def register(parser: argparse.ArgumentParser, args: PyTrueNASArgs, logger: Logge
         help="Filter on a field (repeatable), e.g. -f username=root",
     )
     parser.add_argument("namespace", help="API namespace, e.g. user or pool.dataset")
+    # Targets are the trailing positionals -- must be added AFTER `namespace`.
+    register_targets(parser)
 
 
 def run(client: TrueNASClient, args: Args, logger: Logger):
