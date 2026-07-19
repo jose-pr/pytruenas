@@ -23,6 +23,8 @@ import typing as _ty
 from logging import Logger as _Logger
 from pathlib import Path as _Path
 
+from argparse import SUPPRESS as _SUPPRESS
+
 from duho import Arg, Extend, LoggingArgs, NS
 
 from . import io as _ioutils  # noqa: F401
@@ -49,6 +51,24 @@ def _load_config(path: "_Path") -> dict:
     return yaml.safe_load(path.read_text()) or {}
 
 
+def register_targets(parser) -> None:
+    """Add the trailing ``targets`` positional to a command parser.
+
+    Every command's ``register`` hook must call this **last** (after adding its
+    own positionals) so the target host(s) are the trailing positionals:
+    ``pytruenas query <namespace> <host>...``. Targets support comma-separated
+    lists and ``[A-Z]``/``[0-9]`` range patterns, expanded by
+    ``PyTrueNASArgs._expanded_targets_`` (empty -> ``localhost``).
+    """
+    parser.add_argument(
+        "targets",
+        nargs="*",
+        metavar="TARGET",
+        help="Target host(s) as trailing arguments; comma-separated and "
+        "[A-Z]/[0-9] range patterns supported. Defaults to localhost.",
+    )
+
+
 class PyTrueNASArgs(LoggingArgs):
     """Global options shared by every ``pytruenas`` command.
 
@@ -71,9 +91,13 @@ class PyTrueNASArgs(LoggingArgs):
     "Verify the server's TLS certificate"
     ("--sslverify",)  # type: ignore
 
-    targets: "Arg[list[str], Extend(',')]" = []
-    "Target host(s): repeat -t, or comma-separate; supports [A-Z]/[0-9] range expansion"
-    ("-t", "--target")  # type: ignore
+    # Targets are supplied as the TRAILING POSITIONAL arguments of the command
+    # (after any command-specific positionals), not a -t/--target flag. Each
+    # command's register() calls register_targets(parser) LAST so argparse can
+    # split e.g. `query <namespace> <host>...`. SUPPRESS keeps duho from
+    # auto-registering this field as a `--targets` option; it only holds the
+    # parsed value + default, populated by the imperative positional.
+    targets: "Arg[list[str], _SUPPRESS]" = []
 
     parallel: int = 1
     "Number of targets to operate on concurrently"
@@ -89,11 +113,12 @@ class PyTrueNASArgs(LoggingArgs):
         return config or {}
 
     def _expanded_targets_(self) -> "list[str]":
-        """Return the target list with range patterns expanded (default localhost).
+        """Return the target list with commas split and range patterns expanded.
 
-        Flattens defensively: depending on how the ``Extend`` action accumulates,
-        a value may arrive as a nested list, so any list items are flattened to
-        strings before range expansion.
+        Targets arrive as the trailing positionals (a flat ``list[str]``); each
+        item may itself be a comma-separated list (``nas1,nas2``) and/or carry a
+        ``[A-Z]``/``[0-9]`` range pattern. An empty list defaults to
+        ``localhost``. Flattens defensively in case a nested list slips through.
         """
         from duho import expand
 
@@ -104,7 +129,9 @@ class PyTrueNASArgs(LoggingArgs):
                 else:
                     yield value
 
-        raw = list(_flatten(self.targets)) or ["localhost"]
+        items = list(_flatten(self.targets)) or ["localhost"]
+        # A single positional may still be a comma-list (nas1,nas2).
+        raw = [part for item in items for part in str(item).split(",") if part]
         expanded: "list[str]" = []
         for target in raw:
             expanded.extend(expand(target))
