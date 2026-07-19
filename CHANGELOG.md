@@ -13,18 +13,32 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   and `[A-Z]`/`[0-9]` range patterns still expand; no target means `localhost`.
   The `-t`/`--target` flag has been removed.
 
+- Dependency floors raised to the validated versions: `duho>=0.3.2` (CLI parser
+  fixes — a global option before a subcommand is no longer shadowed; a literal
+  `%` in a `Cmd` docstring no longer breaks parser build) and the `ssh` extra's
+  `pathlib_next[sftp-async]>=0.8.3` (SFTP default concurrency raised 8→16).
+
 ### Fixed
+- **API calls no longer silently return `None` on a dropped connection.** The
+  namespace call retry loop fell through and returned `None` after a single
+  `ECONNABORTED` — which `_get` read as "record missing", turning an `_upsert`
+  into a spurious create (possible duplicate rows). It now retries then raises,
+  and never returns `None` on a connection error.
+- **Long-running jobs no longer spuriously time out.** `core.job_wait` (waited
+  on after uploads/downloads and mutating `_upsert`/`_update` calls) is now
+  issued with no client-side timeout, so a job lasting longer than the 60s
+  default no longer raises `CallTimeout` while it is still running server-side.
+  `Client.call(timeout=None)` now means "wait indefinitely".
 - `client.run()` with a `str` `input` together with a text `encoding`/`errors`
   no longer crashes. It used to pre-encode the string to bytes *and* hand the
   encoding to `subprocess.run`, which then tried to `.encode()` the already-bytes
   input (`AttributeError`). Now text mode keeps `str` input as-is (and decodes
   `bytes` input), binary mode encodes. Found by live testing on TrueNAS 26.0.
 
-### Changed
-- Dependency floors raised to the validated versions: `duho>=0.3.2` (CLI parser
-  fixes — a global option before a subcommand is no longer shadowed; a literal
-  `%` in a `Cmd` docstring no longer breaks parser build) and the `ssh` extra's
-  `pathlib_next[sftp-async]>=0.8.3` (SFTP default concurrency raised 8→16).
+### Internal
+- `jsonrpc.Client.call` narrows the compatibility kwargs it ignores and logs any
+  other unexpected keyword at debug level instead of silently swallowing it;
+  `_ioerror` is no longer forwarded into the upload/download paths.
 
 ## [0.1.0] - 2026-07-18
 

@@ -193,7 +193,7 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
         )
         jobid = resp.json()["job_id"]
         if wait:
-            client.api.core.job_wait(jobid, job=True)
+            client.api.core.job_wait(jobid, job=True, _timeout=None)
 
         return jobid
 
@@ -219,7 +219,7 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
         if wait:
             if buffered:
 
-                client.api.core.job_wait(jobid, job=True)
+                client.api.core.job_wait(jobid, job=True, _timeout=None)
 
             resp = _req.get(
                 target.uri,

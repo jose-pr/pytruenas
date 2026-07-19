@@ -126,6 +126,42 @@ def test_timeout_raises_calltimeout():
         c.close()
 
 
+def test_timeout_none_waits_for_a_delayed_response():
+    # timeout=None must wait indefinitely (used by core.job_wait for long jobs),
+    # NOT fall back to the default and time out. A response arriving after the
+    # client's short default call_timeout (2s here) must still be returned.
+    fake = _FakeWS()
+    c = _client_with(fake)  # call_timeout=2
+
+    def _answer_late(req):
+        # respond after longer than the default timeout would allow
+        def _later():
+            time.sleep(0.3)
+            fake.push(json.dumps({"jsonrpc": "2.0", "id": req["id"], "result": "late"}))
+        threading.Thread(target=_later, daemon=True).start()
+        return None
+
+    fake.responder = _answer_late
+    try:
+        assert c.call("core.job_wait", timeout=None) == "late"
+    finally:
+        c.close()
+
+
+def test_unexpected_kwarg_is_logged_not_swallowed(caplog):
+    import logging
+
+    fake = _FakeWS()
+    fake.responder = lambda req: {"jsonrpc": "2.0", "id": req["id"], "result": 1}
+    c = _client_with(fake)
+    try:
+        with caplog.at_level(logging.DEBUG, logger="pytruenas.jsonrpc"):
+            assert c.call("core.ping", nonsense_kwarg=1) == 1
+        assert any("nonsense_kwarg" in r.message for r in caplog.records)
+    finally:
+        c.close()
+
+
 def test_closed_connection_fails_pending():
     fake = _FakeWS()
     c = _client_with(fake)
