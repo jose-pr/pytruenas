@@ -112,6 +112,22 @@ def test_run_string_input_is_fed_to_stdin():
 
 
 @pytest.mark.skipif(not _has_posix_shell(), reason="needs a POSIX shell")
+def test_run_str_input_with_text_encoding_no_double_encode():
+    # Regression: str input + encoding="utf-8" used to pre-encode to bytes AND
+    # pass encoding to subprocess, which then called .encode() on bytes and
+    # crashed with AttributeError. Verified live on TrueNAS 26.0. Both str and
+    # bytes input must work whether or not a text encoding is given.
+    c = TrueNASClient(None, autologin=False)
+    r1 = c.run("cat", executable=_posix_shell(), input="xy",
+               capture_output="stdout", check=False, encoding="utf-8")
+    assert r1.stdout == "xy"
+    # bytes input WITH a text encoding must also round-trip (decoded for text mode)
+    r2 = c.run("cat", executable=_posix_shell(), input=b"zz",
+               capture_output="stdout", check=False, encoding="utf-8")
+    assert r2.stdout == "zz"
+
+
+@pytest.mark.skipif(not _has_posix_shell(), reason="needs a POSIX shell")
 def test_run_joins_multiple_cmds_and_quotes_cwd():
     c = TrueNASClient(None, autologin=False)
     # two commands joined by ';' both run; cwd is normalised to posix
