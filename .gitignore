@@ -28,6 +28,10 @@ dist/
 htmlcov/
 .tox/
 
+# Docs site build
+/site
+docs/_build/
+
 # Editors / OS
 .vscode/
 .idea/
