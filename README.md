@@ -1,5 +1,10 @@
 # pytruenas
 
+[![PyPI version](https://img.shields.io/pypi/v/pytruenas.svg)](https://pypi.org/project/pytruenas/)
+[![Python versions](https://img.shields.io/pypi/pyversions/pytruenas.svg)](https://pypi.org/project/pytruenas/)
+[![Documentation](https://img.shields.io/badge/docs-jose--pr.github.io%2Fpytruenas-blue.svg)](https://jose-pr.github.io/pytruenas/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/jose-pr/pytruenas/blob/main/LICENSE)
+
 A typed, Pythonic client and CLI for the [TrueNAS](https://www.truenas.com/)
 middleware API.
 
@@ -63,14 +68,16 @@ print(local.api.system.info())
 
 ```sh
 pytruenas --help
-pytruenas -t nas.example.com query -q username=root user
-pytruenas -t nas.example.com dump-api > api.json
-pytruenas -t nas.example.com generate-typings --path typings --api-version v26.0.0
+pytruenas query user -t nas.example.com -f username=root
+pytruenas dump-api -t nas.example.com > api.json
+pytruenas generate-typings -t nas.example.com --path typings --api-version v26.0.0
 ```
 
-`-t/--target` may be repeated or comma-separated and supports `[A-Z]`/`[0-9]`
-range expansion (e.g. `-t nas[1-3].example.com`); `--parallel N` runs several
-targets concurrently.
+The **subcommand comes first**, then `-t/--target` (because `-t` takes a variable
+number of hosts, placing it before the subcommand lets it swallow the command
+name). `-t` may be repeated or comma-separated and supports `[A-Z]`/`[0-9]`
+range expansion (e.g. `-t 'nas[1-3].example.com'`); `--parallel N` runs several
+targets concurrently. Filter `query` with `-f/--filter KEY=VALUE` (repeatable).
 
 ## Typings generator
 
@@ -79,7 +86,7 @@ so editors and type checkers understand `client.api.<namespace>.<method>(...)`.
 It is validated against the full real API (every version in a live dump).
 
 ```sh
-pytruenas -t nas.example.com generate-typings --path truenasapi_typings/current
+pytruenas generate-typings -t nas.example.com --path truenasapi_typings/current
 ```
 
 ## Development
