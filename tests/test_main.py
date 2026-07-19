@@ -1,11 +1,57 @@
 """CLI driver: the fan-out dispatch runs the command once per target."""
 
 import logging
+import subprocess
+import sys
 from types import SimpleNamespace
 from unittest.mock import MagicMock
 
 import pytruenas.main as main
 from duho.discovery import ModuleCommand
+
+
+def _cli(*args):
+    return subprocess.run(
+        [sys.executable, "-m", "pytruenas", *args],
+        capture_output=True, text=True,
+    )
+
+
+def test_cli_version_prints_metadata_version():
+    # __main__ + main() + duho parser build, end to end; _version_ = AUTO
+    # resolves the installed 0.1.0 from importlib.metadata.
+    r = _cli("--version")
+    assert r.returncode == 0
+    assert "0.1.0" in r.stdout
+
+
+def test_cli_help_lists_subcommands():
+    r = _cli("--help")
+    assert r.returncode == 0
+    for sub in ("dump-api", "generate-typings", "query"):
+        assert sub in r.stdout
+
+
+def test_main_version_in_process(monkeypatch, capsys):
+    # In-process so main.py's entry path is measured for coverage. --version
+    # exits via SystemExit(0) after argparse prints the metadata version.
+    import pytest
+
+    monkeypatch.setattr(sys, "argv", ["pytruenas", "--version"])
+    with pytest.raises(SystemExit) as ei:
+        main.main("pytruenas")
+    assert ei.value.code in (0, None)
+    assert "0.1.0" in capsys.readouterr().out
+
+
+def test_main_help_in_process(monkeypatch, capsys):
+    import pytest
+
+    monkeypatch.setattr(sys, "argv", ["pytruenas", "--help"])
+    with pytest.raises(SystemExit) as ei:
+        main.main("pytruenas")
+    assert ei.value.code in (0, None)
+    assert "usage:" in capsys.readouterr().out
 
 
 def _module_command(run):
