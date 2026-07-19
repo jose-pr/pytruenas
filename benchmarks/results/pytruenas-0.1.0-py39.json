@@ -1,0 +1,46 @@
+{
+  "iterations": {
+    "build_inner": 200000,
+    "ejson_inner": 20000,
+    "filter_inner": 50000,
+    "repeat": 5
+  },
+  "metrics": {
+    "ejson.dumps.extended": {
+      "max_ms": 0.021398,
+      "median_ms": 0.020184,
+      "min_ms": 0.019942
+    },
+    "ejson.dumps.plain": {
+      "max_ms": 0.051182,
+      "median_ms": 0.048252,
+      "min_ms": 0.047371
+    },
+    "ejson.loads.extended": {
+      "max_ms": 0.025184,
+      "median_ms": 0.020599,
+      "min_ms": 0.019915
+    },
+    "ejson.loads.plain": {
+      "max_ms": 0.048028,
+      "median_ms": 0.045958,
+      "min_ms": 0.045577
+    },
+    "namespace.methodname": {
+      "max_ms": 0.004854,
+      "median_ms": 0.004291,
+      "min_ms": 0.003911
+    },
+    "query.filter_from_kwargs": {
+      "max_ms": 0.002937,
+      "median_ms": 0.002644,
+      "min_ms": 0.002555
+    }
+  },
+  "name": "pytruenas-0.1.0-py39",
+  "platform": "Windows-10-10.0.26200-SP0",
+  "processor": "Intel64 Family 6 Model 126 Stepping 5, GenuineIntel",
+  "python": "3.9.13",
+  "pytruenas_version": "0.1.0",
+  "timestamp": "2026-07-19T03:58:50+00:00"
+}
