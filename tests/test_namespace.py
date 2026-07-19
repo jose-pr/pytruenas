@@ -114,3 +114,61 @@ def test_update_on_absent_selector_raises_not_found():
     ns, _ = _namespace_with(existing=None)
     with pytest.raises(FileNotFoundError):
         DbAction.UPDATE.execute(ns, ("username",), username="ghost")
+
+
+def test_create_by_explicit_action():
+    # A tuple selector that resolves absent + CREATE -> create; a non-int
+    # result is returned as-is (no job_wait).
+    ns, _ = _namespace_with(existing=None, create_ret={"id": 42})
+    out = DbAction.CREATE.execute(ns, ("username",), username="svc")
+    ns.create.assert_called_once()
+    assert out == {"id": 42}
+
+
+def test_create_action_on_existing_id_raises_exists():
+    # An explicit int id with CREATE (not update/upsert) is a conflict.
+    ns, _ = _namespace_with()
+    with pytest.raises(FileExistsError):
+        DbAction.CREATE.execute(ns, 5, username="svc")
+
+
+def test_create_maps_already_exists_validation_to_file_exists():
+    from pytruenas import _conn
+
+    ns, _ = _namespace_with()
+    err = _conn.ValidationErrors.__new__(_conn.ValidationErrors)
+    err.error = "user with this name already exists"
+    ns.create = MagicMock(side_effect=err)
+    with pytest.raises(FileExistsError):
+        DbAction.CREATE.execute(ns, ("username",), username="dup")
+
+
+def test_no_selector_update_diffs_against_config():
+    # No id, no selector, not force -> config() is diffed and update() called
+    # only with the changed field.
+    ns, _ = _namespace_with(existing=None, update_ret=None)
+    ns.config = MagicMock(return_value={"motd": "old"})
+    DbAction.UPDATE.execute(ns, None, motd="new")
+    ns.update.assert_called_once()
+    assert ns.update.call_args[0][0] == {"motd": "new"}
+
+
+def test_callback_receives_action_and_result():
+    ns, _ = _namespace_with(existing=None, create_ret={"id": 99})
+    seen = {}
+    DbAction.CREATE.execute(
+        ns, ("username",),
+        {"callback": lambda a, i, r: seen.update(action=a, result=r)},
+        username="svc",
+    )
+    assert seen["action"] == DbAction.CREATE
+    assert seen["result"] == {"id": 99}
+
+
+def test_int_result_triggers_job_wait():
+    # An int create result is treated as a job id and waited on.
+    ns, client = _namespace_with(existing=None, create_ret=7)
+    client.api.core.job_wait.return_value = {"id": 7, "done": True}
+    out = DbAction.CREATE.execute(ns, ("username",), {"wait": True}, username="svc")
+    client.api.core.job_wait.assert_called_once_with(7, job=True)
+    assert out == {"id": 7, "done": True}
