@@ -14,6 +14,15 @@ from .utils import query as _q, io as _ioutils
 if _ty.TYPE_CHECKING:
     from . import TrueNASClient
 
+
+class _Unset:
+    """Sentinel type for "argument not supplied" (distinct from ``None``)."""
+
+
+#: Marks a ``_timeout`` argument as "use the client default" -- ``None`` is a
+#: real value meaning "wait indefinitely", so it cannot double as the default.
+_UNSET = _Unset()
+
 _ERRNO_PATTERN = _re.compile(r"^\[([^]]*)\]\s*(.*)")
 
 
@@ -134,7 +143,7 @@ class DbAction(str, _enum.Enum):
 
         wait = opts.get("wait", True)
         if isinstance(result, int) and (wait is None or wait):
-            result = __namespace._client.api.core.job_wait(result, job=True)
+            result = __namespace._client.api.core.job_wait(result, job=True, _timeout=None)
 
         result = _ty.cast(_T, result)
 
@@ -165,45 +174,67 @@ class Namespace:
         _method: str | None = None,
         _ioerror=False,
         _filetransfer: bool | bytes = False,
+        _timeout: "float | None | _Unset" = _UNSET,
         **kwds,
     ):
+        """Invoke this namespace's middleware method.
+
+        ``_tries`` is the number of *reconnect retries* after a dropped
+        connection (``ECONNABORTED``); with the default 1 the call is attempted
+        up to twice. ``_timeout`` is the per-call timeout in seconds; the
+        default sentinel uses the client's configured timeout, ``None`` waits
+        indefinitely (used by ``core.job_wait`` for long jobs). ``_method``
+        appends a leaf method name, ``_ioerror`` maps a middleware error to the
+        matching ``OSError``, and ``_filetransfer`` routes through
+        upload/download.
+        """
         method = self._namespace
         if _method:
             method = f"{method}.{_method}"
+        # _ioerror is only meaningful for the direct-call path below; the
+        # transfer helpers don't accept it (it would leak into their **kwargs
+        # and on to generate_token/core.download), so it is intentionally not
+        # forwarded here.
         if _filetransfer is True:
-            return self._client.download(
-                method,
-                *args,
-                _ioerror=_ioerror,
-                **kwds,
-            )
+            return self._client.download(method, *args, **kwds)
         elif _ioutils.isbytelike(_filetransfer) or hasattr(_filetransfer, "read"):
             return self._client.upload(
-                _ty.cast(bytes, _filetransfer),
-                method,
-                *args,
-                _ioerror=_ioerror,
-                **kwds,
+                _ty.cast(bytes, _filetransfer), method, *args, **kwds
             )
         elif _filetransfer:
             raise TypeError(_filetransfer)
 
-        while _tries > 0:
+        if _timeout is not _UNSET:
+            kwds["timeout"] = _timeout
+
+        # One initial attempt plus `_tries` reconnect retries after an aborted
+        # connection. The loop always ends in a return or a raise -- it must
+        # never fall through to None (a None here reads as "no result" and, via
+        # _get, silently turns an upsert into a create).
+        attempts = max(0, _tries) + 1
+        last_exc: "_conn.ClientException | None" = None
+        for attempt in range(attempts):
             try:
                 self._client.logger.trace(  # type:ignore
                     f"Calling method: {method} args: {args}"
                 )
                 return self._client.websocket.call(method, *args, **kwds)
             except _conn.ClientException as e:
-                if e.errno == _errno.ECONNABORTED and _tries:
+                last_exc = e
+                if e.errno == _errno.ECONNABORTED and attempt < attempts - 1:
                     self._client.logger.warning(
                         "Websocket connection was closed, trying again with new connection"
                     )
-                    _tries -= 1
-                    self._conn = None
+                    # Drop the dead connection on the CLIENT so the next
+                    # `websocket` access reconnects (setting it on self, a
+                    # Namespace, was a no-op that only worked by accident).
+                    self._client._conn = None
                     _time.sleep(1)
-                else:
-                    raise ioerror(e) if _ioerror else e from None
+                    continue
+                raise (ioerror(e) if _ioerror else e) from None
+        # Unreachable in practice (the loop returns or raises), but guarantees
+        # we never return None on a connection error.
+        raise ioerror(last_exc) if _ioerror else last_exc  # type: ignore[misc]
 
     if not _ty.TYPE_CHECKING:
 
