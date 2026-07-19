@@ -68,16 +68,17 @@ print(local.api.system.info())
 
 ```sh
 pytruenas --help
-pytruenas query user -t nas.example.com -f username=root
-pytruenas dump-api -t nas.example.com > api.json
-pytruenas generate-typings -t nas.example.com --path typings --api-version v26.0.0
+pytruenas query user -f username=root nas.example.com
+pytruenas dump-api nas.example.com > api.json
+pytruenas generate-typings --path typings --api-version v26.0.0 nas.example.com
 ```
 
-The **subcommand comes first**, then `-t/--target` (because `-t` takes a variable
-number of hosts, placing it before the subcommand lets it swallow the command
-name). `-t` may be repeated or comma-separated and supports `[A-Z]`/`[0-9]`
-range expansion (e.g. `-t 'nas[1-3].example.com'`); `--parallel N` runs several
-targets concurrently. Filter `query` with `-f/--filter KEY=VALUE` (repeatable).
+The target host(s) are the **trailing positional arguments** — a command's own
+positionals (like `query`'s namespace) come first, then the hosts. Each target
+may be comma-separated and supports `[A-Z]`/`[0-9]` range expansion (e.g.
+`'nas[1-3].example.com'`); with no target the command runs against `localhost`.
+`--parallel N` runs several targets concurrently. Filter `query` with
+`-f/--filter KEY=VALUE` (repeatable).
 
 ## Typings generator
 
@@ -86,7 +87,7 @@ so editors and type checkers understand `client.api.<namespace>.<method>(...)`.
 It is validated against the full real API (every version in a live dump).
 
 ```sh
-pytruenas generate-typings -t nas.example.com --path truenasapi_typings/current
+pytruenas generate-typings --path truenasapi_typings/current nas.example.com
 ```
 
 ## Development

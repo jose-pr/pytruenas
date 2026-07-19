@@ -7,7 +7,7 @@ shapes.
 
 ```bash
 pip install pytruenas[codegen]
-pytruenas generate-typings -t nas.example.com --path truenasapi_typings/current
+pytruenas generate-typings --path truenasapi_typings/current nas.example.com
 ```
 
 Options:
