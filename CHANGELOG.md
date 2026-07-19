@@ -6,6 +6,12 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+- **`pytruenas call <method>` command.** Invoke any middleware method by its
+  dotted name (`system.info`, `core.ping`, `pool.dataset.details`) — not just
+  the queryable `<namespace>.query` methods `query` covers. Parameters are JSON
+  values via `-p/--param` (repeatable).
+
 ### Changed
 - **CLI targets are now trailing positional arguments, not `-t/--target`.**
   A command's own positionals come first, then the target host(s):
