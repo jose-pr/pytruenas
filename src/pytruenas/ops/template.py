@@ -15,14 +15,20 @@ class TemplateTarget:
         raise NotImplementedError()
 
     def apply_template(self, template: "BaseTemplate|str|type", context=None, **kwargs):
-        if issubclass(template, BaseTemplate):
+        if isinstance(template, type) and issubclass(template, BaseTemplate):
+            # A BaseTemplate *class*: instantiate it with the target's current
+            # content as the baseline (empty if the target does not exist yet).
             try:
                 baseline = self.read()
             except FileNotFoundError:
                 baseline = b""
             template = template(baseline, **kwargs)
+        elif isinstance(template, str):
+            # A plain string is the template's literal content.
+            template = TextTemplate(template, **kwargs)
         elif not isinstance(template, BaseTemplate):
-            template = TextTemplate(LocalPath(template), **kwargs)
+            # Anything else (e.g. a path-like) is read as a file's content.
+            template = TextTemplate(LocalPath(template).read_text(), **kwargs)
 
         return template.apply(self, context)
 
