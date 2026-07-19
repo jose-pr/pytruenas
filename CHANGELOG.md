@@ -41,10 +41,22 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   input (`AttributeError`). Now text mode keeps `str` input as-is (and decodes
   `bytes` input), binary mode encodes. Found by live testing on TrueNAS 26.0.
 
+- `ops.template.TemplateTarget.apply_template` no longer crashes on a plain
+  string template (`issubclass()` was called on a non-type); a `str` is now
+  treated as literal template content and a path-like is read as file content.
+- `namespace.ioerror` only maps a middleware error to `OSError` when the
+  bracketed prefix names a real POSIX errno; previously an unrecognised prefix
+  produced `IOError(None, msg)`, discarding the original exception type.
+
 ### Internal
 - `jsonrpc.Client.call` narrows the compatibility kwargs it ignores and logs any
   other unexpected keyword at debug level instead of silently swallowing it;
   `_ioerror` is no longer forwarded into the upload/download paths.
+- `Namespace` child lookups use a per-instance dict instead of `functools.cache`
+  on the methods, so namespaces are garbage-collected with their client instead
+  of being pinned for the process lifetime (relevant to long-lived embeddings).
+- The `pytruenas.ops` subpackage (systemd/midclt host-config helpers) is
+  **experimental** and exercised only by unit tests, not against a live host.
 
 ## [0.1.0] - 2026-07-18
 

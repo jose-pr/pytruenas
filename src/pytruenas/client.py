@@ -171,13 +171,18 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
     def api(self) -> "ApiVersion":
         return Namespace(self)  # type:ignore
 
+    def _http_target(self, path: str):
+        """The host's HTTP(S) URL for ``path`` (the websocket ``ws/wss`` scheme
+        mapped to ``http/https``), used by the upload/download side channels."""
+        scheme = "https" if self._api.scheme == "wss" else "http"
+        return self._api._replace(scheme=scheme, path=path, port=0)
+
     def upload(
         self, file: str | bytes, method: str, *params, token=None, wait=True, **kwargs
     ):
         client: "TrueNASClient[Current]" = self  # type:ignore
 
-        scheme = "https" if client._api.scheme == "wss" else "http"
-        target = client._api._replace(scheme=scheme, path="/_upload", port=0)
+        target = client._http_target("/_upload")
         data = {"method": method, "params": params}
         if isinstance(file, str):
             file = file.encode()
@@ -208,13 +213,11 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
     ):
         client: "TrueNASClient[Current]" = self  # type:ignore
 
-        scheme = "https" if client._api.scheme == "wss" else "http"
-
         jobid, link = client.api.core.download(
             method, args, filename or "download", buffered, **kwargs
         )  # type:ignore
 
-        target = client._api._replace(scheme=scheme, path=link, port=0)
+        target = client._http_target(link)
 
         if wait:
             if buffered:

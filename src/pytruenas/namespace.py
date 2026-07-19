@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from functools import cache
 import typing as _ty
 import errno as _errno
 import time as _time
@@ -27,14 +26,19 @@ _ERRNO_PATTERN = _re.compile(r"^\[([^]]*)\]\s*(.*)")
 
 
 def ioerror(error: _conn.ClientException) -> Exception:
+    """Map a middleware ``[ERRNO] message`` error to the matching ``OSError``.
+
+    Only errors whose bracketed prefix names a real POSIX errno become an
+    ``OSError`` (with that ``errno``); anything else is returned unchanged. The
+    prior ``if error is not None`` guard was always true, so an unrecognised
+    prefix produced ``IOError(None, msg)`` — losing the original exception type.
+    """
     match = _ERRNO_PATTERN.match(error.error)
     if match:
         name = match[1]
         msg = match[2]
-
         errno = getattr(_errno, name, None)
-        if error is not None:
-
+        if errno is not None:
             return IOError(errno, msg)
 
     return error
@@ -159,8 +163,12 @@ class Namespace:
     def __init__(self, client: "TrueNASClient", *name: str) -> None:
         self._client = client
         self._namespace = ".".join([n for n in name if n])
+        # Per-instance child cache. Using functools.cache on the methods keyed
+        # the cache on ``self``, pinning every Namespace for the process
+        # lifetime (uncollectable) -- fine for the CLI, a leak for a long-lived
+        # embedding client. A plain dict is dropped with the instance.
+        self._children: "dict[str, Namespace]" = {}
 
-    @cache
     def __repr__(self) -> str:  # type:ignore
         return f"{self.__class__.__name__}({self._client._api}/{self._namespace.replace('.','/')})"
 
@@ -238,7 +246,6 @@ class Namespace:
 
     if not _ty.TYPE_CHECKING:
 
-        @cache
         def __getattr__(self, name: str) -> "Namespace":
             if isinstance(name, str) and not name.startswith("_"):
                 return self[name.removesuffix("_")]
@@ -251,9 +258,11 @@ class Namespace:
 
         def __getattr__(self, name: str) -> "Namespace": ...
 
-    @cache
     def __getitem__(self, name: str) -> "Namespace":
-        return Namespace(self._client, self._namespace, name)
+        child = self._children.get(name)
+        if child is None:
+            child = self._children[name] = Namespace(self._client, self._namespace, name)
+        return child
 
     def _query(self, *__opts: dict | _q.Option, **filter):
         opts = _q.Option.options(*__opts)
