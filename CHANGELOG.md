@@ -6,6 +6,19 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Fixed
+- `client.run()` with a `str` `input` together with a text `encoding`/`errors`
+  no longer crashes. It used to pre-encode the string to bytes *and* hand the
+  encoding to `subprocess.run`, which then tried to `.encode()` the already-bytes
+  input (`AttributeError`). Now text mode keeps `str` input as-is (and decodes
+  `bytes` input), binary mode encodes. Found by live testing on TrueNAS 26.0.
+
+### Changed
+- Dependency floors raised to the validated versions: `duho>=0.3.2` (CLI parser
+  fixes — a global option before a subcommand is no longer shadowed; a literal
+  `%` in a `Cmd` docstring no longer breaks parser build) and the `ssh` extra's
+  `pathlib_next[sftp-async]>=0.8.3` (SFTP default concurrency raised 8→16).
+
 ## [0.1.0] - 2026-07-18
 
 First packaged release.
