@@ -170,5 +170,5 @@ def test_int_result_triggers_job_wait():
     ns, client = _namespace_with(existing=None, create_ret=7)
     client.api.core.job_wait.return_value = {"id": 7, "done": True}
     out = DbAction.CREATE.execute(ns, ("username",), {"wait": True}, username="svc")
-    client.api.core.job_wait.assert_called_once_with(7, job=True)
+    client.api.core.job_wait.assert_called_once_with(7, job=True, _timeout=None)
     assert out == {"id": 7, "done": True}

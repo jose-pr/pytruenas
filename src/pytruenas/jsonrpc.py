@@ -26,6 +26,7 @@ from __future__ import annotations
 import calendar as _calendar
 import errno as _errno
 import json as _json
+import logging as _logging
 import os as _os
 import socket as _socket
 import ssl as _ssl
@@ -41,6 +42,8 @@ from ipaddress import IPv4Interface as _IPv4Interface
 from ipaddress import IPv6Interface as _IPv6Interface
 
 import websocket as _websocket
+
+_LOGGER = _logging.getLogger("pytruenas.jsonrpc")
 
 __all__ = [
     "Client",
@@ -59,6 +62,20 @@ CALL_TIMEOUT = int(_os.environ.get("CALL_TIMEOUT", 60))
 DEFAULT_UNIX_SOCKET = "/var/run/middleware/middlewared.sock"
 
 _UNIX_PREFIX = "ws+unix://"
+
+
+class _Unset:
+    """Sentinel type for "timeout not supplied" (distinct from ``None``)."""
+
+
+#: Marks ``call(timeout=...)`` as "use the client default". ``None`` is a real
+#: value meaning "wait indefinitely" (long jobs via ``core.job_wait``), so it
+#: cannot double as the default.
+_UNSET = _Unset()
+
+#: Compatibility kwargs the upstream client accepts that this lean, synchronous
+#: client simply ignores (it does not track jobs client-side).
+_COMPAT_KWARGS = frozenset({"job", "background", "callback", "register_call", "raise_"})
 
 # JSON-RPC 2.0 + TrueNAS custom error codes.
 _INVALID_PARAMS = -32602
@@ -295,21 +312,27 @@ class Client:
         self,
         method: str,
         *params,
-        timeout: "float | None" = None,
+        timeout: "float | None | _Unset" = _UNSET,
         **_ignored,
     ):
         """Call ``method`` with ``params`` and return its result.
 
-        Blocks until the response arrives or ``timeout`` (default
-        :attr:`call_timeout`) elapses. Compatibility keyword arguments
-        (``job``, ``background``, ``callback``) accepted by the upstream client
-        are ignored: this client is synchronous and does not track jobs
-        client-side (``core.job_wait`` handles job completion server-side).
+        Blocks until the response arrives or ``timeout`` seconds elapse. The
+        default sentinel uses :attr:`call_timeout`; an explicit ``timeout=None``
+        waits **indefinitely** (used by ``core.job_wait`` for long jobs).
+        Compatibility keyword arguments (``job``, ``background``, ``callback``,
+        …) accepted by the upstream client are ignored -- this client is
+        synchronous and does not track jobs client-side. Any *other* unexpected
+        keyword is logged at debug level rather than silently swallowed.
 
         Raises :class:`ValidationErrors`/:class:`ClientException` on a server
         error, :class:`CallTimeout` on timeout, and :class:`ClientException`
         with ``errno=ECONNABORTED`` if the connection dropped.
         """
+        unexpected = [k for k in _ignored if k not in _COMPAT_KWARGS]
+        if unexpected:
+            _LOGGER.debug("call(%s): ignoring unexpected kwargs %s", method, unexpected)
+
         if self._closed.is_set():
             raise ClientException("Connection closed", _errno.ECONNABORTED)
 
@@ -334,8 +357,10 @@ class Client:
                 f"Failed to send request: {exc}", _errno.ECONNABORTED
             ) from exc
 
-        message = pending.wait(self.call_timeout if timeout is None else timeout)
+        wait_timeout = self.call_timeout if isinstance(timeout, _Unset) else timeout
+        message = pending.wait(wait_timeout)
         if message is None:
+            # Only reachable with a finite timeout; timeout=None waits forever.
             with self._pending_lock:
                 self._pending.pop(call_id, None)
             raise CallTimeout()
