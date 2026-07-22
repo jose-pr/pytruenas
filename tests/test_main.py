@@ -19,10 +19,16 @@ def _cli(*args):
 
 def test_cli_version_prints_metadata_version():
     # __main__ + main() + duho parser build, end to end; _version_ = AUTO
-    # resolves the installed 0.1.0 from importlib.metadata.
+    # resolves the installed version from importlib.metadata.
+    #
+    # Compared against the installed metadata rather than a literal: a
+    # hardcoded version passes against a stale editable install and then fails
+    # the release build, which is exactly how it was found.
+    import importlib.metadata as _md
+
     r = _cli("--version")
     assert r.returncode == 0
-    assert "0.1.0" in r.stdout
+    assert _md.version("pytruenas") in r.stdout
 
 
 def test_cli_help_lists_subcommands():
@@ -40,8 +46,10 @@ def test_main_version_in_process(monkeypatch, capsys):
     monkeypatch.setattr(sys, "argv", ["pytruenas", "--version"])
     with pytest.raises(SystemExit) as ei:
         main.main("pytruenas")
+    import importlib.metadata as _md
+
     assert ei.value.code in (0, None)
-    assert "0.1.0" in capsys.readouterr().out
+    assert _md.version("pytruenas") in capsys.readouterr().out
 
 
 def test_main_help_in_process(monkeypatch, capsys):
