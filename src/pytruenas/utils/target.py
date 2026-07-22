@@ -1,6 +1,14 @@
 import typing as _ty
 import urllib.parse as _urlparse
-import socket as _socket
+
+import netimps as _netimps
+
+# The websocket schemes are absent from every system services database, so
+# ``getservbyname("wss")`` fails -- which left a TrueNAS websocket URL with
+# port 0, the schemes this client uses most. Registering them here teaches
+# netimps' scheme table about them; it already knows http/https/ssh.
+_netimps.register_port("ws", 80)
+_netimps.register_port("wss", 443)
 
 
 class Target(_ty.NamedTuple):
@@ -33,11 +41,10 @@ class Target(_ty.NamedTuple):
         path = _urlparse.unquote(parts.path or "") or defaults.get("path") or ""
         host = parts.hostname or defaults.get("host") or ""
         port = int(parts.port or defaults.get("port") or 0)
-        try:
-            if port == 0 and resolve_port:
-                port = _socket.getservbyname(scheme)
-        except OSError:
-            pass
+        if port == 0 and resolve_port:
+            # netimps consults its own table before the system services
+            # database, so ws/wss resolve here where getservbyname cannot.
+            port = _netimps.get_default_port(scheme) or 0
 
         return cls(
             scheme, username, password, host, port, path, parts.query, parts.fragment
