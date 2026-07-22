@@ -33,6 +33,9 @@ dependencies = [
     # shadowed; '%' in a Cmd docstring no longer crashes parser build; directly-
     # built Cmd seeds field defaults). Validated on 0.3.3.
     "duho>=0.3.2",
+    # Scheme -> port resolution, including ws/wss which no system services
+    # database knows (see utils/target.py).
+    "netimps>=0.0.1",
     # >=0.8.2: SftpPath importable/usable without paramiko (asyncssh-only). The
     # 'uri' extra (uritools) is needed by TnasWsPath/TruenasPath, which are UriPaths.
     # Validated on 0.8.4.
