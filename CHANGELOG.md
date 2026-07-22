@@ -6,6 +6,14 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.0.0] - 2026-07-22
+
+Initial release.
+
+Earlier version numbers appear in this project's git history but were never
+tagged or published, so there is no upgrade path to describe -- everything
+below is simply what the package contains.
+
 ### Fixed
 - **`ws://` and `wss://` URLs no longer parse as port 0.** No system services
   database has an entry for the websocket schemes, so `getservbyname("wss")`
@@ -65,10 +73,6 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - The `pytruenas.ops` subpackage (systemd/midclt host-config helpers) is
   **experimental** and exercised only by unit tests, not against a live host.
 
-## [0.1.0] - 2026-07-18
-
-First packaged release.
-
 ### Added
 - Packaged as `pytruenas` (src layout, hatchling, `pytruenas` console script,
   `py.typed`). Python 3.9+.
@@ -96,5 +100,5 @@ First packaged release.
   `ssh` extra); the middleware API has no command-exec method. SFTP is handled by
   `pathlib_next`.
 
-[Unreleased]: https://github.com/jose-pr/pytruenas/compare/v0.1.0...HEAD
-[0.1.0]: https://github.com/jose-pr/pytruenas/releases/tag/v0.1.0
+[Unreleased]: https://github.com/jose-pr/pytruenas/compare/v0.0.0...HEAD
+[0.0.0]: https://github.com/jose-pr/pytruenas/releases/tag/v0.0.0
