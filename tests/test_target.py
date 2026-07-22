@@ -49,3 +49,34 @@ def test_replace_is_namedtuple():
     t2 = t._replace(scheme="ws")
     assert t2.scheme == "ws"
     assert t.scheme == "http"  # original unchanged
+
+
+def test_websocket_schemes_resolve_to_a_port():
+    """ws/wss are absent from every system services database.
+
+    getservbyname("wss") raises, which left a TrueNAS websocket URL with
+    port 0 -- the schemes this client uses most. netimps' scheme table is
+    consulted first, and utils/target.py registers these two into it.
+    """
+    assert Target.parse("ws://host").port == 80
+    assert Target.parse("wss://host").port == 443
+
+
+def test_known_schemes_still_resolve():
+    """The schemes that already worked must keep working."""
+    assert Target.parse("http://host").port == 80
+    assert Target.parse("https://host").port == 443
+    assert Target.parse("host").port == 80  # bare host defaults to http
+
+
+def test_explicit_port_wins_over_the_scheme():
+    assert Target.parse("wss://host:8443").port == 8443
+
+
+def test_unknown_scheme_leaves_port_zero():
+    """An unresolvable scheme must not invent a port."""
+    assert Target.parse("definitelynotascheme://host").port == 0
+
+
+def test_resolve_port_can_be_disabled():
+    assert Target.parse("wss://host", resolve_port=False).port == 0
