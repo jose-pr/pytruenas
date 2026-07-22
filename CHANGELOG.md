@@ -6,6 +6,13 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Fixed
+- **`ws://` and `wss://` URLs no longer parse as port 0.** No system services
+  database has an entry for the websocket schemes, so `getservbyname("wss")`
+  failed -- and those are the schemes this client uses most. Port resolution now
+  goes through `netimps`, whose scheme table is consulted before the system
+  database.
+
 ### Added
 - **`pytruenas call <method>` command.** Invoke any middleware method by its
   dotted name (`system.info`, `core.ping`, `pool.dataset.details`) — not just
