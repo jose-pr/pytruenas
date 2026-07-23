@@ -36,6 +36,23 @@ def test_uri_roundtrip():
     assert t.uri == "wss://nas:8443/api/current"
 
 
+def test_uri_roundtrips_reserved_chars_in_credentials():
+    """A password with reserved chars must survive parse -> uri -> parse.
+
+    ``parse`` unquotes userinfo, so ``uri`` must re-quote it; otherwise a
+    password like ``p@ss/w:rd`` reassembles into a URL that reparses as a
+    different host/port/path.
+    """
+    original = "wss://root:p%40ss%2Fw%3Ard@nas:8443/api"
+    t = Target.parse(original)
+    assert t.password == "p@ss/w:rd"  # decoded on parse
+    round_tripped = Target.parse(t.uri, resolve_port=False)
+    assert round_tripped.password == "p@ss/w:rd"
+    assert round_tripped.host == "nas"
+    assert round_tripped.port == 8443
+    assert round_tripped.path == "/api"
+
+
 def test_query_val():
     t = Target.parse("http://h/p?a=1&a=2&b=3")
     assert t.query_val("b") == "3"
