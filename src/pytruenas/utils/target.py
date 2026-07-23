@@ -55,14 +55,21 @@ class Target(_ty.NamedTuple):
     # properties -- the work is cheap and Targets are short-lived.
     @property
     def uri(self):
+        # ``parse`` stores userinfo/path already ``unquote``-d, so re-``quote``
+        # them here to round-trip a credential or path that contains reserved
+        # characters (``@ : / #`` etc.). ``safe=""`` also escapes ``/`` inside
+        # userinfo; ``path`` keeps ``/`` as a separator. For the common case
+        # (no reserved chars) ``quote`` is a no-op, so output is unchanged.
         uri = self.scheme + "://"
         if self.username or self.password:
-            uri = f"{uri}{self.username}:{self.password}@"
+            user = _urlparse.quote(self.username, safe="")
+            pw = _urlparse.quote(self.password, safe="")
+            uri = f"{uri}{user}:{pw}@"
         uri = f"{uri}{self.host}"
         if self.port:
             uri = f"{uri}:{self.port}"
         if self.path:
-            uri = f"{uri}{self.path}"
+            uri = f"{uri}{_urlparse.quote(self.path, safe='/')}"
 
         return uri
 
