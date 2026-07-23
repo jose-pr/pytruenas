@@ -50,6 +50,13 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   and the `Extend()` nested-list double-collection), not reproduced.
 
 ### Changed
+- **Local network-adapter discovery uses `netimps` instead of `ifaddr`.**
+  `pytruenas.ops.host.is_local_ip` / `find_adapter_in_network` now delegate to
+  `netimps` (a core dependency), so the optional **`host` extra is removed** —
+  those helpers work out of the box, no `pip install pytruenas[host]` needed.
+  `find_adapter_in_network` now returns a `netimps.Interface` (was an `ifaddr`
+  adapter). Requires `netimps>=0.0.2`, which also supplies the `ws`/`wss` default
+  ports built-in, so `utils/target.py` no longer registers them at import.
 - **Dependency floor `duho>=0.3.2` → `duho>=0.4.0`.** 0.4.0 carries the RunPath
   `register(base=...)` shared-root method inheritance, the `__main__.py`
   lifecycle, the corrected `enable`/`!enable` token spelling, and the `Extend()`
