@@ -8,6 +8,9 @@ import netimps as _netimps
 # ``getservbyname("wss")`` fails -- which left a TrueNAS websocket URL with
 # port 0, the schemes this client uses most. Registering them here teaches
 # netimps' scheme table about them; it already knows http/https/ssh.
+# NOTE: newer netimps seeds ws/wss in its OWN built-in table, so these two
+# calls become redundant once the netimps floor is bumped -- they are
+# idempotent (re-set the same value) so they stay harmless until then.
 _netimps.register_port("ws", 80)
 _netimps.register_port("wss", 443)
 
