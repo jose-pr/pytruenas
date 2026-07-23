@@ -420,4 +420,6 @@ TypedDict schemas only (no runtime behavior); import the submodules directly.
 - **`config`** (`pyyaml`) — required to read a CLI `--config` YAML file;
   missing it with a config file present raises `ImportError`.
 - **`codegen`** (`jinja2`) — required by `pytruenas.codegen`/`generate-typings`.
-- **`host`** (`ifaddr`) — required by `pytruenas.ops.host`.
+
+(There is no `host` extra: `pytruenas.ops.host`'s local-adapter discovery uses
+`netimps` — a core dependency — so it works out of the box.)
