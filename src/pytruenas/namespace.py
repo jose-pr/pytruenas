@@ -8,6 +8,7 @@ import re as _re
 import enum as _enum
 
 from . import _conn
+from . import jsonrpc as _jsonrpc
 from .utils import query as _q, io as _ioutils
 
 if _ty.TYPE_CHECKING:
@@ -263,6 +264,36 @@ class Namespace:
         if child is None:
             child = self._children[name] = Namespace(self._client, self._namespace, name)
         return child
+
+    def subscribe(
+        self,
+        __callback: "_ty.Callable[[_conn.Event], object] | None" = None,
+        *,
+        event: "str | None" = None,
+        maxsize: int = _jsonrpc.DEFAULT_EVENT_QUEUE_SIZE,
+    ) -> "_conn.Subscription":
+        """Subscribe to this namespace's collection events.
+
+        ``client.api.alert.list.subscribe()`` subscribes to the ``alert.list``
+        event -- the event name defaults to this namespace's dotted path.
+        Returns a :class:`~pytruenas.jsonrpc.Subscription`; consume it via its
+        ``events()`` iterator and/or the optional ``__callback`` (invoked inline
+        on the reader thread -- keep it fast).
+
+        Pass ``event=`` to subscribe to a different event name than the
+        namespace path (e.g. from ``client.api`` root). This is a real method,
+        so it shadows any middleware method literally named ``subscribe``; reach
+        such a method via ``ns(_method="subscribe", ...)`` if ever needed.
+        """
+        name = event or self._namespace
+        if not name:
+            raise ValueError(
+                "no event name: call subscribe() on a namespace "
+                "(client.api.alert.list.subscribe()) or pass event=..."
+            )
+        return self._client.websocket.subscribe(
+            name, __callback, maxsize=maxsize
+        )
 
     def _query(self, *__opts: dict | _q.Option, **filter):
         opts = _q.Option.options(*__opts)

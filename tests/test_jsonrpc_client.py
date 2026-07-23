@@ -190,3 +190,165 @@ def test_ejson_roundtrip_over_the_wire():
         assert c.call("echo", dt) == dt
     finally:
         c.close()
+
+
+# -- event subscriptions ----------------------------------------------------
+
+#: A ``responder`` that answers core.subscribe with a canned id and
+#: core.unsubscribe with True, so subscribe()/unsubscribe() complete.
+def _subscribe_responder(sub_id="sub-1"):
+    def responder(req):
+        if req["method"] == "core.subscribe":
+            return {"jsonrpc": "2.0", "id": req["id"], "result": sub_id}
+        if req["method"] == "core.unsubscribe":
+            return {"jsonrpc": "2.0", "id": req["id"], "result": True}
+        return {"jsonrpc": "2.0", "id": req["id"], "result": None}
+    return responder
+
+
+def _notification(collection, msg="added", fields=None):
+    # An id-less collection_update, exactly as the live middleware sends it.
+    return json.dumps({
+        "jsonrpc": "2.0",
+        "method": "collection_update",
+        "params": {"msg": msg, "collection": collection, "fields": fields or {}},
+    })
+
+
+def test_notification_routes_to_subscription():
+    fake = _FakeWS()
+    fake.responder = _subscribe_responder("id-77")
+    c = _client_with(fake)
+    try:
+        sub = c.subscribe("alert.list")
+        assert sub.id == "id-77"
+        fake.push(_notification("alert.list", "added", {"id": 5, "level": "WARNING"}))
+        events = sub.events(timeout=2)
+        ev = next(events)
+        assert ev.collection == "alert.list"
+        assert ev.msg == "added"
+        assert ev.fields == {"id": 5, "level": "WARNING"}
+    finally:
+        c.close()
+
+
+def test_notification_fires_callback():
+    fake = _FakeWS()
+    fake.responder = _subscribe_responder()
+    c = _client_with(fake)
+    got = []
+    try:
+        c.subscribe("reporting.realtime", callback=got.append)
+        fake.push(_notification("reporting.realtime", "changed", {"cpu": 1}))
+        # give the reader thread a moment to route + invoke the callback
+        for _ in range(50):
+            if got:
+                break
+            time.sleep(0.02)
+        assert len(got) == 1 and got[0].collection == "reporting.realtime"
+    finally:
+        c.close()
+
+
+def test_unmatched_notification_dropped_without_disturbing_calls():
+    fake = _FakeWS()
+    fake.responder = _subscribe_responder()
+    c = _client_with(fake)
+    try:
+        c.subscribe("alert.list")
+        # a notification for an event nobody subscribed to
+        fake.push(_notification("something.else"))
+        # a normal call still resolves (reader unaffected)
+        fake.responder = lambda req: {"jsonrpc": "2.0", "id": req["id"], "result": "ok"}
+        assert c.call("core.ping") == "ok"
+    finally:
+        c.close()
+
+
+def test_two_subscribers_same_collection_both_receive():
+    fake = _FakeWS()
+    fake.responder = _subscribe_responder()
+    c = _client_with(fake)
+    try:
+        a = c.subscribe("alert.list")
+        b = c.subscribe("alert.list")
+        fake.push(_notification("alert.list", "removed", {"id": 9}))
+        ea = next(a.events(timeout=2))
+        eb = next(b.events(timeout=2))
+        assert ea.msg == eb.msg == "removed"
+    finally:
+        c.close()
+
+
+def test_raising_callback_is_contained():
+    fake = _FakeWS()
+    fake.responder = _subscribe_responder()
+    c = _client_with(fake)
+    try:
+        def boom(_ev):
+            raise RuntimeError("callback blew up")
+
+        c.subscribe("alert.list", callback=boom)
+        fake.push(_notification("alert.list"))
+        # reader survives: a subsequent call still works
+        fake.responder = lambda req: {"jsonrpc": "2.0", "id": req["id"], "result": 1}
+        assert c.call("core.ping") == 1
+    finally:
+        c.close()
+
+
+def test_queue_full_drops_oldest_and_counts():
+    fake = _FakeWS()
+    fake.responder = _subscribe_responder()
+    c = _client_with(fake)
+    try:
+        sub = c.subscribe("alert.list", maxsize=2)
+        for i in range(5):  # 5 events into a size-2 queue
+            fake.push(_notification("alert.list", "added", {"n": i}))
+        # let the reader drain the inbox
+        for _ in range(50):
+            if sub.dropped >= 3:
+                break
+            time.sleep(0.02)
+        assert sub.dropped == 3  # 5 pushed, 2 retained -> 3 dropped
+        kept = [ev.fields["n"] for ev in sub.events(timeout=0.2)]
+        assert kept == [3, 4]  # the two NEWEST survive (oldest dropped)
+    finally:
+        c.close()
+
+
+def test_close_wakes_events_iterator():
+    fake = _FakeWS()
+    fake.responder = _subscribe_responder()
+    c = _client_with(fake)
+    sub = c.subscribe("alert.list")
+    collected = []
+
+    def _consume():
+        for ev in sub.events(timeout=5):
+            collected.append(ev)
+
+    t = threading.Thread(target=_consume, daemon=True)
+    t.start()
+    time.sleep(0.1)
+    c.close()  # must wake the blocked events() consumer
+    t.join(timeout=3)
+    assert not t.is_alive()  # iterator ended cleanly on close
+
+
+def test_unsubscribe_stops_delivery_and_sends_unsubscribe():
+    fake = _FakeWS()
+    fake.responder = _subscribe_responder("theid")
+    c = _client_with(fake)
+    try:
+        sub = c.subscribe("alert.list")
+        sub.unsubscribe()
+        # core.unsubscribe was sent with the returned id
+        methods = [json.loads(s) for s in fake.sent]
+        unsub = [m for m in methods if m["method"] == "core.unsubscribe"]
+        assert unsub and unsub[0]["params"] == ["theid"]
+        # a later notification is dropped (no sink)
+        fake.push(_notification("alert.list"))
+        assert list(sub.events(timeout=0.2)) == []
+    finally:
+        c.close()

@@ -7,7 +7,7 @@ project overview and CLI usage, see the project overview doc at the repo root.
 
 ## Package root (`pytruenas`)
 
-`__all__ = ["Namespace", "TrueNASClient", "Credentials", "__version__"]`
+`__all__ = ["Namespace", "TrueNASClient", "Credentials", "Event", "Subscription", "__version__"]`
 
 - **`__version__: str`** — resolved from installed package metadata
   (`importlib.metadata`); `"0.0.0.dev0"` when run from a bare checkout with the
@@ -75,6 +75,13 @@ shell=None, logger=None, fsbackend="auto", version="current")`
 - **`.download(method, *args, filename=None, buffered=False, wait=True,
   **kwargs)`** — call `method` to get a download link/job, fetch it over
   HTTP(S), and return the bytes (when `wait=True`) or the job id.
+- **`.subscribe(event, callback=None, *, maxsize=1000) -> jsonrpc.Subscription`**
+  — subscribe to a middleware collection event over the live websocket.
+  `client.subscribe("alert.list")` is shorthand for
+  `client.api.alert.list.subscribe()`. Consume via the returned subscription's
+  `.events(timeout=None)` iterator and/or the inline `callback`. Bound to the
+  current connection; does **not** survive a reconnect (the `events()` iterator
+  ends on disconnect — that's the re-subscribe signal). See `jsonrpc` below.
 - **`.dump_api() -> dict`** — run `middlewared --dump-api` on the target and
   return the parsed JSON (see `pytruenas.models.apidump.Api`).
 - **`.install_sshcreds(name=None, private_key=None)`** — generate/reuse an SSH
@@ -109,6 +116,13 @@ than the dunder-safe helpers below raise `AttributeError` normally.
     `OSError` (see `pytruenas.namespace.ioerror`).
   - **`_filetransfer`** — `True` routes through `client.download`; bytes/a
     readable routes through `client.upload`.
+- **`.subscribe(callback=None, *, event=None, maxsize=1000) ->
+  jsonrpc.Subscription`** — subscribe to this namespace's collection event; the
+  event name defaults to the namespace's dotted path
+  (`client.api.alert.list.subscribe()` -> `alert.list`), or pass `event=` to
+  override (e.g. from `client.api`). A **real method**, so it shadows any
+  middleware method literally named `subscribe`; reach such a method via
+  `ns(_method="subscribe", ...)`. See `jsonrpc.Subscription`/`Event` above.
 - **`._query(*opts, **filter) -> list[dict]`** — calls `<namespace>.query`
   with filters built from `**filter` kwargs (equality by default; wrap a value
   in `EQ`/`NE`/`RE`/`GT`/`GE`/`LT`/`LE`/`IN`/`NIN` from `pytruenas.utils.query`
@@ -149,7 +163,24 @@ imports on Python 3.9.
     kwarg is logged at debug level. Raises `ValidationErrors`/
     `ClientException` on a server error, `CallTimeout` on timeout,
     `ClientException(errno=ECONNABORTED)` if the connection dropped.
-  - **`.close()`** — idempotent; also usable as a context manager.
+  - **`.subscribe(event, callback=None, *, maxsize=1000) -> Subscription`** —
+    issue `core.subscribe(event)` and route its `collection_update`
+    notifications to a `Subscription`. The registry is keyed by event name
+    (the notification's `params.collection`, the routing key — NOT the returned
+    sub id); two subscribers to the same event both receive it.
+  - **`.close()`** — idempotent; also usable as a context manager. Wakes every
+    subscription's `events()` iterator (as does a dropped connection).
+- **`Subscription`** — one live subscription. **`.events(timeout=None)`** yields
+  `Event`s from a bounded queue drained on the caller's thread (ends cleanly on
+  unsubscribe/close/timeout); **`.unsubscribe()`** cancels it (idempotent, sends
+  `core.unsubscribe`), also a context manager; **`.dropped`** counts events
+  discarded when a full queue dropped the oldest; **`.id`** is the server
+  subscription id, **`.event`** the subscribed name.
+- **`Event(collection, msg, fields, id=None)`** — a `NamedTuple` for one
+  `collection_update`: `msg` ∈ `added`/`changed`/`removed`, `fields` the payload
+  dict. Verified against TrueNAS 26.0.
+- **`DEFAULT_EVENT_QUEUE_SIZE`** — default `maxsize` (1000) for a subscription's
+  event queue.
 - **`CALL_TIMEOUT`** — default per-call timeout in seconds (int; overridable
   via the `CALL_TIMEOUT` env var, read at import time).
 - **`ClientException(error, errno=None, trace=None, extra=None)`** — base

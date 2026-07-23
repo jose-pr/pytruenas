@@ -171,6 +171,25 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
     def api(self) -> "ApiVersion":
         return Namespace(self)  # type:ignore
 
+    def subscribe(
+        self,
+        event: str,
+        callback: "_ty.Callable[[_conn.Event], object] | None" = None,
+        *,
+        maxsize: int = _conn.DEFAULT_EVENT_QUEUE_SIZE,
+    ) -> "_conn.Subscription":
+        """Subscribe to a middleware event; return a :class:`Subscription`.
+
+        ``client.subscribe("alert.list")`` is the client-level shorthand for
+        ``client.api.alert.list.subscribe()``. Consume via the returned
+        subscription's ``events()`` iterator and/or ``callback`` (inline on the
+        reader thread -- keep it fast). Note a subscription is bound to the
+        current websocket connection and does NOT survive a reconnect; re-
+        subscribe if the connection drops (the ``events()`` iterator ends on
+        disconnect, signalling exactly that).
+        """
+        return self.websocket.subscribe(event, callback, maxsize=maxsize)
+
     def _http_target(self, path: str):
         """The host's HTTP(S) URL for ``path`` (the websocket ``ws/wss`` scheme
         mapped to ``http/https``), used by the upload/download side channels."""

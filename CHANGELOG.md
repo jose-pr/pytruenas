@@ -7,6 +7,19 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [Unreleased]
 
 ### Added
+- **Event subscriptions.** Subscribe to middleware collection events over the
+  existing websocket: `client.subscribe("alert.list")` (or
+  `client.api.alert.list.subscribe()`) returns a `Subscription`. Consume events
+  by iterating `sub.events(timeout=...)` — a bounded queue drained on the
+  caller's thread, so backpressure is visible; a full queue drops the oldest
+  event and counts it in `sub.dropped` rather than blocking. An optional
+  `callback` is invoked inline on the reader thread (keep it fast; a raising
+  callback is logged and contained). Each event is an `Event(collection, msg,
+  fields, id)`. Close with `sub.unsubscribe()` or a `with` block; closing the
+  client ends every `events()` iterator cleanly. A subscription is bound to the
+  current connection and does **not** survive a reconnect — the `events()`
+  iterator ending is the signal to re-subscribe. Validated live against
+  TrueNAS 26.0.
 - **RunPath step directories.** Adopt `duho.runpath` (requires `duho>=0.4.0`),
   wired into the per-target fan-out: a directory of numbered `NN-name.py` steps
   (no `__init__.py`), placed among the command sources (`PYTRUENAS_PATH` /
