@@ -46,7 +46,10 @@ class _CredentialsMeta(type):
                 try:
                     i, k = cred.split("-", maxsplit=1)
                     is_api_key = i.isnumeric() and k.isalnum() and len(k) == 64
-                except Exception:
+                except ValueError:
+                    # No "-" to unpack -> not an api key. A ValueError is the
+                    # only thing split/unpack raises here; anything else is a
+                    # real bug and should surface, not be swallowed.
                     is_api_key = False
                 return ApiKeyAuth(cred) if is_api_key else TokenAuth(cred)
         elif args:
@@ -55,7 +58,11 @@ class _CredentialsMeta(type):
             for scls in Credentials.__subclasses__():
                 try:
                     return scls(**kwargs)
-                except Exception:
+                except TypeError:
+                    # These kwargs don't fit this subclass's __init__ -> try the
+                    # next. Narrowed from `except Exception` so a genuine bug in
+                    # a subclass __init__ surfaces instead of being hidden behind
+                    # the generic "Credentials not supported" below.
                     pass
 
         raise ValueError("Credentials not supported", kwargs)
