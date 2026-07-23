@@ -14,18 +14,36 @@ called once per target) plus optional ``register``/``init``/``success``/
 
 from __future__ import annotations
 
+import copy as _copy
 import datetime as _dt
 import logging as _pylogging
 import os as _os
 import typing as _ty
 
+import duho.runpath as _runpath
 from duho import AUTO, Cli, app, parse_globals
 from duho import logging as _logging
-from duho.discovery import ModuleCommand, discover_commands
+from duho.discovery import CmdBuilder, ModuleCommand, discover_commands
 from duho.fanout import run_targets
+from duho.runpath import RunPathCmd, is_runpath_dir
 
 from .client import TrueNASClient
 from .utils.cmd import PyTrueNASArgs
+from .utils.runpath import PyTrueNASRunPathArgs
+
+# ``import duho.runpath`` auto-registers the RunPath command provider with its
+# default base (``duho.LoggingArgs``). Re-register with pytruenas's own shared
+# root so every RunPath command built from here inherits PyTrueNASArgs's OWN
+# methods (``_expanded_targets_``, ``_config_dict_``, the target fields) as real
+# members, not just argparse ``parents=`` data-field copies -- the parsed
+# RunPathCmd instance that reaches ``_dispatch`` must be able to answer
+# ``_expanded_targets_()`` to drive the per-target fan-out below. The
+# PyTrueNASRunPathArgs subclass additionally registers the trailing ``targets``
+# positional (SUPPRESS-ed on a plain class command), so ``pytruenas <flow>
+# <host>...`` grammar matches the module commands. Re-registering with a new
+# base on an already-active provider is documented as supported (it updates the
+# base for commands built from then on).
+_runpath.register(base=PyTrueNASRunPathArgs)
 
 #: Third-party loggers to quiet by default (chatty at INFO/DEBUG).
 DEFAULT_LOGLEVELS = {
@@ -48,6 +66,55 @@ class PyTrueNAS(PyTrueNASArgs, Cli):
     _distribution_ = "pytruenas"
 
 
+def _commands_from_source(source: str) -> "list":
+    """Yield the commands one source contributes, RunPath directories included.
+
+    ``duho.discover_commands`` resolves a package name or a directory of loose
+    ``*.py`` command files, but it does NOT consult the RunPath command provider
+    for a *directory* shape -- it only globs ``*.py`` files, so a RunPath
+    directory (numbered ``NN-name.py`` steps, no ``__init__.py``) handed to it is
+    mis-parsed step-by-step into loose module commands, and a RunPath directory
+    nested inside a source directory is never inspected at all. Restoring the
+    predecessor's RunPath support therefore needs this discovery-side seam, not
+    only the ``_dispatch`` fan-out branch:
+
+    * a source that IS a RunPath directory -> build it as ONE RunPath command via
+      :class:`duho.discovery.CmdBuilder` (which consults the provider), NOT
+      ``discover_commands`` (which would mis-parse its steps);
+    * a source directory whose immediate children include RunPath directories ->
+      build each such child as its own RunPath command, and still run
+      ``discover_commands`` on the parent for any ordinary loose command files
+      beside them;
+    * anything else (a dotted package, a directory of loose command files) ->
+      plain ``discover_commands``, unchanged.
+
+    A source that resolves to neither an existing directory nor an importable
+    package (a stray ``--cmdspath`` token, a config path that isn't present) is
+    skipped with a warning rather than crashing the whole app -- mirroring
+    ``duho.discover_commands``'s own resilience toward an individual bad command.
+    """
+    from pathlib import Path as _Path
+
+    path = _Path(source)
+    if path.is_dir() and is_runpath_dir(path):
+        return [CmdBuilder(path.name.replace("_", "-"), path).command]
+
+    try:
+        commands: "list" = list(discover_commands(source))
+    except (ImportError, NotImplementedError) as exc:
+        _pylogging.getLogger("pytruenas").warning(
+            "skipping command source %r: %s", source, exc
+        )
+        commands = []
+    if path.is_dir():
+        for child in sorted(path.iterdir()):
+            if child.is_dir() and is_runpath_dir(child):
+                commands.append(
+                    CmdBuilder(child.name.replace("_", "-"), child).command
+                )
+    return commands
+
+
 def _discover(argv: "_ty.Sequence[str] | None") -> "list":
     """Resolve the command set: built-ins, then env/CLI/config-provided paths.
 
@@ -55,6 +122,9 @@ def _discover(argv: "_ty.Sequence[str] | None") -> "list":
     ``PYTRUENAS_PATH`` globals *before* the full subcommand parser is built. Later
     sources win on a name clash (a user command shadows a built-in), then the list
     is de-duplicated by subcommand name preserving that precedence.
+
+    Each source is resolved through :func:`_commands_from_source`, which layers
+    RunPath-directory discovery on top of ``duho.discover_commands`` (see there).
     """
     globals_ = parse_globals(PyTrueNAS, argv)
     config = globals_._config_dict_()
@@ -68,7 +138,7 @@ def _discover(argv: "_ty.Sequence[str] | None") -> "list":
     for source in sources:
         if not source:
             continue
-        for command in discover_commands(source):
+        for command in _commands_from_source(source):
             name = getattr(command, "_parsername_", None) or getattr(command, "__name__", None)
             if name:
                 by_name[name] = command  # later source wins
@@ -130,17 +200,89 @@ def _run_module_on_target(
     return result
 
 
+def _run_runpath_on_target(
+    instance: "RunPathCmd",
+    target: str,
+    logger: "_pylogging.Logger",
+) -> int:
+    """Run one RunPath command (a whole step directory) against one target.
+
+    A ``RunPathCmd`` is a class command whose ``__call__`` runs the ordered step
+    sequence once; ``pytruenas`` fans that whole sequence out per target. The
+    parsed instance is a namespace, so :func:`copy.copy` gives each concurrent
+    fan-out worker its OWN shallow copy with ``.target`` set to this iteration's
+    target BEFORE calling it -- a single shared mutable ``.target`` (or per-target
+    state a step writes back, e.g. ``cmd.context``) across ``run_targets``'
+    thread pool would race. A RunPath directory's own ``__main__.py`` ``init(cmd,
+    logger)`` then reads ``cmd.target`` to build a per-target client, threaded by
+    duho's ``RunPathCmd.__call__`` into every 2-arg step (``main(cmd, ctx)``) as
+    ``ctx`` (see :mod:`pytruenas.utils.runpath`), so each target gets its own
+    isolated client/context -- the same per-target isolation guarantee
+    :func:`_run_module_on_target` gives module commands.
+
+    ``--logto`` per-target file-handler behavior mirrors
+    :func:`_run_module_on_target` exactly (fanout tags the message but does not
+    route files).
+    """
+    per_target = _copy.copy(instance)
+    per_target.target = target
+
+    file_handler = None
+    if instance.logto and instance.logto != "-":
+        now = _dt.datetime.now()
+        file_handler = _pylogging.FileHandler(
+            instance.logto.format(target=target, isodate=now.isoformat())
+        )
+        file_handler.setFormatter(_logging.DefaultFormatter())
+        logger.addHandler(file_handler)
+
+    logger.info("Started: %s", target)
+    try:
+        rc = per_target()
+        return 0 if rc is None else int(rc)
+    finally:
+        logger.info("Finished: %s", target)
+        if file_handler is not None:
+            logger.removeHandler(file_handler)
+            file_handler.close()
+
+
 def _dispatch(command: object, instance: "PyTrueNAS") -> int:
     """duho ``app`` dispatch seam: fan the selected command over the targets.
 
-    For a module command (every built-in), run it once per target positional via
-    :func:`duho.fanout.run_targets` (thread pool sized by ``--parallel``, per-target
-    ``[target]`` log prefixing, worst exit code wins). A class command (none today)
-    falls back to duho's own single dispatch.
+    For a module command (every built-in) OR a RunPath command (a directory of
+    numbered step files, adopted from :mod:`duho.runpath`), run it once per target
+    positional via :func:`duho.fanout.run_targets` (thread pool sized by
+    ``--parallel``, per-target ``[target]`` log prefixing, worst exit code wins).
+    This restores the private predecessor's behavior, where a RunPath directory
+    ran once per target with a per-target client -- current duho-based dispatch
+    would otherwise fall a class command (which is exactly what a ``RunPathCmd``
+    is) through to duho's plain SINGLE dispatch, un-fanned, never touching a
+    target. Any OTHER class command still falls back to duho's own single
+    dispatch.
     """
     logger = instance._logger_
     for name, level in DEFAULT_LOGLEVELS.items():
         _pylogging.getLogger(name).setLevel(level)
+
+    # A RunPath command reaches dispatch as (class, parsed-instance): ``app``
+    # calls ``dispatch(type(instance), instance)`` for a class command. Check the
+    # instance (and the class, defensively) BEFORE the ModuleCommand branch --
+    # otherwise a RunPathCmd falls through to duho's un-fanned single dispatch.
+    if isinstance(instance, RunPathCmd) or (
+        isinstance(command, type) and issubclass(command, RunPathCmd)
+    ):
+        runpath = _ty.cast("RunPathCmd", instance)
+        targets = runpath._expanded_targets_()
+        logger.info(
+            "Running '%s' on %d target(s)", runpath._parsername_, len(targets)
+        )
+        return run_targets(
+            lambda target: _run_runpath_on_target(runpath, target, logger),
+            targets,
+            max_workers=max(1, instance.parallel),
+            logger=logger,
+        )
 
     if not isinstance(command, ModuleCommand):
         from duho import run_command
