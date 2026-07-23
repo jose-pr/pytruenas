@@ -37,9 +37,9 @@ dependencies = [
     # docstring no longer crashes parser build; directly-built Cmd seeds field
     # defaults) are subsumed. Validated on 0.4.0.
     "duho>=0.4.0",
-    # Scheme -> port resolution, including ws/wss which no system services
-    # database knows (see utils/target.py).
-    "netimps>=0.0.1",
+    # Network utilities: scheme->port resolution (ws/wss, built in since 0.0.2)
+    # and local adapter discovery for pytruenas.ops.host (replaces ifaddr).
+    "netimps>=0.0.2",
     # >=0.8.2: SftpPath importable/usable without paramiko (asyncssh-only). The
     # 'uri' extra (uritools) is needed by TnasWsPath/TruenasPath, which are UriPaths.
     # Validated on 0.8.4.
@@ -56,8 +56,8 @@ config = ["pyyaml"]
 ssh = ["asyncssh", "pathlib_next[sftp-async]>=0.8.3"]
 # Typings generator (`pytruenas generate-typings`).
 codegen = ["jinja2"]
-# Host-side operations helpers (packaging, network adapter discovery).
-host = ["ifaddr"]
+# NOTE: the former 'host' extra (ifaddr) is gone -- local adapter discovery in
+# pytruenas.ops.host now uses netimps (a core dependency), no extra needed.
 dev = ["build", "hatchling", "pytest", "pytest-cov", "twine", "pyyaml", "asyncssh", "jinja2"]
 docs = ["mkdocs", "mkdocs-material", "mkdocstrings[python]"]
 

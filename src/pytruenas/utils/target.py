@@ -4,15 +4,10 @@ import urllib.parse as _urlparse
 
 import netimps as _netimps
 
-# The websocket schemes are absent from every system services database, so
-# ``getservbyname("wss")`` fails -- which left a TrueNAS websocket URL with
-# port 0, the schemes this client uses most. Registering them here teaches
-# netimps' scheme table about them; it already knows http/https/ssh.
-# NOTE: newer netimps seeds ws/wss in its OWN built-in table, so these two
-# calls become redundant once the netimps floor is bumped -- they are
-# idempotent (re-set the same value) so they stay harmless until then.
-_netimps.register_port("ws", 80)
-_netimps.register_port("wss", 443)
+# ws/wss default ports (80/443) are provided by netimps' built-in scheme table
+# (>=0.0.2); no system services database knows the websocket schemes. Earlier
+# releases required registering them here -- the netimps>=0.0.2 floor makes that
+# unnecessary.
 
 
 def redact(connectionstring: str) -> str:

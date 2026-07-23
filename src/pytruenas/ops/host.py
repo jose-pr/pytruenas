@@ -1,8 +1,9 @@
 """Host-side helpers: local network adapter discovery and directory packaging.
 
-These run *on* a machine (not against the middleware API) and need the optional
-``host`` extra (``pip install pytruenas[host]`` -> ``ifaddr``). Import lazily so
-the rest of ``pytruenas.ops`` works without it.
+These run *on* a machine (not against the middleware API). Local adapter
+discovery is delegated to :mod:`netimps` (already a runtime dependency), whose
+``get_interfaces``/``interface_for`` need no third-party package -- so there is
+no longer a ``host`` extra to install.
 """
 
 from __future__ import annotations
@@ -14,19 +15,7 @@ import os as _os
 import typing as _ty
 from pathlib import Path as _Path
 
-if _ty.TYPE_CHECKING:
-    import ifaddr as _if
-
-
-def _require_ifaddr():
-    try:
-        import ifaddr  # noqa: F401
-    except ImportError as exc:  # pragma: no cover - exercised only without the extra
-        raise ImportError(
-            "network adapter helpers require the 'host' extra: "
-            "pip install pytruenas[host]"
-        ) from exc
-    return ifaddr
+import netimps as _netimps
 
 
 class PathPatterns:
@@ -117,34 +106,27 @@ def is_localhost(ip: str) -> bool:
 
 
 def is_local_ip(ip: str) -> bool:
-    """True if ``ip`` is loopback or bound to a local network adapter."""
+    """True if ``ip`` is loopback or bound to a local network adapter.
+
+    Loopback is answered without enumeration; otherwise ``netimps.interface_for``
+    does the reverse lookup (returns the owning interface, or ``None``).
+    """
     address = _ip.ip_address(ip)
     if address.is_loopback:
         return True
-    ifaddr = _require_ifaddr()
-    for adapter in ifaddr.get_adapters():
-        for entry in adapter.ips:
-            try:
-                if address == _ip.ip_address(entry.ip):
-                    return True
-            except ValueError:
-                pass
-    return False
+    return _netimps.interface_for(address, strict=True) is not None
 
 
 def find_adapter_in_network(network: "str | _ip.IPv4Network | _ip.IPv6Network"):
-    """Return the first local adapter whose IP falls inside ``network``."""
+    """Return the first local interface with an IP inside ``network``.
+
+    Returns a :class:`netimps.Interface` (``.name``/``.ips``/…), or ``None``.
+    """
     net = _ip.ip_network(network)
-    ifaddr = _require_ifaddr()
-    for adapter in ifaddr.get_adapters():
-        for entry in adapter.ips:
-            ip = entry.ip
-            if entry.is_IPv6:
-                ip = f"{ip[0]}%{ip[2]}"
-            try:
-                interface = _ip.ip_interface((ip, entry.network_prefix))
-            except ValueError:
-                continue
-            if interface in net:
-                return adapter
+    for interface in _netimps.get_interfaces():
+        for addr in interface.ips:
+            # ``addr`` is an IPv4/IPv6Interface (address + prefix); test the
+            # bare address for membership in the target network.
+            if addr.ip in net:
+                return interface
     return None
