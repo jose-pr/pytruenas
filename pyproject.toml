@@ -29,10 +29,14 @@ classifiers = [
     "Typing :: Typed",
 ]
 dependencies = [
-    # >=0.3.2: CLI parser fixes we rely on (global option before subcommand not
-    # shadowed; '%' in a Cmd docstring no longer crashes parser build; directly-
-    # built Cmd seeds field defaults). Validated on 0.3.3.
-    "duho>=0.3.2",
+    # >=0.4.0: duho.runpath now carries register(base=...) (shared-root METHOD
+    # inheritance, not just data fields), the __main__.py init/success/finally_
+    # lifecycle, the corrected enable/!enable token spelling, and the Extend()
+    # nested-list fix that flattens `--cmdspath a:b` to ['a','b']. Earlier fixes
+    # (>=0.3.2: global option before subcommand not shadowed; '%' in a Cmd
+    # docstring no longer crashes parser build; directly-built Cmd seeds field
+    # defaults) are subsumed. Validated on 0.4.0.
+    "duho>=0.4.0",
     # Scheme -> port resolution, including ws/wss which no system services
     # database knows (see utils/target.py).
     "netimps>=0.0.1",
