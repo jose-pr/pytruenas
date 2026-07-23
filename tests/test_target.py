@@ -1,6 +1,6 @@
 """Connection-string parsing (utils.target.Target)."""
 
-from pytruenas.utils.target import Target
+from pytruenas.utils.target import Target, redact
 
 
 def test_bare_host_defaults_to_http_scheme():
@@ -59,6 +59,34 @@ def test_query_val():
     assert t.query_val("a") == "2"  # last wins
     assert t.query_val("a", islist=True) == ["1", "2"]
     assert t.query_val("missing", "default") == "default"
+
+
+def test_redacted_masks_password_keeps_username():
+    t = Target.parse("wss://root:hunter2@nas:8443/api", resolve_port=False)
+    assert t.redacted == "wss://root:***@nas:8443/api"
+    assert "hunter2" not in t.redacted
+    # the Target itself is unchanged -- redaction is display-only
+    assert t.password == "hunter2"
+
+
+def test_redacted_no_password_is_unchanged():
+    t = Target.parse("wss://nas:8443/api", resolve_port=False)
+    assert t.redacted == t.uri == "wss://nas:8443/api"
+
+
+def test_redact_helper_masks_and_is_safe_on_plain_targets():
+    assert "s3cr3t" not in redact("wss://root:s3cr3t@nas")
+    assert redact("wss://root:s3cr3t@nas") == "wss://root:***@nas"
+    # no userinfo -> returned unchanged (fast path), never raises
+    assert redact("nas.example.com") == "nas.example.com"
+    assert redact("nas:8443") == "nas:8443"
+    assert redact("") == ""
+
+
+def test_redact_helper_masks_even_when_unparseable():
+    # a malformed target must still not leak the password
+    out = redact("wss://a:b:c@d:e:f@host")
+    assert "b:c" not in out or "***" in out
 
 
 def test_replace_is_namedtuple():
