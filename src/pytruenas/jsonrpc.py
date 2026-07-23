@@ -4,7 +4,9 @@ This is a deliberately small client covering exactly what ``pytruenas`` needs:
 open a websocket to the middleware, send a request, wait for the matching
 response, and surface errors as exceptions. Jobs are not tracked client-side --
 the middleware's own ``core.job_wait`` method (a normal blocking call) is used
-for that -- and event subscriptions are not implemented.
+for that. Event subscriptions (``core.subscribe``) ARE supported: see
+:meth:`Client.subscribe` and :class:`Subscription` -- a bounded queue drained on
+the caller's thread, with optional inline callbacks.
 
 Three transports are supported by :class:`Client`:
 
@@ -28,6 +30,7 @@ import errno as _errno
 import json as _json
 import logging as _logging
 import os as _os
+import queue as _queue
 import socket as _socket
 import ssl as _ssl
 import threading as _threading
@@ -51,9 +54,16 @@ __all__ = [
     "ValidationErrors",
     "CallTimeout",
     "CALL_TIMEOUT",
+    "Event",
+    "Subscription",
     "dumps",
     "loads",
 ]
+
+#: Default bound on a subscription's event queue. A slow consumer that lets the
+#: queue fill has its OLDEST event dropped (and ``Subscription.dropped``
+#: incremented) rather than blocking the shared reader thread.
+DEFAULT_EVENT_QUEUE_SIZE = 1000
 
 #: Default per-call timeout in seconds (overridable via ``CALL_TIMEOUT`` env var).
 CALL_TIMEOUT = int(_os.environ.get("CALL_TIMEOUT", 60))
@@ -211,6 +221,137 @@ def _parse_error(error: dict) -> ClientException:
 
 
 # --------------------------------------------------------------------------
+# Event subscriptions
+# --------------------------------------------------------------------------
+
+
+class Event(_ty.NamedTuple):
+    """One ``collection_update`` notification delivered to a subscription.
+
+    Mirrors the middleware wire shape verified against TrueNAS 26.0:
+    ``{"method": "collection_update", "params": {"msg": ..., "collection":
+    ..., "fields": {...}}}``.
+
+    * ``collection`` -- the event name subscribed to (the routing key);
+    * ``msg`` -- ``"added"`` / ``"changed"`` / ``"removed"``;
+    * ``fields`` -- the record payload (may be ``None`` for some events);
+    * ``id`` -- the record id when the middleware includes one, else ``None``.
+    """
+
+    collection: str
+    msg: str
+    fields: "dict | None"
+    id: "object | None" = None
+
+
+#: Sentinel put on a subscription's queue to wake a blocked ``events()``
+#: iterator when the connection closes.
+_EVENT_CLOSED = object()
+
+
+class Subscription:
+    """A live subscription to a middleware event (``core.subscribe``).
+
+    Obtain one from :meth:`Client.subscribe`. Consume events by iterating
+    :meth:`events` (a bounded queue drains on the caller's thread -- no hidden
+    threads, backpressure is visible) and/or by passing a ``callback`` at
+    subscribe time (invoked inline on the reader thread -- keep it fast and
+    non-blocking; a raising callback is logged and swallowed so it never kills
+    the reader or other subscriptions).
+
+    Close with :meth:`unsubscribe` or a ``with`` block. When the queue fills
+    (a slow consumer) the OLDEST event is dropped and :attr:`dropped` is
+    incremented -- the reader never blocks.
+    """
+
+    __slots__ = ("event", "id", "dropped", "_queue", "_callback", "_client", "_closed")
+
+    def __init__(
+        self,
+        event: str,
+        callback: "_ty.Callable[[Event], object] | None",
+        maxsize: int,
+        client: "Client",
+    ) -> None:
+        self.event = event
+        self.id: "str | None" = None  # set by Client.subscribe after core.subscribe
+        self.dropped = 0
+        self._queue: "_queue.Queue" = _queue.Queue(maxsize=maxsize)
+        self._callback = callback
+        self._client = client
+        self._closed = False
+
+    # -- reader side (called on the reader thread) --------------------------
+
+    def _deliver(self, event: "Event") -> None:
+        """Route one event to the queue (+ callback). Never blocks/raises."""
+        try:
+            self._queue.put_nowait(event)
+        except _queue.Full:
+            # Drop the oldest to make room; count it so a consumer can tell it
+            # fell behind. Best-effort -- a concurrent get() may have drained it.
+            try:
+                self._queue.get_nowait()
+                self.dropped += 1
+            except _queue.Empty:  # pragma: no cover - race window
+                pass
+            try:
+                self._queue.put_nowait(event)
+            except _queue.Full:  # pragma: no cover - race window
+                self.dropped += 1
+        if self._callback is not None:
+            try:
+                self._callback(event)
+            except Exception:  # a bad callback must not kill the reader
+                _LOGGER.warning(
+                    "event callback for %r raised; continuing", self.event,
+                    exc_info=True,
+                )
+
+    def _close(self) -> None:
+        """Wake a blocked ``events()`` consumer (connection closed/unsubscribed)."""
+        self._closed = True
+        try:
+            self._queue.put_nowait(_EVENT_CLOSED)
+        except _queue.Full:  # pragma: no cover - drop one to make room for the sentinel
+            try:
+                self._queue.get_nowait()
+                self._queue.put_nowait(_EVENT_CLOSED)
+            except Exception:
+                pass
+
+    # -- consumer side ------------------------------------------------------
+
+    def events(self, timeout: "float | None" = None) -> "_ty.Iterator[Event]":
+        """Yield events until the subscription (or the connection) closes.
+
+        Blocks on each event up to ``timeout`` seconds; ``timeout=None`` waits
+        indefinitely. The iterator ends cleanly when :meth:`unsubscribe` is
+        called or the connection drops.
+        """
+        while True:
+            if self._closed and self._queue.empty():
+                return
+            try:
+                item = self._queue.get(timeout=timeout)
+            except _queue.Empty:
+                return  # timed out with nothing pending
+            if item is _EVENT_CLOSED:
+                return
+            yield item
+
+    def unsubscribe(self) -> None:
+        """Cancel this subscription (idempotent; safe after the client closes)."""
+        self._client._unsubscribe(self)
+
+    def __enter__(self) -> "Subscription":
+        return self
+
+    def __exit__(self, *exc) -> None:
+        self.unsubscribe()
+
+
+# --------------------------------------------------------------------------
 # Client
 # --------------------------------------------------------------------------
 
@@ -225,8 +366,9 @@ class Client:
     The connection is a single blocking websocket. :meth:`call` sends one
     request and blocks on the matching response (by ``id``); a background
     reader thread demultiplexes responses so concurrent calls from different
-    threads are safe. Job tracking and event subscriptions are intentionally
-    omitted -- use the middleware's ``core.job_wait`` for jobs.
+    threads are safe, and routes ``collection_update`` notifications to any
+    :meth:`subscribe` sinks. Job tracking is intentionally omitted -- use the
+    middleware's ``core.job_wait`` for jobs.
     """
 
     def __init__(
@@ -250,6 +392,12 @@ class Client:
         self._send_lock = _threading.Lock()
         self._pending: "dict[str, _Pending]" = {}
         self._pending_lock = _threading.Lock()
+        # Event subscriptions, keyed by event name (the notification's
+        # ``params.collection`` -- the routing key, verified against live 26.0).
+        # A value is a LIST of sinks so two independent subscribers to the same
+        # collection both receive it.
+        self._subs: "dict[str, list[Subscription]]" = {}
+        self._subs_lock = _threading.Lock()
 
         self._ws = self._connect()
         self._reader = _threading.Thread(target=self._read_loop, daemon=True)
@@ -291,20 +439,49 @@ class Client:
                 continue
             mid = message.get("id")
             if mid is None:
-                # A notification (e.g. collection_update); we don't subscribe,
-                # so nothing to route it to.
+                # A JSON-RPC notification. The middleware sends
+                # ``collection_update`` for subscribed events; route it to the
+                # matching sinks (keyed by ``params.collection``) or drop it.
+                self._route_notification(message)
                 continue
             with self._pending_lock:
                 pending = self._pending.pop(mid, None)
             if pending is not None:
                 pending.resolve(message)
-        # Connection ended: fail every waiter so no call blocks forever.
+        # Connection ended: fail every waiter so no call blocks forever, and
+        # wake every subscription's events() consumer.
         self._closed.set()
         with self._pending_lock:
             pending_calls = list(self._pending.values())
             self._pending.clear()
         for pending in pending_calls:
             pending.fail(ClientException("Connection closed", _errno.ECONNABORTED))
+        with self._subs_lock:
+            sinks = [s for sinks in self._subs.values() for s in sinks]
+            self._subs.clear()
+        for sink in sinks:
+            sink._close()
+
+    def _route_notification(self, message: dict) -> None:
+        """Deliver a ``collection_update`` notification to its subscriptions."""
+        if message.get("method") != "collection_update":
+            _LOGGER.debug("ignoring notification method %r", message.get("method"))
+            return
+        params = message.get("params") or {}
+        collection = params.get("collection")
+        with self._subs_lock:
+            sinks = list(self._subs.get(collection, ()))
+        if not sinks:
+            _LOGGER.debug("no subscription for event %r; dropping", collection)
+            return
+        event = Event(
+            collection=collection,
+            msg=params.get("msg"),
+            fields=params.get("fields"),
+            id=params.get("id"),
+        )
+        for sink in sinks:
+            sink._deliver(event)
 
     # -- calls --------------------------------------------------------------
 
@@ -369,6 +546,59 @@ class Client:
             raise _parse_error(message["error"])
         return message.get("result")
 
+    # -- subscriptions ------------------------------------------------------
+
+    def subscribe(
+        self,
+        event: str,
+        callback: "_ty.Callable[[Event], object] | None" = None,
+        *,
+        maxsize: int = DEFAULT_EVENT_QUEUE_SIZE,
+    ) -> "Subscription":
+        """Subscribe to a middleware event and return a :class:`Subscription`.
+
+        ``event`` is a collection name (e.g. ``"alert.list"``,
+        ``"reporting.realtime"``). Consume via the returned subscription's
+        :meth:`~Subscription.events` iterator and/or an optional ``callback``
+        (called inline on the reader thread -- keep it fast).
+
+        Registers the sink BEFORE issuing ``core.subscribe`` so no event can
+        arrive between the server acknowledging and the sink existing; the sink
+        is removed again if the subscribe call fails.
+        """
+        sub = Subscription(event, callback, maxsize, self)
+        with self._subs_lock:
+            self._subs.setdefault(event, []).append(sub)
+        try:
+            sub.id = self.call("core.subscribe", event)
+        except Exception:
+            with self._subs_lock:
+                sinks = self._subs.get(event)
+                if sinks and sub in sinks:
+                    sinks.remove(sub)
+                    if not sinks:
+                        self._subs.pop(event, None)
+            raise
+        return sub
+
+    def _unsubscribe(self, sub: "Subscription") -> None:
+        """Cancel ``sub`` (idempotent). Called by :meth:`Subscription.unsubscribe`."""
+        with self._subs_lock:
+            sinks = self._subs.get(sub.event)
+            present = bool(sinks and sub in sinks)
+            if present:
+                sinks.remove(sub)
+                if not sinks:
+                    self._subs.pop(sub.event, None)
+        sub._close()
+        if present and sub.id is not None and not self._closed.is_set():
+            try:
+                self.call("core.unsubscribe", sub.id)
+            except Exception:
+                # Best-effort: the server drops subscriptions when the socket
+                # closes anyway, and a failed unsubscribe must not raise here.
+                _LOGGER.debug("core.unsubscribe(%s) failed", sub.id, exc_info=True)
+
     # -- lifecycle ----------------------------------------------------------
 
     def close(self) -> None:
@@ -376,6 +606,13 @@ class Client:
         if self._closed.is_set():
             return
         self._closed.set()
+        # Wake any events() consumers; the server drops server-side
+        # subscriptions when the socket closes.
+        with self._subs_lock:
+            sinks = [s for sinks in self._subs.values() for s in sinks]
+            self._subs.clear()
+        for sink in sinks:
+            sink._close()
         try:
             self._ws.close()
         except Exception:
