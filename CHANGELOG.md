@@ -7,6 +7,17 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [Unreleased]
 
 ### Added
+- **Modern `auth.login_ex` login with 2FA.** `client.login(login_ex=True)` uses
+  the middleware's `auth.login_ex` mechanism (`PASSWORD_PLAIN`/`API_KEY_PLAIN`/
+  `TOKEN_PLAIN`) instead of the legacy `auth.login`/`login_with_*`. It handles an
+  `OTP_REQUIRED` challenge by continuing with `auth.login_ex_continue` — the OTP
+  comes from the credential's `otp_token` or an `otp_provider` callback — and
+  raises `auth.AuthenticationError` on `AUTH_ERR`/`DENIED`/etc. `login_options`
+  overrides the server defaults. The legacy path remains the default and
+  unchanged; a credential with no login_ex form (local-socket auth) falls back
+  automatically. Validated live against TrueNAS 26.0.
+- **Client convenience wrappers** `client.me()` (`auth.me`), `client.logout()`
+  (`auth.logout`), and `client.ping()` (`core.ping`).
 - **Event subscriptions.** Subscribe to middleware collection events over the
   existing websocket: `client.subscribe("alert.list")` (or
   `client.api.alert.list.subscribe()`) returns a `Subscription`. Consume events

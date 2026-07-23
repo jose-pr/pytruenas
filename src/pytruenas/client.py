@@ -157,7 +157,25 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
                 self._conn = self._openwss()
         return _ty.cast(_conn.Client, self._conn)
 
-    def login(self, creds: _auth.Credentials | None = None):
+    def login(
+        self,
+        creds: _auth.Credentials | None = None,
+        *,
+        login_ex: bool = False,
+        login_options: "dict | None" = None,
+        otp_provider: "_ty.Callable[[], str] | None" = None,
+    ):
+        """Open a fresh connection and authenticate.
+
+        By default uses the legacy ``auth.login``/``login_with_*`` path
+        (unchanged). Pass ``login_ex=True`` to use the modern ``auth.login_ex``
+        mechanism instead -- which supports 2FA via an ``OTP_REQUIRED``
+        continuation: the OTP comes from the credential's own ``otp_token`` if
+        set, else from ``otp_provider()`` if given. ``login_options`` overrides
+        the server defaults (``{"user_info": True, "reconnect_token": False}``).
+        A credential with no login_ex form (e.g. local-socket auth) falls back
+        to the legacy path automatically.
+        """
         if self._conn and not self._conn._closed.is_set():
             try:
                 self._conn.close()
@@ -165,11 +183,29 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
                 pass
         self._conn = self._openwss()
         creds = creds or self._creds
+        if login_ex:
+            return creds.login_ex(  # type:ignore
+                self, login_options=login_options, otp_provider=otp_provider
+            )
         creds.login(self)  # type:ignore
 
     @cached_property
     def api(self) -> "ApiVersion":
         return Namespace(self)  # type:ignore
+
+    # -- convenience wrappers over common auth/core methods -----------------
+
+    def me(self) -> "dict":
+        """The current session's authenticated user (``auth.me``)."""
+        return _ty.cast(dict, self.api.auth.me())
+
+    def logout(self) -> None:
+        """End the current session (``auth.logout``)."""
+        self.api.auth.logout()
+
+    def ping(self) -> str:
+        """Round-trip the middleware (``core.ping`` -> ``"pong"``)."""
+        return _ty.cast(str, self.api.core.ping())
 
     def subscribe(
         self,

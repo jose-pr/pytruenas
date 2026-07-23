@@ -49,8 +49,17 @@ shell=None, logger=None, fsbackend="auto", version="current")`
 
 ### Methods
 
-- **`.login(creds=None) -> None`** — close any existing connection, open a new
-  one, and authenticate (`creds` or the client's configured credentials).
+- **`.login(creds=None, *, login_ex=False, login_options=None,
+  otp_provider=None)`** — close any existing connection, open a new one, and
+  authenticate (`creds` or the client's configured credentials). Default uses
+  the legacy `auth.login`/`login_with_*` path. `login_ex=True` uses the modern
+  `auth.login_ex` mechanism, handling an `OTP_REQUIRED` 2FA challenge via
+  `auth.login_ex_continue` (OTP from the credential's `otp_token` or
+  `otp_provider()`), raising `auth.AuthenticationError` on failure and returning
+  the success response dict. `login_options` overrides the server defaults
+  (`{"user_info": True, "reconnect_token": False}`).
+- **`.me() -> dict`** (`auth.me`) / **`.logout() -> None`** (`auth.logout`) /
+  **`.ping() -> str`** (`core.ping` -> `"pong"`) — convenience wrappers.
 - **`.path(*path, backend=None)`** — build a `pathlib_next` path rooted at
   `path` for this client; `backend` overrides `.fsbackend` for this call. See
   `pytruenas.fs`.
@@ -211,12 +220,24 @@ imports on Python 3.9.
   - multiple positional args -> `BasicAuth(*args)`.
   - Instantiating a `Credentials` **subclass** directly (e.g. `BasicAuth(...)`)
     bypasses the factory and behaves like a normal constructor.
-- **`.login(client)`** — calls `client.api.auth[self.METHOD](*self._args())`;
-  a no-op when `METHOD` is `None` (`LocalAuth`).
+- **`.login(client)`** — legacy path: `client.api.auth[self.METHOD]
+  (*self._args())`; a no-op when `METHOD` is `None` (`LocalAuth`).
+- **`.login_ex(client, *, login_options=None, otp_provider=None) -> dict|None`**
+  — modern path via `auth.login_ex` using this credential's `MECHANISM`
+  (`PASSWORD_PLAIN`/`API_KEY_PLAIN`/`TOKEN_PLAIN`). Handles `OTP_REQUIRED`
+  (continues with `auth.login_ex_continue`, OTP from `self.otp_token` or
+  `otp_provider()`), returns the `SUCCESS` response dict, raises
+  `AuthenticationError` otherwise. Falls back to legacy `.login()` for a
+  credential with no login_ex form.
+- **`AuthenticationError(response_type, response)`** — raised by `login_ex` on a
+  non-`SUCCESS` response; `.response_type` is the server discriminator,
+  `.response` the full dict.
 - **`Credentials.from_env(env=None) -> Credentials`** — `Credentials(env.get("TN_CREDS"))`, defaulting `env` to `os.environ`.
-- **`LocalAuth`** — no-op auth (local socket). **`ApiKeyAuth(api_key)`** —
-  `login_with_api_key`. **`TokenAuth(token)`** — `login_with_token`.
-  **`BasicAuth(username, password, otp_token=None)`** — `login`.
+- **`LocalAuth`** — no-op auth (local socket). **`ApiKeyAuth(api_key,
+  username=None)`** — `login_with_api_key` (legacy) / `API_KEY_PLAIN` (login_ex,
+  needs `username`). **`TokenAuth(token)`** — `login_with_token` / `TOKEN_PLAIN`.
+  **`BasicAuth(username, password, otp_token=None)`** — `login` /
+  `PASSWORD_PLAIN`.
 
 ## `fs` (`pytruenas.fs`)
 
