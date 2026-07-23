@@ -65,7 +65,13 @@ class _CredentialsMeta(type):
                     # the generic "Credentials not supported" below.
                     pass
 
-        raise ValueError("Credentials not supported", kwargs)
+        # Mask secret-bearing values: this exception (with its args) is likely
+        # to be logged, and the raw kwargs carry the password/token/api_key.
+        _secret = {"password", "passwd", "token", "api_key", "apikey", "secret"}
+        safe_kwargs = {
+            k: ("***" if k.lower() in _secret and v else v) for k, v in kwargs.items()
+        }
+        raise ValueError("Credentials not supported", safe_kwargs)
 
 
 class Credentials(metaclass=_CredentialsMeta):

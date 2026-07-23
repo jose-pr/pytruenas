@@ -30,6 +30,7 @@ from duho.runpath import RunPathCmd, is_runpath_dir
 from .client import TrueNASClient
 from .utils.cmd import PyTrueNASArgs
 from .utils.runpath import PyTrueNASRunPathArgs
+from .utils.target import redact as _redact
 
 # ``import duho.runpath`` auto-registers the RunPath command provider with its
 # default base (``duho.LoggingArgs``). Re-register with pytruenas's own shared
@@ -166,16 +167,19 @@ def _run_module_on_target(
     success = getattr(module, "success", None)
     finally_ = getattr(module, "finally_", None)
 
+    # Redact any password in the target before it reaches a log record or a
+    # ``--logto`` filename; the real ``target`` still builds the client below.
+    shown = _redact(target)
     file_handler = None
     if args.logto and args.logto != "-":
         now = _dt.datetime.now()
         file_handler = _pylogging.FileHandler(
-            args.logto.format(target=target, isodate=now.isoformat())
+            args.logto.format(target=shown, isodate=now.isoformat())
         )
         file_handler.setFormatter(_logging.DefaultFormatter())
         logger.addHandler(file_handler)
 
-    logger.info("Started: %s", target)
+    logger.info("Started: %s", shown)
     client = None
     result = 0
     try:
@@ -192,8 +196,8 @@ def _run_module_on_target(
             try:
                 finally_(client, args, logger)
             except Exception:
-                logger.error("Cleanup failed: %s", target, exc_info=True)
-        logger.info("Finished: %s", target)
+                logger.error("Cleanup failed: %s", shown, exc_info=True)
+        logger.info("Finished: %s", shown)
         if file_handler is not None:
             logger.removeHandler(file_handler)
             file_handler.close()
@@ -227,21 +231,24 @@ def _run_runpath_on_target(
     per_target = _copy.copy(instance)
     per_target.target = target
 
+    # Redact any password in the target before it reaches a log record or a
+    # ``--logto`` filename; ``per_target.target`` keeps the real value.
+    shown = _redact(target)
     file_handler = None
     if instance.logto and instance.logto != "-":
         now = _dt.datetime.now()
         file_handler = _pylogging.FileHandler(
-            instance.logto.format(target=target, isodate=now.isoformat())
+            instance.logto.format(target=shown, isodate=now.isoformat())
         )
         file_handler.setFormatter(_logging.DefaultFormatter())
         logger.addHandler(file_handler)
 
-    logger.info("Started: %s", target)
+    logger.info("Started: %s", shown)
     try:
         rc = per_target()
         return 0 if rc is None else int(rc)
     finally:
-        logger.info("Finished: %s", target)
+        logger.info("Finished: %s", shown)
         if file_handler is not None:
             logger.removeHandler(file_handler)
             file_handler.close()
