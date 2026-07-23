@@ -41,7 +41,9 @@ class PathPatterns:
         path = _Path(path)
         if path.exists():
             self.patterns.extend(
-                r.strip() for r in filter(None, path.read_text().splitlines()) if r
+                r.strip()
+                for r in filter(None, path.read_text(encoding="utf-8").splitlines())
+                if r
             )
 
     def is_match(self, path: "str") -> bool:

@@ -53,7 +53,7 @@ class TruenasSystemFile(FileTarget):
                     etc = self.etc
                 else:
                     etc = (self.etc,)
-                LOGGER.info(f"Reloading etc group: {self.etc}")
+                LOGGER.info(f"Reloading etc group: {etc}")
                 self.client.api.etc.generate(*etc)
             for service in self.services:
                 LOGGER.info(f"Reloading service: {service}")

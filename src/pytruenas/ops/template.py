@@ -28,7 +28,9 @@ class TemplateTarget:
             template = TextTemplate(template, **kwargs)
         elif not isinstance(template, BaseTemplate):
             # Anything else (e.g. a path-like) is read as a file's content.
-            template = TextTemplate(LocalPath(template).read_text(), **kwargs)
+            template = TextTemplate(
+                LocalPath(template).read_text(encoding="utf-8"), **kwargs
+            )
 
         return template.apply(self, context)
 
