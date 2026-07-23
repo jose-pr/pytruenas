@@ -261,6 +261,53 @@ global fields every command sees: `config` (path, default
   [targets...]`** — dumps (or reads a cached) API definition and writes
   `.pyi` stubs via `pytruenas.codegen.Codegen().generate(version, path)`.
 
+### RunPath step directories (`duho.runpath`)
+
+A **RunPath** is a directory of numbered `NN-name.py` *step* files run in
+order, with no `__init__.py` — placed among the command sources
+(`PYTRUENAS_PATH` / `--cmdspath` / config `commandspath`, or nested one level
+inside a source directory) it becomes a subcommand named after the directory.
+`pytruenas` adopts `duho.runpath` (requires `duho>=0.4.0`) and fans the whole
+step directory out **once per target**, each target getting its own connected
+`TrueNASClient` — the same per-target fan-out the built-in commands get. Author
+one with:
+
+- **`__main__.py`** (optional lifecycle) — `init(cmd, logger) -> ctx` builds
+  the per-target client (its return is the `ctx` every 2-arg step receives);
+  `success(ctx, cmd, logger)` / `finally_(ctx, cmd, logger)` run once after the
+  steps. `cmd` is the parsed command instance for THIS target (carrying
+  `cmd.target`, and any per-target state a step needs — e.g. `cmd.context = …`
+  stashed in `init` and read by later steps, isolated per target). Re-export
+  `pytruenas.utils.runpath.default_init` as `init` to build
+  `TrueNASClient(cmd.target, sslverify=cmd.sslverify)` with no boilerplate.
+- **`NN-name.py`** step files — each exposes a `main`/`run`/`call` entrypoint;
+  written `main(cmd, ctx)` it receives the `__main__.py` context, written
+  `main(cmd)` it does not (arity-detected). A step may set module-level
+  `PRIORITY`, `REQUIRED`, `BEFORE`, `AFTER` (ordering) — see `duho.runpath`.
+- **`-O`/`--rcopts PATTERN[,PATTERN…]`** selects steps (fnmatch on step name):
+  `!name` disables, `!*,build` = disable-all-then-enable-`build`, filename
+  `!`/`!strict`/`!enable` tokens set per-step defaults. The grammar and its
+  precedence are `duho.runpath`'s (see the `duho` docs / CHANGELOG for the
+  authoritative description — not restated here to avoid drift).
+
+**Fidelity to the private predecessor (grammar is `duho`'s, two original bugs
+FIXED not reproduced).** This RunPath support restores the predecessor's
+per-target `RunPathCmd` *capability*; the step signature is `duho`'s native
+`main(cmd, ctx)` rather than the predecessor's literal
+`run(client, args, logger)` (the logger travels on `cmd`, the client is `ctx`)
+— capability-parity, not signature-parity. The filename-modifier / `--rcopts`
+grammar follows the predecessor's `RcOptions.from_matchstring` *intent*, with
+two confirmed original bugs deliberately **fixed, not reproduced**: (1) the
+predecessor's disable token was misspelled `:!enable` and set a nonexistent
+`.enable` attribute instead of the real `.enabled` field, so filename-driven
+leading-`!` disable was silently broken — `duho` uses the consistent
+`enable`/`!enable` spelling throughout; (2) the predecessor's `Extend(",")`
+had a latent nested-list double-collection bug (dormant only because its own
+arg layer never built a `list[T]` splitter) — `duho`'s richer list-type
+dispatch would have made it live, and it is already fixed there (the same fix
+that flattens `--cmdspath a:b` to `['a', 'b']`). Do not read this support as
+exact behavioral parity where `duho` intentionally improved on the original.
+
 ## `codegen` (`pytruenas.codegen`)
 
 Backs the `generate-typings` command; not typically used directly.
@@ -295,6 +342,11 @@ TypedDict schemas only (no runtime behavior); import the submodules directly.
   opts passed to `_query`/`_upsert`/etc.; `diff(base, against) -> dict` (keys
   in `against` whose value differs from `base`).
 - **`cmd`** — see "Writing a command module" above.
+- **`runpath`** — helpers for authoring a RunPath step directory (see "RunPath
+  step directories" above): `default_init(cmd, logger) -> TrueNASClient` (the
+  per-target `__main__.py` client builder) and `PyTrueNASRunPathArgs` (the
+  shared root every RunPath command inherits — supplies the target fields /
+  fan-out methods and the trailing `TARGET` positional).
 - **`async_`, `io`** — internal helpers (`async_to_sync`, byte-like checks);
   no stable external contract.
 

@@ -6,6 +6,32 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+- **RunPath step directories.** Adopt `duho.runpath` (requires `duho>=0.4.0`),
+  wired into the per-target fan-out: a directory of numbered `NN-name.py` steps
+  (no `__init__.py`), placed among the command sources (`PYTRUENAS_PATH` /
+  `--cmdspath` / config `commandspath`, or nested one level inside a source
+  directory), becomes a subcommand that runs the whole step sequence **once per
+  target**, each target getting its own connected `TrueNASClient` — restoring
+  the private predecessor's per-target `RunPathCmd` behavior the current
+  duho-based `pytruenas` never had. A directory's optional `__main__.py`
+  `init(cmd, logger)` builds the per-target client (reuse
+  `pytruenas.utils.runpath.default_init`); steps are `main(cmd, ctx)` /
+  `main(cmd)`; `-O/--rcopts` and filename `!`/`!strict`/`!enable` tokens select
+  steps. The step signature is `duho`'s native `main(cmd, ctx)` rather than the
+  predecessor's `run(client, args, logger)` (the logger travels on `cmd`, the
+  client is `ctx`) — capability parity, not signature parity. The
+  filename-modifier / `--rcopts` grammar follows the predecessor's intent with
+  two of its original bugs fixed (the `:!enable`/`.enabled` attribute mismatch,
+  and the `Extend()` nested-list double-collection), not reproduced.
+
+### Changed
+- **Dependency floor `duho>=0.3.2` → `duho>=0.4.0`.** 0.4.0 carries the RunPath
+  `register(base=...)` shared-root method inheritance, the `__main__.py`
+  lifecycle, the corrected `enable`/`!enable` token spelling, and the `Extend()`
+  nested-list fix that now flattens `--cmdspath a:b` to `['a', 'b']` (previously
+  silently mis-collected as `[['a', 'b']]` for multi-value input).
+
 ## [0.0.0] - 2026-07-22
 
 Initial release.
