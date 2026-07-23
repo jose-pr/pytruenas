@@ -368,6 +368,11 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
 
         script = ";".join(script)
         if loglevel:
+            # The full command is logged deliberately (default level is TRACE,
+            # off unless explicitly enabled) so a caller can see exactly what
+            # ran. A command may embed a secret; that exposure is intentional
+            # and opt-in via ``loglevel``, not accidental. Pass ``loglevel=0``
+            # to suppress it entirely for a sensitive command.
             self.logger.log(loglevel, f"Running Command: {script}")
 
         command = [executable, "-c", script]

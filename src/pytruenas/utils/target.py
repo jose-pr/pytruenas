@@ -1,3 +1,4 @@
+import re as _re
 import typing as _ty
 import urllib.parse as _urlparse
 
@@ -9,6 +10,29 @@ import netimps as _netimps
 # netimps' scheme table about them; it already knows http/https/ssh.
 _netimps.register_port("ws", 80)
 _netimps.register_port("wss", 443)
+
+
+def redact(connectionstring: str) -> str:
+    """Mask the password in a raw connection string for safe logging.
+
+    A best-effort wrapper over :meth:`Target.redacted` that never raises on odd
+    input: a string with no parseable userinfo (a bare host, a unix-socket path)
+    comes back unchanged. Reach for this at every point a user-supplied target
+    reaches a log record or a ``--logto`` filename, so a
+    ``wss://root:secret@nas`` positional does not leak ``secret`` by accident.
+    Passing credentials in the target is still supported -- this only stops them
+    being written where they were never meant to go.
+    """
+    if not connectionstring or "@" not in connectionstring:
+        # No userinfo delimiter -> nothing to mask; also the fast path for the
+        # overwhelmingly common ``host``/``host:port`` positional.
+        return connectionstring
+    try:
+        return Target.parse(connectionstring, resolve_port=False).redacted
+    except Exception:
+        # A malformed target must never turn a log call into a crash; fall back
+        # to a blunt mask of any ``user:pass@`` run so we still don't leak.
+        return _re.sub(r"://([^/@]*):([^/@]*)@", r"://\1:***@", connectionstring)
 
 
 class Target(_ty.NamedTuple):
@@ -72,6 +96,26 @@ class Target(_ty.NamedTuple):
             uri = f"{uri}{_urlparse.quote(self.path, safe='/')}"
 
         return uri
+
+    @property
+    def redacted(self):
+        """``uri`` with the password masked -- safe to log or embed in a path.
+
+        The username is kept (it aids diagnostics and is not a secret); only the
+        password is replaced with ``***``. A target with no password is
+        unchanged. Use this anywhere a connection string reaches a log record or
+        a ``--logto`` filename, so a ``wss://root:secret@nas`` positional never
+        writes ``secret`` to disk by accident.
+        """
+        if not self.password:
+            return self.uri
+        # Build the display string off the already-encoded ``uri`` rather than
+        # re-quoting a ``***`` placeholder (``*`` is not URI-unreserved, so it
+        # would come back as ``%2A%2A%2A``). Swap the encoded password run for a
+        # literal ``***`` between the userinfo ``:`` and the ``@``.
+        real = self.uri
+        encoded_pw = _urlparse.quote(self.password, safe="")
+        return real.replace(f":{encoded_pw}@", ":***@", 1)
 
     @property
     def is_local(self):

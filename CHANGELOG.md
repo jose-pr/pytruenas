@@ -32,6 +32,27 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   nested-list fix that now flattens `--cmdspath a:b` to `['a', 'b']` (previously
   silently mis-collected as `[['a', 'b']]` for multi-value input).
 
+### Security
+- **Passwords in a target connection string are redacted from logs.** A target
+  like `wss://root:secret@nas` passed as a positional was logged verbatim
+  (`Started: …`/`Finished: …`, at INFO) and, worse, embedded in the `--logto`
+  filename on disk. The password is now masked (`wss://root:***@nas`) at every
+  such point via `pytruenas.utils.target.redact` — the username is kept, the
+  real target still builds the client. The `auth.Credentials` "not supported"
+  `ValueError` no longer carries the raw `password`/`token`/`api_key` kwargs
+  (which an `exc_info=True` log would have surfaced). Command text logged by
+  `client.run` is unchanged: that logging is intentional, opt-in via `loglevel`
+  (default `TRACE`, off unless enabled), and suppressible with `loglevel=0`.
+
+### Fixed
+- **Connection-string reassembly preserves reserved characters.** `Target.uri`
+  now percent-encodes userinfo and path, so a credential or path containing
+  `@ : / #` round-trips instead of reassembling into a URL that reparses to a
+  different host/port/path.
+- **`ops` reads files as UTF-8**, and narrower exception handling in `auth`
+  (`ValueError`/`TypeError` rather than bare `except Exception`) so a genuine
+  error surfaces instead of being swallowed behind a generic message.
+
 ## [0.0.0] - 2026-07-22
 
 Initial release.
