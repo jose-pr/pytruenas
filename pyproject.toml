@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "pytruenas"
-version = "0.1.0"
+version = "0.1.1"
 authors = [{ name = "Jose A." }]
 description = "A typed, Pythonic client and CLI for the TrueNAS middleware API"
 readme = "README.md"
@@ -43,7 +43,15 @@ dependencies = [
     # actually called, which is what lets main._with_targets wrap
     # ModuleCommand.register to add the shared trailing targets positional
     # app-wide -- including for a command that defines no register of its own.
-    # Validated on 0.4.1.
+    # Validated on 0.4.1. duho 0.5.0 (BREAKING in duho itself, not here) adds a
+    # flag-between-positionals reorder fix + a one-value-per-occurrence default
+    # for list/set/tuple OPTIONS, but the reorder only reaches duho's own
+    # declarative subcommand tree, not a module command's subparser (built by
+    # duho.discovery/runtime._register_module_command via plain
+    # subparsers.add_parser + stdlib's own _SubParsersAction dispatch, never
+    # through Args._initparser_'s patched parse_known_args) -- i.e. it does not
+    # cover pytruenas's own commands, so no floor bump yet. See the duho finding
+    # 2026-07-24_module_command_subparsers_bypass_positional_reorder.md.
     "duho>=0.4.1",
     # Network utilities: scheme->port resolution (ws/wss, built in since 0.0.2)
     # and local adapter discovery for pytruenas.ops.host (replaces ifaddr).
