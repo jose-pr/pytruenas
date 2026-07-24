@@ -7,42 +7,27 @@ type checkers understand ``client.api.<namespace>.<method>(...)`` calls.
 
 from __future__ import annotations
 
-import argparse
 import json
 from logging import Logger
 from pathlib import Path
 
+from duho import Arg, NS
+
 from pytruenas import TrueNASClient, codegen
-from pytruenas.utils.cmd import PyTrueNASArgs, register_targets
+from pytruenas.utils.cmd import PyTrueNASArgs
 
 
 class Args(PyTrueNASArgs):
-    api_version: str
-    path: Path
-    api_cache: Path
+    """Declared CLI fields for ``generate-typings``."""
 
+    api_version: "Arg[str, NS(type=str)]" = None
+    "API version to generate (default: the newest in the dump)"
 
-def register(parser: argparse.ArgumentParser, args: PyTrueNASArgs, logger: Logger):
-    parser.add_argument(
-        "--api-version",
-        type=str,
-        default=None,
-        help="API version to generate (default: the newest in the dump)",
-    )
-    parser.add_argument(
-        "--path",
-        type=Path,
-        default=Path("typings"),
-        help="Output directory for the generated stubs (default: ./typings)",
-    )
-    parser.add_argument(
-        "--api-cache",
-        type=Path,
-        default=None,
-        help="Path to cache the API dump JSON (read if present, written if not)",
-    )
-    # Targets are the trailing positionals.
-    register_targets(parser)
+    path: "Arg[Path, NS(type=Path)]" = Path("typings")
+    "Output directory for the generated stubs (default: ./typings)"
+
+    api_cache: "Arg[Path, NS(type=Path)]" = None
+    "Path to cache the API dump JSON (read if present, written if not)"
 
 
 def run(client: TrueNASClient, args: Args, logger: Logger):

@@ -15,33 +15,28 @@ positionals::
 
 from __future__ import annotations
 
-import argparse
 import json
 from logging import Logger
 
+from duho import Arg, NS
+
 from pytruenas import TrueNASClient
-from pytruenas.utils.cmd import PyTrueNASArgs, register_targets
+from pytruenas.utils.cmd import PyTrueNASArgs
 
 
 class Args(PyTrueNASArgs):
+    """Declared CLI fields for ``call`` (added ahead of the trailing targets)."""
+
     method: str
-    params: list[str]
+    "Method to call, e.g. system.info or core.ping"
+    ("method",)  # type: ignore
 
-
-def register(parser: argparse.ArgumentParser, args: PyTrueNASArgs, logger: Logger):
-    parser.add_argument("method", help="Method to call, e.g. system.info or core.ping")
-    parser.add_argument(
-        "-p",
-        "--param",
-        dest="params",
-        action="append",
-        default=[],
-        metavar="JSON",
-        help="A parameter as a JSON value (repeatable); a value that is not "
-        "valid JSON is passed as a plain string.",
-    )
-    # Targets are the trailing positionals -- added AFTER `method`.
-    register_targets(parser)
+    # nargs=None pins ONE value per -p (`-p a -p b`); duho would otherwise infer
+    # nargs='*' from list[str], and a greedy `-p` swallows the trailing targets.
+    params: "Arg[list[str], NS(action='append', metavar='JSON', nargs=None)]" = []
+    """A parameter as a JSON value (repeatable); a value that is not valid JSON
+    is passed as a plain string."""
+    ("--param", "-p")  # type: ignore
 
 
 def _parse_param(raw: str):
