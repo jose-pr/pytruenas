@@ -54,11 +54,14 @@ def _load_config(path: "_Path") -> dict:
 def register_targets(parser) -> None:
     """Add the trailing ``targets`` positional to a command parser.
 
-    Every command's ``register`` hook must call this **last** (after adding its
-    own positionals) so the target host(s) are the trailing positionals:
-    ``pytruenas query <namespace> <host>...``. Targets support comma-separated
-    lists and ``[A-Z]``/``[0-9]`` range patterns, expanded by
-    ``PyTrueNASArgs._expanded_targets_`` (empty -> ``localhost``).
+    Applied centrally -- a command module never calls this itself.
+    :func:`pytruenas.main._with_targets` wraps every module command's
+    ``register`` hook and calls this *after* it, so the target host(s) are the
+    trailing positionals (``pytruenas query <namespace> <host>...``) whatever
+    positionals the command added; :class:`~pytruenas.utils.runpath.
+    PyTrueNASRunPathArgs` does the same for class/RunPath commands. Targets
+    support comma-separated lists and ``[A-Z]``/``[0-9]`` range patterns,
+    expanded by ``PyTrueNASArgs._expanded_targets_`` (empty -> ``localhost``).
     """
     parser.add_argument(
         "targets",
@@ -92,9 +95,10 @@ class PyTrueNASArgs(LoggingArgs):
     ("--sslverify",)  # type: ignore
 
     # Targets are supplied as the TRAILING POSITIONAL arguments of the command
-    # (after any command-specific positionals), not a -t/--target flag. Each
-    # command's register() calls register_targets(parser) LAST so argparse can
-    # split e.g. `query <namespace> <host>...`. SUPPRESS keeps duho from
+    # (after any command-specific positionals), not a -t/--target flag. The
+    # positional is added centrally, after each command's own register() hook
+    # (main._with_targets), so argparse can split e.g. `query <namespace>
+    # <host>...` without the command taking part. SUPPRESS keeps duho from
     # auto-registering this field as a `--targets` option; it only holds the
     # parsed value + default, populated by the imperative positional.
     targets: "Arg[list[str], _SUPPRESS]" = []

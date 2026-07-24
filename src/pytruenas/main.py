@@ -28,7 +28,7 @@ from duho.fanout import run_targets
 from duho.runpath import RunPathCmd, is_runpath_dir
 
 from .client import TrueNASClient
-from .utils.cmd import PyTrueNASArgs
+from .utils.cmd import PyTrueNASArgs, register_targets
 from .utils.runpath import PyTrueNASRunPathArgs
 from .utils.target import redact as _redact
 
@@ -116,6 +116,77 @@ def _commands_from_source(source: str) -> "list":
     return commands
 
 
+def _wants_logger(hook: "_ty.Callable[..., object]") -> bool:
+    """True if a module ``register`` hook accepts a 3rd ``logger`` positional.
+
+    Mirrors duho's own arity tolerance for the ``register`` hook (2-arg
+    ``(parser, args)`` or 3-arg ``(parser, args, logger)``), which
+    :func:`_with_targets` must reproduce because it calls the module's hook
+    itself. Duplicated rather than imported: duho's version is private
+    (``duho.runtime._wants_logger_arg``, absent from its ``__all__``). A
+    ``*args`` hook can absorb the logger; a signature ``inspect`` refuses falls
+    back to the 2-arg call, which never over-supplies an argument.
+    """
+    import inspect as _inspect
+
+    try:
+        params = _inspect.signature(hook).parameters
+    except (TypeError, ValueError):  # pragma: no cover - builtins/C callables
+        return False
+    positional = 0
+    for param in params.values():
+        if param.kind is _inspect.Parameter.VAR_POSITIONAL:
+            return True
+        if param.kind in (
+            _inspect.Parameter.POSITIONAL_ONLY,
+            _inspect.Parameter.POSITIONAL_OR_KEYWORD,
+        ):
+            positional += 1
+    return positional >= 3
+
+
+def _with_targets(command: object) -> object:
+    """Make ``targets`` the trailing positional of a module command, centrally.
+
+    Every pytruenas command takes the same trailing ``TARGET...`` positionals, so
+    no command should have to opt in. duho reads a module command's ``register``
+    hook off the :class:`~duho.discovery.ModuleCommand` wrapper, which lets us
+    wrap it here: run the module's own hook first (adding ITS positionals), then
+    add ``targets`` -- argparse binds positionals in registration order, so
+    adding last is what keeps them trailing, e.g. ``query <namespace>
+    <host>...``.
+
+    Class commands (RunPath) get the same positional from
+    :class:`pytruenas.utils.runpath.PyTrueNASRunPathArgs` and are returned
+    untouched. The guard against a duplicate ``targets`` action covers a command
+    module that still registers its own.
+
+    Wrapping ``ModuleCommand.register`` is a supported seam as of duho 0.4.1,
+    which gates and introspects the hook on the same object it calls -- so this
+    wrapper runs even for a command that defines no ``register`` of its own
+    (``dump-api``, whose only positionals are the targets). Fields a module
+    declares via its own ``Args`` class are added by duho *before* the hook
+    runs, so they too land ahead of the targets.
+    """
+    if not isinstance(command, ModuleCommand):
+        return command
+
+    inner = getattr(command.module, "register", None)
+    wants_logger = callable(inner) and _wants_logger(inner)
+
+    def register(parser, args, logger=None):
+        if callable(inner):
+            if wants_logger:
+                inner(parser, args, logger)
+            else:
+                inner(parser, args)
+        if not any(action.dest == "targets" for action in parser._actions):
+            register_targets(parser)
+
+    command.register = register
+    return command
+
+
 def _discover(argv: "_ty.Sequence[str] | None") -> "list":
     """Resolve the command set: built-ins, then env/CLI/config-provided paths.
 
@@ -143,7 +214,7 @@ def _discover(argv: "_ty.Sequence[str] | None") -> "list":
             name = getattr(command, "_parsername_", None) or getattr(command, "__name__", None)
             if name:
                 by_name[name] = command  # later source wins
-    return list(by_name.values())
+    return [_with_targets(command) for command in by_name.values()]
 
 
 def _run_module_on_target(
