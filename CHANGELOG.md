@@ -4,7 +4,10 @@ All notable changes to this project are documented here. The format is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.1.0] - 2026-07-24
+
+First published release with real content. `0.0.0` was a placeholder; everything
+below accumulated since and is new to PyPI.
 
 ### Added
 - **Modern `auth.login_ex` login with 2FA.** `client.login(login_ex=True)` uses
@@ -57,6 +60,25 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   `find_adapter_in_network` now returns a `netimps.Interface` (was an `ifaddr`
   adapter). Requires `netimps>=0.0.2`, which also supplies the `ws`/`wss` default
   ports built-in, so `utils/target.py` no longer registers them at import.
+- **The trailing `TARGET...` positionals are registered centrally.** Every
+  command's `register` hook previously had to call
+  `pytruenas.utils.cmd.register_targets(parser)` **last** or silently lose the
+  target grammar. `pytruenas.main` now wraps each command's hook and adds the
+  positional after it, so targets stay trailing whatever positionals a command
+  adds — including for a command with no `register` hook at all, and for
+  third-party commands supplied via `--cmdspath`/`PYTRUENAS_PATH`, which now get
+  the `<command> [args...] [TARGET ...]` grammar for free.
+- **Commands declare their CLI fields via an `Args` class.** `call`, `query` and
+  `generate-typings` declare arguments on their `Args` class rather than adding
+  them imperatively in `register()` (which they no longer define). Previously the
+  `Args` class was inert — duho ignored it, `register()` did the real work, and
+  the two were hand-synced. `register()` remains supported as the escape hatch
+  for what declarations can't express. The CLI surface is unchanged.
+- **Dependency floor `duho>=0.4.0` → `duho>=0.4.1`** for the two behaviors the
+  above depends on: a module command may declare its own `Args` class (added to
+  the subparser before `register` runs), and the `register` hook is gated and
+  introspected on the object actually called, so wrapping it app-wide works even
+  for a command that defines no hook of its own.
 - **Dependency floor `duho>=0.3.2` → `duho>=0.4.0`.** 0.4.0 carries the RunPath
   `register(base=...)` shared-root method inheritance, the `__main__.py`
   lifecycle, the corrected `enable`/`!enable` token spelling, and the `Extend()`
@@ -178,5 +200,6 @@ below is simply what the package contains.
   `ssh` extra); the middleware API has no command-exec method. SFTP is handled by
   `pathlib_next`.
 
-[Unreleased]: https://github.com/jose-pr/pytruenas/compare/v0.0.0...HEAD
+[Unreleased]: https://github.com/jose-pr/pytruenas/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/jose-pr/pytruenas/compare/v0.0.0...v0.1.0
 [0.0.0]: https://github.com/jose-pr/pytruenas/releases/tag/v0.0.0
