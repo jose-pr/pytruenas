@@ -10,10 +10,19 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - **`call`/`query`/`generate-typings` declare fewer field options.** Their
   `Args` classes no longer pass `NS(type=...)` for a plain `str`/`Path` field
   (duho already derives `type=` from the annotation) or `NS(action='append',
-  nargs=...)` for a `list[str]` option (duho 0.5.0+ already defaults a
+  nargs=...)` for a `list[str]` option (duho >=0.5.0 already defaults a
   list-typed option to `action="append"`, `nargs=None` — one value per
   occurrence). Only `NS(metavar=...)` remains where the display name isn't
   inferable. No CLI-surface change.
+- **An option placed between a command's own positional and the trailing
+  targets now parses**, e.g. `pytruenas call method -p '{"a":1}' nas1` — no
+  longer only before the first positional or after the last. Was argparse's
+  own greedy positional-run matching (bpo-15112); fixed by duho >=0.5.1's
+  flag-between-positionals reorder, extended in 0.5.1 to a module command's
+  subparser (this project's entire command set — 0.5.0 alone only covered
+  duho's own declarative subcommand tree).
+- **Dependency floor `duho>=0.4.1` → `duho>=0.5.1`**, required for both
+  changes above.
 
 ## [0.1.0] - 2026-07-24
 

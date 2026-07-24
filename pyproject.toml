@@ -43,16 +43,23 @@ dependencies = [
     # actually called, which is what lets main._with_targets wrap
     # ModuleCommand.register to add the shared trailing targets positional
     # app-wide -- including for a command that defines no register of its own.
-    # Validated on 0.4.1. duho 0.5.0 (BREAKING in duho itself, not here) adds a
-    # flag-between-positionals reorder fix + a one-value-per-occurrence default
-    # for list/set/tuple OPTIONS, but the reorder only reaches duho's own
-    # declarative subcommand tree, not a module command's subparser (built by
-    # duho.discovery/runtime._register_module_command via plain
-    # subparsers.add_parser + stdlib's own _SubParsersAction dispatch, never
-    # through Args._initparser_'s patched parse_known_args) -- i.e. it does not
-    # cover pytruenas's own commands, so no floor bump yet. See the duho finding
-    # 2026-07-24_module_command_subparsers_bypass_positional_reorder.md.
-    "duho>=0.4.1",
+    # >=0.5.0 (BREAKING in duho itself, not here): a list/set/tuple field used
+    # as an OPTION (call.py's -p/--param, query.py's -f/--filter) now takes one
+    # value per occurrence by default (`-f a -f b`, action="append",
+    # nargs=None) instead of space-separated multi-value in one occurrence
+    # (`-f a b`, nargs="*") -- cmd/*.py no longer pin an explicit
+    # NS(action=..., nargs=...) override to get that. 0.5.0 also shipped a
+    # flag-between-positionals reorder fix, but it only covered duho's own
+    # declarative subcommand tree, not a module command's subparser (this
+    # project's entire command set) -- fixed in 0.5.1, which extends the same
+    # reorder to a module command's subparser too, so e.g.
+    # `pytruenas call method -p '{"a":1}' nas1` (flag BETWEEN the method and
+    # the trailing targets) now parses; earlier duho required the flag before
+    # the method or after the targets. See the duho findings
+    # 2026-07-24_optional_between_positional_groups_breaks_trailing_nargs_star.md
+    # and 2026-07-24_module_command_subparsers_bypass_positional_reorder.md for
+    # the history. Validated on 0.5.1.
+    "duho>=0.5.1",
     # Network utilities: scheme->port resolution (ws/wss, built in since 0.0.2)
     # and local adapter discovery for pytruenas.ops.host (replaces ifaddr).
     "netimps>=0.0.2",
