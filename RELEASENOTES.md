@@ -6,7 +6,39 @@ user-facing; this file is the durable record.
 
 ---
 
-## [Unreleased]
+## [0.1.1] - 2026-07-24
+
+### What changed
+
+`call`/`query`/`generate-typings` drop now-redundant `NS(...)` overrides on
+their `Args` fields — `NS(type=...)` on a plain `str`/`Path` field (duho
+already derives `type=` from the annotation) and `NS(action='append',
+nargs=...)` on a `list[str]` option (duho ≥0.5.0 already defaults a list-typed
+option to `action="append"`, `nargs=None`). Only `NS(metavar=...)` remains
+where the display name isn't inferable. No CLI-surface or dependency-floor
+change from 0.1.0 — the `duho>=0.4.1` floor is unchanged since this
+simplification is purely cosmetic against an installed 0.4.1 (duho's own
+default already matches what the explicit overrides asked for).
+
+### Validation evidence
+
+- Tests: **187 passed / 5 skipped** on Windows Python 3.9.13 (unchanged
+  count/shape from 0.1.0 — this release touches only `Args` declarations, no
+  behavior).
+- Build: `python -m build` produces `pytruenas-0.1.1.tar.gz` and
+  `pytruenas-0.1.1-py3-none-any.whl` cleanly.
+- Not re-validated live against a real TrueNAS host for this release (0.1.0's
+  live evidence below still describes the exercised code paths; this release
+  doesn't touch client/namespace/jsonrpc).
+
+### Publication state
+
+Committed to `main` (`ff56cdb`). **Not tagged/published** — same as 0.1.0,
+publishing a `v0.1.1` tag is user-gated.
+
+---
+
+## [0.1.0] - 2026-07-24
 
 ### What changed
 
@@ -22,6 +54,27 @@ user-facing; this file is the durable record.
   concurrency 8→16).
 - **Repo brought to standard:** benchmark suite (`benchmarks/run.py`), docs site
   (`mkdocs.yml` + `docs/`), `CONTRIBUTING.md`, and this file.
+- **Everything else accumulated since `0.0.0`** (auth.login_ex/2FA login, client
+  convenience wrappers, event subscriptions, netimps-based adapter discovery,
+  password redaction in logs, RunPath support) is covered in `CHANGELOG.md`'s
+  `[0.1.0]` section, not repeated here.
+- **CLI: the trailing `targets` positional is registered centrally**, not by
+  each command calling `register_targets(parser)` — `main._with_targets` wraps
+  every module command's `register` hook (even a command with none of its own)
+  and adds `targets` after it, so an external `--cmdspath` command gets the
+  same `<command> [args...] [TARGET ...]` grammar for free.
+- **Commands declare their CLI fields via `Args`** instead of an imperative
+  `register()` that hand-synced against an otherwise-inert `Args` class (duho
+  ≥0.4.1 adds a module command's declared `Args` fields before `register`
+  runs). `register()` remains for what a declaration can't express. No
+  CLI-surface change (`call method [TARGET ...]`, `query namespace [TARGET
+  ...]`, repeatable `-f`/`-p`, `--api-version`/`--api-cache` unchanged).
+- **Known gap, not fixed in this release:** an option placed between a
+  command's own positional and the trailing targets still fails to parse
+  (`query user -f x nas1` → `unrecognized arguments: nas1`) — argparse's own
+  greedy positional-run matching. `call.py`'s docstring documents the
+  workaround; filed upstream against duho (its own flag-reorder fix doesn't
+  reach a module command's subparser).
 
 ### Performance
 
@@ -52,7 +105,8 @@ future regression.
 
 ### Validation evidence
 
-- Tests: **113 passed / 5 skipped** on Windows Python 3.9; **118 passed / 0
+- Tests (as of this file's earlier entries, predating the CLI/`Args` work
+  above): **113 passed / 5 skipped** on Windows Python 3.9; **118 passed / 0
   skipped** on Python 3.13 on a real TrueNAS 26.0 host (the POSIX-shell-gated
   `run()` tests that skip on Windows run there).
 - Live integration on TrueNAS 26.0.0-BETA.1 via the local middleware socket:
@@ -63,6 +117,11 @@ future regression.
   agent-file leakage.
 - Docs: `mkdocs build --strict` clean.
 - Coverage: TOTAL 70% (client 62%, namespace 79%, jsonrpc 84%, main 80%).
+- **Re-verified for the final `0.1.0` tree** (CLI centralization + `Args`
+  declarations included): **187 passed / 5 skipped** on Windows Python 3.9.13
+  (no environment with a live TrueNAS host or `twine`/`mkdocs` available in
+  this pass — the sections above are the last live-host/docs-build evidence on
+  record; only the automated-test count and `python -m build` were re-run).
 
 ### Publication state
 
