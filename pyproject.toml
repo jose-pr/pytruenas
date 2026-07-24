@@ -35,8 +35,16 @@ dependencies = [
     # nested-list fix that flattens `--cmdspath a:b` to ['a','b']. Earlier fixes
     # (>=0.3.2: global option before subcommand not shadowed; '%' in a Cmd
     # docstring no longer crashes parser build; directly-built Cmd seeds field
-    # defaults) are subsumed. Validated on 0.4.0.
-    "duho>=0.4.0",
+    # defaults) are subsumed.
+    # >=0.4.1: a module command may declare its own `Args` class (fields added
+    # to the subparser before register() runs), so cmd/*.py declare their CLI
+    # fields instead of hand-syncing an inert Args class against an imperative
+    # register(); and the register hook is gated/introspected on the object
+    # actually called, which is what lets main._with_targets wrap
+    # ModuleCommand.register to add the shared trailing targets positional
+    # app-wide -- including for a command that defines no register of its own.
+    # Validated on 0.4.1.
+    "duho>=0.4.1",
     # Network utilities: scheme->port resolution (ws/wss, built in since 0.0.2)
     # and local adapter discovery for pytruenas.ops.host (replaces ifaddr).
     "netimps>=0.0.2",

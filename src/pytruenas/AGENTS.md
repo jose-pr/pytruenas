@@ -285,9 +285,18 @@ A command is a plain module exposing:
 
 - **`run(client, args, logger)`** — required; the command body, called once
   per target with a connected `TrueNASClient`.
-- **`register(parser, args, logger)`** — optional; add argparse arguments.
-  Call `pytruenas.utils.cmd.register_targets(parser)` **last**, after any
-  command-specific positionals, so targets stay the trailing positionals.
+- **`Args`** — optional; a `PyTrueNASArgs` subclass declaring the command's own
+  CLI fields (duho ≥0.4.1 adds them to the subparser before `register` runs).
+  Preferred over `register`: an annotated attr + docstring + bare flags-tuple
+  becomes a CLI field, e.g. `("method",)` for a positional or `("--param",
+  "-p")` for an option. For a repeatable `list[str]` option use
+  `NS(action='append', nargs=None)` — duho otherwise infers `nargs='*'`, and a
+  greedy option swallows the trailing targets.
+- **`register(parser, args, logger)`** — optional; the imperative escape hatch,
+  for what declarations can't express (mutually-exclusive/titled groups). The
+  trailing `TARGET...` positionals are added centrally, after this hook runs
+  (`main._with_targets`), so a command never registers them itself — declared
+  and `register`-added positionals both land ahead of the targets.
 - **`init(args, logger) -> client`**, **`success(client, args, logger)`**,
   **`finally_(client, args, logger)`** — optional lifecycle hooks
   (`finally_` always runs).
@@ -296,8 +305,8 @@ A command is a plain module exposing:
 global fields every command sees: `config` (path, default
 `$PYTRUENAS_CFG` or `./pytruenas.yaml`), `cmdspath`, `sslverify` (default
 `False`), `parallel` (default `1`), `logto` (default `-` for stderr, or a
-`{target}`/`{isodate}` path template), plus `targets` (populated by
-`register_targets`, not a flag) and helper methods
+`{target}`/`{isodate}` path template), plus `targets` (the trailing
+positionals, not a flag) and helper methods
 `._config_dict_()`/`._expanded_targets_()`.
 
 ### Built-in commands (`pytruenas.cmd`)
