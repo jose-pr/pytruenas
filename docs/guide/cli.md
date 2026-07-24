@@ -50,9 +50,7 @@ pytruenas call -p '{"username": "svc"}' user.create nas.example.com
 
 `call` invokes any middleware method by its dotted name (unlike `query`, which
 only covers `<namespace>.query`). Parameters are JSON values via `-p/--param`
-(repeatable). Put `-p` values *before* the method or *after* the targets —
-argparse can't split a `-p VALUE` sandwiched between the method and the trailing
-target positionals.
+(repeatable), in any position relative to the method and the targets.
 
 ### `dump-api` — dump the API definition
 
