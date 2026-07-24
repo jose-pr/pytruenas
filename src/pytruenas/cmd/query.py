@@ -2,35 +2,30 @@
 
 from __future__ import annotations
 
-import argparse
 import json
 from logging import Logger
 
+from duho import Arg, NS
+
 from pytruenas import TrueNASClient
-from pytruenas.utils.cmd import PyTrueNASArgs, register_targets
+from pytruenas.utils.cmd import PyTrueNASArgs
 
 
 class Args(PyTrueNASArgs):
-    query: list[str]
+    """Declared CLI fields for ``query`` (added ahead of the trailing targets)."""
+
     namespace: str
+    "API namespace, e.g. user or pool.dataset"
+    ("namespace",)  # type: ignore
 
-
-def register(parser: argparse.ArgumentParser, args: PyTrueNASArgs, logger: Logger):
     # NOTE: not -q -- duho's LoggingArgs owns -q (quiet), and duho.app builds each
     # subcommand parser with parents=[root], so global short flags are inherited
     # and would collide.
-    parser.add_argument(
-        "-f",
-        "--filter",
-        dest="query",
-        action="append",
-        default=[],
-        metavar="KEY=VALUE",
-        help="Filter on a field (repeatable), e.g. -f username=root",
-    )
-    parser.add_argument("namespace", help="API namespace, e.g. user or pool.dataset")
-    # Targets are the trailing positionals -- must be added AFTER `namespace`.
-    register_targets(parser)
+    # nargs=None pins ONE value per -f (see call.py: a greedy nargs='*' inferred
+    # from list[str] would swallow the trailing targets).
+    query: "Arg[list[str], NS(action='append', metavar='KEY=VALUE', nargs=None)]" = []
+    "Filter on a field (repeatable), e.g. -f username=root"
+    ("--filter", "-f")  # type: ignore
 
 
 def run(client: TrueNASClient, args: Args, logger: Logger):
