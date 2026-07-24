@@ -11,8 +11,6 @@ import json
 from logging import Logger
 from pathlib import Path
 
-from duho import Arg, NS
-
 from pytruenas import TrueNASClient, codegen
 from pytruenas.utils.cmd import PyTrueNASArgs
 
@@ -20,13 +18,13 @@ from pytruenas.utils.cmd import PyTrueNASArgs
 class Args(PyTrueNASArgs):
     """Declared CLI fields for ``generate-typings``."""
 
-    api_version: "Arg[str, NS(type=str)]" = None
+    api_version: str = None
     "API version to generate (default: the newest in the dump)"
 
-    path: "Arg[Path, NS(type=Path)]" = Path("typings")
+    path: Path = Path("typings")
     "Output directory for the generated stubs (default: ./typings)"
 
-    api_cache: "Arg[Path, NS(type=Path)]" = None
+    api_cache: Path = None
     "Path to cache the API dump JSON (read if present, written if not)"
 
 

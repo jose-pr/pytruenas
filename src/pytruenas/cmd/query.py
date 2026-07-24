@@ -21,9 +21,10 @@ class Args(PyTrueNASArgs):
     # NOTE: not -q -- duho's LoggingArgs owns -q (quiet), and duho.app builds each
     # subcommand parser with parents=[root], so global short flags are inherited
     # and would collide.
-    # nargs=None pins ONE value per -f (see call.py: a greedy nargs='*' inferred
-    # from list[str] would swallow the trailing targets).
-    query: "Arg[list[str], NS(action='append', metavar='KEY=VALUE', nargs=None)]" = []
+    # duho 0.5.0+ already defaults a list-typed OPTION to action="append",
+    # nargs=None (one value per occurrence, `-f a -f b`) -- no explicit
+    # NS(action=..., nargs=...) needed here.
+    query: "Arg[list[str], NS(metavar='KEY=VALUE')]" = []
     "Filter on a field (repeatable), e.g. -f username=root"
     ("--filter", "-f")  # type: ignore
 

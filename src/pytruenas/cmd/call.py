@@ -11,6 +11,15 @@ positionals::
 
     pytruenas call -p '{"username": "svc"}' user.create nas1
     pytruenas call user.create nas1 -p '{"username": "svc"}'
+
+duho 0.5.0's flag-between-positionals reorder fix does not cover this: it
+patches ``Args._initparser_``'s ``parse_known_args``, which only the root
+parser and duho's own declarative ``_subcommands_`` tree go through. A module
+command's subparser (this one) is built by ``duho.discovery``/
+``duho.runtime._register_module_command`` via plain
+``subparsers.add_parser(...)`` and dispatched by stdlib argparse's own
+``_SubParsersAction``, never reaching the patched method -- see the duho
+finding ``2026-07-24_module_command_subparsers_bypass_positional_reorder.md``.
 """
 
 from __future__ import annotations
@@ -31,9 +40,10 @@ class Args(PyTrueNASArgs):
     "Method to call, e.g. system.info or core.ping"
     ("method",)  # type: ignore
 
-    # nargs=None pins ONE value per -p (`-p a -p b`); duho would otherwise infer
-    # nargs='*' from list[str], and a greedy `-p` swallows the trailing targets.
-    params: "Arg[list[str], NS(action='append', metavar='JSON', nargs=None)]" = []
+    # duho 0.5.0+ already defaults a list-typed OPTION to action="append",
+    # nargs=None (one value per occurrence, `-p a -p b`) -- no explicit
+    # NS(action=..., nargs=...) needed here.
+    params: "Arg[list[str], NS(metavar='JSON')]" = []
     """A parameter as a JSON value (repeatable); a value that is not valid JSON
     is passed as a plain string."""
     ("--param", "-p")  # type: ignore
