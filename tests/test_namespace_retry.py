@@ -10,7 +10,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from pytruenas import _conn
+from pytruenas import connection as _conn
 from pytruenas.namespace import Namespace
 
 
@@ -22,13 +22,13 @@ def _client():
 
 def test_permanent_abort_retries_then_raises():
     c = _client()
-    c.websocket.call.side_effect = _conn.ClientException("closed", errno.ECONNABORTED)
+    c.conn.call.side_effect = _conn.ClientException("closed", errno.ECONNABORTED)
     ns = Namespace(c, "user")
     with pytest.raises(_conn.ClientException) as ei:
         ns.query([], {})
     assert ei.value.errno == errno.ECONNABORTED
     # default _tries=1 -> one initial attempt + one retry == 2 calls
-    assert c.websocket.call.call_count == 2
+    assert c.conn.call.call_count == 2
 
 
 def test_abort_then_success_returns_result(monkeypatch):
@@ -41,7 +41,7 @@ def test_abort_then_success_returns_result(monkeypatch):
             raise _conn.ClientException("closed", errno.ECONNABORTED)
         return [{"id": 1}]
 
-    c.websocket.call.side_effect = flaky
+    c.conn.call.side_effect = flaky
     # avoid the real 1s sleep between attempts
     monkeypatch.setattr("pytruenas.namespace._time.sleep", lambda *_: None)
     ns = Namespace(c, "user")
@@ -52,7 +52,7 @@ def test_abort_then_success_returns_result(monkeypatch):
 def test_retry_drops_client_connection(monkeypatch):
     c = _client()
     c._conn = object()  # a live-looking connection
-    c.websocket.call.side_effect = _conn.ClientException("closed", errno.ECONNABORTED)
+    c.conn.call.side_effect = _conn.ClientException("closed", errno.ECONNABORTED)
     monkeypatch.setattr("pytruenas.namespace._time.sleep", lambda *_: None)
     with pytest.raises(_conn.ClientException):
         Namespace(c, "user").query([], {})
@@ -62,24 +62,24 @@ def test_retry_drops_client_connection(monkeypatch):
 
 def test_non_abort_error_raises_immediately():
     c = _client()
-    c.websocket.call.side_effect = _conn.ClientException("boom", errno.EINVAL)
+    c.conn.call.side_effect = _conn.ClientException("boom", errno.EINVAL)
     with pytest.raises(_conn.ClientException):
         Namespace(c, "user").query([], {})
-    assert c.websocket.call.call_count == 1  # no retry for non-abort
+    assert c.conn.call.call_count == 1  # no retry for non-abort
 
 
 def test_timeout_threaded_through_to_call():
     c = _client()
-    c.websocket.call.return_value = {"ok": True}
+    c.conn.call.return_value = {"ok": True}
     Namespace(c, "core")(_method="ping", _timeout=None)
     # _timeout=None must reach websocket.call as timeout=None (wait forever)
-    _, kwargs = c.websocket.call.call_args
+    _, kwargs = c.conn.call.call_args
     assert kwargs.get("timeout") is None
 
 
 def test_timeout_omitted_by_default():
     c = _client()
-    c.websocket.call.return_value = {"ok": True}
+    c.conn.call.return_value = {"ok": True}
     Namespace(c, "core")(_method="ping")
-    _, kwargs = c.websocket.call.call_args
+    _, kwargs = c.conn.call.call_args
     assert "timeout" not in kwargs  # default sentinel -> client default used

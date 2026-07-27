@@ -27,7 +27,7 @@ from duho.discovery import CmdBuilder, ModuleCommand, discover_commands
 from duho.fanout import run_targets
 from duho.runpath import RunPathCmd, is_runpath_dir
 
-from .client import TrueNASClient
+from .host import TrueNASHost as TrueNASClient
 from .utils.cmd import PyTrueNASArgs, register_targets
 from .utils.runpath import PyTrueNASRunPathArgs
 from .utils.target import redact as _redact
@@ -110,9 +110,7 @@ def _commands_from_source(source: str) -> "list":
     if path.is_dir():
         for child in sorted(path.iterdir()):
             if child.is_dir() and is_runpath_dir(child):
-                commands.append(
-                    CmdBuilder(child.name.replace("_", "-"), child).command
-                )
+                commands.append(CmdBuilder(child.name.replace("_", "-"), child).command)
     return commands
 
 
@@ -211,7 +209,9 @@ def _discover(argv: "_ty.Sequence[str] | None") -> "list":
         if not source:
             continue
         for command in _commands_from_source(source):
-            name = getattr(command, "_parsername_", None) or getattr(command, "__name__", None)
+            name = getattr(command, "_parsername_", None) or getattr(
+                command, "__name__", None
+            )
             if name:
                 by_name[name] = command  # later source wins
     return [_with_targets(command) for command in by_name.values()]
@@ -352,9 +352,7 @@ def _dispatch(command: object, instance: "PyTrueNAS") -> int:
     ):
         runpath = _ty.cast("RunPathCmd", instance)
         targets = runpath._expanded_targets_()
-        logger.info(
-            "Running '%s' on %d target(s)", runpath._parsername_, len(targets)
-        )
+        logger.info("Running '%s' on %d target(s)", runpath._parsername_, len(targets))
         return run_targets(
             lambda target: _run_runpath_on_target(runpath, target, logger),
             targets,

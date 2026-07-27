@@ -9,8 +9,8 @@ from datetime import date, datetime, time, timezone
 
 import pytest
 
-from pytruenas import jsonrpc
-from pytruenas.jsonrpc import (
+from pytruenas import connection as jsonrpc
+from pytruenas.connection import (
     ClientException,
     ValidationErrors,
     _parse_error,
@@ -60,7 +60,12 @@ def test_parse_call_error_carries_errno():
     err = _parse_error(
         {
             "code": -32001,
-            "data": {"reason": "[EPERM] denied", "error": 1, "trace": None, "extra": []},
+            "data": {
+                "reason": "[EPERM] denied",
+                "error": 1,
+                "trace": None,
+                "extra": [],
+            },
         }
     )
     assert isinstance(err, ClientException)
@@ -92,11 +97,11 @@ def test_unix_socket_default_uri():
         created["uri"] = self.uri
         return _FakeWS()
 
-    orig = jsonrpc.Client._connect
-    jsonrpc.Client._connect = fake_connect
+    orig = jsonrpc.TrueNASWSConnection._connect
+    jsonrpc.TrueNASWSConnection._connect = fake_connect
     try:
-        c = jsonrpc.Client()
+        c = jsonrpc.TrueNASWSConnection()
         assert created["uri"].startswith("ws+unix://")
         c.close()
     finally:
-        jsonrpc.Client._connect = orig
+        jsonrpc.TrueNASWSConnection._connect = orig

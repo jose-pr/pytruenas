@@ -22,8 +22,10 @@ p.with_name("report.bak").write_bytes(data)
 pip install pytruenas[ssh]     # enables the SFTP backend
 ```
 
-Choose a backend explicitly with `client.path(..., backend="sftp")` or set the
-client's `fsbackend` (default `"auto"`).
+Choose a provider for one call with `client.path(..., backend="sftp")`, or set
+the whole preference order at construction with
+`path=["sftp", "tnasws"]` — see [Running commands](commands.md#choosing-the-transport-yourself).
+Valid path providers are `local`, `sftp`, and `tnasws`.
 
 !!! note
     SFTP concurrency and transport details come from `pathlib_next`; pytruenas

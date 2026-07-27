@@ -5,10 +5,10 @@ open a websocket to the middleware, send a request, wait for the matching
 response, and surface errors as exceptions. Jobs are not tracked client-side --
 the middleware's own ``core.job_wait`` method (a normal blocking call) is used
 for that. Event subscriptions (``core.subscribe``) ARE supported: see
-:meth:`Client.subscribe` and :class:`Subscription` -- a bounded queue drained on
+:meth:`TrueNASWSConnection.subscribe` and :class:`Subscription` -- a bounded queue drained on
 the caller's thread, with optional inline callbacks.
 
-Three transports are supported by :class:`Client`:
+Three transports are supported by :class:`TrueNASWSConnection`:
 
 * ``wss://host/api/current`` -- TLS websocket to a remote host;
 * ``ws://host/api/current`` -- plain websocket to a remote host;
@@ -46,10 +46,10 @@ from ipaddress import IPv6Interface as _IPv6Interface
 
 import websocket as _websocket
 
-_LOGGER = _logging.getLogger("pytruenas.jsonrpc")
+_LOGGER = _logging.getLogger("pytruenas.connection")
 
 __all__ = [
-    "Client",
+    "TrueNASWSConnection",
     "ClientException",
     "ValidationErrors",
     "CallTimeout",
@@ -102,7 +102,12 @@ class _EJSONEncoder(_json.JSONEncoder):
 
     def default(self, obj):
         if isinstance(obj, _datetime):
-            return {"$date": int(_calendar.timegm(obj.utctimetuple()) * 1000 + obj.microsecond // 1000)}
+            return {
+                "$date": int(
+                    _calendar.timegm(obj.utctimetuple()) * 1000
+                    + obj.microsecond // 1000
+                )
+            }
         if isinstance(obj, _date):
             return {"$type": "date", "$value": obj.strftime("%Y-%m-%d")}
         if isinstance(obj, _time):
@@ -153,7 +158,7 @@ def loads(data: "str | bytes | bytearray", **kwargs):
 
 
 class ClientException(Exception):
-    """Any error surfaced by a :class:`Client` call or connection.
+    """Any error surfaced by a :class:`TrueNASWSConnection` call or connection.
 
     ``errno`` carries the middleware's error number when it maps to a POSIX
     errno (used by the filesystem layer to raise the right ``OSError``);
@@ -217,7 +222,9 @@ def _parse_error(error: dict) -> ClientException:
             data.get("trace"),
             data.get("extra"),
         )
-    return ClientException(error.get("message") or (data if isinstance(data, str) else str(code)))
+    return ClientException(
+        error.get("message") or (data if isinstance(data, str) else str(code))
+    )
 
 
 # --------------------------------------------------------------------------
@@ -252,7 +259,7 @@ _EVENT_CLOSED = object()
 class Subscription:
     """A live subscription to a middleware event (``core.subscribe``).
 
-    Obtain one from :meth:`Client.subscribe`. Consume events by iterating
+    Obtain one from :meth:`TrueNASWSConnection.subscribe`. Consume events by iterating
     :meth:`events` (a bounded queue drains on the caller's thread -- no hidden
     threads, backpressure is visible) and/or by passing a ``callback`` at
     subscribe time (invoked inline on the reader thread -- keep it fast and
@@ -271,10 +278,12 @@ class Subscription:
         event: str,
         callback: "_ty.Callable[[Event], object] | None",
         maxsize: int,
-        client: "Client",
+        client: "TrueNASWSConnection",
     ) -> None:
         self.event = event
-        self.id: "str | None" = None  # set by Client.subscribe after core.subscribe
+        self.id: "str | None" = (
+            None  # set by TrueNASWSConnection.subscribe after core.subscribe
+        )
         self.dropped = 0
         self._queue: "_queue.Queue" = _queue.Queue(maxsize=maxsize)
         self._callback = callback
@@ -304,7 +313,8 @@ class Subscription:
                 self._callback(event)
             except Exception:  # a bad callback must not kill the reader
                 _LOGGER.warning(
-                    "event callback for %r raised; continuing", self.event,
+                    "event callback for %r raised; continuing",
+                    self.event,
                     exc_info=True,
                 )
 
@@ -352,11 +362,11 @@ class Subscription:
 
 
 # --------------------------------------------------------------------------
-# Client
+# TrueNASWSConnection
 # --------------------------------------------------------------------------
 
 
-class Client:
+class TrueNASWSConnection:
     """A synchronous JSON-RPC 2.0 client for the TrueNAS middleware.
 
     ``uri`` may be a ``ws://``/``wss://`` URL or a ``ws+unix://`` unix-socket
@@ -618,7 +628,7 @@ class Client:
         except Exception:
             pass
 
-    def __enter__(self) -> "Client":
+    def __enter__(self) -> "TrueNASWSConnection":
         return self
 
     def __exit__(self, *exc) -> None:

@@ -133,11 +133,16 @@ def test_login_ex_login_options_override():
 
 
 def test_login_ex_token_and_apikey_data():
-    assert TokenAuth("tok")._login_data() == {"mechanism": "TOKEN_PLAIN", "token": "tok"}
+    assert TokenAuth("tok")._login_data() == {
+        "mechanism": "TOKEN_PLAIN",
+        "token": "tok",
+    }
     # api key needs a username for login_ex; without one it falls back (None)
     assert ApiKeyAuth("k")._login_data() is None
     assert ApiKeyAuth("k", username="root")._login_data() == {
-        "mechanism": "API_KEY_PLAIN", "username": "root", "api_key": "k",
+        "mechanism": "API_KEY_PLAIN",
+        "username": "root",
+        "api_key": "k",
     }
 
 

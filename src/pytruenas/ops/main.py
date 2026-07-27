@@ -64,8 +64,9 @@ def init(config_path: str | None = None) -> TrueNASClient:
 
     credentials = (username, password) if username and password else None
     LOGGER.info("Creating pytruenas client for host %s", host)
-    client = TrueNASClient(host if host != "localhost" else None, credentials, sslverify=False)
+    client = TrueNASClient(
+        host if host != "localhost" else None, credentials, sslverify=False
+    )
     # Perform a simple login – the client will automatically handle the websocket
     client.login()
     return client
-

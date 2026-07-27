@@ -49,7 +49,7 @@ class TruenasSystemFile(FileTarget):
         modified = super().write(content)
         if modified:
             if self.etc:
-                if isinstance(self.etc, (list,tuple)):
+                if isinstance(self.etc, (list, tuple)):
                     etc = self.etc
                 else:
                     etc = (self.etc,)
