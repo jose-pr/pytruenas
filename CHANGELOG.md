@@ -4,6 +4,36 @@ All notable changes to this project are documented here. The format is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.1] - 2026-07-27
+
+Documentation and one error-message fix. No API changes.
+
+### Fixed
+
+- **An unknown constructor argument now raises a useful error.** A typo like
+  `TrueNASClient("wss://nas", passwrd="s3cret")` fell through to hostctl's
+  `SystemHost.__init__` and raised `TypeError: SystemHost.__init__() got an
+  unexpected keyword argument 'passwrd'` — accurate, but naming an internal
+  class rather than the thing the caller got wrong. It now raises
+  `ValueError: unknown credential argument: 'passwrd'` and lists the accepted
+  configuration options. Found by testing the documented examples.
+
+### Documentation
+
+- **README** rewritten for 0.2.0: it still advertised a `pytruenas[host]` extra
+  that no longer exists, said "once published to PyPI", and used a venv layout
+  the project no longer follows. Adds the transport table and a
+  commands/files section.
+- **New [Recipes](https://jose-pr.github.io/pytruenas/guide/recipes/) guide** —
+  worked examples for connecting, querying, idempotent upserts, subscriptions,
+  running commands, upload/download, several hosts at once, and provisioning
+  SSH. Every example was run against a live TrueNAS 26.0.0-BETA.1 host.
+- **Filesystem guide** expanded with real path examples and a table of which
+  operations need SFTP (`rename`, `symlink_to`, `readlink`, `resolve` have no
+  `filesystem.*` equivalent and raise rather than failing quietly).
+- `docs/index.md` extras list corrected; both CI workflows dropped a stale
+  `host` extra that pip had been silently warning about.
+
 ## [0.2.0] - 2026-07-27
 
 Rebases pytruenas' generic host machinery onto [hostctl], keeping only the
@@ -319,6 +349,7 @@ below is simply what the package contains.
   `pathlib_next`.
 
 [Unreleased]: https://github.com/jose-pr/pytruenas/compare/v0.1.1...HEAD
+[0.2.1]: https://github.com/jose-pr/pytruenas/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/jose-pr/pytruenas/compare/v0.1.1...v0.2.0
 [0.1.1]: https://github.com/jose-pr/pytruenas/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/jose-pr/pytruenas/compare/v0.0.0...v0.1.0

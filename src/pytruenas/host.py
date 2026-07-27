@@ -484,6 +484,15 @@ _CONFIG_OPTIONS = frozenset(
     if parameter.kind is _inspect.Parameter.KEYWORD_ONLY
 )
 
+#: Keywords that belong to `SystemHost` rather than the config (`info=`,
+#: `initializer=`, ...). Derived from the signature too, so a hostctl release
+#: that adds one does not turn it into a spurious "unknown argument" here.
+_HOST_OPTIONS = frozenset(
+    name
+    for name, parameter in _inspect.signature(_PosixHost.__init__).parameters.items()
+    if parameter.kind is _inspect.Parameter.KEYWORD_ONLY
+) | {"client"}
+
 
 class TrueNASHost(_PosixHost, _ty.Generic[ApiVersion]):
     """A TrueNAS middleware host: POSIX semantics over composed transports.
@@ -548,6 +557,16 @@ class TrueNASHost(_PosixHost, _ty.Generic[ApiVersion]):
             config_options = {
                 key: options.pop(key) for key in list(options) if key in _CONFIG_OPTIONS
             }
+            # Anything left that SystemHost does not take is a typo. Catch it
+            # here rather than letting it reach SystemHost, which would raise a
+            # TypeError naming an internal class -- unhelpful for a caller who
+            # wrote `passwrd=` and needs to be told *that*.
+            unknown = sorted(set(options) - _HOST_OPTIONS)
+            if unknown:
+                raise ValueError(
+                    f"unknown credential argument: {unknown[0]!r} "
+                    f"(configuration options: {', '.join(sorted(_CONFIG_OPTIONS))})"
+                )
             config = TrueNASConfig.from_target(
                 config, **_ty.cast(_ty.Any, config_options)
             )

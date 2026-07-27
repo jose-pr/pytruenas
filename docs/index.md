@@ -23,22 +23,25 @@ attribute-style namespace.
 - **A filesystem, not just an API.** `client.path("/mnt/tank/x")` returns a
   `pathlib`-style object backed by SFTP (preferred) or the middleware
   `filesystem.*` API.
+- **Commands over whichever transport exists.** `client.run(...)` picks between
+  plain `subprocess` (on the NAS), SSH, and the web shell — the same PTY the
+  web UI's Shell page uses, so a host reachable on the API port but not on 22
+  can still run commands. Built on
+  [hostctl](https://github.com/jose-pr/hostctl).
 - **Typings on demand.** `generate-typings` produces `.pyi` stubs for the whole
   API so editors and type checkers understand every call.
-- **Python 3.9+**, tested on 3.9 and 3.14, and validated live against a real
-  TrueNAS 26.0 host.
+- **Python 3.9+**, tested on 3.9 and 3.13 across Linux, macOS and Windows, and
+  validated live against a real TrueNAS 26.0 host.
 
 ## Install
 
 ```bash
-pip install pytruenas          # once published to PyPI
-# or from a checkout:
-pip install .
+pip install pytruenas
 ```
 
-Optional extras: `pytruenas[ssh]` (remote shell + SFTP), `pytruenas[config]`
-(YAML CLI config), `pytruenas[codegen]` (`generate-typings`), `pytruenas[host]`
-(local network/packaging helpers).
+Optional extras: `pytruenas[ssh]` (SSH commands + the SFTP filesystem leg),
+`pytruenas[config]` (YAML CLI config), `pytruenas[codegen]`
+(`generate-typings`).
 
 ## Quickstart
 

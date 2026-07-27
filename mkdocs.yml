@@ -33,6 +33,7 @@ nav:
       - The API namespace: guide/api.md
       - Filesystem paths: guide/filesystem.md
       - Running commands: guide/commands.md
+      - Recipes: guide/recipes.md
       - CLI: guide/cli.md
       - Generating typings: guide/typings.md
   - API Reference:

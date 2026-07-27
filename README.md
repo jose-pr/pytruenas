@@ -15,22 +15,24 @@ through an attribute-style namespace, adds convenience helpers for the common
 create/update/upsert patterns, a remote-filesystem abstraction, an optional
 typings generator, and a small CLI for scripting host configuration.
 
+Running commands and reading files is delegated to
+[hostctl](https://github.com/jose-pr/hostctl): a client is a `hostctl` host, so
+`run()` and `path()` pick whichever transport a target actually offers rather
+than assuming one.
+
 ## Install
 
 ```sh
-pip install pytruenas          # once published to PyPI
-# or, from a checkout:
-pip install .
+pip install pytruenas
 ```
 
 Optional extras:
 
 | Extra | Enables |
 | ----- | ------- |
-| `pytruenas[ssh]` | Remote shell + SFTP filesystem backend (`asyncssh`) |
+| `pytruenas[ssh]` | SSH commands + the SFTP filesystem leg (`asyncssh`) |
 | `pytruenas[config]` | YAML config/targets file for the CLI (`pyyaml`) |
 | `pytruenas[codegen]` | `generate-typings` command (`jinja2`) |
-| `pytruenas[host]` | Local network-adapter / packaging helpers (`ifaddr`) |
 
 ## Quickstart
 
@@ -52,9 +54,35 @@ local = TrueNASClient()            # ws+unix:///var/run/middleware/middlewared.s
 print(local.api.system.info())
 ```
 
+### Commands and files
+
+`run()` and `path()` are inherited from `hostctl`, which selects a transport
+rather than assuming one:
+
+```python
+client = TrueNASClient("nas.example.com", api_key, shell="ssh://root@nas.example.com")
+
+client.run("zpool status", capture_output="stdout", encoding="utf-8").stdout
+client.path("/mnt/tank/notes.txt").read_text()
+
+client.capabilities      # {"run", "path"} -- what this target can actually do
+client.last_selection    # which transport served the last run(), and why
+```
+
+| target | commands | files |
+| --- | --- | --- |
+| on the NAS | `local` (plain `subprocess`) | `local` |
+| remote, SSH configured | `ssh`, then `webshell` | `sftp`, then `tnasws` |
+| remote, no SSH | `webshell` | `tnasws` |
+
+`webshell` runs commands over `/websocket/shell` — the same PTY the web UI's
+Shell page uses — so a host reachable on the API port but **not** on 22 (NAT, a
+firewall allowing only 443) can still run commands. Name providers explicitly
+with `executor=` / `path=` to force or exclude one.
+
 ### Credentials
 
-`TrueNASClient(target, creds)` accepts, for `creds`:
+`TrueNASClient(target, credentials)` accepts, for the second argument:
 
 - an **API key** string `"<id>-<64 chars>"`,
 - `"user:password"` (optionally `"user:password\n<otp>"`),
@@ -62,7 +90,9 @@ print(local.api.system.info())
 - a `(user, password)` tuple,
 - `None` / omitted → local socket auth.
 
-`Credentials.from_env()` reads `TN_CREDS`.
+`Credentials.from_env()` reads `TN_CREDS`. Credentials may also travel in the
+target (`wss://root:secret@nas`); an OTP follows the password after a newline,
+percent-encoded in a URI as `%0A`.
 
 ## CLI
 
@@ -94,12 +124,13 @@ pytruenas generate-typings --path truenasapi_typings/current nas.example.com
 ## Development
 
 ```sh
-py -3.14 -m venv .venv
-.venv/Scripts/python -m pip install -e .[dev]
-.venv/Scripts/python -m pytest
+py -3.14 -m venv .venv/3.14-nt-amd64
+.venv/3.14-nt-amd64/Scripts/python -m pip install -e ".[dev,ssh,config,codegen]"
+.venv/3.14-nt-amd64/Scripts/python -m pytest
 ```
 
-Supports Python 3.9+.
+Supports Python 3.9+. The `run()` tests need a POSIX shell and skip on Windows,
+so verify anything touching command or path dispatch on a real target.
 
 ## License
 
