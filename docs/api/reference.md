@@ -10,3 +10,5 @@ Generated from docstrings, organized by module:
   (`dumps`/`loads`), and `ClientException`/`ValidationErrors`.
 - **[Auth](auth.md)** — `Credentials` and the credential types.
 - **[Filesystem](fs.md)** — `LocalPath` / `TruenasPath`.
+- **[Host](host.md)** — `TrueNASHost` / `TrueNASConfig`, the transport
+  providers, and the web-shell executor.
