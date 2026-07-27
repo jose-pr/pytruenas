@@ -69,6 +69,15 @@ dependencies = [
     "pathlib_next[uri]>=0.8.2",
     "requests",
     "websocket-client",
+    # Generic host machinery: TrueNASHost is a hostctl PosixHost, and run()/
+    # path() are inherited from it. A hard import in pytruenas.host,
+    # pytruenas.providers, and pytruenas.webshell -- not optional.
+    #
+    # UNPINNED AND UNRELEASED: hostctl is not on PyPI yet, so this floor is a
+    # placeholder and `pip install pytruenas` cannot resolve it. Pin the real
+    # floor and cut a release only after hostctl publishes. Development uses a
+    # non-editable install from the sibling checkout; see .agents/AGENTS.md.
+    "hostctl",
 ]
 
 [project.optional-dependencies]

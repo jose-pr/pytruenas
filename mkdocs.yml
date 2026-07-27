@@ -42,6 +42,7 @@ nav:
       - JSON-RPC: api/jsonrpc.md
       - Auth: api/auth.md
       - Filesystem: api/fs.md
+      - Host: api/host.md
   - Changelog: changelog.md
 
 plugins:
