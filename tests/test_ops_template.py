@@ -18,7 +18,9 @@ def test_text_template_decodes_bytes():
 
 
 def test_render_basic_template_substitutes_dict():
-    out = render_basic_template("host=%{HOST} port=%{port}", {"host": "nas", "port": 443})
+    out = render_basic_template(
+        "host=%{HOST} port=%{port}", {"host": "nas", "port": 443}
+    )
     assert out == "host=nas port=443"
 
 

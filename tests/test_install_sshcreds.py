@@ -123,6 +123,6 @@ def test_configures_ssh_credentials_for_later_use(client):
 def test_does_not_overwrite_explicit_credentials(client):
     """A caller who configured their own SSH auth keeps it."""
     _wire(client)
-    client.shell = client.shell._replace(username="root", password="hunter2")
+    client.ssh_config = client.ssh_config._replace(username="root", password="hunter2")
     client.install_sshcreds()
     assert client._ssh_private_key() != PRIVATE_KEY

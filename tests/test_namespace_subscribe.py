@@ -16,7 +16,12 @@ def _client():
     client = MagicMock()
     client.logger = MagicMock()
     # websocket.subscribe echoes the event name so we can assert what was passed
-    client.websocket.subscribe.side_effect = lambda ev, cb=None, **kw: ("SUB", ev, cb, kw)
+    client.websocket.subscribe.side_effect = lambda ev, cb=None, **kw: (
+        "SUB",
+        ev,
+        cb,
+        kw,
+    )
     return client
 
 

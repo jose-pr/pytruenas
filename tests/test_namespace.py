@@ -157,7 +157,8 @@ def test_callback_receives_action_and_result():
     ns, _ = _namespace_with(existing=None, create_ret={"id": 99})
     seen = {}
     DbAction.CREATE.execute(
-        ns, ("username",),
+        ns,
+        ("username",),
         {"callback": lambda a, i, r: seen.update(action=a, result=r)},
         username="svc",
     )

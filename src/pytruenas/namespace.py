@@ -148,7 +148,9 @@ class DbAction(str, _enum.Enum):
 
         wait = opts.get("wait", True)
         if isinstance(result, int) and (wait is None or wait):
-            result = __namespace._client.api.core.job_wait(result, job=True, _timeout=None)
+            result = __namespace._client.api.core.job_wait(
+                result, job=True, _timeout=None
+            )
 
         result = _ty.cast(_T, result)
 
@@ -170,7 +172,7 @@ class Namespace:
         # embedding client. A plain dict is dropped with the instance.
         self._children: "dict[str, Namespace]" = {}
 
-    def __repr__(self) -> str:  # type:ignore
+    def __repr__(self) -> str:  # type: ignore
         return f"{self.__class__.__name__}({self._client._api}/{self._namespace.replace('.','/')})"
 
     def __str__(self) -> str:
@@ -224,7 +226,7 @@ class Namespace:
         last_exc: "_conn.ClientException | None" = None
         for attempt in range(attempts):
             try:
-                self._client.logger.trace(  # type:ignore
+                self._client.logger.trace(  # type: ignore
                     f"Calling method: {method} args: {args}"
                 )
                 return self._client.websocket.call(method, *args, **kwds)
@@ -262,7 +264,9 @@ class Namespace:
     def __getitem__(self, name: str) -> "Namespace":
         child = self._children.get(name)
         if child is None:
-            child = self._children[name] = Namespace(self._client, self._namespace, name)
+            child = self._children[name] = Namespace(
+                self._client, self._namespace, name
+            )
         return child
 
     def subscribe(
@@ -291,9 +295,7 @@ class Namespace:
                 "no event name: call subscribe() on a namespace "
                 "(client.api.alert.list.subscribe()) or pass event=..."
             )
-        return self._client.websocket.subscribe(
-            name, __callback, maxsize=maxsize
-        )
+        return self._client.websocket.subscribe(name, __callback, maxsize=maxsize)
 
     def _query(self, *__opts: dict | _q.Option, **filter):
         opts = _q.Option.options(*__opts)

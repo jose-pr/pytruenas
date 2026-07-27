@@ -65,13 +65,11 @@ def _write_runpath(directory):
         "        fh.write(json.dumps(entry) + '\\n')\n"
     )
     (flow / "01-first.py").write_text(
-        _recorder
-        + "def main(cmd, ctx):\n"
+        _recorder + "def main(cmd, ctx):\n"
         "    _record(['first', cmd.target, ctx.target, cmd.context])\n"
     )
     (flow / "02-second.py").write_text(
-        _recorder
-        + "def main(cmd):\n"
+        _recorder + "def main(cmd):\n"
         "    _record(['second', cmd.target, None, cmd.context])\n"
     )
     return flow

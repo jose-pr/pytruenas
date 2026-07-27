@@ -88,15 +88,13 @@ class Parameter:
     ):
 
         if isinstance(__schema, str):
-            schema = {
-                "type": __schema  # type:ignore
-            }
+            schema = {"type": __schema}  # type: ignore
         else:
             schema = __schema
 
         self.namespace = __namespace or _qn.PythonName("")
         self.schema = _ty.cast(_schema.Schema, schema or {})
-        self.schema.update(kwargs)  # type:ignore
+        self.schema.update(kwargs)  # type: ignore
 
     def argument_declaration(self, typeddicts: dict[str, object]):
         name = self.name
@@ -120,7 +118,7 @@ class Parameter:
 
     @property
     def name(self):
-        title = self.schema["title"]  # type:ignore
+        title = self.schema["title"]  # type: ignore
         # ``**fields``/``__selector`` keep their leading markers; the rest is
         # made a valid Python identifier (``query-filters`` -> ``query_filters``).
         if title.startswith("**") or title.startswith("__"):
@@ -183,7 +181,7 @@ class Method(PyDeclaration):
         self.clear_cache()
 
     @_ftools.cached_property
-    def qualname(self):  # type:ignore
+    def qualname(self):  # type: ignore
         return _qn.DotQualNamed(self.definition["name"])
 
     @property
@@ -194,7 +192,7 @@ class Method(PyDeclaration):
     @_ftools.cached_property
     def parameters(self) -> list[Parameter]:
         callparams = self.definition["schemas"]["properties"]["Call parameters"]
-        items = callparams["prefixItems"]  # type:ignore
+        items = callparams["prefixItems"]  # type: ignore
         params = []
         for item in items:
             params.append(Parameter(item, self.pyname.relative_to(self.pyname.parent)))
@@ -289,7 +287,9 @@ class Namespace(PyDeclaration):
         for method in self.methods():
             if method.qualname.name == "update":
                 fields = method.parameters[-4]
-                update_return = method.definition["schemas"]["properties"]["Return value"]
+                update_return = method.definition["schemas"]["properties"][
+                    "Return value"
+                ]
                 idtype = None
                 for param in method.parameters:
                     if param.name == "id":
@@ -320,7 +320,7 @@ class Namespace(PyDeclaration):
                                         {
                                             **fields.schema,
                                             "title": "**fields",
-                                            "_name": fields.name,  # type:ignore
+                                            "_name": fields.name,  # type: ignore
                                         },
                                     ],
                                     "items": True,
@@ -353,7 +353,7 @@ class Namespace(PyDeclaration):
                                             {
                                                 **fields.schema,
                                                 "title": "**fields",
-                                                "_name": fields.name,  # type:ignore
+                                                "_name": fields.name,  # type: ignore
                                             },
                                         ],
                                         "items": True,
@@ -367,7 +367,9 @@ class Namespace(PyDeclaration):
 
             elif method.qualname.name == "create":
                 fields = method.parameters[-4]
-                create_return = method.definition["schemas"]["properties"]["Return value"]
+                create_return = method.definition["schemas"]["properties"][
+                    "Return value"
+                ]
                 update = Method(
                     {
                         "name": "_create",
@@ -382,7 +384,7 @@ class Namespace(PyDeclaration):
                                         {
                                             **fields.schema,
                                             "title": "**fields",
-                                            "_name": fields.name,  # type:ignore
+                                            "_name": fields.name,  # type: ignore
                                         },
                                     ],
                                     "items": True,
@@ -428,7 +430,7 @@ class Namespace(PyDeclaration):
                                             "type": "object",
                                             "properties": props,
                                             "title": "**fields",
-                                            "_name": "get",  # type:ignore
+                                            "_name": "get",  # type: ignore
                                         },
                                     ],
                                     "items": True,

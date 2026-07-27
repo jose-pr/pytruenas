@@ -49,13 +49,18 @@ def test_path_selection_local_vs_remote():
 
     with patch.object(TrueNASClient, "_openwss", return_value=MagicMock()):
         with patch("requests.get") as rget:
-            rget.return_value = MagicMock(url="https://nas/api/current", status_code=400)
-            remote = TrueNASClient("nas.example.com", "1-" + "a" * 64,
-                                   autologin=False, sslverify=False)
+            rget.return_value = MagicMock(
+                url="https://nas/api/current", status_code=400
+            )
+            remote = TrueNASClient(
+                "nas.example.com", "1-" + "a" * 64, autologin=False, sslverify=False
+            )
     assert isinstance(remote.path("/mnt/tank/x"), TruenasPath)
 
 
-@pytest.mark.skipif(not _has_posix_shell(), reason="needs a POSIX shell (client.run execs via one)")
+@pytest.mark.skipif(
+    not _has_posix_shell(), reason="needs a POSIX shell (client.run execs via one)"
+)
 def test_run_local_subprocess():
     c = TrueNASClient(None, autologin=False)
     result = c.run("exit 0", executable=_posix_shell(), check=False)

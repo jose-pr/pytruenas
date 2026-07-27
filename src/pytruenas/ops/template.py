@@ -90,7 +90,7 @@ def render_basic_template(template: str, context: object | dict):
 
 class FileTarget(TemplateTarget):
 
-    def __init__(self, path: 'Path', baseline: bool = False):
+    def __init__(self, path: "Path", baseline: bool = False):
         if not isinstance(path, Path):
             raise ValueError(path)
         self.path = path
@@ -112,7 +112,7 @@ class FileTarget(TemplateTarget):
         if self._baseline:
             return self.baseline().read_bytes()
         return self.path.read_bytes()
-    
+
     def write(self, content) -> bool:
         if isinstance(content, str):
             content = content.encode()

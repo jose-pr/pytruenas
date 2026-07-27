@@ -6,6 +6,7 @@ selector falls through to the next one. These tests pin that, and pin the
 SFTP -> websocket ordering the selector reproduces.
 """
 
+import sys
 from unittest.mock import MagicMock
 
 import pytest
@@ -121,6 +122,44 @@ def test_middleware_executor_declines_remotely_without_dispatching():
 
 def test_middleware_executor_connect_is_a_noop_when_local():
     MiddlewareExecutorProvider(_client(True)).connect()
+
+
+def test_middleware_executor_declares_args_capability():
+    """Without ``args`` the whole invocation arrives as one string.
+
+    Regression: hostctl renders ``/bin/sh -c 'printf hi'`` and, for a provider
+    that cannot take argv, passes it as a *single* command. subprocess then
+    looks that entire string up as one literal filename and raises
+    FileNotFoundError. Declaring ``args`` makes the shell flavour split it into
+    a real argv (``["/bin/sh", "-c", "printf hi"]``).
+
+    This was caught only on a real POSIX target -- the Windows suite mocks the
+    host, so every run() test passed while the provider was broken.
+    """
+    provider = MiddlewareExecutorProvider(_client(True))
+    assert "args" in provider.capabilities
+
+
+def test_middleware_executor_uses_hostctl_local_executor():
+    """Dispatch must go through hostctl's executor, not a bare subprocess call.
+
+    LocalExecutor owns input normalization against the stream mode, the
+    extended capture_output convention, and the stdin/input conflict check.
+    Reimplementing those here is how the bytes-input deadlock reappeared once.
+    """
+    from hostctl.executor import LocalExecutor
+
+    provider = MiddlewareExecutorProvider(_client(True))
+    result = provider.execute(
+        sys.executable,
+        "-c",
+        "print('hi')",
+        capture_output=True,
+        check=False,
+        encoding="utf-8",
+    )
+    assert result.stdout.strip() == "hi"
+    assert isinstance(provider._executor, LocalExecutor)
 
 
 def test_middleware_executor_reads_legacy_client_target():

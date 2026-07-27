@@ -60,7 +60,12 @@ def test_parse_call_error_carries_errno():
     err = _parse_error(
         {
             "code": -32001,
-            "data": {"reason": "[EPERM] denied", "error": 1, "trace": None, "extra": []},
+            "data": {
+                "reason": "[EPERM] denied",
+                "error": 1,
+                "trace": None,
+                "extra": [],
+            },
         }
     )
     assert isinstance(err, ClientException)
