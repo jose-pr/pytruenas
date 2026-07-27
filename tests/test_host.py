@@ -13,11 +13,14 @@ import pytest
 
 pytest.importorskip("hostctl")
 
-from hostctl.host import HostConfig, PosixHost  # noqa: E402
+from hostctl.host import HostConfig, PosixHost, SshConfig  # noqa: E402
 from hostctl.shell import POSIX_SHELL  # noqa: E402
 
 from pytruenas.host import TrueNASConfig, TrueNASHost  # noqa: E402
 from pytruenas.providers import TnasWsPathProvider  # noqa: E402
+
+#: A minimal SSH leg, for the cases that need one to exist.
+SSH = SshConfig(host="nas")
 
 
 def _host(target="wss://nas", **options):
@@ -69,12 +72,78 @@ def test_without_ssh_the_webshell_stands_in():
     assert _names(host._path_selector.providers) == ["tnasws"]
 
 
-def test_webshell_can_be_turned_off():
-    """With it declined, a remote host without SSH has no executor at all."""
-    host = TrueNASHost(
-        TrueNASConfig.from_target("wss://nas", webshell=False), client=MagicMock()
-    )
+def _built(target="wss://nas", **options):
+    return TrueNASHost(TrueNASConfig.from_target(target, **options), client=MagicMock())
+
+
+# -- explicit provider overrides -------------------------------------------
+#
+# `executor=`/`path=` name the providers to use, in preference order. They
+# replaced a `webshell: bool` flag, which was only ever one hardcoded case of
+# this -- `executor=["ssh"]` says the same thing, and also expresses "SSH
+# only", "force the web shell", or any other combination.
+
+
+def test_executor_override_forces_a_single_provider():
+    host = _built(ssh=SSH, executor="ssh")
+    assert _names(host._executor_selector.providers) == ["ssh"]
+
+
+def test_path_override_forces_a_single_provider():
+    host = _built(ssh=SSH, path=["tnasws"])
+    assert _names(host._path_selector.providers) == ["tnasws"]
+
+
+def test_override_can_reorder_preference():
+    """Order is the caller's, not ours -- webshell can be made to outrank SSH."""
+    host = _built(ssh=SSH, executor=["webshell", "ssh"])
+    assert _names(host._executor_selector.providers) == ["webshell", "ssh"]
+
+
+def test_excluding_the_webshell_leaves_a_host_with_no_executor():
+    """What the old `webshell=False` did, now expressible without a flag."""
+    host = _built(executor=[])
     assert _names(host._executor_selector.providers) == []
+    assert "run" not in host.capabilities
+
+
+def test_override_can_add_tnasws_to_a_local_target():
+    """Forcing the websocket leg locally, e.g. to exercise it in a test.
+
+    It is not offered by default there -- `filesystem.get` routes reads through
+    the HTTP side channel, which a unix-socket client cannot reach -- but a
+    caller who wants it can ask.
+    """
+    host = _built(None, path=["local", "tnasws"])
+    assert _names(host._path_selector.providers) == ["local", "tnasws"]
+
+
+def test_unknown_provider_name_is_rejected():
+    """A typo must fail loudly, not compose a host with no executor."""
+    with pytest.raises(ValueError, match="unknown executor provider"):
+        _built(executor=["shh"])
+    with pytest.raises(ValueError, match="unknown path provider"):
+        _built(path=["sftpp"])
+
+
+def test_requesting_ssh_without_a_config_is_an_error():
+    """Better than silently yielding a host that cannot run anything."""
+    with pytest.raises(ValueError, match="no SSH configuration"):
+        _built(executor=["ssh"])
+    with pytest.raises(ValueError, match="no SSH configuration"):
+        _built(path=["sftp"])
+
+
+def test_ssh_providers_share_one_transport():
+    """Both legs must come from a single factory call.
+
+    Two transports would open two connections, only one of which is ever
+    closed -- which is why hostctl exposes them as a pair.
+    """
+    host = _built(ssh=SSH, executor=["ssh"], path=["sftp"])
+    executor = host._executor_selector.providers[0]
+    path = host._path_selector.providers[0]
+    assert executor.transport is path.transport
 
 
 def test_local_target_uses_only_hostctls_local_providers():
@@ -133,10 +202,10 @@ def test_remote_without_ssh_still_has_run_via_the_webshell():
     assert "path" in host.capabilities
 
 
-def test_remote_without_ssh_or_webshell_reports_no_run():
-    """With the web shell declined, the honest answer is still "no run"."""
+def test_remote_without_any_executor_reports_no_run():
+    """With every executor excluded, the honest answer is "no run"."""
     host = TrueNASHost(
-        TrueNASConfig.from_target("wss://nas", webshell=False), client=MagicMock()
+        TrueNASConfig.from_target("wss://nas", executor=[]), client=MagicMock()
     )
     assert "run" not in host.capabilities
     # Paths still work -- the websocket serves those.
