@@ -77,15 +77,27 @@ def test_webshell_can_be_turned_off():
     assert _names(host._executor_selector.providers) == []
 
 
-def test_local_target_uses_hostctls_local_providers():
-    """On the NAS, plain subprocess and plain local paths -- and first.
+def test_local_target_uses_only_hostctls_local_providers():
+    """On the NAS, plain subprocess and plain local paths -- and nothing else.
 
-    Reaching this machine through SSH, a PTY, or the filesystem API would be
-    slower and strictly less capable, so neither remote executor is even built.
+    No remote provider is built at all. `tnasws` in particular would be a
+    fallback that can only ever fail here: `filesystem.get` routes reads
+    through the HTTP side channel, which resolves to https://localhost and
+    trips the appliance's self-signed certificate.
     """
     host = TrueNASHost(TrueNASConfig.from_target(None), client=MagicMock())
     assert _names(host._executor_selector.providers) == ["local"]
-    assert _names(host._path_selector.providers) == ["local", "tnasws"]
+    assert _names(host._path_selector.providers) == ["local"]
+
+
+def test_local_target_ignores_an_ssh_config():
+    """SSH to reach the machine you are already on is never the right answer."""
+    from hostctl.host import SshConfig
+
+    config = TrueNASConfig.from_target(None, ssh=SshConfig(host="nas"))
+    host = TrueNASHost(config, client=MagicMock())
+    assert _names(host._executor_selector.providers) == ["local"]
+    assert _names(host._path_selector.providers) == ["local"]
 
 
 def test_with_ssh_the_ssh_providers_come_first():

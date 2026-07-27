@@ -117,14 +117,18 @@ Transports are *composed*, and the order is deliberate:
 | | local target | remote + SSH | remote, no SSH |
 | --- | --- | --- | --- |
 | executors | `local` | `ssh`, `webshell` | `webshell` |
-| paths | `local`, `tnasws` | `sftp`, `tnasws` | `tnasws` |
+| paths | `local` | `sftp`, `tnasws` | `tnasws` |
 
 **`local`** is hostctl's stock pair (`LocalExecutor` + a plain local path) —
 pytruenas adds nothing. A target reached over the middleware unix socket *is*
 this machine, so a command is a plain `subprocess` call and a path is a plain
-local path; going through SSH, a PTY, or the filesystem API to reach the same
-box would be slower and strictly less capable. Hence it is first, and the
-remote providers are not even built for a local target.
+local path.
+
+A local target composes **only** that pair: no remote provider is built at all,
+since every one of them is a way of reaching a machine somewhere else. `tnasws`
+in particular would be a fallback that could only ever fail there —
+`filesystem.get` routes reads through the HTTP side channel, which resolves to
+`https://localhost` and trips the appliance's self-signed certificate.
 
 **`webshell`** runs commands over `/websocket/shell` — the same PTY the web
 UI's Shell page drives. It exists for a host reachable on the API port but not
