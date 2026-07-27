@@ -33,7 +33,14 @@ class _FakeConfig:
 
 
 def _client(is_local=False):
-    client = MagicMock()
+    """A stand-in TrueNASClient.
+
+    ``spec`` matters: a bare MagicMock auto-creates *every* attribute, including
+    ``.client``, which the providers use to tell a host from a client. Without
+    it a fake client would be mistaken for a host and unwrapped into its own
+    auto-created child mock.
+    """
+    client = MagicMock(spec=["config", "_api", "api", "run", "path"])
     client.config = _FakeConfig(is_local)
     return client
 
@@ -65,6 +72,60 @@ def test_ws_path_capabilities_exclude_what_the_api_cannot_do():
     # ...but the ordinary surface is claimed.
     for present in ("stat", "read", "write", "mkdir", "unlink", "rmdir"):
         assert present in WS_PATH_CAPABILITIES
+
+
+def test_ws_path_provider_unwraps_a_host(monkeypatch):
+    """A TrueNASHost passes *itself*; the fs layer needs the client.
+
+    Regression: the host builds its providers with `self` (the client is
+    created lazily from the host's own config), so a provider that assumed it
+    held a client raised `AttributeError: no attribute '_api'` on the first
+    `host.path(...)`. Caught only on a live target.
+    """
+    import pytruenas.fs as fs
+    from pathlib_next import LocalPath
+
+    seen = {}
+
+    def fake_path(client, *segments, backend=None):
+        seen["client"] = client
+        return LocalPath("/etc/hostname")
+
+    monkeypatch.setattr(fs, "path", fake_path)
+
+    inner = _client()
+    host_like = MagicMock()
+    host_like.client = inner
+    host_like.config = _FakeConfig(False)
+
+    TnasWsPathProvider(host_like).path("/etc/hostname")
+    assert seen["client"] is inner
+
+
+def test_ws_path_provider_uses_local_paths_for_a_local_target(monkeypatch):
+    """A local target must not be served through the middleware.
+
+    Regression: `filesystem.get` routes reads through the HTTP side channel,
+    which a unix-socket client cannot reach (it resolves to https://localhost
+    and fails the appliance's self-signed cert). A path on the same machine is
+    a plain local path.
+    """
+    import pytruenas.fs as fs
+    from pathlib_next import LocalPath
+
+    seen = {}
+
+    def fake_path(client, *segments, backend=None):
+        seen["backend"] = backend
+        return LocalPath("/etc/hostname")
+
+    monkeypatch.setattr(fs, "path", fake_path)
+
+    TnasWsPathProvider(_client(is_local=True)).path("/etc/hostname")
+    assert seen["backend"] == "local"
+
+    TnasWsPathProvider(_client(is_local=False)).path("/etc/hostname")
+    assert seen["backend"] == "ws"
 
 
 def test_ws_path_provider_builds_a_ws_path(monkeypatch):

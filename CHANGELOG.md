@@ -4,6 +4,55 @@ All notable changes to this project are documented here. The format is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+Rebases pytruenas' generic host machinery onto [hostctl], keeping only the
+TrueNAS-specific parts here. **Release is blocked on hostctl's own release.**
+
+### Changed
+
+- **BREAKING: `TrueNASClient.shell` is now `.ssh_config`.** hostctl's
+  `Host.shell` is the *bound shell object* (`host.shell.run(...)`), so keeping
+  a connection target under that name would collide with it for every consumer
+  of the host API. The constructor argument is still spelled `shell=`.
+- **`.run()` and `.path()` now select a transport rather than branching.**
+  Which one serves a call is chosen from the available providers — SSH first
+  when `.ssh_config` names a host, then the middleware — and
+  `.host.last_selection` records what was tried and why. Previously `.run()`
+  hard-coded a local-vs-SSH branch and `TruenasPath` hand-rolled its
+  SFTP→websocket fallback.
+- **A remote target with no SSH now reports no `run` capability**, instead of
+  failing when a command is attempted. The TrueNAS JSON-RPC API exposes no
+  remote command execution (verified against 26.0.0-BETA.1: of 781 methods only
+  `core.resize_shell` and `user.shell_choices` are shell-adjacent, and the
+  former only resizes an already-open session). This makes the pre-existing
+  situation visible rather than changing it.
+- **The scheme/API-path probe moved from construction to first connect.**
+  `TrueNASClient("bad-host")` now constructs successfully and raises on first
+  use. Configs are therefore buildable offline, which is what `HostConfig`
+  requires.
+
+### Added
+
+- **`pytruenas.host`** — `TrueNASConfig` (a `hostctl.host.HostConfig`) and
+  `TrueNASHost` (a `PosixHost`). `HostConfig("truenas+wss://nas")` resolves
+  through hostctl's registry; every connection string `TrueNASClient` accepts
+  still works, normalized to a `truenas+*` scheme.
+- **`pytruenas.providers`** — `TnasWsPathProvider` and
+  `MiddlewareExecutorProvider`.
+- **`Credentials.from_host_credentials()`** — maps hostctl's already-parsed
+  credential mapping (including a URI-supplied OTP) onto a `Credentials`
+  subclass, with no second round of string parsing.
+- **`TrueNASClient.host`** — the backing `TrueNASHost`, built lazily.
+- `black` in the `dev` extra, pinned to the 3.9 floor.
+
+### Removed
+
+- ~190 lines of generic host machinery from `client.py`: shell quoting, the
+  local-vs-SSH branch in `run()`, the asyncssh connection, and `_shellquote`.
+
+[hostctl]: https://github.com/jose-pr/hostctl
+
 ## [0.1.1] - 2026-07-24
 
 ### Changed
