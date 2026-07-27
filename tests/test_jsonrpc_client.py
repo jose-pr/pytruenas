@@ -11,8 +11,13 @@ import time
 
 import pytest
 
-from pytruenas import jsonrpc
-from pytruenas.jsonrpc import CallTimeout, Client, ClientException, ValidationErrors
+from pytruenas import connection as jsonrpc
+from pytruenas.connection import (
+    CallTimeout,
+    ClientException,
+    TrueNASWSConnection as Client,
+    ValidationErrors,
+)
 
 
 class _FakeWS:
@@ -166,7 +171,7 @@ def test_unexpected_kwarg_is_logged_not_swallowed(caplog):
     fake.responder = lambda req: {"jsonrpc": "2.0", "id": req["id"], "result": 1}
     c = _client_with(fake)
     try:
-        with caplog.at_level(logging.DEBUG, logger="pytruenas.jsonrpc"):
+        with caplog.at_level(logging.DEBUG, logger="pytruenas.connection"):
             assert c.call("core.ping", nonsense_kwarg=1) == 1
         assert any("nonsense_kwarg" in r.message for r in caplog.records)
     finally:

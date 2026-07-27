@@ -1,6 +1,6 @@
 """Namespace attribute proxy + DbAction (create/update/upsert/get) logic.
 
-All mocked at ``client.websocket.call`` -- no server. Exercises the method
+All mocked at ``client.conn.call`` -- no server. Exercises the method
 name-building, the ``_query``/``_get`` filter shaping, and the
 create/update/upsert decision tree in ``DbAction.execute``.
 """
@@ -29,19 +29,19 @@ def test_attribute_access_builds_dotted_method():
 
 def test_call_invokes_websocket_with_method_name():
     client = _client()
-    client.websocket.call.return_value = [{"id": 1}]
+    client.conn.call.return_value = [{"id": 1}]
     ns = Namespace(client, "user")
     result = ns.query([], {})
     assert result == [{"id": 1}]
-    method = client.websocket.call.call_args[0][0]
+    method = client.conn.call.call_args[0][0]
     assert method == "user.query"
 
 
 def test_query_builds_filters_from_kwargs():
     client = _client()
-    client.websocket.call.return_value = []
+    client.conn.call.return_value = []
     Namespace(client, "user")._query(username="root", uid=q.GT(0))
-    method, filters, opts = client.websocket.call.call_args[0]
+    method, filters, opts = client.conn.call.call_args[0]
     assert method == "user.query"
     assert ("username", "=", "root") in filters
     assert ("uid", ">", 0) in filters
@@ -49,18 +49,18 @@ def test_query_builds_filters_from_kwargs():
 
 def test_get_by_id_uses_get_instance():
     client = _client()
-    client.websocket.call.return_value = {"id": 7, "username": "svc"}
+    client.conn.call.return_value = {"id": 7, "username": "svc"}
     got = Namespace(client, "user")._get(7)
     assert got == {"id": 7, "username": "svc"}
-    assert client.websocket.call.call_args[0][0] == "user.get_instance"
+    assert client.conn.call.call_args[0][0] == "user.get_instance"
 
 
 def test_get_by_filter_uses_query_limit_1():
     client = _client()
-    client.websocket.call.return_value = [{"id": 7, "username": "svc"}]
+    client.conn.call.return_value = [{"id": 7, "username": "svc"}]
     got = Namespace(client, "user")._get(username="svc")
     assert got == {"id": 7, "username": "svc"}
-    assert client.websocket.call.call_args[0][0] == "user.query"
+    assert client.conn.call.call_args[0][0] == "user.query"
 
 
 def test_get_id_and_filter_together_raises():
@@ -133,7 +133,7 @@ def test_create_action_on_existing_id_raises_exists():
 
 
 def test_create_maps_already_exists_validation_to_file_exists():
-    from pytruenas import _conn
+    from pytruenas import connection as _conn
 
     ns, _ = _namespace_with()
     err = _conn.ValidationErrors.__new__(_conn.ValidationErrors)

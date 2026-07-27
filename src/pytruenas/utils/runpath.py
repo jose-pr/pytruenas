@@ -43,7 +43,7 @@ import typing as _ty
 from logging import Logger as _Logger
 
 from .cmd import PyTrueNASArgs, register_targets
-from ..client import TrueNASClient
+from ..host import TrueNASHost as TrueNASClient
 
 __all__ = ["default_init", "PyTrueNASRunPathArgs"]
 

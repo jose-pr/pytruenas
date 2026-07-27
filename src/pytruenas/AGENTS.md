@@ -7,13 +7,14 @@ project overview and CLI usage, see the project overview doc at the repo root.
 
 ## Package root (`pytruenas`)
 
-`__all__ = ["Namespace", "TrueNASClient", "Credentials", "Event", "Subscription", "__version__"]`
+`__all__ = ["Namespace", "TrueNASClient", "TrueNASHost", "TrueNASConfig",
+"Credentials", "Event", "Subscription", "TrueNASWSConnection", "__version__"]`
 
 - **`__version__: str`** — resolved from installed package metadata
   (`importlib.metadata`); `"0.0.0.dev0"` when run from a bare checkout with the
   package not installed.
 
-## `TrueNASClient` (`pytruenas.client`)
+## `TrueNASClient` (`pytruenas.host`)
 
 **`TrueNASClient` is `TrueNASHost`** — one class, two names. They were briefly
 two objects forwarding halves of their surface to each other (`client.run()`
@@ -33,7 +34,7 @@ ssh=None, ...)`
   constructor — building a client performs no network I/O.
 - **`credentials`** (positional as `creds` historically) — passed to
   `Credentials(...)` (below); `None` means local-socket auth (no login call).
-- **`autologin`** (default `True`) — the first `.websocket` access calls
+- **`autologin`** (default `True`) — the first `.conn` access calls
   `.login()` automatically when there's no live connection.
 - **`sslverify`** (default `True`) — TLS certificate verification for `wss://`
   and the HTTP(S) side channels (upload/download probing).
@@ -50,7 +51,8 @@ ssh=None, ...)`
 
 - **`.api`** (`cached_property`) — the root `Namespace` for this client
   (`client.api.<namespace>.<method>(...)`).
-- **`.websocket`** — the live `jsonrpc.Client`; connects (and logs in, if
+- **`.conn`** (alias `.websocket`) — the live
+  `connection.TrueNASWSConnection`; connects (and logs in, if
   `autologin`) on first access, reconnects if the prior connection closed.
 - **`.ssh`** — a lazily-opened `asyncssh` connection (requires the `ssh`
   extra), reached through the composed SSH transport. Raises if none is
@@ -101,13 +103,13 @@ ssh=None, ...)`
 - **`.download(method, *args, filename=None, buffered=False, wait=True,
   **kwargs)`** — call `method` to get a download link/job, fetch it over
   HTTP(S), and return the bytes (when `wait=True`) or the job id.
-- **`.subscribe(event, callback=None, *, maxsize=1000) -> jsonrpc.Subscription`**
+- **`.subscribe(event, callback=None, *, maxsize=1000) -> connection.Subscription`**
   — subscribe to a middleware collection event over the live websocket.
   `client.subscribe("alert.list")` is shorthand for
   `client.api.alert.list.subscribe()`. Consume via the returned subscription's
   `.events(timeout=None)` iterator and/or the inline `callback`. Bound to the
   current connection; does **not** survive a reconnect (the `events()` iterator
-  ends on disconnect — that's the re-subscribe signal). See `jsonrpc` below.
+  ends on disconnect — that's the re-subscribe signal). See `connection` below.
 - **`.dump_api() -> dict`** — run `middlewared --dump-api` on the target and
   return the parsed JSON (see `pytruenas.models.apidump.Api`).
 - **`.install_sshcreds(name=None, private_key=None)`** — generate/reuse an SSH
@@ -214,12 +216,12 @@ than the dunder-safe helpers below raise `AttributeError` normally.
   - **`_filetransfer`** — `True` routes through `client.download`; bytes/a
     readable routes through `client.upload`.
 - **`.subscribe(callback=None, *, event=None, maxsize=1000) ->
-  jsonrpc.Subscription`** — subscribe to this namespace's collection event; the
+  connection.Subscription`** — subscribe to this namespace's collection event; the
   event name defaults to the namespace's dotted path
   (`client.api.alert.list.subscribe()` -> `alert.list`), or pass `event=` to
   override (e.g. from `client.api`). A **real method**, so it shadows any
   middleware method literally named `subscribe`; reach such a method via
-  `ns(_method="subscribe", ...)`. See `jsonrpc.Subscription`/`Event` above.
+  `ns(_method="subscribe", ...)`. See `connection.Subscription`/`Event` above.
 - **`._query(*opts, **filter) -> list[dict]`** — calls `<namespace>.query`
   with filters built from `**filter` kwargs (equality by default; wrap a value
   in `EQ`/`NE`/`RE`/`GT`/`GE`/`LT`/`LE`/`IN`/`NIN` from `pytruenas.utils.query`
@@ -241,7 +243,7 @@ than the dunder-safe helpers below raise `AttributeError` normally.
   `update_exclude`/`create_exclude` (field names to drop for that path),
   `wait` (wait on a returned job id; default `True`), `force`.
 
-## `jsonrpc` (`pytruenas.jsonrpc`)
+## `connection` (`pytruenas.connection`)
 
 The synchronous JSON-RPC 2.0 websocket transport backing `TrueNASClient`
 (re-exported as `pytruenas._conn`). All annotations are quoted so the module
@@ -503,7 +505,7 @@ TypedDict schemas only (no runtime behavior); import the submodules directly.
 
 - **`TN_CREDS`** — read by `Credentials.from_env()`.
 - **`CALL_TIMEOUT`** — default per-call JSON-RPC timeout in seconds (read at
-  import time by `pytruenas.jsonrpc`).
+  import time by `pytruenas.connection`).
 - **`PYTRUENAS_CFG`** — default path for the CLI's `--config` (YAML).
 - **`PYTRUENAS_PATH`** — `os.pathsep`-separated extra command source(s) for
   CLI discovery.

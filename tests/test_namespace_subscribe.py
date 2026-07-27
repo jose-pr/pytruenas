@@ -1,6 +1,6 @@
 """Namespace / client subscribe surface (Phase 2 of event subscriptions).
 
-Mocked at ``client.websocket.subscribe`` -- no server. Exercises event-name
+Mocked at ``client.conn.subscribe`` -- no server. Exercises event-name
 derivation from the namespace path and the ``event=`` override; the routing and
 queue mechanics live in test_jsonrpc_client.py.
 """
@@ -16,7 +16,7 @@ def _client():
     client = MagicMock()
     client.logger = MagicMock()
     # websocket.subscribe echoes the event name so we can assert what was passed
-    client.websocket.subscribe.side_effect = lambda ev, cb=None, **kw: (
+    client.conn.subscribe.side_effect = lambda ev, cb=None, **kw: (
         "SUB",
         ev,
         cb,
@@ -30,7 +30,7 @@ def test_subscribe_derives_event_name_from_namespace_path():
     ns = Namespace(client, "alert", "list")
     sub = ns.subscribe()
     # the namespace's dotted path is the event name
-    assert client.websocket.subscribe.call_args[0][0] == "alert.list"
+    assert client.conn.subscribe.call_args[0][0] == "alert.list"
     assert sub[1] == "alert.list"
 
 
@@ -39,7 +39,7 @@ def test_subscribe_passes_callback_and_maxsize():
     cb = lambda ev: None
     ns = Namespace(client, "reporting", "realtime")
     ns.subscribe(cb, maxsize=10)
-    args, kwargs = client.websocket.subscribe.call_args
+    args, kwargs = client.conn.subscribe.call_args
     assert args[0] == "reporting.realtime"
     assert args[1] is cb
     assert kwargs["maxsize"] == 10
@@ -50,7 +50,7 @@ def test_subscribe_event_override():
     # from a different namespace, subscribe to an explicit event name
     ns = Namespace(client, "something")
     ns.subscribe(event="alert.list")
-    assert client.websocket.subscribe.call_args[0][0] == "alert.list"
+    assert client.conn.subscribe.call_args[0][0] == "alert.list"
 
 
 def test_subscribe_on_root_without_event_raises():
@@ -70,10 +70,10 @@ def test_subscribe_is_a_real_method_not_a_child_namespace():
 
 
 def test_client_level_subscribe_delegates_to_websocket():
-    from pytruenas.client import TrueNASClient
+    from pytruenas import TrueNASClient
 
     client = MagicMock(spec=TrueNASClient)
     # call the real method against a mock self
     TrueNASClient.subscribe(client, "alert.list", None)
-    client.websocket.subscribe.assert_called_once()
-    assert client.websocket.subscribe.call_args[0][0] == "alert.list"
+    client.conn.subscribe.assert_called_once()
+    assert client.conn.subscribe.call_args[0][0] == "alert.list"
