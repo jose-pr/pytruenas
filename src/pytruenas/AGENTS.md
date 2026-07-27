@@ -31,6 +31,7 @@ shell=None, logger=None, fsbackend="auto", version="current")`
   and the HTTP(S) side channels (upload/download probing).
 - **`shell`** — connection string for the SSH/local shell used by `.run()`;
   defaults to the API target's host over SSH (remote) or local exec (local).
+  Stored as **`.ssh_config`** (renamed from `.shell` — see below).
 - **`fsbackend`** — default backend for `.path()`: `"auto"` (local when the
   client is local, else `TruenasPath`), `"local"`, `"ws"`/`"api"`, or
   `"truenas"`.
@@ -44,7 +45,13 @@ shell=None, logger=None, fsbackend="auto", version="current")`
 - **`.websocket`** — the live `jsonrpc.Client`; connects (and logs in, if
   `autologin`) on first access, reconnects if the prior connection closed.
 - **`.ssh`** — a lazily-opened `asyncssh` connection (requires the `ssh`
-  extra) built from `.shell`.
+  extra) built from `.ssh_config`.
+- **`.ssh_config`** — the SSH/local connection target for `.run()` and the SFTP
+  leg of `.path()`. **Renamed from `.shell`**: `.shell` now means what it means
+  everywhere in `hostctl` — the *bound shell object* (`host.shell.run(...)`) —
+  so the old name would collide for anyone using the host API.
+- **`.host`** — the `TrueNASHost` backing this client (built lazily; see
+  below). `.run()`/`.path()` delegate to it.
 - **`.logger`** — a `logging.Logger` (default: `logging.getLogger("pytruenas")`).
 
 ### Methods
@@ -63,19 +70,16 @@ shell=None, logger=None, fsbackend="auto", version="current")`
 - **`.path(*path, backend=None)`** — build a `pathlib_next` path rooted at
   `path` for this client; `backend` overrides `.fsbackend` for this call. See
   `pytruenas.fs`.
-- **`.run(*cmds, bufsize=-1, executable=None, stdin=None, stdout=None,
-  stderr=None, cwd=None, env=None, capture_output=True, check=True,
-  encoding=None, errors=None, input=None, timeout=None, loglevel=TRACE) ->
-  subprocess.CompletedProcess`** — run a shell command locally or over SSH
-  (per `.shell.scheme`). Each positional `cmd` is either a string (used
-  as-is) or a sequence (shell-quoted and joined); commands are `;`-joined into
-  one script run via `<executable> -c <script>`. `executable` defaults to
-  root's login shell (looked up locally via `pwd`, or remotely via
-  `user._get(username="root")["shell"]`), falling back to `/bin/bash`.
-  **Gotcha**: when `encoding`/`errors` is set, a `str` `input` is passed
-  through as `str` (subprocess encodes it itself) rather than pre-encoded to
-  bytes — pre-encoding there crashes because `subprocess.run` calls
-  `.encode()` on what it thinks is still text.
+- **`.run(*cmds, **kwargs) -> subprocess.CompletedProcess`** — run commands on
+  the target. Delegates to `.host.run()`, i.e. `hostctl.host.Host.run`; see
+  that for the full signature (`stdin`/`stdout`/`stderr`, `cwd`, `env`,
+  `capture_output`, `check`, `encoding`/`errors`, `input`, `timeout`, `text`).
+  Each positional `cmd` is a string (verbatim shell text), a sequence (one
+  quoted argv command), or a leading path object (a direct executable).
+  **Which transport runs it is selected, not fixed**: SSH first when
+  `.ssh_config` names a host, then the local middleware socket. A *remote*
+  target with no SSH has **no `run` capability at all** — the JSON-RPC API
+  exposes no remote command execution — and `.host.capabilities` says so.
 - **`.upload(file, method, *params, token=None, wait=True, **kwargs)`** —
   upload `file` (`str`/`bytes`) via the middleware's `/_upload` HTTP side
   channel, then call `method(*params, **kwargs)` server-side with it; waits on
@@ -95,8 +99,36 @@ shell=None, logger=None, fsbackend="auto", version="current")`
   return the parsed JSON (see `pytruenas.models.apidump.Api`).
 - **`.install_sshcreds(name=None, private_key=None)`** — generate/reuse an SSH
   keypair via `keychaincredential`, install the public half on `root`'s
-  `authorized_keys`, and configure `.shell` to use it. Requires the `ssh`
-  extra.
+  `authorized_keys`, and configure `.ssh_config` to use it. Returns the private
+  key. Requires the `ssh` extra. On a `TrueNASHost` the key lands on a real
+  `SshConfig.client_keys` and the providers are rebuilt, so a host that had no
+  executor gains one.
+
+## `TrueNASHost` / `TrueNASConfig` (`pytruenas.host`)
+
+`TrueNASHost` is a `hostctl.host.PosixHost`: `run`, `path`, `spawn`, `info`,
+`connect`, `close`, `shell`, `capabilities`, and `last_selection` are all
+inherited, and it adds the middleware surface (`api`, `websocket`, `login`,
+`logout`, `me`, `ping`, `subscribe`, `upload`, `download`, `dump_api`,
+`install_sshcreds`).
+
+Transports are *composed*, and the order is deliberate:
+
+| | with SSH | without SSH |
+| --- | --- | --- |
+| executors | `ssh`, `middleware` | `middleware` (local only) |
+| paths | `sftp`, `tnasws` | `tnasws` |
+
+`TrueNASConfig` is the `hostctl.host.HostConfig`. It accepts every connection
+string `TrueNASClient` does and normalizes to a `truenas+*` scheme
+(`truenas+auto`, `+ws`, `+wss`, `+unix`); `HostConfig("truenas+wss://nas")`
+works from hostctl's own registry. Constructing one performs **no network
+I/O** — the ws-vs-wss and API-path probes happen on first connect, not in the
+constructor.
+
+An OTP travels in the URI password field after a newline
+(`wss://root:pw%0Aotp:123456@nas`); a raw newline works too on recent hostctl.
+Unknown credential names are rejected rather than silently dropped.
 
 Generic type parameter `ApiVersion` (bound to `Namespace`) lets a consumer
 annotate `client: TrueNASClient[Current]` (from generated typings) for
@@ -255,7 +287,7 @@ module-level `path(client, *segments, backend=None)` is what it delegates to.
 - **`TruenasPath`** (`pytruenas.fs.truenas`) — subclasses `TnasWsPath`;
   `unlink`/`rmdir`/`rename`/`symlink_to`/`readlink`/`resolve` try an SFTP leg
   first (via `pathlib_next`'s `SftpPath`, requires the `ssh` extra +
-  `client.shell` host) and fall back to `TnasWsPath`'s websocket behavior (or
+  `client.ssh_config` host) and fall back to `TnasWsPath`'s websocket behavior (or
   raise `NotImplementedError` for ops SFTP alone can do — rename, symlink_to,
   readlink). `symlink_to(..., force=False, onremove=None)` adds a
   pytruenas-specific convenience: `force` (bool, a file-type string, or a set

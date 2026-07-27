@@ -93,10 +93,35 @@ class TnasWsPathProvider(_PathProvider):
             capabilities=WS_PATH_CAPABILITIES,
         )
 
+    @property
+    def _client(self):
+        """The client whose websocket serves these paths.
+
+        A ``TrueNASHost`` passes *itself* here (the two are built together, and
+        the client is created lazily from the host's config), so unwrap it:
+        ``pytruenas.fs.path`` needs the client, not the host.
+        """
+        client = self.client
+        host_client = getattr(client, "client", None)
+        return host_client if host_client is not None else client
+
     def _make_path(self, *segments: object) -> "Path":
         from .fs import path as _make
 
-        return _make(self.client, *segments, backend="ws")
+        # A local target is served straight off the filesystem: going through
+        # the middleware for a path on the same machine adds a websocket
+        # round-trip, and `filesystem.get` routes reads through the HTTP side
+        # channel, which cannot reach a unix-socket client at all.
+        backend = "local" if self._is_local else "ws"
+        return _make(self._client, *segments, backend=backend)
+
+    @property
+    def _is_local(self) -> bool:
+        config = getattr(self.client, "config", None)
+        if config is not None and hasattr(config, "is_local"):
+            return bool(config.is_local)
+        api = getattr(self._client, "_api", None)
+        return bool(getattr(api, "is_local", False))
 
     def probe(self) -> _ProviderProbe:
         return _ProviderProbe("available", capabilities=self.capabilities)
@@ -130,10 +155,12 @@ class MiddlewareExecutorProvider(_ExecutorProvider):
 
     @property
     def _is_local(self) -> bool:
+        # A TrueNASHost carries `.config`; a bare client carries the parsed
+        # target as `._api`. Accept either, since the host builds this provider
+        # with itself before its client exists.
         config = getattr(self.client, "config", None)
         if config is not None and hasattr(config, "is_local"):
             return bool(config.is_local)
-        # Pre-migration clients still carry the parsed Target directly.
         api = getattr(self.client, "_api", None)
         return bool(getattr(api, "is_local", False))
 
