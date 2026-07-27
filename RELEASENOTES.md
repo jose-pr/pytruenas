@@ -6,6 +6,84 @@ user-facing; this file is the durable record.
 
 ---
 
+## [0.2.0] - 2026-07-27
+
+### What changed
+
+pytruenas stops maintaining its own generic host machinery and inherits it from
+[hostctl](https://github.com/jose-pr/hostctl). What stays here is the part no
+other host has: the middleware JSON-RPC websocket, the typed `api` namespace,
+login/2FA, subscriptions, and the upload/download side channels. Roughly 190
+lines of shell quoting, local-vs-SSH branching, asyncssh lifecycle and
+path-backend selection are gone, replaced by `TrueNASHost(PosixHost)` composing
+transports that hostctl selects between.
+
+The user-facing shape is deliberately unchanged: `TrueNASClient("wss://nas")`
+works exactly as before, and every connection string it ever accepted — bare
+host, `host:port`, `ws`/`wss`, `http`/`https`, the unix socket, `None` — still
+resolves. The breaks are `.shell` (now the bound shell object, with the SSH
+target on `.config.ssh`) and the `jsonrpc` → `connection` module rename.
+
+### Why the transports became providers
+
+The old `run()` was a hard `if local: subprocess else: ssh` branch, and
+`TruenasPath` hand-rolled its own "try SFTP, fall back to the websocket"
+fallback. Both are now provider lists that hostctl's selector orders and fails
+over, which bought three things the branch could not:
+
+- **`.capabilities`** — a host that genuinely cannot run commands says so up
+  front instead of raising halfway through a call.
+- **`.last_selection`** — a redacted trace of what was tried and why.
+- **A place to add a transport.** Which is what made the web shell possible.
+
+### The web shell
+
+Investigating "can a remote host without SSH run anything?" turned up a real
+gap: the JSON-RPC API exposes **no** remote command execution. Of 781 methods
+on 26.0.0-BETA.1, only `core.resize_shell` and `user.shell_choices` are
+shell-adjacent, and the former merely resizes an already-open session. So a
+host behind NAT, or a firewall allowing only 443, had no `run()` at all.
+
+`middlewared` also serves `/websocket/shell` — the PTY the web UI's Shell page
+drives — which is a real command channel on the same port. It is now a provider,
+ordered after SSH because a PTY merges stdout and stderr and takes no piped
+input. Verified live: correct exit codes, multi-line output, and stdin through
+pipes and here-strings.
+
+Two things about that endpoint cost real time and are recorded so nobody pays
+twice:
+
+- **It is `/websocket/shell`, not `/_shell`.** The latter is the internal path
+  on middlewared's own port. Connecting to it on 443 does not fail cleanly —
+  nginx serves the web UI there, returns 200 instead of a websocket 400,
+  `websocket-client` follows the redirect, and rejects its own `https://`
+  target with `ValueError: scheme https is invalid`.
+- **Input must be sent as binary frames.** The server writes `msg.data`
+  straight to the pty fd; a text frame delivers `str`, `os.write` raises on the
+  worker thread, and the connection resets with no error message.
+
+### Validation
+
+Windows cannot verify `run()` — those tests are `skipif(not
+_has_posix_shell())` and skip there. Everything touching command or path
+dispatch was therefore checked against a live TrueNAS 26.0.0-BETA.1 box, which
+caught three bugs the full Windows suite passed over: a provider missing the
+`args` capability (so the whole invocation arrived as one literal filename), a
+path provider that assumed it held a client rather than a host, and a local
+target routed through the HTTP side channel it cannot reach.
+
+358 tests pass on both 3.14 and the 3.9 floor.
+
+### Upstream
+
+Four findings were filed against hostctl during the migration and fixed there
+before this release: a URI password's raw newline being silently swallowed
+(taking an OTP with it), `run(input=<bytes>, encoding=...)` deadlocking rather
+than raising, the SSH provider factories being unexported, and the URI helpers
+for third-party configs being private.
+
+---
+
 ## [0.1.1] - 2026-07-24
 
 ### What changed

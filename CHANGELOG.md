@@ -4,23 +4,28 @@ All notable changes to this project are documented here. The format is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.2.0] - 2026-07-27
 
 Rebases pytruenas' generic host machinery onto [hostctl], keeping only the
-TrueNAS-specific parts here. **Release is blocked on hostctl's own release.**
+TrueNAS-specific parts here: the middleware websocket, the `api` namespace,
+login/2FA, subscriptions, and the upload/download side channels. Everything
+else — shell quoting, transport selection, the asyncssh lifecycle, path
+backends — is now inherited.
+
+**Requires `hostctl>=0.1.0,<0.2`.**
 
 ### Changed
 
-- **BREAKING: `TrueNASClient.shell` is now `.ssh_config`.** hostctl's
-  `Host.shell` is the *bound shell object* (`host.shell.run(...)`), so keeping
-  a connection target under that name would collide with it for every consumer
-  of the host API. The constructor argument is still spelled `shell=`.
+- **BREAKING: `TrueNASClient.shell` is gone.** `.shell` now means what it means
+  throughout hostctl — the *bound shell object* (`client.shell.run(...)`). The
+  SSH connection target lives on the configuration as `client.config.ssh`, an
+  `SshConfig`. The constructor argument is still spelled `shell=` and still
+  takes a connection string (`shell="ssh://root@nas"`).
 - **`.run()` and `.path()` now select a transport rather than branching.**
-  Which one serves a call is chosen from the available providers — SSH first
-  when `.ssh_config` names a host, then the middleware — and
-  `.host.last_selection` records what was tried and why. Previously `.run()`
-  hard-coded a local-vs-SSH branch and `TruenasPath` hand-rolled its
-  SFTP→websocket fallback.
+  Which one serves a call is chosen from the available providers, and
+  `.last_selection` records what was tried and why — with credentials redacted.
+  Previously `.run()` hard-coded a local-vs-SSH branch and `TruenasPath`
+  hand-rolled its own SFTP→websocket fallback.
 - **A remote target with no SSH can now run commands over the web shell.** The
   TrueNAS JSON-RPC API exposes no remote command execution (verified against
   26.0.0-BETA.1: of 781 methods only `core.resize_shell` and
@@ -65,13 +70,35 @@ TrueNAS-specific parts here. **Release is blocked on hostctl's own release.**
 - **`Credentials.from_host_credentials()`** — maps hostctl's already-parsed
   credential mapping (including a URI-supplied OTP) onto a `Credentials`
   subclass, with no second round of string parsing.
-- **`TrueNASClient.host`** — the backing `TrueNASHost`, built lazily.
+- **Inherited from hostctl**: `.capabilities` (so a host that genuinely cannot
+  run commands says so up front rather than failing mid-call),
+  `.last_selection`, `.info()`, `.spawn()`, `.connect()`/`.close()`, and
+  context-manager support.
 - `black` in the `dev` extra, pinned to the 3.9 floor.
 
 ### Removed
 
-- ~190 lines of generic host machinery from `client.py`: shell quoting, the
-  local-vs-SSH branch in `run()`, the asyncssh connection, and `_shellquote`.
+- **BREAKING: `pytruenas.jsonrpc` is now `pytruenas.connection`**, and its
+  `Client` class is `TrueNASWSConnection`. `Client` was doubly wrong: the class
+  is not generic JSON-RPC (it knows `core.subscribe`, TrueNAS error codes, and
+  the middleware unix socket), and the name collided with `TrueNASClient`.
+  `client.conn` is the connection, with `.websocket` kept as an alias.
+- **BREAKING: `pytruenas.client` and `pytruenas._conn` are gone.**
+  `from pytruenas import TrueNASClient` is unaffected. `_conn` was a re-export
+  shim for swapping the client implementation, which never happened; `client`
+  had been reduced to an alias by the host/client merge.
+- ~190 lines of generic host machinery: shell quoting, the local-vs-SSH branch
+  in `run()`, the asyncssh connection, and `_shellquote`.
+
+### Known limitations
+
+- **A local unix-socket client cannot use `download()`.** The HTTP side channel
+  resolves to `https://localhost` and trips the appliance's self-signed
+  certificate. This is pre-existing and unrelated to the migration — the URL
+  construction is byte-identical to 0.1.1.
+- **The web shell merges stdout and stderr** (a PTY is one stream), takes no
+  piped `input=`, and requires single-line commands. Pipes and here-strings
+  work, being ordinary shell syntax. It is ordered after SSH for these reasons.
 
 [hostctl]: https://github.com/jose-pr/hostctl
 
@@ -292,6 +319,7 @@ below is simply what the package contains.
   `pathlib_next`.
 
 [Unreleased]: https://github.com/jose-pr/pytruenas/compare/v0.1.1...HEAD
+[0.2.0]: https://github.com/jose-pr/pytruenas/compare/v0.1.1...v0.2.0
 [0.1.1]: https://github.com/jose-pr/pytruenas/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/jose-pr/pytruenas/compare/v0.0.0...v0.1.0
 [0.0.0]: https://github.com/jose-pr/pytruenas/releases/tag/v0.0.0
