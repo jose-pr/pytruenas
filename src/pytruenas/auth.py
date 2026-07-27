@@ -2,16 +2,13 @@ from __future__ import annotations
 
 import typing as _ty
 from .utils import io as _ioutils
+
 if _ty.TYPE_CHECKING:
     from . import TrueNASClient
 
 
 class _CredentialsMeta(type):
-    def __call__(
-        cls: "type[Credentials]",  # type:ignore
-        *args,
-        **kwargs
-    ):
+    def __call__(cls: "type[Credentials]", *args, **kwargs):  # type: ignore
         if cls is not Credentials:
             inst = cls.__new__(cls, *args, **kwargs)
             inst.__init__(*args, **kwargs)
@@ -152,12 +149,15 @@ class Credentials(metaclass=_CredentialsMeta):
                 otp = otp_provider()
             if not otp:
                 raise AuthenticationError("OTP_REQUIRED", resp)
-            resp = _ty.cast(
-                dict,
-                client.api.auth.login_ex_continue(
-                    {"mechanism": "OTP_TOKEN", "otp_token": otp}
-                ),
-            ) or {}
+            resp = (
+                _ty.cast(
+                    dict,
+                    client.api.auth.login_ex_continue(
+                        {"mechanism": "OTP_TOKEN", "otp_token": otp}
+                    ),
+                )
+                or {}
+            )
             rtype = resp.get("response_type")
 
         if rtype == "SUCCESS":
@@ -171,6 +171,60 @@ class Credentials(metaclass=_CredentialsMeta):
 
             env = os.environ
         return Credentials(env.get("TN_CREDS"))
+
+    @staticmethod
+    def from_host_credentials(
+        username: "str | None" = None,
+        password: "str | None" = None,
+        otp: "str | None" = None,
+        api_key: "str | None" = None,
+        token: "str | None" = None,
+    ) -> "Credentials":
+        """Select a credential from an already-parsed credential mapping.
+
+        This is the ``hostctl`` bridge. ``hostctl.host.parse_credentials`` has
+        already split a URI's password field into the password proper and its
+        trailing ``key:value`` extras -- the OTP arrives here as ``otp``, not
+        embedded in ``password``. So this method deliberately does **no string
+        parsing**: it only picks the matching subclass. Contrast
+        ``Credentials(...)``, which still accepts (and must keep accepting) the
+        raw single-string form used by ``TN_CREDS`` and the ``creds=`` argument.
+
+        Both projects encode an OTP the same way -- a newline after the
+        password, then ``otp:<token>`` -- so the two paths agree on meaning
+        while splitting the string exactly once, here or in hostctl, never
+        twice.
+
+        A newline is the separator because **a password can never contain one**:
+        at an interactive prompt, Enter submits the value rather than being
+        typed into it. That makes the split free -- no character is stolen from
+        the password alphabet and no escaping scheme is needed. The one caveat
+        is transport-specific: a *URI* cannot carry a raw newline (``urlsplit``
+        strips it), so an OTP in a connection string must be percent-encoded as
+        ``%0A``. See :mod:`pytruenas.host`.
+
+        Precedence when several are supplied: ``token``, then ``api_key``, then
+        ``password``. They are mutually exclusive mechanisms rather than a
+        fallback chain, so passing more than one is a caller error; the order
+        only makes the outcome deterministic rather than arbitrary. With none of
+        them, this is local-socket auth (:class:`LocalAuth`), which is also what
+        an empty mapping means for a local target.
+        """
+        if token:
+            return TokenAuth(token)
+        if api_key:
+            return ApiKeyAuth(api_key, username)
+        if password:
+            # username defaults to root to match the rest of the stack: hostctl's
+            # SshConfig and pytruenas' own shell handling both treat a missing
+            # user as root, and BasicAuth requires one positionally.
+            return BasicAuth(username or "root", password, otp)
+        # An OTP with nothing to attach it to cannot authenticate anything, and
+        # silently downgrading to LocalAuth would turn a typo into a confusing
+        # "local socket unavailable" much later. Fail where the mistake is.
+        if otp:
+            raise ValueError("otp requires a password")
+        return LocalAuth()
 
 
 class LocalAuth(Credentials):

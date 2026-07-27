@@ -81,7 +81,7 @@ ssh = ["asyncssh", "pathlib_next[sftp-async]>=0.8.3"]
 codegen = ["jinja2"]
 # NOTE: the former 'host' extra (ifaddr) is gone -- local adapter discovery in
 # pytruenas.ops.host now uses netimps (a core dependency), no extra needed.
-dev = ["build", "hatchling", "pytest", "pytest-cov", "twine", "pyyaml", "asyncssh", "jinja2"]
+dev = ["black", "build", "hatchling", "pytest", "pytest-cov", "twine", "pyyaml", "asyncssh", "jinja2"]
 docs = ["mkdocs", "mkdocs-material", "mkdocstrings[python]"]
 
 [project.scripts]
@@ -110,3 +110,9 @@ packages = ["src/pytruenas"]
 [tool.pytest.ini_options]
 pythonpath = ["src"]
 testpaths = ["tests"]
+
+# Pinned to the *floor* (requires-python = ">=3.9"), not the interpreter used
+# for dev: black must never emit syntax 3.9 cannot parse, and routine work now
+# happens on 3.14 where such a mistake would go unnoticed until the floor check.
+[tool.black]
+target-version = ["py39"]
