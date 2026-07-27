@@ -21,12 +21,13 @@ TrueNAS-specific parts here. **Release is blocked on hostctl's own release.**
   `.host.last_selection` records what was tried and why. Previously `.run()`
   hard-coded a local-vs-SSH branch and `TruenasPath` hand-rolled its
   SFTP→websocket fallback.
-- **A remote target with no SSH now reports no `run` capability**, instead of
-  failing when a command is attempted. The TrueNAS JSON-RPC API exposes no
-  remote command execution (verified against 26.0.0-BETA.1: of 781 methods only
-  `core.resize_shell` and `user.shell_choices` are shell-adjacent, and the
-  former only resizes an already-open session). This makes the pre-existing
-  situation visible rather than changing it.
+- **A remote target with no SSH can now run commands over the web shell.** The
+  TrueNAS JSON-RPC API exposes no remote command execution (verified against
+  26.0.0-BETA.1: of 781 methods only `core.resize_shell` and
+  `user.shell_choices` are shell-adjacent, and the former only resizes an
+  already-open session) — so such a host previously had no `run()` at all.
+  `/websocket/shell`, the PTY the web UI's Shell page drives, is a real command
+  channel on the same port. Pass `webshell=False` to require SSH instead.
 - **The scheme/API-path probe moved from construction to first connect.**
   `TrueNASClient("bad-host")` now constructs successfully and raises on first
   use. Configs are therefore buildable offline, which is what `HostConfig`
@@ -40,6 +41,10 @@ TrueNAS-specific parts here. **Release is blocked on hostctl's own release.**
   still works, normalized to a `truenas+*` scheme.
 - **`pytruenas.providers`** — `TnasWsPathProvider` and
   `MiddlewareExecutorProvider`.
+- **`pytruenas.webshell`** — `WebShellExecutorProvider`, command execution over
+  `/websocket/shell`. Ordered after SSH; declares its limits rather than hiding
+  them (stdout and stderr are one stream, no piped input, single-line commands
+  only — pipes and here-strings work, being ordinary shell syntax).
 - **`Credentials.from_host_credentials()`** — maps hostctl's already-parsed
   credential mapping (including a URI-supplied OTP) onto a `Credentials`
   subclass, with no second round of string parsing.

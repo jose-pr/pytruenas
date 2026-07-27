@@ -60,10 +60,30 @@ def test_dispatches_from_a_uri():
 # -- provider composition --------------------------------------------------
 
 
-def test_without_ssh_only_the_middleware_providers_exist():
+def test_without_ssh_the_webshell_stands_in():
+    """A remote host with no SSH still gets a command channel.
+
+    The web shell ranks below SSH but above the middleware, so it only ever
+    serves a host that would otherwise have no executor at all -- which is
+    exactly the NAT/firewall case it exists for.
+    """
     host = _host()
-    assert _names(host._executor_selector.providers) == ["middleware"]
+    assert _names(host._executor_selector.providers) == ["webshell", "middleware"]
     assert _names(host._path_selector.providers) == ["tnasws"]
+
+
+def test_webshell_can_be_turned_off():
+    host = TrueNASHost(
+        TrueNASConfig.from_target("wss://nas", webshell=False), client=MagicMock()
+    )
+    assert _names(host._executor_selector.providers) == ["middleware"]
+
+
+def test_local_target_has_no_webshell():
+    # The unix socket already serves a local target; the PTY would be strictly
+    # worse (merged streams, prompt scraping) for no gain.
+    host = TrueNASHost(TrueNASConfig.from_target(None), client=MagicMock())
+    assert "webshell" not in _names(host._executor_selector.providers)
 
 
 def test_with_ssh_the_ssh_providers_come_first():
@@ -75,24 +95,40 @@ def test_with_ssh_the_ssh_providers_come_first():
         TrueNASConfig.from_target("wss://nas", ssh=SshConfig(host="nas")),
         client=MagicMock(),
     )
-    assert _names(host._executor_selector.providers) == ["ssh", "middleware"]
+    assert _names(host._executor_selector.providers) == [
+        "ssh",
+        "webshell",
+        "middleware",
+    ]
     assert _names(host._path_selector.providers) == ["sftp", "tnasws"]
 
 
 def test_provider_types():
     host = _host()
-    assert isinstance(host._executor_selector.providers[0], MiddlewareExecutorProvider)
+    assert isinstance(host._executor_selector.providers[-1], MiddlewareExecutorProvider)
     assert isinstance(host._path_selector.providers[0], TnasWsPathProvider)
 
 
 # -- capabilities are reported truthfully ----------------------------------
 
 
-def test_remote_without_ssh_reports_no_run_capability():
-    """The honest consequence of step 3: no SSH and a remote target means no
-    command channel at all, and `capabilities` must say so rather than let a
-    caller discover it mid-command."""
+def test_remote_without_ssh_still_has_run_via_the_webshell():
+    """The gap step 3 exposed is closed by the web shell.
+
+    Before it existed, a remote host with no SSH had *no* executor: the
+    JSON-RPC API offers no remote command execution. `/_shell` is a real
+    channel on the same port, so `run` is available again.
+    """
     host = _host("wss://nas")
+    assert "run" in host.capabilities
+    assert "path" in host.capabilities
+
+
+def test_remote_without_ssh_or_webshell_reports_no_run():
+    """With the web shell declined, the honest answer is still "no run"."""
+    host = TrueNASHost(
+        TrueNASConfig.from_target("wss://nas", webshell=False), client=MagicMock()
+    )
     assert "run" not in host.capabilities
     # Paths still work -- the websocket serves those.
     assert "path" in host.capabilities
@@ -188,12 +224,18 @@ def test_install_sshcreds_rebuilds_the_providers():
     Before: a remote host with no SSH has no executor at all. After: it does.
     """
     host, _ = _host_with_client_key()
-    assert _names(host._executor_selector.providers) == ["middleware"]
-    assert "run" not in host.capabilities
+    assert _names(host._executor_selector.providers) == ["webshell", "middleware"]
+    assert _names(host._path_selector.providers) == ["tnasws"]
 
     host.install_sshcreds()
 
-    assert _names(host._executor_selector.providers) == ["ssh", "middleware"]
+    # SSH is now available and outranks the web shell, and paths gain the
+    # richer SFTP leg -- neither of which existed a moment ago.
+    assert _names(host._executor_selector.providers) == [
+        "ssh",
+        "webshell",
+        "middleware",
+    ]
     assert _names(host._path_selector.providers) == ["sftp", "tnasws"]
     assert "run" in host.capabilities
 
