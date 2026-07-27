@@ -38,7 +38,7 @@ if _ty.TYPE_CHECKING:
     from truenasapi_typings.current import Current
 
     ApiVersion = _ty.TypeVar(
-        "ApiVersion", bound=Namespace, default=Current  # type:ignore
+        "ApiVersion", bound=Namespace, default=Current  # type: ignore
     )
 else:
     ApiVersion = _ty.TypeVar(
@@ -69,7 +69,7 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
         shell: str | None = None,
         logger: _logging.Logger | None = None,
         fsbackend: "str|_ty.Sequence[str]" = "auto",
-        version:str = 'current'
+        version: str = "current",
     ) -> None:
         self._api = _TGT.parse(target or "localhost", scheme="auto")
         self.fsbackend = fsbackend
@@ -129,7 +129,7 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
             self._api = self._api._replace(username="", password="")
         self._creds = _auth.Credentials(creds)
         self._conn: _conn.Client | None = None
-        self._ssh: _ssh.SSHClientConnection | None = None  # type:ignore
+        self._ssh: _ssh.SSHClientConnection | None = None  # type: ignore
         self.sslverify = sslverify
         self.autologin = autologin
         self.shell = _TGT.parse(
@@ -140,6 +140,40 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
         if not logger:
             logger = _logging.getLogger("pytruenas")
         self.logger = _logging.getLogger(logger) if isinstance(logger, str) else logger
+
+    @classmethod
+    def _from_config(cls, config, *, autologin: bool = True, logger=None):
+        """Build a client from an already-parsed :class:`~pytruenas.host.TrueNASConfig`.
+
+        The config layer has already done the URI work, so this deliberately
+        does **not** re-parse a target string: it maps the resolved fields onto
+        the client's own state. Used by
+        :class:`~pytruenas.host.TrueNASHost`, which owns the config and needs a
+        client for the API surface.
+
+        Any scheme/path still marked for probing stays unresolved here -- the
+        probe happens on first connect, which is what keeps construction free of
+        network I/O.
+        """
+        if config.is_local:
+            target = None
+        else:
+            scheme = "ws" if config.secure is False else "wss"
+            authority = config.host
+            if config.port:
+                authority = f"{authority}:{config.port}"
+            target = f"{scheme}://{authority}{config.api_path or ''}"
+
+        client = cls(
+            target,
+            config.credentials,
+            autologin=autologin,
+            sslverify=config.sslverify,
+            logger=logger,
+            version=config.version,
+        )
+        client._config = config
+        return client
 
     def _openwss(self):
         return _conn.Client(
@@ -184,14 +218,14 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
         self._conn = self._openwss()
         creds = creds or self._creds
         if login_ex:
-            return creds.login_ex(  # type:ignore
+            return creds.login_ex(  # type: ignore
                 self, login_options=login_options, otp_provider=otp_provider
             )
-        creds.login(self)  # type:ignore
+        creds.login(self)  # type: ignore
 
     @cached_property
     def api(self) -> "ApiVersion":
-        return Namespace(self)  # type:ignore
+        return Namespace(self)  # type: ignore
 
     # -- convenience wrappers over common auth/core methods -----------------
 
@@ -235,7 +269,7 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
     def upload(
         self, file: str | bytes, method: str, *params, token=None, wait=True, **kwargs
     ):
-        client: "TrueNASClient[Current]" = self  # type:ignore
+        client: "TrueNASClient[Current]" = self  # type: ignore
 
         target = client._http_target("/_upload")
         data = {"method": method, "params": params}
@@ -266,11 +300,11 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
         wait=True,
         **kwargs,
     ):
-        client: "TrueNASClient[Current]" = self  # type:ignore
+        client: "TrueNASClient[Current]" = self  # type: ignore
 
         jobid, link = client.api.core.download(
             method, args, filename or "download", buffered, **kwargs
-        )  # type:ignore
+        )  # type: ignore
 
         target = client._http_target(link)
 
@@ -298,18 +332,19 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
         return api
 
     def install_sshcreds(self, name: str | None = None, private_key: str | None = None):
-        client: "TrueNASClient[Current]" = self  # type:ignore
+        client: "TrueNASClient[Current]" = self  # type: ignore
         name = name or "pytruenas"
         keypair = client.api.keychaincredential._get(type="SSH_KEY_PAIR", name=name)
         if not keypair and not private_key:
             private_key = client.api.keychaincredential.generate_ssh_key_pair()[
                 "private_key"
-            ]  # type:ignore
+            ]  # type: ignore
         elif not private_key:
             private_key = keypair["attributes"]["private_key"]  # type: ignore
 
         pubkey = (
-            _asyncssh().import_private_key(private_key)  # type:ignore
+            _asyncssh()
+            .import_private_key(private_key)  # type: ignore
             .export_public_key()
             .decode()
             .strip()
@@ -323,19 +358,43 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
         )
         root = client.api.user._get(username="root")
         rootauthkeys: list[str] = (
-            root.get("sshpubkey") or ""  # type:ignore
-        ).splitlines()  # type:ignore
+            root.get("sshpubkey") or ""  # type: ignore
+        ).splitlines()  # type: ignore
 
         if pubkey not in rootauthkeys:
             rootauthkeys.append(pubkey)
             client.api.user._upsert(
                 "username", username="root", sshpubkey="\n".join(rootauthkeys)
             )
+        installed = _ty.cast(str, keypair["attributes"]["private_key"])  # type: ignore
         if not client.shell.username or not client.shell.password:
             client.shell = client.shell._replace(
                 username="client_keys|root",
-                password=keypair["attributes"]["private_key"],  # type: ignore
+                password=installed,
             )
+        # Returned so a caller holding the config (TrueNASHost) can store the
+        # key on a real SshConfig instead of re-reading the packed username.
+        return installed
+
+    def _ssh_private_key(self) -> "str | None":
+        """The private key configured for SSH auth, if key-based auth is in use.
+
+        A small accessor over how the credential happens to be stored, so
+        callers (and tests) do not depend on the ``client_keys|root`` encoding
+        packed into ``shell.username``. That encoding is what the hostctl
+        migration replaces with ``SshConfig``'s real ``client_keys`` field --
+        see ``.agents/plans/hostctl_host_migration.md`` step 5.
+        """
+        username = self.shell.username or ""
+        if "|" not in username:
+            return None
+        logintype, _, _ = username.partition("|")
+        if logintype != "client_keys":
+            return None
+        password = self.shell.password
+        if isinstance(password, bytes):
+            return password.decode()
+        return password
 
     @property
     def ssh(self):
@@ -356,7 +415,7 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
                 connect_opts[logintype] = creds
             username = username or "root"
             self._ssh = _async.async_to_sync(
-                _asyncssh().connect(  # type:ignore
+                _asyncssh().connect(  # type: ignore
                     self.shell.host,
                     port=self.shell.port or 22,
                     username=username,
@@ -387,7 +446,7 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
         errors: str | None = None,
         input: Input | None = None,
         timeout: float | None = None,
-        loglevel: int = _logging.TRACE,  # type:ignore
+        loglevel: int = _logging.TRACE,  # type: ignore
     ) -> subprocess.CompletedProcess:
 
         if not executable:
@@ -520,10 +579,10 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
 def _shellquote(c: object):
     if isinstance(c, _os.PathLike):
         if hasattr(c, "as_posix"):
-            c = c.as_posix()  # type:ignore
+            c = c.as_posix()  # type: ignore
         else:
             c = _os.fspath(c)
-        c = shlex.quote(c)  # type:ignore
+        c = shlex.quote(c)  # type: ignore
     elif isinstance(c, bytes):
         c = c.decode()
     else:
