@@ -39,8 +39,11 @@ TrueNAS-specific parts here. **Release is blocked on hostctl's own release.**
   `TrueNASHost` (a `PosixHost`). `HostConfig("truenas+wss://nas")` resolves
   through hostctl's registry; every connection string `TrueNASClient` accepts
   still works, normalized to a `truenas+*` scheme.
-- **`pytruenas.providers`** — `TnasWsPathProvider` and
-  `MiddlewareExecutorProvider`.
+- **`pytruenas.providers`** — `TnasWsPathProvider` (the `filesystem.*`
+  websocket leg) and `local_providers()`, which returns hostctl's stock local
+  executor and path providers unchanged. A local target runs plain
+  `subprocess` and uses plain local paths; there is nothing TrueNAS-specific to
+  add, so pytruenas defines no provider class for it.
 - **`pytruenas.webshell`** — `WebShellExecutorProvider`, command execution over
   `/websocket/shell`. Ordered after SSH; declares its limits rather than hiding
   them (stdout and stderr are one stream, no piped input, single-line commands

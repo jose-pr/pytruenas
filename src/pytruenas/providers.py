@@ -1,37 +1,37 @@
 """``hostctl`` providers for a TrueNAS middleware target.
 
-Two adapters, both deliberately thin -- they own *connection* behaviour only,
-and leave operating-system semantics to :class:`hostctl.host.PosixHost`:
+Only **one** adapter is TrueNAS-specific: :class:`TnasWsPathProvider`, paths
+served by the middleware ``filesystem.*`` API. It is deliberately thin -- it
+owns *connection* behaviour only, and leaves operating-system semantics to
+:class:`hostctl.host.PosixHost`.
 
-* :class:`TnasWsPathProvider` -- paths served by the middleware
-  ``filesystem.*`` API, wrapping the existing
-  :class:`~pytruenas.fs.tnasws.TnasWsBackend`.
-* :class:`MiddlewareExecutorProvider` -- command execution over the local
-  middleware unix socket.
+Local execution needs no adapter at all: :func:`local_providers` returns
+hostctl's stock pair. A target reached over the middleware unix socket *is*
+this machine, so a command there is a plain ``subprocess`` call and a path is a
+plain local path -- there is nothing about TrueNAS to add.
 
-**On ordering.** A host composes these *after* the SSH providers, so SSH keeps
-the preference it has today. That reproduces
-:class:`~pytruenas.fs.truenas.TruenasPath`'s hand-rolled "try SFTP, fall back to
-the websocket" behaviour using hostctl's selector, which additionally records a
-redacted trace of what was tried and why (``host.last_selection``).
+**On ordering** (see ``TrueNASHost._build_providers``):
 
-**On honesty.** ``probe()`` here reports what the transport can *actually* do
-rather than what would be convenient. The **JSON-RPC endpoint** is not a general
-command channel: it exposes ``filesystem.*`` and friends, not arbitrary exec
-(verified on 26.0.0-BETA.1 -- of 781 methods only ``core.resize_shell`` and
+``local`` -> ``ssh`` -> ``webshell``, and ``local`` -> ``sftp`` -> ``tnasws``.
+
+Local comes first because reaching this machine through SSH, a PTY, or the
+filesystem API would be slower and strictly less capable; it is only built when
+the target is local, and everything after it is a way of reaching a machine
+somewhere else. Among the remote options SSH wins on capability, which also
+reproduces :class:`~pytruenas.fs.truenas.TruenasPath`'s hand-rolled "try SFTP,
+fall back to the websocket" behaviour -- now through hostctl's selector, which
+additionally records a redacted trace of what was tried and why
+(``host.last_selection``).
+
+**On honesty.** ``probe()`` reports what a transport can *actually* do rather
+than what would be convenient. The JSON-RPC endpoint is not a general command
+channel: it exposes ``filesystem.*`` and friends, not arbitrary exec (verified
+on 26.0.0-BETA.1 -- of 781 methods only ``core.resize_shell`` and
 ``user.shell_choices`` are shell-adjacent, and the former merely resizes an
-already-open session). So :class:`MiddlewareExecutorProvider` declares itself
-available only where it genuinely is -- on the NAS itself, via the unix socket
--- and declines everywhere else, letting the selector fall through to SSH.
-Claiming otherwise would turn a clean "no executor available" into a confusing
-runtime failure halfway through a command.
-
-That limitation belongs to the *JSON-RPC endpoint*, not to ``middlewared`` as a
-whole: it also serves ``/_shell``, a separate websocket app running a real PTY
-login shell, which is how the web UI's Shell page executes commands. Closing the
-remote-without-SSH gap (a host reachable on the API port but not on 22 -- NAT,
-firewall, reverse proxy) means adding a provider for *that* endpoint; the
-protocol is specified in ``.agents/plans/hostctl_host_migration.md`` step 10.
+already-open session). That limitation belongs to the JSON-RPC endpoint, not to
+``middlewared`` as a whole: it also serves the PTY behind
+``/websocket/shell``, which :mod:`pytruenas.webshell` drives to give a
+remote host without SSH a real command channel.
 """
 
 from __future__ import annotations
@@ -40,7 +40,6 @@ import typing as _ty
 
 from hostctl.provider import (
     ExecutorProvider as _ExecutorProvider,
-    OperationNotStarted as _OperationNotStarted,
     PathProvider as _PathProvider,
     ProviderProbe as _ProviderProbe,
 )
@@ -108,100 +107,41 @@ class TnasWsPathProvider(_PathProvider):
     def _make_path(self, *segments: object) -> "Path":
         from .fs import path as _make
 
-        # A local target is served straight off the filesystem: going through
-        # the middleware for a path on the same machine adds a websocket
-        # round-trip, and `filesystem.get` routes reads through the HTTP side
-        # channel, which cannot reach a unix-socket client at all.
-        backend = "local" if self._is_local else "ws"
-        return _make(self._client, *segments, backend=backend)
-
-    @property
-    def _is_local(self) -> bool:
-        config = getattr(self.client, "config", None)
-        if config is not None and hasattr(config, "is_local"):
-            return bool(config.is_local)
-        api = getattr(self._client, "_api", None)
-        return bool(getattr(api, "is_local", False))
+        # Always the websocket backend. A *local* target is served by hostctl's
+        # own local path provider, which the host orders ahead of this one --
+        # so there is no local case left to special-case here.
+        return _make(self._client, *segments, backend="ws")
 
     def probe(self) -> _ProviderProbe:
         return _ProviderProbe("available", capabilities=self.capabilities)
 
 
-class MiddlewareExecutorProvider(_ExecutorProvider):
-    """Command execution over the local middleware unix socket.
+def local_providers():
+    """hostctl's stock local executor and path providers.
 
-    Usable only when this process runs *on* the NAS. The middleware websocket
-    exposes no arbitrary-exec method, so there is nothing to dispatch remotely;
-    rather than pretend, :meth:`probe` reports ``unavailable`` off-box and
-    :meth:`connect` raises :class:`~hostctl.provider.OperationNotStarted` so the
-    selector cleanly falls through to the next executor (SSH).
+    A target reached over the middleware unix socket *is* this machine, so a
+    command there is a plain ``subprocess`` call and a path is a plain local
+    path. hostctl already provides both, and this is the same one-liner its own
+    ``system.py:_local_provider`` uses -- there is nothing TrueNAS-specific to
+    add, so pytruenas does not define a provider class for it.
 
-    ``OperationNotStarted`` is the right signal specifically because nothing was
-    dispatched: hostctl only retries the next provider when a provider proves it
-    started no work, which is what makes the fallback safe to do automatically.
+    (There was one. It wrapped ``LocalExecutor`` behind an ``is_local`` guard
+    and called itself ``MiddlewareExecutorProvider``, which was doubly
+    misleading: nothing about the dispatch involved ``middlewared``, and the
+    guard only duplicated the decision the caller had already made by choosing
+    to build it.)
     """
+    from hostctl.executor import LocalExecutor
+    from pathlib_next import Path as _LocalPath
 
-    def __init__(self, client: "TrueNASClient") -> None:
-        self.client = client
-        self._executor = None
-        # ``args`` matters: without it hostctl renders the whole invocation to
-        # one string (``/bin/sh -c 'printf hi'``) and hands it over as a single
-        # command, which ``subprocess`` then looks up as one literal filename
-        # and fails with FileNotFoundError. Declaring ``args`` makes the shell
-        # flavour split the invocation into a real argv instead.
-        super().__init__(
-            "middleware", self._execute, capabilities=("cwd", "env", "args")
-        )
-
-    @property
-    def _is_local(self) -> bool:
-        # A TrueNASHost carries `.config`; a bare client carries the parsed
-        # target as `._api`. Accept either, since the host builds this provider
-        # with itself before its client exists.
-        config = getattr(self.client, "config", None)
-        if config is not None and hasattr(config, "is_local"):
-            return bool(config.is_local)
-        api = getattr(self.client, "_api", None)
-        return bool(getattr(api, "is_local", False))
-
-    def probe(self) -> _ProviderProbe:
-        if not self._is_local:
-            return _ProviderProbe(
-                "unavailable",
-                reason=(
-                    "the middleware API exposes no remote command execution; "
-                    "use SSH for a remote host"
-                ),
-            )
-        return _ProviderProbe("available", capabilities=self.capabilities)
-
-    def connect(self) -> None:
-        if not self._is_local:
-            raise _OperationNotStarted(
-                "middleware executor is local-only; no command was dispatched"
-            )
-
-    def _execute(self, command: object, *args: object, **options: object):
-        if not self._is_local:
-            # Belt and braces: the selector should never route here, but a
-            # direct caller must not get a silently wrong result.
-            raise _OperationNotStarted(
-                "middleware executor is local-only; no command was dispatched"
-            )
-        # Delegate to hostctl's own local executor rather than calling
-        # subprocess here. It already owns input normalization against the
-        # stream mode, the extended capture_output convention, and the
-        # stdin/input conflict check -- reimplementing those is exactly how the
-        # bytes-input deadlock got reintroduced once already.
-        from hostctl.executor import LocalExecutor
-
-        if self._executor is None:
-            self._executor = LocalExecutor()
-        return self._executor(command, *args, **_ty.cast(_ty.Any, options))
+    return (
+        _ExecutorProvider("local", LocalExecutor()),
+        _PathProvider("local", lambda *parts: _LocalPath(*parts)),
+    )
 
 
 __all__ = [
-    "MiddlewareExecutorProvider",
     "TnasWsPathProvider",
     "WS_PATH_CAPABILITIES",
+    "local_providers",
 ]

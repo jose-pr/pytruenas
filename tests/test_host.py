@@ -17,10 +17,7 @@ from hostctl.host import HostConfig, PosixHost  # noqa: E402
 from hostctl.shell import POSIX_SHELL  # noqa: E402
 
 from pytruenas.host import TrueNASConfig, TrueNASHost  # noqa: E402
-from pytruenas.providers import (  # noqa: E402
-    MiddlewareExecutorProvider,
-    TnasWsPathProvider,
-)
+from pytruenas.providers import TnasWsPathProvider  # noqa: E402
 
 
 def _host(target="wss://nas", **options):
@@ -63,27 +60,32 @@ def test_dispatches_from_a_uri():
 def test_without_ssh_the_webshell_stands_in():
     """A remote host with no SSH still gets a command channel.
 
-    The web shell ranks below SSH but above the middleware, so it only ever
+    The web shell is the last resort for a remote target, so it only ever
     serves a host that would otherwise have no executor at all -- which is
     exactly the NAT/firewall case it exists for.
     """
     host = _host()
-    assert _names(host._executor_selector.providers) == ["webshell", "middleware"]
+    assert _names(host._executor_selector.providers) == ["webshell"]
     assert _names(host._path_selector.providers) == ["tnasws"]
 
 
 def test_webshell_can_be_turned_off():
+    """With it declined, a remote host without SSH has no executor at all."""
     host = TrueNASHost(
         TrueNASConfig.from_target("wss://nas", webshell=False), client=MagicMock()
     )
-    assert _names(host._executor_selector.providers) == ["middleware"]
+    assert _names(host._executor_selector.providers) == []
 
 
-def test_local_target_has_no_webshell():
-    # The unix socket already serves a local target; the PTY would be strictly
-    # worse (merged streams, prompt scraping) for no gain.
+def test_local_target_uses_hostctls_local_providers():
+    """On the NAS, plain subprocess and plain local paths -- and first.
+
+    Reaching this machine through SSH, a PTY, or the filesystem API would be
+    slower and strictly less capable, so neither remote executor is even built.
+    """
     host = TrueNASHost(TrueNASConfig.from_target(None), client=MagicMock())
-    assert "webshell" not in _names(host._executor_selector.providers)
+    assert _names(host._executor_selector.providers) == ["local"]
+    assert _names(host._path_selector.providers) == ["local", "tnasws"]
 
 
 def test_with_ssh_the_ssh_providers_come_first():
@@ -95,17 +97,12 @@ def test_with_ssh_the_ssh_providers_come_first():
         TrueNASConfig.from_target("wss://nas", ssh=SshConfig(host="nas")),
         client=MagicMock(),
     )
-    assert _names(host._executor_selector.providers) == [
-        "ssh",
-        "webshell",
-        "middleware",
-    ]
+    assert _names(host._executor_selector.providers) == ["ssh", "webshell"]
     assert _names(host._path_selector.providers) == ["sftp", "tnasws"]
 
 
 def test_provider_types():
     host = _host()
-    assert isinstance(host._executor_selector.providers[-1], MiddlewareExecutorProvider)
     assert isinstance(host._path_selector.providers[0], TnasWsPathProvider)
 
 
@@ -224,18 +221,14 @@ def test_install_sshcreds_rebuilds_the_providers():
     Before: a remote host with no SSH has no executor at all. After: it does.
     """
     host, _ = _host_with_client_key()
-    assert _names(host._executor_selector.providers) == ["webshell", "middleware"]
+    assert _names(host._executor_selector.providers) == ["webshell"]
     assert _names(host._path_selector.providers) == ["tnasws"]
 
     host.install_sshcreds()
 
     # SSH is now available and outranks the web shell, and paths gain the
     # richer SFTP leg -- neither of which existed a moment ago.
-    assert _names(host._executor_selector.providers) == [
-        "ssh",
-        "webshell",
-        "middleware",
-    ]
+    assert _names(host._executor_selector.providers) == ["ssh", "webshell"]
     assert _names(host._path_selector.providers) == ["sftp", "tnasws"]
     assert "run" in host.capabilities
 
