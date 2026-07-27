@@ -209,6 +209,18 @@ def test_ssh_property_raises_clearly_without_a_transport():
         _host().ssh
 
 
+@pytest.mark.parametrize("typo", ["passwrd", "sslverfy", "nonsense"])
+def test_unknown_constructor_argument_is_rejected_clearly(typo):
+    """A typo must name itself, not an internal class.
+
+    These used to fall through to `SystemHost.__init__`, which raised
+    `TypeError: SystemHost.__init__() got an unexpected keyword argument` --
+    accurate but useless to someone who wrote `passwrd=` on a TrueNASClient.
+    """
+    with pytest.raises(ValueError, match="unknown credential argument"):
+        TrueNASHost("wss://nas", **{typo: "value"})
+
+
 def test_host_options_still_reach_systemhost():
     """`info=` and friends belong to SystemHost, not the config."""
     from hostctl.host import HostInfo

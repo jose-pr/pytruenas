@@ -6,6 +6,49 @@ user-facing; this file is the durable record.
 
 ---
 
+## [0.2.1] - 2026-07-27
+
+### What changed
+
+Documentation, plus one error message that 0.2.0 got wrong.
+
+The README had drifted: it advertised a `pytruenas[host]` extra removed when
+`ops.host` moved to `netimps`, still said "once published to PyPI", and gave a
+venv layout the project no longer uses. It also said nothing about the biggest
+change in 0.2.0 — that commands and files now pick a transport.
+
+A new **Recipes** guide covers what people actually do: connect and reuse,
+query with the `_get`/`_upsert` helpers, subscribe to events, run commands,
+upload and download, fan out across hosts, and provision SSH.
+
+### Writing the docs found a bug
+
+Every recipe was executed against the live 26.0.0-BETA.1 box rather than
+written from memory, and two of thirteen failed on the first pass. One was the
+example's own fault (`me()` returns `pw_name`; `api.user` records use
+`username` — now called out in the guide, since it is an easy mix-up).
+
+The other was real. This:
+
+```python
+TrueNASClient("wss://nas", passwrd="s3cret")
+```
+
+raised `TypeError: SystemHost.__init__() got an unexpected keyword argument
+'passwrd'`. Accurate, but it names a hostctl-internal class rather than telling
+the caller they misspelled `password`. 0.2.0 already rejected unknown
+*credential* names inside the config, and unknown *provider* names in
+`executor=`/`path=` — this was the one path where a typo escaped to a layer
+that could only describe it in its own terms. It now raises
+`ValueError: unknown credential argument: 'passwrd'` with the accepted options
+listed.
+
+That is the argument for running documentation examples rather than reviewing
+them: the failure was in a message nobody would exercise deliberately, and it
+only surfaced because a doc claimed a specific error and the claim was checked.
+
+---
+
 ## [0.2.0] - 2026-07-27
 
 ### What changed
