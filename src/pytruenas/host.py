@@ -377,15 +377,14 @@ class TrueNASHost(_PosixHost):
         executors: list = []
         paths: list = []
 
-        # Local first. If the target *is* this machine -- which is what the
-        # middleware unix socket means -- then plain subprocess and plain local
-        # paths are the right answer: reaching the same box through SSH, a PTY,
-        # or the filesystem API would be slower and strictly less capable.
-        # Everything after this is a way of reaching a machine somewhere else.
+        # A local target is served entirely by hostctl's stock local pair:
+        # plain subprocess and plain local paths. Reaching this same machine
+        # through SSH, a PTY, or the filesystem API would be slower and
+        # strictly less capable, so none of the remote providers are built --
+        # they are all ways of reaching a machine somewhere *else*.
         if config.is_local:
             executor, path = local_providers()
-            executors.append(executor)
-            paths.append(path)
+            return (executor,), (path,)
 
         if config.ssh is not None:
             from hostctl import ssh_providers
@@ -408,8 +407,9 @@ class TrueNASHost(_PosixHost):
 
             executors.append(WebShellExecutorProvider(_ty.cast(_ty.Any, self)))
 
-        # `self` is passed rather than the client: the providers only need it
-        # lazily, and this keeps construction free of a websocket connection.
+        # The websocket filesystem leg, for a remote target only. `self` is
+        # passed rather than the client: the provider only needs it lazily,
+        # which keeps construction free of a websocket connection.
         paths.append(TnasWsPathProvider(_ty.cast(_ty.Any, self)))
         return tuple(executors), tuple(paths)
 
