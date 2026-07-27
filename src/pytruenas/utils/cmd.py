@@ -145,7 +145,9 @@ class PyTrueNASArgs(LoggingArgs):
 class CommandModule(_ty.Protocol):
     """The attributes the app expects from a command module."""
 
-    def run(self, client: "TrueNASClient", args: PyTrueNASArgs, logger: _Logger) -> object: ...
+    def run(
+        self, client: "TrueNASClient", args: PyTrueNASArgs, logger: _Logger
+    ) -> object: ...
 
 
 __all__ = ["PyTrueNASArgs", "CommandModule"]

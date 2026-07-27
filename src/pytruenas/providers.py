@@ -118,7 +118,15 @@ class MiddlewareExecutorProvider(_ExecutorProvider):
 
     def __init__(self, client: "TrueNASClient") -> None:
         self.client = client
-        super().__init__("middleware", self._execute, capabilities=("cwd", "env"))
+        self._executor = None
+        # ``args`` matters: without it hostctl renders the whole invocation to
+        # one string (``/bin/sh -c 'printf hi'``) and hands it over as a single
+        # command, which ``subprocess`` then looks up as one literal filename
+        # and fails with FileNotFoundError. Declaring ``args`` makes the shell
+        # flavour split the invocation into a real argv instead.
+        super().__init__(
+            "middleware", self._execute, capabilities=("cwd", "env", "args")
+        )
 
     @property
     def _is_local(self) -> bool:
@@ -153,13 +161,16 @@ class MiddlewareExecutorProvider(_ExecutorProvider):
             raise _OperationNotStarted(
                 "middleware executor is local-only; no command was dispatched"
             )
-        import subprocess
+        # Delegate to hostctl's own local executor rather than calling
+        # subprocess here. It already owns input normalization against the
+        # stream mode, the extended capture_output convention, and the
+        # stdin/input conflict check -- reimplementing those is exactly how the
+        # bytes-input deadlock got reintroduced once already.
+        from hostctl.executor import LocalExecutor
 
-        options.pop("text", None)
-        return subprocess.run(  # noqa: S603 - the command is caller-supplied by design
-            [str(command), *(str(item) for item in args)],
-            **_ty.cast(_ty.Any, options),
-        )
+        if self._executor is None:
+            self._executor = LocalExecutor()
+        return self._executor(command, *args, **_ty.cast(_ty.Any, options))
 
 
 __all__ = [

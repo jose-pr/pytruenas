@@ -65,13 +65,19 @@ def _client_with(fake):
 
 def test_call_returns_result():
     fake = _FakeWS()
-    fake.responder = lambda req: {"jsonrpc": "2.0", "id": req["id"], "result": {"ok": 1}}
+    fake.responder = lambda req: {
+        "jsonrpc": "2.0",
+        "id": req["id"],
+        "result": {"ok": 1},
+    }
     c = _client_with(fake)
     try:
         assert c.call("core.ping") == {"ok": 1}
         # request was well-formed
         sent = json.loads(fake.sent[0])
-        assert sent["method"] == "core.ping" and sent["jsonrpc"] == "2.0" and "id" in sent
+        assert (
+            sent["method"] == "core.ping" and sent["jsonrpc"] == "2.0" and "id" in sent
+        )
     finally:
         c.close()
 
@@ -82,7 +88,9 @@ def test_call_ignores_compat_kwargs():
     c = _client_with(fake)
     try:
         # job=/background=/callback= are accepted and ignored (upstream-compat).
-        assert c.call("core.job_wait", 1, job=True, background=False, callback=None) == 42
+        assert (
+            c.call("core.job_wait", 1, job=True, background=False, callback=None) == 42
+        )
     finally:
         c.close()
 
@@ -90,7 +98,8 @@ def test_call_ignores_compat_kwargs():
 def test_validation_error_mapped():
     fake = _FakeWS()
     fake.responder = lambda req: {
-        "jsonrpc": "2.0", "id": req["id"],
+        "jsonrpc": "2.0",
+        "id": req["id"],
         "error": {"code": -32602, "data": {"extra": [["user.name", "required", 22]]}},
     }
     c = _client_with(fake)
@@ -104,7 +113,8 @@ def test_validation_error_mapped():
 def test_call_error_carries_errno():
     fake = _FakeWS()
     fake.responder = lambda req: {
-        "jsonrpc": "2.0", "id": req["id"],
+        "jsonrpc": "2.0",
+        "id": req["id"],
         "error": {"code": -32001, "data": {"reason": "[EPERM] no", "error": 1}},
     }
     c = _client_with(fake)
@@ -138,6 +148,7 @@ def test_timeout_none_waits_for_a_delayed_response():
         def _later():
             time.sleep(0.3)
             fake.push(json.dumps({"jsonrpc": "2.0", "id": req["id"], "result": "late"}))
+
         threading.Thread(target=_later, daemon=True).start()
         return None
 
@@ -183,7 +194,11 @@ def test_ejson_roundtrip_over_the_wire():
 
     dt = datetime(2026, 7, 18, 12, 0, 0, tzinfo=timezone.utc)
     fake = _FakeWS()
-    fake.responder = lambda req: {"jsonrpc": "2.0", "id": req["id"], "result": req["params"][0]}
+    fake.responder = lambda req: {
+        "jsonrpc": "2.0",
+        "id": req["id"],
+        "result": req["params"][0],
+    }
     c = _client_with(fake)
     try:
         # a datetime param should serialize out and come back as a datetime.
@@ -194,6 +209,7 @@ def test_ejson_roundtrip_over_the_wire():
 
 # -- event subscriptions ----------------------------------------------------
 
+
 #: A ``responder`` that answers core.subscribe with a canned id and
 #: core.unsubscribe with True, so subscribe()/unsubscribe() complete.
 def _subscribe_responder(sub_id="sub-1"):
@@ -203,16 +219,19 @@ def _subscribe_responder(sub_id="sub-1"):
         if req["method"] == "core.unsubscribe":
             return {"jsonrpc": "2.0", "id": req["id"], "result": True}
         return {"jsonrpc": "2.0", "id": req["id"], "result": None}
+
     return responder
 
 
 def _notification(collection, msg="added", fields=None):
     # An id-less collection_update, exactly as the live middleware sends it.
-    return json.dumps({
-        "jsonrpc": "2.0",
-        "method": "collection_update",
-        "params": {"msg": msg, "collection": collection, "fields": fields or {}},
-    })
+    return json.dumps(
+        {
+            "jsonrpc": "2.0",
+            "method": "collection_update",
+            "params": {"msg": msg, "collection": collection, "fields": fields or {}},
+        }
+    )
 
 
 def test_notification_routes_to_subscription():
@@ -285,6 +304,7 @@ def test_raising_callback_is_contained():
     fake.responder = _subscribe_responder()
     c = _client_with(fake)
     try:
+
         def boom(_ev):
             raise RuntimeError("callback blew up")
 

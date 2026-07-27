@@ -102,7 +102,12 @@ class _EJSONEncoder(_json.JSONEncoder):
 
     def default(self, obj):
         if isinstance(obj, _datetime):
-            return {"$date": int(_calendar.timegm(obj.utctimetuple()) * 1000 + obj.microsecond // 1000)}
+            return {
+                "$date": int(
+                    _calendar.timegm(obj.utctimetuple()) * 1000
+                    + obj.microsecond // 1000
+                )
+            }
         if isinstance(obj, _date):
             return {"$type": "date", "$value": obj.strftime("%Y-%m-%d")}
         if isinstance(obj, _time):
@@ -217,7 +222,9 @@ def _parse_error(error: dict) -> ClientException:
             data.get("trace"),
             data.get("extra"),
         )
-    return ClientException(error.get("message") or (data if isinstance(data, str) else str(code)))
+    return ClientException(
+        error.get("message") or (data if isinstance(data, str) else str(code))
+    )
 
 
 # --------------------------------------------------------------------------
@@ -304,7 +311,8 @@ class Subscription:
                 self._callback(event)
             except Exception:  # a bad callback must not kill the reader
                 _LOGGER.warning(
-                    "event callback for %r raised; continuing", self.event,
+                    "event callback for %r raised; continuing",
+                    self.event,
                     exc_info=True,
                 )
 

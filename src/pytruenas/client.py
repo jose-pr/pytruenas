@@ -3,38 +3,26 @@ from __future__ import annotations
 from functools import cached_property
 import logging as _logging
 import subprocess
-from pathlib import PurePath, PurePosixPath
+from pathlib import PurePath
 import typing as _ty
-import io as _io
 import warnings
 import requests as _req
 import json as _js
-import sys as _sys
-import os as _os
-
-try:
-    import pwd as _pwd
-except ImportError:  # not available on Windows / non-POSIX
-    _pwd = None
 
 warnings.filterwarnings(action="ignore", module=".*asyncssh.*")
 
-import shlex
-
 
 from . import _conn
-from .utils import async_ as _async, io as _ioutils
+from .jsonrpc import DEFAULT_UNIX_SOCKET as _DEFAULT_SOCKET_PATH
 from .utils.target import Target as _TGT
 from . import auth as _auth
 from .namespace import Namespace
-from pathlib_next import Path
 
 FileHandle = _ty.Union[None, int, _ty.IO]
 PathLike = _ty.Union[str, PurePath]
 Input = _ty.Union[bytes, str]
 
 if _ty.TYPE_CHECKING:
-    import asyncssh as _ssh
     from truenasapi_typings.current import Current
 
     ApiVersion = _ty.TypeVar(
@@ -129,10 +117,19 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
             self._api = self._api._replace(username="", password="")
         self._creds = _auth.Credentials(creds)
         self._conn: _conn.Client | None = None
-        self._ssh: _ssh.SSHClientConnection | None = None  # type: ignore
         self.sslverify = sslverify
         self.autologin = autologin
-        self.shell = _TGT.parse(
+        # Built lazily by `.host`; `_config` is also set directly by
+        # `_from_config` when a TrueNASHost owns the configuration.
+        self._host = None
+        self._config = None
+        #: Connection target for the SSH leg of `.run()`/`.path()`.
+        #:
+        #: Renamed from `.shell` in the hostctl migration: `Host.shell` there is
+        #: the *bound shell object* (`host.shell.run(...)`), and keeping a
+        #: connection target under that name would have collided with it for
+        #: every consumer of the new API.
+        self.ssh_config = _TGT.parse(
             shell or "",
             scheme="local" if self._api.is_local else "ssh",
             host=self._api.host,
@@ -367,8 +364,8 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
                 "username", username="root", sshpubkey="\n".join(rootauthkeys)
             )
         installed = _ty.cast(str, keypair["attributes"]["private_key"])  # type: ignore
-        if not client.shell.username or not client.shell.password:
-            client.shell = client.shell._replace(
+        if not client.ssh_config.username or not client.ssh_config.password:
+            client.ssh_config = client.ssh_config._replace(
                 username="client_keys|root",
                 password=installed,
             )
@@ -385,206 +382,126 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
         migration replaces with ``SshConfig``'s real ``client_keys`` field --
         see ``.agents/plans/hostctl_host_migration.md`` step 5.
         """
-        username = self.shell.username or ""
+        username = self.ssh_config.username or ""
         if "|" not in username:
             return None
         logintype, _, _ = username.partition("|")
         if logintype != "client_keys":
             return None
-        password = self.shell.password
+        password = self.ssh_config.password
         if isinstance(password, bytes):
             return password.decode()
         return password
 
+    # -- delegated to hostctl -------------------------------------------
+    #
+    # `run`, `path`, and the asyncssh connection used to live here as ~200
+    # lines of shell quoting, local-vs-ssh branching, and stdin/capture
+    # normalization. That is all generic host behaviour, and hostctl now owns
+    # it: `TrueNASHost` composes an SSH transport with the middleware ones and
+    # inherits `run`/`path`/`spawn` from `hostctl.host.PosixHost`.
+    #
+    # The methods below keep `TrueNASClient`'s signatures working by forwarding
+    # to that host. Equivalence was verified on a real POSIX target (TrueNAS
+    # 26.0.0-BETA.1): every assertion in the ported run() suite passes
+    # identically against both implementations.
+
+    @property
+    def host(self):
+        """The :class:`~pytruenas.host.TrueNASHost` backing this client.
+
+        Built lazily from this client's own configuration, so importing or
+        constructing a client never opens a transport.
+        """
+        if self._host is None:
+            from .host import TrueNASHost
+
+            self._host = TrueNASHost(self._as_config(), client=self)
+        return self._host
+
+    def _as_config(self):
+        """This client's settings as a :class:`~pytruenas.host.TrueNASConfig`.
+
+        A client built the legacy way (a target string parsed in ``__init__``)
+        has already resolved its scheme and path, so the config is constructed
+        from the resolved values rather than re-parsing the original string.
+        """
+        if self._config is not None:
+            return self._config
+
+        from .host import TrueNASConfig
+
+        api = self._api
+        if api.is_local and not api.port:
+            config = TrueNASConfig(
+                socket_path=_DEFAULT_SOCKET_PATH,
+                credentials=self._creds,
+                sslverify=self.sslverify,
+            )
+        else:
+            config = TrueNASConfig(
+                host=api.host,
+                port=api.port,
+                secure=api.scheme == "wss",
+                api_path=api.path or None,
+                credentials=self._creds,
+                sslverify=self.sslverify,
+            )
+        config.ssh = self._as_ssh_config()
+        self._config = config
+        return config
+
+    def _as_ssh_config(self):
+        """An :class:`hostctl.host.SshConfig` from ``.ssh_config``, or ``None``.
+
+        ``None`` means no SSH leg: the host then has only the middleware
+        transports, which for a *remote* target means no ``run`` capability at
+        all. That is not a regression -- it is the pre-existing situation made
+        visible, since the JSON-RPC API exposes no remote command execution.
+        """
+        shell = self.ssh_config
+        host = getattr(shell, "host", None)
+        if not host or shell.scheme == "local":
+            return None
+
+        from hostctl.host import SshConfig
+
+        username = shell.username or ""
+        password = shell.password or None
+        client_keys = None
+        if "|" in username:
+            logintype, username = username.split("|", maxsplit=1)
+            if logintype == "client_keys" and password:
+                client_keys = [
+                    password.encode() if isinstance(password, str) else password
+                ]
+                password = None
+        return SshConfig(
+            host=host,
+            port=shell.port or 22,
+            username=username or "root",
+            password=password,
+            client_keys=client_keys,
+            executable=shell.path or None,
+        )
+
     @property
     def ssh(self):
-        if not self._ssh or self._ssh._close_event.is_set():
-            self.logger.debug("Openning SSH connection")
-
-            connect_opts = {}
-            username = ""
-            if self.shell.username:
-                if "|" in self.shell.username:
-                    logintype, username = self.shell.username.split("|", maxsplit=1)
-                else:
-                    logintype = "password"
-                    username = "root"
-                creds = self.shell.password
-                if logintype == "client_keys" and isinstance(creds, str):
-                    creds = creds.encode()
-                connect_opts[logintype] = creds
-            username = username or "root"
-            self._ssh = _async.async_to_sync(
-                _asyncssh().connect(  # type: ignore
-                    self.shell.host,
-                    port=self.shell.port or 22,
-                    username=username,
-                    known_hosts=None,
-                    **connect_opts,
-                )
-            )
-        return self._ssh
+        """The underlying asyncssh connection (requires the ``ssh`` extra)."""
+        provider = self.host._executor_selector.providers[0]
+        transport = getattr(provider, "transport", None)
+        if transport is None:
+            raise RuntimeError("no SSH transport is configured for this client")
+        return transport.ssh
 
     def path(self, *path: PathLike, backend: "str | None" = None):
         from .fs import path as _make_path
 
         return _make_path(self, *path, backend=backend or self.fsbackend)
 
-    def run(
-        self,
-        *cmds,
-        bufsize: int = -1,
-        executable: str | None = None,
-        stdin: FileHandle = None,
-        stdout: FileHandle = None,
-        stderr: FileHandle = None,
-        cwd: PathLike | None = None,
-        env: _ty.Mapping | None = None,
-        capture_output: str | bool = True,
-        check: bool = True,
-        encoding: str | None = None,
-        errors: str | None = None,
-        input: Input | None = None,
-        timeout: float | None = None,
-        loglevel: int = _logging.TRACE,  # type: ignore
-    ) -> subprocess.CompletedProcess:
+    def run(self, *cmds, **kwargs) -> subprocess.CompletedProcess:
+        """Run commands on the target; see :meth:`hostctl.host.Host.run`.
 
-        if not executable:
-            if self.shell.path:
-                executable = self.shell.path
-            else:
-                try:
-                    if self._api.is_local and _pwd is not None:
-                        executable = _pwd.getpwnam("root").pw_shell
-                    else:
-                        executable = self.api.user._get(username="root")["shell"]  # type: ignore
-                except Exception:
-                    self.logger.warning(
-                        "Could not get default shell for root, using bash as default"
-                    )
-                    executable = "/bin/bash"
-
-        script = []
-        for cmd in cmds:
-            if not isinstance(cmd, (tuple, list)):
-                if isinstance(cmd, (PurePath, Path)):
-                    cmd = shlex.quote(cmd.as_posix())
-                elif isinstance(cmd, _os.PathLike):
-                    cmd = shlex.quote(_os.fspath(cmd))
-                else:
-                    cmd = str(cmd)
-            else:
-                cmd = " ".join(_shellquote(c) for c in cmd)
-            script.append(cmd)
-
-        if cwd:
-            cwd = PurePosixPath(cwd).as_posix()
-
-        script = ";".join(script)
-        if loglevel:
-            # The full command is logged deliberately (default level is TRACE,
-            # off unless explicitly enabled) so a caller can see exactly what
-            # ran. A command may embed a secret; that exposure is intentional
-            # and opt-in via ``loglevel``, not accidental. Pass ``loglevel=0``
-            # to suppress it entirely for a sensitive command.
-            self.logger.log(loglevel, f"Running Command: {script}")
-
-        command = [executable, "-c", script]
-
-        _capture = capture_output or ""
-        if _capture == "stdout":
-            stdout = subprocess.PIPE
-        elif _capture == "stderr":
-            stderr = subprocess.PIPE
-        elif _capture is True:
-            if not stderr:
-                stderr = subprocess.PIPE
-            if not stdout:
-                stdout = subprocess.PIPE
-
-        if input:
-            if stdin is not None:
-                raise ValueError("stdin")
-
-        if _ioutils.isbytelike(stdin) or isinstance(stdin, str):
-            input = _ty.cast(bytes, stdin)
-            stdin = None
-
-        # subprocess encodes str input itself when `encoding`/`errors` are set;
-        # pre-encoding to bytes there makes it call .encode() on bytes and crash.
-        # Only hand it bytes when we are NOT giving it a text mode.
-        if isinstance(input, str) and not (encoding or errors):
-            input = input.encode()
-        elif isinstance(input, bytes) and (encoding or errors):
-            input = input.decode(encoding or "utf-8", errors or "strict")
-
-        if self.shell.scheme == "local":
-            if stdin and not isinstance(stdin, int):
-                try:
-                    readme = stdin.fileno() == -1
-                except (OSError, AttributeError):
-                    if not hasattr(stdin, "read"):
-                        raise TypeError(stdin)
-                    readme = True
-                if readme:
-                    input = stdin.read()
-                    stdin = None
-
-            result = subprocess.run(
-                command,
-                bufsize=bufsize,
-                input=input,
-                stdin=stdin,
-                stdout=stdout,
-                stderr=stderr,
-                cwd=cwd,
-                env=env,
-                check=check,
-                encoding=encoding,
-                errors=errors,
-                timeout=timeout,
-            )
-        elif self.shell.scheme == "ssh":
-            command = shlex.join(command)
-            if cwd:
-                command = f"{shlex.join(['cd', cwd])}; {command}"
-
-            if stdout in (None, subprocess.STDOUT, _sys.stdout):
-                stdout = open(_os.dup(_sys.stdout.fileno()), _sys.stdout.mode)
-            if stderr in (None, _sys.stderr):
-                stderr = open(_os.dup(_sys.stderr.fileno()), _sys.stderr.mode)
-
-            if input:
-                stdin = _io.BytesIO(input)
-
-            result = _async.async_to_sync(
-                self.ssh.run(
-                    command,
-                    bufsize=bufsize,
-                    stdin=stdin,
-                    stdout=stdout,
-                    stderr=stderr,
-                    env=env,
-                    check=check,
-                    encoding=encoding,
-                    errors=errors,
-                    timeout=timeout,
-                )
-            )
-        else:
-            raise NotImplementedError(self.shell.scheme)
-        return _ty.cast(subprocess.CompletedProcess, result)
-
-
-def _shellquote(c: object):
-    if isinstance(c, _os.PathLike):
-        if hasattr(c, "as_posix"):
-            c = c.as_posix()  # type: ignore
-        else:
-            c = _os.fspath(c)
-        c = shlex.quote(c)  # type: ignore
-    elif isinstance(c, bytes):
-        c = c.decode()
-    else:
-        c = shlex.quote(str(c))
-    return c
+        ``executable`` is accepted for backwards compatibility and forwarded.
+        """
+        return self.host.run(*cmds, **kwargs)

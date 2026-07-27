@@ -77,7 +77,9 @@ def async_to_sync(
     return future.result(timeout)
 
 
-def _ensure_coro(awaitable: "_ty.Awaitable[_T]") -> "_ty.Coroutine[_ty.Any, _ty.Any, _T]":
+def _ensure_coro(
+    awaitable: "_ty.Awaitable[_T]",
+) -> "_ty.Coroutine[_ty.Any, _ty.Any, _T]":
     """Adapt any awaitable to a coroutine (``run_coroutine_threadsafe`` requires
     a genuine coroutine object; asyncssh's ``@async_context_manager`` awaitables
     and futures are not)."""
