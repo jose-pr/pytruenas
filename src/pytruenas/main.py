@@ -27,7 +27,7 @@ from duho.discovery import CmdBuilder, ModuleCommand, discover_commands
 from duho.fanout import run_targets
 from duho.runpath import RunPathCmd, is_runpath_dir
 
-from .client import TrueNASClient
+from .host import TrueNASHost as TrueNASClient
 from .utils.cmd import PyTrueNASArgs, register_targets
 from .utils.runpath import PyTrueNASRunPathArgs
 from .utils.target import redact as _redact

@@ -39,7 +39,7 @@ nav:
       - Overview: api/reference.md
       - Client: api/client.md
       - Namespace: api/namespace.md
-      - JSON-RPC: api/jsonrpc.md
+      - Connection: api/connection.md
       - Auth: api/auth.md
       - Filesystem: api/fs.md
       - Host: api/host.md

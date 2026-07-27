@@ -30,7 +30,7 @@ from duho import Arg, Extend, LoggingArgs, NS
 from . import io as _ioutils  # noqa: F401
 
 if _ty.TYPE_CHECKING:
-    from ..client import TrueNASClient
+    from ..host import TrueNASHost as TrueNASClient
 
 
 def _load_config(path: "_Path") -> dict:

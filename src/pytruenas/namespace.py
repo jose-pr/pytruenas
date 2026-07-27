@@ -7,8 +7,7 @@ import time as _time
 import re as _re
 import enum as _enum
 
-from . import _conn
-from . import jsonrpc as _jsonrpc
+from . import connection as _connection
 from .utils import query as _q, io as _ioutils
 
 if _ty.TYPE_CHECKING:
@@ -26,7 +25,7 @@ _UNSET = _Unset()
 _ERRNO_PATTERN = _re.compile(r"^\[([^]]*)\]\s*(.*)")
 
 
-def ioerror(error: _conn.ClientException) -> Exception:
+def ioerror(error: _connection.ClientException) -> Exception:
     """Map a middleware ``[ERRNO] message`` error to the matching ``OSError``.
 
     Only errors whose bracketed prefix names a real POSIX errno become an
@@ -139,7 +138,7 @@ class DbAction(str, _enum.Enum):
             fields = {name: val for name, val in fields.items() if name not in exclude}
             try:
                 result = __namespace.create(fields)
-            except _conn.ValidationErrors as e:
+            except _connection.ValidationErrors as e:
                 if "already exists" in e.error:
                     raise FileExistsError(e.error)
                 else:
@@ -223,21 +222,21 @@ class Namespace:
         # never fall through to None (a None here reads as "no result" and, via
         # _get, silently turns an upsert into a create).
         attempts = max(0, _tries) + 1
-        last_exc: "_conn.ClientException | None" = None
+        last_exc: "_connection.ClientException | None" = None
         for attempt in range(attempts):
             try:
                 self._client.logger.trace(  # type: ignore
                     f"Calling method: {method} args: {args}"
                 )
-                return self._client.websocket.call(method, *args, **kwds)
-            except _conn.ClientException as e:
+                return self._client.conn.call(method, *args, **kwds)
+            except _connection.ClientException as e:
                 last_exc = e
                 if e.errno == _errno.ECONNABORTED and attempt < attempts - 1:
                     self._client.logger.warning(
                         "Websocket connection was closed, trying again with new connection"
                     )
                     # Drop the dead connection on the CLIENT so the next
-                    # `websocket` access reconnects (setting it on self, a
+                    # `conn` access reconnects (setting it on self, a
                     # Namespace, was a no-op that only worked by accident).
                     self._client._conn = None
                     _time.sleep(1)
@@ -271,16 +270,16 @@ class Namespace:
 
     def subscribe(
         self,
-        __callback: "_ty.Callable[[_conn.Event], object] | None" = None,
+        __callback: "_ty.Callable[[_connection.Event], object] | None" = None,
         *,
         event: "str | None" = None,
-        maxsize: int = _jsonrpc.DEFAULT_EVENT_QUEUE_SIZE,
-    ) -> "_conn.Subscription":
+        maxsize: int = _connection.DEFAULT_EVENT_QUEUE_SIZE,
+    ) -> "_connection.Subscription":
         """Subscribe to this namespace's collection events.
 
         ``client.api.alert.list.subscribe()`` subscribes to the ``alert.list``
         event -- the event name defaults to this namespace's dotted path.
-        Returns a :class:`~pytruenas.jsonrpc.Subscription`; consume it via its
+        Returns a :class:`~pytruenas.connection.Subscription`; consume it via its
         ``events()`` iterator and/or the optional ``__callback`` (invoked inline
         on the reader thread -- keep it fast).
 
@@ -295,7 +294,7 @@ class Namespace:
                 "no event name: call subscribe() on a namespace "
                 "(client.api.alert.list.subscribe()) or pass event=..."
             )
-        return self._client.websocket.subscribe(name, __callback, maxsize=maxsize)
+        return self._client.conn.subscribe(name, __callback, maxsize=maxsize)
 
     def _query(self, *__opts: dict | _q.Option, **filter):
         opts = _q.Option.options(*__opts)

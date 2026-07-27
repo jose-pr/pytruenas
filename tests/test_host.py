@@ -416,15 +416,27 @@ def test_convenience_wrappers_call_the_right_api_method(
     getattr(getattr(api, namespace), call).assert_called_once_with()
 
 
-def test_subscribe_goes_through_the_websocket(monkeypatch):
+def test_subscribe_goes_through_the_connection(monkeypatch):
     host = _built()
-    websocket = MagicMock()
-    monkeypatch.setattr(type(host), "websocket", websocket)
+    conn = MagicMock()
+    monkeypatch.setattr(type(host), "conn", conn)
 
     host.subscribe("alert.list")
 
-    websocket.subscribe.assert_called_once()
-    assert websocket.subscribe.call_args[0][0] == "alert.list"
+    conn.subscribe.assert_called_once()
+    assert conn.subscribe.call_args[0][0] == "alert.list"
+
+
+def test_websocket_is_an_alias_for_conn(monkeypatch):
+    """`.websocket` must *read* `.conn`, not be a second copy of it.
+
+    `websocket = conn` at class scope would create two independent attributes,
+    so overriding one would silently leave the other on the original.
+    """
+    host = _built()
+    conn = MagicMock()
+    monkeypatch.setattr(type(host), "conn", conn)
+    assert host.websocket is conn
 
 
 def test_client_is_an_alias_for_self():

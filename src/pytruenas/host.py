@@ -38,9 +38,9 @@ from hostctl.host import HostConfig as _HostConfig
 from hostctl.host import PosixHost as _PosixHost
 from hostctl.host import uri_host as _uri_host
 
-from . import _conn
 from . import auth as _auth
-from .jsonrpc import DEFAULT_UNIX_SOCKET
+from . import connection as _connection
+from .connection import DEFAULT_UNIX_SOCKET
 from .namespace import Namespace as _Namespace
 from .utils.target import Target as _TGT
 
@@ -56,7 +56,7 @@ if _ty.TYPE_CHECKING:  # pragma: no cover - typing only
 else:
     ApiVersion = _ty.TypeVar("ApiVersion", bound=_Namespace)
 
-#: The local middleware unix socket. Re-exported from :mod:`pytruenas.jsonrpc`
+#: The local middleware unix socket. Re-exported from :mod:`pytruenas.connection`
 #: rather than redefined, so the two can never drift apart.
 DEFAULT_SOCKET_PATH = DEFAULT_UNIX_SOCKET
 
@@ -560,8 +560,8 @@ class TrueNASHost(_PosixHost, _ty.Generic[ApiVersion]):
                 f"TrueNASConfig; pass them to from_target instead: {unexpected}"
             )
         self._config = config
-        #: The live JSON-RPC connection, opened on first `.websocket` access.
-        self._conn: "_conn.Client | None" = None
+        #: The live JSON-RPC connection, opened on first `.conn` access.
+        self._conn: "_connection.TrueNASWSConnection | None" = None
         self.logger = _resolve_logger(config.logger)
         # `client=` is accepted and ignored: the host *is* the client now.
         # Kept so existing callers (and tests that injected a stand-in) do not
@@ -691,21 +691,36 @@ class TrueNASHost(_PosixHost, _ty.Generic[ApiVersion]):
 
     def _openwss(self):
         api = self._target
-        return _conn.Client(
+        return _connection.TrueNASWSConnection(
             None if api.is_local and not api.port else api.uri,
             verify_ssl=self._config.sslverify,
             py_exceptions=False,
         )
 
     @property
-    def websocket(self):
-        """The live JSON-RPC websocket; connects on first access."""
+    def conn(self) -> "_connection.TrueNASWSConnection":
+        """The live JSON-RPC connection; opens on first access.
+
+        Logs in first when ``autologin`` is set (the default) and there is no
+        live connection. Reconnects if the previous one closed.
+        """
         if self._conn is None or self._conn._closed.is_set():
             if self._config.autologin:
                 self.login()
             else:
                 self._conn = self._openwss()
-        return _ty.cast(_conn.Client, self._conn)
+        return _ty.cast("_connection.TrueNASWSConnection", self._conn)
+
+    @property
+    def websocket(self) -> "_connection.TrueNASWSConnection":
+        """Former name of :attr:`conn`, kept because it is public API.
+
+        Defined as a property that *reads* ``self.conn`` rather than as
+        ``websocket = conn``: the latter makes two independent class
+        attributes, so patching or overriding one would silently leave the
+        other pointing at the original.
+        """
+        return self.conn
 
     def login(
         self,
@@ -802,7 +817,7 @@ class TrueNASHost(_PosixHost, _ty.Generic[ApiVersion]):
         event: str,
         callback: "_ty.Callable[..., object] | None" = None,
         *,
-        maxsize: int = _conn.DEFAULT_EVENT_QUEUE_SIZE,
+        maxsize: int = _connection.DEFAULT_EVENT_QUEUE_SIZE,
     ):
         """Subscribe to a middleware event; return a ``Subscription``.
 
@@ -811,7 +826,7 @@ class TrueNASHost(_PosixHost, _ty.Generic[ApiVersion]):
         current websocket and does **not** survive a reconnect -- the
         ``events()`` iterator ending is that signal.
         """
-        return self.websocket.subscribe(event, callback, maxsize=maxsize)
+        return self.conn.subscribe(event, callback, maxsize=maxsize)
 
     # -- HTTP side channels ------------------------------------------------
 
