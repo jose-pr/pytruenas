@@ -20,10 +20,12 @@ from hostctl.provider import (  # noqa: E402
     ProviderSelector,
 )
 
+from pathlib_next import LocalPath  # noqa: E402
+
 from pytruenas.providers import (  # noqa: E402
     WS_PATH_CAPABILITIES,
-    MiddlewareExecutorProvider,
     TnasWsPathProvider,
+    local_providers,
 )
 
 
@@ -102,16 +104,16 @@ def test_ws_path_provider_unwraps_a_host(monkeypatch):
     assert seen["client"] is inner
 
 
-def test_ws_path_provider_uses_local_paths_for_a_local_target(monkeypatch):
-    """A local target must not be served through the middleware.
+def test_ws_path_provider_always_uses_the_websocket_backend(monkeypatch):
+    """This provider is unconditionally the websocket leg.
 
-    Regression: `filesystem.get` routes reads through the HTTP side channel,
-    which a unix-socket client cannot reach (it resolves to https://localhost
-    and fails the appliance's self-signed cert). A path on the same machine is
-    a plain local path.
+    A *local* target is served by hostctl's own local path provider, which the
+    host orders ahead of this one, so there is no local case to special-case
+    here. (It used to switch to `backend="local"` itself -- necessary before
+    the local provider existed, because `filesystem.get` routes reads through
+    the HTTP side channel, which a unix-socket client cannot reach at all.)
     """
     import pytruenas.fs as fs
-    from pathlib_next import LocalPath
 
     seen = {}
 
@@ -121,11 +123,9 @@ def test_ws_path_provider_uses_local_paths_for_a_local_target(monkeypatch):
 
     monkeypatch.setattr(fs, "path", fake_path)
 
-    TnasWsPathProvider(_client(is_local=True)).path("/etc/hostname")
-    assert seen["backend"] == "local"
-
-    TnasWsPathProvider(_client(is_local=False)).path("/etc/hostname")
-    assert seen["backend"] == "ws"
+    for is_local in (True, False):
+        TnasWsPathProvider(_client(is_local=is_local)).path("/etc/hostname")
+        assert seen["backend"] == "ws"
 
 
 def test_ws_path_provider_builds_a_ws_path(monkeypatch):
@@ -152,66 +152,30 @@ def test_ws_path_provider_builds_a_ws_path(monkeypatch):
     assert seen["client"] is client
 
 
-# -- MiddlewareExecutorProvider --------------------------------------------
+# -- local_providers -------------------------------------------------------
+#
+# pytruenas defines no executor provider of its own for a local target. There
+# was one -- it wrapped hostctl's LocalExecutor behind an `is_local` guard and
+# called itself MiddlewareExecutorProvider, which was doubly misleading:
+# nothing about the dispatch involved middlewared, and the guard only repeated
+# a decision the caller had already made. These tests pin that the stock
+# hostctl pair is what gets used.
 
 
-def test_middleware_executor_is_an_executor_provider():
-    provider = MiddlewareExecutorProvider(_client(True))
-    assert isinstance(provider, ExecutorProvider)
-    assert provider.name == "middleware"
-
-
-def test_middleware_executor_available_only_when_local():
-    assert MiddlewareExecutorProvider(_client(True)).probe().usable
-    probe = MiddlewareExecutorProvider(_client(False)).probe()
-    assert not probe.usable
-    assert "remote command execution" in probe.reason
-
-
-def test_middleware_executor_declines_remotely_without_dispatching():
-    """Declining must use OperationNotStarted -- that is the failover signal.
-
-    hostctl retries the next provider only when a provider proves it started no
-    work; any other exception is treated as a real failure and propagates.
-    """
-    provider = MiddlewareExecutorProvider(_client(False))
-    with pytest.raises(OperationNotStarted):
-        provider.connect()
-    with pytest.raises(OperationNotStarted):
-        provider.execute("echo", "hi")
-
-
-def test_middleware_executor_connect_is_a_noop_when_local():
-    MiddlewareExecutorProvider(_client(True)).connect()
-
-
-def test_middleware_executor_declares_args_capability():
-    """Without ``args`` the whole invocation arrives as one string.
-
-    Regression: hostctl renders ``/bin/sh -c 'printf hi'`` and, for a provider
-    that cannot take argv, passes it as a *single* command. subprocess then
-    looks that entire string up as one literal filename and raises
-    FileNotFoundError. Declaring ``args`` makes the shell flavour split it into
-    a real argv (``["/bin/sh", "-c", "printf hi"]``).
-
-    This was caught only on a real POSIX target -- the Windows suite mocks the
-    host, so every run() test passed while the provider was broken.
-    """
-    provider = MiddlewareExecutorProvider(_client(True))
-    assert "args" in provider.capabilities
-
-
-def test_middleware_executor_uses_hostctl_local_executor():
-    """Dispatch must go through hostctl's executor, not a bare subprocess call.
-
-    LocalExecutor owns input normalization against the stream mode, the
-    extended capture_output convention, and the stdin/input conflict check.
-    Reimplementing those here is how the bytes-input deadlock reappeared once.
-    """
+def test_local_providers_are_hostctls_own():
     from hostctl.executor import LocalExecutor
 
-    provider = MiddlewareExecutorProvider(_client(True))
-    result = provider.execute(
+    executor, path = local_providers()
+    assert isinstance(executor, ExecutorProvider)
+    assert isinstance(path, PathProvider)
+    assert executor.name == "local"
+    assert path.name == "local"
+    assert isinstance(executor.executor, LocalExecutor)
+
+
+def test_local_executor_runs_a_command():
+    executor, _ = local_providers()
+    result = executor.execute(
         sys.executable,
         "-c",
         "print('hi')",
@@ -220,43 +184,46 @@ def test_middleware_executor_uses_hostctl_local_executor():
         encoding="utf-8",
     )
     assert result.stdout.strip() == "hi"
-    assert isinstance(provider._executor, LocalExecutor)
 
 
-def test_middleware_executor_reads_legacy_client_target():
-    """A pre-migration client carries `_api`, not `config` -- still work."""
-    client = MagicMock(spec=["_api"])
-    client._api = MagicMock()
-    client._api.is_local = True
-    assert MiddlewareExecutorProvider(client).probe().usable
+def test_local_executor_declares_argv_support():
+    """hostctl's LocalExecutor takes a real argv.
+
+    Regression: a provider without the `args` capability gets the whole
+    invocation as one string (``/bin/sh -c 'printf hi'``), which subprocess
+    then looks up as a single literal filename -> FileNotFoundError. Caught
+    only on a real POSIX target, because the Windows suite mocks the host.
+    """
+    executor, _ = local_providers()
+    assert "args" in executor.capabilities
+
+
+def test_local_path_provider_returns_a_real_path():
+    from pathlib_next import Path
+
+    _, path = local_providers()
+    assert isinstance(path.path("/etc/hostname"), Path)
 
 
 # -- selector integration --------------------------------------------------
 
 
-def test_selector_falls_through_to_ssh_when_middleware_declines():
-    """The whole point of step 3: an honest decline yields a clean fallback."""
-    middleware = MiddlewareExecutorProvider(_client(False))
+def test_executor_order_prefers_local_then_ssh():
+    """Local first: reaching this machine over SSH would be strictly worse."""
+    local, _ = local_providers()
     ssh = ExecutorProvider("ssh", lambda *a, **k: "ran-over-ssh")
 
-    selector = ProviderSelector((middleware, ssh))
-    chosen = selector.select().provider
-    # An unusable probe means the selector never even offers the middleware.
-    assert chosen is ssh
-    assert chosen.execute("echo") == "ran-over-ssh"
+    selector = ProviderSelector((local, ssh))
+    assert selector.select().provider is local
 
-
-def test_selector_prefers_middleware_when_local():
-    middleware = MiddlewareExecutorProvider(_client(True))
-    ssh = ExecutorProvider("ssh", lambda *a, **k: "ran-over-ssh")
-
-    selector = ProviderSelector((middleware, ssh))
-    assert selector.select().provider is middleware
+    # If the local leg is declined, the remote one still serves.
+    selector.decline("local", "not this machine")
+    assert selector.select().provider is ssh
 
 
 def test_path_selector_prefers_sftp_then_websocket():
     """Ordering reproduces TruenasPath's SFTP-preferred behaviour."""
-    sftp = PathProvider("sftp", lambda *s: "sftp-path")
+    sftp = PathProvider("sftp", lambda *s: LocalPath("/sftp-path"))
     ws = TnasWsPathProvider(_client())
 
     selector = ProviderSelector((sftp, ws))

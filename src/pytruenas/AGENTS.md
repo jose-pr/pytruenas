@@ -114,10 +114,17 @@ inherited, and it adds the middleware surface (`api`, `websocket`, `login`,
 
 Transports are *composed*, and the order is deliberate:
 
-| | with SSH | without SSH |
-| --- | --- | --- |
-| executors | `ssh`, `webshell`, `middleware` | `webshell`, `middleware` |
-| paths | `sftp`, `tnasws` | `tnasws` |
+| | local target | remote + SSH | remote, no SSH |
+| --- | --- | --- | --- |
+| executors | `local` | `ssh`, `webshell` | `webshell` |
+| paths | `local`, `tnasws` | `sftp`, `tnasws` | `tnasws` |
+
+**`local`** is hostctl's stock pair (`LocalExecutor` + a plain local path) —
+pytruenas adds nothing. A target reached over the middleware unix socket *is*
+this machine, so a command is a plain `subprocess` call and a path is a plain
+local path; going through SSH, a PTY, or the filesystem API to reach the same
+box would be slower and strictly less capable. Hence it is first, and the
+remote providers are not even built for a local target.
 
 **`webshell`** runs commands over `/websocket/shell` — the same PTY the web
 UI's Shell page drives. It exists for a host reachable on the API port but not

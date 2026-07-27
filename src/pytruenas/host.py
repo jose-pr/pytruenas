@@ -372,10 +372,20 @@ class TrueNASHost(_PosixHost):
         )
 
     def _build_providers(self, config: "TrueNASConfig"):
-        from .providers import MiddlewareExecutorProvider, TnasWsPathProvider
+        from .providers import TnasWsPathProvider, local_providers
 
         executors: list = []
         paths: list = []
+
+        # Local first. If the target *is* this machine -- which is what the
+        # middleware unix socket means -- then plain subprocess and plain local
+        # paths are the right answer: reaching the same box through SSH, a PTY,
+        # or the filesystem API would be slower and strictly less capable.
+        # Everything after this is a way of reaching a machine somewhere else.
+        if config.is_local:
+            executor, path = local_providers()
+            executors.append(executor)
+            paths.append(path)
 
         if config.ssh is not None:
             from hostctl import ssh_providers
@@ -388,11 +398,11 @@ class TrueNASHost(_PosixHost):
             executors.append(executor)
             paths.append(path)
 
-        # The web shell sits between SSH and the middleware: it is a real
-        # command channel for a host reachable on the API port but not on 22
-        # (NAT, firewall, reverse proxy), which would otherwise have no
-        # executor at all. It ranks below SSH because a PTY merges stdout and
-        # stderr and cannot take piped input.
+        # The web shell is the last resort for a *remote* host: a real command
+        # channel for one reachable on the API port but not on 22 (NAT,
+        # firewall, reverse proxy), which would otherwise have no executor at
+        # all. It ranks below SSH because a PTY merges stdout and stderr and
+        # cannot take piped input.
         if config.webshell and not config.is_local:
             from .webshell import WebShellExecutorProvider
 
@@ -400,7 +410,6 @@ class TrueNASHost(_PosixHost):
 
         # `self` is passed rather than the client: the providers only need it
         # lazily, and this keeps construction free of a websocket connection.
-        executors.append(MiddlewareExecutorProvider(_ty.cast(_ty.Any, self)))
         paths.append(TnasWsPathProvider(_ty.cast(_ty.Any, self)))
         return tuple(executors), tuple(paths)
 
