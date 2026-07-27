@@ -113,7 +113,10 @@ Repository = "https://github.com/jose-pr/pytruenas"
 "README.md" = "pytruenas/README.md"
 
 [tool.hatch.build.targets.sdist]
-exclude = ["/.*", "/.agents"]
+# `/.*` already covers every dot-entry at the root -- .agents, .github, .venv,
+# .pytest_cache, .coverage. (.gitignore still ships: hatchling includes it for
+# sdists by design, so the archive reproduces the source tree.)
+exclude = ["/.*"]
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/pytruenas"]
