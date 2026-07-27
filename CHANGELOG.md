@@ -27,7 +27,7 @@ TrueNAS-specific parts here. **Release is blocked on hostctl's own release.**
   `user.shell_choices` are shell-adjacent, and the former only resizes an
   already-open session) — so such a host previously had no `run()` at all.
   `/websocket/shell`, the PTY the web UI's Shell page drives, is a real command
-  channel on the same port. Pass `webshell=False` to require SSH instead.
+  channel on the same port. Pass `executor=["ssh"]` to require SSH instead.
 - **The scheme/API-path probe moved from construction to first connect.**
   `TrueNASClient("bad-host")` now constructs successfully and raises on first
   use. Configs are therefore buildable offline, which is what `HostConfig`
@@ -48,6 +48,12 @@ TrueNAS-specific parts here. **Release is blocked on hostctl's own release.**
   `/websocket/shell`. Ordered after SSH; declares its limits rather than hiding
   them (stdout and stderr are one stream, no piped input, single-line commands
   only — pipes and here-strings work, being ordinary shell syntax).
+- **`executor=` / `path=` on `TrueNASConfig`** — name the providers to use, in
+  preference order, as a single name or a sequence: `executor=["ssh"]`,
+  `path=["local", "tnasws"]`, `executor=[]` for no command channel at all.
+  Unknown names, and `ssh`/`sftp` without an `SshConfig`, raise rather than
+  composing a host that would fail later. Matches hostctl's own
+  `SystemConfig(executor=..., path=...)` spelling.
 - **`Credentials.from_host_credentials()`** — maps hostctl's already-parsed
   credential mapping (including a URI-supplied OTP) onto a `Credentials`
   subclass, with no second round of string parsing.

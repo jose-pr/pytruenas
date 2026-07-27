@@ -134,8 +134,22 @@ in particular would be a fallback that could only ever fail there —
 UI's Shell page drives. It exists for a host reachable on the API port but not
 on 22 (NAT, a firewall allowing only 443, a reverse proxy), which would
 otherwise have no `run()` at all. It ranks below SSH because a PTY merges
-stdout and stderr and cannot take piped input; pass `webshell=False` to require
-SSH and get an honest "no run capability" instead.
+stdout and stderr and cannot take piped input.
+
+**Overriding the selection.** `executor=` and `path=` name the providers to
+use, in preference order — a single name or a sequence:
+
+```python
+TrueNASConfig.from_target("wss://nas", executor="ssh", path="sftp")   # SSH only
+TrueNASConfig.from_target("wss://nas", executor=["ssh"])              # no web shell
+TrueNASConfig.from_target(None, path=["local", "tnasws"])             # force tnasws locally
+TrueNASConfig.from_target("wss://nas", executor=[])                   # no run capability
+```
+
+Valid names are `local`/`ssh`/`webshell` for executors and
+`local`/`sftp`/`tnasws` for paths; an unknown one raises rather than silently
+composing a host with nothing. Requesting `ssh`/`sftp` without an `SshConfig`
+also raises. `None` (the default) means "decide from the target".
 
 `TrueNASConfig` is the `hostctl.host.HostConfig`. It accepts every connection
 string `TrueNASClient` does and normalizes to a `truenas+*` scheme

@@ -235,7 +235,8 @@ def test_declared_credentials_are_all_accepted():
             "sslverify",
             "ssh",
             "version",
-            "webshell",
+            "executor",
+            "path",
         }
 
 
@@ -328,12 +329,23 @@ def test_options_reach_the_config_on_every_branch(target):
     for the other, which is how ``webshell=False`` was accepted and dropped.
     """
     config = TrueNASConfig.from_target(
-        target, sslverify=False, version="v2.0", webshell=False
+        target, sslverify=False, version="v2.0", executor=["local"], path=["local"]
     )
     assert config.sslverify is False
     assert config.version == "v2.0"
-    assert config.webshell is False
+    assert config.executors == ("local",)
+    assert config.paths == ("local",)
 
 
-def test_webshell_defaults_on():
-    assert TrueNASConfig.from_target("wss://nas").webshell is True
+def test_provider_overrides_default_to_none():
+    """``None`` means "decide from the target", not "no providers"."""
+    config = TrueNASConfig.from_target("wss://nas")
+    assert config.executors is None
+    assert config.paths is None
+
+
+def test_a_bare_string_override_is_one_name():
+    """``executor="ssh"`` must not become ``("s", "s", "h")``."""
+    config = TrueNASConfig.from_target("wss://nas", executor="ssh", path="sftp")
+    assert config.executors == ("ssh",)
+    assert config.paths == ("sftp",)

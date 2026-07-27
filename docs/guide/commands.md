@@ -72,15 +72,31 @@ rather than a pair of clean channels:
 - The exit status is recovered from the terminal stream, and terminal escape
   sequences are stripped from the output.
 
-Pass `webshell=False` when building the configuration to decline it — a remote
-host without SSH then honestly reports no `run` capability instead of falling
-back to a PTY:
+## Choosing the transport yourself
+
+`executor=` and `path=` override the defaults, naming providers in preference
+order. Each takes a single name or a sequence:
 
 ```python
 from pytruenas.host import TrueNASConfig
 
-config = TrueNASConfig.from_target("wss://nas", webshell=False)
+# SSH only -- never fall back to the web shell
+TrueNASConfig.from_target("wss://nas", executor=["ssh"], path=["sftp"])
+
+# Prefer the web shell over SSH, for whatever reason
+TrueNASConfig.from_target("wss://nas", executor=["webshell", "ssh"])
+
+# Force the websocket filesystem leg on a local target (not offered by default)
+TrueNASConfig.from_target(None, path=["local", "tnasws"])
+
+# Refuse to run commands at all
+TrueNASConfig.from_target("wss://nas", executor=[])
 ```
+
+Valid names are `local`, `ssh`, and `webshell` for executors, and `local`,
+`sftp`, and `tnasws` for paths. An unknown name raises rather than quietly
+composing a host with no provider, and asking for `ssh`/`sftp` without an
+`SshConfig` raises too. Omit them (the default) to decide from the target.
 
 !!! note
     SSH execution and the SFTP leg of `client.path(...)` need the `ssh` extra:

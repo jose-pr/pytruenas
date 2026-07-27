@@ -77,6 +77,40 @@ _SCHEME_ALIASES = {
 #: local-socket shortcut behaves exactly as it does today.
 _LOCAL_HOSTS = {"", "localhost", "127.0.0.1"}
 
+#: Provider names accepted by the ``executor=``/``path=`` overrides.
+EXECUTOR_NAMES = ("local", "ssh", "webshell")
+PATH_NAMES = ("local", "sftp", "tnasws")
+
+
+def _reject_unknown(
+    names: "_ty.Sequence[str]", allowed: "_ty.Sequence[str]", kind: str
+) -> None:
+    """Fail on an unrecognised provider name rather than silently ignoring it.
+
+    A typo (``executor=["shh"]``) would otherwise compose a host with no
+    executor at all and no complaint, surfacing much later as a confusing
+    "no provider is available".
+    """
+    unknown = [name for name in names if name not in allowed]
+    if unknown:
+        raise ValueError(
+            f"unknown {kind} provider: {unknown[0]!r} "
+            f"(available: {', '.join(allowed)})"
+        )
+
+
+def _as_names(value: "_ty.Iterable[str] | str | None") -> "tuple[str, ...] | None":
+    """Normalize a provider override to a tuple of names, or ``None``.
+
+    A bare string is a single name, not an iterable of characters -- ``"ssh"``
+    must not become ``("s", "s", "h")``.
+    """
+    if value is None:
+        return None
+    if isinstance(value, str):
+        return (value,)
+    return tuple(str(item) for item in value)
+
 
 def _normalize_target(target: "str | None") -> str:
     """Rewrite any accepted connection string into a canonical ``truenas+*`` URI.
@@ -164,14 +198,20 @@ class TrueNASConfig(
         sslverify: bool = True,
         credentials: object = None,
         ssh: object = None,
-        webshell: bool = True,
+        executor: "_ty.Iterable[str] | str | None" = None,
+        path: "_ty.Iterable[str] | str | None" = None,
     ) -> None:
         super().__init__()
-        #: Whether to offer the ``/_shell`` executor for a remote target. On by
-        #: default: it ranks below SSH, so it only ever serves a host that would
-        #: otherwise have no command channel at all. Set ``False`` to require
-        #: SSH and get a clear "no run capability" instead of a PTY fallback.
-        self.webshell = webshell
+        #: Explicit provider selection, overriding the defaults. Each is a name
+        #: or a sequence of names, in preference order; ``None`` means "decide
+        #: from the target". See :meth:`TrueNASHost._build_providers`.
+        #:
+        #: This replaced a ``webshell: bool`` flag, which was only ever the one
+        #: hardcoded case of it (``executor=["ssh"]`` says the same thing, and
+        #: says it in a form that also covers "SSH only", "force the web
+        #: shell", or any other combination).
+        self.executors = _as_names(executor)
+        self.paths = _as_names(path)
         self.host = host
         self.port = int(port or 0)
         #: ``True`` -> wss, ``False`` -> ws, ``None`` -> probe on connect.
@@ -220,7 +260,8 @@ class TrueNASConfig(
         "sslverify",
         "ssh",
         "version",
-        "webshell",
+        "executor",
+        "path",
     )
 
     @classmethod
@@ -264,7 +305,8 @@ class TrueNASConfig(
                 sslverify=_ty.cast(bool, credentials.get("sslverify", True)),
                 version=_ty.cast(str, credentials.get("version", "current")),
                 ssh=credentials.get("ssh"),
-                webshell=_ty.cast(bool, credentials.get("webshell", True)),
+                executor=_ty.cast(_ty.Any, credentials.get("executor")),
+                path=_ty.cast(_ty.Any, credentials.get("path")),
             )
 
         secure = None
@@ -273,17 +315,21 @@ class TrueNASConfig(
         elif scheme == "truenas+wss":
             secure = True
 
-        path = parsed.path or ""
+        # Named `uri_path`, not `path`: `path` is now a constructor keyword
+        # (the path-provider override), and shadowing it here would be a
+        # confusing near-miss for anyone editing this call.
+        uri_path = parsed.path or ""
         return cls(
             host=parsed.hostname or "",
             port=parsed.port or 0,
             secure=secure,
-            api_path=path if path.strip("/") else None,
+            api_path=uri_path if uri_path.strip("/") else None,
             credentials=creds,
             sslverify=_ty.cast(bool, credentials.get("sslverify", True)),
             version=_ty.cast(str, credentials.get("version", "current")),
             ssh=credentials.get("ssh"),
-            webshell=_ty.cast(bool, credentials.get("webshell", True)),
+            executor=_ty.cast(_ty.Any, credentials.get("executor")),
+            path=_ty.cast(_ty.Any, credentials.get("path")),
         )
 
     # -- derived state -----------------------------------------------------
@@ -371,47 +417,87 @@ class TrueNASHost(_PosixHost):
             **_ty.cast(_ty.Any, options),
         )
 
-    def _build_providers(self, config: "TrueNASConfig"):
-        from .providers import TnasWsPathProvider, local_providers
+    def _default_provider_names(self, config: "TrueNASConfig"):
+        """The provider names for a target, when nothing is overridden.
 
-        executors: list = []
-        paths: list = []
+        A local target is served entirely by hostctl's stock local pair: plain
+        subprocess and plain local paths. Reaching this same machine through
+        SSH, a PTY, or the filesystem API would be slower and strictly less
+        capable, so no remote provider is offered -- they are all ways of
+        reaching a machine somewhere *else*.
 
-        # A local target is served entirely by hostctl's stock local pair:
-        # plain subprocess and plain local paths. Reaching this same machine
-        # through SSH, a PTY, or the filesystem API would be slower and
-        # strictly less capable, so none of the remote providers are built --
-        # they are all ways of reaching a machine somewhere *else*.
+        Remotely, SSH leads on capability (separate streams, real stdin, a rich
+        POSIX path surface) and the websocket legs follow: the web shell as a
+        command channel for a host with no reachable SSH, and ``tnasws`` for
+        paths.
+        """
         if config.is_local:
-            executor, path = local_providers()
-            return (executor,), (path,)
+            return ("local",), ("local",)
+        executors = ("ssh", "webshell") if config.ssh is not None else ("webshell",)
+        paths = ("sftp", "tnasws") if config.ssh is not None else ("tnasws",)
+        return executors, paths
 
-        if config.ssh is not None:
+    def _build_providers(self, config: "TrueNASConfig"):
+        """Build the ordered provider tuples for this host.
+
+        ``config.executors`` / ``config.paths`` override the defaults when set,
+        naming providers in preference order. That is what makes "force SSH",
+        "never use the web shell", or "websocket only" expressible without a
+        flag per transport.
+        """
+        default_executors, default_paths = self._default_provider_names(config)
+        executor_names = (
+            default_executors if config.executors is None else config.executors
+        )
+        path_names = default_paths if config.paths is None else config.paths
+
+        _reject_unknown(executor_names, EXECUTOR_NAMES, "executor")
+        _reject_unknown(path_names, PATH_NAMES, "path")
+
+        # Both SSH providers come from one factory call so they share a single
+        # transport: assembling them by hand type-checks but can silently open
+        # two connections, only one of which is ever closed.
+        ssh_pair = None
+        if "ssh" in executor_names or "sftp" in path_names:
+            if config.ssh is None:
+                raise ValueError(
+                    "ssh/sftp providers were requested but no SSH configuration "
+                    "is set; pass ssh=SshConfig(...) or call install_sshcreds()"
+                )
             from hostctl import ssh_providers
 
-            # One call, one shared transport. Assembling the two providers by
-            # hand type-checks but can silently open two connections, only one
-            # of which is ever closed -- which is why hostctl exposes the pair
-            # as a factory rather than exporting the transport.
-            executor, path = ssh_providers(_ty.cast(_ty.Any, config.ssh))
-            executors.append(executor)
-            paths.append(path)
+            ssh_pair = ssh_providers(_ty.cast(_ty.Any, config.ssh))
 
-        # The web shell is the last resort for a *remote* host: a real command
-        # channel for one reachable on the API port but not on 22 (NAT,
-        # firewall, reverse proxy), which would otherwise have no executor at
-        # all. It ranks below SSH because a PTY merges stdout and stderr and
-        # cannot take piped input.
-        if config.webshell and not config.is_local:
+        local_pair = None
+        if "local" in executor_names or "local" in path_names:
+            from .providers import local_providers
+
+            local_pair = local_providers()
+
+        def _executor(name: str):
+            if name == "local":
+                return _ty.cast(_ty.Any, local_pair)[0]
+            if name == "ssh":
+                return _ty.cast(_ty.Any, ssh_pair)[0]
             from .webshell import WebShellExecutorProvider
 
-            executors.append(WebShellExecutorProvider(_ty.cast(_ty.Any, self)))
+            return WebShellExecutorProvider(_ty.cast(_ty.Any, self))
 
-        # The websocket filesystem leg, for a remote target only. `self` is
-        # passed rather than the client: the provider only needs it lazily,
-        # which keeps construction free of a websocket connection.
-        paths.append(TnasWsPathProvider(_ty.cast(_ty.Any, self)))
-        return tuple(executors), tuple(paths)
+        def _path(name: str):
+            if name == "local":
+                return _ty.cast(_ty.Any, local_pair)[1]
+            if name == "sftp":
+                return _ty.cast(_ty.Any, ssh_pair)[1]
+            from .providers import TnasWsPathProvider
+
+            # `self` rather than the client: the provider only needs it lazily,
+            # which keeps construction free of a websocket connection.
+            return TnasWsPathProvider(_ty.cast(_ty.Any, self))
+
+        return (
+            tuple(_executor(name) for name in executor_names),
+            tuple(_path(name) for name in path_names),
+        )
 
     # -- the TrueNAS surface ----------------------------------------------
 
