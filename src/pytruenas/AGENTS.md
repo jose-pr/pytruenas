@@ -116,8 +116,15 @@ Transports are *composed*, and the order is deliberate:
 
 | | with SSH | without SSH |
 | --- | --- | --- |
-| executors | `ssh`, `middleware` | `middleware` (local only) |
+| executors | `ssh`, `webshell`, `middleware` | `webshell`, `middleware` |
 | paths | `sftp`, `tnasws` | `tnasws` |
+
+**`webshell`** runs commands over `/websocket/shell` — the same PTY the web
+UI's Shell page drives. It exists for a host reachable on the API port but not
+on 22 (NAT, a firewall allowing only 443, a reverse proxy), which would
+otherwise have no `run()` at all. It ranks below SSH because a PTY merges
+stdout and stderr and cannot take piped input; pass `webshell=False` to require
+SSH and get an honest "no run capability" instead.
 
 `TrueNASConfig` is the `hostctl.host.HostConfig`. It accepts every connection
 string `TrueNASClient` does and normalizes to a `truenas+*` scheme

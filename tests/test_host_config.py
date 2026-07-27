@@ -235,6 +235,7 @@ def test_declared_credentials_are_all_accepted():
             "sslverify",
             "ssh",
             "version",
+            "webshell",
         }
 
 
@@ -316,3 +317,23 @@ def test_bare_schemes_are_not_claimed_globally(uri):
 def test_sslverify_defaults_true_and_is_settable():
     assert TrueNASConfig.from_target("wss://nas").sslverify is True
     assert TrueNASConfig.from_target("wss://nas", sslverify=False).sslverify is False
+
+
+@pytest.mark.parametrize("target", ["wss://nas", None])
+def test_options_reach_the_config_on_every_branch(target):
+    """Each accepted option must take effect for *both* URI shapes.
+
+    ``_from_parsed_uri`` returns from two places -- the unix-socket branch and
+    the host/port branch. An option forwarded in only one is silently ignored
+    for the other, which is how ``webshell=False`` was accepted and dropped.
+    """
+    config = TrueNASConfig.from_target(
+        target, sslverify=False, version="v2.0", webshell=False
+    )
+    assert config.sslverify is False
+    assert config.version == "v2.0"
+    assert config.webshell is False
+
+
+def test_webshell_defaults_on():
+    assert TrueNASConfig.from_target("wss://nas").webshell is True

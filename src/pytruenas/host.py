@@ -164,8 +164,14 @@ class TrueNASConfig(
         sslverify: bool = True,
         credentials: object = None,
         ssh: object = None,
+        webshell: bool = True,
     ) -> None:
         super().__init__()
+        #: Whether to offer the ``/_shell`` executor for a remote target. On by
+        #: default: it ranks below SSH, so it only ever serves a host that would
+        #: otherwise have no command channel at all. Set ``False`` to require
+        #: SSH and get a clear "no run capability" instead of a PTY fallback.
+        self.webshell = webshell
         self.host = host
         self.port = int(port or 0)
         #: ``True`` -> wss, ``False`` -> ws, ``None`` -> probe on connect.
@@ -214,6 +220,7 @@ class TrueNASConfig(
         "sslverify",
         "ssh",
         "version",
+        "webshell",
     )
 
     @classmethod
@@ -257,6 +264,7 @@ class TrueNASConfig(
                 sslverify=_ty.cast(bool, credentials.get("sslverify", True)),
                 version=_ty.cast(str, credentials.get("version", "current")),
                 ssh=credentials.get("ssh"),
+                webshell=_ty.cast(bool, credentials.get("webshell", True)),
             )
 
         secure = None
@@ -275,6 +283,7 @@ class TrueNASConfig(
             sslverify=_ty.cast(bool, credentials.get("sslverify", True)),
             version=_ty.cast(str, credentials.get("version", "current")),
             ssh=credentials.get("ssh"),
+            webshell=_ty.cast(bool, credentials.get("webshell", True)),
         )
 
     # -- derived state -----------------------------------------------------
@@ -378,6 +387,16 @@ class TrueNASHost(_PosixHost):
             executor, path = ssh_providers(_ty.cast(_ty.Any, config.ssh))
             executors.append(executor)
             paths.append(path)
+
+        # The web shell sits between SSH and the middleware: it is a real
+        # command channel for a host reachable on the API port but not on 22
+        # (NAT, firewall, reverse proxy), which would otherwise have no
+        # executor at all. It ranks below SSH because a PTY merges stdout and
+        # stderr and cannot take piped input.
+        if config.webshell and not config.is_local:
+            from .webshell import WebShellExecutorProvider
+
+            executors.append(WebShellExecutorProvider(_ty.cast(_ty.Any, self)))
 
         # `self` is passed rather than the client: the providers only need it
         # lazily, and this keeps construction free of a websocket connection.
