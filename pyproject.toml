@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "pytruenas"
-version = "0.1.1"
+version = "0.2.0"
 authors = [{ name = "Jose A." }]
 description = "A typed, Pythonic client and CLI for the TrueNAS middleware API"
 readme = "README.md"
@@ -73,11 +73,13 @@ dependencies = [
     # path() are inherited from it. A hard import in pytruenas.host,
     # pytruenas.providers, and pytruenas.webshell -- not optional.
     #
-    # UNPINNED AND UNRELEASED: hostctl is not on PyPI yet, so this floor is a
-    # placeholder and `pip install pytruenas` cannot resolve it. Pin the real
-    # floor and cut a release only after hostctl publishes. Development uses a
-    # non-editable install from the sibling checkout; see .agents/AGENTS.md.
-    "hostctl",
+    # >=0.1.0 is the first release, and everything this depends on landed in
+    # it: `ssh_providers`/`winrm_providers` (composing SSH into a non-
+    # SystemConfig host without importing privates), `normalize_input` (a
+    # bytes `input=` with a text `encoding=` otherwise deadlocks the call), the
+    # `uri_credentials` fail-closed check, and the exported URI helpers.
+    # Capped below 0.2: hostctl is 0.x, where a minor bump may break.
+    "hostctl>=0.1.0,<0.2",
 ]
 
 [project.optional-dependencies]
