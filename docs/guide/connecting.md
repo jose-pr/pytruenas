@@ -54,9 +54,9 @@ construction.
 
 ## The SSH leg
 
-`client.run(...)` and the SFTP half of `client.path(...)` use a separate SSH
+`client.run(...)` and the SFTP half of `client.path(...)` can use a separate SSH
 connection, configured by the `shell=` argument and stored as
-`client.ssh_config`:
+`client.config.ssh`:
 
 ```python
 client = TrueNASClient("nas", api_key, shell="ssh://root@nas")
@@ -67,10 +67,10 @@ Omit it and the client falls back to the web shell for a remote target — see
 keypair, installs it on root's `authorized_keys`, and wires it in for you.
 
 !!! note
-    `client.ssh_config` was called `client.shell` before the move to
-    [hostctl](https://github.com/jose-pr/hostctl). The name changed because
-    `.shell` now means the *bound shell object* on a host
-    (`client.host.shell.run(...)`), as it does throughout hostctl.
+    The `shell=` argument was also readable as `client.shell` before the move
+    to [hostctl](https://github.com/jose-pr/hostctl). `.shell` now means the
+    *bound shell object* (`client.shell.run(...)`), as it does throughout
+    hostctl, so the connection target lives on the configuration instead.
 
 ```python
 local = TrueNASClient(autologin=False)   # no connection yet

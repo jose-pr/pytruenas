@@ -31,7 +31,7 @@ def client(monkeypatch):
     key.export_public_key.return_value = (PUBLIC_KEY + "\n").encode()
     fake_asyncssh = MagicMock()
     fake_asyncssh.import_private_key.return_value = key
-    monkeypatch.setattr("pytruenas.client._asyncssh", lambda: fake_asyncssh)
+    monkeypatch.setattr("pytruenas.host._asyncssh", lambda: fake_asyncssh)
     monkeypatch.setattr(type(c), "api", MagicMock())
     return c
 
@@ -108,21 +108,57 @@ def test_handles_root_with_no_sshpubkey(client):
 # -- where the credential lands (this is what step 5 changes) --------------
 
 
-def test_configures_ssh_credentials_for_later_use(client):
-    """After installing, the client must be able to authenticate over SSH.
+def test_returns_the_installed_key(client):
+    """The local fixture has no SSH leg to wire -- but still provisions."""
+    _wire(client)
+    assert client.install_sshcreds() == PRIVATE_KEY
 
-    Deliberately asserted through the *behaviour* rather than the storage
-    layout, so this test survives the ``.shell`` -> ``.ssh_config`` rename and
-    documents the contract that actually matters.
+
+def test_a_local_target_gets_no_ssh_leg(client):
+    """There is no host to SSH *to*, and none is needed: commands run here.
+
+    The keypair is still provisioned and installed on root's authorized_keys,
+    so other machines can use it -- there is just no leg to attach it to.
     """
     _wire(client)
     client.install_sshcreds()
-    assert client._ssh_private_key() == PRIVATE_KEY
+    assert client._config.is_local
+    assert client._config.ssh is None
 
 
-def test_does_not_overwrite_explicit_credentials(client):
+def test_a_remote_target_gets_the_key_wired_in(monkeypatch):
+    """It lands on a real `SshConfig.client_keys` field.
+
+    Not the `"client_keys|root"` string the pre-hostctl client packed into a
+    username.
+    """
+    remote = TrueNASClient("wss://nas", autologin=False)
+    key = MagicMock()
+    key.export_public_key.return_value = (PUBLIC_KEY + "\n").encode()
+    fake_asyncssh = MagicMock()
+    fake_asyncssh.import_private_key.return_value = key
+    monkeypatch.setattr("pytruenas.host._asyncssh", lambda: fake_asyncssh)
+    monkeypatch.setattr(type(remote), "api", MagicMock())
+    _wire(remote)
+
+    assert remote.install_sshcreds() == PRIVATE_KEY
+    assert remote._config.ssh.client_keys == [PRIVATE_KEY.encode()]
+
+
+def test_does_not_overwrite_explicit_credentials(monkeypatch):
     """A caller who configured their own SSH auth keeps it."""
-    _wire(client)
-    client.ssh_config = client.ssh_config._replace(username="root", password="hunter2")
-    client.install_sshcreds()
-    assert client._ssh_private_key() != PRIVATE_KEY
+    from hostctl.host import SshConfig
+
+    remote = TrueNASClient("wss://nas", autologin=False)
+    key = MagicMock()
+    key.export_public_key.return_value = (PUBLIC_KEY + "\n").encode()
+    fake_asyncssh = MagicMock()
+    fake_asyncssh.import_private_key.return_value = key
+    monkeypatch.setattr("pytruenas.host._asyncssh", lambda: fake_asyncssh)
+    monkeypatch.setattr(type(remote), "api", MagicMock())
+    _wire(remote)
+
+    remote._config.ssh = SshConfig(host="nas", password="hunter2")
+    remote.install_sshcreds()
+    assert remote._config.ssh.password == "hunter2"
+    assert remote._config.ssh.client_keys is None

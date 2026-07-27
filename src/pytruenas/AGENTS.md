@@ -15,26 +15,34 @@ project overview and CLI usage, see the project overview doc at the repo root.
 
 ## `TrueNASClient` (`pytruenas.client`)
 
-`TrueNASClient(target=None, creds=None, autologin=True, sslverify=True, *,
-shell=None, logger=None, fsbackend="auto", version="current")`
+**`TrueNASClient` is `TrueNASHost`** — one class, two names. They were briefly
+two objects forwarding halves of their surface to each other (`client.run()`
+called `client.host.run()`; `host.api` called `host.client.api`); that is gone.
+`client` is the friendlier word at a call site, `TrueNASHost` is where the
+host half of the API is documented, and `.client`/`.host` both return the
+object itself.
+
+`TrueNASClient(target=None, credentials=None, *, sslverify=True, shell=None,
+logger=None, autologin=True, version="current", executor=None, path=None,
+ssh=None, ...)`
 
 - **`target`** — a host, `"host:port"`, or full `scheme://...` URI. `None` /
   omitted / local-only resolves to the local middleware unix socket
   (`ws+unix:///var/run/middleware/middlewared.sock`); for a remote target the
-  scheme (`ws`/`wss`) and API path are auto-probed via an HTTP(S) request when
-  not given explicitly.
-- **`creds`** — passed to `Credentials(...)` (below); `None` means local-socket
-  auth (no login call).
+  scheme (`ws`/`wss`) and API path are probed on first connect, **not** in the
+  constructor — building a client performs no network I/O.
+- **`credentials`** (positional as `creds` historically) — passed to
+  `Credentials(...)` (below); `None` means local-socket auth (no login call).
 - **`autologin`** (default `True`) — the first `.websocket` access calls
   `.login()` automatically when there's no live connection.
 - **`sslverify`** (default `True`) — TLS certificate verification for `wss://`
   and the HTTP(S) side channels (upload/download probing).
-- **`shell`** — connection string for the SSH/local shell used by `.run()`;
-  defaults to the API target's host over SSH (remote) or local exec (local).
-  Stored as **`.ssh_config`** (renamed from `.shell` — see below).
-- **`fsbackend`** — default backend for `.path()`: `"auto"` (local when the
-  client is local, else `TruenasPath`), `"local"`, `"ws"`/`"api"`, or
-  `"truenas"`.
+- **`shell`** — connection string for the SSH leg (`"ssh://root@nas"`,
+  `"root:pw@nas:22"`). Stored as an `SshConfig` on `.config.ssh`; pass
+  `ssh=SshConfig(...)` to supply one directly.
+- **`executor`/`path`** — name the providers to use, in preference order.
+  Replaces `fsbackend`, which could only pick a filesystem backend; see the
+  provider table below.
 - **`version`** — API path version probed when auto-resolving the websocket
   path (default `"current"`, i.e. `/api/current`).
 
@@ -45,13 +53,18 @@ shell=None, logger=None, fsbackend="auto", version="current")`
 - **`.websocket`** — the live `jsonrpc.Client`; connects (and logs in, if
   `autologin`) on first access, reconnects if the prior connection closed.
 - **`.ssh`** — a lazily-opened `asyncssh` connection (requires the `ssh`
-  extra) built from `.ssh_config`.
-- **`.ssh_config`** — the SSH/local connection target for `.run()` and the SFTP
-  leg of `.path()`. **Renamed from `.shell`**: `.shell` now means what it means
-  everywhere in `hostctl` — the *bound shell object* (`host.shell.run(...)`) —
-  so the old name would collide for anyone using the host API.
-- **`.host`** — the `TrueNASHost` backing this client (built lazily; see
-  below). `.run()`/`.path()` delegate to it.
+  extra), reached through the composed SSH transport. Raises if none is
+  configured. For the raw connection only; `.run()`/`.path()` select a
+  transport instead of assuming this one.
+- **`.config`** — the `TrueNASConfig` this was built from. `.config.ssh` is the
+  SSH leg; `.shell` means the *bound shell object* (`client.shell.run(...)`),
+  as it does throughout hostctl.
+- **`.client`** / **`.host`** — both return the object itself, kept so code
+  written against the two-object model keeps working.
+- **`.capabilities`** — `{"run", "path"}` as available; a remote target with no
+  SSH and no web shell honestly reports no `run`.
+- **`.last_selection`** — the redacted provider trace for the most recent
+  `run()`: what was tried, what was chosen, and why.
 - **`.logger`** — a `logging.Logger` (default: `logging.getLogger("pytruenas")`).
 
 ### Methods
@@ -68,18 +81,18 @@ shell=None, logger=None, fsbackend="auto", version="current")`
 - **`.me() -> dict`** (`auth.me`) / **`.logout() -> None`** (`auth.logout`) /
   **`.ping() -> str`** (`core.ping` -> `"pong"`) — convenience wrappers.
 - **`.path(*path, backend=None)`** — build a `pathlib_next` path rooted at
-  `path` for this client; `backend` overrides `.fsbackend` for this call. See
-  `pytruenas.fs`.
+  `path`; `backend` names one provider for this call. Inherited from
+  `hostctl.host.Host`. See `pytruenas.fs`.
 - **`.run(*cmds, **kwargs) -> subprocess.CompletedProcess`** — run commands on
-  the target. Delegates to `.host.run()`, i.e. `hostctl.host.Host.run`; see
-  that for the full signature (`stdin`/`stdout`/`stderr`, `cwd`, `env`,
-  `capture_output`, `check`, `encoding`/`errors`, `input`, `timeout`, `text`).
-  Each positional `cmd` is a string (verbatim shell text), a sequence (one
-  quoted argv command), or a leading path object (a direct executable).
-  **Which transport runs it is selected, not fixed**: SSH first when
-  `.ssh_config` names a host, then the local middleware socket. A *remote*
-  target with no SSH has **no `run` capability at all** — the JSON-RPC API
-  exposes no remote command execution — and `.host.capabilities` says so.
+  the target. Inherited from `hostctl.host.Host.run`; see that for the full
+  signature (`stdin`/`stdout`/`stderr`, `cwd`, `env`, `capture_output`,
+  `check`, `encoding`/`errors`, `input`, `timeout`, `text`). Each positional
+  `cmd` is a string (verbatim shell text), a sequence (one quoted argv
+  command), or a leading path object (a direct executable).
+  **Which transport runs it is selected, not fixed** — see the provider table
+  below. A *remote* target with neither SSH nor the web shell has **no `run`
+  capability at all**, and `.capabilities` says so rather than failing
+  mid-command.
 - **`.upload(file, method, *params, token=None, wait=True, **kwargs)`** —
   upload `file` (`str`/`bytes`) via the middleware's `/_upload` HTTP side
   channel, then call `method(*params, **kwargs)` server-side with it; waits on
@@ -99,18 +112,29 @@ shell=None, logger=None, fsbackend="auto", version="current")`
   return the parsed JSON (see `pytruenas.models.apidump.Api`).
 - **`.install_sshcreds(name=None, private_key=None)`** — generate/reuse an SSH
   keypair via `keychaincredential`, install the public half on `root`'s
-  `authorized_keys`, and configure `.ssh_config` to use it. Returns the private
-  key. Requires the `ssh` extra. On a `TrueNASHost` the key lands on a real
-  `SshConfig.client_keys` and the providers are rebuilt, so a host that had no
-  executor gains one.
+  `authorized_keys`, and store the private half on `.config.ssh` as a real
+  `SshConfig.client_keys`. Returns the private key. Requires the `ssh` extra.
+  The providers are rebuilt afterwards, so a host that had no SSH executor
+  gains one. A *local* target provisions the key but wires no leg — there is
+  nothing to SSH to.
 
 ## `TrueNASHost` / `TrueNASConfig` (`pytruenas.host`)
 
-`TrueNASHost` is a `hostctl.host.PosixHost`: `run`, `path`, `spawn`, `info`,
-`connect`, `close`, `shell`, `capabilities`, and `last_selection` are all
-inherited, and it adds the middleware surface (`api`, `websocket`, `login`,
-`logout`, `me`, `ping`, `subscribe`, `upload`, `download`, `dump_api`,
-`install_sshcreds`).
+`TrueNASHost` **is** `TrueNASClient` (same class). Constructible from a
+connection string, a `TrueNASConfig`, or nothing:
+
+```python
+TrueNASHost("wss://nas")
+TrueNASHost("nas", credentials="1-...", executor=["ssh"])
+TrueNASHost()                       # the local middleware socket
+```
+
+It is a `hostctl.host.PosixHost`, so `run`, `path`, `spawn`, `info`, `connect`,
+`close`, `shell`, `capabilities`, and `last_selection` are all inherited; the
+middleware surface (`api`, `websocket`, `login`, `logout`, `me`, `ping`,
+`subscribe`, `upload`, `download`, `dump_api`, `install_sshcreds`) is what this
+class adds. Generic in `ApiVersion`: `TrueNASHost[Current]("nas").api`
+completes like `TrueNASClient[Current]`.
 
 Transports are *composed*, and the order is deliberate:
 
@@ -319,7 +343,7 @@ module-level `path(client, *segments, backend=None)` is what it delegates to.
 - **`TruenasPath`** (`pytruenas.fs.truenas`) — subclasses `TnasWsPath`;
   `unlink`/`rmdir`/`rename`/`symlink_to`/`readlink`/`resolve` try an SFTP leg
   first (via `pathlib_next`'s `SftpPath`, requires the `ssh` extra +
-  `client.ssh_config` host) and fall back to `TnasWsPath`'s websocket behavior (or
+  `client.config.ssh` host) and fall back to `TnasWsPath`'s websocket behavior (or
   raise `NotImplementedError` for ops SFTP alone can do — rename, symlink_to,
   readlink). `symlink_to(..., force=False, onremove=None)` adds a
   pytruenas-specific convenience: `force` (bool, a file-type string, or a set

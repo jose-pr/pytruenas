@@ -34,16 +34,16 @@ client.run("cat > /tmp/x", input="hello\n", encoding="utf-8")
 
 ## Which transport ran it
 
-`client.host.last_selection` records what was tried and why, with credentials
+`client.last_selection` records what was tried and why, with credentials
 redacted — useful when a command took an unexpected route:
 
 ```python
 client.run("uptime")
-[t["provider"] for t in client.host.last_selection if t["chosen"]]
+[t["provider"] for t in client.last_selection if t["chosen"]]
 # ['ssh']
 ```
 
-`client.host.capabilities` reports whether `run` is available at all, so a
+`client.capabilities` reports whether `run` is available at all, so a
 caller can check up front instead of discovering it mid-command.
 
 ## The web shell

@@ -39,6 +39,14 @@ TrueNAS-specific parts here. **Release is blocked on hostctl's own release.**
   `TrueNASHost` (a `PosixHost`). `HostConfig("truenas+wss://nas")` resolves
   through hostctl's registry; every connection string `TrueNASClient` accepts
   still works, normalized to a `truenas+*` scheme.
+- **`TrueNASClient` and `TrueNASHost` are now one class.** They were briefly
+  two objects that forwarded halves of their surface to each other —
+  `client.run()` called `client.host.run()` while `host.api` called
+  `host.client.api`, each holding a reference to the other. `TrueNASClient` is
+  an alias for `TrueNASHost`, so every existing import and call keeps working,
+  and `client.host` / `host.client` both return the object itself.
+  `TrueNASHost("wss://nas")` also takes a connection string directly, with the
+  same options as `TrueNASConfig.from_target`.
 - **`pytruenas.providers`** — `TnasWsPathProvider` (the `filesystem.*`
   websocket leg) and `local_providers()`, which returns hostctl's stock local
   executor and path providers unchanged. A local target runs plain

@@ -28,34 +28,34 @@ def _has_posix_shell():
 
 def test_local_construction_no_network():
     c = TrueNASClient(None, autologin=False)
-    assert c._api.is_local
-    assert c._api.scheme == "ws"
-    assert isinstance(c._creds, LocalAuth)
+    assert c._config.is_local
+    assert c._target.scheme == "ws+unix"
+    assert isinstance(c._config.credentials, LocalAuth)
 
 
 def test_creds_wired_from_target():
     c = TrueNASClient(None, ("root", "secret"), autologin=False)
-    assert isinstance(c._creds, BasicAuth)
+    assert isinstance(c._config.credentials, BasicAuth)
 
 
 def test_api_key_creds():
     c = TrueNASClient(None, "1-" + "a" * 64, autologin=False)
-    assert isinstance(c._creds, ApiKeyAuth)
+    assert isinstance(c._config.credentials, ApiKeyAuth)
 
 
 def test_path_selection_local_vs_remote():
-    local = TrueNASClient(None, autologin=False)
-    assert isinstance(local.path("/etc/hosts"), LocalPath)
+    """A local target gets real local paths; a remote one the websocket leg.
 
-    with patch.object(TrueNASClient, "_openwss", return_value=MagicMock()):
-        with patch("requests.get") as rget:
-            rget.return_value = MagicMock(
-                url="https://nas/api/current", status_code=400
-            )
-            remote = TrueNASClient(
-                "nas.example.com", "1-" + "a" * 64, autologin=False, sslverify=False
-            )
-    assert isinstance(remote.path("/mnt/tank/x"), TruenasPath)
+    Paths come back wrapped in hostctl's `CompositePosixPath` -- that wrapper
+    is what lets a path fail over to the next provider -- so the provider list
+    is what identifies the leg, not the returned class.
+    """
+    local = TrueNASClient(None, autologin=False)
+    assert [p.name for p in local._path_selector.providers] == ["local"]
+    assert local.path("/etc/hosts").as_posix() == "/etc/hosts"
+
+    remote = TrueNASClient("wss://nas", "1-" + "a" * 64, autologin=False)
+    assert [p.name for p in remote._path_selector.providers] == ["tnasws"]
 
 
 @pytest.mark.skipif(
