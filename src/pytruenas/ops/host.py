@@ -21,7 +21,11 @@ import netimps as _netimps
 class PathPatterns:
     """A small ``fnmatch`` allow/deny list loaded from ignore-style files."""
 
-    def __init__(self, path: "str | _Path | None" = None, patterns: "_ty.Iterable[str] | None" = None) -> None:
+    def __init__(
+        self,
+        path: "str | _Path | None" = None,
+        patterns: "_ty.Iterable[str] | None" = None,
+    ) -> None:
         self.patterns = [*(patterns or [])]
         if path:
             self.load(path)
@@ -58,7 +62,9 @@ def package(
     fileobj = _io.BytesIO()
     gitignore = PathPatterns(patterns=["/.*", "/**/*-stub", "/**/*.pyi"])
     for child in topdir.iterdir():
-        if child.is_file() and (child.name.endswith(".gitignore") or child.name.endswith(".ignore")):
+        if child.is_file() and (
+            child.name.endswith(".gitignore") or child.name.endswith(".ignore")
+        ):
             gitignore.load(child)
 
     if not callable(symlink):

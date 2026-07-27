@@ -85,18 +85,25 @@ def test_stat_from_listdir_entry_without_mode():
 # -- TruenasPath fallback -----------------------------------------------------
 
 
+# The SSH target is `client.ssh_config` (renamed from `.shell` in the hostctl
+# migration). Setting the OLD name on a MagicMock client would silently do
+# nothing -- the attribute would be created, ignored, and `ssh_config.host`
+# would remain a truthy Mock -- so these tests would pass while asserting the
+# opposite of what they claim. Hence explicit `ssh_config` here.
+
+
 def test_truenaspath_falls_back_to_ws_without_sftp():
     client = _client(stat={"mode": 0o100644}, get=b"x")
-    client.shell.host = None  # no ssh target -> no sftp leg
+    client.ssh_config.host = None  # no ssh target -> no sftp leg
     p = TruenasPath("truenas://nas/f.txt", backend=TnasWsBackend(client))
-    assert p.read_text() == "x"          # ws leg
-    p.unlink()                           # ws shell fallback
+    assert p.read_text() == "x"  # ws leg
+    p.unlink()  # ws shell fallback
     assert client.run.call_args[0][0] == ("rm", "-f", "/f.txt")
 
 
 def test_truenaspath_rename_without_sftp_raises():
     client = _client()
-    client.shell.host = None
+    client.ssh_config.host = None
     p = TruenasPath("truenas://nas/f", backend=TnasWsBackend(client))
     with pytest.raises(NotImplementedError):
         p.rename("/g")
@@ -107,10 +114,10 @@ def test_truenaspath_resolve_falls_back_when_sftp_lacks_op():
     # NotImplementedError so resolve() falls back to returning self, not crash
     # with AttributeError.
     client = _client()
-    client.shell.host = "nas"
-    client.shell.port = 22
-    client.shell.username = "root"
-    client.shell.password = None
+    client.ssh_config.host = "nas"
+    client.ssh_config.port = 22
+    client.ssh_config.username = "root"
+    client.ssh_config.password = None
     p = TruenasPath("truenas://nas/a/b", backend=TnasWsBackend(client))
     resolved = p.resolve()
     assert resolved.path == "/a/b"  # returned self, no AttributeError

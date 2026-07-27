@@ -102,7 +102,9 @@ class TnasWsPath(_UriPath):
         data = self._fs.get(self.path, _filetransfer=True, _ioerror=True)
         return _ty.cast(bytes, data)
 
-    def _write_bytes(self, data: bytes, *, append: bool = False, mode: "int | None" = None):
+    def _write_bytes(
+        self, data: bytes, *, append: bool = False, mode: "int | None" = None
+    ):
         opts: dict = {"append": bool(append)}
         if mode is not None:
             opts["mode"] = mode
@@ -112,7 +114,9 @@ class TnasWsPath(_UriPath):
     # -- mutation ----------------------------------------------------------
 
     def _mkdir(self, mode):
-        self._fs.mkdir({"path": self.path, "options": {"mode": oct(mode)}}, _ioerror=True)
+        self._fs.mkdir(
+            {"path": self.path, "options": {"mode": oct(mode)}}, _ioerror=True
+        )
 
     def chmod(self, mode, *, follow_symlinks=True):
         # filesystem.setperm takes an octal-ish mode string.
@@ -121,7 +125,15 @@ class TnasWsPath(_UriPath):
             _ioerror=True,
         )
 
-    def chown(self, uid=None, gid=None, *, follow_symlinks=True, recursive=False, traverse=True):
+    def chown(
+        self,
+        uid=None,
+        gid=None,
+        *,
+        follow_symlinks=True,
+        recursive=False,
+        traverse=True,
+    ):
         if uid == -1:
             uid = None
         if gid == -1:

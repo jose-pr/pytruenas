@@ -46,9 +46,7 @@ def test_is_local_ip_returns_false_when_no_interface(monkeypatch):
 
 
 def _iface(name, *cidrs):
-    return SimpleNamespace(
-        name=name, ips=[ipaddress.ip_interface(c) for c in cidrs]
-    )
+    return SimpleNamespace(name=name, ips=[ipaddress.ip_interface(c) for c in cidrs])
 
 
 def test_find_adapter_in_network_matches(monkeypatch):

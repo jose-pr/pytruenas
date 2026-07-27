@@ -53,9 +53,9 @@ def test_no_undefined_uppercase_return_types(generated):
         for match in re.finditer(r"->\s*([A-Za-z_][A-Za-z0-9_]*)", src):
             name = match.group(1)
             if name[0].isupper():
-                assert name in defined or name in imported, (
-                    f"{path.name}: undefined return type {name!r}"
-                )
+                assert (
+                    name in defined or name in imported
+                ), f"{path.name}: undefined return type {name!r}"
 
 
 def test_expected_namespaces_and_methods(generated):

@@ -5,7 +5,7 @@ import gc
 import weakref
 from unittest.mock import MagicMock
 
-from pytruenas import _conn
+from pytruenas import connection as _conn
 from pytruenas.namespace import Namespace, ioerror
 
 

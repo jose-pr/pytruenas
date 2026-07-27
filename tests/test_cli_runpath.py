@@ -27,7 +27,6 @@ import os
 
 import pytest
 
-import pytruenas.client as _client
 import pytruenas.utils.runpath as _runpath_utils
 
 _RECORD_ENV = "PYTRUENAS_TEST_RECORD"
@@ -65,13 +64,11 @@ def _write_runpath(directory):
         "        fh.write(json.dumps(entry) + '\\n')\n"
     )
     (flow / "01-first.py").write_text(
-        _recorder
-        + "def main(cmd, ctx):\n"
+        _recorder + "def main(cmd, ctx):\n"
         "    _record(['first', cmd.target, ctx.target, cmd.context])\n"
     )
     (flow / "02-second.py").write_text(
-        _recorder
-        + "def main(cmd):\n"
+        _recorder + "def main(cmd):\n"
         "    _record(['second', cmd.target, None, cmd.context])\n"
     )
     return flow
@@ -96,8 +93,10 @@ def _records(record_path):
 def record_path(tmp_path, monkeypatch):
     path = tmp_path / "record.jsonl"
     monkeypatch.setenv(_RECORD_ENV, str(path))
+    # `runpath` is the module that constructs the client, so patching its name
+    # is what matters. (There used to be a second patch of `pytruenas.client`,
+    # a re-export shim that no longer exists.)
     monkeypatch.setattr(_runpath_utils, "TrueNASClient", _FakeClient)
-    monkeypatch.setattr(_client, "TrueNASClient", _FakeClient)
     monkeypatch.delenv("PYTRUENAS_PATH", raising=False)
     return path
 

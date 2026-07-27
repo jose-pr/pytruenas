@@ -8,7 +8,7 @@ on a real POSIX shell, matching test_client.py).
 
 import os
 import subprocess
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -27,6 +27,7 @@ def _has_posix_shell():
 
 
 # ---------------------------------------------------------------- download ----
+
 
 def test_download_buffered_builds_target_and_waits(monkeypatch):
     c = TrueNASClient(None, autologin=False)
@@ -55,8 +56,9 @@ def test_download_no_wait_returns_jobid(monkeypatch):
     c.api = MagicMock()
     c.api.core.download.return_value = (22, "/_download/22")
     # wait=False must NOT touch requests.get at all
-    monkeypatch.setattr("requests.get",
-                        MagicMock(side_effect=AssertionError("should not GET")))
+    monkeypatch.setattr(
+        "requests.get", MagicMock(side_effect=AssertionError("should not GET"))
+    )
     assert c.download("config.save", wait=False) == 22
 
 
@@ -82,10 +84,12 @@ def test_upload_generates_token_when_absent(monkeypatch):
 
 # --------------------------------------------------------------- dump_api ----
 
+
 def test_dump_api_parses_run_output(monkeypatch):
     c = TrueNASClient(None, autologin=False)
     monkeypatch.setattr(
-        TrueNASClient, "run",
+        TrueNASClient,
+        "run",
         lambda self, *a, **k: subprocess.CompletedProcess(a, 0, stdout=b"{}"),
     )
     assert c.dump_api() == {}
@@ -93,11 +97,17 @@ def test_dump_api_parses_run_output(monkeypatch):
 
 # -------------------------------------------------------------------- run ----
 
+
 @pytest.mark.skipif(not _has_posix_shell(), reason="needs a POSIX shell")
 def test_run_capture_stdout_only():
     c = TrueNASClient(None, autologin=False)
-    r = c.run("printf hi", executable=_posix_shell(), capture_output="stdout",
-              check=False, encoding="utf-8")
+    r = c.run(
+        "printf hi",
+        executable=_posix_shell(),
+        capture_output="stdout",
+        check=False,
+        encoding="utf-8",
+    )
     assert r.stdout == "hi"
     # stderr was not captured
     assert r.stderr is None
@@ -106,8 +116,14 @@ def test_run_capture_stdout_only():
 @pytest.mark.skipif(not _has_posix_shell(), reason="needs a POSIX shell")
 def test_run_string_input_is_fed_to_stdin():
     c = TrueNASClient(None, autologin=False)
-    r = c.run("cat", executable=_posix_shell(), input="abc",
-              capture_output="stdout", check=False, encoding="utf-8")
+    r = c.run(
+        "cat",
+        executable=_posix_shell(),
+        input="abc",
+        capture_output="stdout",
+        check=False,
+        encoding="utf-8",
+    )
     assert r.stdout == "abc"
 
 
@@ -118,12 +134,24 @@ def test_run_str_input_with_text_encoding_no_double_encode():
     # crashed with AttributeError. Verified live on TrueNAS 26.0. Both str and
     # bytes input must work whether or not a text encoding is given.
     c = TrueNASClient(None, autologin=False)
-    r1 = c.run("cat", executable=_posix_shell(), input="xy",
-               capture_output="stdout", check=False, encoding="utf-8")
+    r1 = c.run(
+        "cat",
+        executable=_posix_shell(),
+        input="xy",
+        capture_output="stdout",
+        check=False,
+        encoding="utf-8",
+    )
     assert r1.stdout == "xy"
     # bytes input WITH a text encoding must also round-trip (decoded for text mode)
-    r2 = c.run("cat", executable=_posix_shell(), input=b"zz",
-               capture_output="stdout", check=False, encoding="utf-8")
+    r2 = c.run(
+        "cat",
+        executable=_posix_shell(),
+        input=b"zz",
+        capture_output="stdout",
+        check=False,
+        encoding="utf-8",
+    )
     assert r2.stdout == "zz"
 
 
@@ -131,8 +159,15 @@ def test_run_str_input_with_text_encoding_no_double_encode():
 def test_run_joins_multiple_cmds_and_quotes_cwd():
     c = TrueNASClient(None, autologin=False)
     # two commands joined by ';' both run; cwd is normalised to posix
-    r = c.run("cd /", ("echo", "x"), executable=_posix_shell(),
-              capture_output="stdout", check=False, encoding="utf-8", cwd="/tmp")
+    r = c.run(
+        "cd /",
+        ("echo", "x"),
+        executable=_posix_shell(),
+        capture_output="stdout",
+        check=False,
+        encoding="utf-8",
+        cwd="/tmp",
+    )
     assert r.stdout.strip() == "x"
 
 
@@ -142,58 +177,44 @@ def test_run_input_and_stdin_conflict_raises():
         c.run("true", executable="/bin/sh", input=b"x", stdin=subprocess.PIPE)
 
 
-# -- run() local-branch internals, subprocess mocked (platform-independent) ---
-
-def _mock_subprocess_run(monkeypatch):
-    """Patch subprocess.run in client.py to record its call and return a dummy."""
-    calls = {}
-
-    def fake_run(command, **kw):
-        calls["command"] = command
-        calls["kw"] = kw
-        return subprocess.CompletedProcess(command, 0, stdout=b"", stderr=b"")
-
-    monkeypatch.setattr("pytruenas.client.subprocess.run", fake_run)
-    return calls
+# -- construction ------------------------------------------------------------
+#
+# These replace a block that tested the client->host bridge: a lazily built
+# `.host`, `_as_config()`, `_as_ssh_config()`, and `run()` forwarding to the
+# host. There is no bridge any more -- the two classes were merged, so `run()`
+# is inherited from hostctl rather than delegated, and the config is built
+# once at construction.
 
 
-def test_run_capture_true_pipes_both_streams(monkeypatch):
+def test_local_client_uses_the_socket_and_no_ssh_leg():
     c = TrueNASClient(None, autologin=False)
-    calls = _mock_subprocess_run(monkeypatch)
-    c.run("true", executable="/bin/sh", capture_output=True)
-    assert calls["kw"]["stdout"] == subprocess.PIPE
-    assert calls["kw"]["stderr"] == subprocess.PIPE
-    # command is [executable, "-c", script]
-    assert calls["command"][:2] == ["/bin/sh", "-c"]
+    assert c._config.is_local
+    # Nothing to SSH to: commands already run on this machine.
+    assert c._config.ssh is None
+    assert [p.name for p in c._executor_selector.providers] == ["local"]
 
 
-def test_run_reads_from_filelike_stdin(monkeypatch):
-    import io
-
-    c = TrueNASClient(None, autologin=False)
-    calls = _mock_subprocess_run(monkeypatch)
-    c.run("cat", executable="/bin/sh", stdin=io.BytesIO(b"streamed"))
-    # a readable file-like stdin is drained into `input` and stdin cleared
-    assert calls["kw"]["input"] == b"streamed"
-    assert calls["kw"]["stdin"] is None
+def test_remote_client_carries_the_target():
+    c = TrueNASClient("wss://nas", "1-" + "a" * 64, autologin=False, sslverify=False)
+    assert c._config.host == "nas"
+    assert not c._config.is_local
+    assert c._config.sslverify is False
 
 
-def test_run_default_shell_from_api_when_remote(monkeypatch):
-    c = TrueNASClient(None, autologin=False)
-    calls = _mock_subprocess_run(monkeypatch)
-    # force the non-local shell lookup: no shell.path, not local -> api.user._get
-    c.api = MagicMock()
-    c.api.user._get.return_value = {"shell": "/usr/bin/zsh"}
-    monkeypatch.setattr(type(c._api), "is_local", property(lambda self: False))
-    c.run("true", capture_output=False)
-    assert calls["command"][0] == "/usr/bin/zsh"
+def test_shell_string_becomes_an_ssh_leg():
+    c = TrueNASClient("wss://nas", autologin=False, shell="ssh://root:pw@nas")
+    ssh = c._config.ssh
+    assert ssh is not None
+    assert (ssh.host, ssh.username, ssh.password) == ("nas", "root", "pw")
+    assert "ssh" in [p.name for p in c._executor_selector.providers]
 
 
-def test_run_default_shell_falls_back_to_bash_on_error(monkeypatch):
-    c = TrueNASClient(None, autologin=False)
-    calls = _mock_subprocess_run(monkeypatch)
-    c.api = MagicMock()
-    c.api.user._get.side_effect = RuntimeError("no api")
-    monkeypatch.setattr(type(c._api), "is_local", property(lambda self: False))
-    c.run("true", capture_output=False)
-    assert calls["command"][0] == "/bin/bash"
+def test_client_keys_encoding_is_unpacked_into_a_real_field():
+    """`client_keys|root` was a string hack; SshConfig has a real field."""
+    c = TrueNASClient(
+        "wss://nas", autologin=False, shell="ssh://client_keys|root:PRIVATEKEY@nas"
+    )
+    ssh = c._config.ssh
+    assert ssh.username == "root"
+    assert ssh.client_keys == [b"PRIVATEKEY"]
+    assert ssh.password is None

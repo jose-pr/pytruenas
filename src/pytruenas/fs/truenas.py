@@ -65,7 +65,12 @@ class TruenasPath(_TnasWsPath):
         if sftp_cls is None:
             return None
         client = self.backend.client
-        shell = getattr(client, "shell", None)
+        # `.ssh_config` was `.shell` before the hostctl migration; a plain
+        # getattr on the old name would silently yield None here and drop the
+        # SFTP leg rather than fail, so both names are checked explicitly.
+        shell = getattr(client, "ssh_config", None)
+        if shell is None:
+            shell = getattr(client, "shell", None)
         host = getattr(shell, "host", None)
         if not host:
             return None
@@ -158,7 +163,11 @@ class TruenasPath(_TnasWsPath):
                 if onremove(self, "link"):
                     self.unlink()
             else:
-                kind = "directory" if self.is_dir() else "file" if self.is_file() else "unknown"
+                kind = (
+                    "directory"
+                    if self.is_dir()
+                    else "file" if self.is_file() else "unknown"
+                )
                 if kind not in allowed:
                     raise FileExistsError(self)
                 if onremove(self, kind):
@@ -205,7 +214,9 @@ def _connect_opts_from_shell(shell) -> "dict":
     opts["username"] = user or "root"
     if password:
         if logintype == "client_keys":
-            opts["client_keys"] = [password.encode() if isinstance(password, str) else password]
+            opts["client_keys"] = [
+                password.encode() if isinstance(password, str) else password
+            ]
         else:
             opts["password"] = password
     return opts

@@ -13,7 +13,8 @@ from duho.discovery import ModuleCommand
 def _cli(*args):
     return subprocess.run(
         [sys.executable, "-m", "pytruenas", *args],
-        capture_output=True, text=True,
+        capture_output=True,
+        text=True,
     )
 
 
@@ -63,7 +64,9 @@ def test_main_help_in_process(monkeypatch, capsys):
 
 
 def _module_command(run):
-    mod = SimpleNamespace(__doc__="fake", run=run, init=None, success=None, finally_=None)
+    mod = SimpleNamespace(
+        __doc__="fake", run=run, init=None, success=None, finally_=None
+    )
     return ModuleCommand(mod, name="fake", entrypoint=run)
 
 
