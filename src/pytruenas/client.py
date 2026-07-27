@@ -159,7 +159,13 @@ class TrueNASClient(_ty.Generic[ApiVersion]):
             authority = config.host
             if config.port:
                 authority = f"{authority}:{config.port}"
-            target = f"{scheme}://{authority}{config.api_path or ''}"
+            # A path is always supplied, even when the config has not resolved
+            # one: `__init__` probes for a missing path over HTTP, which would
+            # make building the client hit the network -- exactly the thing the
+            # config layer exists to defer. The default matches what that probe
+            # settles on first.
+            api_path = config.api_path or f"/api/{config.version}"
+            target = f"{scheme}://{authority}{api_path}"
 
         client = cls(
             target,

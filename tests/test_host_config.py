@@ -223,21 +223,32 @@ def test_unknown_credential_is_rejected(typo):
 
 
 def test_declared_credentials_are_all_accepted():
-    # Every name in `uri_credentials` must actually be handled -- declaring one
-    # that `_from_parsed_uri` ignores would let it through silently.
+    """Every declared name must actually reach the constructor.
+
+    Declaring one that `_from_parsed_uri` ignores would let it through the
+    strict check and then silently drop it -- the failure mode that once hid
+    `webshell=False`. Checked against the real signature rather than a second
+    hand-maintained list, so the two cannot drift.
+    """
+    import inspect
+
+    from pytruenas.auth import Credentials
+
+    accepted = {
+        name
+        for name, parameter in inspect.signature(
+            TrueNASConfig.__init__
+        ).parameters.items()
+        if parameter.kind is inspect.Parameter.KEYWORD_ONLY
+    }
+    # These are consumed by `_from_parsed_uri` itself to build the credential
+    # rather than passed straight through.
+    credential_inputs = set(
+        inspect.signature(Credentials.from_host_credentials).parameters
+    )
+
     for name in TrueNASConfig.uri_credentials:
-        assert name in {
-            "password",
-            "otp",
-            "api_key",
-            "token",
-            "credentials",
-            "sslverify",
-            "ssh",
-            "version",
-            "executor",
-            "path",
-        }
+        assert name in accepted | credential_inputs, name
 
 
 # -- connection_uri is credential-free -------------------------------------

@@ -16,7 +16,11 @@ pytest.importorskip("hostctl")
 from hostctl.host import HostConfig, PosixHost, SshConfig  # noqa: E402
 from hostctl.shell import POSIX_SHELL  # noqa: E402
 
-from pytruenas.host import TrueNASConfig, TrueNASHost  # noqa: E402
+from pytruenas.host import (  # noqa: E402
+    DEFAULT_SOCKET_PATH,
+    TrueNASConfig,
+    TrueNASHost,
+)
 from pytruenas.providers import TnasWsPathProvider  # noqa: E402
 
 #: A minimal SSH leg, for the cases that need one to exist.
@@ -55,6 +59,144 @@ def test_config_creates_the_host():
 def test_dispatches_from_a_uri():
     host = HostConfig("truenas+wss://nas")._create_host()
     assert isinstance(host, TrueNASHost)
+
+
+# -- construction from a connection string ---------------------------------
+
+
+def test_constructs_from_a_connection_string():
+    """`TrueNASHost("wss://nas")` -- no need to build a config first.
+
+    hostctl's own `Host("uri")` shortcut cannot cover this: its metaclass only
+    intercepts when `cls is Host`, so a subclass falls through to normal
+    construction.
+    """
+    host = TrueNASHost("wss://nas")
+    assert isinstance(host, TrueNASHost)
+    assert host.connection_uri == "truenas+wss://nas"
+
+
+@pytest.mark.parametrize(
+    "target, expected",
+    [
+        ("wss://nas", "truenas+wss://nas"),
+        ("nas", "truenas+auto://nas"),
+        ("https://nas", "truenas+wss://nas"),
+        (None, f"truenas+unix://{DEFAULT_SOCKET_PATH}"),
+    ],
+)
+def test_string_construction_accepts_every_target_form(target, expected):
+    assert TrueNASHost(target).connection_uri == expected
+
+
+def test_string_construction_takes_config_options():
+    host = TrueNASHost("wss://nas", ssh=SSH, executor=["ssh"])
+    assert _names(host._executor_selector.providers) == ["ssh"]
+    # The selectors are independent: overriding one leaves the other default.
+    assert _names(host._path_selector.providers) == ["sftp", "tnasws"]
+
+
+def test_string_construction_takes_credentials():
+    from pytruenas.auth import ApiKeyAuth
+
+    host = TrueNASHost("wss://nas", credentials="1-" + "a" * 64)
+    assert isinstance(host._config.credentials, ApiKeyAuth)
+
+
+def test_an_existing_config_is_used_as_is():
+    config = TrueNASConfig.from_target("wss://nas")
+    assert TrueNASHost(config)._config is config
+
+
+def test_config_options_alongside_a_config_are_rejected():
+    """Silently ignoring them would be the worst outcome.
+
+    The config is already built, so a late `executor=` could not take effect;
+    saying so beats letting a caller believe it did.
+    """
+    config = TrueNASConfig.from_target("wss://nas")
+    with pytest.raises(TypeError, match="may not be combined"):
+        TrueNASHost(config, executor=["ssh"])
+
+
+def test_every_client_setting_is_reachable():
+    """`TrueNASHost` must be able to express whatever `TrueNASClient` can.
+
+    Checked against the real signature so a new client setting cannot be added
+    without either surfacing here or failing this test. `target` and `creds`
+    differ only in spelling (positional, and `credentials=`); `fsbackend` is
+    superseded by the finer-grained `path=` override.
+    """
+    import inspect
+
+    from pytruenas import TrueNASClient
+    from pytruenas.host import TrueNASConfig as _Config
+
+    equivalents = {"target", "creds", "fsbackend"}
+    config_params = set(inspect.signature(_Config.__init__).parameters)
+
+    for name, parameter in inspect.signature(TrueNASClient.__init__).parameters.items():
+        if name in ("self", *equivalents):
+            continue
+        assert name in config_params, f"{name} is not reachable from TrueNASHost"
+        assert (
+            parameter.default
+            == inspect.signature(_Config.__init__).parameters[name].default
+        ), f"{name} default differs"
+
+
+@pytest.mark.parametrize(
+    "shell, expected",
+    [
+        ("ssh://root@nas", ("nas", 22, "root")),
+        ("ssh://admin@nas:2222", ("nas", 2222, "admin")),
+        ("nas", ("nas", 22, "root")),
+    ],
+)
+def test_shell_string_builds_the_ssh_leg(shell, expected):
+    """`shell=` takes the connection string the client always took.
+
+    Requiring a prebuilt SshConfig for the common case would be a step
+    backwards from `TrueNASClient(shell="ssh://root@nas")`.
+    """
+    config = TrueNASConfig.from_target("wss://nas", shell=shell)
+    assert (config.ssh.host, config.ssh.port, config.ssh.username) == expected
+
+
+def test_shell_string_unpacks_the_legacy_client_keys_form():
+    """`client_keys|root` was a string hack; SshConfig has a real field."""
+    config = TrueNASConfig.from_target(
+        "wss://nas", shell="ssh://client_keys|root:PRIVATEKEY@nas"
+    )
+    assert config.ssh.username == "root"
+    assert config.ssh.client_keys == [b"PRIVATEKEY"]
+    assert config.ssh.password is None
+
+
+def test_autologin_and_logger_reach_the_client(monkeypatch):
+    import requests
+
+    monkeypatch.setattr(
+        requests,
+        "get",
+        lambda *a, **k: pytest.fail("built the client over the network"),
+    )
+    host = TrueNASHost("wss://nas", autologin=False, logger="mylog")
+    assert host.client.autologin is False
+    assert host.client.logger.name == "mylog"
+
+
+def test_ssh_property_raises_clearly_without_a_transport():
+    with pytest.raises(RuntimeError, match="no SSH transport"):
+        _host().ssh
+
+
+def test_host_options_still_reach_systemhost():
+    """`info=` and friends belong to SystemHost, not the config."""
+    from hostctl.host import HostInfo
+
+    host = TrueNASHost("wss://nas", info=HostInfo(hostname="pinned"))
+    assert host.info().hostname == "pinned"
 
 
 # -- provider composition --------------------------------------------------

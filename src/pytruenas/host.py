@@ -25,6 +25,7 @@ inside ``__init__`` are *recorded* here (:attr:`~TrueNASConfig.needs_scheme_prob
 
 from __future__ import annotations
 
+import inspect as _inspect
 import typing as _ty
 from urllib.parse import unquote as _unquote
 from urllib.parse import urlsplit as _urlsplit
@@ -35,9 +36,20 @@ from hostctl.host import uri_host as _uri_host
 
 from . import auth as _auth
 from .jsonrpc import DEFAULT_UNIX_SOCKET
+from .namespace import Namespace as _Namespace
+from .utils.target import Target as _TGT
 
 if _ty.TYPE_CHECKING:  # pragma: no cover - typing only
     from hostctl.host import Host
+    from truenasapi_typings.current import Current
+
+    #: Mirrors `TrueNASClient`'s parameter so `TrueNASHost[Current]` gives the
+    #: same completion on `.api` that `TrueNASClient[Current]` does.
+    ApiVersion = _ty.TypeVar(
+        "ApiVersion", bound=_Namespace, default=Current  # type: ignore
+    )
+else:
+    ApiVersion = _ty.TypeVar("ApiVersion", bound=_Namespace)
 
 #: The local middleware unix socket. Re-exported from :mod:`pytruenas.jsonrpc`
 #: rather than redefined, so the two can never drift apart.
@@ -80,6 +92,64 @@ _LOCAL_HOSTS = {"", "localhost", "127.0.0.1"}
 #: Provider names accepted by the ``executor=``/``path=`` overrides.
 EXECUTOR_NAMES = ("local", "ssh", "webshell")
 PATH_NAMES = ("local", "sftp", "tnasws")
+
+
+def _shared_options(credentials: "_ty.Mapping[str, object]") -> "dict[str, object]":
+    """Config options common to every branch of ``_from_parsed_uri``.
+
+    Shared deliberately: that method returns from two places (the unix-socket
+    form and the host/port form), and an option forwarded in only one is
+    silently ignored for the other. That is not hypothetical -- it is exactly
+    how ``webshell=False`` was once accepted and dropped.
+    """
+    return {
+        "sslverify": _ty.cast(bool, credentials.get("sslverify", True)),
+        "version": _ty.cast(str, credentials.get("version", "current")),
+        "ssh": credentials.get("ssh"),
+        "shell": _ty.cast(_ty.Any, credentials.get("shell")),
+        "executor": _ty.cast(_ty.Any, credentials.get("executor")),
+        "path": _ty.cast(_ty.Any, credentials.get("path")),
+        "autologin": _ty.cast(bool, credentials.get("autologin", True)),
+        "logger": credentials.get("logger"),
+    }
+
+
+def _ssh_config_from(shell: "str | None"):
+    """Build an :class:`hostctl.host.SshConfig` from a shell connection string.
+
+    Accepts what ``TrueNASClient(shell=...)`` has always taken --
+    ``"ssh://root@nas"``, ``"root:pw@nas:22"``, a bare host -- so reaching the
+    SSH leg does not require importing and assembling an SshConfig by hand.
+    ``None`` or a local target yields ``None``: no SSH leg.
+    """
+    if not shell:
+        return None
+
+    from hostctl.host import SshConfig
+
+    target = _TGT.parse(shell, scheme="ssh")
+    if target.scheme == "local" or not target.host:
+        return None
+
+    username = target.username or "root"
+    password = target.password or None
+    client_keys = None
+    # The pre-hostctl client packed the auth type into the username as
+    # "client_keys|root"; accept it so an existing connection string keeps
+    # working, but unpack it into SshConfig's real fields.
+    if "|" in username:
+        logintype, username = username.split("|", maxsplit=1)
+        if logintype == "client_keys" and password:
+            client_keys = [password.encode() if isinstance(password, str) else password]
+            password = None
+    return SshConfig(
+        host=target.host,
+        port=target.port or 22,
+        username=username or "root",
+        password=password,
+        client_keys=client_keys,
+        executable=target.path or None,
+    )
 
 
 def _reject_unknown(
@@ -198,10 +268,17 @@ class TrueNASConfig(
         sslverify: bool = True,
         credentials: object = None,
         ssh: object = None,
+        shell: "str | None" = None,
         executor: "_ty.Iterable[str] | str | None" = None,
         path: "_ty.Iterable[str] | str | None" = None,
+        autologin: bool = True,
+        logger: object = None,
     ) -> None:
         super().__init__()
+        #: Whether the first websocket access logs in automatically.
+        self.autologin = autologin
+        #: Logger for the client built from this config; a name or a Logger.
+        self.logger = logger
         #: Explicit provider selection, overriding the defaults. Each is a name
         #: or a sequence of names, in preference order; ``None`` means "decide
         #: from the target". See :meth:`TrueNASHost._build_providers`.
@@ -220,7 +297,11 @@ class TrueNASConfig(
         self.api_path = api_path
         self.version = version
         self.sslverify = sslverify
-        self.ssh = ssh
+        #: The SSH leg. Accepts a ready :class:`hostctl.host.SshConfig` or, via
+        #: ``shell=``, the connection string ``TrueNASClient`` has always taken
+        #: (``"ssh://root@nas"``, ``"root@nas:22"``) -- so a caller does not
+        #: have to import and assemble an SshConfig for the common case.
+        self.ssh = ssh if ssh is not None else _ssh_config_from(shell)
         # Credentials are normalized once, here, so every downstream consumer
         # sees a Credentials instance rather than "maybe a string, maybe a
         # tuple, maybe None".
@@ -260,8 +341,11 @@ class TrueNASConfig(
         "sslverify",
         "ssh",
         "version",
+        "shell",
         "executor",
         "path",
+        "autologin",
+        "logger",
     )
 
     @classmethod
@@ -302,11 +386,7 @@ class TrueNASConfig(
             return cls(
                 socket_path=socket_path or DEFAULT_SOCKET_PATH,
                 credentials=creds,
-                sslverify=_ty.cast(bool, credentials.get("sslverify", True)),
-                version=_ty.cast(str, credentials.get("version", "current")),
-                ssh=credentials.get("ssh"),
-                executor=_ty.cast(_ty.Any, credentials.get("executor")),
-                path=_ty.cast(_ty.Any, credentials.get("path")),
+                **_shared_options(credentials),
             )
 
         secure = None
@@ -325,11 +405,7 @@ class TrueNASConfig(
             secure=secure,
             api_path=uri_path if uri_path.strip("/") else None,
             credentials=creds,
-            sslverify=_ty.cast(bool, credentials.get("sslverify", True)),
-            version=_ty.cast(str, credentials.get("version", "current")),
-            ssh=credentials.get("ssh"),
-            executor=_ty.cast(_ty.Any, credentials.get("executor")),
-            path=_ty.cast(_ty.Any, credentials.get("path")),
+            **_shared_options(credentials),
         )
 
     # -- derived state -----------------------------------------------------
@@ -372,7 +448,19 @@ class TrueNASConfig(
         return TrueNASHost(self)
 
 
-class TrueNASHost(_PosixHost):
+#: Keywords `TrueNASHost(...)` should route to the config rather than to
+#: `SystemHost`. Derived from the signature so the two cannot drift: adding a
+#: `TrueNASConfig` parameter makes it accepted here automatically.
+#: `signature(TrueNASConfig)` would resolve through HostConfig's metaclass
+#: `__call__`, not the constructor, so read `__init__` directly.
+_CONFIG_OPTIONS = frozenset(
+    name
+    for name, parameter in _inspect.signature(TrueNASConfig.__init__).parameters.items()
+    if parameter.kind is _inspect.Parameter.KEYWORD_ONLY
+)
+
+
+class TrueNASHost(_PosixHost, _ty.Generic[ApiVersion]):
     """A TrueNAS middleware host: POSIX semantics over composed transports.
 
     Everything generic -- ``run``, ``path``, ``spawn``, ``info``, ``connect``,
@@ -381,28 +469,64 @@ class TrueNASHost(_PosixHost):
     assembled below. What this class adds is only the part no other host has:
     the middleware JSON-RPC websocket and the API surface built on it.
 
-    Provider order is deliberate and mirrors today's behaviour:
+    Construct it from a connection string, a :class:`TrueNASConfig`, or nothing
+    at all (the local middleware socket)::
 
-    * executors -- SSH first (the only remote command channel the JSON-RPC API
-      offers is none at all), then the middleware unix socket, which is usable
-      only when this process runs on the NAS itself.
-    * paths -- SFTP first for its richer POSIX surface (symlinks, rename,
-      realpath), then the ``filesystem.*`` websocket, which is always reachable
-      but narrower. That reproduces :class:`~pytruenas.fs.truenas.TruenasPath`'s
-      hand-rolled fallback through hostctl's selector, which additionally
-      records a redacted trace of what was tried (``host.last_selection``).
+        TrueNASHost("wss://nas")
+        TrueNASHost("nas", credentials="1-...", executor=["ssh"])
+        TrueNASHost(TrueNASConfig.from_target("wss://nas"))
+        TrueNASHost()
+
+    A string accepts every form :class:`~pytruenas.TrueNASClient` does and takes
+    the same keyword options as :meth:`TrueNASConfig.from_target`.
+
+    Provider order depends on the target, and is overridable per selector with
+    ``executor=``/``path=``:
+
+    * **local** -- hostctl's stock ``local`` pair, and nothing else. Reaching
+      this same machine over SSH, a PTY, or the filesystem API would be slower
+      and strictly less capable.
+    * **remote** -- ``ssh`` then ``webshell`` for commands, ``sftp`` then
+      ``tnasws`` for paths. SSH leads on capability; the websocket legs follow.
+      This reproduces :class:`~pytruenas.fs.truenas.TruenasPath`'s hand-rolled
+      fallback through hostctl's selector, which additionally records a redacted
+      trace of what was tried (``host.last_selection``).
     """
 
     config_type = TrueNASConfig
 
     def __init__(
         self,
-        config: "TrueNASConfig | None" = None,
+        config: "TrueNASConfig | str | None" = None,
         *,
         client: object = None,
         **options: object,
     ) -> None:
-        config = config if config is not None else TrueNASConfig.from_target(None)
+        # A connection string is the common case, so accept it directly rather
+        # than making every caller reach for TrueNASConfig.from_target first.
+        # hostctl's own `Host("uri")` shortcut cannot help here: its metaclass
+        # only intercepts when `cls is Host`, so a subclass falls straight
+        # through to normal construction.
+        #
+        # Keywords are split by destination: everything TrueNASConfig accepts
+        # builds the config, and the rest (`info=`, `initializer=`, ...) goes
+        # on to SystemHost. Splitting rather than guessing keeps a typo an
+        # error from whichever layer owns the name.
+        if config is None or isinstance(config, str):
+            config_options = {
+                key: options.pop(key) for key in list(options) if key in _CONFIG_OPTIONS
+            }
+            config = TrueNASConfig.from_target(
+                config, **_ty.cast(_ty.Any, config_options)
+            )
+        elif any(key in _CONFIG_OPTIONS for key in options):
+            unexpected = ", ".join(
+                sorted(key for key in options if key in _CONFIG_OPTIONS)
+            )
+            raise TypeError(
+                "configuration options may not be combined with an existing "
+                f"TrueNASConfig; pass them to from_target instead: {unexpected}"
+            )
         # The client owns the websocket and the api namespace; the host owns
         # transport selection. They reference each other, so the client is
         # built lazily on first use unless one is injected (tests do inject).
@@ -507,18 +631,44 @@ class TrueNASHost(_PosixHost):
         if self._client is None:
             from .client import TrueNASClient
 
-            self._client = TrueNASClient._from_config(self._config)
+            self._client = TrueNASClient._from_config(
+                self._config,
+                autologin=self._config.autologin,
+                logger=self._config.logger,
+            )
         return self._client
 
     @property
-    def api(self):
-        """The root API namespace (``host.api.<namespace>.<method>(...)``)."""
-        return self.client.api
+    def api(self) -> "ApiVersion":
+        """The root API namespace (``host.api.<namespace>.<method>(...)``).
+
+        Parameterise the host to type it: ``TrueNASHost[Current]("nas").api``
+        completes exactly as ``TrueNASClient[Current]`` does.
+        """
+        return _ty.cast("ApiVersion", self.client.api)
 
     @property
     def websocket(self):
         """The live JSON-RPC websocket, connecting on first access."""
         return self.client.websocket
+
+    @property
+    def ssh(self):
+        """The underlying ``asyncssh`` connection (requires the ``ssh`` extra).
+
+        For the rare caller that needs the raw connection -- port forwarding,
+        an SFTP client of its own. Ordinary command and path work should go
+        through :meth:`run` and :meth:`path`, which pick a transport rather
+        than assuming this one exists.
+        """
+        for provider in self._executor_selector.providers:
+            transport = getattr(provider, "transport", None)
+            if transport is not None and hasattr(transport, "ssh"):
+                return transport.ssh
+        raise RuntimeError(
+            "no SSH transport is configured for this host; pass shell=... or "
+            "ssh=SshConfig(...), or call install_sshcreds()"
+        )
 
     def login(self, *args, **kwargs):
         return self.client.login(*args, **kwargs)
