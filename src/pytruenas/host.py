@@ -26,14 +26,19 @@ inside ``__init__`` are *recorded* here (:attr:`~TrueNASConfig.needs_scheme_prob
 from __future__ import annotations
 
 import inspect as _inspect
+import json as _js
+import logging as _logging
 import typing as _ty
+from functools import cached_property as _cached_property
 from urllib.parse import unquote as _unquote
 from urllib.parse import urlsplit as _urlsplit
 
+import requests as _req
 from hostctl.host import HostConfig as _HostConfig
 from hostctl.host import PosixHost as _PosixHost
 from hostctl.host import uri_host as _uri_host
 
+from . import _conn
 from . import auth as _auth
 from .jsonrpc import DEFAULT_UNIX_SOCKET
 from .namespace import Namespace as _Namespace
@@ -92,6 +97,26 @@ _LOCAL_HOSTS = {"", "localhost", "127.0.0.1"}
 #: Provider names accepted by the ``executor=``/``path=`` overrides.
 EXECUTOR_NAMES = ("local", "ssh", "webshell")
 PATH_NAMES = ("local", "sftp", "tnasws")
+
+
+def _resolve_logger(logger: object):
+    """A ``Logger`` from a name, an instance, or ``None``."""
+    if logger is None:
+        return _logging.getLogger("pytruenas")
+    if isinstance(logger, str):
+        return _logging.getLogger(logger)
+    return _ty.cast(_logging.Logger, logger)
+
+
+def _asyncssh():
+    """Import ``asyncssh`` on demand (the optional ``ssh`` extra)."""
+    try:
+        import asyncssh
+    except ImportError as exc:  # pragma: no cover - only without the extra
+        raise ImportError(
+            "SSH/SFTP support requires the 'ssh' extra: pip install pytruenas[ssh]"
+        ) from exc
+    return asyncssh
 
 
 def _shared_options(credentials: "_ty.Mapping[str, object]") -> "dict[str, object]":
@@ -498,10 +523,17 @@ class TrueNASHost(_PosixHost, _ty.Generic[ApiVersion]):
     def __init__(
         self,
         config: "TrueNASConfig | str | None" = None,
+        credentials: object = None,
         *,
         client: object = None,
         **options: object,
     ) -> None:
+        # `TrueNASClient(target, creds)` passed credentials positionally, and
+        # that is the single most common call in the wild -- accept it.
+        if credentials is not None:
+            if "credentials" in options:
+                raise TypeError("credentials given both positionally and by keyword")
+            options["credentials"] = credentials
         # A connection string is the common case, so accept it directly rather
         # than making every caller reach for TrueNASConfig.from_target first.
         # hostctl's own `Host("uri")` shortcut cannot help here: its metaclass
@@ -527,11 +559,14 @@ class TrueNASHost(_PosixHost, _ty.Generic[ApiVersion]):
                 "configuration options may not be combined with an existing "
                 f"TrueNASConfig; pass them to from_target instead: {unexpected}"
             )
-        # The client owns the websocket and the api namespace; the host owns
-        # transport selection. They reference each other, so the client is
-        # built lazily on first use unless one is injected (tests do inject).
-        self._client = client
         self._config = config
+        #: The live JSON-RPC connection, opened on first `.websocket` access.
+        self._conn: "_conn.Client | None" = None
+        self.logger = _resolve_logger(config.logger)
+        # `client=` is accepted and ignored: the host *is* the client now.
+        # Kept so existing callers (and tests that injected a stand-in) do not
+        # break on an unexpected keyword.
+        del client
 
         executors, paths = self._build_providers(config)
         super().__init__(
@@ -626,31 +661,91 @@ class TrueNASHost(_PosixHost, _ty.Generic[ApiVersion]):
     # -- the TrueNAS surface ----------------------------------------------
 
     @property
-    def client(self):
-        """The :class:`~pytruenas.TrueNASClient` backing this host's API."""
-        if self._client is None:
-            from .client import TrueNASClient
+    def _target(self):
+        """The resolved websocket target as a :class:`~pytruenas.utils.target.Target`.
 
-            self._client = TrueNASClient._from_config(
-                self._config,
-                autologin=self._config.autologin,
-                logger=self._config.logger,
-            )
-        return self._client
+        Built from the config rather than stored, so a probe that resolves the
+        scheme or API path later is picked up without re-syncing two copies.
+        """
+        config = self._config
+        if config.is_local:
+            return _TGT.parse(f"ws+unix://{config.socket_path}", scheme="ws+unix")
+        scheme = "ws" if config.secure is False else "wss"
+        authority = config.host
+        if config.port:
+            authority = f"{authority}:{config.port}"
+        api_path = config.api_path or f"/api/{config.version}"
+        return _TGT.parse(f"{scheme}://{authority}{api_path}", scheme=scheme)
 
     @property
+    def client(self):
+        """Deprecated alias for ``self``.
+
+        The host *is* the client -- they were two objects forwarding halves of
+        their surface to each other, which is now one class. Kept so
+        ``host.client.api`` and similar keep working.
+        """
+        return self
+
+    # -- middleware connection ---------------------------------------------
+
+    def _openwss(self):
+        api = self._target
+        return _conn.Client(
+            None if api.is_local and not api.port else api.uri,
+            verify_ssl=self._config.sslverify,
+            py_exceptions=False,
+        )
+
+    @property
+    def websocket(self):
+        """The live JSON-RPC websocket; connects on first access."""
+        if self._conn is None or self._conn._closed.is_set():
+            if self._config.autologin:
+                self.login()
+            else:
+                self._conn = self._openwss()
+        return _ty.cast(_conn.Client, self._conn)
+
+    def login(
+        self,
+        creds: "_auth.Credentials | None" = None,
+        *,
+        login_ex: bool = False,
+        login_options: "dict | None" = None,
+        otp_provider: "_ty.Callable[[], str] | None" = None,
+    ):
+        """Open a fresh connection and authenticate.
+
+        By default uses the legacy ``auth.login``/``login_with_*`` path. Pass
+        ``login_ex=True`` for the modern mechanism, which supports 2FA via an
+        ``OTP_REQUIRED`` continuation: the OTP comes from the credential's own
+        ``otp_token`` if set, else from ``otp_provider()``. A credential with no
+        login_ex form (e.g. local-socket auth) falls back automatically.
+        """
+        if self._conn and not self._conn._closed.is_set():
+            try:
+                self._conn.close()
+            except Exception:
+                pass
+        self._conn = self._openwss()
+        creds = creds or _ty.cast(_auth.Credentials, self._config.credentials)
+        if login_ex:
+            return creds.login_ex(
+                _ty.cast(_ty.Any, self),
+                login_options=login_options,
+                otp_provider=otp_provider,
+            )
+        creds.login(_ty.cast(_ty.Any, self))
+
+    @_cached_property
     def api(self) -> "ApiVersion":
         """The root API namespace (``host.api.<namespace>.<method>(...)``).
 
         Parameterise the host to type it: ``TrueNASHost[Current]("nas").api``
-        completes exactly as ``TrueNASClient[Current]`` does.
+        completes exactly as the old ``TrueNASClient[Current]`` did.
         """
-        return _ty.cast("ApiVersion", self.client.api)
-
-    @property
-    def websocket(self):
-        """The live JSON-RPC websocket, connecting on first access."""
-        return self.client.websocket
+        return _ty.cast("ApiVersion", _Namespace(_ty.cast(_ty.Any, self)))
 
     @property
     def ssh(self):
@@ -670,29 +765,122 @@ class TrueNASHost(_PosixHost, _ty.Generic[ApiVersion]):
             "ssh=SshConfig(...), or call install_sshcreds()"
         )
 
-    def login(self, *args, **kwargs):
-        return self.client.login(*args, **kwargs)
+    @property
+    def ssh(self):
+        """The underlying ``asyncssh`` connection (requires the ``ssh`` extra).
 
-    def logout(self) -> None:
-        self.client.logout()
+        For the rare caller that needs the raw connection -- port forwarding,
+        an SFTP client of its own. Ordinary command and path work should go
+        through :meth:`run` and :meth:`path`, which pick a transport rather
+        than assuming this one exists.
+        """
+        for provider in self._executor_selector.providers:
+            transport = getattr(provider, "transport", None)
+            if transport is not None and hasattr(transport, "ssh"):
+                return transport.ssh
+        raise RuntimeError(
+            "no SSH transport is configured for this host; pass shell=... or "
+            "ssh=SshConfig(...), or call install_sshcreds()"
+        )
+
+    # -- convenience wrappers over common auth/core methods ----------------
 
     def me(self) -> dict:
-        return self.client.me()
+        """The current session's authenticated user (``auth.me``)."""
+        return _ty.cast(dict, self.api.auth.me())
+
+    def logout(self) -> None:
+        """End the current session (``auth.logout``)."""
+        self.api.auth.logout()
 
     def ping(self) -> str:
-        return self.client.ping()
+        """Round-trip the middleware (``core.ping`` -> ``"pong"``)."""
+        return _ty.cast(str, self.api.core.ping())
 
-    def subscribe(self, *args, **kwargs):
-        return self.client.subscribe(*args, **kwargs)
+    def subscribe(
+        self,
+        event: str,
+        callback: "_ty.Callable[..., object] | None" = None,
+        *,
+        maxsize: int = _conn.DEFAULT_EVENT_QUEUE_SIZE,
+    ):
+        """Subscribe to a middleware event; return a ``Subscription``.
 
-    def upload(self, *args, **kwargs):
-        return self.client.upload(*args, **kwargs)
+        ``host.subscribe("alert.list")`` is shorthand for
+        ``host.api.alert.list.subscribe()``. A subscription is bound to the
+        current websocket and does **not** survive a reconnect -- the
+        ``events()`` iterator ending is that signal.
+        """
+        return self.websocket.subscribe(event, callback, maxsize=maxsize)
 
-    def download(self, *args, **kwargs):
-        return self.client.download(*args, **kwargs)
+    # -- HTTP side channels ------------------------------------------------
+
+    def _http_target(self, path: str):
+        """This host's HTTP(S) URL for ``path``.
+
+        The websocket ``ws``/``wss`` scheme maps to ``http``/``https``; used by
+        the upload/download side channels and the web shell.
+        """
+        api = self._target
+        scheme = "https" if api.scheme == "wss" else "http"
+        return api._replace(scheme=scheme, path=path, port=0)
+
+    def upload(
+        self, file: "str | bytes", method: str, *params, token=None, wait=True, **kwargs
+    ):
+        """Upload ``file`` via ``/_upload``, then call ``method`` with it."""
+        target = self._http_target("/_upload")
+        data = {"method": method, "params": params}
+        if isinstance(file, str):
+            file = file.encode()
+
+        if not token:
+            token = self.api.auth.generate_token(5, {}, False, **kwargs)
+
+        resp = _req.post(
+            target.uri,
+            headers={"Authorization": f"Token {token}"},
+            verify=self._config.sslverify,
+            files={"data": _js.dumps(data).encode(), "file": file},
+        )
+        jobid = resp.json()["job_id"]
+        if wait:
+            self.api.core.job_wait(jobid, job=True, _timeout=None)
+        return jobid
+
+    def download(
+        self,
+        method: str,
+        *args,
+        filename: "str | None" = None,
+        buffered=False,
+        wait=True,
+        **kwargs,
+    ):
+        """Call ``method`` for a download link and fetch it over HTTP(S)."""
+        jobid, link = self.api.core.download(
+            method, args, filename or "download", buffered, **kwargs
+        )
+        target = self._http_target(link)
+
+        if wait:
+            if buffered:
+                self.api.core.job_wait(jobid, job=True, _timeout=None)
+            resp = _req.get(target.uri, verify=self._config.sslverify)
+            resp.raise_for_status()
+            return resp.content
+        return jobid
 
     def dump_api(self):
-        return self.client.dump_api()
+        """Run ``middlewared --dump-api`` on the target and parse the JSON."""
+        import json
+
+        from .models.apidump import Api
+
+        api: Api = json.loads(
+            self.run("middlewared --dump-api", capture_output=True).stdout
+        )
+        return api
 
     def install_sshcreds(
         self, name: "str | None" = None, private_key: "str | None" = None
@@ -710,13 +898,46 @@ class TrueNASHost(_PosixHost, _ty.Generic[ApiVersion]):
         are rebuilt: a host that had no executor at all (remote, no SSH) gains
         one, and paths gain the richer SFTP leg.
         """
-        private_key = self.client.install_sshcreds(name=name, private_key=private_key)
-        if private_key is None:
-            private_key = self.client._ssh_private_key()
-        if private_key is None:
-            return None
+        name = name or "pytruenas"
+        keypair = self.api.keychaincredential._get(type="SSH_KEY_PAIR", name=name)
+        if not keypair and not private_key:
+            private_key = self.api.keychaincredential.generate_ssh_key_pair()[
+                "private_key"
+            ]
+        elif not private_key:
+            private_key = keypair["attributes"]["private_key"]
+
+        pubkey = (
+            _asyncssh()
+            .import_private_key(private_key)
+            .export_public_key()
+            .decode()
+            .strip()
+        )
+        keypair = self.api.keychaincredential._upsert(
+            ("name", "type"),
+            type="SSH_KEY_PAIR",
+            name=name,
+            attributes={"private_key": private_key, "public_key": pubkey},
+        )
+        root = self.api.user._get(username="root")
+        authorized = (root.get("sshpubkey") or "").splitlines()
+        if pubkey not in authorized:
+            authorized.append(pubkey)
+            self.api.user._upsert(
+                "username", username="root", sshpubkey="\n".join(authorized)
+            )
+
+        private_key = _ty.cast(str, keypair["attributes"]["private_key"])
 
         from hostctl.host import SshConfig
+
+        # A local target has no host to SSH *to*, and needs none -- commands
+        # already run here. The keypair is still provisioned (it is installed
+        # on root's authorized_keys, so other machines can use it), but there
+        # is no leg to wire it into.
+        if self._config.is_local:
+            return private_key
 
         existing = self._config.ssh
         if existing is None:
@@ -742,22 +963,20 @@ class TrueNASHost(_PosixHost, _ty.Generic[ApiVersion]):
     def close(self) -> None:
         """Close the transports, then the websocket.
 
-        Order matters: the middleware path provider talks over the websocket,
+        Order matters: the ``tnasws`` path provider talks over the websocket,
         so it must be torn down before the connection it depends on.
         """
         try:
             super().close()
         finally:
-            client = self._client
-            if client is not None:
-                conn = getattr(client, "_conn", None)
-                if conn is not None:
-                    try:
-                        conn.close()
-                    except Exception:
-                        # close() must be safe to call repeatedly and must not
-                        # mask an error raised by the provider teardown above.
-                        pass
+            conn, self._conn = self._conn, None
+            if conn is not None:
+                try:
+                    conn.close()
+                except Exception:
+                    # close() must be safe to call repeatedly and must not mask
+                    # an error raised by the provider teardown above.
+                    pass
 
 
 __all__ = ["AUTO_SCHEME", "DEFAULT_SOCKET_PATH", "TrueNASConfig", "TrueNASHost"]

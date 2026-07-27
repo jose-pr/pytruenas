@@ -177,106 +177,44 @@ def test_run_input_and_stdin_conflict_raises():
         c.run("true", executable="/bin/sh", input=b"x", stdin=subprocess.PIPE)
 
 
-# -- run() delegation to the hostctl host -------------------------------------
+# -- construction ------------------------------------------------------------
 #
-# These replace four tests that asserted client.py's own subprocess plumbing --
-# the [executable, "-c", script] argv, the file-like stdin drain, and the
-# root-shell lookup. That code is gone; hostctl owns it, and its equivalence
-# was verified against the old implementation on a real POSIX target (TrueNAS
-# 26.0.0-BETA.1), where every ported assertion passed identically on both.
-#
-# What pytruenas still owns is the *delegation*: that `.run()` reaches the
-# right host with the caller's arguments intact. That is what is tested here,
-# and unlike the originals these do not need a POSIX shell to be meaningful.
+# These replace a block that tested the client->host bridge: a lazily built
+# `.host`, `_as_config()`, `_as_ssh_config()`, and `run()` forwarding to the
+# host. There is no bridge any more -- the two classes were merged, so `run()`
+# is inherited from hostctl rather than delegated, and the config is built
+# once at construction.
 
 
-def test_run_delegates_to_the_host(monkeypatch):
+def test_local_client_uses_the_socket_and_no_ssh_leg():
     c = TrueNASClient(None, autologin=False)
-    host = MagicMock()
-    host.run.return_value = subprocess.CompletedProcess("true", 0)
-    monkeypatch.setattr(type(c), "host", property(lambda self: host))
-
-    c.run("true", capture_output=True, check=False, encoding="utf-8")
-
-    host.run.assert_called_once_with(
-        "true", capture_output=True, check=False, encoding="utf-8"
-    )
+    assert c._config.is_local
+    # Nothing to SSH to: commands already run on this machine.
+    assert c._config.ssh is None
+    assert [p.name for p in c._executor_selector.providers] == ["local"]
 
 
-def test_run_forwards_multiple_commands_verbatim(monkeypatch):
-    c = TrueNASClient(None, autologin=False)
-    host = MagicMock()
-    monkeypatch.setattr(type(c), "host", property(lambda self: host))
-
-    c.run("cd /", ("echo", "x"), cwd="/tmp")
-
-    # Quoting and joining are the shell flavour's job now -- the client must
-    # pass the commands through untouched rather than pre-rendering them.
-    assert host.run.call_args[0] == ("cd /", ("echo", "x"))
-    assert host.run.call_args.kwargs["cwd"] == "/tmp"
+def test_remote_client_carries_the_target():
+    c = TrueNASClient("wss://nas", "1-" + "a" * 64, autologin=False, sslverify=False)
+    assert c._config.host == "nas"
+    assert not c._config.is_local
+    assert c._config.sslverify is False
 
 
-def test_run_result_is_returned_unchanged(monkeypatch):
-    c = TrueNASClient(None, autologin=False)
-    expected = subprocess.CompletedProcess("x", 3, stdout="out", stderr="err")
-    host = MagicMock()
-    host.run.return_value = expected
-    monkeypatch.setattr(type(c), "host", property(lambda self: host))
-
-    assert c.run("x", check=False) is expected
-
-
-def test_host_is_built_lazily_and_cached(monkeypatch):
-    c = TrueNASClient(None, autologin=False)
-    assert c._host is None
-    first = c.host
-    assert c._host is first
-    assert c.host is first
-
-
-def test_local_client_builds_a_local_socket_config():
-    c = TrueNASClient(None, autologin=False)
-    config = c._as_config()
-    assert config.is_local
-    # No SSH target for a local client -> no SSH leg to compose.
-    assert config.ssh is None
-
-
-def test_remote_client_config_carries_the_resolved_target():
-    with patch.object(TrueNASClient, "_openwss", return_value=MagicMock()):
-        with patch("pytruenas.client._req.get") as get:
-            get.return_value = MagicMock(url="https://nas", status_code=400)
-            c = TrueNASClient("nas", "1-" + "a" * 64, autologin=False, sslverify=False)
-    config = c._as_config()
-    assert config.host == "nas"
-    assert not config.is_local
-    assert config.sslverify is False
-
-
-def test_ssh_config_becomes_an_ssh_leg():
-    """The renamed `.ssh_config` target is what composes the SSH transport."""
-    with patch.object(TrueNASClient, "_openwss", return_value=MagicMock()):
-        with patch("pytruenas.client._req.get") as get:
-            get.return_value = MagicMock(url="https://nas", status_code=400)
-            c = TrueNASClient("nas", autologin=False, sslverify=False)
-    c.ssh_config = c.ssh_config._replace(username="root", password="pw")
-    ssh = c._as_ssh_config()
+def test_shell_string_becomes_an_ssh_leg():
+    c = TrueNASClient("wss://nas", autologin=False, shell="ssh://root:pw@nas")
+    ssh = c._config.ssh
     assert ssh is not None
-    assert ssh.host == "nas"
-    assert ssh.username == "root"
-    assert ssh.password == "pw"
+    assert (ssh.host, ssh.username, ssh.password) == ("nas", "root", "pw")
+    assert "ssh" in [p.name for p in c._executor_selector.providers]
 
 
 def test_client_keys_encoding_is_unpacked_into_a_real_field():
     """`client_keys|root` was a string hack; SshConfig has a real field."""
-    with patch.object(TrueNASClient, "_openwss", return_value=MagicMock()):
-        with patch("pytruenas.client._req.get") as get:
-            get.return_value = MagicMock(url="https://nas", status_code=400)
-            c = TrueNASClient("nas", autologin=False, sslverify=False)
-    c.ssh_config = c.ssh_config._replace(
-        username="client_keys|root", password="PRIVATEKEY"
+    c = TrueNASClient(
+        "wss://nas", autologin=False, shell="ssh://client_keys|root:PRIVATEKEY@nas"
     )
-    ssh = c._as_ssh_config()
+    ssh = c._config.ssh
     assert ssh.username == "root"
     assert ssh.client_keys == [b"PRIVATEKEY"]
     assert ssh.password is None

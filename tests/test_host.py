@@ -119,30 +119,42 @@ def test_config_options_alongside_a_config_are_rejected():
         TrueNASHost(config, executor=["ssh"])
 
 
-def test_every_client_setting_is_reachable():
-    """`TrueNASHost` must be able to express whatever `TrueNASClient` can.
+def test_truenasclient_is_the_same_class():
+    """The two were merged; `TrueNASClient` is kept as the friendlier name.
 
-    Checked against the real signature so a new client setting cannot be added
-    without either surfacing here or failing this test. `target` and `creds`
-    differ only in spelling (positional, and `credentials=`); `fsbackend` is
-    superseded by the finer-grained `path=` override.
+    They used to be separate objects forwarding halves of their surface to each
+    other -- `client.run()` called `client.host.run()` while `host.api` called
+    `host.client.api`, each holding a reference to the other.
     """
-    import inspect
-
     from pytruenas import TrueNASClient
-    from pytruenas.host import TrueNASConfig as _Config
 
-    equivalents = {"target", "creds", "fsbackend"}
-    config_params = set(inspect.signature(_Config.__init__).parameters)
+    assert TrueNASClient is TrueNASHost
 
-    for name, parameter in inspect.signature(TrueNASClient.__init__).parameters.items():
-        if name in ("self", *equivalents):
-            continue
-        assert name in config_params, f"{name} is not reachable from TrueNASHost"
-        assert (
-            parameter.default
-            == inspect.signature(_Config.__init__).parameters[name].default
-        ), f"{name} default differs"
+
+def test_every_historical_client_setting_is_accepted():
+    """Every setting the old two-argument constructor took still works.
+
+    `target` and `creds` were positional; `fsbackend` is superseded by the
+    finer-grained `path=`. The rest are keywords on the config.
+    """
+    host = TrueNASHost(
+        "wss://nas",
+        "1-" + "a" * 64,  # creds, positionally, as the old client took them
+        sslverify=False,
+        version="v2.0",
+        shell="ssh://root@nas",
+        autologin=False,
+        logger="mylog",
+        path=["tnasws"],  # what fsbackend used to express
+    )
+    config = host._config
+    assert config.sslverify is False
+    assert config.version == "v2.0"
+    assert config.ssh.host == "nas"
+    assert config.autologin is False
+    assert config.paths == ("tnasws",)
+    assert host.logger.name == "mylog"
+    assert type(config.credentials).__name__ == "ApiKeyAuth"
 
 
 @pytest.mark.parametrize(
@@ -173,17 +185,23 @@ def test_shell_string_unpacks_the_legacy_client_keys_form():
     assert config.ssh.password is None
 
 
-def test_autologin_and_logger_reach_the_client(monkeypatch):
+def test_autologin_and_logger_are_honoured(monkeypatch):
     import requests
 
     monkeypatch.setattr(
-        requests,
-        "get",
-        lambda *a, **k: pytest.fail("built the client over the network"),
+        requests, "get", lambda *a, **k: pytest.fail("constructed over the network")
     )
     host = TrueNASHost("wss://nas", autologin=False, logger="mylog")
-    assert host.client.autologin is False
-    assert host.client.logger.name == "mylog"
+    assert host._config.autologin is False
+    assert host.logger.name == "mylog"
+
+    # autologin=False means `.websocket` opens a connection without logging in.
+    opened = MagicMock()
+    monkeypatch.setattr(type(host), "_openwss", lambda self: opened)
+    monkeypatch.setattr(
+        type(host), "login", lambda self, *a, **k: pytest.fail("logged in")
+    )
+    assert host.websocket is opened
 
 
 def test_ssh_property_raises_clearly_without_a_transport():
@@ -369,45 +387,76 @@ def test_remote_with_ssh_reports_run():
     assert "run" in host.capabilities
 
 
-# -- the TrueNAS surface delegates to the client ---------------------------
+# -- the middleware surface, owned directly --------------------------------
+#
+# These used to assert *delegation* -- that `host.ping()` called
+# `host.client.ping()`. There is no longer a second object: the host and the
+# client were merged, so what is tested now is that each wrapper reaches the
+# right API method.
 
 
 @pytest.mark.parametrize(
-    "method, args",
+    "method, args, expected",
     [
-        ("ping", ()),
-        ("me", ()),
-        ("logout", ()),
-        ("dump_api", ()),
-        ("subscribe", ("alert.list",)),
+        ("ping", (), "core.ping"),
+        ("me", (), "auth.me"),
+        ("logout", (), "auth.logout"),
     ],
 )
-def test_api_surface_delegates_to_the_client(method, args):
-    client = MagicMock()
-    host = TrueNASHost(TrueNASConfig.from_target("wss://nas"), client=client)
+def test_convenience_wrappers_call_the_right_api_method(
+    monkeypatch, method, args, expected
+):
+    host = _built()
+    api = MagicMock()
+    monkeypatch.setattr(type(host), "api", api)
+
     getattr(host, method)(*args)
-    getattr(client, method).assert_called_once_with(*args)
+
+    namespace, call = expected.split(".")
+    getattr(getattr(api, namespace), call).assert_called_once_with()
 
 
-def test_api_property_is_the_clients_namespace():
-    client = MagicMock()
-    host = TrueNASHost(TrueNASConfig.from_target("wss://nas"), client=client)
-    assert host.api is client.api
-    assert host.websocket is client.websocket
+def test_subscribe_goes_through_the_websocket(monkeypatch):
+    host = _built()
+    websocket = MagicMock()
+    monkeypatch.setattr(type(host), "websocket", websocket)
+
+    host.subscribe("alert.list")
+
+    websocket.subscribe.assert_called_once()
+    assert websocket.subscribe.call_args[0][0] == "alert.list"
+
+
+def test_client_is_an_alias_for_self():
+    """The two objects were merged; `.client` stays so old code keeps working."""
+    host = _built()
+    assert host.client is host
+
+
+def test_api_is_a_namespace_bound_to_this_host():
+    from pytruenas.namespace import Namespace
+
+    host = _built()
+    assert isinstance(host.api, Namespace)
+    # Cached: the namespace is built once, not per access.
+    assert host.api is host.api
 
 
 def test_close_tears_down_the_websocket_after_the_providers():
-    client = MagicMock()
-    host = TrueNASHost(TrueNASConfig.from_target("wss://nas"), client=client)
+    host = _built()
+    conn = MagicMock()
+    host._conn = conn
     host.close()
-    client._conn.close.assert_called_once()
+    conn.close.assert_called_once()
+    assert host._conn is None
 
 
 def test_close_survives_a_websocket_that_raises():
     # close() must be safe to call repeatedly and must not mask provider errors.
-    client = MagicMock()
-    client._conn.close.side_effect = RuntimeError("already gone")
-    host = TrueNASHost(TrueNASConfig.from_target("wss://nas"), client=client)
+    host = _built()
+    host._conn = MagicMock()
+    host._conn.close.side_effect = RuntimeError("already gone")
+    host.close()
     host.close()
 
 
@@ -416,76 +465,96 @@ def test_close_survives_a_websocket_that_raises():
 PRIVATE_KEY = "-----BEGIN PRIVATE KEY-----\nfake\n-----END PRIVATE KEY-----"
 
 
-def _host_with_client_key():
-    client = MagicMock()
-    client.install_sshcreds.return_value = PRIVATE_KEY
-    host = TrueNASHost(TrueNASConfig.from_target("wss://nas"), client=client)
-    return host, client
+PUBLIC_KEY = "ssh-ed25519 AAAAC3Nz fake"
 
 
-def test_install_sshcreds_creates_an_ssh_config():
+@pytest.fixture
+def keyed_host(monkeypatch):
+    """A remote host whose middleware calls return a canned keypair.
+
+    Stubs `api` rather than injecting a fake client -- there is no second
+    object to inject any more.
+    """
+    host = _built()
+    api = MagicMock()
+    api.keychaincredential._get.return_value = None
+    api.keychaincredential.generate_ssh_key_pair.return_value = {
+        "private_key": PRIVATE_KEY
+    }
+    api.keychaincredential._upsert.return_value = {
+        "attributes": {"private_key": PRIVATE_KEY, "public_key": PUBLIC_KEY}
+    }
+    api.user._get.return_value = {"username": "root", "sshpubkey": ""}
+    monkeypatch.setattr(type(host), "api", api)
+
+    key = MagicMock()
+    key.export_public_key.return_value = (PUBLIC_KEY + "\n").encode()
+    asyncssh = MagicMock()
+    asyncssh.import_private_key.return_value = key
+    monkeypatch.setattr("pytruenas.host._asyncssh", lambda: asyncssh)
+    return host
+
+
+def test_install_sshcreds_creates_an_ssh_config(keyed_host):
     """The `client_keys|root` string encoding is gone -- it is a real field."""
-    from hostctl.host import SshConfig
+    assert keyed_host._config.ssh is None
+    keyed_host.install_sshcreds()
 
-    host, _ = _host_with_client_key()
-    assert host._config.ssh is None
-    host.install_sshcreds()
-
-    ssh = host._config.ssh
+    ssh = keyed_host._config.ssh
     assert isinstance(ssh, SshConfig)
     assert ssh.host == "nas"
     assert ssh.username == "root"
     assert ssh.client_keys == [PRIVATE_KEY.encode()]
 
 
-def test_install_sshcreds_rebuilds_the_providers():
+def test_install_sshcreds_rebuilds_the_providers(keyed_host):
     """Gaining an SSH transport must change what the host can do.
 
-    Before: a remote host with no SSH has no executor at all. After: it does.
+    Before: a remote host with no SSH has only the web shell. After: SSH leads,
+    and paths gain the richer SFTP leg.
     """
-    host, _ = _host_with_client_key()
-    assert _names(host._executor_selector.providers) == ["webshell"]
-    assert _names(host._path_selector.providers) == ["tnasws"]
+    assert _names(keyed_host._executor_selector.providers) == ["webshell"]
+    assert _names(keyed_host._path_selector.providers) == ["tnasws"]
 
-    host.install_sshcreds()
+    keyed_host.install_sshcreds()
 
-    # SSH is now available and outranks the web shell, and paths gain the
-    # richer SFTP leg -- neither of which existed a moment ago.
-    assert _names(host._executor_selector.providers) == ["ssh", "webshell"]
-    assert _names(host._path_selector.providers) == ["sftp", "tnasws"]
-    assert "run" in host.capabilities
+    assert _names(keyed_host._executor_selector.providers) == ["ssh", "webshell"]
+    assert _names(keyed_host._path_selector.providers) == ["sftp", "tnasws"]
+    assert "run" in keyed_host.capabilities
 
 
-def test_install_sshcreds_does_not_override_explicit_credentials():
-    from hostctl.host import SshConfig
+def test_install_sshcreds_installs_the_public_half(keyed_host):
+    keyed_host.install_sshcreds()
+    written = keyed_host.api.user._upsert.call_args.kwargs["sshpubkey"]
+    assert PUBLIC_KEY in written
 
-    client = MagicMock()
-    client.install_sshcreds.return_value = PRIVATE_KEY
-    config = TrueNASConfig.from_target(
-        "wss://nas", ssh=SshConfig(host="nas", password="hunter2")
+
+def test_install_sshcreds_does_not_override_explicit_credentials(keyed_host):
+    keyed_host._config.ssh = SshConfig(host="nas", password="hunter2")
+    keyed_host.install_sshcreds()
+    assert keyed_host._config.ssh.password == "hunter2"
+    assert keyed_host._config.ssh.client_keys is None
+
+
+def test_install_sshcreds_fills_an_ssh_config_lacking_auth(keyed_host):
+    """An SshConfig with no credentials gets the new key; one with keeps them."""
+    keyed_host._config.ssh = SshConfig(host="nas")
+    keyed_host.install_sshcreds()
+    assert keyed_host._config.ssh.client_keys == [PRIVATE_KEY.encode()]
+
+
+def test_install_sshcreds_honours_an_explicit_name(keyed_host):
+    keyed_host.install_sshcreds(name="custom")
+    assert (
+        keyed_host.api.keychaincredential._upsert.call_args.kwargs["name"] == "custom"
     )
-    host = TrueNASHost(config, client=client)
-    host.install_sshcreds()
-    assert config.ssh.password == "hunter2"
-    assert config.ssh.client_keys is None
 
 
-def test_install_sshcreds_fills_an_ssh_config_lacking_auth():
-    from hostctl.host import SshConfig
-
-    client = MagicMock()
-    client.install_sshcreds.return_value = PRIVATE_KEY
-    config = TrueNASConfig.from_target("wss://nas", ssh=SshConfig(host="nas"))
-    host = TrueNASHost(config, client=client)
-    host.install_sshcreds()
-    assert config.ssh.client_keys == [PRIVATE_KEY.encode()]
-
-
-def test_install_sshcreds_forwards_arguments():
-    host, client = _host_with_client_key()
-    host.install_sshcreds(name="custom", private_key=PRIVATE_KEY)
-    client.install_sshcreds.assert_called_once_with(
-        name="custom", private_key=PRIVATE_KEY
+def test_install_sshcreds_default_name(keyed_host):
+    keyed_host.install_sshcreds()
+    assert (
+        keyed_host.api.keychaincredential._upsert.call_args.kwargs["name"]
+        == "pytruenas"
     )
 
 
