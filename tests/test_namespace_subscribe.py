@@ -1,4 +1,4 @@
-"""Namespace / client subscribe surface (Phase 2 of event subscriptions).
+"""Namespace / client subscribe surface for event subscriptions.
 
 Mocked at ``client.conn.subscribe`` -- no server. Exercises event-name
 derivation from the namespace path and the ``event=`` override; the routing and
