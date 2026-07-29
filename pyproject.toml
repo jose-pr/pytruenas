@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "pytruenas"
-version = "0.3.0"
+version = "0.3.1"
 authors = [{ name = "Jose A." }]
 description = "A typed, Pythonic client and CLI for the TrueNAS middleware API"
 readme = "README.md"
@@ -69,13 +69,21 @@ dependencies = [
     # this a core dependency.)
     # Capped below 0.3: netimps is 0.x, where a minor bump may break -- 0.2.0
     # reworked resolve() and made dnspython optional. Neither touches
-    # get_default_port. Validated against 0.2.0 from the sibling checkout; PyPI
-    # still has 0.1.0 at the time of writing, so that is what installs resolve.
+    # get_default_port. Validated on 0.2.0.
     "netimps>=0.0.2,<0.3",
     # >=0.8.2: SftpPath importable/usable without paramiko (asyncssh-only). The
-    # 'uri' extra (uritools) is needed by TnasWsPath/TruenasPath, which are UriPaths.
-    # Validated on 0.8.4.
-    "pathlib_next[uri]>=0.8.2",
+    # 'uri' extra (uritools) is needed by TnasWsPath/TruenasPath, which are
+    # UriPaths.
+    # >=0.9.0: `UriPath.__fspath__` returns the host-local path for a scheme
+    # marked `_host_filesystem_path` (TnasWsPath/TruenasPath set it) instead of
+    # raising for every non-`file` scheme, so `os.fspath()` is the one way to
+    # name a remote path in a command line -- `patch.zfs.host_path` relies on
+    # it rather than unwrapping the URI by hand. 0.9.0 also stopped
+    # `Source.__str__`/`__repr__` leaking the password, which matters because
+    # `repr` is what a traceback frame renders. Both came from findings filed
+    # here. Capped below 0.10: pathlib_next is 0.x, where a minor bump may
+    # break. Validated on 0.9.0.
+    "pathlib_next[uri]>=0.9.0,<0.10",
     "requests",
     "websocket-client",
     # Generic host machinery: TrueNASHost is a hostctl PosixHost, and run()/
@@ -98,8 +106,15 @@ dependencies = [
     # `[nasa]`. NOTE the deliberate trade-off it carries: `.host` is the given
     # spelling, not a canonical one, so two spellings of one machine are not
     # equal configs (routing still case-folds; only display keeps the case).
-    # Capped below 0.2: hostctl is 0.x, where a minor bump may break.
-    "hostctl>=0.1.2,<0.2",
+    # Ceiling raised to <0.3 for hostctl 0.2.x: 0.2.1 added ConnectionString
+    # (from a finding filed here) and 0.2.2 widened its own dependency ranges
+    # to admit pathlib_next 0.9 / netimps 0.2 -- which pathlib_next 0.9's `uri`
+    # extra requires, so the old `<0.2` cap made the four packages
+    # unresolvable together. Nothing pytruenas imports changed; every symbol it
+    # uses is still present. The floor stays at 0.1.2 rather than rising: none
+    # of the 0.2 API is used here, and demanding a version the code does not
+    # need would exclude working installs. Validated on 0.2.2.
+    "hostctl>=0.1.2,<0.3",
 ]
 
 [project.optional-dependencies]
@@ -107,7 +122,7 @@ dependencies = [
 config = ["pyyaml"]
 # Remote shell + SFTP filesystem leg (asyncssh via pathlib_next's sftp-async).
 # >=0.8.3: AsyncsshSftpBackend default concurrency 8->16 (faster recursive SFTP).
-ssh = ["asyncssh", "pathlib_next[sftp-async]>=0.8.3"]
+ssh = ["asyncssh", "pathlib_next[sftp-async]>=0.9.0,<0.10"]
 # Typings generator (`pytruenas generate-typings`).
 codegen = ["jinja2"]
 # NOTE: there is no 'host' extra. It installed ifaddr for pytruenas.ops.host's
