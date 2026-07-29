@@ -433,12 +433,45 @@ def _dispatch(command: object, instance: "PyTrueNAS") -> int:
     )
 
 
+#: Everything after a bare ``--`` on the command line. A command that supports
+#: a passthrough reads this rather than an argparse field.
+#:
+#: Split before argparse rather than declared as ``nargs=REMAINDER``, which does
+#: not work here and fails *silently*: the shared trailing ``targets``
+#: positional is ``nargs="*"``, so it greedily consumes the whole tail --
+#: argparse drops the ``--`` separator and folds ``query user`` into the target
+#: list, leaving the remainder empty. A passthrough that quietly runs nothing is
+#: worse than one that errors, so the separator is handled where it is
+#: unambiguous: before any parser sees it.
+PASSTHROUGH: "list[str]" = []
+
+
+def _split_passthrough(
+    argv: "_ty.Sequence[str] | None",
+) -> "tuple[_ty.Sequence[str] | None, list[str]]":
+    """Split ``argv`` at the first bare ``--``; return ``(head, tail)``."""
+    if argv is None:
+        import sys
+
+        argv = sys.argv[1:]
+    argv = list(argv)
+    if "--" not in argv:
+        return argv, []
+    index = argv.index("--")
+    return argv[:index], argv[index + 1 :]
+
+
 def main(
     name: "str | None" = None,
     argv: "_ty.Sequence[str] | None" = None,
 ) -> int:
     """Build the app, parse ``argv``, and run the selected command per target."""
     name = name or "pytruenas"
+    argv, passthrough = _split_passthrough(argv)
+    # Module-global rather than threaded through: `app` builds the parsed
+    # instance itself, so there is no seam to pass this along, and a command
+    # reads it at run time from one obvious place.
+    PASSTHROUGH[:] = passthrough
     return app(
         PyTrueNAS,
         commands=_discover(argv),
