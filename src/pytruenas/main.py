@@ -17,7 +17,6 @@ from __future__ import annotations
 import copy as _copy
 import datetime as _dt
 import logging as _pylogging
-import os as _os
 import typing as _ty
 
 import duho.runpath as _runpath
@@ -29,7 +28,7 @@ from duho.runpath import RunPathCmd, is_runpath_dir
 
 from .host import TrueNASConfig
 from .host import TrueNASHost as TrueNASClient
-from .utils.cmd import PyTrueNASArgs, register_targets
+from .utils.cmd import ENV, PyTrueNASArgs, register_targets
 from .utils.runpath import PyTrueNASRunPathArgs
 from .utils.target import redact as _redact
 
@@ -200,8 +199,9 @@ def _discover(argv: "_ty.Sequence[str] | None") -> "list":
     globals_ = parse_globals(PyTrueNAS, argv)
     config = globals_._config_dict_()
     sources: "list[str]" = [_BUILTIN_COMMANDS]
-    if _os.environ.get("PYTRUENAS_PATH"):
-        sources += _os.environ["PYTRUENAS_PATH"].split(_os.pathsep)
+    # `ENV.paths` splits on os.pathsep and yields [] for a missing/empty value,
+    # so neither the presence check nor the manual split is needed here.
+    sources += ENV.paths("PATH")
     sources += list(globals_.cmdspath or [])
     sources += list(config.get("commandspath") or [])
 

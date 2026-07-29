@@ -18,7 +18,6 @@ client/logger threading are ``pytruenas``-specific and live here + in
 
 from __future__ import annotations
 
-import os as _os
 import typing as _ty
 from logging import Logger as _Logger
 from pathlib import Path as _Path
@@ -26,11 +25,28 @@ from pathlib import Path as _Path
 from argparse import SUPPRESS as _SUPPRESS
 
 from duho import Arg, Extend, LoggingArgs, NS
+from duho.env import Env as _Env
 
 from . import io as _ioutils  # noqa: F401
 
 if _ty.TYPE_CHECKING:
     from ..host import TrueNASHost as TrueNASClient
+
+#: Every ``PYTRUENAS_*`` setting, read through one accessor.
+#:
+#: Reading ``os.environ`` directly at each site is how this app ended up with
+#: three names for two settings (``PYTRUENAS_CFG`` here, ``PYTRUENAS_CONFIG``
+#: in ``ops``, ``PYTRUENAS_PATH`` in ``main``) -- a prefixed accessor makes the
+#: full set enumerable (``list(ENV)``) instead of something you find by
+#: grepping. ``.paths()`` also splits on ``os.pathsep`` rather than a hardcoded
+#: separator, so a Windows ``C:\...`` entry is not mis-split on its drive
+#: colon.
+#:
+#: ``autoload=False``: the companion-module feature would import a
+#: ``pytruenas_env`` module from anywhere on ``sys.path``, including the CWD.
+#: This app ships no such defaults, so the import is pure attack surface --
+#: and a CLI is routinely run from a directory the user does not control.
+ENV = _Env("pytruenas", autoload=False)
 
 
 def _load_config(path: "_Path") -> dict:
@@ -80,8 +96,11 @@ class PyTrueNASArgs(LoggingArgs):
     make the runnable app root.
     """
 
+    # `CONFIG` first, `CFG` for compatibility: both spellings existed (`CFG`
+    # here, `CONFIG` in `ops.main`), which is exactly the drift a single
+    # accessor is meant to stop. `CONFIG` wins as the spelled-out name.
     config: "Arg[dict, NS(type=_Path)]" = _Path(
-        _os.environ.get("PYTRUENAS_CFG") or "./pytruenas.yaml"
+        ENV.get("CONFIG") or ENV.get("CFG") or "./pytruenas.yaml"
     )
     "Config file to use"
     ("--config", "-c")  # type: ignore
