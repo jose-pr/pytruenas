@@ -63,10 +63,15 @@ dependencies = [
     # Network utilities. >=0.0.2 for the built-in scheme->port table, which is
     # what resolves ws/wss: no system services database knows those schemes, so
     # getservbyname raises and a websocket URL would otherwise carry port 0.
-    # Used by utils/target.py. (It also once backed the adapter discovery in
-    # pytruenas.ops.host, replacing ifaddr; that module is gone, but the scheme
-    # table alone still makes this a core dependency.)
-    "netimps>=0.0.2",
+    # `get_default_port` in utils/target.py is the ONLY thing used from this
+    # package. (It also once backed the adapter discovery in pytruenas.ops.host,
+    # replacing ifaddr; that module is gone, but the scheme table alone keeps
+    # this a core dependency.)
+    # Capped below 0.3: netimps is 0.x, where a minor bump may break -- 0.2.0
+    # reworked resolve() and made dnspython optional. Neither touches
+    # get_default_port. Validated against 0.2.0 from the sibling checkout; PyPI
+    # still has 0.1.0 at the time of writing, so that is what installs resolve.
+    "netimps>=0.0.2,<0.3",
     # >=0.8.2: SftpPath importable/usable without paramiko (asyncssh-only). The
     # 'uri' extra (uritools) is needed by TnasWsPath/TruenasPath, which are UriPaths.
     # Validated on 0.8.4.
