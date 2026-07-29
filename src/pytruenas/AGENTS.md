@@ -419,6 +419,16 @@ positionals, not a flag) and helper methods
 - **`generate-typings [--api-version V] [--path DIR] [--api-cache FILE]
   [targets...]`** — dumps (or reads a cached) API definition and writes
   `.pyi` stubs via `pytruenas.codegen.Codegen().generate(version, path)`.
+- **`deploy [--path PATH] [--mode pyz|dir] [--pkg-root DIST] [--pkg-name PKG]
+  [--extra E] [--skip DIST] [--force] [targets...] [-- COMMAND ...]`** —
+  installs pytruenas (or the caller's own distribution) ON the target so it can
+  run there. Probes what the host already has via
+  `utils.bundle.PROBE_SOURCE`, bundles only the difference, and copies it.
+  Defaults to `/var/db/system/pytruenas.pyz` — a dataset on a *data* pool,
+  which survives an update, unlike `/var/db` itself (boot environment).
+  Anything after `--` runs on the target afterwards (read from
+  `main.PASSTHROUGH`, split before argparse; see there for why it cannot be an
+  argparse field).
 
 ### RunPath step directories (`duho.runpath`)
 
@@ -467,6 +477,43 @@ dispatch would have made it live, and it is already fixed there (the same fix
 that flattens `--cmdspath a:b` to `['a', 'b']`). Do not read this support as
 exact behavioral parity where `duho` intentionally improved on the original.
 
+## `patch` (`pytruenas.patch`)
+
+Modifying a host **beyond what the middleware API exposes** — unsupported by
+definition, since TrueNAS owns its own configuration and a boot-environment
+swap on update discards anything outside the persistent datasets. Was
+`pytruenas.ops`, a name that said neither what it does nor what it costs.
+
+Everything is built to be repeatable and undoable:
+
+- **`templates`** — `base` renders (`BaseTemplate`/`TextTemplate`/
+  `BasicTemplate`, `%{NAME}` substitution); `targets` writes (`TemplateTarget`,
+  `FileTarget`). `write()` compares content first and returns whether anything
+  changed; every caller keys expensive follow-up work off that boolean.
+  `FileTarget(path, baseline=True)` snapshots the original on first write and
+  `read()`s *that* thereafter, so a patch layers onto the stock file rather
+  than onto its own previous output.
+- **`systemd`** — `unitfile` (pure text: unit syntax is case-sensitive,
+  `=`-only, and `%` belongs to systemd, so all three `ConfigParser` defaults
+  are wrong); `files.SystemFile` (a file plus the `etc` groups and services to
+  notify); `units.Unit`/`ServiceUnit`/`MountUnit`/`AutomountUnit`. Unit
+  `enable`/`start` are three-valued — `None` means "not mine to manage", which
+  a bool could not express.
+- **`middleware.MiddlewareFiles`** — locate files in the host's `middlewared`
+  package, chiefly to take a stock `etc_files` template as a baseline.
+  `module_path` is resolved lazily by running `import middlewared` on the host
+  (no API method reports it, checked against 26.0). `find_template` defaults to
+  `baseline=False`: that package is on a **read-only mount**, so snapshotting
+  beside it cannot work.
+- **`zfs.writable(client, path)`** — a context manager that clears `readonly`
+  on the backing dataset and **restores it however the block exits**. Required
+  for anything under `/usr`. `dataset_for` walks up to an existing ancestor,
+  because `findmnt --target` fails on a path that does not exist yet — the
+  ordinary "create this file" case. `host_path` unwraps a path for argv: a
+  `UriPath` renders as a URI via `str()`, scp syntax via `as_posix()`, and
+  raises from `os.fspath()`, so only `.path` is usable (filed upstream as
+  `2026-07-29_uripath_fspath_refuses_remote_schemes`).
+
 ## `codegen` (`pytruenas.codegen`)
 
 Backs the `generate-typings` command; not typically used directly.
@@ -500,7 +547,19 @@ TypedDict schemas only (no runtime behavior); import the submodules directly.
   `Option(name, value)` + `Option.options(*opts)` merge dict/tuple/`Option`
   opts passed to `_query`/`_upsert`/etc.; `diff(base, against) -> dict` (keys
   in `against` whose value differs from `base`).
-- **`cmd`** — see "Writing a command module" above.
+- **`cmd`** — see "Writing a command module" above. Also holds **`ENV`**, the
+  single `duho.env.Env("pytruenas")` accessor every `PYTRUENAS_*` setting is
+  read through (`autoload=False`; see "Environment variables").
+- **`bundle`** — deliberately generic, and knows nothing about pytruenas or
+  TrueNAS so it can be lifted out later. `requirements(root, extras)` resolves
+  a transitive closure from installed *distribution metadata* (not an import
+  scan — `import yaml` does not name `pyyaml`); `PROBE_SOURCE` is stdlib-only
+  source to run on the target to list what it has; `missing_on(installed,
+  root, ...)` subtracts; `build(dest, dists, package=...)` writes a zipapp and
+  `export(dest, dists)` an unpacked tree; `tar_tree`/`tar_digest` archive one
+  with normalized ownership and `bin/*` made executable. Refuses a
+  distribution carrying a compiled extension, and one that resolves to data
+  files only — both would build cleanly and fail to import on the target.
 - **`runpath`** — helpers for authoring a RunPath step directory (see "RunPath
   step directories" above): `default_init(cmd, logger) -> TrueNASClient` (the
   per-target `__main__.py` client builder) and `PyTrueNASRunPathArgs` (the
@@ -511,12 +570,26 @@ TypedDict schemas only (no runtime behavior); import the submodules directly.
 
 ## Environment variables
 
-- **`TN_CREDS`** — read by `Credentials.from_env()`.
-- **`CALL_TIMEOUT`** — default per-call JSON-RPC timeout in seconds (read at
-  import time by `pytruenas.connection`).
-- **`PYTRUENAS_CFG`** — default path for the CLI's `--config` (YAML).
-- **`PYTRUENAS_PATH`** — `os.pathsep`-separated extra command source(s) for
-  CLI discovery.
+Every `PYTRUENAS_*` setting is read through one accessor,
+`utils.cmd.ENV` (a `duho.env.Env("pytruenas")`), so the set is enumerable with
+`sorted(ENV)` rather than by grepping. Reading `os.environ` directly at each
+site is how this app once had three names for two settings. `autoload=False`
+on purpose: the companion-module feature would import a `pytruenas_env` module
+from anywhere on `sys.path` including the CWD, and a CLI is routinely run from
+a directory the user does not control.
+
+- **`PYTRUENAS_CONFIG`** — default path for the CLI's `--config` (YAML).
+  `PYTRUENAS_CFG` is still accepted as the older spelling.
+- **`PYTRUENAS_PATH`** — `os.pathsep`-separated extra command source(s) for CLI
+  discovery (read with `ENV.paths`, which splits on the platform separator, so
+  a Windows `C:\...` entry is not mis-split on its drive colon).
+- **`PYTRUENAS_PKG_ROOT` / `PYTRUENAS_PKG_NAME`** — the distribution `deploy`
+  bundles, and the package the deployed copy runs. For when pytruenas is a
+  *dependency* of the thing being deployed rather than the deliverable.
+- **`TN_CREDS`** — read by `Credentials.from_env()`. Not prefixed, and not
+  routed through `ENV`.
+- **`CALL_TIMEOUT`** — default per-call JSON-RPC timeout in seconds, read at
+  import time by `pytruenas.connection`. Also unprefixed.
 
 ## Optional extras and their gating imports
 

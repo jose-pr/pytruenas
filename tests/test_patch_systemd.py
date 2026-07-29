@@ -1,4 +1,4 @@
-"""ops/systemd: unit rendering and the systemctl calls it makes.
+"""patch/systemd: unit rendering and the systemctl calls it makes.
 
 The client is a stand-in that records invocations, so argv shaping and the
 idempotence logic are covered without a host. What is deliberately NOT covered
@@ -7,13 +7,13 @@ is whether systemd accepts the result -- that needs a real machine.
 
 import io
 
-from pytruenas.ops.systemd import (
+from pytruenas.patch.systemd import (
     AutomountUnit,
     MountUnit,
     ServiceUnit,
     Unit,
-    _as_sequence,
-    _UnitConfigParser,
+    as_names,
+    UnitConfigParser,
 )
 
 
@@ -91,7 +91,7 @@ class _FakeClient:
 def test_parser_preserves_option_case():
     # Systemd keys are case-sensitive (ExecStart, not execstart); the default
     # ConfigParser lowercases them, so optionxform is overridden.
-    parser = _UnitConfigParser()
+    parser = UnitConfigParser()
     parser.read_dict({"Service": {"ExecStart": "/bin/true", "Restart": "always"}})
     out = io.StringIO()
     parser.write(out)
@@ -101,14 +101,14 @@ def test_parser_preserves_option_case():
 
 
 def test_parser_roundtrips_equals_delimiter():
-    parser = _UnitConfigParser()
+    parser = UnitConfigParser()
     parser.read_string("[Unit]\nDescription = demo\n")
     assert parser["Unit"]["Description"] == "demo"
 
 
 def test_parser_does_not_interpolate_systemd_specifiers():
     """`%i` is systemd's, not ConfigParser's -- interpolation must be off."""
-    parser = _UnitConfigParser()
+    parser = UnitConfigParser()
     parser.read_dict({"Service": {"ExecStart": "/bin/echo %i"}})
     out = io.StringIO()
     parser.write(out)
@@ -118,13 +118,13 @@ def test_parser_does_not_interpolate_systemd_specifiers():
 # -- name / sequence normalization ----------------------------------------
 
 
-def test_as_sequence_treats_a_bare_string_as_one_name():
+def testas_names_treats_a_bare_string_as_one_name():
     """`services="nfs"` must not iterate into three characters."""
-    assert _as_sequence("nfs") == ("nfs",)
-    assert _as_sequence("nfs,smb") == ("nfs", "smb")
-    assert _as_sequence(["nfs", "smb"]) == ("nfs", "smb")
-    assert _as_sequence(None) == ()
-    assert _as_sequence("") == ()
+    assert as_names("nfs") == ("nfs",)
+    assert as_names("nfs,smb") == ("nfs", "smb")
+    assert as_names(["nfs", "smb"]) == ("nfs", "smb")
+    assert as_names(None) == ()
+    assert as_names("") == ()
 
 
 def test_unit_name_gets_its_suffix_only_when_missing():
