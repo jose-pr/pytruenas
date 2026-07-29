@@ -102,6 +102,7 @@ pytruenas query user -f username=root nas.example.com
 pytruenas call system.info nas.example.com          # any method by dotted name
 pytruenas dump-api nas.example.com > api.json
 pytruenas generate-typings --path typings --api-version v26.0.0 nas.example.com
+pytruenas deploy nas.example.com                    # install pytruenas ON the host
 ```
 
 The target host(s) are the **trailing positional arguments** — a command's own
@@ -110,6 +111,30 @@ may be comma-separated and supports `[A-Z]`/`[0-9]` range expansion (e.g.
 `'nas[1-3].example.com'`); with no target the command runs against `localhost`.
 `--parallel N` runs several targets concurrently. Filter `query` with
 `-f/--filter KEY=VALUE` (repeatable).
+
+## Running on the appliance
+
+TrueNAS has a read-only root and no `pip`, so `deploy` bootstraps instead: it
+asks the target which distributions it already has, bundles only the
+difference, and copies that over. In practice that is five pure-Python packages
+under a megabyte — the appliance already ships `requests`, `websocket-client`,
+`pyyaml`, `asyncssh` and `jinja2`.
+
+```sh
+pytruenas deploy nas.example.com                 # a single executable .pyz
+pytruenas deploy --mode dir nas.example.com      # an unpacked bin/ + lib/ tree
+pytruenas deploy nas.example.com -- call system.info   # install, then run there
+```
+
+Everything after `--` runs on the target once it is installed. The default
+destination is under `/var/db/system`, which is a dataset on a *data* pool and
+so survives an update — unlike `/var/db` itself, `/root` or `/data`, which live
+in the boot environment and are replaced by one. A digest is recorded beside
+the payload, so redeploying verifies instead of re-copying; `--force` overrides.
+
+When pytruenas is a *dependency* of your own tool rather than the thing being
+deployed, name yours as the root: `--pkg-root mytool` (or `PYTRUENAS_PKG_ROOT`),
+and your package ships with pytruenas bundled underneath it.
 
 ## Typings generator
 
