@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "pytruenas"
-version = "0.2.1"
+version = "0.2.2"
 authors = [{ name = "Jose A." }]
 description = "A typed, Pythonic client and CLI for the TrueNAS middleware API"
 readme = "README.md"
@@ -78,8 +78,19 @@ dependencies = [
     # SystemConfig host without importing privates), `normalize_input` (a
     # bytes `input=` with a text `encoding=` otherwise deadlocks the call), the
     # `uri_credentials` fail-closed check, and the exported URI helpers.
+    # >=0.1.2: `uri_hostname()` -- the host as *written*, not as urlsplit
+    # case-folded it. Both this and the 0.1.1 fix it completes came out of a
+    # finding filed from here (2026-07-28_redact_uri_case_folds_the_hostname):
+    # 0.1.1 stopped `redact_uri`'s rebuild from folding, which had made one
+    # machine render two ways depending on whether the URI carried a password;
+    # 0.1.2 exported the helper so a config stores the typed spelling in the
+    # first place. `TrueNASConfig` uses it for `host`, which `name` and
+    # `connection_uri` render back out -- without it a `nasA` fan-out logs
+    # `[nasa]`. NOTE the deliberate trade-off it carries: `.host` is the given
+    # spelling, not a canonical one, so two spellings of one machine are not
+    # equal configs (routing still case-folds; only display keeps the case).
     # Capped below 0.2: hostctl is 0.x, where a minor bump may break.
-    "hostctl>=0.1.0,<0.2",
+    "hostctl>=0.1.2,<0.2",
 ]
 
 [project.optional-dependencies]

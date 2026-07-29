@@ -6,6 +6,108 @@ user-facing; this file is the durable record.
 
 ---
 
+## [0.2.2] - 2026-07-28
+
+### What changed
+
+Every log record used to carry the whole connection string:
+
+```
+[wss://root:hunter2@nas1.example.com:8443/api/current] Started: wss://root:...
+```
+
+That is unreadable at fan-out width, repeats the target twice, and puts the
+password on every line. Records now carry the machine's short name:
+
+```
+[nas1.example.com:8443] Started
+```
+
+The name is `client.name` / `config.name` — the hostname, plus the port only
+when it is non-default (`:8443` distinguishes; `:443` just repeats the scheme).
+`--logto`'s `{target}` uses it too, which additionally makes it a *legal
+filename*, where a raw URI is not.
+
+### Attribution was missing outside the CLI
+
+Investigating the prefix turned up a gap that had nothing to do with the URI.
+The `[target]` tag came only from `duho.fanout`, which the CLI installs. A
+library caller with three clients open got three interleaved streams with
+nothing to tell them apart, and `connection.py` logged through a module-global
+logger that could not know its host at all — so `Websocket connection was
+closed` never said *which* host closed.
+
+`client.logger` is now bound to the host's name via a `LoggerAdapter`, and
+`TrueNASWSConnection` accepts `logger=` so the host can share its own. An
+adapter rather than a filter: it needs no handler installation, so it works
+with whatever logging the caller has already configured, including none.
+
+### Redaction removes the password instead of masking it
+
+`wss://root:***@nas` is now `wss://root@nas`. A `***` placeholder is not a real
+password and would reparse into a *wrong* credential if the rendered form were
+ever fed back in; removing it leaves a URI that is both safe to log and still
+correct to reconnect with.
+
+This turned out to be a duplicate worth deleting rather than a change worth
+making: hostctl's `redact_uri` already did exactly this, with the same
+reasoning in its docstring. `pytruenas.utils.target.redact` now delegates to
+it, so a target rendered here and one rendered by hostctl read identically.
+
+Worth being precise about the scope, because the old docstrings overstated it:
+credentials are extracted at *parse* time, so `config.connection_uri` was
+already credential-free and `repr(config)` was already safe. Redaction only
+ever applied to rendering a *raw* connection string, which is now just the
+`--logto` filename path.
+
+### A test caught a design mistake
+
+The fan-out target was first implemented as a `str` subclass whose `__str__`
+returned the label. Tests failed with `ctx-nasA` becoming `ctx-nasa`: a RunPath
+step doing `'ctx-%s' % cmd.target` silently got the label instead of the value.
+Overriding `__str__` on a value that user code also formats is too surprising,
+so the label moved to a separate attribute that only the logging path reads.
+
+### Two upstream releases, from one finding
+
+`urlsplit().hostname` case-folds unconditionally — right for resolution, wrong
+for a label an operator greps for, so a `nasA`/`nasB` fan-out logged
+`[nasa]`/`[nasb]`. Recovering the typed spelling locally fixed most of it, but
+exposed a real hostctl bug: `redact_uri` folded the host, and *only* on the
+branch that rebuilds an authority. So one machine rendered two ways depending
+on whether a credential happened to be present:
+
+```
+redact_uri("wss://root:pw@nasA:8443")  ->  'wss://root@nasa:8443'
+redact_uri("wss://root@nasA")          ->  'wss://root@nasA'
+```
+
+Filed upstream, and fixed in two steps that are worth distinguishing because
+the intermediate state was misread once here. **0.1.1** fixed the rebuild,
+which removed the inconsistency — but the local workaround was still
+load-bearing for *every* target, since `_from_parsed_uri` reads
+`parsed.hostname` and `urlsplit` folds that regardless of who produced the
+`SplitResult`. **0.1.2** exported `uri_hostname()` so a config stores the
+written spelling in the first place, which is what actually retired the
+workaround. Verified both times by deleting the local helper and watching what
+broke, rather than by reading the release note.
+
+The floor is now `hostctl>=0.1.2`, and it carries a deliberate trade-off from
+that release: `config.host` is the spelling the caller typed rather than a
+canonical one, so **two spellings of one machine are not equal configs**.
+Routing is unaffected — `_normalize_target` case-folds before the local-host
+check and `is_local` keys off `socket_path` — and both facts are now pinned by
+tests so neither is rediscovered the hard way.
+
+### Validation
+
+389 passed / 5 skipped on 3.14 and the 3.9 floor (23 new tests), against
+hostctl 0.1.2 installed from PyPI rather than the sibling checkout. CLI
+behavior checked end to end, including that no password reaches a log record
+or a `--logto` filename.
+
+---
+
 ## [0.2.1] - 2026-07-27
 
 ### What changed

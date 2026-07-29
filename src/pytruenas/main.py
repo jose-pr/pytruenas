@@ -27,6 +27,7 @@ from duho.discovery import CmdBuilder, ModuleCommand, discover_commands
 from duho.fanout import run_targets
 from duho.runpath import RunPathCmd, is_runpath_dir
 
+from .host import TrueNASConfig
 from .host import TrueNASHost as TrueNASClient
 from .utils.cmd import PyTrueNASArgs, register_targets
 from .utils.runpath import PyTrueNASRunPathArgs
@@ -217,6 +218,52 @@ def _discover(argv: "_ty.Sequence[str] | None") -> "list":
     return [_with_targets(command) for command in by_name.values()]
 
 
+def _target_label(target: str) -> str:
+    """The short name to tag this target's log records with.
+
+    ``duho.fanout`` prefixes every record for a target with ``[%s]``, so this
+    is what a reader sees on every single line. Passing the raw positional put
+    the whole connection string there -- scheme, port, API path, and any
+    userinfo -- which is unreadable at fan-out width and leaks the password.
+
+    Falls back to the password-free rendering of the target if it does not
+    parse: an unparseable target must still run (and fail) on its own terms,
+    not die here in the display path.
+    """
+    try:
+        return TrueNASConfig.from_target(target).name
+    except Exception:
+        return _redact(target)
+
+
+class _Target:
+    """What ``duho.fanout`` tags records with: renders as the short label.
+
+    ``fanout`` stringifies whatever object it is handed to build each record's
+    ``[...]`` prefix, and passes that same object to the worker. So the display
+    form lives in ``__str__`` and the real connection string stays on
+    :attr:`target`, where the worker reads it.
+
+    Deliberately *not* a ``str`` subclass with an overridden ``__str__``. That
+    was tried: it makes the object silently render as the label anywhere user
+    code interpolates it, which a RunPath test caught when a step's context
+    value turned from ``ctx-nasA`` into ``ctx-nasa``. Keeping the two roles on
+    separate attributes means nothing can confuse the value with its label.
+    """
+
+    __slots__ = ("target", "label")
+
+    def __init__(self, target: str) -> None:
+        self.target = target
+        self.label = _target_label(target)
+
+    def __str__(self) -> str:
+        return self.label
+
+    def __repr__(self) -> str:
+        return repr(self.label)
+
+
 def _run_module_on_target(
     command: "ModuleCommand",
     args: "PyTrueNAS",
@@ -238,9 +285,13 @@ def _run_module_on_target(
     success = getattr(module, "success", None)
     finally_ = getattr(module, "finally_", None)
 
-    # Redact any password in the target before it reaches a log record or a
-    # ``--logto`` filename; the real ``target`` still builds the client below.
-    shown = _redact(target)
+    # ``shown`` is the ``--logto`` filename's {target}: the host's short name,
+    # which is credential-free AND a legal filename component -- a raw URI is
+    # neither. Log records get the same name from the fan-out prefix.
+    if isinstance(target, _Target):
+        target, shown = target.target, target.label
+    else:
+        shown = _redact(target)
     file_handler = None
     if args.logto and args.logto != "-":
         now = _dt.datetime.now()
@@ -250,7 +301,9 @@ def _run_module_on_target(
         file_handler.setFormatter(_logging.DefaultFormatter())
         logger.addHandler(file_handler)
 
-    logger.info("Started: %s", shown)
+    # The target is already on every record as the ``[name]`` prefix, so naming
+    # it again here would just read "[nas1] Started: nas1".
+    logger.info("Started")
     client = None
     result = 0
     try:
@@ -267,8 +320,8 @@ def _run_module_on_target(
             try:
                 finally_(client, args, logger)
             except Exception:
-                logger.error("Cleanup failed: %s", shown, exc_info=True)
-        logger.info("Finished: %s", shown)
+                logger.error("Cleanup failed", exc_info=True)
+        logger.info("Finished")
         if file_handler is not None:
             logger.removeHandler(file_handler)
             file_handler.close()
@@ -299,12 +352,15 @@ def _run_runpath_on_target(
     :func:`_run_module_on_target` exactly (fanout tags the message but does not
     route files).
     """
+    # Unwrap BEFORE the copy: a step reads ``cmd.target`` and may format it, so
+    # it must receive the real connection string, never the display wrapper.
+    if isinstance(target, _Target):
+        target, shown = target.target, target.label
+    else:
+        shown = _redact(target)
+
     per_target = _copy.copy(instance)
     per_target.target = target
-
-    # Redact any password in the target before it reaches a log record or a
-    # ``--logto`` filename; ``per_target.target`` keeps the real value.
-    shown = _redact(target)
     file_handler = None
     if instance.logto and instance.logto != "-":
         now = _dt.datetime.now()
@@ -314,12 +370,14 @@ def _run_runpath_on_target(
         file_handler.setFormatter(_logging.DefaultFormatter())
         logger.addHandler(file_handler)
 
-    logger.info("Started: %s", shown)
+    # Already on every record as the ``[name]`` prefix -- see
+    # _run_module_on_target.
+    logger.info("Started")
     try:
         rc = per_target()
         return 0 if rc is None else int(rc)
     finally:
-        logger.info("Finished: %s", shown)
+        logger.info("Finished")
         if file_handler is not None:
             logger.removeHandler(file_handler)
             file_handler.close()
@@ -351,7 +409,7 @@ def _dispatch(command: object, instance: "PyTrueNAS") -> int:
         isinstance(command, type) and issubclass(command, RunPathCmd)
     ):
         runpath = _ty.cast("RunPathCmd", instance)
-        targets = runpath._expanded_targets_()
+        targets = [_Target(target) for target in runpath._expanded_targets_()]
         logger.info("Running '%s' on %d target(s)", runpath._parsername_, len(targets))
         return run_targets(
             lambda target: _run_runpath_on_target(runpath, target, logger),
@@ -365,7 +423,7 @@ def _dispatch(command: object, instance: "PyTrueNAS") -> int:
 
         return run_command(_ty.cast(_ty.Any, command), instance)
 
-    targets = instance._expanded_targets_()
+    targets = [_Target(target) for target in instance._expanded_targets_()]
     logger.info("Running '%s' on %d target(s)", command._parsername_, len(targets))
     return run_targets(
         lambda target: _run_module_on_target(command, instance, target, logger),

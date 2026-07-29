@@ -4,6 +4,67 @@ All notable changes to this project are documented here. The format is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.2] - 2026-07-28
+
+Log records now identify the host they came from, and no longer carry the
+connection string that used to be the only identification.
+
+Released as a patch: the public surface only gains (`client.name`,
+`config.name`, `TrueNASWSConnection(logger=...)`). The one output change is to
+`pytruenas.utils.target`'s `redact`/`Target.redacted`, an internal utility
+module — not exported from the package root, not in the docs, and reached only
+by explicit deep import.
+
+### Changed
+
+- **Log records identify the host by name, not by connection string.** Every
+  record carried the full URI — scheme, port, API path and any userinfo — which
+  was unreadable at fan-out width and put the password on every line. Records
+  are now prefixed with the machine's short name (`[nas1]`, `[nas1:8443]`,
+  `localhost` for the unix socket), available as `client.name` /
+  `config.name`. Because the prefix always names the target, the per-target
+  `Started:`/`Finished:` messages no longer repeat it.
+- **Attribution no longer depends on the CLI.** `client.logger` is now bound to
+  the host's name, so a *library* caller with several clients open gets
+  attributed records with no fan-out involved — previously only the CLI's
+  `duho.fanout` added a prefix, and a bare "Websocket connection was closed"
+  did not say which host closed. `TrueNASWSConnection` accepts `logger=` and
+  the host passes its own, so transport-layer records are attributed too.
+- **Redaction removes the password instead of masking it.**
+  `pytruenas.utils.target.redact` and `Target.redacted` rendered
+  `wss://root:***@nas`; they now render `wss://root@nas`. A `***` placeholder
+  is not a real password and would reparse into a *wrong* credential if the
+  rendered form were ever fed back in, whereas what comes out now is a valid,
+  reusable URI. `redact` delegates to `hostctl.host.redact_uri`, so pytruenas
+  and hostctl render a target identically. Note this is only for rendering a
+  *raw* connection string: credentials are extracted at parse time, so
+  `config.connection_uri` was already credential-free.
+- **`--logto` filenames use the short name.** `{target}` now expands to `nas1`
+  rather than a full URI, which is both credential-free and a legal filename —
+  a URI is neither.
+
+### Fixed
+
+- **A hostname's typed casing is preserved in its label.** `urlsplit` folds
+  case, so a fan-out over `nasA`/`nasB` logged `[nasa]`/`[nasb]`. Correct for
+  resolution, wrong for a label an operator greps for.
+- **The same host renders the same way with or without a password.** A target
+  whose URI carried a credential logged as `[nasa]` while the identical host
+  without one logged as `[nasA]`, because hostctl rebuilt the authority from
+  the case-folded hostname when stripping the password. Filed upstream and
+  fixed across hostctl 0.1.1/0.1.2.
+
+### Dependencies
+
+- **`hostctl>=0.1.2`** (was `>=0.1.0`) — for `uri_hostname()`, which returns a
+  URI's host as written instead of as `urlsplit` case-folded it.
+  `TrueNASConfig` stores that, since the value is rendered back out through
+  `name` and `connection_uri`. Both hostctl releases came from a finding filed
+  from this repo. **Note the trade-off inherited with it:** `config.host` is
+  now the spelling the caller typed rather than a canonical one, so two
+  spellings of one machine are not equal configs — casefold explicitly if you
+  key on a host. Routing is unaffected.
+
 ## [0.2.1] - 2026-07-27
 
 Documentation and one error-message fix. No API changes.

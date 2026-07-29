@@ -3,6 +3,7 @@ import typing as _ty
 import urllib.parse as _urlparse
 
 import netimps as _netimps
+from hostctl.host import redact_uri as _redact_uri
 
 # ws/wss default ports (80/443) are provided by netimps' built-in scheme table
 # (>=0.0.2); no system services database knows the websocket schemes. Earlier
@@ -11,26 +12,31 @@ import netimps as _netimps
 
 
 def redact(connectionstring: str) -> str:
-    """Mask the password in a raw connection string for safe logging.
+    """Strip the password from a raw connection string, leaving a valid URI.
 
-    A best-effort wrapper over :meth:`Target.redacted` that never raises on odd
-    input: a string with no parseable userinfo (a bare host, a unix-socket path)
-    comes back unchanged. Reach for this at every point a user-supplied target
-    reaches a log record or a ``--logto`` filename, so a
-    ``wss://root:secret@nas`` positional does not leak ``secret`` by accident.
-    Passing credentials in the target is still supported -- this only stops them
-    being written where they were never meant to go.
+    ``wss://root:secret@nas`` becomes ``wss://root@nas`` -- the password is
+    *removed*, not masked. A ``***`` placeholder would make the rendered string
+    round-trip into a wrong credential if anything fed it back in, and is not a
+    real password anyway; what comes out here is still a usable target.
+
+    Delegates to :func:`hostctl.host.redact_uri`, which is the same function
+    hostctl's own dispatch and error paths use, so a target rendered by
+    pytruenas and one rendered by hostctl read identically. It never raises: a
+    string with no userinfo (a bare host, a unix-socket path) comes back
+    unchanged, and characters ``urlsplit`` would silently delete (tab, CR, LF --
+    the OTP separator) are encoded first, so a password written with a raw
+    newline is removed whole rather than partly surviving.
     """
     if not connectionstring or "@" not in connectionstring:
-        # No userinfo delimiter -> nothing to mask; also the fast path for the
+        # No userinfo delimiter -> nothing to strip; also the fast path for the
         # overwhelmingly common ``host``/``host:port`` positional.
         return connectionstring
     try:
-        return Target.parse(connectionstring, resolve_port=False).redacted
+        return _redact_uri(connectionstring)
     except Exception:
         # A malformed target must never turn a log call into a crash; fall back
-        # to a blunt mask of any ``user:pass@`` run so we still don't leak.
-        return _re.sub(r"://([^/@]*):([^/@]*)@", r"://\1:***@", connectionstring)
+        # to dropping any ``:pass@`` run so we still don't leak.
+        return _re.sub(r"://([^/@]*):([^/@]*)@", r"://\1@", connectionstring)
 
 
 class Target(_ty.NamedTuple):
@@ -85,8 +91,15 @@ class Target(_ty.NamedTuple):
         uri = self.scheme + "://"
         if self.username or self.password:
             user = _urlparse.quote(self.username, safe="")
-            pw = _urlparse.quote(self.password, safe="")
-            uri = f"{uri}{user}:{pw}@"
+            if self.password:
+                pw = _urlparse.quote(self.password, safe="")
+                uri = f"{uri}{user}:{pw}@"
+            else:
+                # No password -> no ``:`` separator. A trailing ``user:@host``
+                # is legal but means "empty password", which is a different
+                # claim from "no password given" -- and it is what `redacted`
+                # produces, so it must render as the plain ``user@host`` form.
+                uri = f"{uri}{user}@"
         uri = f"{uri}{self.host}"
         if self.port:
             uri = f"{uri}:{self.port}"
@@ -97,23 +110,20 @@ class Target(_ty.NamedTuple):
 
     @property
     def redacted(self):
-        """``uri`` with the password masked -- safe to log or embed in a path.
+        """``uri`` with the password removed -- still a valid, usable URI.
 
-        The username is kept (it aids diagnostics and is not a secret); only the
-        password is replaced with ``***``. A target with no password is
-        unchanged. Use this anywhere a connection string reaches a log record or
-        a ``--logto`` filename, so a ``wss://root:secret@nas`` positional never
-        writes ``secret`` to disk by accident.
+        The username is kept (it aids diagnostics and is not a secret); the
+        password is dropped entirely rather than masked, so
+        ``wss://root:secret@nas`` renders as ``wss://root@nas``. A placeholder
+        would make the rendered form reparse into a *wrong* credential if
+        anything fed it back in; removing the password leaves a string that is
+        both safe to log and still correct to reconnect with (it just prompts
+        for, or is given, the credential separately). A target with no password
+        is unchanged.
         """
         if not self.password:
             return self.uri
-        # Build the display string off the already-encoded ``uri`` rather than
-        # re-quoting a ``***`` placeholder (``*`` is not URI-unreserved, so it
-        # would come back as ``%2A%2A%2A``). Swap the encoded password run for a
-        # literal ``***`` between the userinfo ``:`` and the ``@``.
-        real = self.uri
-        encoded_pw = _urlparse.quote(self.password, safe="")
-        return real.replace(f":{encoded_pw}@", ":***@", 1)
+        return self._replace(password="").uri
 
     @property
     def is_local(self):
