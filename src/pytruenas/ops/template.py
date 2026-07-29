@@ -91,8 +91,19 @@ def render_basic_template(template: str, context: object | dict):
 class FileTarget(TemplateTarget):
 
     def __init__(self, path: "Path", baseline: bool = False):
-        if not isinstance(path, Path):
-            raise ValueError(path)
+        # Duck-typed rather than `isinstance(path, Path)`: this class only ever
+        # calls exists/read_bytes/write_bytes/parent/with_name, and demanding a
+        # concrete pathlib_next.Path rejected perfectly good stand-ins (a test
+        # double, or any other path-like a host backend might hand back) for no
+        # benefit. The error still fires early, and now says which method is
+        # missing instead of just echoing the object.
+        missing = [
+            attribute
+            for attribute in ("exists", "read_bytes", "write_bytes", "with_name")
+            if not callable(getattr(path, attribute, None))
+        ]
+        if missing:
+            raise TypeError(f"{path!r} is not path-like: missing {', '.join(missing)}")
         self.path = path
         if baseline is True:
             baseline = ".baseline"

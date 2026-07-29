@@ -2,11 +2,12 @@
 
 * :mod:`.template` -- render + apply file templates to remote paths with an
   optional baseline snapshot.
-* :mod:`.midclt` -- systemd unit / etc-file management on a TrueNAS host.
-* :mod:`.host` -- local (non-API) helpers: network adapter discovery.
+* :mod:`.systemd` -- systemd units and system files, written idempotently.
+  Formerly ``midclt.py``, which was a misnomer: ``midclt`` is TrueNAS's own CLI
+  binary and nothing in the module invokes it.
 
-Two things that used to live here have moved, because neither was an
-"operation against a host":
+Three things that used to live here are gone, none of which was an "operation
+against a host":
 
 * ``ops.main.init`` (build a client from a YAML config) was imported by
   nothing, duplicated the CLI's own config loading, and documented a
@@ -16,6 +17,11 @@ Two things that used to live here have moved, because neither was an
 * ``ops.host``'s directory packaging is now
   :func:`pytruenas.utils.bundle.tar_tree` / ``tar_digest``, beside the code
   that builds the trees it archives.
+* ``ops.host``'s network helpers (``is_localhost``, ``is_local_ip``,
+  ``find_adapter_in_network``) are deleted outright. They were thin wrappers
+  over :mod:`netimps` and :mod:`ipaddress` that nothing in the package
+  imported -- only their own tests did. Call ``netimps.interface_for`` /
+  ``get_interfaces`` and ``ipaddress.ip_address(...).is_loopback`` directly.
 """
 
 from .template import (

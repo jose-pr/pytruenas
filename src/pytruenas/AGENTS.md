@@ -528,5 +528,6 @@ TypedDict schemas only (no runtime behavior); import the submodules directly.
   missing it with a config file present raises `ImportError`.
 - **`codegen`** (`jinja2`) — required by `pytruenas.codegen`/`generate-typings`.
 
-(There is no `host` extra: `pytruenas.ops.host`'s local-adapter discovery uses
-`netimps` — a core dependency — so it works out of the box.)
+(There is no `host` extra. It existed for `pytruenas.ops.host`'s adapter
+discovery, which moved from `ifaddr` to `netimps` — a core dependency — and the
+module has since been removed outright.)
