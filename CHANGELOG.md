@@ -4,6 +4,38 @@ All notable changes to this project are documented here. The format is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.1] - 2026-07-29
+
+### Fixed
+
+- **`hostctl<0.2` made the dependency set unresolvable.** `pathlib_next`
+  0.9.0's `uri` extra requires `netimps>=0.2.0`, and `hostctl` widened its own
+  ranges to admit that in 0.2.2 — so pinning `hostctl<0.2` left no solution for
+  a `pip install pytruenas` that also pulled `pathlib_next[uri]`.
+- **`os.fspath()` on a `TruenasPath`/`TnasWsPath` raised
+  `NotImplementedError`.** Both now set `_host_filesystem_path`, so `fspath`
+  returns the host-local path (`/usr/lib/x`, not
+  `truenas://root@nas/usr/lib/x`). Requires `pathlib_next>=0.9.0`.
+
+### Changed
+
+- **`patch.zfs.host_path` uses `os.fspath()` only.** It previously fell back to
+  `.path`, then `as_posix()`, then `str()`, for `pathlib_next<0.9` where
+  `fspath` raised for every non-`file` scheme. A URI scheme with no host-local
+  path now raises rather than yielding a string that is not a path.
+
+### Dependencies
+
+- **`hostctl>=0.1.2,<0.3`** (from `<0.2`). Nothing pytruenas imports changed;
+  the floor stays at 0.1.2 because no 0.2 API is used here. Validated on 0.2.2.
+- **`pathlib_next[uri]>=0.9.0,<0.10`** (from `>=0.8.2`, uncapped) — for
+  `UriPath.__fspath__` on host-filesystem schemes, and for
+  `Source.__str__`/`__repr__` no longer emitting the password. The `ssh`
+  extra's `pathlib_next[sftp-async]` moves to `>=0.9.0,<0.10` alongside it.
+- **`netimps>=0.0.2,<0.3`** — ceiling added; 0.2.0 reworked `resolve()` and
+  made `dnspython` optional, neither of which touches `get_default_port`, the
+  only function used here. Validated on 0.2.0.
+
 ## [0.3.0] - 2026-07-29
 
 ### Added

@@ -49,29 +49,18 @@ def host_path(path: "PathLike") -> str:
 
     A remote path does not stringify to something usable in a command line:
     ``str()`` on a ``UriPath`` gives a whole URI, and ``as_posix()`` gives scp
-    syntax (``root@nas:/usr/lib/x``). ``os.fspath()`` is the right protocol and
-    is tried first -- pathlib_next >=0.9.0 answers it with the host path for
-    schemes marked ``_host_filesystem_path`` (``sftp``, and pytruenas' own
-    ``truenas``/``tnasws``; see :mod:`pytruenas.fs.tnasws`).
+    syntax (``root@nas:/usr/lib/x``). ``os.fspath()`` is the protocol for this,
+    and pathlib_next >=0.9.0 answers it with the host path for schemes marked
+    ``_host_filesystem_path`` -- ``sftp``, plus pytruenas' own
+    ``truenas``/``tnasws`` (see :mod:`pytruenas.fs.tnasws`).
 
-    The fallbacks cover the rest: a scheme that has *not* opted in still raises
-    from fspath, and an older pathlib_next raises for every non-``file``
-    scheme, so ``.path`` is consulted before giving up on ``str()``.
+    A plain ``str`` passes through. Anything else raises whatever ``fspath``
+    raises: a scheme that has not opted in has no host-local path, and
+    inventing one from ``str()`` would put a URI into an argv.
     """
-    try:
-        return _os.fspath(path)
-    except (NotImplementedError, TypeError):
-        # NotImplementedError: a URI scheme whose path is not a host filesystem
-        # path (or a pathlib_next older than 0.9.0, which raised for all of
-        # them). TypeError: not path-like at all -- a plain string arrives here.
-        pass
-    inner = getattr(path, "path", None)
-    if isinstance(inner, str):
-        return inner
-    as_posix = getattr(path, "as_posix", None)
-    if callable(as_posix):
-        return as_posix()
-    return str(path)
+    if isinstance(path, str):
+        return path
+    return _os.fspath(path)
 
 
 LOGGER = _logging.getLogger(__name__)

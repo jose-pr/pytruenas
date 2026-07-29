@@ -9,8 +9,8 @@ composes the two: each operation is tried on the SFTP leg first and falls back t
 the websocket leg when SFTP is unavailable or does not implement it.
 
 The SFTP leg is pluggable. When ``pathlib_next``'s ``SftpPath`` is importable
-(the ``sftp``/``sftp-async`` extra -- see pathlib_next 0.8.2 which made this work
-asyncssh-only), it is used; otherwise this falls back to the websocket leg alone.
+(the ``sftp``/``sftp-async`` extra), it is used; otherwise this falls back to
+the websocket leg alone.
 Construct via :meth:`~pytruenas.TrueNASClient.path`.
 """
 
