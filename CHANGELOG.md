@@ -6,117 +6,119 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [0.3.0] - 2026-07-29
 
-Run pytruenas *on* the appliance, and patch things the API does not expose.
-
-`pytruenas.ops` is now `pytruenas.patch`, restructured into subpackages, with
-`ops.host` and `ops.main` removed (see "Removed"). The subpackage was
-experimental and unexercised, and most of its paths did not work:
-`MiddlewareFiles` referenced an attribute that never existed, `systemctl` calls
-ran four commands instead of one, and creating a file with a baseline raised.
-Those are all fixed below.
-
 ### Added
 
-- **`pytruenas deploy <target>`** — installs pytruenas onto a host that cannot
-  install for itself. TrueNAS has a read-only root and no `pip`, so this probes
-  what the target already has, bundles only the difference, and copies that
-  over. In practice five pure-Python packages under a megabyte: the appliance
-  already ships `requests`, `websocket-client`, `pyyaml`, `asyncssh` and
-  `jinja2`, and *which* it ships varies by release, so it is asked rather than
-  assumed.
-  - `--mode pyz` (default) writes one executable zipapp; `--mode dir` an
-    unpacked `bin/` + `lib/` tree, swapped into place via a staging directory
-    so an interrupted transfer never leaves a half-written tree.
-  - Everything after `--` runs on the target once installed:
+- **`deploy` command** — installs pytruenas onto a target that has no `pip` and
+  a read-only root. Queries the target's installed distributions, bundles only
+  those it lacks, and transfers the result. On TrueNAS 26.0.0-BETA.1 that is 5
+  packages / ~600 KB (`duho`, `hostctl`, `netimps`, `pathlib-next`,
+  `pytruenas`); the appliance already provides `requests`, `websocket-client`,
+  `pyyaml`, `asyncssh`, `jinja2`, `certifi`, `urllib3`, `idna`,
+  `charset-normalizer` and `dnspython`.
+  - `--mode pyz` (default): a single executable zipapp. `--mode dir`: a
+    `bin/` + `lib/` tree, unpacked to a staging directory and swapped into
+    place.
+  - Arguments after `--` are executed on the target after installation:
     `pytruenas deploy nas1 -- call system.info`.
-  - Defaults to `/var/db/system`, which is a dataset on a *data* pool and
-    survives an update — unlike `/var/db` itself, `/root` or `/data`, which
-    live in the boot environment and are replaced by one. Verified on a live
-    appliance rather than assumed.
-  - A digest is recorded beside the payload, so a redeploy verifies instead of
-    re-copying; `--force` overrides.
-  - `--pkg-root`/`--pkg-name` (or `PYTRUENAS_PKG_ROOT`/`PYTRUENAS_PKG_NAME`)
-    deploy *your* distribution with pytruenas bundled underneath, for when
-    pytruenas is a dependency rather than the deliverable.
-- **`pytruenas.utils.bundle`** — the machinery behind it, deliberately generic:
-  it knows nothing about pytruenas or TrueNAS and could be lifted out. Resolves
-  a transitive closure from installed *distribution metadata* (not an import
-  scan — `import yaml` does not name `pyyaml`), and refuses a distribution
-  carrying a compiled extension or resolving to data files only, both of which
-  would build cleanly and fail to import on the target.
-- **`pytruenas.patch.zfs`** — `writable(client, path)` clears `readonly` on the
-  backing dataset and restores it **however the block exits**. Required for
-  anything under `/usr`. `dataset_for` walks up to an existing ancestor,
-  because `findmnt --target` fails on a path that does not exist yet.
-- **Undo, for the patch system that promised it.** `FileTarget.revert()`
-  restores the baseline and clears the snapshot; `is_patched()` reports whether
-  a file currently differs from its baseline; `would_change(content)` is the
-  dry run. A file the patch *created* is deliberately left alone — with no
-  baseline there is nothing proving it was ours to delete.
-- **`SystemFile(..., writable=True, mode=...)`** — patch a read-only mount
-  without remembering the ZFS dance, and set the mode for a file the patch
-  creates.
+  - Default path `/var/db/system`, the mountpoint of `<pool>/.system` on a data
+    pool. `/var/db`, `/root` and `/data` are datasets under
+    `boot-pool/ROOT/<version>/` and are replaced by a boot-environment swap on
+    update.
+  - A SHA-256 digest is stored beside the payload; a redeploy with a matching
+    digest transfers nothing. `--force` overrides.
+  - `--pkg-root` / `--pkg-name`, or `PYTRUENAS_PKG_ROOT` / `PYTRUENAS_PKG_NAME`:
+    bundle a different distribution as the root, with pytruenas as a dependency
+    of it.
+- **`pytruenas.utils.bundle`** — dependency-closure resolution and bundle
+  construction. Reads installed distribution metadata (`importlib.metadata`)
+  rather than scanning imports. Raises `BundleError` for a distribution
+  containing a compiled extension, or one resolving to data files with no
+  importable module.
+- **`pytruenas.patch.zfs`** — `writable(client, path)` context manager: clears
+  `readonly` on the ZFS dataset backing `path` and restores the previous value
+  on exit, including when the block raises. `dataset_for` walks to the nearest
+  existing ancestor, as `findmnt --target` exits non-zero for a path that does
+  not exist. Also `is_readonly`, `set_readonly`, `host_path`.
+- **`FileTarget.revert(remove_baseline=True)`** — restores the baseline
+  snapshot and removes it. Returns `False` when no baseline exists.
+- **`FileTarget.is_patched()`** — whether the file differs from its baseline.
+- **`FileTarget.would_change(content)`** — whether a write would modify the
+  file. No side effects.
+- **`FileTarget(..., mode=)` and `SystemFile(..., writable=, mode=)`** — mode
+  for a newly created file; `writable=True` wraps writes in `patch.zfs.writable`.
 
 ### Fixed
 
-- **A rewrite no longer widens a file's permissions.** Rewriting reset the mode
-  to whatever the umask gave, so patching `/etc/shadow` (`0640 root:shadow` on
-  a real box) would silently have made it `0644`. The existing mode is now
-  captured before the write and restored after.
-- **`systemctl` was invoked as four separate commands.** `run(*cmds)` treats
-  each positional as its own command, so `run("systemctl", "disable", "--now",
-  name)` ran four — with the unit name hand-quoted on top, which argv does not
-  want. Every call now builds one argv list.
-- **`is-active`/`is-enabled` could raise on the non-zero exit that *is* their
-  answer**, so asking "is this running?" about a stopped service threw.
-- **`services="nfs"` iterated into three per-character reloads.**
-- **`mkdir(755, ...)` passed decimal 755** — `0o1363`, setuid plus wrong bits —
-  on every directory it created.
-- **`baseline=True` on a file that does not exist yet raised
-  `FileNotFoundError`** from inside `write()`: it tried to snapshot a missing
-  original. That is the ordinary "create this config if absent" case.
-- **`baseline()` called `resolve()`**, which hostctl's `CompositePosixPath` does
-  not have, so any baseline against a real client path crashed.
-- **`BaseTemplate.render` returned `None`** for a subclass that forgot to
-  override it, and that `None` flowed into `write()` as the file's content. It
-  now raises, and `write()` refuses `None` outright.
-- **`MiddlewareFiles` used a `client.middlewared_path` that never existed.**
-  Replaced with a lazy lookup that asks the host's own interpreter — no API
-  method reports it (checked against 26.0's 781 methods).
-- **`find_template` defaulted to taking a baseline** beside a template on a
-  **read-only mount**, which cannot work; it failed with a bare `OSError` on
-  first read.
-- **`apply_template(**kwargs)`** raised `TypeError` for an already-built
-  template and silently dropped the kwargs elsewhere.
+- **File permissions are preserved across a rewrite.** The mode was previously
+  reset to the umask default. On TrueNAS 26.0, `/etc/shadow` is `0640
+  root:shadow`; patching it produced `0644`.
+- **`systemctl` invocations ran as separate commands.** `Host.run(*cmds)`
+  treats each positional argument as its own command, so
+  `run("systemctl", "disable", "--now", name)` executed four commands. Unit
+  names were also shell-quoted while being passed as argv. Each invocation now
+  builds a single argv list.
+- **`is-active` / `is-enabled` raised on a non-zero exit**, which is their
+  result value for "no".
+- **`services="nfs"` was iterated character-wise**, producing three service
+  reloads.
+- **`mkdir(755, ...)` passed decimal `755`** (`0o1363`: setuid, setgid, sticky
+  and `rwx-wx-wx`) as the mode for created directories. Now `0o755`.
+- **`baseline=True` raised `FileNotFoundError` for a file that does not exist**,
+  from `read_bytes()` on the absent original inside `write()`.
+- **`FileTarget.baseline()` called `resolve()`**, absent from
+  `hostctl.host.CompositePosixPath`.
+- **`BaseTemplate.render` returned `None`** when not overridden; the value
+  reached `write()` as file content. Now raises `NotImplementedError`, and
+  `write()` rejects `None`.
+- **`MiddlewareFiles` read `client.middlewared_path`**, which does not exist.
+  Replaced by `middlewared_path(client)`, which runs `import middlewared` on
+  the host. No API method reports the path (checked against all 781 methods on
+  26.0.0-BETA.1).
+- **`MiddlewareFiles.find_template` defaulted to `baseline=True`.** The
+  middlewared package is on a read-only mount
+  (`boot-pool/ROOT/<version>/usr`), so the snapshot write failed with `OSError`
+  on first read. Now defaults to `False`.
+- **`apply_template(**kwargs)` raised `TypeError`** for an already-constructed
+  template, and discarded the arguments in other branches.
+- **`pytruenas/cmd/` had no `__init__.py`.** `zipimport` does not support
+  namespace packages, so a zipapp built from the package exposed no commands.
+- **`pytruenas/utils/io.py` called `Path(__file__).stat()` at import** to build
+  an unused `STAT_FIELDS` constant, raising `NotADirectoryError` when imported
+  from a zipapp. Removed.
 
 ### Changed
 
-- **`PYTRUENAS_*` settings are read through one `duho.env` accessor.** The app
-  had grown three names for two settings (`PYTRUENAS_CFG`, `PYTRUENAS_CONFIG`,
-  `PYTRUENAS_PATH`); `PYTRUENAS_CONFIG` is now canonical with `CFG` still
-  accepted, and the set is enumerable rather than grep-discoverable.
-- **`pytruenas.ops` → `pytruenas.patch`**, split into `templates/`, `systemd/`,
-  `middleware.py`, `zfs.py`. The old name described neither what the code does
-  nor what it costs: it modifies a host beyond what the middleware API
-  supports, which is unsupported by definition and discarded by a boot
-  environment swap on update.
-  - `ops.midclt` → `patch.systemd` (`midclt` is TrueNAS's own CLI binary, which
-    nothing in the module invokes). `TruenasSystemFile` → `SystemFile`,
+- **`PYTRUENAS_*` variables are read through a single `duho.env.Env`
+  accessor** (`pytruenas.utils.cmd.ENV`). `PYTRUENAS_CONFIG` is the documented
+  name; `PYTRUENAS_CFG` remains accepted. `PYTRUENAS_PATH` is split with
+  `os.pathsep` and yields `[]` when unset (previously `[""]`, which resolved to
+  the working directory).
+- **`pytruenas.ops` is now `pytruenas.patch`**, split into `templates/`
+  (`base.py`, `targets.py`), `systemd/` (`unitfile.py`, `files.py`, `units.py`),
+  `middleware.py` and `zfs.py`.
+  - `ops.midclt` → `patch.systemd`. `TruenasSystemFile` → `SystemFile`,
     `SystemdUnit` → `Unit`, `SystemdServiceUnit` → `ServiceUnit`,
+    `SystemdMountUnit` → `MountUnit`, `SystemdAutoMountUnit` → `AutomountUnit`,
     `MiddlewareCode` → `MiddlewareFiles`.
-  - Unit `enable`/`start` are now three-valued: `None` means "not mine to
-    manage", which a bool could not express.
+  - `ops.template` → `patch.templates`.
+  - `Unit.enable` and `Unit.start` accept `None`, meaning the current state is
+    left unchanged. Previously `bool` only.
+  - `MountUnit` omits `Options` and `Type` when empty.
+  - `FileTarget` accepts any object providing `exists`, `read_bytes`,
+    `write_bytes` and `with_name`, rather than requiring
+    `pathlib_next.Path`.
 
 ### Removed
 
-- **`pytruenas.ops.host`** — its packaging half became
-  `patch.templates`/`utils.bundle`; the remaining network helpers
-  (`is_localhost`, `is_local_ip`, `find_adapter_in_network`) were thin wrappers
-  over `netimps` and `ipaddress` that nothing in the package imported. Call
-  `netimps.interface_for`/`get_interfaces` and `ipaddress` directly.
-- **`pytruenas.ops.main.init`** — imported by nothing, duplicated the CLI's own
-  config loading, and documented a `pytruenas.client` module deleted in 0.2.0.
-  Now `examples/simple_client_from_yaml.py`, as a worked example.
+- **`pytruenas.ops.host`** — `package`/`package_digest`/`PathPatterns` are now
+  `pytruenas.utils.bundle.tar_tree`/`tar_digest`. `is_localhost`, `is_local_ip`
+  and `find_adapter_in_network` are removed with no replacement; they wrapped
+  `netimps.interface_for` / `netimps.get_interfaces` and `ipaddress`.
+- **`pytruenas.ops.main`** — moved to `examples/simple_client_from_yaml.py`.
+
+### Dependencies
+
+- **`hostctl>=0.1.2`** (from `>=0.1.0`) — for `uri_hostname()`.
 
 ### Dependencies
 
@@ -125,94 +127,71 @@ Those are all fixed below.
 
 ## [0.2.2] - 2026-07-28
 
-Log records now identify the host they came from, and no longer carry the
-connection string that used to be the only identification.
+### Added
 
-Released as a patch: the public surface only gains (`client.name`,
-`config.name`, `TrueNASWSConnection(logger=...)`). The one output change is to
-`pytruenas.utils.target`'s `redact`/`Target.redacted`, an internal utility
-module — not exported from the package root, not in the docs, and reached only
-by explicit deep import.
+- **`client.name` / `config.name`** — the host's short label: hostname, plus
+  the port when it is not the scheme default; `localhost` for the unix socket.
+- **`TrueNASWSConnection(logger=)`** — the connection emits through the host's
+  logger when one is supplied.
 
 ### Changed
 
-- **Log records identify the host by name, not by connection string.** Every
-  record carried the full URI — scheme, port, API path and any userinfo — which
-  was unreadable at fan-out width and put the password on every line. Records
-  are now prefixed with the machine's short name (`[nas1]`, `[nas1:8443]`,
-  `localhost` for the unix socket), available as `client.name` /
-  `config.name`. Because the prefix always names the target, the per-target
-  `Started:`/`Finished:` messages no longer repeat it.
-- **Attribution no longer depends on the CLI.** `client.logger` is now bound to
-  the host's name, so a *library* caller with several clients open gets
-  attributed records with no fan-out involved — previously only the CLI's
-  `duho.fanout` added a prefix, and a bare "Websocket connection was closed"
-  did not say which host closed. `TrueNASWSConnection` accepts `logger=` and
-  the host passes its own, so transport-layer records are attributed too.
-- **Redaction removes the password instead of masking it.**
-  `pytruenas.utils.target.redact` and `Target.redacted` rendered
-  `wss://root:***@nas`; they now render `wss://root@nas`. A `***` placeholder
-  is not a real password and would reparse into a *wrong* credential if the
-  rendered form were ever fed back in, whereas what comes out now is a valid,
-  reusable URI. `redact` delegates to `hostctl.host.redact_uri`, so pytruenas
-  and hostctl render a target identically. Note this is only for rendering a
-  *raw* connection string: credentials are extracted at parse time, so
-  `config.connection_uri` was already credential-free.
-- **`--logto` filenames use the short name.** `{target}` now expands to `nas1`
-  rather than a full URI, which is both credential-free and a legal filename —
-  a URI is neither.
+- **Log records are prefixed with the host name** (`[nas1]`, `[nas1:8443]`)
+  instead of the full connection string, which included the scheme, port, API
+  path and userinfo. `client.logger` is bound to the name, so records are
+  attributed without the CLI's `duho.fanout` prefix filter. The per-target
+  `Started:` / `Finished:` messages no longer repeat the target.
+- **`utils.target.redact` and `Target.redacted` remove the password** rather
+  than masking it: `wss://root:secret@nas` renders as `wss://root@nas`, not
+  `wss://root:***@nas`. The result reparses to an equivalent target;
+  `***` reparsed as a literal password. `redact` now delegates to
+  `hostctl.host.redact_uri`. This affects only the rendering of a raw
+  connection string — credentials are extracted during parsing, so
+  `config.connection_uri` contained none.
+- **`--logto` `{target}` expands to the host name** rather than the connection
+  string. The name is also a valid filename component.
 
 ### Fixed
 
-- **A hostname's typed casing is preserved in its label.** `urlsplit` folds
-  case, so a fan-out over `nasA`/`nasB` logged `[nasa]`/`[nasb]`. Correct for
-  resolution, wrong for a label an operator greps for.
-- **The same host renders the same way with or without a password.** A target
-  whose URI carried a credential logged as `[nasa]` while the identical host
-  without one logged as `[nasA]`, because hostctl rebuilt the authority from
-  the case-folded hostname when stripping the password. Filed upstream and
-  fixed across hostctl 0.1.1/0.1.2.
+- **Hostname case is preserved in the log label.** `urlsplit` case-folds
+  `hostname`, so `nasA` / `nasB` were logged as `[nasa]` / `[nasb]`.
+- **A host renders identically with and without a credential.** With a password
+  in the URI the label was `[nasa]`; without one, `[nasA]`. `hostctl.redact_uri`
+  rebuilt the authority from the case-folded hostname (fixed in hostctl 0.1.1,
+  completed by `uri_hostname()` in 0.1.2).
 
 ### Dependencies
 
-- **`hostctl>=0.1.2`** (was `>=0.1.0`) — for `uri_hostname()`, which returns a
-  URI's host as written instead of as `urlsplit` case-folded it.
-  `TrueNASConfig` stores that, since the value is rendered back out through
-  `name` and `connection_uri`. Both hostctl releases came from a finding filed
-  from this repo. **Note the trade-off inherited with it:** `config.host` is
-  now the spelling the caller typed rather than a canonical one, so two
-  spellings of one machine are not equal configs — casefold explicitly if you
-  key on a host. Routing is unaffected.
+- **`hostctl>=0.1.2`** (from `>=0.1.0`) — for `uri_hostname()`. Note the
+  behaviour it brings: `config.host` holds the spelling as given, not a
+  canonical one, so two spellings of one host are not equal configs. Routing
+  case-folds before comparing and is unaffected.
 
 ## [0.2.1] - 2026-07-27
 
-Documentation and one error-message fix. No API changes.
-
 ### Fixed
 
-- **An unknown constructor argument now raises a useful error.** A typo like
-  `TrueNASClient("wss://nas", passwrd="s3cret")` fell through to hostctl's
-  `SystemHost.__init__` and raised `TypeError: SystemHost.__init__() got an
-  unexpected keyword argument 'passwrd'` — accurate, but naming an internal
-  class rather than the thing the caller got wrong. It now raises
-  `ValueError: unknown credential argument: 'passwrd'` and lists the accepted
-  configuration options. Found by testing the documented examples.
+- **An unknown constructor keyword raises `ValueError` naming it.**
+  `TrueNASClient("wss://nas", passwrd="s3cret")` reached
+  `hostctl.host.SystemHost.__init__` and raised `TypeError:
+  SystemHost.__init__() got an unexpected keyword argument 'passwrd'`. It now
+  raises `ValueError: unknown credential argument: 'passwrd'`, listing the
+  accepted configuration options.
 
 ### Documentation
 
-- **README** rewritten for 0.2.0: it still advertised a `pytruenas[host]` extra
-  that no longer exists, said "once published to PyPI", and used a venv layout
-  the project no longer follows. Adds the transport table and a
-  commands/files section.
-- **New [Recipes](https://jose-pr.github.io/pytruenas/guide/recipes/) guide** —
-  worked examples for connecting, querying, idempotent upserts, subscriptions,
-  running commands, upload/download, several hosts at once, and provisioning
-  SSH. Every example was run against a live TrueNAS 26.0.0-BETA.1 host.
-- **Filesystem guide** expanded with real path examples and a table of which
-  operations need SFTP (`rename`, `symlink_to`, `readlink`, `resolve` have no
-  `filesystem.*` equivalent and raise rather than failing quietly).
-- `docs/index.md` extras list corrected; both CI workflows dropped a stale
-  `host` extra that pip had been silently warning about.
+- **README** updated for 0.2.0: removed the `pytruenas[host]` extra (dropped in
+  0.2.0) and a pre-publication note; corrected the venv layout; added the
+  transport table and a commands/files section.
+- **Added the [Recipes](https://jose-pr.github.io/pytruenas/guide/recipes/)
+  guide** — 13 examples covering connections, queries, upserts, subscriptions,
+  commands, transfers, multi-host fan-out and SSH provisioning. All executed
+  against TrueNAS 26.0.0-BETA.1.
+- **Filesystem guide** — added path examples and a table of operations
+  requiring SFTP: `rename`, `symlink_to`, `readlink` and `resolve` have no
+  `filesystem.*` equivalent.
+- `docs/index.md` extras list corrected. Both CI workflows referenced the
+  removed `host` extra.
 
 ## [0.2.0] - 2026-07-27
 
