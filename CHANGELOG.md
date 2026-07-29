@@ -9,12 +9,11 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 Run pytruenas *on* the appliance, and patch things the API does not expose.
 
 `pytruenas.ops` is now `pytruenas.patch`, restructured into subpackages, with
-`ops.host` and `ops.main` removed (see "Removed"). Renaming it is why this is
-0.3.0 rather than 0.2.3 — though in practice there was nothing to break: the
-subpackage was experimental, unexercised, and most of its paths simply did not
-work. `MiddlewareFiles` referenced an attribute that never existed, `systemctl`
-calls ran four commands instead of one, and creating a file with a baseline
-raised. Those are all fixed below; the rename is the part worth noticing.
+`ops.host` and `ops.main` removed (see "Removed"). The subpackage was
+experimental and unexercised, and most of its paths did not work:
+`MiddlewareFiles` referenced an attribute that never existed, `systemctl` calls
+ran four commands instead of one, and creating a file with a baseline raised.
+Those are all fixed below.
 
 ### Added
 
