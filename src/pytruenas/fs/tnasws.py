@@ -52,6 +52,14 @@ class TnasWsPath(_UriPath):
     __SCHEMES = (_SCHEME,)
     __slots__ = ()
 
+    #: The path component names a real file *on the TrueNAS host*, so
+    #: ``os.fspath()`` may return it (pathlib_next >=0.9.0). Without this,
+    #: fspath raises for this scheme and anything building a command line that
+    #: names the file -- a `chmod`, a `systemctl` argument -- has to unwrap the
+    #: URI by hand. It stays false for schemes whose path is not a filesystem
+    #: path (`http`, `s3`), which is what the opt-in exists to distinguish.
+    _host_filesystem_path = True
+
     # -- backend / client access -------------------------------------------
 
     def _initbackend(self):

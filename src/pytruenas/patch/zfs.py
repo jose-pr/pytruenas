@@ -24,6 +24,7 @@ from __future__ import annotations
 
 import contextlib as _contextlib
 import logging as _logging
+import os as _os
 import typing as _ty
 from pathlib import PurePosixPath as _PurePosixPath
 
@@ -46,18 +47,24 @@ __all__ = [
 def host_path(path: "PathLike") -> str:
     """The plain filesystem path ``path`` names *on the host*.
 
-    Needed because a remote path does not stringify to something you can put in
-    a command line. A ``pathlib_next`` ``UriPath`` -- what the SFTP backend
-    hands back -- renders three different wrong ways:
+    A remote path does not stringify to something usable in a command line:
+    ``str()`` on a ``UriPath`` gives a whole URI, and ``as_posix()`` gives scp
+    syntax (``root@nas:/usr/lib/x``). ``os.fspath()`` is the right protocol and
+    is tried first -- pathlib_next >=0.9.0 answers it with the host path for
+    schemes marked ``_host_filesystem_path`` (``sftp``, and pytruenas' own
+    ``truenas``/``tnasws``; see :mod:`pytruenas.fs.tnasws`).
 
-    * ``str()`` -> ``sftp://root@nas/usr/lib/x``: a whole URI, and one that
-      **puts credentials in an argv** if the target carried any;
-    * ``as_posix()`` -> ``root@nas:/usr/lib/x``: scp syntax, not a path;
-    * ``os.fspath()`` -> ``NotImplementedError``.
-
-    The real path is on ``.path``, so prefer that; fall back to ``as_posix()``
-    for an ordinary pure path, and ``str()`` for a plain string.
+    The fallbacks cover the rest: a scheme that has *not* opted in still raises
+    from fspath, and an older pathlib_next raises for every non-``file``
+    scheme, so ``.path`` is consulted before giving up on ``str()``.
     """
+    try:
+        return _os.fspath(path)
+    except (NotImplementedError, TypeError):
+        # NotImplementedError: a URI scheme whose path is not a host filesystem
+        # path (or a pathlib_next older than 0.9.0, which raised for all of
+        # them). TypeError: not path-like at all -- a plain string arrives here.
+        pass
     inner = getattr(path, "path", None)
     if isinstance(inner, str):
         return inner

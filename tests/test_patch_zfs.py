@@ -119,12 +119,14 @@ def test_host_path_accepts_str_and_pure_paths():
 
 
 def test_host_path_unwraps_a_uripath_and_never_leaks_credentials():
-    """A UriPath renders three ways, and two of them are wrong for argv.
+    """A UriPath renders several ways and most are wrong for argv.
 
-    `str()` gives a whole URI, `as_posix()` gives scp syntax, `os.fspath()`
-    raises. Only `.path` is the host-local filesystem path -- and getting this
-    wrong would put a URI (historically, with credentials in it) into a command
-    line. Filed upstream as 2026-07-29_uripath_fspath_refuses_remote_schemes.
+    `str()` gives a whole URI, `as_posix()` gives scp syntax. `os.fspath()` is
+    the right protocol and answers correctly on pathlib_next >=0.9.0; on older
+    versions it raises for every non-`file` scheme, so `host_path` falls back
+    to `.path`. Either way the result must be the host-local path, never a URI
+    -- which historically carried credentials into the command line. (Filed
+    upstream as 2026-07-29_uripath_fspath_refuses_remote_schemes; fixed there.)
     """
     sftp = pytest.importorskip("pathlib_next.uri.schemes.sftp")
 
@@ -133,6 +135,21 @@ def test_host_path_unwraps_a_uripath_and_never_leaks_credentials():
     assert "hunter2" not in zfs.host_path(path)
     assert "nas" not in zfs.host_path(path)
     assert "sftp://" not in zfs.host_path(path)
+
+
+def test_host_path_handles_pytruenas_own_path_types():
+    """`TruenasPath`/`TnasWsPath` name a file ON the NAS, so fspath applies.
+
+    They opt in via `_host_filesystem_path` (pathlib_next >=0.9.0). On an older
+    pathlib_next the attribute is inert and the `.path` fallback covers it, so
+    this asserts the outcome rather than the mechanism.
+    """
+    from pytruenas.fs.truenas import TruenasPath
+
+    path = TruenasPath("truenas://root:hunter2@nas/usr/lib/x.conf")
+    assert zfs.host_path(path) == "/usr/lib/x.conf"
+    assert "hunter2" not in zfs.host_path(path)
+    assert "truenas://" not in zfs.host_path(path)
 
 
 def test_dataset_for_walks_up_to_an_existing_ancestor():
