@@ -6,6 +6,111 @@ user-facing; this file is the durable record.
 
 ---
 
+## [0.3.0] - 2026-07-29
+
+### What changed
+
+Two things: pytruenas can now install and run *on* an appliance, and the
+subpackage for changing a host beyond the API — `ops`, now `patch` — was
+rewritten from something that mostly did not work into something verified
+against a live box.
+
+### Running on the appliance
+
+TrueNAS has a read-only root and no `pip`, so "install it there" has no answer.
+`pytruenas deploy <target>` bootstraps instead: it asks the target what it
+already has, bundles only the difference, and copies that over.
+
+The probe is the point. TrueNAS 26.0 already ships `requests`,
+`websocket-client`, `pyyaml`, `asyncssh`, `jinja2` and the whole `requests`
+transitive set, so a vendored payload would be mostly redundant — and *which*
+packages are present varies by release. In practice the bundle is five
+pure-Python packages, ~600 KB.
+
+It reads installed distribution metadata rather than walking imports. Declared
+dependencies resolve transitively and already account for extras and markers,
+where an import scan cannot tell that `import yaml` means `pyyaml`, and misses
+anything imported inside a function body. That found `certifi`, `urllib3`,
+`idna` and `dnspython` — none of which appear in pytruenas' own dependency
+list.
+
+The default destination, `/var/db/system`, was chosen by asking the appliance
+rather than by picking a plausible path. `/var/db` itself is in the boot
+environment (`boot-pool/ROOT/<version>/var`) and is replaced by an update, as
+are `/root` and `/data`. `/var/db/system` is the mountpoint of `<pool>/.system`
+on a *data* pool, so it survives.
+
+### Five bugs that only a real box could find
+
+Every one built cleanly and failed only after deployment:
+
+- **`pytruenas/cmd/` had no `__init__.py`.** Fine on a filesystem, but
+  `zipimport` does not implement namespace packages — so the deployed app
+  imported cleanly and offered *zero* commands.
+- **`utils/io.py` stat-ed its own `__file__`** at import to build a constant
+  nothing used. Inside a zipapp that path is not a real file, so importing
+  pytruenas raised `NotADirectoryError`.
+- **`pathlib.Path` mangled remote POSIX paths** into `\var\db\system` on a
+  Windows controller.
+- **`write_text` wrote CRLF** into the launcher, making the shebang
+  `#!/bin/sh\r` — "bad interpreter", naming a path that visibly exists.
+- **A RECORD entry escaping site-packages** (`../../Scripts/foo.exe`) made a
+  mypyc `.pyd` belonging to *black* look like part of hostctl.
+
+Plus editable installs: their RECORD lists only a `.pth` shim, so `pytruenas`
+first shipped as a lone `README.md`.
+
+### The patch subpackage
+
+`ops` said nothing about what the code does or what it costs. `patch` says
+both, and the package docstring is explicit that this is unsupported territory:
+the appliance owns its configuration, and a boot environment swap discards
+anything outside the persistent datasets.
+
+Verifying it as asked turned up seven bugs with no tests between them — the
+sharpest being `mkdir(755, ...)`, which passes **decimal** 755, i.e. `0o1363`:
+setuid plus wrong permission bits on every directory it created. Also
+`baseline=True` on a file that did not exist yet raised from inside `write()`
+(the ordinary "create this config if absent" case), `baseline()` called
+`resolve()` which hostctl's path type does not have, and `MiddlewareFiles`
+referenced a `client.middlewared_path` that never existed.
+
+Then the gap that mattered most: the docstring promised "undoable" and there
+was no way to undo. Baselines were snapshotted faithfully and nothing restored
+from them. `revert()`, `is_patched()` and `would_change()` close that.
+
+And one security bug, found by checking what modes real files carry rather than
+assuming: `/etc/shadow` is `0640 root:shadow`, and rewriting a file resets its
+mode to whatever the umask gives. Patching it would have silently widened it to
+`0644`. The mode is now captured before the write and restored after.
+
+`patch.zfs` restores capability lost in an earlier code transfer:
+`writable(client, path)` clears `readonly` on the backing dataset and restores
+it however the block exits — which is why it is a context manager and not two
+functions.
+
+### Validation
+
+443 passed / 5 skipped on 3.14 and the 3.9 floor. Verified live against
+TrueNAS 26.0.0-BETA.1: both deploy modes install and run against the local
+middleware socket with the appliance's stock `python3`; a file on a read-only
+mount is created, patched, reverted and its `0640` mode preserved throughout;
+`readonly` restores even when the patch body raises.
+
+**Not verified live:** the `systemctl` paths. `ServiceUnit.apply()` is covered
+only by a test double, and that is exactly where the four-commands-instead-of-one
+bug lived. Install a real unit before relying on it.
+
+### Upstream
+
+Two findings filed: `pathlib_next` (`os.fspath()` raises for remote schemes, so
+code building a command line for a process running *on that host* has no
+correct generic way to name the path) and `hostctl` (three implementations of
+"parse a connection string" exist, differing in defaults rather than structure;
+asks for a `ConnectionString` base).
+
+---
+
 ## [0.2.2] - 2026-07-28
 
 ### What changed

@@ -4,6 +4,126 @@ All notable changes to this project are documented here. The format is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2026-07-29
+
+Run pytruenas *on* the appliance, and patch things the API does not expose.
+
+`pytruenas.ops` is now `pytruenas.patch`, restructured into subpackages, with
+`ops.host` and `ops.main` removed (see "Removed"). Renaming it is why this is
+0.3.0 rather than 0.2.3 — though in practice there was nothing to break: the
+subpackage was experimental, unexercised, and most of its paths simply did not
+work. `MiddlewareFiles` referenced an attribute that never existed, `systemctl`
+calls ran four commands instead of one, and creating a file with a baseline
+raised. Those are all fixed below; the rename is the part worth noticing.
+
+### Added
+
+- **`pytruenas deploy <target>`** — installs pytruenas onto a host that cannot
+  install for itself. TrueNAS has a read-only root and no `pip`, so this probes
+  what the target already has, bundles only the difference, and copies that
+  over. In practice five pure-Python packages under a megabyte: the appliance
+  already ships `requests`, `websocket-client`, `pyyaml`, `asyncssh` and
+  `jinja2`, and *which* it ships varies by release, so it is asked rather than
+  assumed.
+  - `--mode pyz` (default) writes one executable zipapp; `--mode dir` an
+    unpacked `bin/` + `lib/` tree, swapped into place via a staging directory
+    so an interrupted transfer never leaves a half-written tree.
+  - Everything after `--` runs on the target once installed:
+    `pytruenas deploy nas1 -- call system.info`.
+  - Defaults to `/var/db/system`, which is a dataset on a *data* pool and
+    survives an update — unlike `/var/db` itself, `/root` or `/data`, which
+    live in the boot environment and are replaced by one. Verified on a live
+    appliance rather than assumed.
+  - A digest is recorded beside the payload, so a redeploy verifies instead of
+    re-copying; `--force` overrides.
+  - `--pkg-root`/`--pkg-name` (or `PYTRUENAS_PKG_ROOT`/`PYTRUENAS_PKG_NAME`)
+    deploy *your* distribution with pytruenas bundled underneath, for when
+    pytruenas is a dependency rather than the deliverable.
+- **`pytruenas.utils.bundle`** — the machinery behind it, deliberately generic:
+  it knows nothing about pytruenas or TrueNAS and could be lifted out. Resolves
+  a transitive closure from installed *distribution metadata* (not an import
+  scan — `import yaml` does not name `pyyaml`), and refuses a distribution
+  carrying a compiled extension or resolving to data files only, both of which
+  would build cleanly and fail to import on the target.
+- **`pytruenas.patch.zfs`** — `writable(client, path)` clears `readonly` on the
+  backing dataset and restores it **however the block exits**. Required for
+  anything under `/usr`. `dataset_for` walks up to an existing ancestor,
+  because `findmnt --target` fails on a path that does not exist yet.
+- **Undo, for the patch system that promised it.** `FileTarget.revert()`
+  restores the baseline and clears the snapshot; `is_patched()` reports whether
+  a file currently differs from its baseline; `would_change(content)` is the
+  dry run. A file the patch *created* is deliberately left alone — with no
+  baseline there is nothing proving it was ours to delete.
+- **`SystemFile(..., writable=True, mode=...)`** — patch a read-only mount
+  without remembering the ZFS dance, and set the mode for a file the patch
+  creates.
+
+### Fixed
+
+- **A rewrite no longer widens a file's permissions.** Rewriting reset the mode
+  to whatever the umask gave, so patching `/etc/shadow` (`0640 root:shadow` on
+  a real box) would silently have made it `0644`. The existing mode is now
+  captured before the write and restored after.
+- **`systemctl` was invoked as four separate commands.** `run(*cmds)` treats
+  each positional as its own command, so `run("systemctl", "disable", "--now",
+  name)` ran four — with the unit name hand-quoted on top, which argv does not
+  want. Every call now builds one argv list.
+- **`is-active`/`is-enabled` could raise on the non-zero exit that *is* their
+  answer**, so asking "is this running?" about a stopped service threw.
+- **`services="nfs"` iterated into three per-character reloads.**
+- **`mkdir(755, ...)` passed decimal 755** — `0o1363`, setuid plus wrong bits —
+  on every directory it created.
+- **`baseline=True` on a file that does not exist yet raised
+  `FileNotFoundError`** from inside `write()`: it tried to snapshot a missing
+  original. That is the ordinary "create this config if absent" case.
+- **`baseline()` called `resolve()`**, which hostctl's `CompositePosixPath` does
+  not have, so any baseline against a real client path crashed.
+- **`BaseTemplate.render` returned `None`** for a subclass that forgot to
+  override it, and that `None` flowed into `write()` as the file's content. It
+  now raises, and `write()` refuses `None` outright.
+- **`MiddlewareFiles` used a `client.middlewared_path` that never existed.**
+  Replaced with a lazy lookup that asks the host's own interpreter — no API
+  method reports it (checked against 26.0's 781 methods).
+- **`find_template` defaulted to taking a baseline** beside a template on a
+  **read-only mount**, which cannot work; it failed with a bare `OSError` on
+  first read.
+- **`apply_template(**kwargs)`** raised `TypeError` for an already-built
+  template and silently dropped the kwargs elsewhere.
+
+### Changed
+
+- **`PYTRUENAS_*` settings are read through one `duho.env` accessor.** The app
+  had grown three names for two settings (`PYTRUENAS_CFG`, `PYTRUENAS_CONFIG`,
+  `PYTRUENAS_PATH`); `PYTRUENAS_CONFIG` is now canonical with `CFG` still
+  accepted, and the set is enumerable rather than grep-discoverable.
+- **`pytruenas.ops` → `pytruenas.patch`**, split into `templates/`, `systemd/`,
+  `middleware.py`, `zfs.py`. The old name described neither what the code does
+  nor what it costs: it modifies a host beyond what the middleware API
+  supports, which is unsupported by definition and discarded by a boot
+  environment swap on update.
+  - `ops.midclt` → `patch.systemd` (`midclt` is TrueNAS's own CLI binary, which
+    nothing in the module invokes). `TruenasSystemFile` → `SystemFile`,
+    `SystemdUnit` → `Unit`, `SystemdServiceUnit` → `ServiceUnit`,
+    `MiddlewareCode` → `MiddlewareFiles`.
+  - Unit `enable`/`start` are now three-valued: `None` means "not mine to
+    manage", which a bool could not express.
+
+### Removed
+
+- **`pytruenas.ops.host`** — its packaging half became
+  `patch.templates`/`utils.bundle`; the remaining network helpers
+  (`is_localhost`, `is_local_ip`, `find_adapter_in_network`) were thin wrappers
+  over `netimps` and `ipaddress` that nothing in the package imported. Call
+  `netimps.interface_for`/`get_interfaces` and `ipaddress` directly.
+- **`pytruenas.ops.main.init`** — imported by nothing, duplicated the CLI's own
+  config loading, and documented a `pytruenas.client` module deleted in 0.2.0.
+  Now `examples/simple_client_from_yaml.py`, as a worked example.
+
+### Dependencies
+
+- **`hostctl>=0.1.2`** — for `uri_hostname()`, which returns a URI's host as
+  written rather than case-folded.
+
 ## [0.2.2] - 2026-07-28
 
 Log records now identify the host they came from, and no longer carry the
