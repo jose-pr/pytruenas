@@ -492,7 +492,12 @@ Everything is built to be repeatable and undoable:
   changed; every caller keys expensive follow-up work off that boolean.
   `FileTarget(path, baseline=True)` snapshots the original on first write and
   `read()`s *that* thereafter, so a patch layers onto the stock file rather
-  than onto its own previous output.
+  than onto its own previous output. Also `revert(remove_baseline=True)`
+  (restore + clear the snapshot; a no-op without a baseline, since a file the
+  patch created is not provably ours to delete), `is_patched()`,
+  `would_change(content)` (dry run), and `mode=` for a created file — an
+  *existing* file keeps its own mode across a rewrite, so patching
+  `/etc/shadow` cannot silently widen it from `0640`.
 - **`systemd`** — `unitfile` (pure text: unit syntax is case-sensitive,
   `=`-only, and `%` belongs to systemd, so all three `ConfigParser` defaults
   are wrong); `files.SystemFile` (a file plus the `etc` groups and services to
