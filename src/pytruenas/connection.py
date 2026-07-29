@@ -312,7 +312,7 @@ class Subscription:
             try:
                 self._callback(event)
             except Exception:  # a bad callback must not kill the reader
-                _LOGGER.warning(
+                self._client.logger.warning(
                     "event callback for %r raised; continuing",
                     self.event,
                     exc_info=True,
@@ -388,12 +388,19 @@ class TrueNASWSConnection:
         verify_ssl: bool = True,
         call_timeout: float = CALL_TIMEOUT,
         py_exceptions: bool = False,
+        logger: "_logging.Logger | _logging.LoggerAdapter | None" = None,
     ) -> None:
         if not uri or uri == _UNIX_PREFIX:
             uri = _UNIX_PREFIX + DEFAULT_UNIX_SOCKET
         self.uri = uri
         self.verify_ssl = verify_ssl
         self.call_timeout = call_timeout
+        #: Where this connection's records go. A host passes its own
+        #: name-bound logger, so "connection was closed" says *which* host
+        #: closed even with several open at once; standalone use falls back to
+        #: the module logger, which is what this class did unconditionally
+        #: before (a module global cannot know its caller's target).
+        self.logger = logger if logger is not None else _LOGGER
         # Accepted for parity with the upstream client; this lean client never
         # asks the server to pickle exceptions.
         self.py_exceptions = py_exceptions
@@ -475,14 +482,14 @@ class TrueNASWSConnection:
     def _route_notification(self, message: dict) -> None:
         """Deliver a ``collection_update`` notification to its subscriptions."""
         if message.get("method") != "collection_update":
-            _LOGGER.debug("ignoring notification method %r", message.get("method"))
+            self.logger.debug("ignoring notification method %r", message.get("method"))
             return
         params = message.get("params") or {}
         collection = params.get("collection")
         with self._subs_lock:
             sinks = list(self._subs.get(collection, ()))
         if not sinks:
-            _LOGGER.debug("no subscription for event %r; dropping", collection)
+            self.logger.debug("no subscription for event %r; dropping", collection)
             return
         event = Event(
             collection=collection,
@@ -518,7 +525,9 @@ class TrueNASWSConnection:
         """
         unexpected = [k for k in _ignored if k not in _COMPAT_KWARGS]
         if unexpected:
-            _LOGGER.debug("call(%s): ignoring unexpected kwargs %s", method, unexpected)
+            self.logger.debug(
+                "call(%s): ignoring unexpected kwargs %s", method, unexpected
+            )
 
         if self._closed.is_set():
             raise ClientException("Connection closed", _errno.ECONNABORTED)
@@ -607,7 +616,7 @@ class TrueNASWSConnection:
             except Exception:
                 # Best-effort: the server drops subscriptions when the socket
                 # closes anyway, and a failed unsubscribe must not raise here.
-                _LOGGER.debug("core.unsubscribe(%s) failed", sub.id, exc_info=True)
+                self.logger.debug("core.unsubscribe(%s) failed", sub.id, exc_info=True)
 
     # -- lifecycle ----------------------------------------------------------
 

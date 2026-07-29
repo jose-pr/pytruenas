@@ -37,6 +37,7 @@ import requests as _req
 from hostctl.host import HostConfig as _HostConfig
 from hostctl.host import PosixHost as _PosixHost
 from hostctl.host import uri_host as _uri_host
+from hostctl.host import uri_hostname as _uri_hostname
 
 from . import auth as _auth
 from . import connection as _connection
@@ -99,13 +100,59 @@ EXECUTOR_NAMES = ("local", "ssh", "webshell")
 PATH_NAMES = ("local", "sftp", "tnasws")
 
 
-def _resolve_logger(logger: object):
-    """A ``Logger`` from a name, an instance, or ``None``."""
+class _HostLogger(_logging.LoggerAdapter):
+    """A logger that prefixes every record with the host it belongs to.
+
+    ``[nas1] Websocket connection was closed`` rather than a bare
+    ``Websocket connection was closed`` -- with more than one client open, an
+    unattributed record cannot be acted on, and there is no other point in the
+    stack that knows both the message and the target.
+
+    An adapter, not a filter: it needs no installation on a handler, so it works
+    with whatever logging the caller has already configured (including none),
+    and it composes with the CLI's fan-out prefix instead of competing with it
+    -- ``duho.fanout`` tags at the handler, this tags at the call site, and a
+    record that somehow passed through both would read ``[nas1] [nas1] ...``,
+    which :meth:`process` suppresses.
+
+    ``.trace`` is forwarded if the underlying logger has it (``duho.logging``
+    installs a TRACE level); :mod:`pytruenas.namespace` calls it for per-call
+    logging, and a plain ``logging.Logger`` has no such method.
+    """
+
+    def process(self, msg, kwargs):
+        prefix = f"[{self.extra['name']}] " if self.extra else ""
+        text = str(msg)
+        if prefix and text.startswith(prefix):
+            return text, kwargs
+        return f"{prefix}{text}", kwargs
+
+    def trace(self, msg, *args, **kwargs):
+        # LoggerAdapter forwards only the standard levels; TRACE is duho's
+        # addition, and namespace.py calls it on every API call.
+        inner = getattr(self.logger, "trace", None)
+        if inner is None:  # pragma: no cover - only without duho's logging setup
+            return
+        msg, kwargs = self.process(msg, kwargs)
+        inner(msg, *args, **kwargs)
+
+
+def _resolve_logger(logger: object, name: "str | None" = None):
+    """A ``Logger`` from a name, an instance, or ``None``.
+
+    When ``name`` is given the result is wrapped in a :class:`_HostLogger` so
+    every record it emits identifies the host. An adapter passed in by the
+    caller is left alone -- they have already decided how their records look.
+    """
     if logger is None:
-        return _logging.getLogger("pytruenas")
-    if isinstance(logger, str):
-        return _logging.getLogger(logger)
-    return _ty.cast(_logging.Logger, logger)
+        resolved: object = _logging.getLogger("pytruenas")
+    elif isinstance(logger, str):
+        resolved = _logging.getLogger(logger)
+    else:
+        resolved = logger
+    if name and isinstance(resolved, _logging.Logger):
+        return _HostLogger(resolved, {"name": name})
+    return _ty.cast(_logging.Logger, resolved)
 
 
 def _asyncssh():
@@ -425,7 +472,12 @@ class TrueNASConfig(
         # confusing near-miss for anyone editing this call.
         uri_path = parsed.path or ""
         return cls(
-            host=parsed.hostname or "",
+            # `uri_hostname`, not `parsed.hostname`: urlsplit case-folds the
+            # host unconditionally (right for resolution, since DNS is
+            # case-insensitive), but this value is rendered back out through
+            # `connection_uri` and `name`, where echoing a spelling the
+            # operator never typed turns a `nasA` fan-out into `[nasa]` logs.
+            host=_uri_hostname(parsed),
             port=parsed.port or 0,
             secure=secure,
             api_path=uri_path if uri_path.strip("/") else None,
@@ -449,6 +501,28 @@ class TrueNASConfig(
     def needs_path_probe(self) -> bool:
         """Whether the API path still has to be resolved against the server."""
         return not self.is_local and self.api_path is None
+
+    @property
+    def name(self) -> str:
+        """A short label for this target: the hostname, not a whole URI.
+
+        This is what belongs in a log prefix or a progress line. The scheme,
+        port, API path and userinfo that :attr:`connection_uri` carries are
+        noise once every record on the line repeats them -- and on a fan-out
+        across ten hosts, the one thing a reader needs is *which machine*.
+
+        ``localhost`` for the local middleware socket; the bare hostname
+        otherwise, with the port appended only when it is non-default (a
+        ``:8443`` is a real distinguisher between two entries for one host,
+        where ``:443`` just repeats the scheme).
+        """
+        if self.is_local:
+            return "localhost"
+        host = _uri_host(self.host) if self.host else "localhost"
+        default_port = 443 if self.secure else 80
+        if self.port and self.port != default_port:
+            return f"{host}:{self.port}"
+        return host
 
     @property
     def connection_uri(self) -> str:
@@ -581,7 +655,7 @@ class TrueNASHost(_PosixHost, _ty.Generic[ApiVersion]):
         self._config = config
         #: The live JSON-RPC connection, opened on first `.conn` access.
         self._conn: "_connection.TrueNASWSConnection | None" = None
-        self.logger = _resolve_logger(config.logger)
+        self.logger = _resolve_logger(config.logger, config.name)
         # `client=` is accepted and ignored: the host *is* the client now.
         # Kept so existing callers (and tests that injected a stand-in) do not
         # break on an unexpected keyword.
@@ -714,6 +788,11 @@ class TrueNASHost(_PosixHost, _ty.Generic[ApiVersion]):
             None if api.is_local and not api.port else api.uri,
             verify_ssl=self._config.sslverify,
             py_exceptions=False,
+            # Share the host's name-bound logger, so a record from the
+            # connection layer names the host it came from -- with several
+            # clients open at once, an unattributed "connection was closed" is
+            # not actionable.
+            logger=self.logger,
         )
 
     @property
@@ -993,6 +1072,11 @@ class TrueNASHost(_PosixHost, _ty.Generic[ApiVersion]):
         self._executor_selector = ProviderSelector(executors)
         self._path_selector = ProviderSelector(paths)
         return private_key
+
+    @property
+    def name(self) -> str:
+        """This host's short label -- see :attr:`TrueNASConfig.name`."""
+        return self._config.name
 
     def close(self) -> None:
         """Close the transports, then the websocket.
