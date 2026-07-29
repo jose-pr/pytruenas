@@ -151,6 +151,9 @@ def _fake_path_factory():
         def mkdir(self, mode=None, parents=False, exist_ok=False):
             self._store.setdefault(self._path, None)
 
+        def unlink(self, missing_ok=False):
+            self._store.pop(self._path, None)
+
         def resolve(self):
             return self
 
@@ -236,3 +239,192 @@ def test_file_target_rejects_a_non_path_naming_what_is_missing():
 
     with pytest.raises(TypeError, match="not path-like"):
         FileTarget(object())
+
+
+# -- inspection and undo --------------------------------------------------
+
+
+def test_revert_restores_the_original_and_clears_the_baseline():
+    """The counterpart the baseline mechanism exists for."""
+    from pytruenas.patch.templates import FileTarget
+
+    P = _fake_path_factory()
+    store = {"/etc/c.conf": b"original\n"}
+    target = FileTarget(P(store, "/etc/c.conf"), baseline=True)
+
+    target.write("patched\n")
+    assert store["/etc/c.conf"] == b"patched\n"
+
+    assert target.revert() is True
+    assert store["/etc/c.conf"] == b"original\n"
+    assert "/etc/c.conf.baseline" not in store  # snapshot cleaned up
+
+
+def test_revert_can_keep_the_baseline_for_a_re_apply():
+    from pytruenas.patch.templates import FileTarget
+
+    P = _fake_path_factory()
+    store = {"/etc/c.conf": b"original\n"}
+    target = FileTarget(P(store, "/etc/c.conf"), baseline=True)
+    target.write("patched\n")
+
+    target.revert(remove_baseline=False)
+    assert store["/etc/c.conf.baseline"] == b"original\n"
+
+
+def test_revert_is_a_noop_without_a_baseline():
+    """A file this target CREATED is not ours to delete."""
+    from pytruenas.patch.templates import FileTarget
+
+    P = _fake_path_factory()
+    store = {}
+    target = FileTarget(P(store, "/etc/new.conf"), baseline=True)
+    target.write("created\n")
+
+    assert target.revert() is False
+    assert store["/etc/new.conf"] == b"created\n"  # left alone
+
+
+def test_revert_reports_false_when_already_at_the_baseline():
+    from pytruenas.patch.templates import FileTarget
+
+    P = _fake_path_factory()
+    store = {"/etc/c.conf": b"original\n"}
+    target = FileTarget(P(store, "/etc/c.conf"), baseline=True)
+    target.write("patched\n")
+    target.revert(remove_baseline=False)
+
+    assert target.revert() is False  # nothing left to undo
+
+
+def test_is_patched_tracks_the_difference_from_the_baseline():
+    from pytruenas.patch.templates import FileTarget
+
+    P = _fake_path_factory()
+    store = {"/etc/c.conf": b"original\n"}
+    target = FileTarget(P(store, "/etc/c.conf"), baseline=True)
+
+    assert target.is_patched() is False  # no baseline taken yet
+    target.write("patched\n")
+    assert target.is_patched() is True
+    target.revert(remove_baseline=False)
+    assert target.is_patched() is False
+
+
+def test_would_change_is_a_dry_run_with_no_side_effects():
+    from pytruenas.patch.templates import FileTarget
+
+    P = _fake_path_factory()
+    store = {"/etc/c.conf": b"original\n"}
+    target = FileTarget(P(store, "/etc/c.conf"))
+
+    assert target.would_change("different\n") is True
+    assert target.would_change("original\n") is False
+    assert store == {"/etc/c.conf": b"original\n"}  # untouched
+
+
+def test_would_change_is_true_for_a_file_that_does_not_exist():
+    from pytruenas.patch.templates import FileTarget
+
+    P = _fake_path_factory()
+    assert FileTarget(P({}, "/etc/new.conf")).would_change("x") is True
+
+
+# -- permissions ----------------------------------------------------------
+
+
+class _ModedPath:
+    """A fake path that tracks a mode, like a real filesystem."""
+
+    def __init__(self, store, modes, path):
+        self._store, self._modes, self._path = store, modes, path
+
+    def exists(self):
+        return self._path in self._store
+
+    def read_bytes(self):
+        return self._store[self._path]
+
+    def write_bytes(self, data):
+        created = self._path not in self._store
+        self._store[self._path] = data
+        if created:
+            self._modes[self._path] = 0o644  # umask default on create
+
+    def with_name(self, name):
+        return _ModedPath(
+            self._store, self._modes, self._path.rsplit("/", 1)[0] + "/" + name
+        )
+
+    @property
+    def name(self):
+        return self._path.rsplit("/", 1)[-1]
+
+    @property
+    def parent(self):
+        return _ModedPath(self._store, self._modes, self._path.rsplit("/", 1)[0])
+
+    def mkdir(self, *args, **kwargs):
+        pass
+
+    def stat(self):
+        import types
+
+        return types.SimpleNamespace(st_mode=0o100000 | self._modes[self._path])
+
+    def chmod(self, mode):
+        self._modes[self._path] = mode
+
+    def unlink(self, missing_ok=False):
+        self._store.pop(self._path, None)
+        self._modes.pop(self._path, None)
+
+
+def test_rewriting_preserves_an_existing_files_mode():
+    """Silently widening /etc/shadow from 0640 to 0644 is a security bug."""
+    from pytruenas.patch.templates import FileTarget
+
+    store = {"/etc/shadow": b"original\n"}
+    modes = {"/etc/shadow": 0o640}
+    target = FileTarget(_ModedPath(store, modes, "/etc/shadow"))
+
+    target.write("patched\n")
+    assert modes["/etc/shadow"] == 0o640
+
+
+def test_mode_applies_to_a_file_this_target_creates():
+    from pytruenas.patch.templates import FileTarget
+
+    store, modes = {}, {}
+    target = FileTarget(_ModedPath(store, modes, "/etc/new.conf"), mode=0o600)
+
+    target.write("secret\n")
+    assert modes["/etc/new.conf"] == 0o600
+
+
+def test_an_existing_mode_wins_over_the_declared_one():
+    """`mode=` is for creation; an existing file's own mode is authoritative."""
+    from pytruenas.patch.templates import FileTarget
+
+    store = {"/etc/c.conf": b"x\n"}
+    modes = {"/etc/c.conf": 0o600}
+    target = FileTarget(_ModedPath(store, modes, "/etc/c.conf"), mode=0o644)
+
+    target.write("y\n")
+    assert modes["/etc/c.conf"] == 0o600
+
+
+def test_a_backend_without_chmod_warns_rather_than_failing(caplog):
+    """The websocket filesystem leg has no chmod; a write must still succeed."""
+    import logging
+
+    from pytruenas.patch.templates import FileTarget
+
+    P = _fake_path_factory()  # no chmod/stat on this one
+    store = {}
+    target = FileTarget(P(store, "/etc/new.conf"), mode=0o600)
+
+    with caplog.at_level(logging.WARNING, logger="pytruenas.patch.templates.targets"):
+        assert target.write("content\n") is True
+    assert store["/etc/new.conf"] == b"content\n"
+    assert any("could not set mode" in r.getMessage() for r in caplog.records)

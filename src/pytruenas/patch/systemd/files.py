@@ -49,8 +49,9 @@ class SystemFile(FileTarget):
         services: "str | _ty.Sequence[str] | None" = None,
         baseline: bool = True,
         writable: bool = False,
+        mode: "int | None" = None,
     ) -> None:
-        super().__init__(client.path(path), baseline=baseline)
+        super().__init__(client.path(path), baseline=baseline, mode=mode)
         self.client = client
         self.etc = as_names(etc)
         self.services = as_names(services)
@@ -69,14 +70,37 @@ class SystemFile(FileTarget):
                 return self._write_and_notify(content)
         return self._write_and_notify(content)
 
+    def revert(self, remove_baseline: bool = True) -> bool:
+        """Restore the original content, then notify as a write would.
+
+        Reverting is a change like any other: a service still holding the
+        patched config has to be told, or the file on disk and the running
+        state disagree. Wrapped in the same ``writable`` window as a write,
+        since the file being restored is usually on a read-only mount.
+        """
+        if self.writable:
+            from ..zfs import writable as _writable
+
+            with _writable(self.client, self.path):
+                reverted = super().revert(remove_baseline)
+        else:
+            reverted = super().revert(remove_baseline)
+        if reverted:
+            self._notify()
+        return reverted
+
     def _write_and_notify(self, content) -> bool:
         modified = super().write(content)
         if not modified:
             return False
+        self._notify()
+        return True
+
+    def _notify(self) -> None:
+        """Regenerate etc groups and reload services after a real change."""
         if self.etc:
             LOGGER.info("Regenerating etc group(s): %s", ", ".join(self.etc))
             self.client.api.etc.generate(*self.etc)
         for service in self.services:
             LOGGER.info("Reloading service: %s", service)
             self.client.api.service.reload(service)
-        return True

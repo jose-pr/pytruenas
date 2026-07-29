@@ -10,6 +10,7 @@ whether to reload a service or regenerate an etc group from the boolean
 from __future__ import annotations
 
 import logging as _logging
+import stat as _stat
 import typing as _ty
 from pathlib import Path as _LocalPath
 
@@ -95,7 +96,12 @@ class FileTarget(TemplateTarget):
     the stock config, not its own previous output.
     """
 
-    def __init__(self, path, baseline: "bool | str" = False) -> None:
+    def __init__(
+        self,
+        path,
+        baseline: "bool | str" = False,
+        mode: "int | None" = None,
+    ) -> None:
         # Duck-typed rather than `isinstance(path, pathlib_next.Path)`: this
         # class only calls the methods below, and demanding one concrete type
         # rejected valid stand-ins (a test double, another backend's path) for
@@ -111,6 +117,10 @@ class FileTarget(TemplateTarget):
         if baseline is True:
             baseline = ".baseline"
         self._baseline = str(baseline or "")
+        #: Mode for a file this target CREATES. An existing file keeps its own
+        #: mode across a rewrite regardless -- see :meth:`write`. ``None``
+        #: leaves a new file at whatever the backend/umask produces.
+        self.mode = mode
 
     def __repr__(self) -> str:
         return f"{type(self).__name__}({self.path})"
@@ -158,6 +168,74 @@ class FileTarget(TemplateTarget):
             return baseline.read_bytes()
         return self.path.read_bytes()
 
+    # -- inspection and undo ----------------------------------------------
+
+    def is_patched(self) -> bool:
+        """Whether the file currently differs from its baseline.
+
+        ``False`` when there is no baseline to compare against -- either
+        because this target does not use one, or because the file did not exist
+        when it was first written (nothing was displaced, so nothing is
+        "patched" in the sense of overwriting something).
+        """
+        baseline = self.baseline_path
+        if baseline is None or not baseline.exists() or not self.path.exists():
+            return False
+        return self.path.read_bytes() != baseline.read_bytes()
+
+    def would_change(self, content: "str | bytes") -> bool:
+        """Whether writing ``content`` would modify the file. No side effects.
+
+        The dry-run half of :meth:`write`. Without it the only way to find out
+        was to perform the write, which is the wrong tool for "show me what
+        this patch would do".
+        """
+        if isinstance(content, str):
+            content = content.encode()
+        if not self.path.exists():
+            return True
+        return self.path.read_bytes() != content
+
+    def revert(self, remove_baseline: bool = True) -> bool:
+        """Restore the original content. Returns whether anything changed.
+
+        The counterpart the baseline mechanism exists for. Three cases:
+
+        * a baseline exists -> its content is written back, and (by default)
+          the snapshot is removed, so the target is left exactly as found;
+        * no baseline, but this target created the file -> nothing to restore
+          and no way to know it was ours, so this is a no-op returning ``False``
+          rather than deleting a file that may not be ours to delete;
+        * baseline configured but never taken -> also a no-op.
+
+        ``remove_baseline=False`` keeps the snapshot, for reverting a patch you
+        intend to re-apply.
+        """
+        baseline = self.baseline_path
+        if baseline is None or not baseline.exists():
+            LOGGER.debug("Nothing to revert for %s (no baseline)", self.path)
+            return False
+
+        original = baseline.read_bytes()
+        changed = not self.path.exists() or self.path.read_bytes() != original
+        if changed:
+            LOGGER.info("Reverting %s to its baseline", self.path)
+            self.path.write_bytes(original)
+        if remove_baseline:
+            unlink = getattr(baseline, "unlink", None)
+            if callable(unlink):
+                unlink(missing_ok=True)
+            else:
+                # Not in _REQUIRED_PATH_METHODS, because only revert() needs
+                # it: a backend that cannot delete should still be able to
+                # patch and to restore content.
+                LOGGER.warning(
+                    "cannot remove the baseline at %s (backend has no unlink); "
+                    "the snapshot is left in place",
+                    baseline,
+                )
+        return changed
+
     def write(self, content: "str | bytes") -> bool:
         if content is None:
             raise TypeError(
@@ -175,8 +253,43 @@ class FileTarget(TemplateTarget):
 
         if self.path.exists() and self.path.read_bytes() == content:
             return False
+
+        # Capture the mode BEFORE writing. Rewriting a file can reset it to
+        # whatever the umask says, and silently widening /etc/shadow from 0640
+        # to 0644 is a security regression, not a cosmetic one.
+        mode = self._current_mode()
         self.path.write_bytes(content)
+        if mode is not None:
+            self._restore_mode(mode)
+        elif self.mode is not None:
+            self._apply_mode(self.mode)
         return True
+
+    def _current_mode(self) -> "int | None":
+        """The file's permission bits, or ``None`` if it does not exist yet."""
+        try:
+            if not self.path.exists():
+                return None
+            return _stat.S_IMODE(self.path.stat().st_mode)
+        except (OSError, AttributeError):  # pragma: no cover - backend gaps
+            return None
+
+    def _apply_mode(self, mode: int) -> None:
+        try:
+            self.path.chmod(mode)
+        except (OSError, AttributeError, NotImplementedError):
+            # A backend without chmod (the websocket filesystem leg) must not
+            # turn a successful write into a failure -- but the caller should
+            # know the mode is not what they asked for.
+            LOGGER.warning(
+                "could not set mode %s on %s; it keeps whatever the write gave it",
+                oct(mode),
+                self.path,
+            )
+
+    def _restore_mode(self, mode: int) -> None:
+        if self._current_mode() != mode:
+            self._apply_mode(mode)
 
 
 if _ty.TYPE_CHECKING:  # pragma: no cover - typing only
