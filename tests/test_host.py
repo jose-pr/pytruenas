@@ -502,8 +502,10 @@ def keyed_host(monkeypatch):
     host = _built()
     api = MagicMock()
     api.keychaincredential._get.return_value = None
+    # The real middleware returns both halves, so no local derivation is needed.
     api.keychaincredential.generate_ssh_key_pair.return_value = {
-        "private_key": PRIVATE_KEY
+        "private_key": PRIVATE_KEY,
+        "public_key": PUBLIC_KEY,
     }
     api.keychaincredential._upsert.return_value = {
         "attributes": {"private_key": PRIVATE_KEY, "public_key": PUBLIC_KEY}
@@ -511,11 +513,9 @@ def keyed_host(monkeypatch):
     api.user._get.return_value = {"username": "root", "sshpubkey": ""}
     monkeypatch.setattr(type(host), "api", api)
 
-    key = MagicMock()
-    key.export_public_key.return_value = (PUBLIC_KEY + "\n").encode()
-    asyncssh = MagicMock()
-    asyncssh.import_private_key.return_value = key
-    monkeypatch.setattr("pytruenas.host._asyncssh", lambda: asyncssh)
+    # Stub the derivation itself: PRIVATE_KEY is a placeholder, so a real key
+    # parser (cryptography or asyncssh) would reject it.
+    monkeypatch.setattr("pytruenas.host._public_key", lambda _key: PUBLIC_KEY)
     return host
 
 
