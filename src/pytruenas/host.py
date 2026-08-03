@@ -1078,6 +1078,16 @@ class TrueNASHost(_PosixHost, _ty.Generic[ApiVersion]):
         """This host's short label -- see :attr:`TrueNASConfig.name`."""
         return self._config.name
 
+    @property
+    def sslverify(self) -> bool:
+        """TLS verification for this host -- see :attr:`TrueNASConfig.sslverify`.
+
+        Read from the config rather than stored, so every transport -- the
+        JSON-RPC connection, the REST calls, and the web shell -- answers from
+        the one value the caller set, with no second copy to drift.
+        """
+        return self._config.sslverify
+
     def close(self) -> None:
         """Close the transports, then the websocket.
 

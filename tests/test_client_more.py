@@ -201,6 +201,77 @@ def test_remote_client_carries_the_target():
     assert c._config.sslverify is False
 
 
+def test_sslverify_reaches_every_transport():
+    # The web shell reads `client.sslverify`, the JSON-RPC and REST legs read
+    # `client._config.sslverify`. They must be the one value the caller set --
+    # the property existing at all is the regression: without it the web shell
+    # raised AttributeError on every wss:// connect.
+    c = TrueNASClient("wss://nas", "1-" + "a" * 64, autologin=False, sslverify=False)
+    assert c.sslverify is False
+    assert c.sslverify is c._config.sslverify
+
+    d = TrueNASClient("wss://nas", "1-" + "a" * 64, autologin=False)
+    assert d.sslverify is True
+
+
+def _webshell_sslopt(monkeypatch, **kwargs) -> dict:
+    """Run WebShellSession.connect() against a stub and report the sslopt used."""
+    import sys
+    import types
+
+    from pytruenas.webshell import WebShellSession
+
+    seen: dict = {}
+
+    class _StubWS:
+        def __init__(self, sslopt=None):
+            seen["sslopt"] = sslopt
+
+        def connect(self, uri):
+            pass
+
+        def send(self, payload):
+            pass
+
+        def settimeout(self, timeout):
+            pass
+
+        def recv(self):
+            # Ends the banner drain loop: connect() reads until it times out.
+            raise TimeoutError
+
+    monkeypatch.setitem(
+        sys.modules, "websocket", types.SimpleNamespace(WebSocket=_StubWS)
+    )
+
+    client = TrueNASClient("wss://nas", autologin=False, **kwargs)
+    # The token call is the only real I/O left in connect(); stub the API leg.
+    monkeypatch.setattr(
+        type(client),
+        "api",
+        property(
+            lambda self: types.SimpleNamespace(
+                auth=types.SimpleNamespace(
+                    generate_token=lambda *a, **k: "tok",
+                )
+            )
+        ),
+    )
+    WebShellSession(client).connect()
+    return seen["sslopt"]
+
+
+def test_webshell_sslopt_follows_the_flag(monkeypatch):
+    import ssl
+
+    # sslverify=False must reach the socket the web shell actually opens --
+    # this is the leg that was reading a nonexistent client attribute.
+    assert _webshell_sslopt(monkeypatch, sslverify=False) == {
+        "cert_reqs": ssl.CERT_NONE
+    }
+    assert _webshell_sslopt(monkeypatch) == {}
+
+
 def test_shell_string_becomes_an_ssh_leg():
     c = TrueNASClient("wss://nas", autologin=False, shell="ssh://root:pw@nas")
     ssh = c._config.ssh
