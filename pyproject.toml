@@ -59,7 +59,11 @@ dependencies = [
     # 2026-07-24_optional_between_positional_groups_breaks_trailing_nargs_star.md
     # and 2026-07-24_module_command_subparsers_bypass_positional_reorder.md for
     # the history. Validated on 0.5.1.
-    "duho>=0.5.1",
+    # >=0.5.2: `runpath.register(step_adapter=...)`, which is how a RunPath step
+    # gets this app's `(client, args, logger)` signature without a decorator in
+    # every step file (see utils.runpath.step_adapter). Not optional -- main.py
+    # passes the keyword at import, so 0.5.1 raises TypeError on startup.
+    "duho>=0.5.2",
     # Network utilities. >=0.0.2 for the built-in scheme->port table, which is
     # what resolves ws/wss: no system services database knows those schemes, so
     # getservbyname raises and a websocket URL would otherwise carry port 0.
