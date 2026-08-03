@@ -4,6 +4,53 @@ All notable changes to this project are documented here. The format is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.3] - 2026-08-03
+
+### Fixed
+
+- **`install_sshcreds` no longer requires the `ssh` extra.** It provisions a
+  keypair over the middleware API and opens no SSH connection, but imported
+  `asyncssh` unconditionally to derive the public key from the private one — so
+  the extra was required for work that never used it. The middleware already
+  returns both halves on the paths that generate or store a keypair, so the
+  public key is now carried through when known and derived only when genuinely
+  absent (a caller-supplied `private_key=` for a key the host does not have).
+- **The root user was selected by id rather than by field name.**
+  `_upsert("username", ...)` passes a bare `str`, which `DbAction.execute`
+  reads as a record *id*; `("username",)` is the sequence form meaning "match
+  on this field".
+
+### Added
+
+- **RunPath steps may use the module command signature** — `(client, args,
+  logger)`, the same shape `cmd/` modules use — with no decorator in the step
+  file. Requires duho 0.5.2's `register(step_adapter=...)`. Only unambiguous
+  3-argument steps are adapted automatically; a shorter `(client, args)` is
+  indistinguishable from duho's own `(cmd, ctx)` and still needs `@step`.
+  duho-native steps are unaffected.
+- **`examples/runpath/`** — a runnable three-step flow showing all three step
+  shapes side by side, with a README covering the arguments and the per-target
+  `init` hook.
+
+### Changed
+
+- **Public-key derivation prefers `cryptography` over `asyncssh`.** `asyncssh`
+  depends on `cryptography`, so the `ssh` extra already brings it, and it is
+  far lighter than an SSH protocol stack for pure key math. `asyncssh` remains
+  the fallback. Both OpenSSH and PEM/PKCS#8 encodings are handled.
+
+### Dependencies
+
+- **`duho>=0.5.2`** (from `>=0.5.1`) for `runpath.register(step_adapter=...)`.
+  Not optional: the keyword is passed at import, so 0.5.1 raises `TypeError` on
+  startup.
+
+### CI
+
+- Actions updated to current majors (`checkout@v7`, `setup-python@v7`,
+  `upload-artifact@v7`, `download-artifact@v8`, and the Pages actions), ahead
+  of the Node 20 runtime deprecation.
+
 ## [0.3.2] - 2026-08-03
 
 ### Fixed
@@ -572,7 +619,8 @@ below is simply what the package contains.
   `ssh` extra); the middleware API has no command-exec method. SFTP is handled by
   `pathlib_next`.
 
-[Unreleased]: https://github.com/jose-pr/pytruenas/compare/v0.3.2...HEAD
+[Unreleased]: https://github.com/jose-pr/pytruenas/compare/v0.3.3...HEAD
+[0.3.3]: https://github.com/jose-pr/pytruenas/compare/v0.3.2...v0.3.3
 [0.3.2]: https://github.com/jose-pr/pytruenas/compare/v0.3.1...v0.3.2
 [0.2.1]: https://github.com/jose-pr/pytruenas/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/jose-pr/pytruenas/compare/v0.1.1...v0.2.0
