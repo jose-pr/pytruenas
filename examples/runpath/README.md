@@ -33,14 +33,11 @@ pytruenas --cmdspath examples/runpath health --rcopts '!*,system-info' nas1
 
 ## The step signature
 
-`@step` lets a step take the **module command signature**, `(client, args,
-logger)` — the same one a command module's `run()` takes, so the same body works
-in either kind:
+A step may take the **module command signature**, `(client, args, logger)` —
+the same one a command module's `run()` takes, so the same body works in either
+kind. No decorator, no import:
 
 ```python
-from pytruenas.utils.runpath import step
-
-@step
 def main(client, args, logger):
     logger.info("%s", client.api.system.info()["hostname"])
 ```
@@ -51,16 +48,28 @@ def main(client, args, logger):
 | `args` | the parsed command for this target: options, `args.target`, stashed state |
 | `logger` | already `[target]`-prefixed by the fan-out |
 
-A decorated step may declare fewer parameters (`(client, args)`, `(client)`) and
-is handed only those.
+Three arguments is unambiguous — duho never calls a step with more than two —
+so pytruenas adapts it automatically, via duho's `register(step_adapter=...)`
+hook.
 
-Without the decorator, duho calls a step `main(cmd, ctx)` — client *second*, no
-logger — so writing the module signature raises `TypeError` at runtime. Both
-forms work side by side; `@step` is purely opt-in.
+A **shorter** app-shaped signature is ambiguous: `(client, args)` and duho's own
+`(cmd, ctx)` look identical, and guessing would silently swap them. Those need
+an explicit decorator:
+
+```python
+from pytruenas.utils.runpath import step
+
+@step
+def main(client, args):
+    ...
+```
+
+duho's native `main(cmd, ctx)` keeps working untouched. All three forms coexist
+in one directory.
 
 | file | shape |
 |---|---|
-| [`10-system-info.py`](health/10-system-info.py) | `@step` with all three arguments |
+| [`10-system-info.py`](health/10-system-info.py) | `(client, args, logger)`, adapted automatically |
 | [`20-pools.py`](health/20-pools.py) | `@step` with a shorter signature |
 | [`30-report.py`](health/30-report.py) | duho-native `main(cmd, ctx)` |
 

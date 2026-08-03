@@ -1,8 +1,9 @@
-"""Step 1 -- the full module-command signature, via ``@step``.
+"""Step 1 -- the full module-command signature, no decorator needed.
 
-``@step`` lets a RunPath step take ``(client, args, logger)``: exactly what a
-command module's ``run()`` takes, so the same body works in either kind without
-being rewritten.
+A step may take ``(client, args, logger)``: exactly what a command module's
+``run()`` takes, so the same body works in either kind without being rewritten.
+Three arguments is unambiguous -- duho never calls a step with more than two --
+so pytruenas adapts it automatically. Nothing to import.
 
 All three are used here:
 
@@ -14,16 +15,14 @@ All three are used here:
 * ``logger`` -- already ``[target]``-prefixed by the fan-out, so it needs no
   target of its own and honors ``-v``/``-q``/``--logto``.
 
-Without ``@step`` duho calls a step ``main(cmd, ctx)`` -- client *second*, no
-logger -- so writing this signature raises ``TypeError`` at runtime.
+A step with a SHORTER app-shaped signature (``(client, args)``) is ambiguous --
+duho's own steps are ``(cmd, ctx)`` -- so those still need an explicit
+``@step``. See ``20-pools.py``.
 """
 
 from __future__ import annotations
 
-from pytruenas.utils.runpath import step
 
-
-@step
 def main(client, args, logger):
     info = client.api.system.info()
 

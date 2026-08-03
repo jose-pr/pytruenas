@@ -89,6 +89,38 @@ class PyTrueNASRunPathArgs(PyTrueNASArgs):
         return result
 
 
+#: Marks a callable as already wrapped by :func:`step`, so the automatic
+#: adapter does not wrap it a second time (which would feed the wrapper's own
+#: ``(cmd, ctx)`` signature back in as if it were ``(client, args)``).
+_ADAPTED = "_pytruenas_step_adapted_"
+
+
+def step_adapter(
+    entrypoint: "_ty.Callable[..., object]",
+) -> "_ty.Callable[..., object]":
+    """duho ``register(step_adapter=...)`` hook: auto-apply :func:`step`.
+
+    Installed once by :mod:`pytruenas.main`, so a step written with the module
+    command signature works with no decorator and no import in the step file.
+
+    Only a **3-argument** step is adapted automatically, plus anything already
+    decorated with :func:`step`. Three positionals is unambiguous -- duho never
+    calls a step with more than two, so such a step is broken as-is and can
+    only have meant ``(client, args, logger)``.
+
+    A 1- or 2-arg step is left alone, deliberately: ``(cmd, ctx)`` is duho's
+    own contract and ``(client, args)`` is this app's, and nothing in the
+    signature distinguishes them. Guessing would silently swap a caller's two
+    arguments, which is worse than the explicit ``@step`` that shorter
+    signatures still have.
+    """
+    if getattr(entrypoint, _ADAPTED, False):
+        return entrypoint
+    if _positional_count(entrypoint) >= 3:
+        return step(entrypoint)
+    return entrypoint
+
+
 def _positional_count(entrypoint: "_ty.Callable[..., object]") -> int:
     """How many of ``(client, args, logger)`` a decorated step will accept.
 
@@ -165,6 +197,7 @@ def step(entrypoint: "_ty.Callable[..., object]") -> "_ty.Callable[..., object]"
 
     # See the docstring: this must go, or arity detection reads through it.
     del _adapter.__wrapped__
+    setattr(_adapter, _ADAPTED, True)
     return _adapter
 
 

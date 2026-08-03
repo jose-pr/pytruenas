@@ -29,7 +29,7 @@ from duho.runpath import RunPathCmd, is_runpath_dir
 from .host import TrueNASConfig
 from .host import TrueNASHost as TrueNASClient
 from .utils.cmd import ENV, PyTrueNASArgs, register_targets
-from .utils.runpath import PyTrueNASRunPathArgs
+from .utils.runpath import PyTrueNASRunPathArgs, step_adapter as _step_adapter
 from .utils.target import redact as _redact
 
 # ``import duho.runpath`` auto-registers the RunPath command provider with its
@@ -44,7 +44,12 @@ from .utils.target import redact as _redact
 # <host>...`` grammar matches the module commands. Re-registering with a new
 # base on an already-active provider is documented as supported (it updates the
 # base for commands built from then on).
-_runpath.register(base=PyTrueNASRunPathArgs)
+#
+# ``step_adapter`` additionally lets a step be written with the MODULE command
+# signature -- ``(client, args, logger)``, the same shape ``cmd/`` modules use --
+# with no decorator in the step file. Only unambiguous 3-arg steps are adapted
+# automatically; see ``utils.runpath.step_adapter``.
+_runpath.register(base=PyTrueNASRunPathArgs, step_adapter=_step_adapter)
 
 #: Third-party loggers to quiet by default (chatty at INFO/DEBUG).
 DEFAULT_LOGLEVELS = {

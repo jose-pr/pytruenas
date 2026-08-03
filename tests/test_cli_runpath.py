@@ -199,6 +199,75 @@ def test_step_decorator_gives_steps_the_module_signature(
     assert records["nas1"][1] == ("second", "nas1", None)
 
 
+def _write_undecorated_runpath(directory):
+    """A RunPath dir whose 3-arg step uses the module signature, NO decorator."""
+    flow = directory / "myflow"
+    flow.mkdir()
+    (flow / "__main__.py").write_text(
+        "from pytruenas.utils.runpath import default_init as init\n"
+    )
+    _recorder = (
+        "import json, os\n"
+        "def _record(entry):\n"
+        "    with open(os.environ['PYTRUENAS_TEST_RECORD'], 'a') as fh:\n"
+        "        fh.write(json.dumps(entry) + '\\n')\n"
+    )
+    (flow / "01-first.py").write_text(
+        _recorder + "def main(client, args, logger):\n"
+        "    _record(['first', args.target, client.target,\n"
+        "             logger is not None and hasattr(logger, 'info')])\n"
+    )
+    # duho's own shape must keep working alongside it, undecorated too.
+    (flow / "02-second.py").write_text(
+        _recorder + "def main(cmd, ctx):\n"
+        "    _record(['second', cmd.target, ctx.target, None])\n"
+    )
+    return flow
+
+
+def test_a_three_arg_step_needs_no_decorator(tmp_path, monkeypatch, record_path):
+    # The step_adapter registered in pytruenas.main adapts an unambiguous
+    # 3-arg step automatically: duho never calls a step with three positionals,
+    # so it can only have meant the module signature.
+    _write_undecorated_runpath(tmp_path)
+    monkeypatch.setenv("PYTRUENAS_PATH", str(tmp_path))
+    import pytruenas.main as main
+
+    rc = main.main("pytruenas", ["myflow", "nas1"])
+    assert rc == 0
+    records = _records(record_path)
+    # client bound FIRST (not to cmd), and a real logger arrived third.
+    assert records["nas1"][0] == ("first", "nas1", True)
+    # duho's native (cmd, ctx) step is untouched by the adapter.
+    assert records["nas1"][1] == ("second", "nas1", None)
+
+
+def test_step_adapter_leaves_ambiguous_arities_alone():
+    # A 2-arg step could be duho's (cmd, ctx) or this app's (client, args), and
+    # nothing in the signature says which. Guessing would silently swap them,
+    # so shorter signatures still need an explicit @step.
+    from pytruenas.utils.runpath import step, step_adapter
+
+    def native(cmd, ctx):
+        return cmd
+
+    def one(cmd):
+        return cmd
+
+    for entrypoint in (native, one):
+        assert step_adapter(entrypoint) is entrypoint
+
+    def three(client, args, logger):
+        return client
+
+    assert step_adapter(three) is not three
+
+    # An already-decorated step is not wrapped a second time -- that would feed
+    # the wrapper's own (cmd, ctx) signature back in as if it were (client, args).
+    decorated = step(three)
+    assert step_adapter(decorated) is decorated
+
+
 def test_step_decorator_preserves_arity_detection():
     # functools.wraps sets __wrapped__, which makes inspect.signature report the
     # DECORATED function. duho decides the call arity from exactly that, so a
