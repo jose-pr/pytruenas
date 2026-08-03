@@ -123,7 +123,11 @@ ssh=None, ...)`
 - **`.install_sshcreds(name=None, private_key=None)`** — generate/reuse an SSH
   keypair via `keychaincredential`, install the public half on `root`'s
   `authorized_keys`, and store the private half on `.config.ssh` as a real
-  `SshConfig.client_keys`. Returns the private key. Requires the `ssh` extra.
+  `SshConfig.client_keys`. Returns the private key. Needs **no** optional
+  extra: provisioning runs over the middleware API and opens no SSH
+  connection. Passing `private_key=` for a key the host does not already know
+  is the exception — the public half is derived locally, which needs
+  `cryptography` (preferred) or `asyncssh`.
   The providers are rebuilt afterwards, so a host that had no SSH executor
   gains one. A *local* target provisions the key but wires no leg — there is
   nothing to SSH to.
@@ -599,9 +603,12 @@ a directory the user does not control.
 ## Optional extras and their gating imports
 
 - **`ssh`** (`asyncssh`, `pathlib_next[sftp-async]>=0.8.3`) — required for
-  `.ssh`, `.run()` over SSH, `.install_sshcreds`, and the SFTP leg of
-  `TruenasPath`. Missing it raises a clear `ImportError` naming the extra at
-  first use, not at import time.
+  `.ssh`, `.run()` over SSH, and the SFTP leg of `TruenasPath`. Missing it
+  raises a clear `ImportError` naming the extra at first use, not at import
+  time. **Not** required by `.install_sshcreds`, which provisions over the
+  middleware API; only deriving a public key from a caller-supplied
+  `private_key=` needs a key library, and `cryptography` (which `asyncssh`
+  itself depends on) is preferred over `asyncssh` for that.
 - **`config`** (`pyyaml`) — required to read a CLI `--config` YAML file;
   missing it with a config file present raises `ImportError`.
 - **`codegen`** (`jinja2`) — required by `pytruenas.codegen`/`generate-typings`.

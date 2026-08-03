@@ -14,9 +14,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-pytest.importorskip("asyncssh")
-
-from pytruenas import TrueNASClient  # noqa: E402
+from pytruenas import TrueNASClient
 
 PRIVATE_KEY = "-----BEGIN PRIVATE KEY-----\nfake\n-----END PRIVATE KEY-----"
 PUBLIC_KEY = "ssh-ed25519 AAAAC3Nz fake"
@@ -25,13 +23,10 @@ PUBLIC_KEY = "ssh-ed25519 AAAAC3Nz fake"
 @pytest.fixture
 def client(monkeypatch):
     c = TrueNASClient(None, autologin=False)
-    # Keep asyncssh out of it: importing a fake PEM would fail. Only the
-    # public-key derivation is stubbed; every middleware call stays real-shaped.
-    key = MagicMock()
-    key.export_public_key.return_value = (PUBLIC_KEY + "\n").encode()
-    fake_asyncssh = MagicMock()
-    fake_asyncssh.import_private_key.return_value = key
-    monkeypatch.setattr("pytruenas.host._asyncssh", lambda: fake_asyncssh)
+    # Stub the derivation itself: PRIVATE_KEY is a placeholder, not a real key,
+    # so any genuine parser (cryptography or asyncssh) would reject it. Only
+    # this is faked; every middleware call stays real-shaped.
+    monkeypatch.setattr("pytruenas.host._public_key", lambda _key: PUBLIC_KEY)
     monkeypatch.setattr(type(c), "api", MagicMock())
     return c
 
@@ -39,8 +34,12 @@ def client(monkeypatch):
 def _wire(client, *, existing_keypair=None, root_sshpubkey=""):
     api = client.api
     api.keychaincredential._get.return_value = existing_keypair
+    # The real middleware returns BOTH halves here; returning only the private
+    # one would understate what install_sshcreds has to work with, and is what
+    # made the asyncssh derivation look unavoidable.
     api.keychaincredential.generate_ssh_key_pair.return_value = {
-        "private_key": PRIVATE_KEY
+        "private_key": PRIVATE_KEY,
+        "public_key": PUBLIC_KEY,
     }
     api.keychaincredential._upsert.return_value = {
         "attributes": {"private_key": PRIVATE_KEY, "public_key": PUBLIC_KEY}
@@ -105,6 +104,144 @@ def test_handles_root_with_no_sshpubkey(client):
     assert api.user._upsert.call_args.kwargs["sshpubkey"] == PUBLIC_KEY
 
 
+# -- the optional 'ssh' extra is not required to provision -----------------
+
+
+@pytest.fixture
+def no_derivation(monkeypatch):
+    """A client that cannot derive a public key at all.
+
+    Stubs `_public_key` rather than just the asyncssh import: derivation now
+    prefers `cryptography` and only falls back to asyncssh, so blocking one
+    library would leave the other doing the work and the test would pass
+    without proving anything.
+    """
+    c = TrueNASClient(None, autologin=False)
+
+    def _boom(_private_key):
+        raise ImportError("SSH/SFTP support requires the 'ssh' extra")
+
+    monkeypatch.setattr("pytruenas.host._public_key", _boom)
+    monkeypatch.setattr(type(c), "api", MagicMock())
+    return c
+
+
+def test_generating_a_keypair_needs_no_derivation(no_derivation):
+    # Provisioning talks to the middleware and opens no SSH connection, so
+    # requiring the extra here was a dependency on a library doing nothing.
+    api = _wire(no_derivation)
+    no_derivation.install_sshcreds()
+    assert (
+        api.keychaincredential._upsert.call_args.kwargs["attributes"]["public_key"]
+        == PUBLIC_KEY
+    )
+
+
+def test_reusing_a_keypair_needs_no_derivation(no_derivation):
+    # The stored credential carries the public half alongside the private one.
+    api = _wire(
+        no_derivation,
+        existing_keypair={
+            "attributes": {"private_key": PRIVATE_KEY, "public_key": PUBLIC_KEY}
+        },
+    )
+    no_derivation.install_sshcreds()
+    assert PUBLIC_KEY in api.user._upsert.call_args.kwargs["sshpubkey"]
+
+
+def test_a_supplied_private_key_still_needs_the_extra(no_derivation):
+    # The one genuine use: deriving the public half from a key the host does
+    # not know. It fails loudly, pointing at the extra.
+    _wire(no_derivation)
+    with pytest.raises(ImportError, match="ssh"):
+        no_derivation.install_sshcreds(private_key=PRIVATE_KEY)
+
+
+def test_a_blank_stored_public_key_falls_back_to_deriving(no_derivation):
+    # An empty/whitespace public_key is treated as absent rather than written
+    # through as a blank authorized_keys line.
+    _wire(
+        no_derivation,
+        existing_keypair={
+            "attributes": {"private_key": PRIVATE_KEY, "public_key": " "}
+        },
+    )
+    with pytest.raises(ImportError):
+        no_derivation.install_sshcreds()
+
+
+def test_root_is_selected_by_field_name_not_by_id(client):
+    # `("username",)` is a one-item SEQUENCE, not the bare string "username".
+    # DbAction.execute reads a bare `str` selector as a record *id*, so the
+    # string form would ask the middleware to update the user whose id is
+    # "username" rather than the one whose username is "root".
+    api = _wire(client, root_sshpubkey="ssh-rsa EXISTING other@host")
+    client.install_sshcreds()
+    selector = api.user._upsert.call_args.args[0]
+    assert selector == ("username",)
+    assert not isinstance(selector, str)
+
+
+# -- deriving a public key (cryptography, with asyncssh as the fallback) ----
+
+
+def test_derivation_prefers_cryptography_over_asyncssh(monkeypatch):
+    # asyncssh depends on cryptography, so the `ssh` extra already brings it --
+    # and it is far lighter than a whole SSH protocol stack for pure key math.
+    ser = pytest.importorskip("cryptography.hazmat.primitives.serialization")
+    ed25519 = pytest.importorskip("cryptography.hazmat.primitives.asymmetric.ed25519")
+    import pytruenas.host as host
+
+    def _fail():
+        raise AssertionError("asyncssh must not be used when cryptography works")
+
+    monkeypatch.setattr(host, "_asyncssh", _fail)
+
+    key = ed25519.Ed25519PrivateKey.generate()
+    expected = (
+        key.public_key()
+        .public_bytes(ser.Encoding.OpenSSH, ser.PublicFormat.OpenSSH)
+        .decode()
+    )
+    for fmt in (ser.PrivateFormat.OpenSSH, ser.PrivateFormat.PKCS8):
+        pem = key.private_bytes(ser.Encoding.PEM, fmt, ser.NoEncryption()).decode()
+        # Both encodings TrueNAS may hand back need a different loader.
+        assert host._public_key(pem) == expected
+
+
+def test_derivation_reports_an_unparseable_key(monkeypatch):
+    pytest.importorskip("cryptography")
+    import pytruenas.host as host
+
+    with pytest.raises(ValueError, match="could not parse"):
+        host._public_key("-----BEGIN PRIVATE KEY-----\nnot-a-key\n-----END-----")
+
+
+def test_derivation_falls_back_to_asyncssh(monkeypatch):
+    # An environment with asyncssh but no cryptography is unlikely (asyncssh
+    # requires it) -- but the fallback must still work if it happens.
+    import builtins
+
+    import pytruenas.host as host
+
+    real_import = builtins.__import__
+
+    def _no_cryptography(name, *args, **kwargs):
+        if name.startswith("cryptography"):
+            raise ImportError("no cryptography")
+        return real_import(name, *args, **kwargs)
+
+    monkeypatch.setattr(builtins, "__import__", _no_cryptography)
+
+    key = MagicMock()
+    key.export_public_key.return_value = (PUBLIC_KEY + "\n").encode()
+    fake_asyncssh = MagicMock()
+    fake_asyncssh.import_private_key.return_value = key
+    monkeypatch.setattr(host, "_asyncssh", lambda: fake_asyncssh)
+
+    assert host._public_key(PRIVATE_KEY) == PUBLIC_KEY
+
+
 # -- where the credential lands (this is what step 5 changes) --------------
 
 
@@ -133,11 +270,7 @@ def test_a_remote_target_gets_the_key_wired_in(monkeypatch):
     username.
     """
     remote = TrueNASClient("wss://nas", autologin=False)
-    key = MagicMock()
-    key.export_public_key.return_value = (PUBLIC_KEY + "\n").encode()
-    fake_asyncssh = MagicMock()
-    fake_asyncssh.import_private_key.return_value = key
-    monkeypatch.setattr("pytruenas.host._asyncssh", lambda: fake_asyncssh)
+    monkeypatch.setattr("pytruenas.host._public_key", lambda _key: PUBLIC_KEY)
     monkeypatch.setattr(type(remote), "api", MagicMock())
     _wire(remote)
 
@@ -150,11 +283,7 @@ def test_does_not_overwrite_explicit_credentials(monkeypatch):
     from hostctl.host import SshConfig
 
     remote = TrueNASClient("wss://nas", autologin=False)
-    key = MagicMock()
-    key.export_public_key.return_value = (PUBLIC_KEY + "\n").encode()
-    fake_asyncssh = MagicMock()
-    fake_asyncssh.import_private_key.return_value = key
-    monkeypatch.setattr("pytruenas.host._asyncssh", lambda: fake_asyncssh)
+    monkeypatch.setattr("pytruenas.host._public_key", lambda _key: PUBLIC_KEY)
     monkeypatch.setattr(type(remote), "api", MagicMock())
     _wire(remote)
 

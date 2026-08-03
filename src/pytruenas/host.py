@@ -166,6 +166,66 @@ def _asyncssh():
     return asyncssh
 
 
+def _public_key(private_key: str) -> str:
+    """Derive the OpenSSH public key for ``private_key``.
+
+    Only reached when the public half is genuinely unknown -- a caller who
+    passed ``private_key=`` to :meth:`TrueNASHost.install_sshcreds` and nothing
+    else. Every other path gets both halves from the middleware, which is what
+    keeps ``install_sshcreds`` usable without the optional ``ssh`` extra: it
+    provisions a keypair through the API and never opens an SSH connection, so
+    requiring ``asyncssh`` for the common case was a dependency on a library
+    that was not being used to do anything.
+
+    This is pure key math, so it prefers ``cryptography`` over ``asyncssh``:
+    it is what asyncssh itself depends on for the primitives (so the ``ssh``
+    extra already brings it), it is far lighter than a whole SSH protocol
+    stack, and it is commonly present for unrelated reasons. ``asyncssh``
+    remains the fallback, so an environment that has only that keeps working.
+
+    Unlike asyncssh's single entry point, ``cryptography`` needs the loader
+    that matches the encoding -- ``load_ssh_private_key`` for an OpenSSH key
+    block, ``load_pem_private_key`` for PKCS#8/PEM -- and TrueNAS may hand back
+    either, so both are tried before giving up.
+    """
+    try:
+        from cryptography.hazmat.primitives import serialization
+    except ImportError:
+        return (
+            _asyncssh()
+            .import_private_key(private_key)
+            .export_public_key()
+            .decode()
+            .strip()
+        )
+
+    data = private_key.encode()
+    for loader in (
+        serialization.load_ssh_private_key,
+        serialization.load_pem_private_key,
+    ):
+        try:
+            key = loader(data, password=None)
+        except Exception:
+            # Wrong encoding for this loader (or a genuinely bad key -- the
+            # final raise below reports that, once both have been tried).
+            continue
+        return (
+            key.public_key()
+            .public_bytes(
+                serialization.Encoding.OpenSSH,
+                serialization.PublicFormat.OpenSSH,
+            )
+            .decode()
+            .strip()
+        )
+
+    raise ValueError(
+        "could not parse the SSH private key: expected an OpenSSH or PEM/PKCS#8 "
+        "encoded key"
+    )
+
+
 def _shared_options(credentials: "_ty.Mapping[str, object]") -> "dict[str, object]":
     """Config options common to every branch of ``_from_parsed_uri``.
 
@@ -1010,23 +1070,30 @@ class TrueNASHost(_PosixHost, _ty.Generic[ApiVersion]):
         Adding an SSH transport changes what this host can do, so the providers
         are rebuilt: a host that had no executor at all (remote, no SSH) gains
         one, and paths gain the richer SFTP leg.
+
+        Does **not** require the optional ``ssh`` extra: provisioning runs
+        entirely over the middleware API and opens no SSH connection. The one
+        exception is passing ``private_key=`` for a key the host does not
+        already know, where the public half has to be derived locally (see
+        :func:`_public_key`). *Using* the SSH transport this configures still
+        needs the extra, as it always did.
         """
         name = name or "pytruenas"
         keypair = self.api.keychaincredential._get(type="SSH_KEY_PAIR", name=name)
+        # The middleware hands back BOTH halves on the paths it generates or
+        # stores, so the public key is usually already known -- see `_public_key`
+        # for why that matters.
+        pubkey: "str | None" = None
         if not keypair and not private_key:
-            private_key = self.api.keychaincredential.generate_ssh_key_pair()[
-                "private_key"
-            ]
+            generated = self.api.keychaincredential.generate_ssh_key_pair()
+            private_key = generated["private_key"]
+            pubkey = generated.get("public_key")
         elif not private_key:
-            private_key = keypair["attributes"]["private_key"]
+            attributes = keypair["attributes"]
+            private_key = attributes["private_key"]
+            pubkey = attributes.get("public_key")
 
-        pubkey = (
-            _asyncssh()
-            .import_private_key(private_key)
-            .export_public_key()
-            .decode()
-            .strip()
-        )
+        pubkey = (pubkey or "").strip() or _public_key(_ty.cast(str, private_key))
         keypair = self.api.keychaincredential._upsert(
             ("name", "type"),
             type="SSH_KEY_PAIR",
@@ -1037,8 +1104,12 @@ class TrueNASHost(_PosixHost, _ty.Generic[ApiVersion]):
         authorized = (root.get("sshpubkey") or "").splitlines()
         if pubkey not in authorized:
             authorized.append(pubkey)
+            # `("username",)` -- a one-item SEQUENCE, not the bare string. A
+            # bare `str` selector is read as a record *id* (see
+            # `DbAction.execute`); the tuple says "match on this field name",
+            # which is what selecting root by username means.
             self.api.user._upsert(
-                "username", username="root", sshpubkey="\n".join(authorized)
+                ("username",), username="root", sshpubkey="\n".join(authorized)
             )
 
         private_key = _ty.cast(str, keypair["attributes"]["private_key"])
