@@ -144,6 +144,87 @@ def test_runpath_rcopts_disables_a_step(tmp_path, monkeypatch, record_path):
     assert step_names == ["first"]
 
 
+def _write_module_signature_runpath(directory):
+    """A RunPath dir whose steps use the MODULE signature via ``@step``.
+
+    Module commands are ``run(client, args, logger)``; duho calls a step
+    ``main(cmd, ctx)``. These steps are written the module way and decorated,
+    so the same body would work in either command kind.
+    """
+    flow = directory / "myflow"
+    flow.mkdir()
+    (flow / "__main__.py").write_text(
+        "from pytruenas.utils.runpath import default_init as init\n"
+    )
+    _recorder = (
+        "import json, os\n"
+        "def _record(entry):\n"
+        "    with open(os.environ['PYTRUENAS_TEST_RECORD'], 'a') as fh:\n"
+        "        fh.write(json.dumps(entry) + '\\n')\n"
+    )
+    # Full module signature: client FIRST, args second, a real logger third.
+    (flow / "01-first.py").write_text(
+        _recorder + "from pytruenas.utils.runpath import step\n"
+        "@step\n"
+        "def main(client, args, logger):\n"
+        "    _record(['first', args.target, client.target,\n"
+        "             logger is not None and hasattr(logger, 'info')])\n"
+    )
+    # Shorter arity: a step that does not care about the logger.
+    (flow / "02-second.py").write_text(
+        _recorder + "from pytruenas.utils.runpath import step\n"
+        "@step\n"
+        "def main(client, args):\n"
+        "    _record(['second', args.target, client.target, None])\n"
+    )
+    return flow
+
+
+def test_step_decorator_gives_steps_the_module_signature(
+    tmp_path, monkeypatch, record_path
+):
+    # The regression: without @step a module-signature step raises TypeError
+    # (duho passes exactly 2 positionals, client second). With it, `client` is
+    # the per-target client, `args` the cmd, and `logger` a usable logger.
+    _write_module_signature_runpath(tmp_path)
+    monkeypatch.setenv("PYTRUENAS_PATH", str(tmp_path))
+    import pytruenas.main as main
+
+    rc = main.main("pytruenas", ["myflow", "nas1"])
+    assert rc == 0
+    records = _records(record_path)
+    # client.target is the per-target client -- proving it did NOT bind to cmd.
+    assert records["nas1"][0] == ("first", "nas1", True)
+    # A 2-arg step still gets (client, args) and is not handed the logger.
+    assert records["nas1"][1] == ("second", "nas1", None)
+
+
+def test_step_decorator_preserves_arity_detection():
+    # functools.wraps sets __wrapped__, which makes inspect.signature report the
+    # DECORATED function. duho decides the call arity from exactly that, so a
+    # 1-arg `@step def main(client)` would take duho's 1-arg branch and receive
+    # ctx=None -- a silently None client rather than an error.
+    from duho.runpath import _step_wants_ctx
+
+    from pytruenas.utils.runpath import step
+
+    @step
+    def one(client):
+        return client
+
+    @step
+    def three(client, args, logger):
+        return client
+
+    for entrypoint in (one, three):
+        assert _step_wants_ctx(entrypoint) is True
+
+    # The wrapper still reports the original name for tracebacks.
+    assert one.__name__ == "one"
+    # And a 1-arg step really receives the client, not None.
+    assert one(object(), "the-client") == "the-client"
+
+
 def test_runpath_discovered_as_subcommand(tmp_path, monkeypatch, record_path):
     # The RunPath directory becomes a subcommand named after the directory,
     # discovered via PYTRUENAS_PATH -- listed in --help output.
