@@ -28,6 +28,12 @@ predecessor relied on is preserved, only the parameter shape is duho's:
   step logs through ``cmd._logger_`` (present because the RunPath command inherits
   :class:`PyTrueNASRunPathArgs` -> ``LoggingArgs``).
 
+A step that would rather use the MODULE command signature -- ``run(client, args,
+logger)``, client first, logger as a real parameter -- can decorate its
+entrypoint with :func:`step`, which adapts the two shapes so the same body works
+in either command kind. Without it, writing a step that way fails at runtime:
+duho passes exactly two positionals, in the other order.
+
 Capabilities preserved from the predecessor (through duho's API): the per-target
 client built by ``__main__.py`` ``init``; per-target mutable state stashed on
 ``cmd`` and read by later steps; filename-modifier + ``--rcopts`` step selection
@@ -39,13 +45,15 @@ travels on ``cmd`` rather than as a separate parameter).
 
 from __future__ import annotations
 
+import functools as _functools
+import inspect as _inspect
 import typing as _ty
 from logging import Logger as _Logger
 
 from .cmd import PyTrueNASArgs, register_targets
 from ..host import TrueNASHost as TrueNASClient
 
-__all__ = ["default_init", "PyTrueNASRunPathArgs"]
+__all__ = ["default_init", "PyTrueNASRunPathArgs", "step"]
 
 
 class PyTrueNASRunPathArgs(PyTrueNASArgs):
@@ -81,6 +89,85 @@ class PyTrueNASRunPathArgs(PyTrueNASArgs):
         return result
 
 
+def _positional_count(entrypoint: "_ty.Callable[..., object]") -> int:
+    """How many of ``(client, args, logger)`` a decorated step will accept.
+
+    Capped at 3 -- the full module-command signature -- and 3 for a ``*args``
+    catch-all, which can take all of them. Falls back to 3 when the signature
+    cannot be introspected, matching the documented shape rather than silently
+    dropping the logger.
+    """
+    try:
+        params = _inspect.signature(entrypoint).parameters
+    except (TypeError, ValueError):  # pragma: no cover - builtins/C callables
+        return 3
+    count = 0
+    for param in params.values():
+        if param.kind is _inspect.Parameter.VAR_POSITIONAL:
+            return 3
+        if param.kind in (
+            _inspect.Parameter.POSITIONAL_ONLY,
+            _inspect.Parameter.POSITIONAL_OR_KEYWORD,
+        ):
+            count += 1
+    return min(count, 3)
+
+
+def step(entrypoint: "_ty.Callable[..., object]") -> "_ty.Callable[..., object]":
+    """Let a RunPath step use the module command signature ``(client, args, logger)``.
+
+    The two command kinds otherwise disagree on the shape of the same three
+    values. A module command's entrypoint is ``run(client, args, logger)``;
+    duho calls a step ``main(cmd, ctx)`` -- the client second (as ``ctx``)
+    rather than first, and no logger at all. So the same body cannot move
+    between a ``NN-step.py`` and a ``cmd/`` module without being rewritten, and
+    writing a step with the module signature fails at *runtime*, not import:
+    duho supplies exactly two positionals, so the third is a ``TypeError`` and
+    the first two silently bind in the wrong order.
+
+    Decorating with ``@step`` closes that gap::
+
+        from pytruenas.utils.runpath import step
+
+        @step
+        def main(client, args, logger):
+            logger.info("%s", client.api.system.info())
+
+    ``client`` is the ``ctx`` built by the directory's ``init``
+    (:func:`default_init` unless overridden), ``args`` is the per-target ``cmd``
+    instance, and ``logger`` is ``cmd._logger_`` -- the same logger duho hands a
+    module command, already ``[target]``-prefixed by the fan-out. A step may
+    declare fewer parameters (``(client, args)`` or ``(client)``) and is handed
+    only those.
+
+    ``__wrapped__`` is explicitly cleared after :func:`functools.wraps`: it makes
+    ``inspect.signature`` report the *decorated* function's signature instead of
+    the wrapper's, and duho decides the call arity from exactly that. Left in
+    place, a ``@step``-decorated ``main(client)`` reports one positional, duho
+    takes the 1-arg branch, and the step is handed ``ctx=None`` -- a client that
+    is silently ``None`` rather than an error. The name and docstring that
+    ``wraps`` copies are still wanted for tracebacks; only the signature link is
+    harmful.
+
+    A 1-arg or 2-arg duho-native step needs no decorator -- ``main(cmd, ctx)``
+    still works untouched, and this is purely opt-in.
+    """
+    wants = _positional_count(entrypoint)
+
+    @_functools.wraps(entrypoint)
+    def _adapter(cmd, ctx=None):
+        # `_logger_` comes from LoggingArgs via PyTrueNASRunPathArgs, so it is
+        # present on any step reached through a pytruenas RunPath command.
+        # Truncated to the arity the step actually declares, the same way duho
+        # trims its own step call: a step that ignores the logger (or the args)
+        # should not have to name a parameter just to be callable.
+        return entrypoint(*(ctx, cmd, getattr(cmd, "_logger_", None))[:wants])
+
+    # See the docstring: this must go, or arity detection reads through it.
+    del _adapter.__wrapped__
+    return _adapter
+
+
 def default_init(cmd: "_ty.Any", logger: "_Logger") -> "TrueNASClient":
     """Build the per-target :class:`~pytruenas.TrueNASClient` for a RunPath ``ctx``.
 
@@ -88,7 +175,7 @@ def default_init(cmd: "_ty.Any", logger: "_Logger") -> "TrueNASClient":
     parsed RunPath command instance for one target
     (:func:`pytruenas.main._dispatch` has set ``cmd.target`` to this fan-out
     iteration's target). Returns a :class:`TrueNASClient` connected to that
-    target, honoring ``cmd.sslverify`` (defaulting to ``False`` if absent) -- the
+    target, honoring ``cmd.sslverify`` -- the
     same client :func:`pytruenas.main._run_module_on_target` builds for a plain
     module command, and the ``ctx`` every 2-arg step (``main(cmd, ctx)``)
     receives. Re-export it as a directory's ``init`` (``from
@@ -97,4 +184,9 @@ def default_init(cmd: "_ty.Any", logger: "_Logger") -> "TrueNASClient":
     (``def init(cmd, logger): c = default_init(cmd, logger); cmd.context = ...;
     return c``).
     """
-    return TrueNASClient(cmd.target, sslverify=getattr(cmd, "sslverify", False))
+    # `cmd.sslverify` is read directly rather than via getattr: every RunPath
+    # command inherits PyTrueNASRunPathArgs -> PyTrueNASArgs, so the field is
+    # always present. A `getattr(..., False)` fallback would turn a missing
+    # field into "silently stop verifying TLS", which is the wrong direction to
+    # fail -- and would hide the real error (a command built off the wrong base).
+    return TrueNASClient(cmd.target, sslverify=cmd.sslverify)
