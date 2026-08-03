@@ -61,6 +61,128 @@ def test_is_readonly_reads_the_property():
     assert zfs.is_readonly(_FakeClient(readonly=False), "pool/ds") is False
 
 
+class _PropClient:
+    """Answers zfs get/set/inherit from a real property mapping.
+
+    Models what ``zfs get`` actually prints: ``-H`` gives tab-separated,
+    unheadered fields, and an unset *user* property is reported as ``-`` with a
+    zero exit rather than an error.
+    """
+
+    def __init__(self, **properties):
+        self.properties = dict(properties)
+        self.calls = []
+
+    def run(self, argv, check=True, capture_output=None, encoding=None, **kwargs):
+        self.calls.append(list(argv))
+        if argv[:2] == ["zfs", "get"]:
+            names = argv[-2].split(",")
+            fields = argv[argv.index("-o") + 1]
+            lines = []
+            for name in names:
+                value = self.properties.get(name, "-")
+                lines.append(value if fields == "value" else f"{name}\t{value}")
+            return _Result("\n".join(lines) + "\n")
+        if argv[:2] == ["zfs", "set"]:
+            for pair in argv[2:-1]:
+                name, _, value = pair.partition("=")
+                self.properties[name] = value
+            return _Result()
+        if argv[:2] == ["zfs", "inherit"]:
+            self.properties.pop(argv[-2], None)
+            return _Result()
+        return _Result()
+
+
+def test_get_property_reads_native_and_user_properties():
+    client = _PropClient(compression="lz4", **{"com.example:role": "backup"})
+    assert zfs.get_property(client, "pool/ds", "compression") == "lz4"
+    assert zfs.get_property(client, "pool/ds", "com.example:role") == "backup"
+
+
+def test_get_property_returns_the_default_when_unset():
+    # ZFS prints "-" for an unset user property (exit 0), so absent is a value
+    # to recognise, not an error.
+    client = _PropClient()
+    assert zfs.get_property(client, "pool/ds", "com.example:role") is None
+    assert zfs.get_property(client, "pool/ds", "com.example:role", default="x") == "x"
+
+
+def test_set_property_renders_bools_as_on_off():
+    client = _PropClient()
+    zfs.set_property(client, "pool/ds", "com.example:role", "backup")
+    zfs.set_property(client, "pool/ds", "atime", False)
+    zfs.set_property(client, "pool/ds", "readonly", True)
+    assert client.properties["com.example:role"] == "backup"
+    assert client.properties["atime"] == "off"
+    assert client.properties["readonly"] == "on"
+
+
+def test_set_and_get_round_trip():
+    client = _PropClient()
+    zfs.set_property(client, "pool/ds", "com.example:role", "backup")
+    assert zfs.get_property(client, "pool/ds", "com.example:role") == "backup"
+
+
+def test_get_properties_asks_once_and_omits_unset():
+    client = _PropClient(compression="lz4", readonly="on")
+    values = zfs.get_properties(
+        client, "pool/ds", ["compression", "readonly", "com.example:absent"]
+    )
+    assert values == {"compression": "lz4", "readonly": "on"}
+    # One round trip for the whole set, not one per property.
+    gets = [c for c in client.calls if c[:2] == ["zfs", "get"]]
+    assert len(gets) == 1
+    assert "compression,readonly,com.example:absent" in gets[0]
+
+
+def test_get_properties_with_no_names_does_not_call_the_host():
+    client = _PropClient()
+    assert zfs.get_properties(client, "pool/ds", []) == {}
+    assert client.calls == []
+
+
+def test_set_properties_sets_them_in_one_call():
+    client = _PropClient()
+    zfs.set_properties(
+        client, "pool/ds", {"com.example:role": "backup", "atime": False}
+    )
+    assert client.properties["com.example:role"] == "backup"
+    assert client.properties["atime"] == "off"
+    sets = [c for c in client.calls if c[:2] == ["zfs", "set"]]
+    assert len(sets) == 1
+    assert sets[0][2:] == ["com.example:role=backup", "atime=off", "pool/ds"]
+
+
+def test_set_properties_with_nothing_to_set_is_a_noop():
+    client = _PropClient()
+    zfs.set_properties(client, "pool/ds", {})
+    assert client.calls == []
+
+
+def test_inherit_property_clears_a_user_property():
+    client = _PropClient(**{"com.example:role": "backup"})
+    zfs.inherit_property(client, "pool/ds", "com.example:role")
+    assert zfs.get_property(client, "pool/ds", "com.example:role") is None
+    assert client.calls[0] == ["zfs", "inherit", "com.example:role", "pool/ds"]
+
+
+def test_inherit_property_can_revert_to_the_received_value():
+    client = _PropClient(**{"com.example:role": "backup"})
+    zfs.inherit_property(client, "pool/ds", "com.example:role", received=True)
+    assert client.calls[0] == ["zfs", "inherit", "-S", "com.example:role", "pool/ds"]
+
+
+def test_readonly_helpers_still_work_over_the_property_api():
+    # is_readonly/set_readonly are now thin wrappers -- make sure the
+    # refactor kept their behavior, including the on/off rendering.
+    client = _PropClient(readonly="on")
+    assert zfs.is_readonly(client, "pool/ds") is True
+    zfs.set_readonly(client, "pool/ds", False)
+    assert client.properties["readonly"] == "off"
+    assert zfs.is_readonly(client, "pool/ds") is False
+
+
 def test_writable_flips_and_restores():
     client = _FakeClient(readonly=True)
     with zfs.writable(client, "/usr") as dataset:

@@ -15,6 +15,14 @@ narrow:
 * It is a no-op when the dataset is already writable, so wrapping something
   that turns out not to need it costs one query and changes nothing.
 
+Underneath those sits a general dataset property API -- :func:`get_property` /
+:func:`set_property` (plus the batched :func:`get_properties` /
+:func:`set_properties`, and :func:`inherit_property` to clear one). It handles
+both native properties and ZFS *user* properties (``com.example:role``), which
+are the way to attach your own metadata to a dataset: ZFS stores them verbatim
+and they survive send/receive. ``readonly`` is just the one this module needs,
+and its two helpers are thin wrappers over that API.
+
 What this cannot protect you from: a boot environment swap on update discards
 the whole dataset, patches included. Nothing here makes an unsupported change
 supported -- it only makes it possible, and reversible while the system runs.
@@ -36,7 +44,12 @@ PathLike = _ty.Union[str, "_ty.Any"]
 
 __all__ = [
     "dataset_for",
+    "get_properties",
+    "get_property",
+    "inherit_property",
     "is_readonly",
+    "set_properties",
+    "set_property",
     "set_readonly",
     "writable",
     "host_path",
@@ -111,22 +124,163 @@ def dataset_for(client: "TrueNASClient", path: "PathLike") -> str:
     )
 
 
-def is_readonly(client: "TrueNASClient", dataset: str) -> bool:
-    """Whether ``dataset`` has ``readonly=on``."""
+#: What ``zfs get`` prints for a property that has no value set. ZFS uses this
+#: for an unset *user* property rather than failing, so it is a value to
+#: recognise, not an error to raise.
+_UNSET = "-"
+
+
+def get_property(
+    client: "TrueNASClient",
+    dataset: str,
+    name: str,
+    *,
+    default: "str | None" = None,
+) -> "str | None":
+    """The value of ZFS property ``name`` on ``dataset``.
+
+    Works for both kinds of property ZFS has: a native one (``readonly``,
+    ``compression``, ``mountpoint``) and a *user* property, which is any name
+    containing a colon (``com.example:role``). User properties are the ones
+    worth setting on a dataset to carry your own metadata -- ZFS stores them
+    verbatim, and they survive send/receive.
+
+    Returns ``default`` when the property is unset. ZFS prints ``-`` for an
+    unset user property (and exits 0), so "absent" is a value here rather than
+    an error; a *native* property is never absent, so this only bites for user
+    properties. ``zfs get`` still fails loudly for a bad dataset name.
+
+    ``-H -o value`` asks for exactly one unheadered field, so the result needs
+    no parsing beyond a strip.
+    """
     result = client.run(
-        ["zfs", "get", "-H", "-o", "value", "readonly", dataset],
+        ["zfs", "get", "-H", "-o", "value", name, dataset],
         capture_output="stdout",
         encoding="utf-8",
         check=True,
     )
-    return result.stdout.strip() == "on"
+    value = result.stdout.strip()
+    return default if value == _UNSET else value
+
+
+def get_properties(
+    client: "TrueNASClient",
+    dataset: str,
+    names: "_ty.Sequence[str]",
+) -> "dict[str, str]":
+    """Several ZFS properties of ``dataset`` at once, as ``{name: value}``.
+
+    One ``zfs get`` for the whole set rather than one per property -- over a
+    websocket or SSH leg the round trip dominates, so asking for five properties
+    individually is five times the latency for the same data.
+
+    Unset properties are **omitted** from the mapping rather than mapped to
+    ``None``, so a caller can use ``in`` / ``.get(...)`` to distinguish "not
+    set" without a sentinel. Passing no names returns an empty mapping without
+    calling the host (``zfs get`` with an empty property list is an error).
+    """
+    if not names:
+        return {}
+    result = client.run(
+        ["zfs", "get", "-H", "-o", "property,value", ",".join(names), dataset],
+        capture_output="stdout",
+        encoding="utf-8",
+        check=True,
+    )
+    values: "dict[str, str]" = {}
+    for line in result.stdout.splitlines():
+        if not line.strip():
+            continue
+        # -H separates fields with a single tab; a value may itself contain
+        # spaces, so split on tab and only once.
+        prop, _, value = line.partition("\t")
+        if value.strip() == _UNSET:
+            continue
+        values[prop.strip()] = value.strip()
+    return values
+
+
+def set_property(
+    client: "TrueNASClient",
+    dataset: str,
+    name: str,
+    value: "str | bool",
+) -> None:
+    """Set ZFS property ``name`` to ``value`` on ``dataset``.
+
+    Takes effect immediately. ``True``/``False`` are written as ZFS' own
+    ``on``/``off`` so a caller does not have to spell those for boolean
+    properties; any other value is passed through as its string form.
+
+    As with :func:`get_property`, a name containing a colon is a user property
+    and may be any string.
+    """
+    rendered = _render(value)
+    LOGGER.info("Setting %s=%s on %s", name, rendered, dataset)
+    client.run(["zfs", "set", f"{name}={rendered}", dataset], check=True)
+
+
+def set_properties(
+    client: "TrueNASClient",
+    dataset: str,
+    properties: "_ty.Mapping[str, str | bool]",
+) -> None:
+    """Set several ZFS properties on ``dataset`` in one call.
+
+    ``zfs set`` accepts multiple ``name=value`` pairs, and applying them
+    together is both one round trip and one atomic-ish change, rather than a
+    window where half the properties are set. Does nothing when ``properties``
+    is empty.
+    """
+    if not properties:
+        return
+    pairs = [f"{name}={_render(value)}" for name, value in properties.items()]
+    LOGGER.info("Setting %s on %s", ", ".join(pairs), dataset)
+    client.run(["zfs", "set", *pairs, dataset], check=True)
+
+
+def inherit_property(
+    client: "TrueNASClient",
+    dataset: str,
+    name: str,
+    *,
+    received: bool = False,
+) -> None:
+    """Clear ``name`` on ``dataset``, reverting to inherited/default.
+
+    This is how a property is *removed*: there is no ``zfs unset``. For a user
+    property the result is genuinely absent (:func:`get_property` returns its
+    ``default`` again); for a native one it reverts to the parent's value or the
+    ZFS default.
+
+    ``received=True`` (``zfs inherit -S``) reverts to the value received with a
+    ``zfs send``/``recv`` stream instead of clearing outright.
+    """
+    argv = ["zfs", "inherit"]
+    if received:
+        argv.append("-S")
+    argv += [name, dataset]
+    LOGGER.info(
+        "Clearing %s on %s%s", name, dataset, " (to received)" if received else ""
+    )
+    client.run(argv, check=True)
+
+
+def _render(value: "str | bool") -> str:
+    """A ZFS property value as ``zfs set`` wants it (``bool`` -> ``on``/``off``)."""
+    if isinstance(value, bool):
+        return "on" if value else "off"
+    return str(value)
+
+
+def is_readonly(client: "TrueNASClient", dataset: str) -> bool:
+    """Whether ``dataset`` has ``readonly=on``."""
+    return get_property(client, dataset, "readonly") == "on"
 
 
 def set_readonly(client: "TrueNASClient", dataset: str, readonly: bool) -> None:
     """Set ``readonly`` on ``dataset``. Takes effect immediately."""
-    value = "on" if readonly else "off"
-    LOGGER.info("Setting readonly=%s on %s", value, dataset)
-    client.run(["zfs", "set", f"readonly={value}", dataset], check=True)
+    set_property(client, dataset, "readonly", readonly)
 
 
 @_contextlib.contextmanager
