@@ -4,6 +4,39 @@ All notable changes to this project are documented here. The format is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.2] - 2026-08-03
+
+### Fixed
+
+- **`sslverify` never reached the web shell.** `WebShellSession.connect()`
+  read `client.sslverify`, but the flag lives on `TrueNASConfig` and
+  `TrueNASHost` exposed no such attribute — so every `wss://` web shell connect
+  raised `AttributeError` rather than falling back to verifying.
+  `TrueNASHost.sslverify` now delegates to the config, so the JSON-RPC, REST,
+  and web shell legs all answer from the one value the caller set.
+
+### Added
+
+- **`patch.zfs` can get and set arbitrary dataset properties.**
+  `get_property`/`set_property`, the batched `get_properties`/`set_properties`
+  (one round trip instead of one per property), and `inherit_property` to clear
+  one — ZFS has no `zfs unset`. Native properties and user properties
+  (`com.example:role`) are both supported; an unset user property reads as
+  absent rather than as the literal `-` ZFS prints, and booleans render as
+  `on`/`off`. `is_readonly`/`set_readonly` are now thin wrappers over this API.
+- **`utils.runpath.step`** — a decorator letting a RunPath step use the module
+  command signature `(client, args, logger)` instead of duho's `main(cmd,
+  ctx)`, so the same body works in either command kind. Steps declaring fewer
+  parameters are handed only those; undecorated duho-native steps are
+  unaffected.
+
+### Changed
+
+- **`utils.runpath.default_init` reads `cmd.sslverify` directly.** The previous
+  `getattr(cmd, "sslverify", False)` would have turned a missing field into
+  silently disabled TLS verification; every RunPath command inherits the field
+  from `PyTrueNASRunPathArgs`.
+
 ## [0.3.1] - 2026-07-29
 
 ### Fixed
@@ -539,7 +572,8 @@ below is simply what the package contains.
   `ssh` extra); the middleware API has no command-exec method. SFTP is handled by
   `pathlib_next`.
 
-[Unreleased]: https://github.com/jose-pr/pytruenas/compare/v0.1.1...HEAD
+[Unreleased]: https://github.com/jose-pr/pytruenas/compare/v0.3.2...HEAD
+[0.3.2]: https://github.com/jose-pr/pytruenas/compare/v0.3.1...v0.3.2
 [0.2.1]: https://github.com/jose-pr/pytruenas/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/jose-pr/pytruenas/compare/v0.1.1...v0.2.0
 [0.1.1]: https://github.com/jose-pr/pytruenas/compare/v0.1.0...v0.1.1
