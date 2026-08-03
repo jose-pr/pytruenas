@@ -121,7 +121,7 @@ jobs:
               sys.exit(f"No CHANGELOG.md section found for version {version!r}")
           pathlib.Path("release_notes.md").write_text(match.group(1).strip() + "\n", encoding="utf-8")
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           files: dist/*
           generate_release_notes: true
