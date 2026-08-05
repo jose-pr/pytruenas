@@ -4,6 +4,59 @@ All notable changes to this project are documented here. The format is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.4] - 2026-08-04
+
+### Fixed
+
+- **`client.path()` raised `ModuleNotFoundError: asyncssh`** whenever an SSH
+  configuration existed but the optional `ssh` extra did not — even though the
+  websocket backend could serve the call. The sequel to 0.3.3: provisioning
+  worked without the extra, and the next path call died. Provider *names* were
+  chosen from "is SSH configured", never "is it importable"; they are now gated
+  on an import check before any provider is built.
+
+  Only **defaults** degrade. A caller who names `executor=["ssh"]` or
+  `path=["sftp"]` explicitly still gets it, and still fails loudly — silently
+  serving a transport the caller did not ask for is its own bug.
+- **A download link's query string was percent-encoded into the path**
+  (`/_download/12345%3Fauth_token%3Dabc`), so the middleware 404'd. Split in
+  `_http_target()`, the one choke point every HTTP side channel uses. This also
+  fixed `Target.uri`, which parsed a `query` but never rendered it — so the
+  split alone would have dropped the query silently instead.
+- **`repr()` on any namespace raised `AttributeError`**, reading a `_client._api`
+  attribute that no longer exists. `repr` is what a traceback frame renders, so
+  it failed while something else was already going wrong. Now renders the host's
+  short, credential-free `name`.
+- The same stale attribute made `fs.path()` unreachable through the path
+  provider entirely; resolved via `fs._settings()`, which accepts either
+  spelling.
+
+### Changed
+
+- **The websocket path provider returns a `TruenasPath`**, not a `TnasWsPath`.
+  Both ride the same backend, so the transport is unchanged — but `TruenasPath`
+  carries the documented `symlink_to(force=, onremove=)` and the
+  SFTP→websocket fallback. Pinning the narrower type was silently dropping a
+  documented API.
+
+  With `pathlib_next>=0.9.1` and `hostctl>=0.2.3`, `force=` now survives the
+  whole chain: `client.path(...).symlink_to(target, force=True)` reaches the
+  backend instead of raising `TypeError` at the composition boundary.
+
+### Dependencies
+
+Both floors rise for the same reason, and both came from findings filed here:
+the provider hands back a `TruenasPath` so its documented
+`symlink_to(force=, onremove=)` is available, and below these versions that
+kwarg is stripped before it reaches the backend — the API would be advertised
+and not deliverable.
+
+- **`pathlib_next[uri]>=0.9.1,<0.10`** (from `>=0.9.0`) — `symlink_to(force=)`
+  as a generic `Path` extension over a `_symlink_to()` backend primitive.
+- **`hostctl>=0.2.3,<0.3`** (from `>=0.1.2`) — signature-aware keyword
+  forwarding through composite path dispatch. This is the first time the
+  hostctl floor has moved past 0.1.2.
+
 ## [0.3.3] - 2026-08-03
 
 ### Fixed
@@ -619,7 +672,8 @@ below is simply what the package contains.
   `ssh` extra); the middleware API has no command-exec method. SFTP is handled by
   `pathlib_next`.
 
-[Unreleased]: https://github.com/jose-pr/pytruenas/compare/v0.3.3...HEAD
+[Unreleased]: https://github.com/jose-pr/pytruenas/compare/v0.3.4...HEAD
+[0.3.4]: https://github.com/jose-pr/pytruenas/compare/v0.3.3...v0.3.4
 [0.3.3]: https://github.com/jose-pr/pytruenas/compare/v0.3.2...v0.3.3
 [0.3.2]: https://github.com/jose-pr/pytruenas/compare/v0.3.1...v0.3.2
 [0.2.1]: https://github.com/jose-pr/pytruenas/compare/v0.2.0...v0.2.1
