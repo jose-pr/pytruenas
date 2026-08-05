@@ -172,7 +172,16 @@ class Namespace:
         self._children: "dict[str, Namespace]" = {}
 
     def __repr__(self) -> str:  # type: ignore
-        return f"{self.__class__.__name__}({self._client._api}/{self._namespace.replace('.','/')})"
+        # `_client._api` was a pre-hostctl leftover: the attribute exists
+        # nowhere anymore, so this raised AttributeError for every namespace --
+        # and `repr` is what a traceback frame renders, so the failure landed
+        # while something else was already going wrong.
+        #
+        # `name` rather than the connection URI: it is the short label, and it
+        # is credential-free by construction. A repr that leaks a password is
+        # worse than an unhelpful one.
+        host = getattr(self._client, "name", None) or self._client
+        return f"{self.__class__.__name__}({host}/{self._namespace.replace('.','/')})"
 
     def __str__(self) -> str:
         return self._namespace

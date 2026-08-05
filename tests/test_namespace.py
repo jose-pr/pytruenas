@@ -173,3 +173,28 @@ def test_int_result_triggers_job_wait():
     out = DbAction.CREATE.execute(ns, ("username",), {"wait": True}, username="svc")
     client.api.core.job_wait.assert_called_once_with(7, job=True, _timeout=None)
     assert out == {"id": 7, "done": True}
+
+
+# -- repr -----------------------------------------------------------------
+#
+# `__repr__` read `client._api`, a pre-hostctl leftover that exists nowhere
+# anymore -- so repr()ing any namespace raised AttributeError. `repr` is what a
+# traceback frame renders, so the failure landed while something else was
+# already going wrong.
+
+
+def test_repr_names_the_host_and_namespace():
+    from pytruenas import TrueNASClient
+
+    client = TrueNASClient("wss://nas", autologin=False)
+    assert repr(client.api.system) == "Namespace(nas/system)"
+    # A nested namespace renders its full dotted path as a URL-ish tail.
+    assert repr(client.api.pool.dataset) == "Namespace(nas/pool/dataset)"
+
+
+def test_repr_does_not_leak_a_password():
+    """A repr that leaks a credential is worse than an unhelpful one."""
+    from pytruenas import TrueNASClient
+
+    client = TrueNASClient("wss://root:secret@nas", autologin=False)
+    assert "secret" not in repr(client.api.system)
