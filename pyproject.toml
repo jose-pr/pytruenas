@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "pytruenas"
-version = "0.3.3"
+version = "0.3.4"
 authors = [{ name = "Jose A." }]
 description = "A typed, Pythonic client and CLI for the TrueNAS middleware API"
 readme = "README.md"
@@ -87,7 +87,13 @@ dependencies = [
     # `repr` is what a traceback frame renders. Both came from findings filed
     # here. Capped below 0.10: pathlib_next is 0.x, where a minor bump may
     # break. Validated on 0.9.0.
-    "pathlib_next[uri]>=0.9.0,<0.10",
+    # >=0.9.1: `symlink_to(force=)` as a generic Path extension over a
+    # `_symlink_to` backend primitive. Not merely nice-to-have here: the path
+    # provider hands back a TruenasPath specifically so its documented
+    # `symlink_to(force=, onremove=)` survives, and below 0.9.1 the kwarg is
+    # rejected at hostctl's composite boundary -- so the documented API would
+    # be advertised and not deliverable. Came from a finding filed here.
+    "pathlib_next[uri]>=0.9.1,<0.10",
     "requests",
     "websocket-client",
     # Generic host machinery: TrueNASHost is a hostctl PosixHost, and run()/
@@ -118,7 +124,14 @@ dependencies = [
     # uses is still present. The floor stays at 0.1.2 rather than rising: none
     # of the 0.2 API is used here, and demanding a version the code does not
     # need would exclude working installs. Validated on 0.2.2.
-    "hostctl>=0.1.2,<0.3",
+    # >=0.2.3 raises that floor for the first time, for the same reason as
+    # pathlib_next 0.9.1: composite path dispatch now forwards a backend's
+    # keyword arguments (signature-aware -- a kwarg the backend declares is
+    # passed, one it does not is still rejected at the boundary). Below 0.2.3
+    # every extension is stripped there, so `client.path(...).symlink_to(...,
+    # force=True)` raises TypeError however good the backend is. Came from a
+    # finding filed here.
+    "hostctl>=0.2.3,<0.3",
 ]
 
 [project.optional-dependencies]
