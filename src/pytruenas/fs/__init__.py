@@ -40,7 +40,7 @@ def path(client: "TrueNASClient", *segments, backend: "str | None" = None):
     backend = backend or "auto"
     posix = "/".join(str(s) for s in segments) if segments else "/"
 
-    if backend == "local" or (backend == "auto" and client._api.is_local):
+    if backend == "local" or (backend == "auto" and _settings(client).is_local):
         return LocalPath(*segments) if segments else LocalPath("/")
 
     ws_backend = TnasWsBackend(client)
@@ -49,8 +49,25 @@ def path(client: "TrueNASClient", *segments, backend: "str | None" = None):
     return TruenasPath(_truenas_uri(client, posix), backend=ws_backend)
 
 
+def _settings(client: "TrueNASClient"):
+    """The object carrying ``host``/``is_local`` for ``client``.
+
+    A ``TrueNASHost`` keeps them on ``_config``; the pre-hostctl client kept
+    them on ``_api``. Both spellings are accepted because this module is
+    reached from both directions -- the path providers pass a host, while
+    ``client.path()`` callers may hold either. Reading the wrong one raised
+    ``AttributeError`` deep inside URI construction, which is a long way from
+    the cause.
+    """
+    for name in ("_config", "_api"):
+        settings = getattr(client, name, None)
+        if settings is not None:
+            return settings
+    return client
+
+
 def _host(client: "TrueNASClient") -> str:
-    return getattr(client._api, "host", None) or "localhost"
+    return getattr(_settings(client), "host", None) or "localhost"
 
 
 def _ws_uri(client: "TrueNASClient", posix: str) -> str:
