@@ -595,3 +595,65 @@ def test_building_a_host_does_no_network_io(monkeypatch):
     monkeypatch.setattr(requests, "post", explode)
     TrueNASHost(TrueNASConfig.from_target("wss://nas"), client=MagicMock())
     TrueNASHost(TrueNASConfig.from_target("nas"), client=MagicMock())
+
+
+# -- HTTP side-channel URLs -----------------------------------------------
+#
+# The middleware hands back download links that already carry a query string.
+# Assigning the whole string to `path=` percent-encoded the `?` and `=` into
+# the path, so the server saw a filename containing `%3F` and 404'd.
+
+
+def test_http_target_keeps_a_download_links_query_string():
+    host = TrueNASHost(TrueNASConfig.from_target("wss://nas"), client=MagicMock())
+    target = host._http_target("/_download/12345?auth_token=abc")
+
+    assert target.path == "/_download/12345"
+    assert target.query == "auth_token=abc"
+    # The separators must survive as separators, not as %3F / %3D.
+    assert target.uri == "https://nas/_download/12345?auth_token=abc"
+
+
+def test_http_target_without_a_query_is_unchanged():
+    host = TrueNASHost(TrueNASConfig.from_target("wss://nas"), client=MagicMock())
+    assert host._http_target("/_upload").uri == "https://nas/_upload"
+
+
+# -- degrading without the optional ssh extra ------------------------------
+
+
+def test_default_providers_drop_ssh_when_asyncssh_is_missing(monkeypatch):
+    """A configured-but-unimportable SSH leg must not break `path()`.
+
+    `install_sshcreds()` sets config.ssh and rebuilds providers, so a client
+    that worked over the websocket would gain a broken SFTP provider and die on
+    the next path call.
+    """
+    import pytruenas.host as host_module
+    from hostctl.host import SshConfig
+
+    monkeypatch.setattr(host_module, "_ssh_available", lambda: False)
+    config = TrueNASConfig.from_target("wss://nas", ssh=SshConfig(host="nas"))
+    host = TrueNASHost(config, client=MagicMock())
+
+    assert [p.name for p in host._path_selector.providers] == ["tnasws"]
+    assert [p.name for p in host._executor_selector.providers] == ["webshell"]
+
+
+def test_an_explicitly_named_ssh_provider_is_still_honored(monkeypatch):
+    """Only DEFAULTS degrade.
+
+    Silently serving a different transport than the one the caller named is its
+    own bug -- and quieter than the failure it replaces.
+    """
+    import pytruenas.host as host_module
+    from hostctl.host import SshConfig
+
+    monkeypatch.setattr(host_module, "_ssh_available", lambda: False)
+    config = TrueNASConfig.from_target(
+        "wss://nas", ssh=SshConfig(host="nas"), path=["sftp"], executor=["ssh"]
+    )
+    host = TrueNASHost(config, client=MagicMock())
+
+    assert [p.name for p in host._path_selector.providers] == ["sftp"]
+    assert [p.name for p in host._executor_selector.providers] == ["ssh"]

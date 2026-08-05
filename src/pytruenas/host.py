@@ -25,6 +25,7 @@ inside ``__init__`` are *recorded* here (:attr:`~TrueNASConfig.needs_scheme_prob
 
 from __future__ import annotations
 
+import importlib.util as _importlib_util
 import inspect as _inspect
 import json as _js
 import logging as _logging
@@ -164,6 +165,20 @@ def _asyncssh():
             "SSH/SFTP support requires the 'ssh' extra: pip install pytruenas[ssh]"
         ) from exc
     return asyncssh
+
+
+def _ssh_available() -> bool:
+    """Whether an SSH/SFTP leg can actually be built (the ``ssh`` extra).
+
+    Uses :func:`importlib.util.find_spec` rather than importing: this runs
+    during provider construction, which happens for every client including ones
+    that will never touch SSH, and importing asyncssh is not cheap.
+
+    Deliberately answers "can it be imported", not "is it configured" -- those
+    are different questions, and conflating them is what let a configured-but-
+    uninstallable SSH leg reach the point of use before failing.
+    """
+    return _importlib_util.find_spec("asyncssh") is not None
 
 
 def _public_key(private_key: str) -> str:
@@ -758,6 +773,8 @@ class TrueNASHost(_PosixHost, _ty.Generic[ApiVersion]):
         flag per transport.
         """
         default_executors, default_paths = self._default_provider_names(config)
+        explicit_executors = config.executors is not None
+        explicit_paths = config.paths is not None
         executor_names = (
             default_executors if config.executors is None else config.executors
         )
@@ -765,6 +782,22 @@ class TrueNASHost(_PosixHost, _ty.Generic[ApiVersion]):
 
         _reject_unknown(executor_names, EXECUTOR_NAMES, "executor")
         _reject_unknown(path_names, PATH_NAMES, "path")
+
+        # An SSH leg needs asyncssh, which is the optional `ssh` extra. Decide
+        # that BEFORE building anything: the defaults offer ssh/sftp whenever a
+        # config.ssh exists, which asks whether SSH is *configured* and never
+        # whether it is *importable*. Without this, `install_sshcreds()` --
+        # which sets config.ssh and rebuilds -- hands a working client a broken
+        # SFTP provider, and the next `path()` dies on the import.
+        #
+        # Only DEFAULTS degrade. A caller who named "ssh"/"sftp" explicitly gets
+        # the ImportError: silently serving a different transport than the one
+        # asked for is its own bug, and quieter than the failure it replaces.
+        if not _ssh_available():
+            if not explicit_executors:
+                executor_names = tuple(n for n in executor_names if n != "ssh")
+            if not explicit_paths:
+                path_names = tuple(n for n in path_names if n != "sftp")
 
         # Both SSH providers come from one factory call so they share a single
         # transport: assembling them by hand type-checks but can silently open
@@ -790,6 +823,11 @@ class TrueNASHost(_PosixHost, _ty.Generic[ApiVersion]):
             if name == "local":
                 return _ty.cast(_ty.Any, local_pair)[0]
             if name == "ssh":
+                # None only when the name survived the filter above -- i.e. the
+                # caller asked for it explicitly. Dropped here rather than
+                # returned as None so the tuple never holds a hole.
+                if ssh_pair is None:
+                    return None
                 return _ty.cast(_ty.Any, ssh_pair)[0]
             from .webshell import WebShellExecutorProvider
 
@@ -799,6 +837,8 @@ class TrueNASHost(_PosixHost, _ty.Generic[ApiVersion]):
             if name == "local":
                 return _ty.cast(_ty.Any, local_pair)[1]
             if name == "sftp":
+                if ssh_pair is None:
+                    return None
                 return _ty.cast(_ty.Any, ssh_pair)[1]
             from .providers import TnasWsPathProvider
 
@@ -806,9 +846,11 @@ class TrueNASHost(_PosixHost, _ty.Generic[ApiVersion]):
             # which keeps construction free of a websocket connection.
             return TnasWsPathProvider(_ty.cast(_ty.Any, self))
 
+        # Filtering None keeps a half-built SSH pair from putting a hole in the
+        # provider tuple, which would fail later and further from the cause.
         return (
-            tuple(_executor(name) for name in executor_names),
-            tuple(_path(name) for name in path_names),
+            tuple(p for p in map(_executor, executor_names) if p is not None),
+            tuple(p for p in map(_path, path_names) if p is not None),
         )
 
     # -- the TrueNAS surface ----------------------------------------------
@@ -993,10 +1035,22 @@ class TrueNASHost(_PosixHost, _ty.Generic[ApiVersion]):
 
         The websocket ``ws``/``wss`` scheme maps to ``http``/``https``; used by
         the upload/download side channels and the web shell.
+
+        ``path`` may carry a query string, because the middleware hands back
+        download links that already do (``/_download/12345?auth_token=abc``).
+        It is split off here rather than at each call site: assigning the whole
+        string to ``path=`` percent-encodes the ``?`` and ``=`` into the path,
+        so the server sees a filename containing ``%3F`` and 404s. Splitting in
+        the one place every HTTP side channel goes through means the next
+        caller handed a link with a query cannot reintroduce it.
+
+        A fragment is dropped deliberately: it is a client-side construct and
+        is never sent to the server, so carrying it would only mislead.
         """
         api = self._target
         scheme = "https" if api.scheme == "wss" else "http"
-        return api._replace(scheme=scheme, path=path, port=0)
+        path, _, query = path.partition("?")
+        return api._replace(scheme=scheme, path=path, query=query, port=0)
 
     def upload(
         self, file: "str | bytes", method: str, *params, token=None, wait=True, **kwargs

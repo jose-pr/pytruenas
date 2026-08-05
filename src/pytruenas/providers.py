@@ -107,10 +107,16 @@ class TnasWsPathProvider(_PathProvider):
     def _make_path(self, *segments: object) -> "Path":
         from .fs import path as _make
 
-        # Always the websocket backend. A *local* target is served by hostctl's
-        # own local path provider, which the host orders ahead of this one --
-        # so there is no local case left to special-case here.
-        return _make(self._client, *segments, backend="ws")
+        # `truenas`, not `ws`: both ride the same TnasWsBackend, so this is not
+        # a transport change -- it is which path CLASS the caller receives.
+        # TruenasPath adds what TnasWsPath lacks: the documented
+        # `symlink_to(force=, onremove=)` extension, and the SFTP->websocket
+        # fallback for the operations SFTP alone can do. Handing back the
+        # narrower type was silently dropping a documented API.
+        #
+        # A *local* target is served by hostctl's own local path provider,
+        # which the host orders ahead of this one -- no local case to handle.
+        return _make(self._client, *segments, backend="truenas")
 
     def probe(self) -> _ProviderProbe:
         return _ProviderProbe("available", capabilities=self.capabilities)
