@@ -105,6 +105,16 @@ class Target(_ty.NamedTuple):
             uri = f"{uri}:{self.port}"
         if self.path:
             uri = f"{uri}{_urlparse.quote(self.path, safe='/')}"
+        if self.query:
+            # `safe` keeps the separators a query is MADE of -- `=` between a
+            # key and its value, `&`/`;` between pairs -- while still escaping
+            # anything else reserved. Quoting them would turn a query back into
+            # one opaque string, which is the bug this renders around: a
+            # download link's `?auth_token=abc` must reach the server as a
+            # query, not as `%3Fauth_token%3Dabc` glued onto the path.
+            uri = f"{uri}?{_urlparse.quote(self.query, safe='=&;/')}"
+        if self.fragment:
+            uri = f"{uri}#{_urlparse.quote(self.fragment, safe='/')}"
 
         return uri
 

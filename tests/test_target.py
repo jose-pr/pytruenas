@@ -149,3 +149,37 @@ def test_unknown_scheme_leaves_port_zero():
 
 def test_resolve_port_can_be_disabled():
     assert Target.parse("wss://host", resolve_port=False).port == 0
+
+
+# -- query and fragment rendering -----------------------------------------
+#
+# `Target` has always PARSED a query into its own field, but `uri` never
+# rendered it back out -- so a round trip silently dropped it, and a caller
+# that stuffed the query into `path` instead got the separators percent-encoded
+# (`/_download/1?a=b` -> `/_download/1%3Fa%3Db`).
+
+
+def test_uri_renders_a_query_string():
+    target = Target.parse(
+        "https://nas/_download/12345?auth_token=abc", resolve_port=False
+    )
+    assert target.path == "/_download/12345"
+    assert target.query == "auth_token=abc"
+    assert target.uri == "https://nas/_download/12345?auth_token=abc"
+
+
+def test_uri_keeps_query_separators_unencoded():
+    target = Target.parse("https://nas/x?a=1&b=2", resolve_port=False)
+    # `=` and `&` are what a query is MADE of; encoding them would turn the
+    # query back into one opaque string.
+    assert target.uri == "https://nas/x?a=1&b=2"
+
+
+def test_uri_renders_a_fragment():
+    target = Target.parse("https://nas/x#frag", resolve_port=False)
+    assert target.uri == "https://nas/x#frag"
+
+
+def test_uri_without_a_query_is_unchanged():
+    target = Target.parse("https://nas/_upload", resolve_port=False)
+    assert target.uri == "https://nas/_upload"
