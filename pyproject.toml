@@ -131,7 +131,14 @@ dependencies = [
     # every extension is stripped there, so `client.path(...).symlink_to(...,
     # force=True)` raises TypeError however good the backend is. Came from a
     # finding filed here.
-    "hostctl>=0.2.3,<0.3",
+    # >=0.2.5 raises it again: `webshell.py` imports `write_output` (with
+    # `capture_streams`) from the PUBLIC `hostctl.executor`, and 0.2.5 is where
+    # it became public -- before that it lived in `_common` and pytruenas
+    # imported it privately. Sharing these is a correctness requirement, not
+    # tidiness: a host can dispatch one call through different providers on
+    # different attempts, so an executor handling output differently returns
+    # results that vary by which transport won. Also from a finding filed here.
+    "hostctl>=0.2.5,<0.3",
 ]
 
 [project.optional-dependencies]
