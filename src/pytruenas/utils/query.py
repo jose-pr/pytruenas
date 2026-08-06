@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import typing as _ty
 
+from .io import json_scalar as _json_scalar
+
 
 class _Exclude: ...
 
@@ -114,8 +116,40 @@ MISSING = _Missing
 
 
 def diff(base: _ty.Mapping, against: _ty.Mapping):
+    """Fields in ``against`` that differ from ``base``, normalized for compare.
+
+    ``base`` is what the API just reported (plain JSON scalars); ``against`` is
+    what the caller wants. A caller holding a value as a wrapper object --
+    ``IPv4Address("1.2.3.4")``, a MAC type, a ``PurePath`` -- is comparing an
+    object against the string the API returned, and those are never equal. The
+    field then looks changed on EVERY call, so an upsert rewrites it forever
+    and reports a change that did not happen.
+
+    Comparison is on the normalized form; the value STORED is the caller's
+    original, so whatever the encoder does with it on the way out is unchanged.
+    """
     d = {}
     for k, v in against.items():
-        if base.get(k, MISSING) != v:
+        current = base.get(k, MISSING)
+        if current is MISSING or not _same(current, v):
             d[k] = v
     return d
+
+
+def _same(current, wanted) -> bool:
+    """Whether an API-reported value already matches what the caller wants.
+
+    Tries the plain comparison first -- it is correct for the overwhelmingly
+    common all-scalars case and avoids normalizing on every field. Only when
+    that says "different" is the wrapper case considered, so this can turn a
+    false difference into equality but never the reverse.
+    """
+    if current == wanted:
+        return True
+    try:
+        return _json_scalar(current) == _json_scalar(wanted)
+    except Exception:
+        # A __json__ that raises, or an un-stringifiable value: fall back to
+        # "different". Reporting a spurious change is recoverable; silently
+        # skipping a real one is not.
+        return False

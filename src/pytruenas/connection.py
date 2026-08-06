@@ -46,6 +46,8 @@ from ipaddress import IPv6Interface as _IPv6Interface
 
 import websocket as _websocket
 
+from .utils.io import json_scalar as _json_scalar
+
 _LOGGER = _logging.getLogger("pytruenas.connection")
 
 __all__ = [
@@ -118,7 +120,14 @@ class _EJSONEncoder(_json.JSONEncoder):
             return {"$ipv4_interface": str(obj)}
         if isinstance(obj, _IPv6Interface):
             return {"$ipv6_interface": str(obj)}
-        return super().default(obj)
+
+        # Everything above is an EXTENDED type the middleware round-trips
+        # through a wrapper object, and must keep its exact shape. What follows
+        # is the general fallback for ordinary wrapper values -- an IP address,
+        # a MAC, a path, an enum-ish domain type -- which the API just wants as
+        # a scalar. Ordering matters: a blanket str() ahead of these would send
+        # `"2026-01-01T00:00:00"` where the middleware expects `{"$date": ...}`.
+        return _json_scalar(obj, default=super().default)
 
 
 def _object_hook(obj: dict):
