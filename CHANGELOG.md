@@ -4,6 +4,57 @@ All notable changes to this project are documented here. The format is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.5] - 2026-08-05
+
+### Added
+
+- **A derived tool can supply its own shared args root.** `main(args=...)`, or
+  `_ARGS_` on a `PyTrueNAS` subclass, sets the class every command inherits —
+  so a tool built on pytruenas can add global options:
+
+  ```python
+  class MyApp(PyTrueNAS):
+      _ARGS_ = MyArgs        # a PyTrueNASArgs subclass
+
+  main("mytool", root=MyApp)
+  ```
+
+  The value reaches **both** the app root and `duho.runpath`'s base, which is
+  the whole point: a global flag that worked on `pytruenas call` but vanished
+  on a RunPath directory would be the obvious way to get this wrong. A plain
+  `PyTrueNASArgs` subclass is combined with `PyTrueNASRunPathArgs` for the
+  RunPath base, so a derived tool keeps its trailing `TARGET` positional.
+
+  This does **not** add per-directory arguments: the base is app-wide, and a
+  step directory still cannot declare its own flags.
+
+### Fixed
+
+- **The web shell discarded output it was not capturing.** With
+  `capture_output=False` the command ran and its output went nowhere — unlike
+  every other executor. It is now written through to `stdout` (defaulting to
+  `sys.stdout.buffer`), and **incrementally**, as frames arrive, so a
+  long-running command reports progress instead of staying silent until it
+  exits.
+
+  Those writes carry the **raw** PTY bytes, so colour and other escape
+  sequences survive. The captured `CompletedProcess.stdout` value stays
+  cleaned — a caller parsing it wants the text, not the terminal's rendering.
+
+### Changed
+
+- **The web shell no longer rejects `stdout=`/`stderr=`.** `capture_output`
+  and `stdout` now resolve through `hostctl.executor.capture_streams`, the
+  same helper the SSH executor uses, so the option surface matches whichever
+  provider a host selects. `stdin=` is still rejected — the PTY has no input
+  channel to attach to.
+
+  `stderr` remains `None` on the result: a PTY has one stream, and writing the
+  merged output to both sinks would duplicate every line. Splitting them would
+  mean rewriting the caller's command, which is deliberately not done.
+- `WebShellSession.run_script()` returns `(text, raw_bytes, returncode)` and
+  takes an optional `sink=`. The extra element is the raw byte stream.
+
 ## [0.3.4] - 2026-08-04
 
 ### Fixed

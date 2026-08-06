@@ -71,6 +71,21 @@ class PyTrueNAS(PyTrueNASArgs, Cli):
     _version_ = AUTO
     _distribution_ = "pytruenas"
 
+    #: The shared args root every command inherits, and what :func:`main` uses
+    #: when no ``args=`` is passed. Declared here rather than as a `main`
+    #: default so a derived tool can set it ONCE by subclassing::
+    #:
+    #:     class MyApp(PyTrueNAS):
+    #:         _ARGS_ = MyArgs
+    #:
+    #:     main(root=MyApp)          # picks up MyArgs with no second argument
+    #:
+    #: `main(args=...)` still overrides it for a caller who would rather not
+    #: subclass. Kept dunder-ish (`_NAME_`) to match duho's own class-level
+    #: knobs (`_version_`, `_distribution_`, `_parsername_`) and to stay clear
+    #: of the field namespace -- a plain `ARGS` would be parsed as a CLI field.
+    _ARGS_: "type[PyTrueNASArgs]" = PyTrueNASArgs
+
 
 def _commands_from_source(source: str) -> "list":
     """Yield the commands one source contributes, RunPath directories included.
@@ -466,22 +481,112 @@ def _split_passthrough(
     return argv[:index], argv[index + 1 :]
 
 
+def _app_root(
+    root: "type[PyTrueNAS]", args: "type[PyTrueNASArgs]"
+) -> "type[PyTrueNAS]":
+    """Return the runnable app root for ``args``.
+
+    ``root`` is used as-is when it already carries ``args`` -- the ordinary
+    case, either the default pair or a subclass that set ``_ARGS_``. Rebuilding
+    an equivalent class would change the app's identity and ``__doc__`` (which
+    becomes the CLI description) for no gain.
+
+    A caller passing ``args=`` WITHOUT a matching root gets a class built here,
+    combining the two. ``args`` goes first so its fields and methods win the
+    MRO, matching how ``duho.runpath`` orders its own ``base``.
+    """
+    if issubclass(root, args):
+        return root
+    return _ty.cast(
+        "type[PyTrueNAS]",
+        type(
+            args.__name__ + "Cli",
+            (args, root),
+            {
+                # `__doc__` becomes the CLI description; prefer the args
+                # class's own when it has one, else keep the root's.
+                "__doc__": args.__doc__ or root.__doc__,
+                "_ARGS_": args,
+            },
+        ),
+    )
+
+
+def _runpath_base(args: "type[PyTrueNASArgs]") -> type:
+    """The ``duho.runpath`` base for ``args``.
+
+    A RunPath command needs :class:`~pytruenas.utils.runpath.
+    PyTrueNASRunPathArgs`'s trailing-``targets`` ``_initparser_`` override on
+    top of the shared root -- without it a derived tool's RunPath commands
+    silently lose their ``TARGET`` positional (it is ``SUPPRESS``-ed on a plain
+    class command). So an args class that does not already derive from it is
+    COMBINED with it rather than used directly.
+    """
+    if issubclass(args, PyTrueNASRunPathArgs):
+        return args
+    return type(args.__name__ + "RunPath", (args, PyTrueNASRunPathArgs), {})
+
+
 def main(
     name: "str | None" = None,
     argv: "_ty.Sequence[str] | None" = None,
+    args: "type[PyTrueNASArgs] | None" = None,
+    root: "type[PyTrueNAS] | None" = None,
 ) -> int:
-    """Build the app, parse ``argv``, and run the selected command per target."""
+    """Build the app, parse ``argv``, and run the selected command per target.
+
+    ``root`` (default :class:`PyTrueNAS`) is the app class; ``args`` is the
+    shared args root every command inherits, defaulting to that root's
+    :attr:`PyTrueNAS._ARGS_`. A derived tool adds global options either way::
+
+        class MyArgs(PyTrueNASArgs):
+            region: str = "us-east"
+            "Which region to operate on"
+            ("--region",)  # type: ignore
+
+        class MyApp(PyTrueNAS):
+            _ARGS_ = MyArgs
+
+        sys.exit(main(name="mytool", root=MyApp))   # or: main(args=MyArgs)
+
+    Whichever way it arrives, the args class is applied in BOTH places a shared
+    root has to reach -- which is the whole reason this is a parameter rather
+    than something a caller wires up itself:
+
+    * the app root, so module commands and the global parser see the added
+      fields; and
+    * ``duho.runpath``'s ``base``, so RunPath commands inherit them too --
+      re-registered here rather than only at import, because duho applies a
+      base when each command CLASS IS BUILT, and discovery happens below.
+      Registering at import time (as this module does for the default) is too
+      early to honour a per-call ``args``.
+    """
     name = name or "pytruenas"
+    root = root or PyTrueNAS
+    args = args or root._ARGS_
+    if not (isinstance(args, type) and issubclass(args, PyTrueNASArgs)):
+        raise TypeError(
+            "args must be a PyTrueNASArgs subclass; the fan-out reads "
+            "_expanded_targets_/_config_dict_ off the parsed instance"
+        )
+
+    root = _app_root(root, args)
+    # Only re-register when the caller actually changed the base: the default
+    # was already registered at import, and a redundant call would rebuild the
+    # RunPath base for no reason.
+    if args is not PyTrueNASArgs:
+        _runpath.register(base=_runpath_base(args), step_adapter=_step_adapter)
+
     argv, passthrough = _split_passthrough(argv)
     # Module-global rather than threaded through: `app` builds the parsed
     # instance itself, so there is no seam to pass this along, and a command
     # reads it at run time from one obvious place.
     PASSTHROUGH[:] = passthrough
     return app(
-        PyTrueNAS,
+        root,
         commands=_discover(argv),
         argv=argv,
         name=name,
-        description=PyTrueNAS.__doc__,
+        description=root.__doc__,
         dispatch=_dispatch,
     )

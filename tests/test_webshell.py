@@ -102,10 +102,14 @@ def test_rejects_multi_line_scripts():
         session.run_script("echo a\necho b")
 
 
-@pytest.mark.parametrize("stream", ["stdin", "stdout", "stderr"])
-def test_rejects_stream_redirection(stream):
-    with pytest.raises(NotImplementedError, match="PTY|redirect"):
-        _provider()._execute("true", **{stream: subprocess.PIPE})
+def test_rejects_stdin_redirection():
+    """stdin stays rejected: the PTY has no input channel to attach to.
+
+    stdout/stderr are NOT rejected any more -- the merged stream is written
+    through to whatever the caller set, matching every other executor.
+    """
+    with pytest.raises(NotImplementedError, match="stdin"):
+        _provider()._execute("true", stdin=subprocess.PIPE)
 
 
 def test_rejects_piped_input():
@@ -122,6 +126,147 @@ def test_rejects_argv_arguments():
 
 def test_declares_no_args_capability():
     assert "args" not in _provider().capabilities
+
+
+# -- streaming output ------------------------------------------------------
+#
+# These drive run_script() against a fake websocket rather than a real PTY:
+# the frames a PTY would send are exactly the input this logic has to handle,
+# and scripting them is the only way to test *incremental* delivery at all --
+# a live box hands back whatever timing it feels like.
+
+
+class _FakeWS:
+    """A websocket that replays a fixed frame sequence.
+
+    `sent` records what run_script wrote, so a test can recover the generated
+    sentinel and build a matching completion frame.
+    """
+
+    def __init__(self, frames):
+        self._frames = list(frames)
+        self.sent = []
+        self.timeout = None
+
+    def send_binary(self, data):
+        self.sent.append(data)
+
+    def settimeout(self, value):
+        self.timeout = value
+
+    def recv(self):
+        if not self._frames:
+            raise AssertionError("run_script read past the scripted frames")
+        frame = self._frames.pop(0)
+        return frame() if callable(frame) else frame
+
+    def close(self):
+        pass
+
+
+def _session(frames):
+    session = WebShellSession(MagicMock())
+    session._ws = _FakeWS(frames)
+    return session
+
+
+def _end(session):
+    """The sentinel run_script generated, recovered from what it sent."""
+    sent = session._ws.sent[0].decode()
+    return sent.split('printf "')[1].split("%s")[0]
+
+
+def test_sink_receives_raw_bytes_preserving_ansi():
+    """Colour must survive to the sink: raw bytes, not cleaned text.
+
+    clean_output() strips exactly these escape sequences, so a sink fed the
+    cleaned form would silently lose every colour the caller wanted to see.
+    """
+    session = _session([])
+    chunks = []
+    red = b"\x1b[31mDANGER\x1b[0m\r\n"
+    session._ws = _FakeWS([red, lambda: f"{_end(session)}0\r\n".encode()])
+
+    text, raw, code = session.run_script("echo x", sink=chunks.append)
+
+    joined = b"".join(chunks)
+    assert b"\x1b[31m" in joined, "ANSI was stripped before reaching the sink"
+    assert b"DANGER" in joined
+    assert code == 0
+    # The cleaned return value is the opposite contract -- no escapes.
+    assert "\x1b[31m" not in text and "DANGER" in text
+    assert b"\x1b[31m" in raw
+
+
+def test_sink_is_incremental_not_one_final_write():
+    """Output arrives as it happens, not all at once when the command ends.
+
+    A single write at completion is the behaviour this replaces, so the test
+    asserts the sink saw data BEFORE the sentinel frame was ever read.
+    """
+    session = _session([])
+    # Ordering, not totals: record how much the sink had received at the moment
+    # each frame was read. Asserting only on the final total cannot distinguish
+    # streaming from a single flush at completion -- the completion branch
+    # writes the withheld remainder too, so both end with the same bytes.
+    written = []
+    events = []
+
+    big = b"x" * 8192  # over _BATCH, so it flushes on arrival
+
+    def frame_then_mark(data):
+        def _f():
+            events.append(("read", len(b"".join(written))))
+            return data
+        return _f
+
+    session._ws = _FakeWS(
+        [
+            frame_then_mark(big),
+            frame_then_mark(big),
+            lambda: f"{_end(session)}0\r\n".encode(),
+        ]
+    )
+    session.run_script("run", sink=written.append)
+
+    # By the time the SECOND frame was read, the first must already have been
+    # written out. Under buffer-until-done this is still 0.
+    assert events[1][1] >= 4096, (
+        "sink had received %d bytes when the 2nd frame arrived -- output is "
+        "being buffered until completion, not streamed" % events[1][1]
+    )
+
+
+def test_sink_never_emits_the_sentinel():
+    """The sentinel is internal bookkeeping and must not reach a terminal."""
+    session = _session([])
+    chunks = []
+    session._ws = _FakeWS(
+        [b"real output\r\n", lambda: f"{_end(session)}0\r\n".encode()]
+    )
+
+    session.run_script("echo hi", sink=chunks.append)
+
+    joined = b"".join(chunks)
+    assert b"real output" in joined
+    assert b"__EN" not in joined, "the completion sentinel leaked to the sink"
+
+
+def test_returncode_is_recovered_from_the_sentinel():
+    session = _session([])
+    session._ws = _FakeWS([lambda: f"{_end(session)}42\r\n".encode()])
+    _, _, code = session.run_script("false")
+    assert code == 42
+
+
+def test_no_sink_still_returns_the_output():
+    """Omitting the sink keeps the previous buffered behaviour intact."""
+    session = _session([])
+    session._ws = _FakeWS(
+        [b"hello\r\n", lambda: f"{_end(session)}0\r\n".encode()]
+    )
+    text, raw, code = session.run_script("echo hello")
+    assert "hello" in text and b"hello" in raw and code == 0
 
 
 # -- probe -----------------------------------------------------------------
