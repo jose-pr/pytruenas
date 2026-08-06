@@ -159,13 +159,30 @@ class FileTarget(TemplateTarget):
         return baseline
 
     def read(self) -> bytes:
+        """The content to template FROM: the baseline if one exists, else the file.
+
+        **Never creates the snapshot.** Taking it is :meth:`write`'s job, and
+        doing it here made reading a mutating operation -- which fails outright
+        on a read-only mount (the middlewared package ships on one; see
+        :meth:`pytruenas.patch.middleware.MiddlewareFiles.find_template`). That
+        turned ``baseline=True`` into "cannot even read this file", which is
+        why the middleware helper used to default it off.
+
+        Snapshotting at write time is also the correct moment on its own terms:
+        the mount must be writable by then anyway, and a caller who only reads
+        has changed nothing that needs undoing.
+
+        With no snapshot yet, the file's CURRENT content is the right answer --
+        nothing has displaced it, so it is still its own original.
+        """
         if self._baseline:
-            baseline = self.baseline()
-            if not baseline.exists():
-                # No original to template from: an empty baseline is the
-                # correct answer for a file that does not exist yet.
-                raise FileNotFoundError(str(self.path))
-            return baseline.read_bytes()
+            baseline = self.baseline_path
+            if baseline is not None and baseline.exists():
+                return baseline.read_bytes()
+        if not self.path.exists():
+            # No original to template from: distinguishing this from an empty
+            # file is the caller's job (`apply_template` treats it as empty).
+            raise FileNotFoundError(str(self.path))
         return self.path.read_bytes()
 
     # -- inspection and undo ----------------------------------------------
