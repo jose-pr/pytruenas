@@ -54,23 +54,46 @@ proxy — has no SSH to fall back on. For those, `run()` uses `/websocket/shell`
 the same PTY the web UI's Shell page drives.
 
 It is ranked below SSH deliberately, because a PTY is a single terminal stream
-rather than a pair of clean channels:
+rather than a pair of clean channels. Most of that is worked around, but not
+all of it:
 
-- **stdout and stderr are merged.** `capture_output="stderr"` cannot be
-  honoured; everything arrives on `stdout`.
-- **`input=` is not supported.** Encode the payload into the command itself —
-  a pipe or a here-string works, being ordinary shell syntax:
+- **stdout and stderr are separated when the shell allows it.** A PTY has one
+  stream, so the command is wrapped to fence its stderr in terminal escape
+  markers, which are split back out into `.stderr`. This needs a shell with
+  process substitution — bash, zsh, or ksh. The login shell is read from
+  `auth.me()`; under anything else (`sh`, `dash`) the streams stay **merged**,
+  everything arrives on `stdout`, and `.stderr` is `None`. Merged output is
+  always correct, just less informative.
+
+    The wrapper is only applied when you ask for the distinction — a plain
+    `capture_output=True` costs nothing extra.
+
+- **Input works, in two shapes.**
 
     ```python
-    client.run("tr a-z A-Z <<< 'shout'")     # fine
-    client.run("printf 'x\\n' | tr a-z A-Z")  # also fine
+    # Known up front -- delivered as a here-document. Prefer this.
+    client.run("cat", input="hello\n", encoding="utf-8")
+
+    # Still being produced -- pumped in the background.
+    client.run("cat", stdin=open("big.bin", "rb"))
     ```
+
+    `input=` is reliable; `stdin=` races the terminal's echo of the command
+    line and is mitigated by a short delay rather than fully cured. A file
+    *descriptor* (`subprocess.PIPE`) is rejected — there is no PTY fd to
+    attach one to.
+
+- **Output you do not capture is streamed as it arrives**, in raw bytes, to
+  `stdout` (default `sys.stdout.buffer`) — so a long-running command reports
+  progress instead of going silent, and colour and other escape sequences
+  survive. Anything you *do* capture is cleaned text.
 
 - **Commands must be single-line.** An embedded newline submits a partial line
   to the terminal and desynchronises the session, so it is rejected rather than
-  silently mangled.
+  silently mangled. A here-document is the exception, since its newlines are
+  the document's own — which is how `input=` is delivered.
 - The exit status is recovered from the terminal stream, and terminal escape
-  sequences are stripped from the output.
+  sequences are stripped from the captured output.
 
 ## Choosing the transport yourself
 
