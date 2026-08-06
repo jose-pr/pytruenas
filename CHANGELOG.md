@@ -4,7 +4,66 @@ All notable changes to this project are documented here. The format is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.3.5] - 2026-08-05
+## [0.4.0] - 2026-08-05
+
+### Added
+
+- **The web shell separates stdout from stderr.** A PTY has one stream, so the
+  command is wrapped to fence its stderr in terminal escape markers and the
+  reader splits them back out into `CompletedProcess.stderr`.
+
+  This needs a shell with process substitution (bash/zsh/ksh). The login shell
+  is read from `auth.me()`, and output stays **merged** under anything else
+  (`sh`, `dash`) with `.stderr` as `None` — always correct, just less
+  informative. The wrapper is applied only when the caller asks for the
+  distinction, so an ordinary `capture_output=True` costs nothing.
+
+  Reading the shell from the API rather than by running a command is
+  deliberate: probing by driving the terminal would hang in exactly the case
+  the probe exists to detect.
+
+- **The web shell accepts input.** `input=` rides along as a here-document —
+  no timing, no second channel — and is the reliable form. `stdin=` takes a
+  readable object and pumps it on a background thread for a stream still being
+  produced; it races the terminal's echo of the command line and is mitigated
+  by a short delay rather than cured. A file *descriptor* is rejected: there is
+  no PTY fd to attach one to.
+
+- **Web-shell output that is not captured is streamed as it arrives**, in raw
+  bytes, to `stdout` (default `sys.stdout.buffer`). A long-running command
+  reports progress instead of going silent until it exits, and colour and other
+  escape sequences survive. Captured `.stdout` remains cleaned text.
+
+### Fixed
+
+- **A patched file could lose its only undo path.** `read()` created the
+  baseline snapshot, which made *reading* a write — and that fails outright on
+  the read-only mount the middlewared package ships on. `find_template` worked
+  around it by defaulting `baseline=False`, trading away the safety net to
+  dodge the bug.
+
+  Reading no longer snapshots (`write()` already did, which is the correct
+  moment: the mount must be writable by then anyway). With that fixed,
+  `find_template` defaults `baseline=True` like everything else in the package,
+  and skipping the snapshot is opt-in. Overwriting a stock template with
+  nothing beside it has no way back — the original ships inside the middlewared
+  package, so recovering it means reinstalling.
+
+- **A shell prompt could end up inside a filesystem path.** The web shell's
+  prompt stripping missed zsh's trailing prompt when its line redraw and the
+  prompt merged onto one line, so `middlewared_path()` returned
+  `/usr/.../middlewared\n#   root@HOST[~]#` and every path built from it was
+  wrong.
+
+### Changed
+
+- **The web shell no longer rejects `stdout=`/`stderr=`.** `capture_output` and
+  `stdout` resolve through `hostctl.executor.capture_streams`, the same helper
+  the SSH executor uses, so the option surface matches whichever provider a
+  host selects. `stdin=` as a file descriptor is still rejected.
+- `WebShellSession.run_script()` returns `(text, raw_bytes, returncode)` and
+  takes `sink=`, `errsink=`, `heredoc=`, and `stdin=`. The extra return element
+  is the raw byte stream.
 
 ### Added
 
@@ -27,33 +86,6 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
   This does **not** add per-directory arguments: the base is app-wide, and a
   step directory still cannot declare its own flags.
-
-### Fixed
-
-- **The web shell discarded output it was not capturing.** With
-  `capture_output=False` the command ran and its output went nowhere — unlike
-  every other executor. It is now written through to `stdout` (defaulting to
-  `sys.stdout.buffer`), and **incrementally**, as frames arrive, so a
-  long-running command reports progress instead of staying silent until it
-  exits.
-
-  Those writes carry the **raw** PTY bytes, so colour and other escape
-  sequences survive. The captured `CompletedProcess.stdout` value stays
-  cleaned — a caller parsing it wants the text, not the terminal's rendering.
-
-### Changed
-
-- **The web shell no longer rejects `stdout=`/`stderr=`.** `capture_output`
-  and `stdout` now resolve through `hostctl.executor.capture_streams`, the
-  same helper the SSH executor uses, so the option surface matches whichever
-  provider a host selects. `stdin=` is still rejected — the PTY has no input
-  channel to attach to.
-
-  `stderr` remains `None` on the result: a PTY has one stream, and writing the
-  merged output to both sinks would duplicate every line. Splitting them would
-  mean rewriting the caller's command, which is deliberately not done.
-- `WebShellSession.run_script()` returns `(text, raw_bytes, returncode)` and
-  takes an optional `sink=`. The extra element is the raw byte stream.
 
 ## [0.3.4] - 2026-08-04
 
