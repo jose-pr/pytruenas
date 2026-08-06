@@ -6,7 +6,9 @@ was verified live against 26.0.0-BETA.1 (18/18), which is the only way to check
 it -- a mocked PTY would just assert this module's own assumptions back at it.
 """
 
+import io
 import subprocess
+import threading as _threading
 from unittest.mock import MagicMock
 
 import pytest
@@ -112,9 +114,15 @@ def test_rejects_stdin_redirection():
         _provider()._execute("true", stdin=subprocess.PIPE)
 
 
-def test_rejects_piped_input():
-    with pytest.raises(NotImplementedError, match="here-string|pipe"):
-        _provider()._execute("cat", input="data")
+def test_rejects_an_fd_for_stdin():
+    """An int fd has nothing to read and no pty fd to attach to."""
+    with pytest.raises(NotImplementedError, match="descriptor|readable"):
+        _provider()._execute("cat", stdin=subprocess.PIPE)
+
+
+def test_rejects_stdin_and_input_together():
+    with pytest.raises(ValueError, match="may not both"):
+        _provider()._execute("cat", stdin=io.BytesIO(b"a"), input="b")
 
 
 def test_rejects_argv_arguments():
@@ -267,6 +275,163 @@ def test_no_sink_still_returns_the_output():
     )
     text, raw, code = session.run_script("echo hello")
     assert "hello" in text and b"hello" in raw and code == 0
+
+
+# -- stderr splitting ------------------------------------------------------
+#
+# These test the SPLITTER against bytes shaped like what the wrapper asks the
+# shell to emit. That the appliance's shell actually produces those bytes is a
+# separate claim, only checkable live -- see the module docstring.
+
+_ERR_START = b"\x1b]1337;PytruenasStderr\x07"
+_ERR_END = b"\x1b]1337;PytruenasStdout\x07"
+
+
+def test_split_streams_separates_marked_regions():
+    raw = b"out1" + _ERR_START + b"err1" + _ERR_END + b"out2"
+    out, err = WebShellSession.split_streams(raw)
+    assert out == b"out1out2"
+    assert err == b"err1"
+
+
+def test_split_streams_handles_no_markers():
+    out, err = WebShellSession.split_streams(b"plain")
+    assert out == b"plain" and err == b""
+
+
+def test_split_streams_treats_an_unterminated_region_as_stderr():
+    """The stream said it switched and never said it switched back."""
+    out, err = WebShellSession.split_streams(b"a" + _ERR_START + b"boom")
+    assert out == b"a" and err == b"boom"
+
+
+def test_sinks_receive_their_own_streams():
+    session = _session([])
+    out_chunks, err_chunks = [], []
+    body = b"to-out" + _ERR_START + b"to-err" + _ERR_END
+    session._ws = _FakeWS([body, lambda: f"{_end(session)}0\r\n".encode()])
+
+    session.run_script(
+        "cmd", sink=out_chunks.append, errsink=err_chunks.append
+    )
+
+    assert b"to-out" in b"".join(out_chunks)
+    assert b"to-err" in b"".join(err_chunks)
+    # Neither sink may see the other's bytes, nor the framing itself.
+    assert b"to-err" not in b"".join(out_chunks)
+    assert b"\x1b]1337" not in b"".join(out_chunks + err_chunks)
+
+
+def test_stderr_region_spanning_two_batches_stays_stderr():
+    """The in-region flag has to persist across emits.
+
+    A stderr burst longer than one batch would otherwise have its tail put
+    back on stdout the moment a boundary fell inside the region.
+    """
+    session = _session([])
+    out_chunks, err_chunks = [], []
+    big = b"E" * 9000  # spans several _BATCH-sized emits
+    session._ws = _FakeWS(
+        [
+            _ERR_START + big[:4500],
+            big[4500:] + _ERR_END,
+            lambda: f"{_end(session)}0\r\n".encode(),
+        ]
+    )
+
+    session.run_script("cmd", sink=out_chunks.append, errsink=err_chunks.append)
+
+    assert b"".join(err_chunks).count(b"E") == 9000
+    assert b"E" not in b"".join(out_chunks)
+
+
+def test_markers_are_stripped_when_there_is_no_errsink():
+    """Merged view still must not render the framing as garbage."""
+    session = _session([])
+    chunks = []
+    session._ws = _FakeWS(
+        [
+            b"a" + _ERR_START + b"b" + _ERR_END + b"c",
+            lambda: f"{_end(session)}0\r\n".encode(),
+        ]
+    )
+    session.run_script("cmd", sink=chunks.append)
+    joined = b"".join(chunks)
+    assert b"\x1b]1337" not in joined
+    # Both streams still arrive -- merged is the point, not dropped.
+    assert b"a" in joined and b"b" in joined and b"c" in joined
+
+
+def test_wrap_stderr_uses_cat_not_a_read_loop():
+    """A read loop is line-buffered and mangles the payload; cat is raw."""
+    wrapped = WebShellSession.wrap_stderr("mycmd")
+    assert "2> >(" in wrapped
+    assert "cat" in wrapped
+    assert "while read" not in wrapped
+    assert "mycmd" in wrapped
+
+
+# -- input delivery --------------------------------------------------------
+
+
+def test_with_input_builds_a_quoted_heredoc():
+    from pytruenas.webshell import _with_input
+
+    script = _with_input("cat", "$HOME `id`")
+    # Quoted delimiter: the payload must not be expanded by the shell.
+    assert "<<'" in script
+    assert "$HOME `id`" in script
+    # Opens and closes with the same generated delimiter.
+    delimiter = script.split("<<'")[1].split("'")[0]
+    assert script.rstrip().endswith(delimiter)
+
+
+def test_with_input_accepts_bytes():
+    from pytruenas.webshell import _with_input
+
+    assert "hello" in _with_input("cat", b"hello")
+
+
+def test_heredoc_newlines_are_allowed_through_run_script():
+    """A here-doc is the one legal multi-line form."""
+    session = _session([])
+    session._ws = _FakeWS([lambda: f"{_end(session)}0\r\n".encode()])
+    # Would raise without heredoc=True.
+    _, _, code = session.run_script("cat <<'X'\ndata\nX", heredoc=True)
+    assert code == 0
+
+
+def test_multi_line_still_rejected_without_heredoc():
+    session = WebShellSession(MagicMock())
+    with pytest.raises(ValueError, match="single-line"):
+        session.run_script("echo a\necho b")
+
+
+def test_stdin_is_pumped_to_the_websocket(monkeypatch):
+    """A readable handle is forwarded as binary frames, then EOF.
+
+    `_PUMP_DELAY` is patched out: it exists to lose a race against a REAL
+    pty's echo (see `_pump_stdin`), and there is no pty here -- left in, the
+    test would just sleep for it.
+    """
+    import pytruenas.webshell as ws_mod
+
+    monkeypatch.setattr(ws_mod, "_PUMP_DELAY", 0)
+    session = _session([])
+    session._ws = _FakeWS([lambda: f"{_end(session)}0\r\n".encode()])
+
+    session.run_script("cat", stdin=io.BytesIO(b"piped-payload"))
+
+    # The pump runs on its own thread; wait for it rather than assuming it
+    # won the race with this assertion.
+    for thread in _threading.enumerate():
+        if thread.name == "pytruenas-webshell-stdin":
+            thread.join(timeout=5)
+
+    # sent[0] is the command itself; the pump's writes follow.
+    pumped = b"".join(session._ws.sent[1:])
+    assert b"piped-payload" in pumped
+    assert pumped.endswith(b"\x04"), "no EOF sent; a reader would hang"
 
 
 # -- probe -----------------------------------------------------------------
