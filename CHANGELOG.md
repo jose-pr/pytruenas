@@ -4,6 +4,37 @@ All notable changes to this project are documented here. The format is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.1] - 2026-08-06
+
+### Fixed
+
+- **Wrapper objects reach the API as the scalars it expects.** Holding a value
+  as `IPv4Address`, a MAC type, or a `PurePath` is the natural thing to do in
+  Python, and it broke twice: serializing raised
+  `TypeError: not JSON serializable`, and `diff()` compared the wrapper against
+  the plain string the API had reported. Those are never equal, so the field
+  looked changed on *every* call — an upsert rewrote it forever and reported a
+  change that never happened.
+
+  A type may define `__json__()` to choose its own form (the only hook that can
+  produce something other than a string); otherwise a type carrying its own
+  `__str__` is stringified. Anything else — JSON natives, containers, and
+  objects with the *default* `__str__` — is left alone, so an opaque object
+  still raises `TypeError` rather than being sent as
+  `"<module.Thing object at 0x...>"`.
+
+  The middleware's extended types (`datetime`, `set`, IP *interfaces*) keep
+  their `{"$date": ...}`-style envelopes: the reduction runs only after those
+  are handled. `diff()` normalizes for the comparison only — the value sent is
+  the caller's original.
+
+### Changed
+
+- **Requires `hostctl>=0.2.5`** (was `>=0.2.3`). The web-shell executor
+  imported `write_output` from `hostctl.executor._common` because it was not
+  exported; 0.2.5 makes the stream helpers public, so the import moves to
+  `hostctl.executor`. No private `hostctl` imports remain.
+
 ## [0.4.0] - 2026-08-05
 
 ### Added
