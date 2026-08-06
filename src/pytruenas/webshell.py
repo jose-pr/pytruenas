@@ -39,15 +39,22 @@ error message. This is the single least obvious thing about the endpoint.
 
 Known limits, all deliberate and declared rather than papered over:
 
-* **stdout and stderr are one stream** -- a PTY has no separate error channel,
-  so ``capture_output="stderr"`` cannot be honoured and ``CompletedProcess.
-  stderr`` is always ``None``. The merged output is reported as stdout. A
-  caller passing ``stderr=`` is not rejected, but nothing is written to it:
-  duplicating the merged stream into both sinks would double every line.
-  Splitting the two would mean rewriting the caller's command (redirecting
-  ``2>`` to a marked file and reading it back), which changes what runs and
-  breaks on shells without process substitution -- so it is deliberately not
-  done here.
+* **stdout and stderr share one fd**, because a PTY has no second channel.
+  They are separated *in band* when the caller asks for it: the command is
+  wrapped so its stderr passes through a process substitution that brackets it
+  with OSC 1337 markers, and the reader routes the marked regions to stderr.
+  Verified live on 26.0.0-BETA.1.
+
+  This needs ``2> >(...)``, which only bash/zsh/ksh parse -- under ``sh`` it is
+  a syntax error, the command never runs, and the call would TIME OUT rather
+  than fail usefully. So it is gated on the login shell reported by
+  ``auth.me()`` (see :meth:`WebShellSession.supports_stderr_split`) and simply
+  stays merged when that is not positive. Merged output is always correct,
+  just less informative.
+
+  A caller who asks for no separation (no ``stderr=``, no
+  ``capture_output="stderr"``) pays nothing: the wrapper is only applied when
+  the difference is observable.
 
 Output that is **not** captured is written through to ``stdout`` (defaulting to
 ``sys.stdout.buffer``) incrementally, as frames arrive, rather than buffered
@@ -61,7 +68,16 @@ uses, so the option surface matches whichever provider a host selects.
   sentinel (``printf "__END__%s\\n" "$?"``) and reading until it appears.
 * **No raw multi-line input** -- an embedded newline submits a partial line to
   the PTY and desynchronises every later read. Pipes and here-strings work
-  because they are ordinary single-line shell syntax.
+  because they are ordinary single-line shell syntax, and a here-DOCUMENT is
+  the one legal multi-line form (its newlines are the document's own, and the
+  shell reads to the delimiter). ``input=`` uses exactly that.
+* **Input works, in two shapes.** ``input=`` is a value known in full up
+  front and rides along as a here-document -- no timing, no second channel,
+  and the preferred form. ``stdin=`` takes a readable object and PUMPS it on a
+  background thread, for a stream the caller is still producing; it races the
+  pty's echo of the command line and is mitigated, not cured, by a short delay
+  (see :meth:`WebShellSession._pump_stdin`). A file DESCRIPTOR is rejected --
+  there is no pty fd to attach one to.
 * A command that exits the shell (``exit 3``) ends the session; the next call
   reconnects.
 
@@ -116,8 +132,8 @@ _ANSI = _re.compile(
 #: redrawing its line. The second is easy to miss -- it looks like blank output
 #: rather than a prompt, and leaves a stray ``#`` on the end of every result.
 _PROMPT = _re.compile(
-    r"^[^\s@]+@[^\s\[]*\[[^\]]*\][#$]\s*"  # root@HOST[~]#
-    r"|^[#$]\s{2,}$"  # a bare, space-padded redraw
+    r"[^\s@]+@[^\s\[]*\[[^\]]*\][#$]\s*"  # root@HOST[~]#
+    r"|^[#$]\s{2,}"  # a bare, space-padded redraw
     r"|^\s*$",  # and the blank line it leaves behind
     _re.MULTILINE,
 )
@@ -138,6 +154,33 @@ _BATCH = 4096
 #: "silent until done" behaviour streaming is meant to remove.
 _FLUSH_INTERVAL = 0.1
 
+#: OSC code for the stderr boundary markers. 1337 is iTerm2's vendor code,
+#: already used for private terminal integrations, so a terminal that does not
+#: know these specific payloads still parses the SEQUENCE correctly and prints
+#: nothing -- which is exactly the fallback wanted. A bare private string would
+#: risk being rendered as literal text somewhere.
+_OSC = 1337
+
+#: What the wrapper emits around bytes that came from the command's stderr.
+#: Matched against the RAW stream (never the cleaned text -- `clean_output`
+#: strips OSC sequences, which would delete the very markers being looked for).
+_ERR_START = b"\x1b]1337;PytruenasStderr\x07"
+_ERR_END = b"\x1b]1337;PytruenasStdout\x07"
+
+#: Shells whose syntax supports the `2> >(...)` process substitution the stderr
+#: split depends on. `sh`/`dash` parse it as a syntax error, and the failure is
+#: not clean: the command never runs, so the completion sentinel never appears
+#: and the call TIMES OUT rather than reporting the real problem. Hence a
+#: positive probe rather than an attempt-and-see.
+_PROCSUB_SHELLS = ("bash", "zsh", "ksh")
+
+#: How long the stdin pump waits before its first write, so the pty has echoed
+#: the command line and the program is actually reading. See
+#: `WebShellSession._pump_stdin` -- this mitigates a race it cannot eliminate,
+#: which is why `input=` (a here-document, delivered with the command itself)
+#: is preferred whenever the data is known up front.
+_PUMP_DELAY = 0.5
+
 #: The **externally reachable** web-shell path. ``middlewared`` registers the
 #: handler at ``/_shell`` (``main.py``'s ``add_route('*', '/_shell{...}')``),
 #: but that is the *internal* path on port 6000: nginx exposes it as
@@ -149,6 +192,43 @@ _FLUSH_INTERVAL = 0.1
 #: redirect target is an ``https://`` URL its own ``parse_url`` then rejects
 #: with the baffling ``ValueError: scheme https is invalid``.
 WEBSHELL_PATH = "/websocket/shell"
+
+
+def _with_input(script: str, value: object, *, encoding: object = None) -> str:
+    """Embed ``value`` as the command's stdin, via a here-document.
+
+    The PTY has no separate input channel, but a value known in FULL up front
+    needs none: a here-document is ordinary single-line shell syntax, and the
+    shell feeds it to the command as stdin exactly as a pipe would.
+
+    The delimiter is quoted (``<<'EOF'``) so the shell performs NO expansion on
+    the payload -- an unquoted here-doc would substitute ``$HOME``, backticks,
+    and ``\\`` escapes inside what is supposed to be opaque data.
+
+    A payload containing the delimiter would end the document early, so the
+    delimiter carries a random suffix; a value containing THAT is not worth
+    defending against. Bytes are decoded because the whole command is one text
+    line by the time it reaches the pty.
+    """
+    if isinstance(value, bytes):
+        value = value.decode(
+            _ty.cast(str, encoding) or "utf-8", "replace"
+        )
+    text = str(value)
+    delimiter = "PYTNIN" + _uuid.uuid4().hex[:8]
+    if delimiter in text:  # pragma: no cover - a random 8-hex collision
+        raise ValueError("input collides with the generated here-doc delimiter")
+    # A here-doc is the one place a newline is legal in an otherwise
+    # single-line command: it is the document's own line separator, and the
+    # shell keeps reading until the delimiter line. `run_script` still rejects
+    # newlines in the COMMAND, so this is built as one string and sent whole.
+    return f"{script} <<'{delimiter}'\n{text}\n{delimiter}"
+
+
+def _send(sink: "_ty.Callable[[bytes], None] | None", data: bytes) -> None:
+    """Hand non-empty ``data`` to ``sink``, if there is one."""
+    if sink is not None and data:
+        sink(data)
 
 
 def clean_output(data: bytes) -> str:
@@ -174,6 +254,13 @@ class WebShellSession:
         self._ws = None
         self._lock = _threading.RLock()
         self.shell_id: "str | None" = None
+        #: Tri-state: None = not yet probed, then the cached answer. See
+        #: `supports_stderr_split`.
+        self._procsub: "bool | None" = None
+        #: Guards websocket SENDS only. Deliberately not `_lock`: the stdin
+        #: pump runs while `run_script` holds that one and blocks in recv, so
+        #: sharing it would deadlock. See `_pump_stdin`.
+        self._send_lock = _threading.Lock()
 
     # -- connection --------------------------------------------------------
 
@@ -236,6 +323,83 @@ class WebShellSession:
                 except Exception:
                     pass
 
+    # -- stderr splitting --------------------------------------------------
+
+    def login_shell(self) -> "str | None":
+        """The login shell of the account this session authenticates as.
+
+        ``auth.me()`` reports the authenticated account's passwd entry, so
+        ``pw_shell`` is the shell ``/usr/bin/login`` will exec -- exactly what
+        the PTY ends up running. ``None`` when the API cannot answer.
+        """
+        try:
+            return _ty.cast(
+                "str | None", self.client.api.auth.me().get("pw_shell")
+            )
+        except Exception:
+            return None
+
+    def supports_stderr_split(self) -> bool:
+        """Whether the login shell can split stderr; resolved once, then cached.
+
+        The split wraps the command in ``2> >(...)`` process substitution,
+        which only bash/zsh/ksh parse. Under ``sh``/``dash`` it is a syntax
+        error and the command never runs -- so the completion sentinel never
+        arrives and the call TIMES OUT instead of failing usefully. Hence a
+        positive answer is required before wrapping anything.
+
+        The answer comes from the **API** (``auth.me()``'s ``pw_shell``), not
+        from running a command. Asking the shell to identify itself would mean
+        driving the very PTY this is meant to make safe: if the terminal is
+        wedged, so is the probe, and the timeout it exists to prevent happens
+        during the check. The API path also costs no PTY round-trip at all.
+
+        Falls back to ``False`` when the shell is unknown -- merged output is
+        always correct, just less informative, so an unknown shell degrades
+        rather than risking the syntax error.
+        """
+        if self._procsub is None:
+            shell = self.login_shell()
+            self._procsub = bool(shell) and any(
+                # Match the basename: `/usr/bin/zsh` -> `zsh`. A substring test
+                # over the whole path would let `/usr/bin/nozsh` through, and
+                # would miss nothing a basename match catches.
+                shell.rsplit("/", 1)[-1] == name  # type: ignore[union-attr]
+                for name in _PROCSUB_SHELLS
+            )
+        return self._procsub
+
+    @staticmethod
+    def wrap_stderr(script: str) -> str:
+        """Wrap ``script`` so its stderr arrives fenced in OSC markers.
+
+        stderr is redirected into a process substitution that brackets it with
+        :data:`_ERR_START`/:data:`_ERR_END` and forwards it to the shared PTY.
+        Both streams stay on one fd -- a PTY has no second channel -- but the
+        markers say which bytes were which, so the reader can separate them.
+
+        ``cat`` rather than a ``while read -r line`` loop, deliberately. A read
+        loop is line-buffered (so a progress bar or a prompt written to stderr
+        without a trailing newline never appears at all), strips trailing
+        whitespace, and lets ``echo -e`` interpret backslash escapes inside the
+        payload. ``cat`` forwards bytes unchanged, which is the whole point of
+        keeping the stream raw.
+
+        The markers therefore bracket each *write* ``cat`` performs rather than
+        each line, which is the granularity the ordering actually needs: stderr
+        stays interleaved with stdout in real time instead of arriving as a
+        trailing dump the way a temp-file redirect would give.
+        """
+        # The markers hold ESC and BEL, which cannot appear literally in a
+        # single-line command, so they are written as printf %b escapes.
+        start = "\\033]%d;PytruenasStderr\\007" % _OSC
+        end = "\\033]%d;PytruenasStdout\\007" % _OSC
+        # `printf %b` emits the opening marker, then `cat` streams stderr
+        # through untouched, then the closing marker. One marker pair per
+        # stderr burst, with no shell loop between the bytes and the pty.
+        forward = f'{{ printf "%b" "{start}"; cat; printf "%b" "{end}"; }}'
+        return f"{{ {script} ; }} 2> >({forward})"
+
     # -- execution ---------------------------------------------------------
 
     def run_script(
@@ -244,6 +408,9 @@ class WebShellSession:
         *,
         timeout: "float | None" = None,
         sink: "_ty.Callable[[bytes], None] | None" = None,
+        errsink: "_ty.Callable[[bytes], None] | None" = None,
+        heredoc: bool = False,
+        stdin: object = None,
     ) -> "tuple[str, bytes, int]":
         """Run one shell script; return cleaned output, raw bytes, and status.
 
@@ -264,7 +431,11 @@ class WebShellSession:
         module exists to hide. The withheld tail is flushed on completion,
         minus the sentinel line itself.
         """
-        if "\n" in script or "\r" in script:
+        # A here-document is the one legal multi-line form: its newlines are
+        # the document's own separators and the shell keeps reading until the
+        # delimiter, so the pty stays in sync. Anything else with an embedded
+        # newline submits a partial line and desynchronises every later read.
+        if not heredoc and ("\n" in script or "\r" in script):
             raise ValueError(
                 "the web shell takes single-line commands; encode a multi-line "
                 "payload as a here-string or a pipe"
@@ -278,7 +449,21 @@ class WebShellSession:
             ws = self.connect()
             # BINARY: the server writes msg.data straight to the pty fd, which
             # rejects str and kills its writer thread. See the module docstring.
-            ws.send_binary(f'{script}; printf "{end}%s\\n" "$?"\n'.encode())
+            #
+            # The sentinel's separator depends on the shape of the command. A
+            # here-document ends at a line containing ONLY its delimiter, so
+            # appending `; printf ...` to that last line stops it terminating:
+            # the shell keeps reading input forever and the command never runs.
+            # A NEWLINE puts the sentinel on its own line, after the document,
+            # where it is an ordinary next command. Everything else keeps `;`,
+            # which is what makes the status apply to the command just run.
+            separator = "\n" if heredoc else "; "
+            ws.send_binary(
+                f'{script}{separator}printf "{end}%s\\n" "$?"\n'.encode()
+            )
+
+            if stdin is not None:
+                self._pump_stdin(ws, stdin)
 
             ws.settimeout(timeout)
             deadline = _time.monotonic() + timeout
@@ -286,9 +471,23 @@ class WebShellSession:
             # How much of `buffer` the sink has already seen. Bytes are emitted
             # once and never re-sent, so this only ever moves forward.
             emitted = 0
-            # Never emit a tail that could still be a partial sentinel. The
-            # sentinel is ASCII, so its byte length bounds how much to withhold.
-            hold = len(end.encode()) + 12  # + room for the status digits
+            # Which stream the NEXT byte belongs to. This has to persist across
+            # batches: a stderr burst can span two emits, and splitting each
+            # chunk independently would put its tail back on stdout the moment
+            # a batch boundary fell inside the region.
+            in_err = [False]
+            # Never emit a tail that could still be a partial marker -- of
+            # EITHER kind. An OSC boundary split across two frames would
+            # otherwise reach the terminal as escape-sequence garbage AND put
+            # the following bytes on the wrong stream, so the longest marker
+            # bounds how much is withheld, not just the sentinel.
+            hold = (
+                max(
+                    len(end.encode()) + 12,  # + room for the status digits
+                    len(_ERR_START),
+                    len(_ERR_END),
+                )
+            )
             flush_at = _time.monotonic() + _FLUSH_INTERVAL
             while _time.monotonic() < deadline:
                 try:
@@ -313,12 +512,17 @@ class WebShellSession:
                     if safe - emitted >= _BATCH or (
                         safe > emitted and _time.monotonic() >= flush_at
                     ):
-                        sink(buffer[emitted:safe])
+                        self._emit(buffer[emitted:safe], sink, errsink, in_err)
                         emitted = safe
                         flush_at = _time.monotonic() + _FLUSH_INTERVAL
                 if found:
                     if sink is not None:
-                        sink(self._tail(buffer[emitted:], end))
+                        self._emit(
+                            self._tail(buffer[emitted:], end),
+                            sink,
+                            errsink,
+                            in_err,
+                        )
                     return (
                         self._strip(text, script, end),
                         buffer,
@@ -327,6 +531,150 @@ class WebShellSession:
 
         self.close()
         raise _subprocess.TimeoutExpired(script, timeout)
+
+    def _pump_stdin(self, ws: object, stdin: object) -> "_threading.Thread":
+        """Forward a readable ``stdin`` to the pty on a background thread.
+
+        The mirror of the output watcher: it reads the caller's handle and
+        sends each chunk as a BINARY frame, so a stream the caller is still
+        producing (a file, a pipe, another process's output) reaches the
+        command as it arrives rather than having to be known up front.
+
+        **Concurrency.** `run_script` holds `self._lock` and blocks in
+        `ws.recv()` for the whole command, so this thread cannot take that
+        lock -- it would deadlock immediately. `websocket-client` does not
+        guarantee a send is safe against a CONCURRENT recv, so sends are
+        serialised on a separate `_send_lock` that the reader never holds:
+        recv is left free to block while a send completes under its own lock.
+
+        The thread is a daemon and is never joined for longer than the command:
+        a handle that never reaches EOF (an open pipe with no writer) must not
+        outlive the call or wedge interpreter shutdown.
+
+        **Startup race, and why the delay is not a tuning knob.** There is no
+        signal for "the command is now reading stdin" -- the pty echoes the
+        command line, and nothing distinguishes the shell still parsing it from
+        the program having started. Writing immediately puts the payload into
+        the terminal's input buffer AHEAD of the program, where the shell
+        treats it as the next command line instead of as input. `_PUMP_DELAY`
+        waits for the echo to drain first; measured against 26.0.0-BETA.1,
+        under 0.3s the payload is consistently mis-delivered.
+
+        This is a genuine limitation of driving a terminal rather than a pipe:
+        the delay makes the common case work, it does not make the race
+        impossible. `input=` has no such problem -- a here-document is part of
+        the command line itself, so the shell delivers it with no timing
+        involved -- and is the better choice whenever the data is known up
+        front.
+        """
+        read = getattr(stdin, "read", None)
+        if read is None:
+            raise NotImplementedError(
+                "stdin must be a readable object with a .read() method"
+            )
+
+        def _run() -> None:
+            try:
+                # See the docstring: let the command line's echo drain before
+                # writing, or the payload is parsed as the next command.
+                _time.sleep(_PUMP_DELAY)
+                while True:
+                    chunk = read(_BATCH)
+                    if not chunk:
+                        break
+                    if isinstance(chunk, str):
+                        chunk = chunk.encode("utf-8")
+                    with self._send_lock:
+                        ws.send_binary(chunk)  # type: ignore[attr-defined]
+                # EOF on the handle is EOF for the command: ^D on a pty, which
+                # is what a program blocking on read() is waiting for. Without
+                # it `cat` never returns and the command hangs to its timeout.
+                with self._send_lock:
+                    ws.send_binary(b"\x04")  # type: ignore[attr-defined]
+            except Exception:
+                # A pump failure must not kill the command: the output watcher
+                # is still reading, and the command may well complete without
+                # the rest of its input. It surfaces as whatever the command
+                # does with truncated stdin.
+                pass
+
+        thread = _threading.Thread(
+            target=_run, name="pytruenas-webshell-stdin", daemon=True
+        )
+        thread.start()
+        return thread
+
+    @staticmethod
+    def _emit(
+        chunk: bytes,
+        sink: "_ty.Callable[[bytes], None] | None",
+        errsink: "_ty.Callable[[bytes], None] | None",
+        in_err: "list[bool]",
+    ) -> None:
+        """Route one chunk to the stdout/stderr sinks, honouring OSC markers.
+
+        ``in_err`` is a one-element list used as a mutable cell: the "which
+        stream are we in" flag has to survive between calls, because a stderr
+        region can span batches.
+
+        With no ``errsink`` the markers are still REMOVED but both streams go
+        to ``sink`` -- that is the merged view a plain terminal wants, minus
+        this module's framing bytes, and it keeps the markers from being
+        rendered as garbage by a terminal that ignores OSC 1337.
+        """
+        if not chunk:
+            return
+        rest = chunk
+        while rest:
+            if in_err[0]:
+                stop = rest.find(_ERR_END)
+                if stop < 0:
+                    _send(errsink or sink, rest)
+                    return
+                _send(errsink or sink, rest[:stop])
+                rest = rest[stop + len(_ERR_END) :]
+                in_err[0] = False
+                continue
+            start = rest.find(_ERR_START)
+            if start < 0:
+                _send(sink, rest)
+                return
+            _send(sink, rest[:start])
+            rest = rest[start + len(_ERR_START) :]
+            in_err[0] = True
+
+    @staticmethod
+    def split_streams(data: bytes) -> "tuple[bytes, bytes]":
+        """Split raw PTY bytes into ``(stdout, stderr)`` on the OSC markers.
+
+        Everything between :data:`_ERR_START` and :data:`_ERR_END` came from
+        the command's stderr; everything else is stdout. The markers themselves
+        are dropped from both -- they are this module's framing, not output.
+
+        Runs against the RAW stream. `clean_output` strips OSC sequences, so
+        splitting the cleaned text would find no markers at all.
+
+        An unterminated final region (the command died mid-write, or the
+        buffer was cut at a batch boundary) counts as stderr through the end:
+        the marker said the stream switched, and nothing said it switched back.
+        """
+        out = bytearray()
+        err = bytearray()
+        rest = data
+        while True:
+            start = rest.find(_ERR_START)
+            if start < 0:
+                out += rest
+                break
+            out += rest[:start]
+            rest = rest[start + len(_ERR_START) :]
+            stop = rest.find(_ERR_END)
+            if stop < 0:
+                err += rest
+                break
+            err += rest[:stop]
+            rest = rest[stop + len(_ERR_END) :]
+        return bytes(out), bytes(err)
 
     @staticmethod
     def _tail(remainder: bytes, end: str) -> bytes:
@@ -412,18 +760,36 @@ class WebShellExecutorProvider(_ExecutorProvider):
             raise NotImplementedError(
                 "the web shell takes one rendered command, not argv arguments"
             )
-        if options.get("stdin") is not None:
-            raise NotImplementedError(
-                "the web shell cannot redirect stdin: the PTY has no input "
-                "channel a caller can attach to"
-            )
-        if options.get("input") is not None:
-            raise NotImplementedError(
-                "the web shell cannot pipe input; encode it as a here-string "
-                "or a pipe inside the command"
-            )
-
         script = str(command)
+
+        # Two different things, both deliverable through the PTY's input side:
+        #
+        # * `input=` is a value known in full up front, so it is embedded as a
+        #   here-document -- one line of ordinary shell syntax, no second
+        #   channel needed.
+        # * `stdin=` is a file-like the caller keeps writing to, so it is
+        #   PUMPED: a reader thread forwards it to the websocket as it
+        #   produces bytes (see `WebShellSession.pump_stdin`).
+        #
+        # An int fd (subprocess.PIPE/DEVNULL) is neither: PIPE has no bytes to
+        # read and DEVNULL means "no input", so both are rejected rather than
+        # silently doing nothing.
+        payload = options.get("input")
+        stdin = options.get("stdin")
+        if payload is not None and stdin is not None:
+            raise ValueError("stdin and input arguments may not both be used")
+        heredoc = False
+        if payload is not None:
+            script = _with_input(
+                script, payload, encoding=options.get("encoding")
+            )
+            heredoc = True
+        if isinstance(stdin, int):
+            raise NotImplementedError(
+                "the web shell needs a readable stdin object, not a file "
+                "descriptor: the PTY has no fd a caller's pipe can be "
+                "attached to"
+            )
         encoding = _ty.cast("str | None", options.get("encoding"))
         errors = _ty.cast("str | None", options.get("errors"))
         text_mode = bool(encoding or errors or options.get("text"))
@@ -446,23 +812,57 @@ class WebShellExecutorProvider(_ExecutorProvider):
         if stdout_target != _subprocess.PIPE:
             sink = self._sink(stdout_target, encoding, errors)
 
+        # Splitting stderr costs an extra shell wrapper, so it is only done
+        # when the caller can actually observe the difference -- either they
+        # want stderr captured separately, or they gave it its own sink. The
+        # probe is what decides whether the login shell can do it at all;
+        # without process substitution the streams stay merged, which is
+        # always correct, just less informative.
+        want_split = stderr_target is not None and stderr_target != _subprocess.STDOUT
+        split = want_split and self.session.supports_stderr_split()
+        if split:
+            script = self.session.wrap_stderr(script)
+
+        errsink = None
+        if split and stderr_target != _subprocess.PIPE:
+            errsink = self._sink(stderr_target, encoding, errors)
+
         text, raw, returncode = self.session.run_script(
             script,
             timeout=_ty.cast("float | None", options.get("timeout")),
             sink=sink,
+            errsink=errsink,
+            heredoc=heredoc,
+            stdin=stdin,
         )
 
         # The captured value is the CLEANED text: a caller parsing stdout wants
         # what the command printed, not the terminal's rendering of it. The
         # live sink above is the opposite case and deliberately gets `raw`.
-        value: "str | bytes" = text if text_mode else text.encode(encoding or "utf-8")
+        if split:
+            # Split the RAW stream (the markers are stripped from the cleaned
+            # text), then clean each side independently.
+            out_raw, err_raw = self.session.split_streams(raw)
+            # No separate marker-stripping pass: `_ANSI` already matches
+            # `\x1b][^\x07]*\x07`, which is exactly the OSC form these use.
+            out_text = clean_output(out_raw)
+            err_text = clean_output(err_raw)
+        else:
+            out_text, err_text = text, ""
 
-        # Already written by the sink; `dispatch_output` would write it twice.
-        stdout = value if stdout_target == _subprocess.PIPE else None
-        # stdout and stderr are the same stream on a PTY. There is nothing to
-        # put in stderr, so it stays None whatever the caller asked for --
-        # writing the merged output to BOTH sinks would duplicate every line.
-        stderr = None
+        def _value(rendered: str) -> "str | bytes":
+            return rendered if text_mode else rendered.encode(encoding or "utf-8")
+
+        # Already written by the sink; writing it again would duplicate it.
+        stdout = _value(out_text) if stdout_target == _subprocess.PIPE else None
+        # Without a split there is genuinely nothing to report: a PTY merges
+        # the two, and that merged text is already on stdout. Putting it in
+        # stderr as well would duplicate every line.
+        stderr = (
+            _value(err_text)
+            if split and stderr_target == _subprocess.PIPE
+            else None
+        )
         result = _subprocess.CompletedProcess(script, returncode, stdout, stderr)
         if options.get("check") and returncode:
             raise _subprocess.CalledProcessError(returncode, script, stdout, stderr)
