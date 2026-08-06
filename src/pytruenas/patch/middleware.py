@@ -91,17 +91,27 @@ class MiddlewareFiles:
         template: str,
         etc: "str | _ty.Sequence[str] | None" = None,
         services: "str | _ty.Sequence[str] | None" = None,
-        baseline: bool = False,
+        baseline: bool = True,
     ) -> SystemFile:
         """Find an ``etc_files`` template by name, with or without ``.mako``.
 
-        ``baseline`` defaults to **False** here, unlike
-        :class:`~pytruenas.patch.systemd.SystemFile` generally. The middlewared
-        package sits on a read-only mount (``boot-pool/ROOT/<version>/usr``),
-        so snapshotting a stock template beside itself cannot work -- it fails
-        with a bare ``OSError: Failure`` from SFTP at the moment you first read
-        it. A baseline belongs next to the file being *patched*, not next to
-        the template being read from.
+        ``baseline`` defaults to **True**, matching
+        :class:`~pytruenas.patch.systemd.SystemFile` and everything else in
+        this package. Overwriting a stock template with no snapshot beside it
+        leaves no way back: the original ships in the middlewared package, so
+        recovering it means reinstalling or pulling the file from another
+        system. Losing the undo path is the more expensive failure, so keeping
+        it is the default and skipping it (``baseline=False``) is the opt-in.
+
+        This USED to default to ``False``, on the grounds that the middlewared
+        package sits on a read-only mount (``boot-pool/ROOT/<version>/usr`` --
+        verified ``ro`` on 26.0.0-BETA.1) and snapshotting beside the template
+        would fail. That reasoning does not survive: writing the patched
+        template fails on a read-only mount too, so any caller reaching a write
+        has already made the dataset writable (see
+        :func:`pytruenas.patch.zfs.writable`). Once it is, the snapshot works.
+        A default that only helped while the operation could not succeed anyway
+        was trading a real safety net for nothing.
 
         Raises ``FileNotFoundError`` naming every location tried, rather than
         just the template name -- on a host where the middlewared layout has

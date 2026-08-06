@@ -198,6 +198,75 @@ def test_baseline_snapshots_an_existing_file_once():
     assert store["/etc/c.conf.baseline"] == b"original\n"  # not re-snapshotted
 
 
+def test_read_never_creates_the_baseline():
+    """Reading must not mutate the target -- the snapshot is write's job.
+
+    This is not a style point: taking the snapshot in read() makes reading a
+    WRITE, which fails outright on a read-only mount (the middlewared package
+    ships on one). That is what forced MiddlewareFiles.find_template to default
+    baseline=False, trading away the undo path.
+    """
+    from pytruenas.patch.templates import FileTarget
+
+    P = _fake_path_factory()
+    store = {"/etc/c.conf": b"original\n"}
+    target = FileTarget(P(store, "/etc/c.conf"), baseline=True)
+
+    assert target.read() == b"original\n"
+    assert "/etc/c.conf.baseline" not in store, "read() snapshotted the file"
+    # Still nothing written after repeated reads.
+    target.read()
+    assert list(store) == ["/etc/c.conf"]
+
+
+def test_read_falls_back_to_the_file_when_no_baseline_exists():
+    """With no snapshot yet the file IS its own original."""
+    from pytruenas.patch.templates import FileTarget
+
+    P = _fake_path_factory()
+    store = {"/etc/c.conf": b"stock\n"}
+    target = FileTarget(P(store, "/etc/c.conf"), baseline=True)
+    assert target.read() == b"stock\n"
+
+
+def test_read_raises_for_a_missing_file():
+    import pytest
+
+    from pytruenas.patch.templates import FileTarget
+
+    P = _fake_path_factory()
+    target = FileTarget(P({}, "/etc/absent.conf"), baseline=True)
+    with pytest.raises(FileNotFoundError):
+        target.read()
+
+
+def test_write_still_snapshots_before_changing_anything():
+    """The safety net the default exists for: write captures the original."""
+    from pytruenas.patch.templates import FileTarget
+
+    P = _fake_path_factory()
+    store = {"/etc/c.conf": b"original\n"}
+    target = FileTarget(P(store, "/etc/c.conf"), baseline=True)
+
+    target.write("patched\n")
+    assert store["/etc/c.conf.baseline"] == b"original\n"
+    assert store["/etc/c.conf"] == b"patched\n"
+
+
+def test_find_template_defaults_to_keeping_a_baseline():
+    """baseline=False must be opt-in: losing the undo path is unrecoverable.
+
+    The stock template ships inside the middlewared package, so overwriting it
+    with no snapshot means reinstalling to get it back.
+    """
+    import inspect
+
+    from pytruenas.patch.middleware import MiddlewareFiles
+
+    signature = inspect.signature(MiddlewareFiles.find_template)
+    assert signature.parameters["baseline"].default is True
+
+
 def test_write_returns_false_when_content_is_unchanged():
     from pytruenas.patch.templates import FileTarget
 
