@@ -97,14 +97,15 @@ import time as _time
 import typing as _ty
 import uuid as _uuid
 
-# `capture_streams` is part of `hostctl.executor`'s own __all__. `write_output`
-# is NOT re-exported, so it comes from the private module -- deliberately, and
-# narrowly: reimplementing it here would mean re-deriving its bytes<->str
-# fallback and its fd-dup handling, and then drifting from the semantics every
-# other executor gets. Tracked as a request to export it; if it moves, this
-# import is the single site to fix.
-from hostctl.executor import capture_streams as _capture_streams
-from hostctl.executor._common import write_output as _write_output
+# Both public as of hostctl 0.2.5 (`write_output` was private until then, and
+# this module imported it from `_common`). Sharing them is a correctness
+# requirement, not a convenience: a host can dispatch the same call through
+# different providers on different attempts, so an executor that handled output
+# differently would return results that varied by which transport won.
+from hostctl.executor import (
+    capture_streams as _capture_streams,
+    write_output as _write_output,
+)
 from hostctl.provider import (
     ExecutorProvider as _ExecutorProvider,
     OperationNotStarted as _OperationNotStarted,
@@ -875,7 +876,7 @@ class WebShellExecutorProvider(_ExecutorProvider):
         """A callable writing raw PTY bytes to one resolved stdout target.
 
         ``None`` means "the process's own stdout", matching
-        :func:`hostctl.executor._common.dispatch_output`. ``sys.stdout.buffer``
+        :func:`hostctl.executor.dispatch_output`. ``sys.stdout.buffer``
         is preferred over ``sys.stdout`` so the bytes reach the terminal
         UNDECODED -- a batch boundary can fall inside a multi-byte character,
         and decoding each batch independently would corrupt it. ``write_output``
