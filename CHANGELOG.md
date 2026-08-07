@@ -4,7 +4,22 @@ All notable changes to this project are documented here. The format is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.4.2] - 2026-08-06
+
+### Fixed
+
+- **The web shell's stderr split could misattribute stdout as stderr.**
+  `wrap_stderr` bracketed stderr with its start/end markers around the whole
+  `2> >(...)` process substitution's *lifetime*, not each individual write —
+  so the subshell's own scheduling decided when the markers actually fired,
+  and stdout written while that bracket happened to still be open came back
+  labelled as stderr. Switched to a per-line read loop that closes the
+  bracket after each line, so a write can only be misattributed if it lands
+  mid-line.
+- **`clean_output()` left stray escape bytes behind for one OSC form.** It
+  only recognized a BEL-terminated OSC sequence (`ESC ] ... BEL`); the
+  equally common ST-terminated form (`ESC ] ... ESC \`) — including its own
+  stray `ESC \` — passed through into what was supposed to be cleaned output.
 
 ### Added
 
