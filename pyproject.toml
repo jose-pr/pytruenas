@@ -149,10 +149,18 @@ config = ["pyyaml"]
 ssh = ["asyncssh", "pathlib_next[sftp-async]>=0.9.0,<0.10"]
 # Typings generator (`pytruenas generate-typings`).
 codegen = ["jinja2"]
+# Repo-tree bundling (`pytruenas deploy --source repo`): gitignore-style
+# filtering via pathspec's GitWildMatch (accurate on `**`/negation, which a
+# hand-rolled matcher gets wrong at the edges), and a parser for
+# pyproject.toml's [project] table on interpreters below 3.11, where stdlib
+# tomllib does not exist yet. tomli is version-gated rather than unconditional
+# so 3.11+ never installs a redundant package for what it already has built
+# in -- `pytruenas.utils.bundle` tries tomllib first regardless.
+repo = ["pathspec", "tomli; python_version<'3.11'"]
 # NOTE: there is no 'host' extra. It installed ifaddr for pytruenas.ops.host's
 # adapter discovery; that moved to netimps (a core dependency) and the module
 # has since been removed entirely. Nothing to install, nothing to add back.
-dev = ["black", "build", "hatchling", "pytest", "pytest-cov", "twine", "pyyaml", "asyncssh", "jinja2"]
+dev = ["black", "build", "hatchling", "pytest", "pytest-cov", "twine", "pyyaml", "asyncssh", "jinja2", "pathspec", "tomli; python_version<'3.11'"]
 docs = ["mkdocs", "mkdocs-material", "mkdocstrings[python]"]
 
 [project.scripts]

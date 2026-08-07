@@ -4,6 +4,41 @@ All notable changes to this project are documented here. The format is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- **`pytruenas deploy --source repo`: ship a repo working tree as-is,** rather
+  than the installed dependency closure. Copies files filtered by whichever of
+  `.gitignore`/`.ignore`/`.bundleignore` exist (`--ignore-file` narrows the
+  selection; `--ignore-pattern` adds patterns on the command line), and reads
+  declared dependencies straight from `pyproject.toml`/`requirements.txt` —
+  no import, nothing installed required — logging them as a heads-up via the
+  new `bundle.repo_requirements()` (`--include`/`--exclude` accept a bare
+  dependency name or a bracketed `[extra]`; an exclude always wins).
+
+  This does **not** vendor the repo's own dependencies alongside it — that
+  needs a resolved transitive closure, which requires those dependencies
+  installed here, the exact thing repo mode exists to avoid needing. It is
+  for the read-only-root workflow of shipping source to be read, edited, or
+  run by an interpreter that already has (or can reach) what the repo
+  declares; `--source installed` (the default, unchanged) is still what
+  builds a fully self-contained bundle.
+
+  Only `--mode dir` supports it: a zipapp needs its package importable at the
+  archive root, which a `src/`-layout repo copy does not have. `--mode dir`'s
+  launcher instead puts every directory an importable package was found under
+  (`src/`, `lib/`, `vendor/`, or the repo root itself — auto-detected, or
+  named explicitly with `--pythonpath`) on `PYTHONPATH`.
+
+  New public `pytruenas.utils.bundle` functions: `collect_repo()` (the
+  gitignore-filtered tree walk, via the new optional `pathspec` dependency —
+  the `repo` extra) and `repo_requirements()` (the static dependency reader,
+  using `tomllib`/the optional `tomli` fallback below Python 3.11). `build()`
+  and `export()` gained a `contents=` parameter accepting either function's
+  output directly, so the zipapp/tree-writing code is identical regardless of
+  where the file list came from.
+
 ## [0.4.1] - 2026-08-06
 
 ### Fixed
