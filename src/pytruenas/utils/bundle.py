@@ -34,6 +34,24 @@ A distribution containing a compiled extension is refused rather than silently
 shipped: a ``.so`` built for the local interpreter and platform will not load
 on a different one, and failing at build time with a clear message beats an
 ``ImportError`` after deployment.
+
+Repo mode (:func:`collect_repo`, :func:`repo_requirements`) is a fourth, PARALLEL
+path answering a different question: not "what does an installed distribution
+need", but "what would a clone of this working tree have". It copies files as
+the tree's own ``.gitignore``/``.ignore``/``.bundleignore`` says to, and reads
+declared dependencies straight from ``pyproject.toml``/``requirements.txt`` with
+no import and nothing installed. Both feed the same :func:`build`/:func:`export`
+sinks as the installed-metadata path -- see those functions' ``contents=``
+parameter -- so the output layout (zipapp vs. tree) is identical either way;
+only where the file list comes from differs.
+
+Repo mode has its own, OPTIONAL dependency: :func:`collect_repo` needs
+``pathspec`` (the ``repo`` extra) for gitignore-accurate pattern matching, and
+:func:`repo_requirements` needs a TOML parser -- ``tomllib`` on 3.11+, else
+``tomli`` (also in the ``repo`` extra) -- ONLY when reading a ``pyproject.toml``
+(a plain ``requirements.txt`` needs neither). Both are imported lazily inside
+the functions that need them, so every other function in this module, and
+every existing caller, keeps working with nothing extra installed.
 """
 
 from __future__ import annotations
@@ -52,7 +70,26 @@ __all__ = [
     "tar_tree",
     "tar_digest",
     "default_package",
+    "collect_repo",
+    "repo_requirements",
+    "DEFAULT_IGNORE_FILES",
 ]
+
+#: The ignore files consulted by default, in the order their patterns are
+#: layered. Order matters for gitignore semantics: a later file's negation
+#: (``!keep.txt``) can un-ignore something an earlier file ignored, so
+#: `.bundleignore` -- the most bundle-specific, and the one most likely to
+#: intentionally override the other two -- is applied last.
+DEFAULT_IGNORE_FILES = (".gitignore", ".ignore", ".bundleignore")
+
+#: pathspec's registered pattern factory used for every ignore-file line and
+#: every ``--ignore-pattern``. ``"gitignore"`` (``GitIgnoreBasicPattern``),
+#: not the older ``"gitwildmatch"`` (``GitWildMatchPattern``, deprecated by
+#: pathspec as of the version this depends on) -- they are DIFFERENT classes,
+#: not a rename, so this was checked for parity on the cases this module
+#: actually relies on (negation, a directory-anchored pattern, a nested
+#: match) before switching, rather than assumed equivalent from the name.
+_PATTERN_FACTORY = "gitignore"
 
 #: Distributions never worth shipping: they are either part of the standard
 #: library's tooling surface or present on any interpreter that can run the
@@ -314,20 +351,347 @@ def _collect(
     return contents
 
 
+#: Always excluded from a repo-mode walk, regardless of any ignore file's
+#: content. A repo's own VCS metadata is never part of "the files a clone
+#: would have" -- a `.bundleignore` that forgets to say so must not ship it.
+_ALWAYS_IGNORED = (".git",)
+
+
+def _require_pathspec():
+    """Import ``pathspec``, or raise the one clear error every repo-mode entry
+    point should give when the ``repo`` extra is not installed."""
+    try:
+        import pathspec
+    except ImportError as exc:
+        raise BundleError(
+            "repo mode requires the 'repo' extra: pip install pytruenas[repo]"
+        ) from exc
+    return pathspec
+
+
+def _load_ignore(
+    root: "_Path",
+    files: "_ty.Sequence[str] | None" = None,
+    extra_patterns: "_ty.Sequence[str]" = (),
+) -> object:
+    """Build one combined ``PathSpec`` from whichever ``files`` exist under ``root``.
+
+    Requires the ``repo`` extra (``pathspec``); imported here, not at module
+    level, so plain dependency-closure bundling -- what every existing caller
+    does -- keeps working with nothing extra installed. Only a repo-mode call
+    pays for it.
+
+    ``files`` defaults to :data:`DEFAULT_IGNORE_FILES`, all three combined. A
+    missing file is silently skipped: a repo that only has ``.gitignore``
+    should not need an explicit override just to avoid a raised error for
+    files it was never going to have.
+
+    ``extra_patterns`` -- a caller's own patterns (e.g. ``--exclude``) -- are
+    compiled as a SEPARATE spec and added last via ``PathSpec.__add__``, which
+    layers pattern lists rather than merging them into one; that preserves
+    gitignore's actual semantics, where a later pattern's negation can
+    un-ignore something an earlier one matched. String-concatenating pattern
+    text first would work too, but round-trips through each compiled
+    pattern's source text for no benefit -- ``__add__`` is the library's own
+    supported way to layer specs and is used instead.
+    """
+    pathspec = _require_pathspec()
+
+    lines: "list[str]" = []
+    for name in files if files is not None else DEFAULT_IGNORE_FILES:
+        path = root / name
+        if path.is_file():
+            lines.extend(path.read_text(encoding="utf-8").splitlines())
+    spec = pathspec.PathSpec.from_lines(_PATTERN_FACTORY, lines)
+    if extra_patterns:
+        spec = spec + pathspec.PathSpec.from_lines(_PATTERN_FACTORY, extra_patterns)
+    return spec
+
+
+def collect_repo(
+    root: "str | _Path",
+    *,
+    ignore_files: "_ty.Sequence[str] | None" = None,
+    extra_ignores: "_ty.Sequence[str]" = (),
+    prefix: "str | None" = None,
+) -> "list[tuple[str, _Path]]":
+    """``[(arcname, source_path)]`` for a repo tree, filtered like a clone would be.
+
+    The repo-mode counterpart to :func:`_collect`: same output shape, so it
+    feeds :func:`build`/:func:`export`/:func:`tar_tree` with no changes to
+    those functions beyond accepting a pre-built list (their ``contents=``
+    parameter) instead of resolving one from installed metadata.
+
+    ``ignore_files`` selects which ignore file(s) to honour (default: all of
+    :data:`DEFAULT_IGNORE_FILES` that exist). ``extra_ignores`` are additional
+    gitwildmatch patterns layered AFTER the files -- e.g. a caller's own
+    ``--exclude``, which should be able to override what an ignore file says,
+    not just add to it. ``.git`` is excluded unconditionally; see
+    :data:`_ALWAYS_IGNORED`.
+
+    ``prefix`` names the top-level directory files are arranged under in the
+    returned arcnames (default: ``root``'s own directory name) -- matching how
+    :func:`_collect` arranges each distribution under its own top-level name,
+    so a repo bundle has the same "one recognisable top directory" shape a
+    dependency bundle does.
+
+    Directories matched by an ignore pattern are pruned rather than merely
+    having their files filtered out one by one: ``rglob`` has already
+    descended into a directory by the time a file inside it could be checked,
+    so pruning means checking the directory's OWN path (with a trailing slash,
+    since gitwildmatch's directory-anchor patterns like ``.venv*/`` only match
+    that form) before recursing rather than after.
+    """
+    # Resolved before anything else: `Path(".").name` is `""`, which would
+    # arrange every arcname under a leading "/" instead of a real top
+    # directory -- exactly the "." a caller runs this from is the common case.
+    root = _Path(root).resolve()
+    if not root.is_dir():
+        raise BundleError(f"{root} is not a directory")
+    spec = _load_ignore(root, ignore_files, extra_ignores)
+    name = prefix if prefix is not None else root.name
+
+    def _ignored(relative: str, *, is_dir: bool) -> bool:
+        parts = _Path(relative).parts
+        if parts and parts[0] in _ALWAYS_IGNORED:
+            return True
+        candidate = relative + "/" if is_dir else relative
+        return spec.match_file(candidate)
+
+    contents: "list[tuple[str, _Path]]" = []
+
+    def _walk(directory: "_Path") -> None:
+        for child in sorted(directory.iterdir()):
+            relative = child.relative_to(root).as_posix()
+            if child.is_dir():
+                if _ignored(relative, is_dir=True):
+                    continue
+                _walk(child)
+            elif child.is_file():
+                if _ignored(relative, is_dir=False):
+                    continue
+                contents.append((f"{name}/{relative}", child))
+            # Anything else (a symlink to nowhere, a socket, ...) is skipped:
+            # neither a directory to descend into nor a file to ship.
+
+    _walk(root)
+    return contents
+
+
+def _toml_loader():
+    """``tomllib``/``tomli``'s ``loads``, or ``None`` if neither is importable.
+
+    ``tomllib`` (stdlib, 3.11+) is tried first so a modern interpreter never
+    reaches for the optional dependency it does not need; ``tomli`` (the
+    ``repo`` extra's fallback below 3.11) is tried second. Returning ``None``
+    rather than raising here lets a caller reading ``requirements.txt`` --
+    which needs no TOML parser at all -- proceed with no dependency on either.
+    """
+    try:
+        import tomllib
+
+        return tomllib.loads
+    except ImportError:
+        pass
+    try:
+        import tomli
+
+        return tomli.loads
+    except ImportError:
+        return None
+
+
+def _dependency_name(raw: str) -> str:
+    """The bare distribution name from one PEP 508 requirement string.
+
+    Degrades the same way :func:`requirements` does when ``packaging`` is
+    absent (bundle.py:118-121): a plain split on the marker/extras/version
+    delimiters. Good enough for a name; not a substitute for real parsing if
+    the caller needs the marker or the extras too.
+    """
+    try:
+        from packaging.requirements import Requirement
+
+        return Requirement(raw).name
+    except ImportError:  # pragma: no cover - packaging ships with pip/setuptools
+        return raw.split(";")[0].split("[")[0].split("=")[0].split("<")[0].split(
+            ">"
+        )[0].split("~")[0].strip()
+
+
+def _parse_pyproject(
+    text: str, extras: "_ty.Sequence[str]", *, include_base: bool = True
+) -> "list[str]":
+    """Dependency names from a ``pyproject.toml``'s ``[project]`` table.
+
+    Only the PEP 621 fields this needs are read -- ``dependencies`` and the
+    requested keys of ``optional-dependencies`` -- not a general TOML->object
+    mapping of the whole file.
+
+    ``include_base`` (default ``True``) includes ``[project.dependencies]``
+    alongside any requested ``extras``. The primary :func:`repo_requirements`
+    call wants both together; resolving what ONE extra alone contributes (for
+    an ``[extra]``-bracketed ``include``/``exclude`` -- see there) needs
+    ``include_base=False``, or a base dependency shared with no extra at all
+    would be wrongly attributed to it. This bit BEFORE the fix: excluding
+    ``[ssh]`` removed every core dependency too, because "what ssh
+    contributes" was computed as base-plus-ssh rather than ssh alone.
+    """
+    loads = _toml_loader()
+    if loads is None:
+        raise BundleError(
+            "reading dependencies from pyproject.toml requires a TOML parser: "
+            "install the 'repo' extra (pip install pytruenas[repo]) on Python "
+            "< 3.11, or use Python 3.11+ where tomllib is built in"
+        )
+    data = loads(text)
+    project = data.get("project", {})
+    names = (
+        [_dependency_name(raw) for raw in project.get("dependencies", [])]
+        if include_base
+        else []
+    )
+    optional = project.get("optional-dependencies", {})
+    for extra in extras:
+        for raw in optional.get(extra, []):
+            names.append(_dependency_name(raw))
+    return names
+
+
+def _parse_requirements_txt(text: str) -> "list[str]":
+    """Dependency names from a ``requirements.txt``-style file.
+
+    Handles what actually appears in one of these: comments (``#``), blank
+    lines, and per-line PEP 508 requirement strings. Deliberately does NOT
+    follow ``-r other.txt``/``-c constraints.txt`` includes or ``-e``/VCS
+    lines -- those name other files or non-index sources, not a distribution
+    this function can return a name for, and silently skipping them would
+    misreport what the repo actually depends on. A caller needing those
+    should read the file themselves; this covers the common case.
+    """
+    names: "list[str]" = []
+    for line in text.splitlines():
+        line = line.strip()
+        if not line or line.startswith("#") or line.startswith("-"):
+            continue
+        names.append(_dependency_name(line))
+    return names
+
+
+def repo_requirements(
+    root: "str | _Path",
+    extras: "_ty.Sequence[str]" = (),
+    *,
+    include: "_ty.Sequence[str]" = (),
+    exclude: "_ty.Sequence[str]" = (),
+) -> "list[str]":
+    """Declared dependency NAMES from ``pyproject.toml`` or ``requirements.txt``.
+
+    The static counterpart to :func:`requirements`: no import, and nothing
+    needs to be installed. ``pyproject.toml`` is preferred when present (its
+    ``[project.dependencies]``, plus ``[project.optional-dependencies]`` for
+    each requested ``extras`` entry); ``requirements.txt`` is the fallback.
+
+    This does NOT resolve a transitive closure or return ``Distribution``
+    objects the way :func:`requirements` does -- that needs the packages
+    installed, which is exactly what this function exists to avoid requiring.
+    It answers "what does this repo declare", for a caller to act on directly
+    (e.g. writing the names into a ``requirements.txt`` the TARGET's own pip
+    resolves, rather than vendoring the packages here).
+
+    ``include``/``exclude`` accept a plain distribution name (``"requests"``)
+    or a bracketed extra name (``"[ssh]"``) -- the same syntax
+    ``deploy.py``'s ``--include``/``--exclude`` flags take, resolved here so
+    both a CLI caller and a library caller get identical behaviour. An
+    extras-bracket ``include`` re-reads that extra's dependencies from the
+    same source even if it was not in ``extras``; a plain-name ``include`` is
+    added as a literal name with no version/marker information, since there is
+    nowhere else to resolve one from. ``exclude`` is applied LAST and always
+    wins, even over an ``include`` naming the same thing -- an explicit "never
+    ship this" should not be silently overridable by an equally explicit
+    "ship this".
+    """
+    root = _Path(root)
+    pyproject = root / "pyproject.toml"
+    reqtxt = root / "requirements.txt"
+
+    if pyproject.is_file():
+        names = _parse_pyproject(
+            pyproject.read_text(encoding="utf-8"), extras
+        )
+    elif reqtxt.is_file():
+        names = _parse_requirements_txt(reqtxt.read_text(encoding="utf-8"))
+    else:
+        raise BundleError(
+            f"no pyproject.toml or requirements.txt found under {root}"
+        )
+
+    result = list(dict.fromkeys(names))  # de-duplicate, keep first occurrence
+    for item in include:
+        if item.startswith("[") and item.endswith("]"):
+            extra = item[1:-1]
+            if pyproject.is_file():
+                for extra_name in _parse_pyproject(
+                    pyproject.read_text(encoding="utf-8"),
+                    (extra,),
+                    include_base=False,
+                ):
+                    if extra_name not in result:
+                        result.append(extra_name)
+            # A requirements.txt has no concept of extras; a bracketed
+            # --include against one names nothing and is silently a no-op,
+            # matching how an --extra the target format cannot express is
+            # handled elsewhere in this module (missing_on's `skip`, etc).
+        elif item not in result:
+            result.append(item)
+
+    excluded_names = {item for item in exclude if not item.startswith("[")}
+    excluded_extras = {
+        item[1:-1] for item in exclude if item.startswith("[") and item.endswith("]")
+    }
+    if excluded_extras and pyproject.is_file():
+        for extra in excluded_extras:
+            for extra_name in _parse_pyproject(
+                pyproject.read_text(encoding="utf-8"),
+                (extra,),
+                include_base=False,
+            ):
+                excluded_names.add(extra_name)
+    result = [name for name in result if name not in excluded_names]
+    return result
+
+
 def export(
-    destination: "str | _Path", distributions: "_ty.Mapping[str, object]"
+    destination: "str | _Path",
+    distributions: "_ty.Mapping[str, object] | None" = None,
+    *,
+    contents: "_ty.Sequence[tuple[str, _Path]] | None" = None,
 ) -> "_Path":
-    """Write ``distributions`` as an unpacked tree under ``destination``.
+    """Write a file set as an unpacked tree under ``destination``.
 
     The directory counterpart of :func:`build`: same file set, laid out as
     importable packages rather than zipped, for a deployment that should be
     readable and editable on the target.
+
+    Exactly one of ``distributions`` (resolved through :func:`_collect`, the
+    installed-metadata path every existing caller uses) or ``contents`` (an
+    already-built ``[(arcname, source_path)]`` list -- what
+    :func:`collect_repo` returns) must be given. Accepting either here, rather
+    than writing a separate repo-mode export function, is what lets ``--mode
+    dir`` behave identically regardless of ``--source``: the zip/tree-writing
+    code is the same code either way, only where the file list came from
+    differs.
     """
     import shutil
 
+    if (distributions is None) == (contents is None):
+        raise TypeError("pass exactly one of distributions= or contents=")
+    if contents is None:
+        contents = _collect(_ty.cast("_ty.Mapping[str, object]", distributions))
+
     destination = _Path(destination)
     destination.mkdir(parents=True, exist_ok=True)
-    for arcname, source in _collect(distributions):
+    for arcname, source in contents:
         target = destination / arcname
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(source, target)
@@ -409,11 +773,13 @@ runpy.run_module({package!r}, run_name="__main__", alter_sys=True)
 
 def build(
     destination: "str | _Path",
-    distributions: "_ty.Mapping[str, object]",
-    package: str,
+    distributions: "_ty.Mapping[str, object] | None" = None,
+    package: "str | None" = None,
     interpreter: "str | None" = "/usr/bin/env python3",
+    *,
+    contents: "_ty.Sequence[tuple[str, _Path]] | None" = None,
 ) -> "_Path":
-    """Write a zipapp containing ``distributions`` and return its path.
+    """Write a zipapp containing a file set and return its path.
 
     ``package`` is the import name the zipapp runs when executed -- the
     caller's own package when this library is bundled as a dependency of it.
@@ -426,10 +792,20 @@ def build(
     Compiled artifacts and caches are excluded: ``__pycache__`` is per-version
     and would be stale on the target anyway, and ``.pyc`` outside it is dead
     weight.
+
+    Exactly one of ``distributions`` or ``contents`` must be given -- see
+    :func:`export`'s docstring for why both exist on the same function rather
+    than a separate repo-mode zipapp builder.
     """
+    if package is None:
+        raise TypeError("package is required")
+    if (distributions is None) == (contents is None):
+        raise TypeError("pass exactly one of distributions= or contents=")
+    if contents is None:
+        contents = _collect(_ty.cast("_ty.Mapping[str, object]", distributions))
+
     destination = _Path(destination)
     destination.parent.mkdir(parents=True, exist_ok=True)
-    contents = _collect(distributions)
 
     raw = destination.with_suffix(destination.suffix + ".tmp")
     with _zipfile.ZipFile(raw, "w", _zipfile.ZIP_DEFLATED) as archive:
