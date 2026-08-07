@@ -43,7 +43,10 @@ Known limits, all deliberate and declared rather than papered over:
   They are separated *in band* when the caller asks for it: the command is
   wrapped so its stderr passes through a process substitution that brackets it
   with OSC 1337 markers, and the reader routes the marked regions to stderr.
-  Verified live on 26.0.0-BETA.1.
+  The bracketing is per-line (see :meth:`WebShellSession.wrap_stderr` -- an
+  earlier version bracketed the whole process substitution's lifetime instead,
+  via a bare ``cat``, which let interleaved stdout writes land inside an open
+  bracket and get misattributed as stderr).
 
   This needs ``2> >(...)``, which only bash/zsh/ksh parse -- under ``sh`` it is
   a syntax error, the command never runs, and the call would TIME OUT rather
@@ -119,7 +122,7 @@ if _ty.TYPE_CHECKING:  # pragma: no cover - typing only
 #: caller sees stdout -- they are display instructions, not data.
 _ANSI = _re.compile(
     rb"\x1b\[[0-9;?]*[a-zA-Z]"
-    rb"|\x1b\][^\x07]*\x07"
+    rb"|\x1b\](?:[^\x1b\x07]|\x1b(?!\\))*(?:\x07|\x1b\\)"
     rb"|\x1b[=>]"
     rb"|\x1b\[\?[0-9]+[hl]"
     rb"|\x1b\[K"
@@ -379,26 +382,58 @@ class WebShellSession:
         Both streams stay on one fd -- a PTY has no second channel -- but the
         markers say which bytes were which, so the reader can separate them.
 
-        ``cat`` rather than a ``while read -r line`` loop, deliberately. A read
-        loop is line-buffered (so a progress bar or a prompt written to stderr
-        without a trailing newline never appears at all), strips trailing
-        whitespace, and lets ``echo -e`` interpret backslash escapes inside the
-        payload. ``cat`` forwards bytes unchanged, which is the whole point of
-        keeping the stream raw.
+        A per-LINE ``read`` loop, not a single ``cat``. ``cat`` looks like the
+        obviously-correct choice -- it forwards bytes unchanged -- but ``2>
+        >(...)`` gives the substitution its own subshell with its own
+        scheduling: ``printf start; cat; printf end`` emits ``start`` once,
+        when the subshell is FIRST scheduled (which can be before the wrapped
+        command has written anything), and ``end`` once, only when its input
+        pipe hits EOF (which is when the WHOLE wrapped command finishes, not
+        after any one stderr write). Every stdout byte written in between --
+        by ``script`` itself, on the pty's other fd -- lands inside that one
+        open bracket and reads back as stderr. Verified against real bash:
+        ``{ echo out1; echo err1 >&2; echo out2; echo err2 >&2; }`` wrapped
+        with the ``cat`` form puts BOTH ``out1`` and ``out2`` inside the
+        bracket alongside the two ``err`` lines, nondeterministically
+        depending on subshell scheduling.
 
-        The markers therefore bracket each *write* ``cat`` performs rather than
-        each line, which is the granularity the ordering actually needs: stderr
-        stays interleaved with stdout in real time instead of arriving as a
-        trailing dump the way a temp-file redirect would give.
+        Bracketing per read (here, per line -- the granularity ``read``
+        offers) closes each region before the next stdout write can land
+        inside it. The trade made for this: a stderr write with no trailing
+        newline still needs a line boundary to be forwarded at all, hence the
+        ``|| [ -n "$line" ]`` to flush the final partial line, and every
+        forwarded line gains a synthetic trailing ``\\n`` (harmless --
+        `clean_output` already collapses blank-line runs). ``read -r`` and
+        ``printf %s`` (not ``%b``) keep the payload itself byte-for-byte:
+        backslashes and ``%`` in the command's actual stderr text are not
+        reinterpreted, only the marker halves of the format string are.
+
+        A byte-exact (NUL-safe) alternative was tried and rejected: bracket
+        each raw OS-level read via ``dd bs=N count=1`` into a scratch file
+        (``mktemp``), instead of each shell line. It IS byte-exact where this
+        line loop is not -- but every burst costs 4 forked processes
+        (``mktemp``, ``dd``, ``wc``, ``cat``), and that startup cost loses the
+        race against a short-lived command: ``2> >(...)`` does not wait for
+        the substitution's subshell to actually be scheduled before the
+        wrapped command can run and exit, so a fast `printf ... >&2` can close
+        its write end before ``dd``'s first read ever happens. Verified
+        against real bash: a trivial ``printf "abc\\n" >&2`` lost the stderr
+        content outright in 2 of 6 trials with the ``dd`` version, and 0 of 6
+        with this line loop. A shell builtin with no per-burst fork beats a
+        byte-exact external pipeline that cannot reliably start in time.
         """
         # The markers hold ESC and BEL, which cannot appear literally in a
         # single-line command, so they are written as printf %b escapes.
         start = "\\033]%d;PytruenasStderr\\007" % _OSC
         end = "\\033]%d;PytruenasStdout\\007" % _OSC
-        # `printf %b` emits the opening marker, then `cat` streams stderr
-        # through untouched, then the closing marker. One marker pair per
-        # stderr burst, with no shell loop between the bytes and the pty.
-        forward = f'{{ printf "%b" "{start}"; cat; printf "%b" "{end}"; }}'
+        # One marker pair per LINE read from stderr, so a bracket never spans
+        # past the stderr write it belongs to and cannot swallow a stdout
+        # write that happens to land in between.
+        forward = (
+            'while IFS= read -r line || [ -n "$line" ]; do '
+            f'printf "%b%s\\n%b" "{start}" "$line" "{end}"; '
+            "done"
+        )
         return f"{{ {script} ; }} 2> >({forward})"
 
     # -- execution ---------------------------------------------------------

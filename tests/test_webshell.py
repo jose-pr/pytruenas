@@ -7,6 +7,7 @@ it -- a mocked PTY would just assert this module's own assumptions back at it.
 """
 
 import io
+import shutil
 import subprocess
 import threading as _threading
 from unittest.mock import MagicMock
@@ -362,13 +363,45 @@ def test_markers_are_stripped_when_there_is_no_errsink():
     assert b"a" in joined and b"b" in joined and b"c" in joined
 
 
-def test_wrap_stderr_uses_cat_not_a_read_loop():
-    """A read loop is line-buffered and mangles the payload; cat is raw."""
+def test_wrap_stderr_uses_a_read_loop_not_cat():
+    """cat's start/end only bracket the subshell's whole lifetime.
+
+    Verified live: `{ echo out1; echo err1 >&2; echo out2; echo err2 >&2; }`
+    wrapped with a bare `{ printf start; cat; printf end; }` puts BOTH out1
+    and out2 inside the bracket alongside the err lines, nondeterministically
+    -- the process substitution is a separate subshell whose own scheduling
+    decides when `start`/`end` fire, not the timing of the actual stderr
+    writes. A per-line read loop closes the bracket after every line instead,
+    so a stdout write in between cannot land inside an open one.
+    """
     wrapped = WebShellSession.wrap_stderr("mycmd")
     assert "2> >(" in wrapped
-    assert "cat" in wrapped
-    assert "while read" not in wrapped
+    assert "while" in wrapped and "read" in wrapped
     assert "mycmd" in wrapped
+
+
+def test_wrap_stderr_forwards_stdout_and_stderr_correctly_live():
+    """The gap the splitter tests above call out: does the real shell agree?
+
+    Everything else in this module tests the SPLITTER against synthetic bytes
+    shaped like what the wrapper is supposed to emit. This is the one test
+    that actually runs the wrapped script through bash and checks the two
+    streams come back attributed correctly -- skipped where bash is not on
+    PATH, since that live claim can only be checked where a real shell exists.
+    """
+    bash = shutil.which("bash")
+    if bash is None:
+        pytest.skip("no bash on PATH to verify wrap_stderr against")
+
+    script = "echo out1; echo err1 >&2; echo out2; echo err2 >&2"
+    wrapped = WebShellSession.wrap_stderr(script)
+    raw = subprocess.run(
+        [bash, "-c", wrapped], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL
+    ).stdout
+
+    out, err = WebShellSession.split_streams(raw)
+    assert out == b"out1\nout2\n"
+    assert err == b"err1\nerr2\n"
 
 
 # -- input delivery --------------------------------------------------------
