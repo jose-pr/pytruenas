@@ -144,6 +144,74 @@ def test_truenaspath_builds_the_sftp_leg_from_config_ssh():
     assert str(sftp) == "sftp://nas:2222/a/b"
 
 
+# -- the sftp:// URI must be built as a URI -----------------------------------
+
+
+# RFC 3986 `pchar` plus `/`, spelled out here rather than imported from the
+# module under test: the input side of these cases is a fixture, and the
+# assertion is a *round-trip*, so borrowing the implementation's own constant
+# for both halves would make the pin tautological.
+_PCHAR = "/:@-._~!$&'()*+,;="
+
+
+def _truenas_path(client, remote):
+    """A `TruenasPath` whose `.path` really is `remote`.
+
+    `TruenasPath` is itself a `UriPath`, so handing it a raw `truenas://` URI
+    truncates the same way the SFTP leg used to -- the fixture has to encode
+    too, or the precondition below fails before the leg is ever reached.
+    """
+    from urllib.parse import quote
+
+    return TruenasPath(
+        "truenas://nas" + quote(remote, safe=_PCHAR), backend=TnasWsBackend(client)
+    )
+
+
+@pytest.mark.parametrize(
+    "remote",
+    [
+        "/mnt/tank/cache?v=2",  # truncated at the `?` -- read as a query
+        "/mnt/tank/a#b",  # truncated at the `#` -- read as a fragment
+        "/mnt/tank/sp ace",
+        "/mnt/tank/100%",  # a lone `%` -- must not be re-encoded twice
+        "/mnt/tank/report%20final.txt",  # a literal `%20`, NOT a space
+        "/mnt/tank/café.txt",
+    ],
+)
+def test_sftp_leg_survives_uri_syntax_in_a_filename(remote):
+    """Regression: `_sftp()` interpolated the path into a URI unencoded.
+
+    `SftpPath` parses that string and uridecodes the parts, so a `?` or `#` in
+    a filename truncated the path into a query or fragment -- the operation
+    then ran against a *shorter, different* file with no error -- and a genuine
+    `%xx` decoded into another name again. hostctl fixed the identical defect
+    on its own SFTP leg in 0.2.6; this hand-built URI never got it.
+
+    What is pinned is the round-trip, not the encoded spelling.
+    """
+    client = _client(ssh=_ssh_config(host="nas", port=2222))
+    p = _truenas_path(client, remote)
+    assert p.path == remote  # precondition: the path really carries the name
+
+    sftp = p._sftp()
+    assert sftp is not None
+    assert sftp.path == remote
+
+
+def test_sftp_leg_encoding_leaves_uri_legal_characters_readable():
+    """Encoding is minimal: `:` is legal in a path segment, so it stays.
+
+    A naive `quote(path, safe="/")` would render a Windows-flavoured remote
+    path as `/C%3A/Temp`, which is a different (and wrong) name.
+    """
+    client = _client(ssh=_ssh_config(host="nas", port=2222))
+    p = _truenas_path(client, "/C:/Temp")
+    sftp = p._sftp()
+    assert str(sftp) == "sftp://nas:2222/C:/Temp"
+    assert sftp.path == "/C:/Temp"
+
+
 def test_truenaspath_ignores_the_pre_merge_ssh_config_attribute():
     """`client.ssh_config` is gone; reading it built the leg off a Mock.
 

@@ -6,6 +6,27 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Fixed
+
+- **`TruenasPath`'s SFTP leg built its `sftp://` URI without encoding the path,
+  so a filename containing `?` or `#` silently addressed a different file.**
+  `_sftp()` interpolated the path directly — `f"sftp://{host}:{port}{self.path}"`
+  — and `SftpPath` parses that string and uridecodes the parts, so `?` began a
+  query and `#` began a fragment: `/mnt/tank/cache?v=2` became `/mnt/tank/cache`
+  and the `unlink`/`rmdir`/`rename`/`readlink`/`symlink_to` that followed
+  operated on the truncated name **with no error**. A literal `%xx` in a name
+  decoded into another name again (`report%20final.txt` → `report final.txt`).
+  The path is now percent-encoded with RFC 3986 `pchar` as the safe set, which
+  leaves `:` alone so a Windows-flavoured remote path still reads as
+  `sftp://host:22/C:/Temp` rather than `/C%3A/Temp`.
+
+  This is the same safe set `hostctl` adopted for its own SFTP leg in 0.2.6;
+  two SFTP legs reach the same host and they must agree on what a filename
+  means. The defect is only reachable from 0.4.3, which is what made this leg
+  engage at all — before that `_sftp()` returned `None` for every real host —
+  so a silent wrong-file operation is exactly as old as the repair that
+  exposed it.
+
 ## [0.4.3] - 2026-08-16
 
 ### Fixed

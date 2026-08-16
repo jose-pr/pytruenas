@@ -21,6 +21,7 @@ Construct via :meth:`~pytruenas.TrueNASClient.path`.
 from __future__ import annotations
 
 import typing as _ty
+from urllib.parse import quote as _quote
 
 from .tnasws import TnasWsPath as _TnasWsPath
 
@@ -28,6 +29,16 @@ if _ty.TYPE_CHECKING:
     from .. import TrueNASClient
 
 _FTYPE = _ty.Literal["file", "link", "directory"]
+
+#: RFC 3986 ``pchar``, plus ``/``. Everything legal in a URI path segment is
+#: left as written -- including ``:``, so a Windows-flavoured remote path still
+#: reads as ``sftp://host:22/C:/Temp`` rather than ``/C%3A/Temp`` -- while
+#: ``%``, ``?``, ``#``, space and non-ASCII are percent-encoded, because those
+#: are what a URI parser would otherwise take for syntax. Deliberately the same
+#: safe set ``hostctl`` uses for its own SFTP leg (``hostctl.host._ssh``, fixed
+#: in 0.2.6): two SFTP legs reach the same host, and they must agree on what a
+#: filename means.
+_URI_PATH_SAFE = "/:@-._~!$&'()*+,;="
 
 
 def _sftp_path_cls():
@@ -105,7 +116,16 @@ class TruenasPath(_TnasWsPath):
             backend = AsyncsshSftpBackend(connect_opts=connect_opts)
         except ImportError:
             return None
-        return sftp_cls(f"sftp://{host}:{port}{self.path}", backend=backend)
+        # The path becomes part of a URI, so it has to be encoded as one.
+        # ``SftpPath`` parses this string and uridecodes the components: a raw
+        # ``?`` or ``#`` in a filename was taken as the start of the query or
+        # fragment and silently truncated the path -- the operation then ran
+        # against a shorter, different file -- and a genuine ``%xx`` decoded
+        # into another name again.
+        return sftp_cls(
+            f"sftp://{host}:{port}{_quote(self.path, safe=_URI_PATH_SAFE)}",
+            backend=backend,
+        )
 
     def _try_sftp(self, op: str, *args, **kwargs):
         """Run ``op`` on the SFTP leg.
