@@ -6,6 +6,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.4.4] - 2026-08-16
+
 ### Fixed
 
 - **`TruenasPath`'s SFTP leg built its `sftp://` URI without encoding the path,
@@ -26,6 +28,42 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   engage at all — before that `_sftp()` returned `None` for every real host —
   so a silent wrong-file operation is exactly as old as the repair that
   exposed it.
+
+### Changed
+
+- **Dependency ranges are now pinned to a minor series, floored at the base of
+  that series unless a specific API says otherwise.** `netimps` moves from
+  `>=0.0.2,<0.3` to `>=0.2.0,<0.3`: only `get_default_port` is used and it has
+  been there since 0.0.2, so the old floor named a release far below the capped
+  series for no reason. `duho` gains the missing upper bound it never had —
+  `>=0.5.2,<0.6` — because duho is pre-1.0, where a minor may break (0.5.0
+  itself changed the arity of a list-typed option).
+
+  Three floors stay above the base of their series, each for a named API:
+  `duho>=0.5.2` for `runpath.register(step_adapter=...)` (added in 0.5.2;
+  `main.py` passes the keyword at import, so 0.5.1 raises `TypeError` on
+  startup), `pathlib_next>=0.9.1` for `Path.symlink_to(force=)` over the
+  `_symlink_to()` backend primitive (added in 0.9.1; `client.path(...)` routes
+  symlink operations to hostctl's `SftpPath`, a plain pathlib_next path, which
+  rejects the keyword below that), and `hostctl>=0.2.5` for the public
+  `hostctl.executor.write_output`/`capture_streams` that `webshell.py` imports
+  (public from 0.2.5; private `_common` before it).
+
+  No floor follows the newest patch of its series. Nothing added in duho 0.5.3
+  or 0.5.4, netimps 0.2.1 or 0.2.2, pathlib_next 0.9.2, or hostctl 0.2.6 is
+  called from this package, and requiring one of those would have excluded
+  working installs without buying anything. The whole suite was exercised
+  against the newest of each anyway — duho 0.5.4, netimps 0.2.2,
+  pathlib_next 0.9.2, hostctl 0.2.6 — on Python 3.9 and 3.14.
+
+### Documentation
+
+- Four places still quoted dependency floors the package had already moved
+  past, so a reader checking what to install got a wrong answer from the docs
+  and a different one from the metadata: the shipped API header named
+  `duho>=0.4.0` and `pathlib_next[sftp-async]>=0.8.3`, the filesystem guide
+  named `>=0.8.3`, and `utils/target.py`'s comment named `netimps>=0.0.2`. All
+  four now state the declared range and why it is where it is.
 
 ## [0.4.3] - 2026-08-16
 
@@ -927,7 +965,8 @@ below is simply what the package contains.
   `ssh` extra); the middleware API has no command-exec method. SFTP is handled by
   `pathlib_next`.
 
-[Unreleased]: https://github.com/jose-pr/pytruenas/compare/v0.4.3...HEAD
+[Unreleased]: https://github.com/jose-pr/pytruenas/compare/v0.4.4...HEAD
+[0.4.4]: https://github.com/jose-pr/pytruenas/compare/v0.4.3...v0.4.4
 [0.4.3]: https://github.com/jose-pr/pytruenas/compare/v0.4.2...v0.4.3
 [0.4.2]: https://github.com/jose-pr/pytruenas/compare/v0.4.1...v0.4.2
 [0.4.1]: https://github.com/jose-pr/pytruenas/compare/v0.4.0...v0.4.1

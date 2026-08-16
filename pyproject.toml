@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "pytruenas"
-version = "0.4.3"
+version = "0.4.4"
 authors = [{ name = "Jose A." }]
 description = "A typed, Pythonic client and CLI for the TrueNAS middleware API"
 readme = "README.md"
@@ -63,19 +63,33 @@ dependencies = [
     # >=0.5.2: `runpath.register(step_adapter=...)`, which is how a RunPath step
     # gets this app's `(client, args, logger)` signature without a decorator in
     # every step file (see utils.runpath.step_adapter). Not optional -- main.py
-    # passes the keyword at import, so 0.5.1 raises TypeError on startup.
-    "duho>=0.5.2",
-    # Network utilities. >=0.0.2 for the built-in scheme->port table, which is
-    # what resolves ws/wss: no system services database knows those schemes, so
-    # getservbyname raises and a websocket URL would otherwise carry port 0.
+    # passes the keyword at import, so 0.5.1 raises TypeError on startup. This
+    # is the one reason the floor sits above 0.5.0 rather than at it; nothing
+    # added in 0.5.3 (DUHO_TRACEBACK, per-subsystem framework logger names) or
+    # 0.5.4 (__version__ sync, `Env.bool` accepting `on`) is used here, so
+    # demanding one of those would exclude working installs for nothing.
+    # Capped below 0.6: duho is 0.x, where a minor bump may break -- 0.5.0
+    # itself was such a bump (a list-typed OPTION changed arity). Validated on
+    # 0.5.4.
+    "duho>=0.5.2,<0.6",
+    # Network utilities. Wanted for the built-in scheme->port table (there since
+    # 0.0.2), which is what resolves ws/wss: no system services database knows
+    # those schemes, so getservbyname raises and a websocket URL would
+    # otherwise carry port 0.
     # `get_default_port` in utils/target.py is the ONLY thing used from this
     # package. (It also once backed the adapter discovery in pytruenas.ops.host,
     # replacing ifaddr; that module is gone, but the scheme table alone keeps
     # this a core dependency.)
     # Capped below 0.3: netimps is 0.x, where a minor bump may break -- 0.2.0
     # reworked resolve() and made dnspython optional. Neither touches
-    # get_default_port. Validated on 0.2.0.
-    "netimps>=0.0.2,<0.3",
+    # get_default_port.
+    # The floor is the base of the capped minor series (0.2.0), not the oldest
+    # release that happens to work: `get_default_port` has been there since
+    # 0.0.2 and nothing added in 0.2.1 (AddressLike, rdtype auto-selection) or
+    # 0.2.2 (resolve_system's real wall-time deadline, the IPv6 ping/multicast
+    # fixes) is used here, so there is no API reason to floor higher inside the
+    # series. Validated on 0.2.2.
+    "netimps>=0.2.0,<0.3",
     # >=0.8.2: SftpPath importable/usable without paramiko (asyncssh-only). The
     # 'uri' extra (uritools) is needed by TnasWsPath/TruenasPath, which are
     # UriPaths.
@@ -93,7 +107,17 @@ dependencies = [
     # provider hands back a TruenasPath specifically so its documented
     # `symlink_to(force=, onremove=)` survives, and below 0.9.1 the kwarg is
     # rejected at hostctl's composite boundary -- so the documented API would
-    # be advertised and not deliverable. Came from a finding filed here.
+    # be advertised and not deliverable. Came from a finding filed here. That
+    # `Path.symlink_to(force=)` extension (over the `_symlink_to()` backend
+    # primitive) is the one API this project needs from above 0.9.0, and it is
+    # why the floor is not the base of the series: `client.path(...)` hands
+    # symlink operations to hostctl's own SftpPath, a plain pathlib_next Path,
+    # which only accepts the keyword from 0.9.1 on.
+    # The floor stops there rather than following the latest patch: 0.9.2 is
+    # all fixes (MemPath open-over-directory, Pathname.__eq__/__hash__,
+    # is_relative_to normalization, LocalPath.chown on Windows) and adds no API
+    # used here, so requiring it would exclude working installs. Validated on
+    # 0.9.2.
     "pathlib_next[uri]>=0.9.1,<0.10",
     "requests",
     "websocket-client",
@@ -139,6 +163,13 @@ dependencies = [
     # tidiness: a host can dispatch one call through different providers on
     # different attempts, so an executor handling output differently returns
     # results that vary by which transport won. Also from a finding filed here.
+    # 0.2.5 is where the floor stops. It does not follow the latest patch:
+    # 0.2.6 added `wants_text` (which webshell.py does not import) and fixed
+    # direct-execution NameErrors, `hostctl cp` URI-port parsing, native WinRM
+    # cert-ignore and exit codes, cross-provider text-mode agreement, SFTP URI
+    # percent-encoding, PSRP pool ownership and GC-time write-back -- all
+    # welcome, none of it API this project calls. Requiring it would exclude
+    # working installs for nothing. Validated on 0.2.6.
     "hostctl>=0.2.5,<0.3",
 ]
 
@@ -147,6 +178,8 @@ dependencies = [
 config = ["pyyaml"]
 # Remote shell + SFTP filesystem leg (asyncssh via pathlib_next's sftp-async).
 # >=0.8.3: AsyncsshSftpBackend default concurrency 8->16 (faster recursive SFTP).
+# This names only what the extra itself needs; the effective floor is the
+# stricter core `pathlib_next[uri]` one above, since it is the same package.
 ssh = ["asyncssh", "pathlib_next[sftp-async]>=0.9.0,<0.10"]
 # Typings generator (`pytruenas generate-typings`).
 codegen = ["jinja2"]

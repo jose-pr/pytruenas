@@ -6,9 +6,11 @@ import netimps as _netimps
 from hostctl.host import redact_uri as _redact_uri
 
 # ws/wss default ports (80/443) are provided by netimps' built-in scheme table
-# (>=0.0.2); no system services database knows the websocket schemes. Earlier
-# releases required registering them here -- the netimps>=0.0.2 floor makes that
-# unnecessary.
+# (there since 0.0.2); no system services database knows the websocket schemes.
+# Earlier releases required registering them here -- the declared netimps floor
+# makes that unnecessary. The floor itself is `>=0.2.0,<0.3` (see
+# pyproject.toml): the base of the capped minor series, not the oldest release
+# that carries the table, since nothing later in the series is used here.
 
 
 def redact(connectionstring: str) -> str:
