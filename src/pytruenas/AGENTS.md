@@ -362,7 +362,9 @@ module-level `path(client, *segments, backend=None)` is what it delegates to.
   readlink). `symlink_to(..., force=False, onremove=None)` adds a
   pytruenas-specific convenience: `force` (bool, a file-type string, or a set
   of `"file"/"link"/"directory"`) removes a conflicting existing target first;
-  `onremove(path, kind)` gates each removal.
+  `onremove(path, kind)` gates each removal. The SFTP leg is resolved *before*
+  `force` removes anything, so a host that cannot create the link raises
+  `NotImplementedError` with the existing target still in place.
 - **`TnasWsBackend(client)`** — the backend object `TnasWsPath`/`TruenasPath`
   carry; just holds `.client`.
 

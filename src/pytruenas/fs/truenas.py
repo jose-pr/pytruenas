@@ -158,8 +158,19 @@ class TruenasPath(_TnasWsPath):
         file-type, or a set of file-types that may be replaced); ``onremove`` is a
         callback consulted before each removal. Not part of pathlib_next -- kept
         from the original pytruenas API. The link itself is created via the SFTP
-        leg (``filesystem.*`` has no symlink op).
+        leg (``filesystem.*`` has no symlink op), so a host with no SFTP leg
+        raises ``NotImplementedError`` -- and raises it *before* ``force``
+        removes anything, so a call that cannot succeed leaves the existing
+        target alone rather than deleting it and then failing.
         """
+        # Resolve the creating leg up front. Building it is local (no network),
+        # and doing it here is what keeps the force-removal below from running
+        # on a host that has no way to create the replacement link.
+        sftp = self._sftp()
+        create = getattr(sftp, "symlink_to", None) if sftp is not None else None
+        if create is None:
+            raise NotImplementedError("symlink_to requires the SFTP backend")
+
         if force and (self.exists() or self.is_symlink()):
             onremove = onremove or (lambda _p, _t: True)
             if force is True:
@@ -183,10 +194,7 @@ class TruenasPath(_TnasWsPath):
                     raise FileExistsError(self)
                 if onremove(self, kind):
                     self.rm(recursive=True, missing_ok=True)
-        try:
-            return self._try_sftp("symlink_to", _as_posix(target), target_is_directory)
-        except (_NoSftp, NotImplementedError):
-            raise NotImplementedError("symlink_to requires the SFTP backend")
+        return create(_as_posix(target), target_is_directory)
 
     def resolve(self, strict=False):
         try:

@@ -158,6 +158,75 @@ def test_truenaspath_ignores_the_pre_merge_ssh_config_attribute():
     assert p._sftp() is None
 
 
+# -- symlink_to(force=) must not remove before it can create ------------------
+
+
+class _FakeSftp:
+    """Just enough SFTP leg to record a `symlink_to`."""
+
+    def __init__(self):
+        self.calls = []
+
+    def symlink_to(self, target, target_is_directory=False):
+        self.calls.append((target, target_is_directory))
+
+
+def test_symlink_to_force_does_not_remove_when_nothing_can_create(monkeypatch):
+    """Regression: the removal used to run, and *then* the call failed.
+
+    A websocket-only host has no way to make a symlink, so `force=True` was
+    pure loss -- the existing target was deleted and `NotImplementedError`
+    raised straight after.
+    """
+    client = _client(stat={"mode": 0o100644})  # target exists, is a file
+    p = TruenasPath("truenas://nas/link", backend=TnasWsBackend(client))
+    assert p._sftp() is None  # websocket-only
+
+    with pytest.raises(NotImplementedError):
+        p.symlink_to("/target", force=True)
+
+    assert not client.run.called  # nothing was removed
+    assert not client.api.filesystem.unlink.called
+
+
+def test_symlink_to_force_still_removes_when_a_leg_can_create(monkeypatch):
+    """The gate must not disable `force=` on a host that *does* have SFTP."""
+    client = _client(stat={"mode": 0o100644}, ssh=_ssh_config())
+    fake = _FakeSftp()
+    monkeypatch.setattr(TruenasPath, "_sftp", lambda self: fake)
+
+    p = TruenasPath("truenas://nas/link", backend=TnasWsBackend(client))
+    p.symlink_to("/target", force=True)
+
+    assert client.run.called  # the conflicting file was removed
+    assert fake.calls == [("/target", False)]
+
+
+def test_symlink_to_force_honours_onremove_veto(monkeypatch):
+    client = _client(stat={"mode": 0o100644}, ssh=_ssh_config())
+    fake = _FakeSftp()
+    monkeypatch.setattr(TruenasPath, "_sftp", lambda self: fake)
+
+    p = TruenasPath("truenas://nas/link", backend=TnasWsBackend(client))
+    p.symlink_to("/target", force=True, onremove=lambda _p, _kind: False)
+
+    assert not client.run.called  # veto -> no removal
+    assert fake.calls == [("/target", False)]
+
+
+def test_symlink_to_force_rejects_a_kind_it_was_not_allowed(monkeypatch):
+    client = _client(stat={"mode": 0o100644}, ssh=_ssh_config())
+    fake = _FakeSftp()
+    monkeypatch.setattr(TruenasPath, "_sftp", lambda self: fake)
+
+    p = TruenasPath("truenas://nas/link", backend=TnasWsBackend(client))
+    with pytest.raises(FileExistsError):
+        p.symlink_to("/target", force="link")  # existing target is a file
+
+    assert not client.run.called
+    assert fake.calls == []
+
+
 def test_truenaspath_sftp_leg_reachable_on_a_real_host():
     """Construction only -- no network. Pins the real class's attribute shape."""
     from hostctl.host import SshConfig

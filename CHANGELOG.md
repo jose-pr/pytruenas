@@ -18,6 +18,14 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   `client.config.ssh` — the `hostctl.host.SshConfig` the host actually
   carries. (Host-level `client.path(...)` work was mostly unaffected: hostctl's
   composite path routes symlink-ish operations to its own `sftp` provider.)
+- **`TruenasPath.symlink_to(force=True)` deleted the existing target and then
+  failed** on a host with no SFTP leg: the force-removal ran first, and only
+  afterwards did the call discover there was no way to create the link. The
+  creating leg is now resolved before anything is removed, so the call raises
+  `NotImplementedError` with the target untouched. (Consequence of the
+  ordering: on a host with no SFTP leg, a `force=` conflict now raises
+  `NotImplementedError` rather than `FileExistsError` — neither call could
+  ever have succeeded.)
 
 ## [0.4.2] - 2026-08-06
 
