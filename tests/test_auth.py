@@ -59,6 +59,34 @@ def test_existing_credentials_passthrough():
     assert Credentials(inner) is inner
 
 
+def test_mixed_args_and_kwargs_error_hides_the_secret():
+    """Regression: this branch raised `AttributeError(args, kwargs)` raw.
+
+    An exception's args are what a traceback and every log handler render, so
+    the raw credential ended up in the log for what is only a call-shape
+    mistake.
+    """
+    with pytest.raises(ValueError) as ei:
+        Credentials("root:hunter2", password="hunter2", token="t0ps3cret")
+    rendered = str(ei.value)
+    assert "hunter2" not in rendered
+    assert "t0ps3cret" not in rendered
+    assert "root:" not in rendered  # the positional is masked whole
+    assert "***" in rendered
+
+
+def test_unsupported_credentials_error_hides_the_secret():
+    from pytruenas.auth import _mask_kwargs
+
+    # The "Credentials not supported" branch is hard to reach from the public
+    # constructor (LocalAuth swallows unknown kwargs -- filed separately), so
+    # pin the masking it uses rather than the unreachable raise.
+    assert _mask_kwargs({"username": "root", "password": "hunter2"}) == {
+        "username": "root",
+        "password": "***",
+    }
+
+
 def test_from_env(monkeypatch):
     monkeypatch.setenv("TN_CREDS", "root:pw")
     cred = Credentials.from_env()

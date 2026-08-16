@@ -7,6 +7,28 @@ if _ty.TYPE_CHECKING:
     from . import TrueNASClient
 
 
+#: Keyword names whose value is a secret and must never reach an exception.
+_SECRET_KEYS = {"password", "passwd", "token", "api_key", "apikey", "secret"}
+
+
+def _mask_kwargs(kwargs: dict) -> dict:
+    """Replace secret-bearing keyword values with ``***``, keeping the shape."""
+    return {
+        k: ("***" if k.lower() in _SECRET_KEYS and v else v) for k, v in kwargs.items()
+    }
+
+
+def _mask_args(args: tuple) -> tuple:
+    """Mask positional credentials entirely.
+
+    Unlike a keyword, a positional argument to ``Credentials(...)`` *is* the
+    credential -- ``"root:hunter2"``, an api key, a ``(user, password)`` tuple
+    -- so there is no non-secret part to keep. Only the type name survives, so
+    the message can still say what kind of thing was passed.
+    """
+    return tuple(f"<{type(a).__name__}>" if a is not None else None for a in args)
+
+
 class _CredentialsMeta(type):
     def __call__(cls: "type[Credentials]", *args, **kwargs):  # type: ignore
         if cls is not Credentials:
@@ -16,7 +38,18 @@ class _CredentialsMeta(type):
         if not (args or kwargs):
             return LocalAuth()
         if args and kwargs:
-            raise AttributeError(args, kwargs)
+            # Never the raw values: `args` here IS the credential
+            # ("root:hunter2", an api key, a (user, password) tuple) and the
+            # kwargs carry password=/token=. An exception's args are exactly
+            # what a traceback or log handler renders, so a call-shape mistake
+            # would print the secret. Same masking as the "not supported"
+            # branch below, and the same ValueError -- this is a bad call
+            # shape, not a missing attribute.
+            raise ValueError(
+                "Credentials given both positionally and by keyword",
+                _mask_args(args),
+                _mask_kwargs(kwargs),
+            )
         if args and len(args) == 1:
             cred = args[0]
             if cred is None:
@@ -64,11 +97,7 @@ class _CredentialsMeta(type):
 
         # Mask secret-bearing values: this exception (with its args) is likely
         # to be logged, and the raw kwargs carry the password/token/api_key.
-        _secret = {"password", "passwd", "token", "api_key", "apikey", "secret"}
-        safe_kwargs = {
-            k: ("***" if k.lower() in _secret and v else v) for k, v in kwargs.items()
-        }
-        raise ValueError("Credentials not supported", safe_kwargs)
+        raise ValueError("Credentials not supported", _mask_kwargs(kwargs))
 
 
 class AuthenticationError(Exception):

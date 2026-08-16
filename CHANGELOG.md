@@ -26,6 +26,13 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   ordering: on a host with no SFTP leg, a `force=` conflict now raises
   `NotImplementedError` rather than `FileExistsError` — neither call could
   ever have succeeded.)
+- **`Credentials(...)` printed the secret when called with both positional and
+  keyword arguments.** That branch raised `AttributeError(args, kwargs)` with
+  the raw values — and an exception's args are exactly what a traceback or log
+  handler renders, so a call-shape mistake leaked the credential. It now
+  raises `ValueError` (matching the sibling "Credentials not supported"
+  branch) with the keyword secrets masked as `***` and the positional
+  credential reduced to its type name.
 
 ## [0.4.2] - 2026-08-06
 
