@@ -805,7 +805,7 @@ class WebShellExecutorProvider(_ExecutorProvider):
         #   channel needed.
         # * `stdin=` is a file-like the caller keeps writing to, so it is
         #   PUMPED: a reader thread forwards it to the websocket as it
-        #   produces bytes (see `WebShellSession.pump_stdin`).
+        #   produces bytes (see `WebShellSession._pump_stdin`).
         #
         # An int fd (subprocess.PIPE/DEVNULL) is neither: PIPE has no bytes to
         # read and DEVNULL means "no input", so both are rejected rather than

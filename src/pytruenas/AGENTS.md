@@ -425,16 +425,39 @@ positionals, not a flag) and helper methods
 - **`generate-typings [--api-version V] [--path DIR] [--api-cache FILE]
   [targets...]`** — dumps (or reads a cached) API definition and writes
   `.pyi` stubs via `pytruenas.codegen.Codegen().generate(version, path)`.
-- **`deploy [--path PATH] [--mode pyz|dir] [--pkg-root DIST] [--pkg-name PKG]
-  [--extra E] [--skip DIST] [--force] [targets...] [-- COMMAND ...]`** —
-  installs pytruenas (or the caller's own distribution) ON the target so it can
-  run there. Probes what the host already has via
-  `utils.bundle.PROBE_SOURCE`, bundles only the difference, and copies it.
-  Defaults to `/var/db/system/pytruenas.pyz` — a dataset on a *data* pool,
-  which survives an update, unlike `/var/db` itself (boot environment).
-  Anything after `--` runs on the target afterwards (read from
-  `main.PASSTHROUGH`, split before argparse; see there for why it cannot be an
-  argparse field).
+- **`deploy [--path PATH] [--mode pyz|dir] [--source installed|repo]
+  [--pkg-root DIST] [--pkg-name PKG] [--extra E] [--skip DIST] [--force]
+  [--repo-root PATH] [--ignore-file FILE] [--ignore-pattern PATTERN]
+  [--include NAME] [--exclude NAME] [--pythonpath DIR] [targets...]
+  [-- COMMAND ...]`** — installs pytruenas (or the caller's own distribution)
+  ON the target so it can run there. Defaults to
+  `/var/db/system/pytruenas.pyz` — a dataset on a *data* pool, which survives
+  an update, unlike `/var/db` itself (boot environment). Anything after `--`
+  runs on the target afterwards (read from `main.PASSTHROUGH`, split before
+  argparse; see there for why it cannot be an argparse field).
+
+  `--source` picks **what** gets bundled; `--mode` is orthogonal and picks the
+  output **layout** (zipapp or unpacked tree) either way.
+  - `installed` (default) — the resolved dependency closure. Probes what the
+    host already has via `utils.bundle.PROBE_SOURCE` and bundles only the
+    difference. `--pkg-root`/`--pkg-name` name the distribution and its import
+    name (default `PYTRUENAS_PKG_ROOT`/`PYTRUENAS_PKG_NAME`, else pytruenas);
+    `--extra` adds an extra's dependencies, `--skip` never bundles a named
+    distribution.
+  - `repo` — a working tree copied as-is from `--repo-root` (default `.`),
+    filtered by whichever of `.gitignore`/`.ignore`/`.bundleignore` exist.
+    `--ignore-file` narrows that selection; `--ignore-pattern` adds a
+    gitignore-style pattern applied after them (a leading `!` un-ignores).
+    `--pythonpath` names directories, relative to the repo root, to put on the
+    launcher's `PYTHONPATH` (default: whichever of `src/`, `lib/`, `vendor/`
+    and the root itself hold an importable package, in that order). Requires
+    the `repo` extra (`pathspec`, plus `tomli` below 3.11).
+    Repo mode does **not** vendor the repo's own dependencies — that needs
+    them installed here, the thing repo mode exists to avoid. It *logs* what
+    the repo declares as a heads-up; `--include`/`--exclude` adjust only that
+    logged list (each takes a bare dependency name or a bracketed `[extra]`,
+    exclude wins). `--skip` is the `installed`-mode counterpart and has no
+    effect here.
 
 ### RunPath step directories (`duho.runpath`)
 
@@ -571,6 +594,25 @@ TypedDict schemas only (no runtime behavior); import the submodules directly.
   with normalized ownership and `bin/*` made executable. Refuses a
   distribution carrying a compiled extension, and one that resolves to data
   files only — both would build cleanly and fail to import on the target.
+
+  The repo-mode half (`deploy --source repo`; needs the `repo` extra):
+  - `collect_repo(root, *, ignore_files=None, extra_ignores=(), prefix=None)
+    -> [(arcname, source_path)]` — a working tree filtered the way a clone
+    would be. `ignore_files` defaults to `DEFAULT_IGNORE_FILES`
+    (`.gitignore`, `.ignore`, `.bundleignore`, layered in that order so the
+    most bundle-specific negations win); `extra_ignores` are additional
+    gitignore-style patterns applied after them.
+  - `build(...)` and `export(...)` take that list directly as
+    **`contents=`**, instead of resolving one from installed metadata —
+    `distributions` becomes optional, and the two are mutually exclusive.
+    `tar_tree` archives the result unchanged.
+  - `repo_requirements(root, extras=(), *, include=(), exclude=())
+    -> list[str]` — the dependency NAMES a repo *declares*
+    (`pyproject.toml`, else `requirements.txt`). Static: nothing is imported
+    and nothing need be installed, which is the point. It does not resolve a
+    transitive closure or return `Distribution` objects the way
+    `requirements()` does. `include`/`exclude` accept a bare name or a
+    bracketed `[extra]`; exclude wins.
 - **`runpath`** — helpers for authoring a RunPath step directory (see "RunPath
   step directories" above): `default_init(cmd, logger) -> TrueNASClient` (the
   per-target `__main__.py` client builder) and `PyTrueNASRunPathArgs` (the
@@ -614,6 +656,12 @@ a directory the user does not control.
 - **`config`** (`pyyaml`) — required to read a CLI `--config` YAML file;
   missing it with a config file present raises `ImportError`.
 - **`codegen`** (`jinja2`) — required by `pytruenas.codegen`/`generate-typings`.
+- **`repo`** (`pathspec`, plus `tomli` below 3.11) — required by
+  `deploy --source repo` and `utils.bundle.collect_repo`/`repo_requirements`.
+  `pathspec` does the gitignore-style matching (`**` and negation are what a
+  hand-rolled matcher gets wrong); `tomli` reads `pyproject.toml` where stdlib
+  `tomllib` does not exist yet. Missing it raises `ImportError` naming the
+  extra at first use.
 
 (There is no `host` extra. It existed for `pytruenas.ops.host`'s adapter
 discovery, which moved from `ifaddr` to `netimps` — a core dependency — and the

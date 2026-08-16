@@ -33,6 +33,7 @@ Optional extras:
 | `pytruenas[ssh]` | SSH commands + the SFTP filesystem leg (`asyncssh`) |
 | `pytruenas[config]` | YAML config/targets file for the CLI (`pyyaml`) |
 | `pytruenas[codegen]` | `generate-typings` command (`jinja2`) |
+| `pytruenas[repo]` | `deploy --source repo` (`pathspec`, `tomli` below 3.11) |
 
 ## Quickstart
 
@@ -151,6 +152,15 @@ the payload, so redeploying verifies instead of re-copying; `--force` overrides.
 When pytruenas is a *dependency* of your own tool rather than the thing being
 deployed, name yours as the root: `--pkg-root mytool` (or `PYTRUENAS_PKG_ROOT`),
 and your package ships with pytruenas bundled underneath it.
+
+`--source repo` ships a working tree as-is instead of an installed dependency
+closure — the files a clone would have, filtered by whichever of `.gitignore`,
+`.ignore` and `.bundleignore` are present, with nothing needing to be installed
+locally first (needs `pytruenas[repo]`):
+
+```sh
+pytruenas deploy --source repo --repo-root . nas.example.com
+```
 
 ## Typings generator
 

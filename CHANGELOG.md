@@ -34,6 +34,23 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   branch) with the keyword secrets masked as `***` and the positional
   credential reduced to its type name.
 
+### Changed
+
+- Declare Python 3.14 support (classifier), and test it in CI — it is the
+  routine development interpreter, so a 3.14-only breakage should not have to
+  wait for a manual check.
+
+### Documentation
+
+- The shipped API header (`pytruenas/AGENTS.md`) documents 0.4.2's whole repo
+  mode: every `deploy --source repo` flag, and `utils.bundle`'s `collect_repo`
+  / `repo_requirements` / `DEFAULT_IGNORE_FILES` / `contents=`. The `repo`
+  extra is listed there and in the README.
+- The changelog's reference links stopped at `[0.3.4]`, so every `## [0.4.x]`
+  heading rendered as a dead reference. Added the missing definitions
+  (`0.2.2`, `0.3.0`, `0.3.1`, `0.4.0`, `0.4.1`, `0.4.2`) and repointed
+  `[Unreleased]` at `v0.4.2...HEAD`.
+
 ## [0.4.2] - 2026-08-06
 
 ### Fixed
@@ -866,10 +883,16 @@ below is simply what the package contains.
   `ssh` extra); the middleware API has no command-exec method. SFTP is handled by
   `pathlib_next`.
 
-[Unreleased]: https://github.com/jose-pr/pytruenas/compare/v0.3.4...HEAD
+[Unreleased]: https://github.com/jose-pr/pytruenas/compare/v0.4.2...HEAD
+[0.4.2]: https://github.com/jose-pr/pytruenas/compare/v0.4.1...v0.4.2
+[0.4.1]: https://github.com/jose-pr/pytruenas/compare/v0.4.0...v0.4.1
+[0.4.0]: https://github.com/jose-pr/pytruenas/compare/v0.3.4...v0.4.0
 [0.3.4]: https://github.com/jose-pr/pytruenas/compare/v0.3.3...v0.3.4
 [0.3.3]: https://github.com/jose-pr/pytruenas/compare/v0.3.2...v0.3.3
 [0.3.2]: https://github.com/jose-pr/pytruenas/compare/v0.3.1...v0.3.2
+[0.3.1]: https://github.com/jose-pr/pytruenas/compare/v0.3.0...v0.3.1
+[0.3.0]: https://github.com/jose-pr/pytruenas/compare/v0.2.2...v0.3.0
+[0.2.2]: https://github.com/jose-pr/pytruenas/compare/v0.2.1...v0.2.2
 [0.2.1]: https://github.com/jose-pr/pytruenas/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/jose-pr/pytruenas/compare/v0.1.1...v0.2.0
 [0.1.1]: https://github.com/jose-pr/pytruenas/compare/v0.1.0...v0.1.1

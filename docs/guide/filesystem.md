@@ -90,6 +90,10 @@ link = client.path("/mnt/tank/current")
 link.symlink_to("/mnt/tank/releases/v2", force="link")   # replace only a symlink
 ```
 
+The SFTP leg is resolved *before* `force=` removes anything, so a host that
+cannot create the link raises `NotImplementedError` with the existing target
+still in place — rather than deleting it and then failing.
+
 !!! note
     SFTP concurrency and transport details come from `pathlib_next`; pytruenas
     just selects and wires the backend. The `ssh` extra requires
