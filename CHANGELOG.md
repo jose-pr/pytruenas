@@ -6,6 +6,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.4.3] - 2026-08-16
+
 ### Fixed
 
 - **`TruenasPath`'s SFTP leg never engaged.** `_sftp()` looked the SSH target
@@ -883,7 +885,8 @@ below is simply what the package contains.
   `ssh` extra); the middleware API has no command-exec method. SFTP is handled by
   `pathlib_next`.
 
-[Unreleased]: https://github.com/jose-pr/pytruenas/compare/v0.4.2...HEAD
+[Unreleased]: https://github.com/jose-pr/pytruenas/compare/v0.4.3...HEAD
+[0.4.3]: https://github.com/jose-pr/pytruenas/compare/v0.4.2...v0.4.3
 [0.4.2]: https://github.com/jose-pr/pytruenas/compare/v0.4.1...v0.4.2
 [0.4.1]: https://github.com/jose-pr/pytruenas/compare/v0.4.0...v0.4.1
 [0.4.0]: https://github.com/jose-pr/pytruenas/compare/v0.3.4...v0.4.0
