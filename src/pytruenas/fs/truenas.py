@@ -86,8 +86,9 @@ class TruenasPath(_TnasWsPath):
         if not host:
             return None
         port = getattr(ssh, "port", 0) or 22
-        # Reuse the client's asyncssh connect options (key/password) so the SFTP
-        # leg authenticates the same way the client's own ssh channel does. Let
+        # Reuse the client's asyncssh connect options (key/password/known_hosts)
+        # so the SFTP leg authenticates -- and checks the host key -- the same
+        # way the client's own ssh channel does. Let
         # pathlib_next auto-select its SFTP backend (asyncssh or paramiko); if
         # NEITHER is installed (the ssh extra wasn't installed) building it
         # raises ImportError -- treat that as "no SFTP leg" so callers fall back
@@ -222,21 +223,34 @@ def _as_posix(value: object) -> str:
 
 
 def _connect_opts_from_ssh(ssh) -> "dict":
-    """Map an :class:`hostctl.host.SshConfig` to asyncssh connect options.
+    """asyncssh connect options for an :class:`hostctl.host.SshConfig`.
 
-    ``SshConfig`` carries ``username``/``password``/``client_keys`` as real
-    fields, so no decoding is needed. The pre-hostctl ``"client_keys|root"``
-    username packing is unpacked once, in :func:`pytruenas.host._ssh_config_from`,
-    on the way into the config -- it never reaches here.
+    Delegates to ``SshConfig.connect_opts()`` -- the single source of truth the
+    host's own SSH executor and SFTP path provider both use -- so this leg
+    authenticates *and applies the host-key policy* exactly the way
+    ``client.run()`` does.
+
+    It used to hand-map ``username``/``client_keys``/``password`` and silently
+    dropped ``known_hosts``: a caller configuring a ``known_hosts`` file (or
+    passing ``known_hosts=None`` to disable checking) had that policy enforced
+    on the SSH leg and ignored on the SFTP leg. Hand-copying the field list is
+    how that drifted, so do not reintroduce one -- extend
+    ``hostctl``'s ``connect_opts()`` instead.
+
+    No filtering is needed: every key ``connect_opts()`` emits (``username``,
+    ``password``, ``client_keys``, ``known_hosts``) is a real
+    ``asyncssh.connect()`` keyword, and ``AsyncsshSftpBackend`` forwards its
+    ``connect_opts`` straight into ``asyncssh.connect()`` -- hostctl's own
+    ``SftpPathProvider`` hands it the very same mapping.
+
+    Note ``SshConfig.known_hosts`` defaults to the ``()`` sentinel, which
+    ``connect_opts()`` omits; pathlib_next then applies its own
+    ``known_hosts=None`` default. That is unchanged here and matches hostctl's
+    SFTP leg exactly -- see
+    ``.agents/findings/2026-08-16_sftp_leg_default_disables_host_key_checking.md``.
+
+    The pre-hostctl ``"client_keys|root"`` username packing is unpacked once,
+    in :func:`pytruenas.host._ssh_config_from`, on the way into the config --
+    it never reaches here.
     """
-    opts: "dict[str, object]" = {}
-    opts["username"] = getattr(ssh, "username", None) or "root"
-    client_keys = getattr(ssh, "client_keys", None)
-    if client_keys:
-        opts["client_keys"] = [
-            key.encode() if isinstance(key, str) else key for key in client_keys
-        ]
-    password = getattr(ssh, "password", None)
-    if password:
-        opts["password"] = password
-    return opts
+    return dict(ssh.connect_opts())

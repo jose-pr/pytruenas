@@ -10,6 +10,19 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
+- **`TruenasPath`'s SFTP leg ignored the configured `known_hosts`, so it did
+  not apply the caller's host-key policy.** `_connect_opts_from_ssh()`
+  hand-mapped `username`/`client_keys`/`password` out of the `SshConfig` and
+  dropped everything else â€” including `known_hosts`, which
+  `SshConfig.connect_opts()` does pass. A host configured with a `known_hosts`
+  file had that policy enforced on the SSH executor leg and ignored on the
+  SFTP leg (verified against a live appliance: the executor refused to connect,
+  the SFTP leg connected anyway), and a caller passing `known_hosts=None` to
+  disable verification was likewise ignored. The mapping now delegates to
+  `SshConfig.connect_opts()`, the single source of truth hostctl's own SSH and
+  SFTP legs use, so both legs of a host authenticate and verify identically.
+  The bug predates this release but was unreachable while the SFTP leg was dead
+  (below) â€” 0.4.3 is what makes it reachable, which is why it is fixed here.
 - **`TruenasPath`'s SFTP leg never engaged.** `_sftp()` looked the SSH target
   up on `client.ssh_config` (removed when `TrueNASClient` merged into
   `TrueNASHost`) and then `client.shell` (hostctl's bound `Shell`, which has

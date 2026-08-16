@@ -242,11 +242,51 @@ def test_truenaspath_sftp_leg_reachable_on_a_real_host():
     assert p._sftp() is not None
 
 
-def test_connect_opts_prefer_real_sshconfig_fields():
+def test_connect_opts_delegate_to_sshconfig_connect_opts():
+    """The mapping is hostctl's, not a hand-rolled copy of its field list.
+
+    A local copy is how `known_hosts` went missing (see the test below), so
+    pin the delegation itself: whatever `SshConfig.connect_opts()` produces is
+    what the SFTP leg connects with.
+    """
     from pytruenas.fs.truenas import _connect_opts_from_ssh
 
-    opts = _connect_opts_from_ssh(_ssh_config(username="admin", password="pw"))
-    assert opts == {"username": "admin", "password": "pw"}
+    ssh = _ssh_config(username="admin", password="pw")
+    assert _connect_opts_from_ssh(ssh) == ssh.connect_opts()
+    assert _connect_opts_from_ssh(ssh) == {"username": "admin", "password": "pw"}
 
-    keyed = _connect_opts_from_ssh(_ssh_config(client_keys=["PRIVATE"]))
-    assert keyed == {"username": "root", "client_keys": [b"PRIVATE"]}
+    keyed = _ssh_config(client_keys=["PRIVATE"])
+    assert _connect_opts_from_ssh(keyed) == keyed.connect_opts()
+
+
+def test_connect_opts_carry_known_hosts():
+    """Regression: the SFTP leg dropped the caller's host-key policy.
+
+    `_connect_opts_from_ssh` hand-mapped username/client_keys/password only, so
+    `known_hosts` never reached `asyncssh.connect()`. The SSH executor (which
+    uses `SshConfig.connect_opts()`) enforced the configured policy while this
+    leg ignored it -- proven live: a `known_hosts` file with no entry for the
+    host made hostctl's ssh executor refuse to connect, and the SFTP leg
+    connected anyway.
+    """
+    from pytruenas.fs.truenas import _connect_opts_from_ssh
+
+    opts = _connect_opts_from_ssh(_ssh_config(known_hosts="/etc/ssh/known_hosts"))
+    assert opts["known_hosts"] == "/etc/ssh/known_hosts"
+
+    # `None` means "do not verify" and is a real, deliberate choice -- distinct
+    # from the `()` default, which SshConfig treats as "unset" and omits.
+    disabled = _connect_opts_from_ssh(_ssh_config(known_hosts=None))
+    assert "known_hosts" in disabled and disabled["known_hosts"] is None
+
+    assert "known_hosts" not in _connect_opts_from_ssh(_ssh_config())
+
+
+def test_sftp_backend_is_built_with_the_configured_known_hosts():
+    """The same regression, end to end through the leg the client really builds."""
+    client = _client(ssh=_ssh_config(known_hosts="/etc/ssh/known_hosts"))
+    p = TruenasPath("truenas://nas/etc/hosts", backend=TnasWsBackend(client))
+
+    sftp = p._sftp()
+    assert sftp is not None
+    assert sftp.backend.connect_opts["known_hosts"] == "/etc/ssh/known_hosts"
