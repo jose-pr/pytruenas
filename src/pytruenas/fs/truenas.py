@@ -5,8 +5,12 @@ A remote TrueNAS host can be reached two ways: over SSH/SFTP (rich POSIX
 semantics -- symlinks, rename, recursive remove) when a shell is configured, or
 over the middleware websocket (:class:`~pytruenas.fs.tnasws.TnasWsPath`), which is
 always available but exposes a narrower ``filesystem.*`` surface. ``TruenasPath``
-composes the two: each operation is tried on the SFTP leg first and falls back to
-the websocket leg when SFTP is unavailable or does not implement it.
+composes the two: five operations -- ``unlink``, ``rmdir``, ``rename``,
+``symlink_to`` and ``readlink`` -- are tried on the SFTP leg first and fall back
+to the websocket leg when SFTP is unavailable or does not implement it.
+``resolve`` is *not* one of them despite calling into the same machinery:
+``pathlib_next``'s ``SftpPath`` has no ``resolve``, so that call always falls
+through and ``resolve()`` returns ``self`` on every host, SFTP or not.
 
 The SFTP leg is pluggable. When ``pathlib_next``'s ``SftpPath`` is importable
 (the ``sftp``/``sftp-async`` extra), it is used; otherwise this falls back to
@@ -44,8 +48,9 @@ class TruenasPath(_TnasWsPath):
 
     Subclasses :class:`~pytruenas.fs.tnasws.TnasWsPath` so the always-available
     websocket backend is the base behaviour; the SFTP-preferred operations
-    (unlink/rmdir/rename/symlink_to/readlink/resolve) are overridden to try SFTP
-    first. Carries the same
+    (unlink/rmdir/rename/symlink_to/readlink) are overridden to try SFTP first.
+    ``resolve`` is overridden too but never reaches SFTP -- ``SftpPath`` has no
+    ``resolve`` -- so it always returns ``self``. Carries the same
     ``TnasWsBackend`` (holding the client); the SFTP leg is built lazily from
     the host's SSH configuration (``client.config.ssh``, an
     :class:`hostctl.host.SshConfig`).
@@ -198,11 +203,19 @@ class TruenasPath(_TnasWsPath):
         return create(_as_posix(target), target_is_directory)
 
     def resolve(self, strict=False):
+        """Always returns ``self`` -- neither leg can resolve symlinks.
+
+        The SFTP attempt below is structural, not effective: ``pathlib_next``'s
+        ``SftpPath`` implements no ``resolve``, so ``_try_sftp`` raises
+        ``NotImplementedError`` on every host and the fallback runs even when
+        the SFTP leg is fully configured. The middleware has no ``realpath``
+        either, so returning the path unchanged is the best effort available --
+        matching a filesystem with no symlink resolution. The branch is kept so
+        the operation starts working the day ``SftpPath`` grows a ``resolve``.
+        """
         try:
             resolved = self._try_sftp("resolve", strict=strict)
         except (_NoSftp, NotImplementedError):
-            # No SFTP: the middleware has no realpath; return self unchanged
-            # (best effort, matching a filesystem with no symlink resolution).
             return self
         return self.with_segments(_as_posix(resolved))
 

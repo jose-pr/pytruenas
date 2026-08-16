@@ -354,12 +354,15 @@ module-level `path(client, *segments, backend=None)` is what it delegates to.
   mkdir/chmod/chown; `unlink`/`rmdir` shell out (`rm -f` / `rmdir`) because
   `filesystem.*` has no delete op. Built from a bare URI (no backend) raises
   `RuntimeError` on first use — always construct via `client.path(...)`.
-- **`TruenasPath`** (`pytruenas.fs.truenas`) — subclasses `TnasWsPath`;
-  `unlink`/`rmdir`/`rename`/`symlink_to`/`readlink`/`resolve` try an SFTP leg
-  first (via `pathlib_next`'s `SftpPath`, requires the `ssh` extra +
+- **`TruenasPath`** (`pytruenas.fs.truenas`) — subclasses `TnasWsPath`; five
+  operations — `unlink`/`rmdir`/`rename`/`symlink_to`/`readlink` — try an SFTP
+  leg first (via `pathlib_next`'s `SftpPath`, requires the `ssh` extra +
   `client.config.ssh` host) and fall back to `TnasWsPath`'s websocket behavior (or
   raise `NotImplementedError` for ops SFTP alone can do — rename, symlink_to,
-  readlink). `symlink_to(..., force=False, onremove=None)` adds a
+  readlink). **`resolve` is not one of them**: `SftpPath` has no `resolve`, so
+  the attempt always raises `NotImplementedError` and `resolve()` returns
+  `self` on every host, SFTP configured or not.
+  `symlink_to(..., force=False, onremove=None)` adds a
   pytruenas-specific convenience: `force` (bool, a file-type string, or a set
   of `"file"/"link"/"directory"`) removes a conflicting existing target first;
   `onremove(path, kind)` gates each removal. The SFTP leg is resolved *before*

@@ -13,7 +13,7 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - **`TruenasPath`'s SFTP leg ignored the configured `known_hosts`, so it did
   not apply the caller's host-key policy.** `_connect_opts_from_ssh()`
   hand-mapped `username`/`client_keys`/`password` out of the `SshConfig` and
-  dropped everything else â€” including `known_hosts`, which
+  dropped everything else — including `known_hosts`, which
   `SshConfig.connect_opts()` does pass. A host configured with a `known_hosts`
   file had that policy enforced on the SSH executor leg and ignored on the
   SFTP leg (verified against a live appliance: the executor refused to connect,
@@ -22,13 +22,13 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   `SshConfig.connect_opts()`, the single source of truth hostctl's own SSH and
   SFTP legs use, so both legs of a host authenticate and verify identically.
   The bug predates this release but was unreachable while the SFTP leg was dead
-  (below) â€” 0.4.3 is what makes it reachable, which is why it is fixed here.
+  (below) — 0.4.3 is what makes it reachable, which is why it is fixed here.
 - **`TruenasPath`'s SFTP leg never engaged.** `_sftp()` looked the SSH target
   up on `client.ssh_config` (removed when `TrueNASClient` merged into
   `TrueNASHost`) and then `client.shell` (hostctl's bound `Shell`, which has
   no `host`), so it returned `None` for every real host: the documented
-  SFTP-first behaviour of `unlink`/`rmdir`/`rename`/`readlink`/`symlink_to`/
-  `resolve` was unreachable, and `rename`/`readlink`/`symlink_to` raised
+  SFTP-first behaviour of `unlink`/`rmdir`/`rename`/`readlink`/`symlink_to`
+  was unreachable, and `rename`/`readlink`/`symlink_to` raised
   `NotImplementedError` no matter how the host was configured. It now reads
   `client.config.ssh` — the `hostctl.host.SshConfig` the host actually
   carries. (Host-level `client.path(...)` work was mostly unaffected: hostctl's
@@ -65,6 +65,14 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   heading rendered as a dead reference. Added the missing definitions
   (`0.2.2`, `0.3.0`, `0.3.1`, `0.4.0`, `0.4.1`, `0.4.2`) and repointed
   `[Unreleased]` at `v0.4.2...HEAD`.
+- **`TruenasPath` tries SFTP first for five operations, not six.**
+  `pathlib_next`'s `SftpPath` implements no `resolve`, so `TruenasPath.resolve()`
+  has always fallen through to returning `self` — on every host, whether or not
+  SFTP is configured. The module docstring, the shipped API header and the
+  filesystem guide all listed `resolve` alongside
+  `unlink`/`rmdir`/`rename`/`symlink_to`/`readlink` as SFTP-preferred; they now
+  say what actually happens. No behaviour change — the docs were wrong, not the
+  code.
 
 ## [0.4.2] - 2026-08-06
 

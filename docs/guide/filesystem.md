@@ -69,9 +69,9 @@ d.rm(recursive=True, missing_ok=True)   # pytruenas convenience
 
 ## What needs SFTP
 
-The middleware `filesystem.*` API has no symlink, rename, or realpath
-operation, so these need the `ssh` extra and a reachable SSH leg. Without one
-they raise `NotImplementedError` rather than failing silently:
+The middleware `filesystem.*` API has no symlink or rename operation, so these
+need the `ssh` extra and a reachable SSH leg. Without one they raise
+`NotImplementedError` rather than failing silently:
 
 | operation | `sftp` | `tnasws` |
 | --- | --- | --- |
@@ -79,7 +79,12 @@ they raise `NotImplementedError` rather than failing silently:
 | `unlink`/`rmdir` | ✅ | ✅ (shells out) |
 | `rename` | ✅ | ❌ |
 | `symlink_to` / `readlink` | ✅ | ❌ |
-| `resolve` | ✅ | returns the path unchanged |
+| `resolve` | ❌ | ❌ — returns the path unchanged |
+
+`resolve()` is the one exception to "SFTP first": neither leg can do it.
+`pathlib_next`'s `SftpPath` implements no `resolve` and the middleware has no
+`realpath`, so `resolve()` returns the path unchanged on **every** host,
+whether or not SFTP is configured.
 
 `symlink_to` takes a pytruenas-specific `force=` that removes a conflicting
 target first — a bool, a file-type string, or a set of
