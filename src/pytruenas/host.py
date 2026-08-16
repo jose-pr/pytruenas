@@ -980,24 +980,6 @@ class TrueNASHost(_PosixHost, _ty.Generic[ApiVersion]):
             "ssh=SshConfig(...), or call install_sshcreds()"
         )
 
-    @property
-    def ssh(self):
-        """The underlying ``asyncssh`` connection (requires the ``ssh`` extra).
-
-        For the rare caller that needs the raw connection -- port forwarding,
-        an SFTP client of its own. Ordinary command and path work should go
-        through :meth:`run` and :meth:`path`, which pick a transport rather
-        than assuming this one exists.
-        """
-        for provider in self._executor_selector.providers:
-            transport = getattr(provider, "transport", None)
-            if transport is not None and hasattr(transport, "ssh"):
-                return transport.ssh
-        raise RuntimeError(
-            "no SSH transport is configured for this host; pass shell=... or "
-            "ssh=SshConfig(...), or call install_sshcreds()"
-        )
-
     # -- convenience wrappers over common auth/core methods ----------------
 
     def me(self) -> dict:
