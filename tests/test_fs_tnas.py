@@ -5,6 +5,7 @@ that TruenasPath falls back to the websocket leg when no SFTP is configured.
 """
 
 import stat
+from types import SimpleNamespace
 from unittest.mock import MagicMock
 
 import pytest
@@ -13,11 +14,29 @@ from pytruenas.fs.tnasws import TnasWsBackend, TnasWsPath, _stat_from_info
 from pytruenas.fs.truenas import TruenasPath
 
 
-def _client(**fs):
+def _client(ssh=None, **fs):
+    """A fake host: websocket-only by default, or carrying an SSH leg.
+
+    The shape matters -- `TruenasPath._sftp()` reads the SSH target off
+    `client.config.ssh` (a real `hostctl.host.SshConfig`), exactly as a live
+    `TrueNASHost` carries it. A bare `MagicMock` would auto-vivify *any*
+    attribute name and make the leg look configured no matter what it read,
+    which is how the dead `client.ssh_config` lookup stayed green for a
+    release.
+    """
     client = MagicMock()
+    client.config = SimpleNamespace(ssh=ssh)
     for name, value in fs.items():
         getattr(client.api.filesystem, name).return_value = value
     return client
+
+
+def _ssh_config(**overrides):
+    from hostctl.host import SshConfig
+
+    opts = dict(host="nas", port=22, username="root", password=None)
+    opts.update(overrides)
+    return SshConfig(**opts)
 
 
 # -- TnasWsPath ---------------------------------------------------------------
@@ -85,16 +104,14 @@ def test_stat_from_listdir_entry_without_mode():
 # -- TruenasPath fallback -----------------------------------------------------
 
 
-# The SSH target is `client.ssh_config` (renamed from `.shell` in the hostctl
-# migration). Setting the OLD name on a MagicMock client would silently do
-# nothing -- the attribute would be created, ignored, and `ssh_config.host`
-# would remain a truthy Mock -- so these tests would pass while asserting the
-# opposite of what they claim. Hence explicit `ssh_config` here.
+# The SSH target is `client.config.ssh`, an `hostctl.host.SshConfig`. It was
+# `client.ssh_config` before `TrueNASClient` merged into `TrueNASHost`, and
+# that name no longer exists anywhere -- see
+# `test_truenaspath_ignores_the_pre_merge_ssh_config_attribute`.
 
 
 def test_truenaspath_falls_back_to_ws_without_sftp():
-    client = _client(stat={"mode": 0o100644}, get=b"x")
-    client.ssh_config.host = None  # no ssh target -> no sftp leg
+    client = _client(stat={"mode": 0o100644}, get=b"x")  # no ssh -> no sftp leg
     p = TruenasPath("truenas://nas/f.txt", backend=TnasWsBackend(client))
     assert p.read_text() == "x"  # ws leg
     p.unlink()  # ws shell fallback
@@ -103,7 +120,6 @@ def test_truenaspath_falls_back_to_ws_without_sftp():
 
 def test_truenaspath_rename_without_sftp_raises():
     client = _client()
-    client.ssh_config.host = None
     p = TruenasPath("truenas://nas/f", backend=TnasWsBackend(client))
     with pytest.raises(NotImplementedError):
         p.rename("/g")
@@ -113,11 +129,55 @@ def test_truenaspath_resolve_falls_back_when_sftp_lacks_op():
     # pathlib_next's SftpPath has no resolve(); _try_sftp must surface that as
     # NotImplementedError so resolve() falls back to returning self, not crash
     # with AttributeError.
-    client = _client()
-    client.ssh_config.host = "nas"
-    client.ssh_config.port = 22
-    client.ssh_config.username = "root"
-    client.ssh_config.password = None
+    client = _client(ssh=_ssh_config())
     p = TruenasPath("truenas://nas/a/b", backend=TnasWsBackend(client))
+    assert p._sftp() is not None  # the leg really is built here
     resolved = p.resolve()
     assert resolved.path == "/a/b"  # returned self, no AttributeError
+
+
+def test_truenaspath_builds_the_sftp_leg_from_config_ssh():
+    client = _client(ssh=_ssh_config(host="nas", port=2222, username="admin"))
+    p = TruenasPath("truenas://nas/a/b", backend=TnasWsBackend(client))
+    sftp = p._sftp()
+    assert sftp is not None
+    assert str(sftp) == "sftp://nas:2222/a/b"
+
+
+def test_truenaspath_ignores_the_pre_merge_ssh_config_attribute():
+    """`client.ssh_config` is gone; reading it built the leg off a Mock.
+
+    Fails on the pre-fix lookup, which read `ssh_config` first and would have
+    happily built an SFTP path out of this stray attribute.
+    """
+    client = _client()  # config.ssh is None -> websocket-only
+    client.ssh_config = SimpleNamespace(
+        host="nas", port=22, username="root", password=None
+    )
+    p = TruenasPath("truenas://nas/f", backend=TnasWsBackend(client))
+    assert p._sftp() is None
+
+
+def test_truenaspath_sftp_leg_reachable_on_a_real_host():
+    """Construction only -- no network. Pins the real class's attribute shape."""
+    from hostctl.host import SshConfig
+
+    from pytruenas import TrueNASClient
+
+    host = TrueNASClient(
+        "wss://nas",
+        autologin=False,
+        ssh=SshConfig(host="nas", port=22, username="root", password="pw"),
+    )
+    p = TruenasPath("truenas://nas/etc/hosts", backend=TnasWsBackend(host))
+    assert p._sftp() is not None
+
+
+def test_connect_opts_prefer_real_sshconfig_fields():
+    from pytruenas.fs.truenas import _connect_opts_from_ssh
+
+    opts = _connect_opts_from_ssh(_ssh_config(username="admin", password="pw"))
+    assert opts == {"username": "admin", "password": "pw"}
+
+    keyed = _connect_opts_from_ssh(_ssh_config(client_keys=["PRIVATE"]))
+    assert keyed == {"username": "root", "client_keys": [b"PRIVATE"]}

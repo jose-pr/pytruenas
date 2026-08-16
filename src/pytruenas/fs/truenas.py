@@ -46,8 +46,9 @@ class TruenasPath(_TnasWsPath):
     websocket backend is the base behaviour; the SFTP-preferred operations
     (unlink/rmdir/rename/symlink_to/readlink/resolve) are overridden to try SFTP
     first. Carries the same
-    ``TnasWsBackend`` (holding the client); the SFTP leg is built lazily from the
-    client's shell/ssh configuration.
+    ``TnasWsBackend`` (holding the client); the SFTP leg is built lazily from
+    the host's SSH configuration (``client.config.ssh``, an
+    :class:`hostctl.host.SshConfig`).
     """
 
     __SCHEMES = ("truenas",)
@@ -55,33 +56,43 @@ class TruenasPath(_TnasWsPath):
 
     # -- SFTP leg ----------------------------------------------------------
 
+    def _ssh_config(self):
+        """The client's :class:`hostctl.host.SshConfig`, or ``None``.
+
+        The SSH leg lives on the host's config (``client.config.ssh``) since
+        ``TrueNASClient`` was merged into ``TrueNASHost``. This used to read
+        ``client.ssh_config`` and then ``client.shell``; neither carries the
+        SSH target on a real host anymore -- ``ssh_config`` was removed with
+        the merge and ``client.shell`` is hostctl's bound ``Shell``, which has
+        no ``host`` -- so the whole SFTP leg was unreachable.
+        """
+        client = self.backend.client
+        config = getattr(client, "config", None)
+        if config is None:
+            config = getattr(client, "_config", client)
+        return getattr(config, "ssh", None)
+
     def _sftp(self):
         """Build an ``SftpPath`` for this path from the client's ssh config, or None.
 
         Returns ``None`` when pathlib_next's SFTP is unavailable or the client has
-        no usable shell target -- callers then use the websocket leg.
+        no usable SSH target -- callers then use the websocket leg.
         """
         sftp_cls = _sftp_path_cls()
         if sftp_cls is None:
             return None
-        client = self.backend.client
-        # `.ssh_config` was `.shell` before the hostctl migration; a plain
-        # getattr on the old name would silently yield None here and drop the
-        # SFTP leg rather than fail, so both names are checked explicitly.
-        shell = getattr(client, "ssh_config", None)
-        if shell is None:
-            shell = getattr(client, "shell", None)
-        host = getattr(shell, "host", None)
+        ssh = self._ssh_config()
+        host = getattr(ssh, "host", None)
         if not host:
             return None
-        port = getattr(shell, "port", 0) or 22
+        port = getattr(ssh, "port", 0) or 22
         # Reuse the client's asyncssh connect options (key/password) so the SFTP
         # leg authenticates the same way the client's own ssh channel does. Let
         # pathlib_next auto-select its SFTP backend (asyncssh or paramiko); if
         # NEITHER is installed (the ssh extra wasn't installed) building it
         # raises ImportError -- treat that as "no SFTP leg" so callers fall back
         # to the websocket leg rather than crashing.
-        connect_opts = _connect_opts_from_shell(shell)
+        connect_opts = _connect_opts_from_ssh(ssh)
         try:
             from pathlib_next.uri.schemes.sftp import AsyncsshSftpBackend
 
@@ -202,21 +213,22 @@ def _as_posix(value: object) -> str:
     return str(value)
 
 
-def _connect_opts_from_shell(shell) -> "dict":
-    """Map the client's shell target to asyncssh connect options."""
+def _connect_opts_from_ssh(ssh) -> "dict":
+    """Map an :class:`hostctl.host.SshConfig` to asyncssh connect options.
+
+    ``SshConfig`` carries ``username``/``password``/``client_keys`` as real
+    fields, so no decoding is needed. The pre-hostctl ``"client_keys|root"``
+    username packing is unpacked once, in :func:`pytruenas.host._ssh_config_from`,
+    on the way into the config -- it never reaches here.
+    """
     opts: "dict[str, object]" = {}
-    username = getattr(shell, "username", "") or ""
-    password = getattr(shell, "password", None)
-    if "|" in username:
-        logintype, user = username.split("|", maxsplit=1)
-    else:
-        logintype, user = "password", username or "root"
-    opts["username"] = user or "root"
+    opts["username"] = getattr(ssh, "username", None) or "root"
+    client_keys = getattr(ssh, "client_keys", None)
+    if client_keys:
+        opts["client_keys"] = [
+            key.encode() if isinstance(key, str) else key for key in client_keys
+        ]
+    password = getattr(ssh, "password", None)
     if password:
-        if logintype == "client_keys":
-            opts["client_keys"] = [
-                password.encode() if isinstance(password, str) else password
-            ]
-        else:
-            opts["password"] = password
+        opts["password"] = password
     return opts

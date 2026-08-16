@@ -4,6 +4,21 @@ All notable changes to this project are documented here. The format is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+
+- **`TruenasPath`'s SFTP leg never engaged.** `_sftp()` looked the SSH target
+  up on `client.ssh_config` (removed when `TrueNASClient` merged into
+  `TrueNASHost`) and then `client.shell` (hostctl's bound `Shell`, which has
+  no `host`), so it returned `None` for every real host: the documented
+  SFTP-first behaviour of `unlink`/`rmdir`/`rename`/`readlink`/`symlink_to`/
+  `resolve` was unreachable, and `rename`/`readlink`/`symlink_to` raised
+  `NotImplementedError` no matter how the host was configured. It now reads
+  `client.config.ssh` — the `hostctl.host.SshConfig` the host actually
+  carries. (Host-level `client.path(...)` work was mostly unaffected: hostctl's
+  composite path routes symlink-ish operations to its own `sftp` provider.)
+
 ## [0.4.2] - 2026-08-06
 
 ### Fixed
