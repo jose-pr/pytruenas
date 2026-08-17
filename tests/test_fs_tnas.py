@@ -10,6 +10,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
+from pytruenas.fs import path as fs_path
 from pytruenas.fs.tnasws import TnasWsBackend, TnasWsPath, _stat_from_info
 from pytruenas.fs.truenas import TruenasPath
 
@@ -210,6 +211,89 @@ def test_sftp_leg_encoding_leaves_uri_legal_characters_readable():
     sftp = p._sftp()
     assert str(sftp) == "sftp://nas:2222/C:/Temp"
     assert sftp.path == "/C:/Temp"
+
+
+# -- the truenas:// URI is built the same way, one layer up --------------------
+
+
+def _path_client(ssh=None):
+    """A remote fake host shaped for `pytruenas.fs.path()`.
+
+    `path()` reads `is_local`/`host` off the settings object (`_api` here, the
+    pre-hostctl spelling it still accepts), while `TruenasPath._sftp()` reads
+    the SSH target off `client.config.ssh` -- two different attributes, so both
+    have to be real for a path built through `path()` to reach its SFTP leg.
+    """
+    return SimpleNamespace(
+        _api=SimpleNamespace(is_local=False, host="nas", port=0),
+        config=SimpleNamespace(ssh=ssh),
+        api=SimpleNamespace(),
+        fsbackend="auto",
+    )
+
+
+_URI_SYNTAX_NAMES = [
+    "/mnt/tank/cache?v=2",  # truncated at the `?` -- read as a query
+    "/mnt/tank/a#b",  # truncated at the `#` -- read as a fragment
+    "/mnt/tank/sp ace",
+    "/mnt/tank/100%",  # a lone `%` -- must not be re-encoded twice
+    "/mnt/tank/report%20final.txt",  # a literal `%20`, NOT a space
+    "/mnt/tank/café.txt",
+]
+
+
+@pytest.mark.parametrize("remote", _URI_SYNTAX_NAMES)
+@pytest.mark.parametrize(
+    "backend,expected",
+    [("ws", TnasWsPath), ("api", TnasWsPath), ("auto", TruenasPath)],
+)
+def test_path_construction_survives_uri_syntax_in_a_filename(remote, backend, expected):
+    """Regression: `_ws_uri`/`_truenas_uri` interpolated the path unencoded.
+
+    Worse than the SFTP defect fixed in 0.4.4, because it corrupts `self.path`
+    at *construction* -- before any leg is chosen -- so the websocket leg
+    (`read_bytes`, `stat`, every `filesystem.*` call) addressed the truncated
+    name too, not just the five SFTP-first operations.
+
+    What is pinned is the round-trip, not the encoded spelling.
+    """
+    p = fs_path(_path_client(), remote, backend=backend)
+    assert isinstance(p, expected)
+    assert p.path == remote
+
+
+def test_path_construction_leaves_uri_legal_characters_readable():
+    """Encoding is minimal, as on the SFTP leg: `:` is legal in a segment."""
+    p = fs_path(_path_client(), "/C:/Temp", backend="ws")
+    assert str(p) == "truenas+ws://nas/C:/Temp"
+    assert p.path == "/C:/Temp"
+
+
+def test_path_construction_joins_segments_before_encoding():
+    """A `/` between segments is a separator, not part of a name."""
+    p = fs_path(_path_client(), "/mnt/tank", "a?b", "c#d", backend="ws")
+    assert p.path == "/mnt/tank/a?b/c#d"
+    assert p.name == "c#d"
+
+
+@pytest.mark.parametrize("remote", _URI_SYNTAX_NAMES)
+def test_sftp_leg_is_not_encoded_twice(remote):
+    """The two encoding sites compose to exactly one round of encoding.
+
+    Construction encodes into the `truenas://` URI and `_sftp()` encodes again
+    into the `sftp://` one. That is correct only because `UriPath.path`
+    *decodes*: the SFTP leg quotes the decoded name, never the already-quoted
+    spelling. If either side were to encode an encoded value, `100%` would
+    reach the host as `100%25` and `report%20final.txt` as
+    `report%2520final.txt` -- a different file, silently.
+    """
+    client = _path_client(ssh=_ssh_config(host="nas", port=2222))
+    p = fs_path(client, remote, backend="auto")
+    assert p.path == remote
+
+    sftp = p._sftp()
+    assert sftp is not None
+    assert sftp.path == remote  # one decode of one encode, not two of two
 
 
 def test_truenaspath_ignores_the_pre_merge_ssh_config_attribute():

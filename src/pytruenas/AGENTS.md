@@ -375,6 +375,16 @@ module-level `path(client, *segments, backend=None)` is what it delegates to.
 `"truenas"`/`"auto"` -> `TruenasPath`/`LocalPath` (`"auto"` picks `LocalPath`
 for a local client).
 
+**Segments are filesystem paths, not URIs** (since 0.4.5). Both remote types are
+`UriPath`s, so `path()` percent-encodes each segment into the `truenas://` /
+`truenas+ws://` URI it builds: a name containing `?`, `#`, `%`, a space or
+non-ASCII survives `p.path` unchanged, and the SFTP leg re-encodes the decoded
+name exactly once. Before 0.4.5 the segments were interpolated raw and
+`client.path("/mnt/tank/cache?v=2")` addressed `/mnt/tank/cache` silently, on
+**both** legs. Constructing a path type *directly* from a URI string
+(`TruenasPath("truenas://nas/...")`) is unchanged and still URI syntax — `?`
+there really is a query; encode the path yourself if you go around `path()`.
+
 ## `main` (`pytruenas.main`) — CLI entry point
 
 - **`main(name=None, argv=None) -> int`** — build the `duho` app

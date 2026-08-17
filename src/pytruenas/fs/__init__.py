@@ -19,6 +19,7 @@ import typing as _ty
 
 from pathlib_next import LocalPath as LocalPath
 
+from ._uri import quote_uri_path as _quote_uri_path
 from .tnasws import TnasWsBackend as TnasWsBackend
 from .tnasws import TnasWsPath as TnasWsPath
 from .truenas import TruenasPath as TruenasPath
@@ -71,11 +72,25 @@ def _host(client: "TrueNASClient") -> str:
 
 
 def _ws_uri(client: "TrueNASClient", posix: str) -> str:
-    return f"truenas+ws://{_host(client)}{_abspath(posix)}"
+    return f"truenas+ws://{_host(client)}{_uri_path(posix)}"
 
 
 def _truenas_uri(client: "TrueNASClient", posix: str) -> str:
-    return f"truenas://{_host(client)}{_abspath(posix)}"
+    return f"truenas://{_host(client)}{_uri_path(posix)}"
+
+
+def _uri_path(posix: str) -> str:
+    """``posix`` as the absolute, percent-encoded path component of a URI.
+
+    Both path types here are ``UriPath``s: they parse the string built above
+    and uridecode it. Interpolated raw, a ``?`` or ``#`` in a filename began a
+    query or fragment and truncated the path *at construction* --
+    ``client.path("/mnt/tank/cache?v=2")`` yielded a path pointing at
+    ``/mnt/tank/cache`` before any transport leg was chosen, so the websocket
+    leg (``read_bytes``, ``stat``, every ``filesystem.*`` call) addressed the
+    wrong file just as the SFTP one did, with no error either way.
+    """
+    return _quote_uri_path(_abspath(posix))
 
 
 def _abspath(posix: str) -> str:
