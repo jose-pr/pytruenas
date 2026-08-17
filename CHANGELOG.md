@@ -6,6 +6,40 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.4.5] - 2026-08-16
+
+### Fixed
+
+- **`client.path()` built its `truenas://` URI without encoding the path, so a
+  filename containing `?` or `#` was truncated at construction — on every
+  transport leg.** `pytruenas.fs.path()` interpolated the segments straight into
+  `f"truenas://{host}{posix}"` (and `f"truenas+ws://..."`), and both remote path
+  types are `UriPath`s: they parse that string and uridecode it, so `?` began a
+  query and `#` began a fragment. `client.path("/mnt/tank/cache?v=2")` returned a
+  path already pointing at `/mnt/tank/cache`, and a literal `%20` in a name
+  decoded into a space.
+
+  This is the same defect 0.4.4 fixed on the SFTP leg, one layer up and wider:
+  because the name was lost *before* a leg was chosen, the always-available
+  websocket leg — `read_bytes`, `write_bytes`, `stat`, `iterdir`, every
+  `filesystem.*` call — read and wrote the truncated name too, not just the five
+  SFTP-first operations. No error was raised on either leg; the call simply
+  addressed a different file.
+
+  Segments are now percent-encoded with the same RFC 3986 `pchar` safe set the
+  SFTP leg uses, which leaves `:` alone so a Windows-flavoured remote path still
+  reads as `/C:/Temp`. The safe set and the quoting moved into one internal
+  helper shared by both sites (`pytruenas.fs._uri`) rather than being spelled
+  twice — a second copy is how the SFTP leg was fixed in 0.4.4 while this one
+  stayed broken. The two encodings compose to exactly one round trip:
+  construction encodes, `UriPath.path` decodes, and the SFTP leg quotes the
+  decoded name, so `100%` does not become `100%25` on the wire.
+
+  Constructing a path type directly from a URI string is unchanged and still
+  URI syntax — a `?` in `TruenasPath("truenas://nas/...")` is a query, as it
+  should be. Only `client.path()` / `pytruenas.fs.path()`, which take
+  filesystem segments, are affected.
+
 ## [0.4.4] - 2026-08-16
 
 ### Fixed
@@ -965,7 +999,8 @@ below is simply what the package contains.
   `ssh` extra); the middleware API has no command-exec method. SFTP is handled by
   `pathlib_next`.
 
-[Unreleased]: https://github.com/jose-pr/pytruenas/compare/v0.4.4...HEAD
+[Unreleased]: https://github.com/jose-pr/pytruenas/compare/v0.4.5...HEAD
+[0.4.5]: https://github.com/jose-pr/pytruenas/compare/v0.4.4...v0.4.5
 [0.4.4]: https://github.com/jose-pr/pytruenas/compare/v0.4.3...v0.4.4
 [0.4.3]: https://github.com/jose-pr/pytruenas/compare/v0.4.2...v0.4.3
 [0.4.2]: https://github.com/jose-pr/pytruenas/compare/v0.4.1...v0.4.2
