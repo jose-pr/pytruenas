@@ -354,6 +354,15 @@ module-level `path(client, *segments, backend=None)` is what it delegates to.
   mkdir/chmod/chown; `unlink`/`rmdir` shell out (`rm -f` / `rmdir`) because
   `filesystem.*` has no delete op. Built from a bare URI (no backend) raises
   `RuntimeError` on first use — always construct via `client.path(...)`.
+  Listing calls `filesystem.listdir` with an explicit `select` projection
+  (`name` for `_listdir`; `name`/`type`/`size`/`mode` for `_scandir`, which
+  seeds each child's stat in the same round trip). That is load-bearing, not
+  an optimisation: an unrestricted `listdir` computes the ZFS-only `zfs_attrs`
+  column and fails with `EFAULT ... ZFS attributes are not supported.` on any
+  non-ZFS path (`/tmp`, `/dev`, `/proc`, ...), so widening the projection to
+  that column breaks `iterdir`/`glob`/`walk` off-pool. `listdir` reports no
+  `mtime` on any filesystem, so stats seeded from a listing carry `st_mtime`
+  0; `stat()` uses `filesystem.stat`, which does report it.
 - **`TruenasPath`** (`pytruenas.fs.truenas`) — subclasses `TnasWsPath`; five
   operations — `unlink`/`rmdir`/`rename`/`symlink_to`/`readlink` — try an SFTP
   leg first (via `pathlib_next`'s `SftpPath`, requires the `ssh` extra +

@@ -90,6 +90,196 @@ def test_iterdir_uses_listdir():
     assert names == ["a", "sub"]
 
 
+# -- listing must not ask the server for ZFS-only columns ---------------------
+
+
+#: Every column of `FilesystemDirQueryResultItem` (TrueNAS 26.0.0-BETA.1). Only
+#: `zfs_attrs` is ZFS-only; it is the one that makes the whole call fail on a
+#: filesystem that has no ZFS attributes, even though the schema says it is
+#: nullable exactly for that case.
+_LISTDIR_COLUMNS = (
+    "name",
+    "path",
+    "realpath",
+    "type",
+    "size",
+    "allocation_size",
+    "mode",
+    "mount_id",
+    "acl",
+    "uid",
+    "gid",
+    "is_mountpoint",
+    "is_ctldir",
+    "attributes",
+    "xattrs",
+    "zfs_attrs",
+)
+
+_TMP_ENTRIES = [
+    {
+        "name": "note.txt",
+        "path": "/tmp/note.txt",
+        "realpath": "/tmp/note.txt",
+        "type": "FILE",
+        "size": 5,
+        "allocation_size": 4096,
+        "mode": 0o100644,
+        "mount_id": 27,
+        "acl": False,
+        "uid": 0,
+        "gid": 0,
+        "is_mountpoint": False,
+        "is_ctldir": False,
+        "attributes": [],
+        "xattrs": [],
+    },
+    {
+        "name": "sub",
+        "path": "/tmp/sub",
+        "realpath": "/tmp/sub",
+        "type": "DIRECTORY",
+        "size": 40,
+        "allocation_size": 0,
+        "mode": 0o40755,
+        "mount_id": 27,
+        "acl": False,
+        "uid": 0,
+        "gid": 0,
+        "is_mountpoint": False,
+        "is_ctldir": False,
+        "attributes": [],
+        "xattrs": [],
+    },
+]
+
+
+def _non_zfs_middleware(method, *args, **kwds):
+    """A `filesystem.*` server whose filesystem is not ZFS (a tmpfs `/tmp`).
+
+    Models exactly what 26.0.0-BETA.1 does, measured on the appliance: an
+    unrestricted `listdir` computes `zfs_attrs` for every entry and fails the
+    call outright; a `select` that does not name that column succeeds, because
+    an unrequested column is never computed. `stat` is unaffected either way,
+    which is what made the bug read like a permissions problem.
+    """
+    from pytruenas.connection import ClientException
+
+    path = args[0]
+    if method == "filesystem.stat":
+        entry = next((e for e in _TMP_ENTRIES if e["path"] == path), None)
+        if entry is None:
+            raise ClientException(f"[ENOENT] {path}: No such file or directory", 2)
+        return {**entry, "mtime": 1700000000.0}
+    if method != "filesystem.listdir":  # pragma: no cover - guard
+        raise AssertionError(method)
+
+    options = args[2] if len(args) > 2 else {}
+    select = list(options.get("select") or ())
+    if not select or "zfs_attrs" in select:
+        raise ClientException(f"[EFAULT] {path}: ZFS attributes are not supported.", 14)
+    unknown = set(select) - set(_LISTDIR_COLUMNS)
+    assert not unknown, f"selected columns the API does not define: {sorted(unknown)}"
+    return [{k: v for k, v in e.items() if k in select} for e in _TMP_ENTRIES]
+
+
+def _non_zfs_client():
+    """A client whose `api` is the real `Namespace`, so the wire call is real.
+
+    `_client()` stubs `client.api.filesystem.listdir` itself, which cannot see
+    the query options at all -- the defect here is precisely *what gets sent*,
+    so the dispatcher has to be genuine and only the connection faked.
+    """
+    from pytruenas.namespace import Namespace
+
+    client = MagicMock()
+    client.conn.call.side_effect = _non_zfs_middleware
+    client.api = Namespace(client)
+    return client
+
+
+def _listdir_calls(client):
+    return [
+        c for c in client.conn.call.call_args_list if c[0][0] == "filesystem.listdir"
+    ]
+
+
+def test_iterdir_works_on_a_filesystem_without_zfs_attributes():
+    """Regression: `iterdir()` raised EFAULT on every non-ZFS path.
+
+    `_listdir`/`_scandir` sent no query options, so the middleware computed the
+    ZFS-only `zfs_attrs` column for each entry and failed the whole listing on
+    `/tmp`, `/var/tmp`, `/dev`, `/proc`, `/sys` and any non-pool mount -- while
+    `stat()` and `read_bytes()` on those same paths worked. Fails on the
+    pre-fix code with `OSError: [Errno 14] ... ZFS attributes are not
+    supported.`, exactly as it failed live.
+    """
+    client = _non_zfs_client()
+    p = TnasWsPath("truenas+ws://nas/tmp", backend=TnasWsBackend(client))
+
+    children = sorted(p.iterdir(), key=lambda c: c.name)
+    assert [c.name for c in children] == ["note.txt", "sub"]
+    assert children[1].is_dir() and not children[0].is_dir()
+
+
+def test_scandir_seeds_the_stat_it_promises_without_zfs_columns():
+    """The projection has to carry everything `_stat_from_info` reads.
+
+    `_scandir`'s whole point is one round trip: a `select` narrow enough to
+    dodge `zfs_attrs` but too narrow to type the entries would trade this bug
+    for a silent one, so pin the seeded stat rather than the column list.
+    """
+    client = _non_zfs_client()
+    p = TnasWsPath("truenas+ws://nas/tmp", backend=TnasWsBackend(client))
+
+    seeded = dict(p._scandir())
+    assert stat.S_ISDIR(seeded["sub"].st_mode)
+    assert stat.S_ISREG(seeded["note.txt"].st_mode)
+    assert seeded["note.txt"].st_size == 5
+
+    # And the hint really is what a child answers from -- `lstat()` consumes it
+    # instead of going back to the server.
+    child = next(c for c in p.iterdir() if c.name == "sub")
+    before = len(client.conn.call.call_args_list)
+    assert child.lstat().st_mode == 0o40755
+    assert len(client.conn.call.call_args_list) == before
+
+
+def test_listdir_asks_only_for_the_name():
+    """`_listdir` yields names, so it has no reason to pull anything else."""
+    client = _non_zfs_client()
+    p = TnasWsPath("truenas+ws://nas/tmp", backend=TnasWsBackend(client))
+
+    assert sorted(p._listdir()) == ["note.txt", "sub"]
+    (call,) = _listdir_calls(client)
+    assert call[0][0] == "filesystem.listdir"
+    assert call[0][1] == "/tmp"
+    assert call[0][3] == {"select": ["name"]}
+
+
+@pytest.mark.parametrize(
+    "listing", [lambda p: list(p.iterdir()), lambda p: list(p._listdir())]
+)
+def test_every_listing_call_projects_away_the_zfs_column(listing):
+    """One code path for both filesystem kinds: no retry, no error sniffing.
+
+    Whatever a listing caller selects, it must be a non-empty projection that
+    omits `zfs_attrs` -- that is the whole fix, and it is the same request on a
+    ZFS pool as on a tmpfs, so there is never a second round trip.
+    """
+    client = _non_zfs_client()
+    p = TnasWsPath("truenas+ws://nas/tmp", backend=TnasWsBackend(client))
+    listing(p)
+
+    calls = _listdir_calls(client)
+    assert calls, "no filesystem.listdir call was made"
+    assert len(calls) == 1, "the listing was retried -- it should never need to be"
+    for call in calls:
+        select = call[0][3]["select"]
+        assert select and "zfs_attrs" not in select
+        assert "name" in select
+
+
 def test_unlink_shells_out():
     client = _client()
     p = TnasWsPath("truenas+ws://nas/f", backend=TnasWsBackend(client))

@@ -30,6 +30,35 @@ if _ty.TYPE_CHECKING:
 #: work; the connection lives on the backend, not in the URI.
 _SCHEME = "truenas+ws"
 
+#: ``filesystem.listdir`` query options, one per caller.
+#:
+#: An unrestricted ``listdir`` computes every column of
+#: ``FilesystemDirQueryResultItem``, and one of them -- ``zfs_attrs`` -- is
+#: ZFS-only. On a non-ZFS filesystem the middleware does not return the ``null``
+#: its own schema promises for that case; it fails the whole call with
+#: ``EFAULT ... ZFS attributes are not supported.``. So every listing operation
+#: (``iterdir``/``glob``/``walk``/``rglob``) raised on ``/tmp``, ``/var/tmp``,
+#: ``/dev``, ``/proc``, ``/sys`` and any other non-pool mount, while ``stat`` and
+#: ``read_bytes`` on the very same paths worked.
+#:
+#: Projecting with ``select`` fixes it at the source: an unrequested column is
+#: never computed, so a single code path serves ZFS and non-ZFS alike -- no
+#: error-string sniffing and no second round trip. Each caller asks for exactly
+#: what it consumes, so neither pulls a column in on the other's behalf.
+#:
+#: Measured on 26.0.0-BETA.1: ``zfs_attrs`` is the *only* column that fails on a
+#: non-ZFS path, and ``mtime`` is not a ``listdir`` column at all (it is absent
+#: from the result schema and from every entry, on ZFS too) -- which is why the
+#: stat projection does not ask for it and seeded stats carry ``st_mtime`` 0
+#: here exactly as they always did. ``stat()`` uses ``filesystem.stat``, a
+#: different call that does report ``mtime``, and is unaffected.
+_LISTDIR_NAME_ONLY = {"select": ["name"]}
+
+#: ``_scandir`` seeds each child's stat from the listing, so it needs everything
+#: :func:`_stat_from_info` reads: ``mode`` (the full ``st_mode``), ``size``, and
+#: ``type`` as the coarse fallback for an entry that reports no ``mode``.
+_LISTDIR_STAT = {"select": ["name", "type", "size", "mode"]}
+
 
 class TnasWsBackend:
     """Backend state for :class:`TnasWsPath`: it just holds the client.
@@ -85,13 +114,13 @@ class TnasWsPath(_UriPath):
         return _stat_from_info(info)
 
     def _listdir(self):
-        for entry in self._fs.listdir(self.path, _ioerror=True):
+        for entry in self._fs.listdir(self.path, [], _LISTDIR_NAME_ONLY, _ioerror=True):
             yield entry["name"]
 
     def _scandir(self):
         # listdir returns metadata per entry in one round trip, so seed each
         # child's stat (lstat-like: symlinks unresolved) to avoid a stat() each.
-        for entry in self._fs.listdir(self.path, _ioerror=True):
+        for entry in self._fs.listdir(self.path, [], _LISTDIR_STAT, _ioerror=True):
             yield entry["name"], _stat_from_info(entry)
 
     # -- open / read / write ----------------------------------------------
