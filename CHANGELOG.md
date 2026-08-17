@@ -6,6 +6,39 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.4.6] - 2026-08-17
+
+### Fixed
+
+- **`iterdir()` and every listing operation raised on any path not backed by
+  ZFS.** `TnasWsPath._listdir`/`_scandir` called `filesystem.listdir(path)` with
+  no query options, so the middleware computed all sixteen columns of its
+  result — including `zfs_attrs`, which is ZFS-only. On a filesystem that has no
+  ZFS attributes the middleware does not return the `null` its own schema
+  promises for that case; it fails the whole call with
+  `EFAULT ... ZFS attributes are not supported.`. So `iterdir()`, `glob()`,
+  `walk()` and `rglob()` were unusable on `/tmp`, `/var/tmp`, `/dev`, `/proc`,
+  `/sys` and every other non-pool mount, while `stat()` and `read_bytes()` on
+  those very same paths worked — which made it read like a permissions or
+  existence problem rather than a projection one, on a path the caller never
+  thought of as ZFS. Listing a dataset worked, which is why it went unnoticed.
+
+  Both callers now project with `select`, so the ZFS-only column is never
+  computed and one code path serves both kinds of filesystem — no error-string
+  sniffing, and no retry doubling the round trips. Each asks for exactly what it
+  consumes: `_listdir` for `name`, and `_scandir`, which seeds each child's stat
+  from the same listing, for `name`/`type`/`size`/`mode`. Seeded stats are
+  unchanged, including `st_mtime`: `listdir` has never reported `mtime` at all —
+  it is absent from the result schema and from every entry, on ZFS too — so the
+  narrower projection drops nothing that was previously there. `stat()` goes
+  through `filesystem.stat`, a different call that does report `mtime` and was
+  never affected.
+
+  Verified on a live TrueNAS 26.0.0-BETA.1 appliance: `iterdir`, `glob` and
+  `walk` on `/tmp` (tmpfs), which previously raised; `iterdir` still correct on
+  `/root` and `/mnt` (ZFS); and, together with the 0.4.5 encoding fix, a
+  directory whose name contains `?` still lists itself rather than its parent.
+
 ## [0.4.5] - 2026-08-16
 
 ### Fixed
@@ -999,7 +1032,8 @@ below is simply what the package contains.
   `ssh` extra); the middleware API has no command-exec method. SFTP is handled by
   `pathlib_next`.
 
-[Unreleased]: https://github.com/jose-pr/pytruenas/compare/v0.4.5...HEAD
+[Unreleased]: https://github.com/jose-pr/pytruenas/compare/v0.4.6...HEAD
+[0.4.6]: https://github.com/jose-pr/pytruenas/compare/v0.4.5...v0.4.6
 [0.4.5]: https://github.com/jose-pr/pytruenas/compare/v0.4.4...v0.4.5
 [0.4.4]: https://github.com/jose-pr/pytruenas/compare/v0.4.3...v0.4.4
 [0.4.3]: https://github.com/jose-pr/pytruenas/compare/v0.4.2...v0.4.3
