@@ -96,3 +96,27 @@ def test_upload_builds_upload_target(monkeypatch):
     assert captured["headers"]["Authorization"] == "Token tok"
     # Always passed per request -- see TrueNASHost._http_verify.
     assert captured["verify"] is True
+
+
+def test_upload_reports_a_refused_upload(monkeypatch):
+    """A refused upload answers with an HTTP error and an HTML body, which
+    surfaced as a bare KeyError naming neither the status nor the reason."""
+    import requests
+
+    from pytruenas.connection import ClientException
+
+    c = TrueNASClient(None, autologin=False)
+    c.api = MagicMock()
+
+    resp = MagicMock(status_code=413, text="<html>Payload Too Large</html>")
+    resp.raise_for_status.side_effect = requests.HTTPError("413 Client Error")
+    monkeypatch.setattr("requests.Session.post", lambda self, *a, **k: resp)
+    with pytest.raises(requests.HTTPError):
+        c.upload(b"data", "config.upload", token="tok", wait=False)
+
+    ok = MagicMock(status_code=200, text="not json")
+    ok.raise_for_status.return_value = None
+    ok.json.side_effect = ValueError("no json")
+    monkeypatch.setattr("requests.Session.post", lambda self, *a, **k: ok)
+    with pytest.raises(ClientException, match="no job id"):
+        c.upload(b"data", "config.upload", token="tok", wait=False)

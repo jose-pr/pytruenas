@@ -54,6 +54,14 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
+- **Keyword credentials produced local-socket auth.** `Credentials(api_key=…)`,
+  `(token=…)` and `(username=…, password=…)` all returned `LocalAuth`, so the
+  client connected without authenticating and every call failed with
+  `ENOTAUTHENTICATED`. The factory now dispatches on the keyword names;
+  an unknown name still raises (with the values masked).
+- `upload()` never checked the HTTP status: a refused upload surfaced as a
+  `KeyError` naming neither the status nor the reason. It raises for the
+  status, and a response with no job id raises `ClientException` quoting it.
 - **A retry could run a call twice.** After a dropped connection, the default
   one retry replayed the request — including `create`, `delete` and job
   starts — even when it had already been sent and the server may have run it.

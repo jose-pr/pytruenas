@@ -1224,7 +1224,17 @@ class TrueNASHost(_PosixHost, _ty.Generic[ApiVersion]):
             verify=self._http_verify,
             files={"data": _js.dumps(data).encode(), "file": file},
         )
-        jobid = resp.json()["job_id"]
+        # An upload the middleware refuses answers with an HTTP error and an
+        # HTML/JSON body; without these checks that surfaced as a KeyError or a
+        # JSON decode error, naming neither the status nor the reason.
+        resp.raise_for_status()
+        try:
+            jobid = resp.json()["job_id"]
+        except (ValueError, KeyError, TypeError):
+            raise _connection.ClientException(
+                f"upload to {target.uri} returned no job id "
+                f"(HTTP {resp.status_code}): {resp.text[:200]}"
+            ) from None
         if wait:
             self.wait(jobid, callback=wait if callable(wait) else None)
         return jobid

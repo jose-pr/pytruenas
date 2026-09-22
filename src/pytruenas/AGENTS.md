@@ -254,7 +254,9 @@ constructor.
 
 An OTP travels in the URI password field after a newline
 (`wss://root:pw%0Aotp:123456@nas`); a raw newline works too on recent hostctl.
-Unknown credential names are rejected rather than silently dropped.
+Unknown credential names are rejected rather than silently dropped. The
+keyword form dispatches on the names (`username`/`password`/`otp`/`api_key`/
+`token`), the same selection `Credentials.from_host_credentials` makes.
 
 Generic type parameter `ApiVersion` (bound to `Namespace`) lets a consumer
 annotate `client: TrueNASClient[Current]` (from generated typings) for

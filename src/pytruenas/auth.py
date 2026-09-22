@@ -130,6 +130,14 @@ class _CredentialsMeta(type):
         elif args:
             return BasicAuth(*args)
         else:
+            # Dispatch on the names, not by trying each subclass until one
+            # does not raise TypeError: LocalAuth accepted anything, so every
+            # keyword form -- Credentials(api_key=...), (token=...),
+            # (username=, password=) -- returned LOCAL auth and the client
+            # connected unauthenticated.
+            known = {"username", "password", "otp", "api_key", "token"}
+            if set(kwargs) <= known:
+                return Credentials.from_host_credentials(**kwargs)
             for scls in Credentials.__subclasses__():
                 try:
                     return scls(**kwargs)
@@ -316,6 +324,14 @@ class Credentials(metaclass=_CredentialsMeta):
 
 
 class LocalAuth(Credentials):
+    """Local unix-socket auth: no login call, and no credential to carry."""
+
+    def __init__(self) -> None:
+        # Explicitly argument-less: inheriting Credentials' permissive
+        # __init__(*args, **kwargs) made this the catch-all that swallowed
+        # every keyword the factory tried on it.
+        pass
+
     def _args(self):
         return []
 

@@ -92,6 +92,28 @@ def test_unsupported_credentials_error_hides_the_secret():
     }
 
 
+@pytest.mark.parametrize(
+    "kwargs,expected",
+    [
+        ({"api_key": "1-" + "k" * 64}, "ApiKeyAuth"),
+        ({"token": "tok"}, "TokenAuth"),
+        ({"username": "root", "password": "pw"}, "BasicAuth"),
+        ({"password": "pw"}, "BasicAuth"),
+        ({"username": "root", "password": "pw", "otp": "123456"}, "BasicAuth"),
+        ({}, "LocalAuth"),
+    ],
+)
+def test_keyword_credentials_pick_the_right_mechanism(kwargs, expected):
+    """LocalAuth inherited a permissive __init__ and was tried first, so every
+    keyword form returned LOCAL auth -- a client that never authenticated."""
+    assert type(Credentials(**kwargs)).__name__ == expected
+
+
+def test_an_unknown_credential_keyword_still_raises():
+    with pytest.raises(ValueError, match="not supported"):
+        Credentials(passwrd="hunter2")
+
+
 def test_call_args_are_redacted_for_logging():
     from pytruenas.auth import redact_call_args
 
