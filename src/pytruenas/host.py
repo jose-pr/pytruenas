@@ -914,6 +914,9 @@ class TrueNASHost(_PosixHost, _ty.Generic[ApiVersion]):
             return _TGT.parse(f"ws+unix://{config.socket_path}", scheme="ws+unix")
         scheme = "ws" if config.secure is False else "wss"
         authority = config.host
+        if ":" in authority and not authority.startswith("["):
+            # An IPv6 literal: without brackets its colons read as a port.
+            authority = f"[{authority}]"
         if config.port:
             authority = f"{authority}:{config.port}"
         api_path = config.api_path or f"/api/{config.version}"
@@ -932,9 +935,17 @@ class TrueNASHost(_PosixHost, _ty.Generic[ApiVersion]):
     # -- middleware connection ---------------------------------------------
 
     def _openwss(self):
-        api = self._target
+        config = self._config
+        # A unix socket is addressed by its path as given, not re-parsed as a
+        # URI: `None` here meant "the default socket", so a configured
+        # `socket_path` was silently ignored.
+        uri = (
+            _connection._UNIX_PREFIX + (config.socket_path or DEFAULT_SOCKET_PATH)
+            if config.is_local
+            else self._target.uri
+        )
         return _connection.TrueNASWSConnection(
-            None if api.is_local and not api.port else api.uri,
+            uri,
             verify_ssl=self._config.sslverify,
             py_exceptions=False,
             # Share the host's name-bound logger, so a record from the
@@ -1075,11 +1086,22 @@ class TrueNASHost(_PosixHost, _ty.Generic[ApiVersion]):
 
         A fragment is dropped deliberately: it is a client-side construct and
         is never sent to the server, so carrying it would only mislead.
+
+        The target's port is kept (a ``wss://nas:8443`` API means
+        ``https://nas:8443`` side channels; it used to be dropped, sending
+        uploads, downloads, file reads, the web shell -- and their auth tokens
+        -- to 443). On the NAS itself (the unix-socket target) the side channels
+        go to middlewared's own HTTP listener, ``http://127.0.0.1:6000``: there
+        is no hostname to use, and nginx on 80 only redirects to 443.
         """
+        path, _, query = path.partition("?")
+        if self._config.is_local:
+            return _TGT("http", "", "", "127.0.0.1", 6000, path, query, "")
         api = self._target
         scheme = "https" if api.scheme == "wss" else "http"
-        path, _, query = path.partition("?")
-        return api._replace(scheme=scheme, path=path, query=query, port=0)
+        default = 443 if scheme == "https" else 80
+        port = 0 if api.port == default else api.port
+        return api._replace(scheme=scheme, path=path, query=query, port=port)
 
     def upload(
         self, file: "str | bytes", method: str, *params, token=None, wait=True, **kwargs

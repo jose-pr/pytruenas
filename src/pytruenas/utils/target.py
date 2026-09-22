@@ -99,7 +99,12 @@ class Target(_ty.NamedTuple):
                 # claim from "no password given" -- and it is what `redacted`
                 # produces, so it must render as the plain ``user@host`` form.
                 uri = f"{uri}{user}@"
-        uri = f"{uri}{self.host}"
+        host = self.host
+        if ":" in host and not host.startswith("["):
+            # urlsplit strips an IPv6 literal's brackets; put them back, or its
+            # colons read as a port separator.
+            host = f"[{host}]"
+        uri = f"{uri}{host}"
         if self.port:
             uri = f"{uri}:{self.port}"
         if self.path:

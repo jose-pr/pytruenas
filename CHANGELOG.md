@@ -40,6 +40,13 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
+- A non-default API port (`wss://nas:8443`) was dropped for every HTTP side
+  channel — uploads, downloads, file reads over the websocket leg and the web
+  shell went to port 443, with their auth tokens. On the NAS itself those URLs
+  had no host at all; they now use middlewared's `http://127.0.0.1:6000`.
+- An IPv6 literal target (`https://[fe80::1]:8443`) failed on first connect; a
+  custom unix socket path (`unix:///run/x.sock`) was ignored in favour of the
+  default socket.
 - **Every `wait=True` returned before the job finished.** `core.job_wait` is
   itself a job, so calling it returned a new job id at once (0.4 s, measured on
   26.0.0-BETA.1); `upload()`, `download(buffered=True)` and the

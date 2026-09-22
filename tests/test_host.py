@@ -797,3 +797,45 @@ def test_an_explicitly_named_ssh_provider_is_still_honored(monkeypatch):
 
     assert [p.name for p in host._path_selector.providers] == ["sftp"]
     assert [p.name for p in host._executor_selector.providers] == ["ssh"]
+
+
+# -- where the side channels and the websocket actually go ---------------------
+
+
+@pytest.mark.parametrize(
+    "target, expected",
+    [
+        ("wss://nas", "https://nas/_upload"),
+        # A non-default port used to be dropped: uploads, downloads, file reads
+        # and the web shell -- with their auth tokens -- went to 443.
+        ("wss://nas:8443", "https://nas:8443/_upload"),
+        ("ws://nas:8080/api/v25", "http://nas:8080/_upload"),
+        ("https://[fe80::1]:8443", "https://[fe80::1]:8443/_upload"),
+        # On the NAS itself: middlewared's own listener, not "http:///_upload".
+        (None, "http://127.0.0.1:6000/_upload"),
+    ],
+)
+def test_http_side_channels_keep_the_targets_port(target, expected):
+    assert TrueNASHost(target)._http_target("/_upload").uri == expected
+
+
+def test_an_ipv6_target_is_bracketed():
+    """Its colons used to be parsed as a port on the first connect."""
+    assert TrueNASHost("wss://[fe80::1]:8443")._target.uri == (
+        "wss://[fe80::1]:8443/api/current"
+    )
+
+
+def test_a_custom_socket_path_reaches_the_connection(monkeypatch):
+    """`None` was passed for every unix target, meaning "the default socket"."""
+    import pytruenas.connection as connection
+
+    seen = {}
+
+    class _Conn:
+        def __init__(self, uri, **kwargs):
+            seen["uri"] = uri
+
+    monkeypatch.setattr(connection, "TrueNASWSConnection", _Conn)
+    TrueNASHost("unix:///run/custom/middleware.sock", autologin=False)._openwss()
+    assert seen["uri"] == "ws+unix:///run/custom/middleware.sock"
