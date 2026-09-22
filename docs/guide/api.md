@@ -43,8 +43,28 @@ created. A bare string or int selector is a **record id**, not a field name
 (`_upsert("username", ...)` looks up the record whose id is `"username"`). A
 `!`-prefixed name (`("username", "!uid")`) is left out of the match and is not
 changed on update; a selector made only of those is rejected, since it would
-match the first record in the collection. A middleware job returned by a mutating call is waited on by
-default (`wait=True`).
+match the first record in the collection. A middleware job returned by a
+mutating call is waited on by default (`wait=True`; pass a callable instead to
+receive progress updates).
+
+## Waiting for jobs
+
+Many middleware methods start a *job* and return its id. `client.wait(job_id)`
+blocks until it finishes and returns its result; a failed job raises
+`pytruenas.connection.JobFailed`. Pass `callback=` to follow progress, or
+iterate `client.job_updates(job_id)` yourself:
+
+```python
+job_id = client.upload(data, "filesystem.put", "/mnt/tank/big.bin", wait=False)
+client.wait(job_id, callback=lambda job: print(
+    f"{job['progress']['percent']:3}% {job['progress']['description']}"))
+
+for job in client.job_updates(job_id):      # same updates, as a loop
+    bar.update(job["progress"]["percent"])
+```
+
+`upload()`, `download()` and the `_create`/`_update`/`_upsert` helpers accept
+the same callable as `wait=`.
 
 ## Query filters
 
