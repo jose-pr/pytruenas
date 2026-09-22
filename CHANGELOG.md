@@ -8,6 +8,12 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- `client.wait(job_id, callback=None, timeout=None)` returns a middleware job's
+  result once it has finished and raises `JobFailed` (with the job record and
+  errno) when it failed; `callback(job)` receives every change of state and
+  progress. `client.job_updates(job_id)` yields the same updates as a
+  generator. `upload()`, `download()` and `_create`/`_update`/`_upsert` accept
+  a callable `wait=` for progress.
 - `TrueNASClient(..., verify=False)` — one switch that turns off every check the
   client makes: TLS certificate verification (websocket, HTTP side channels,
   web shell) and SSH host-key verification (commands and SFTP). `sslverify=`
@@ -34,6 +40,12 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
+- **Every `wait=True` returned before the job finished.** `core.job_wait` is
+  itself a job, so calling it returned a new job id at once (0.4 s, measured on
+  26.0.0-BETA.1); `upload()`, `download(buffered=True)` and the
+  `_create`/`_update`/`_upsert` helpers therefore returned early, a failed job
+  went unreported, and a helper whose call ran as a job returned the waiter's
+  job id instead of the record. They now wait on the job's state.
 - **Web shell (`run()` without SSH) rewritten; measured against TrueNAS
   26.0.0-BETA.1's zsh before and after.**
   - A captured `stdout` contained the terminal's echo of the wrapped command and

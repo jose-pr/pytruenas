@@ -2,9 +2,10 @@
 
 This is a deliberately small client covering exactly what ``pytruenas`` needs:
 open a websocket to the middleware, send a request, wait for the matching
-response, and surface errors as exceptions. Jobs are not tracked client-side --
-the middleware's own ``core.job_wait`` method (a normal blocking call) is used
-for that. Event subscriptions (``core.subscribe``) ARE supported: see
+response, and surface errors as exceptions. Jobs are not tracked here: a
+job's id is returned, and :meth:`pytruenas.TrueNASHost.wait` polls
+``core.get_jobs`` for its outcome (``core.job_wait`` is itself a job and does
+not block). Event subscriptions (``core.subscribe``) ARE supported: see
 :meth:`TrueNASWSConnection.subscribe` and :class:`Subscription` -- a bounded queue drained on
 the caller's thread, with optional inline callbacks.
 
@@ -55,6 +56,7 @@ __all__ = [
     "ClientException",
     "ValidationErrors",
     "CallTimeout",
+    "JobFailed",
     "CALL_TIMEOUT",
     "Event",
     "Subscription",
@@ -81,7 +83,7 @@ class _Unset:
 
 
 #: Marks ``call(timeout=...)`` as "use the client default". ``None`` is a real
-#: value meaning "wait indefinitely" (long jobs via ``core.job_wait``), so it
+#: value meaning "wait indefinitely" (a long-running call), so it
 #: cannot double as the default.
 _UNSET = _Unset()
 
@@ -209,6 +211,25 @@ class ValidationErrors(ClientException):
             name = _errno.errorcode.get(errcode, "EUNKNOWN")
             msgs.append(f"[{name}] {attribute or 'ALL'}: {errmsg}")
         return "\n".join(msgs)
+
+
+class JobFailed(ClientException):
+    """A middleware job ended in ``FAILED`` or ``ABORTED``.
+
+    ``job`` is the job record from ``core.get_jobs`` (``error``,
+    ``exception``, ``exc_info``, ...); ``errno`` comes from ``exc_info`` when
+    the middleware reports one.
+    """
+
+    def __init__(self, job: dict) -> None:
+        info = job.get("exc_info") or {}
+        super().__init__(
+            job.get("error") or f"job {job.get('id')} {job.get('state', '').lower()}",
+            info.get("errno"),
+            job.get("exception"),
+            info.get("extra"),
+        )
+        self.job = job
 
 
 class CallTimeout(ClientException):
@@ -387,7 +408,7 @@ class TrueNASWSConnection:
     reader thread demultiplexes responses so concurrent calls from different
     threads are safe, and routes ``collection_update`` notifications to any
     :meth:`subscribe` sinks. Job tracking is intentionally omitted -- use the
-    middleware's ``core.job_wait`` for jobs.
+    :meth:`pytruenas.TrueNASHost.wait` for jobs.
     """
 
     def __init__(
@@ -522,7 +543,7 @@ class TrueNASWSConnection:
 
         Blocks until the response arrives or ``timeout`` seconds elapse. The
         default sentinel uses :attr:`call_timeout`; an explicit ``timeout=None``
-        waits **indefinitely** (used by ``core.job_wait`` for long jobs).
+        waits **indefinitely** (a long-running call).
         Compatibility keyword arguments (``job``, ``background``, ``callback``,
         …) accepted by the upstream client are ignored -- this client is
         synchronous and does not track jobs client-side. Any *other* unexpected

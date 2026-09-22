@@ -1101,8 +1101,85 @@ class TrueNASHost(_PosixHost, _ty.Generic[ApiVersion]):
         )
         jobid = resp.json()["job_id"]
         if wait:
-            self.api.core.job_wait(jobid, job=True, _timeout=None)
+            self.wait(jobid, callback=wait if callable(wait) else None)
         return jobid
+
+    #: Job states after which a job never changes again.
+    JOB_DONE = ("SUCCESS", "FAILED", "ABORTED")
+
+    def job_updates(
+        self,
+        job_id: int,
+        *,
+        timeout: "float | None" = None,
+        poll: float = 0.25,
+        max_poll: float = 2.0,
+    ) -> "_ty.Iterator[dict]":
+        """Yield job ``job_id``'s record each time its state or progress changes.
+
+        The record is ``core.get_jobs``'s: ``state`` (``WAITING``/``RUNNING``,
+        then one of :attr:`JOB_DONE`), ``progress`` (``percent``,
+        ``description``), ``result``, ``error``... The first record is always
+        yielded and the finished one is always the last, so a loop over this
+        can drive a log line or a progress bar and then inspect the outcome::
+
+            for job in client.job_updates(job_id):
+                print(job["progress"]["percent"], job["progress"]["description"])
+
+        Polls with a back-off from ``poll`` to ``max_poll`` seconds, reset
+        whenever something changes. ``timeout=None`` waits indefinitely;
+        otherwise :class:`~pytruenas.connection.CallTimeout` is raised (the job
+        keeps running on the server). Failure is not raised here -- the final
+        record says so; :meth:`wait` raises it.
+        """
+        import time as _time
+
+        deadline = None if timeout is None else _time.monotonic() + timeout
+        delay = poll
+        last = None
+        while True:
+            found = self.api.core.get_jobs([["id", "=", job_id]])
+            if not found:
+                raise _connection.ClientException(f"no such job: {job_id}")
+            job = found[0]
+            seen = (job.get("state"), _js.dumps(job.get("progress"), default=str))
+            if seen != last:
+                last = seen
+                delay = poll
+                yield job
+            if job.get("state") in self.JOB_DONE:
+                return
+            if deadline is not None and _time.monotonic() + delay > deadline:
+                raise _connection.CallTimeout()
+            _time.sleep(delay)
+            delay = min(delay * 2, max_poll)
+
+    def wait(
+        self,
+        job_id: int,
+        *,
+        callback: "_ty.Callable[[dict], object] | None" = None,
+        timeout: "float | None" = None,
+    ) -> object:
+        """Block until middleware job ``job_id`` finishes; return its result.
+
+        ``callback(job)`` is called with the job record every time its state or
+        progress changes (see :meth:`job_updates`) -- enough for a log line or
+        a progress bar. ``SUCCESS`` returns the job's ``result``;
+        ``FAILED``/``ABORTED`` raise :class:`~pytruenas.connection.JobFailed`
+        carrying the record.
+
+        Not ``core.job_wait``: that method is itself a job, so calling it
+        returns a NEW job id immediately instead of blocking (measured on
+        26.0.0-BETA.1: 0.4 s) -- every "wait" built on it returned early.
+        """
+        job: dict = {}
+        for job in self.job_updates(job_id, timeout=timeout):
+            if callback is not None:
+                callback(job)
+        if job.get("state") != "SUCCESS":
+            raise _connection.JobFailed(job)
+        return job.get("result")
 
     def download(
         self,
@@ -1121,7 +1198,7 @@ class TrueNASHost(_PosixHost, _ty.Generic[ApiVersion]):
 
         if wait:
             if buffered:
-                self.api.core.job_wait(jobid, job=True, _timeout=None)
+                self.wait(jobid, callback=wait if callable(wait) else None)
             resp = _req.get(target.uri, verify=self._config.sslverify)
             resp.raise_for_status()
             return resp.content

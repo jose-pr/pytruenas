@@ -119,6 +119,18 @@ version="current", executor=None, path=None, ssh=None, ...)`
   below. A *remote* target with neither SSH nor the web shell has **no `run`
   capability at all**, and `.capabilities` says so rather than failing
   mid-command.
+- **`.wait(job_id, *, callback=None, timeout=None) -> object`** — block until
+  middleware job `job_id` finishes and return its `result`. Polls
+  `core.get_jobs` (back-off 0.25 s -> 2 s). `callback(job)` receives the job
+  record (`state`, `progress` `{percent, description}`, ...) each time its
+  state or progress changes — enough for a log line or a progress bar.
+  `FAILED`/`ABORTED` raise `connection.JobFailed` (`.job` is the record,
+  `.errno` from `exc_info`); `timeout` raises `connection.CallTimeout` (the
+  job keeps running). Not `core.job_wait`: that method is itself a job and
+  returns a new job id at once instead of blocking.
+- **`.job_updates(job_id, *, timeout=None) -> Iterator[dict]`** — the same
+  polling as a generator: yields the job record on every change of state or
+  progress, the finished record last; does not raise for a failed job.
 - **`.upload(file, method, *params, token=None, wait=True, **kwargs)`** —
   upload `file` (`str`/`bytes`) via the middleware's `/_upload` HTTP side
   channel, then call `method(*params, **kwargs)` server-side with it; waits on
@@ -127,6 +139,8 @@ version="current", executor=None, path=None, ssh=None, ...)`
 - **`.download(method, *args, filename=None, buffered=False, wait=True,
   **kwargs)`** — call `method` to get a download link/job, fetch it over
   HTTP(S), and return the bytes (when `wait=True`) or the job id.
+  For both, `wait=` may also be a callable: it waits, and is passed to
+  `.wait(callback=...)` for progress.
 - **`.subscribe(event, callback=None, *, maxsize=1000) -> connection.Subscription`**
   — subscribe to a middleware collection event over the live websocket.
   `client.subscribe("alert.list")` is shorthand for
@@ -246,7 +260,7 @@ than the dunder-safe helpers below raise `AttributeError` normally.
     **always** returns or raises — never silently returns `None` on a
     connection error.
   - **`_timeout`** — per-call seconds; the default sentinel uses the client's
-    configured timeout, `None` waits indefinitely (used by `core.job_wait`).
+    configured timeout, `None` waits indefinitely.
   - **`_ioerror`** — map a middleware `[ERRNO] message` error to the matching
     `OSError` (see `pytruenas.namespace.ioerror`).
   - **`_filetransfer`** — `True` routes through `client.download`; bytes/a
@@ -326,6 +340,9 @@ imports on Python 3.9.
   the middleware's `[ERRNO] message` prefix maps to one.
 - **`ValidationErrors(errors)`** (`ClientException` subclass) — per-field
   validation errors; `.errors` is `list[(attribute, errmsg, errcode)]`.
+- **`JobFailed(job)`** (`ClientException` subclass) — raised by
+  `TrueNASHost.wait` for a `FAILED`/`ABORTED` job; `.job` is the
+  `core.get_jobs` record, `.errno` the middleware's errno when it reports one.
 - **`CallTimeout()`** (`ClientException` subclass) — raised when a call
   exceeds its timeout.
 - **`dumps(obj, **kwargs) -> str`** / **`loads(data, **kwargs)`** — JSON

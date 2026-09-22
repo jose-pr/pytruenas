@@ -169,8 +169,10 @@ class DbAction(str, _enum.Enum):
 
         wait = opts.get("wait", True)
         if isinstance(result, int) and (wait is None or wait):
-            result = __namespace._client.api.core.job_wait(
-                result, job=True, _timeout=None
+            # A job id: block until the job finishes and return its result
+            # (`core.job_wait` is itself a job and returns immediately).
+            result = __namespace._client.wait(
+                result, callback=wait if callable(wait) else None
             )
 
         result = _ty.cast(_T, result)

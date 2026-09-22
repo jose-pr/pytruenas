@@ -43,13 +43,23 @@ def test_download_buffered_builds_target_and_waits(monkeypatch):
         return MagicMock(content=b"payload", raise_for_status=lambda: None)
 
     monkeypatch.setattr("requests.get", fake_get)
+    monkeypatch.setattr("time.sleep", lambda _s: None)
+    # The job is still running on the first poll: the fetch must wait for it.
+    states = iter(["RUNNING", "SUCCESS"])
+    polled = []
+
+    def get_jobs(filters):
+        polled.append(filters)
+        assert "url" not in captured, "fetched before the job finished"
+        return [{"id": 11, "state": next(states), "progress": {}, "result": None}]
+
+    c.api.core.get_jobs.side_effect = get_jobs
 
     out = c.download("config.save", filename="cfg", buffered=True, wait=True)
     assert out == b"payload"
     assert "/_download/11" in captured["url"]
-    # buffered=True must block on THE job it started (11) before fetching
-    assert c.api.core.job_wait.call_count == 1
-    assert c.api.core.job_wait.call_args[0][0] == 11
+    # buffered=True blocks on THE job it started (11) before fetching
+    assert polled == [[["id", "=", 11]]] * 2
 
 
 def test_download_no_wait_returns_jobid(monkeypatch):
@@ -293,3 +303,86 @@ def test_client_keys_encoding_is_unpacked_into_a_real_field():
     assert ssh.username == "root"
     assert ssh.client_keys == [b"PRIVATEKEY"]
     assert ssh.password is None
+
+
+# ------------------------------------------------------------------- wait ----
+#
+# `core.job_wait` is itself a job, so calling it returned a new job id at once
+# instead of blocking (measured on 26.0.0-BETA.1) -- every "wait" returned
+# before the job finished. `wait`/`job_updates` poll `core.get_jobs` instead.
+
+
+def _job_client(monkeypatch, *records):
+    """A client whose `core.get_jobs` answers with `records`, one per poll."""
+    monkeypatch.setattr("time.sleep", lambda _s: None)
+    c = TrueNASClient("wss://nas", autologin=False)
+    feed = iter(records)
+    polls = []
+
+    def get_jobs(filters):
+        polls.append(filters)
+        return [next(feed)]
+
+    c.api = MagicMock()
+    c.api.core.get_jobs.side_effect = get_jobs
+    return c, polls
+
+
+def _job(state, percent=0, text="", **extra):
+    return {
+        "id": 5,
+        "state": state,
+        "progress": {"percent": percent, "description": text},
+        **extra,
+    }
+
+
+def test_job_updates_yield_each_change_once_and_end_with_the_final_record(
+    monkeypatch,
+):
+    c, polls = _job_client(
+        monkeypatch,
+        _job("WAITING"),
+        _job("RUNNING", 10, "copying"),
+        _job("RUNNING", 10, "copying"),  # unchanged: not yielded again
+        _job("RUNNING", 60, "copying"),
+        _job("SUCCESS", 100, "done", result={"ok": 1}),
+    )
+    seen = [(j["state"], j["progress"]["percent"]) for j in c.job_updates(5)]
+    assert seen == [("WAITING", 0), ("RUNNING", 10), ("RUNNING", 60), ("SUCCESS", 100)]
+    assert polls[0] == [["id", "=", 5]] and len(polls) == 5
+
+
+def test_wait_reports_progress_to_a_callback_and_returns_the_result(monkeypatch):
+    c, _ = _job_client(
+        monkeypatch,
+        _job("RUNNING", 50, "half"),
+        _job("SUCCESS", 100, "done", result=["a"]),
+    )
+    progress = []
+    assert c.wait(5, callback=lambda job: progress.append(job["progress"]["percent"]))
+    assert progress == [50, 100]
+
+
+def test_wait_raises_jobfailed_with_the_middleware_errno(monkeypatch):
+    from pytruenas.connection import JobFailed
+
+    failed = _job(
+        "FAILED",
+        error="[EFAULT] Service not running after start",
+        exc_info={"type": "CallError", "errno": 14, "extra": None},
+    )
+    c, _ = _job_client(monkeypatch, _job("RUNNING"), failed)
+    with pytest.raises(JobFailed) as caught:
+        c.wait(5)
+    assert caught.value.errno == 14
+    assert "Service not running" in str(caught.value)
+    assert caught.value.job["state"] == "FAILED"
+
+
+def test_wait_times_out_without_stopping_the_job(monkeypatch):
+    from pytruenas.connection import CallTimeout
+
+    c, _ = _job_client(monkeypatch, *[_job("RUNNING", i) for i in range(100)])
+    with pytest.raises(CallTimeout):
+        c.wait(5, timeout=0)

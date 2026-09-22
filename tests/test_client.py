@@ -88,7 +88,6 @@ def test_upload_builds_upload_target(monkeypatch):
     monkeypatch.setattr("requests.post", fake_post)
     # a pre-supplied token avoids the auth.generate_token API round trip
     c.api = MagicMock()
-    c.api.core.job_wait.return_value = None
     c.upload(b"data", "config.upload", token="tok", wait=False)
     assert "/_upload" in captured["url"]
     assert captured["headers"]["Authorization"] == "Token tok"
