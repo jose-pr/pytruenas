@@ -46,6 +46,7 @@ def test_closure_is_transitive_and_includes_the_root():
         assert name in found, f"{name} (transitive) missing from the closure"
 
 
+@pytest.mark.requires("pathspec")
 def test_extras_are_excluded_unless_asked_for():
     """An extra nobody requested must not silently enlarge the payload."""
     core = bundle.requirements("pytruenas")
@@ -190,9 +191,7 @@ def test_native_extension_is_refused(tmp_path, monkeypatch):
 # clone of the repo would actually have" -- either because something ignored
 # leaked in, or because something that should survive (a negation) did not.
 
-pytest.importorskip("pathspec")
-
-
+@pytest.mark.requires("pathspec")
 def test_collect_repo_excludes_gitignored_files(tmp_path):
     repo = tmp_path / "repo"
     (repo / "src").mkdir(parents=True)
@@ -205,6 +204,7 @@ def test_collect_repo_excludes_gitignored_files(tmp_path):
     assert "repo/a.log" not in names
 
 
+@pytest.mark.requires("pathspec")
 def test_collect_repo_negation_un_ignores_a_file():
     """The reason this uses pathspec rather than a hand-rolled matcher: a
     later `!pattern` line must be able to override an earlier ignore, and a
@@ -224,6 +224,7 @@ def test_collect_repo_negation_un_ignores_a_file():
         assert "repo/a.log" not in names
 
 
+@pytest.mark.requires("pathspec")
 def test_collect_repo_prunes_ignored_directories_without_descending(tmp_path):
     """A directory-anchored pattern (`.venv*/`) must match the DIRECTORY's own
     path, not just filter its files out one by one after the fact -- this repo's
@@ -239,6 +240,7 @@ def test_collect_repo_prunes_ignored_directories_without_descending(tmp_path):
     assert names == {"repo/.gitignore", "repo/src/ok.py"}
 
 
+@pytest.mark.requires("pathspec")
 def test_collect_repo_always_excludes_dot_git(tmp_path):
     """VCS metadata is never "the files a clone would have", regardless of
     what any ignore file does or does not say."""
@@ -252,6 +254,7 @@ def test_collect_repo_always_excludes_dot_git(tmp_path):
     assert "repo/src.py" in names
 
 
+@pytest.mark.requires("pathspec")
 def test_collect_repo_ignore_files_selects_a_subset(tmp_path):
     repo = tmp_path / "repo"
     repo.mkdir()
@@ -273,6 +276,7 @@ def test_collect_repo_ignore_files_selects_a_subset(tmp_path):
     assert "repo/c.txt" in both
 
 
+@pytest.mark.requires("pathspec")
 def test_collect_repo_missing_ignore_files_are_silently_skipped(tmp_path):
     """A repo with only .gitignore should not need an override to avoid an
     error for .ignore/.bundleignore it was never going to have."""
@@ -283,6 +287,7 @@ def test_collect_repo_missing_ignore_files_are_silently_skipped(tmp_path):
     assert "repo/x.txt" in names
 
 
+@pytest.mark.requires("pathspec")
 def test_collect_repo_extra_ignores_layer_after_ignore_files(tmp_path):
     repo = tmp_path / "repo"
     repo.mkdir()
@@ -297,6 +302,7 @@ def test_collect_repo_extra_ignores_layer_after_ignore_files(tmp_path):
     assert "repo/kept.txt" in names
 
 
+@pytest.mark.requires("pathspec")
 def test_collect_repo_prefix_overrides_the_default_directory_name(tmp_path):
     repo = tmp_path / "repo"
     repo.mkdir()
@@ -312,6 +318,7 @@ def test_collect_repo_rejects_a_non_directory(tmp_path):
         bundle.collect_repo(not_a_dir)
 
 
+@pytest.mark.requires("pathspec")
 def test_collect_repo_feeds_a_working_zipapp(tmp_path):
     """The whole point of matching _collect's output shape: build()/export()
     need no changes to accept it."""
@@ -333,6 +340,7 @@ def test_collect_repo_feeds_a_working_zipapp(tmp_path):
     assert "__main__.py" in names
 
 
+@pytest.mark.requires("pathspec")
 def test_collect_repo_feeds_export(tmp_path):
     repo = tmp_path / "repo"
     (repo / "pkg").mkdir(parents=True)

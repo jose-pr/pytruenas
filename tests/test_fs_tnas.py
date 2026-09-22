@@ -75,7 +75,9 @@ def test_mkdir_and_chmod():
     p.mkdir()
     assert client.api.filesystem.mkdir.call_args[0][0]["path"] == "/d"
     p.chmod(0o644)
-    assert client.api.filesystem.setperm.called
+    # The middleware takes the mode as octal digits; "420" would be decimal.
+    sent = client.api.filesystem.setperm.call_args[0][0]
+    assert (sent["path"], sent["mode"]) == ("/d", "644")
 
 
 def test_iterdir_uses_listdir():
@@ -316,6 +318,7 @@ def test_truenaspath_rename_without_sftp_raises():
         p.rename("/g")
 
 
+@pytest.mark.requires("asyncssh")
 def test_truenaspath_resolve_falls_back_when_sftp_lacks_op():
     # pathlib_next's SftpPath has no resolve(); _try_sftp must surface that as
     # NotImplementedError so resolve() falls back to returning self, not crash
@@ -327,6 +330,7 @@ def test_truenaspath_resolve_falls_back_when_sftp_lacks_op():
     assert resolved.path == "/a/b"  # returned self, no AttributeError
 
 
+@pytest.mark.requires("asyncssh")
 def test_truenaspath_builds_the_sftp_leg_from_config_ssh():
     client = _client(ssh=_ssh_config(host="nas", port=2222, username="admin"))
     p = TruenasPath("truenas://nas/a/b", backend=TnasWsBackend(client))
@@ -359,6 +363,7 @@ def _truenas_path(client, remote):
     )
 
 
+@pytest.mark.requires("asyncssh")
 @pytest.mark.parametrize(
     "remote",
     [
@@ -390,6 +395,7 @@ def test_sftp_leg_survives_uri_syntax_in_a_filename(remote):
     assert sftp.path == remote
 
 
+@pytest.mark.requires("asyncssh")
 def test_sftp_leg_encoding_leaves_uri_legal_characters_readable():
     """Encoding is minimal: `:` is legal in a path segment, so it stays.
 
@@ -466,6 +472,7 @@ def test_path_construction_joins_segments_before_encoding():
     assert p.name == "c#d"
 
 
+@pytest.mark.requires("asyncssh")
 @pytest.mark.parametrize("remote", _URI_SYNTAX_NAMES)
 def test_sftp_leg_is_not_encoded_twice(remote):
     """The two encoding sites compose to exactly one round of encoding.
@@ -569,6 +576,7 @@ def test_symlink_to_force_rejects_a_kind_it_was_not_allowed(monkeypatch):
     assert fake.calls == []
 
 
+@pytest.mark.requires("asyncssh")
 def test_truenaspath_sftp_leg_reachable_on_a_real_host():
     """Construction only -- no network. Pins the real class's attribute shape."""
     from hostctl.host import SshConfig
@@ -627,6 +635,7 @@ def test_connect_opts_carry_known_hosts():
     assert _connect_opts_from_ssh(_ssh_config())["known_hosts"] == ()
 
 
+@pytest.mark.requires("asyncssh")
 def test_sftp_backend_is_built_with_the_configured_known_hosts():
     """The same regression, end to end through the leg the client really builds."""
     client = _client(ssh=_ssh_config(known_hosts="/etc/ssh/known_hosts"))

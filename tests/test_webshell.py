@@ -14,8 +14,6 @@ from unittest.mock import MagicMock
 
 import pytest
 
-pytest.importorskip("hostctl")
-
 from pytruenas.webshell import (  # noqa: E402
     WEBSHELL_PATH,
     WebShellExecutorProvider,

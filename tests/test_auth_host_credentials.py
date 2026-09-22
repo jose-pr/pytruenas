@@ -97,7 +97,7 @@ def test_precedence_is_deterministic(kwargs, expected):
 
 # -- agreement with hostctl's parser ---------------------------------------
 
-hostctl_common = pytest.importorskip("hostctl.host._common")
+from hostctl.host import parse_credentials  # noqa: E402
 
 
 @pytest.mark.parametrize(
@@ -116,7 +116,7 @@ def test_round_trip_through_hostctl_parse_credentials(raw, password, otp):
     anything itself. The CRLF row matters because a password pasted from a file
     or a Windows prompt arrives that way.
     """
-    parsed_password, extras = hostctl_common.parse_credentials(raw)
+    parsed_password, extras = parse_credentials(raw)
     cred = Credentials.from_host_credentials(
         username="root", password=parsed_password, **extras
     )
@@ -128,7 +128,7 @@ def test_round_trip_through_hostctl_parse_credentials(raw, password, otp):
 def test_hostctl_extras_are_lowercased_keys():
     # from_host_credentials takes `otp=` as a keyword, so hostctl's casefolding
     # of extra names is what makes `**extras` splat cleanly. Pin it.
-    _, extras = hostctl_common.parse_credentials("pw\nOTP:9999")
+    _, extras = parse_credentials("pw\nOTP:9999")
     assert extras == {"otp": "9999"}
     cred = Credentials.from_host_credentials(password="pw", **extras)
     assert isinstance(cred, BasicAuth)

@@ -52,11 +52,20 @@ def test_param_json_parsing():
 
 
 def test_run_invokes_method_and_prints(capsys):
+    """Parameters reach the method, decoded, in order.
+
+    `args` is a plain namespace, not a MagicMock: a misspelled attribute on a
+    MagicMock auto-vivifies to an empty iterable, which let a `run()` that
+    dropped every `-p` pass.
+    """
+    from types import SimpleNamespace
+
+    seen = []
+    method = MagicMock(side_effect=lambda *p: seen.append(p) or {"version": "26.0"})
     client = MagicMock()
-    client.api = MagicMock()
-    # api["system.info"](...) -> the record
-    client.api.__getitem__.return_value = MagicMock(return_value={"version": "26.0"})
-    args = MagicMock(method="system.info", params=[])
+    client.api.__getitem__.return_value = method
+    args = SimpleNamespace(method="system.info", params=['{"a": 1}', "5"])
     call_cmd.run(client, args, MagicMock())
     client.api.__getitem__.assert_called_once_with("system.info")
+    assert seen == [({"a": 1}, 5)]
     assert json.loads(capsys.readouterr().out) == {"version": "26.0"}

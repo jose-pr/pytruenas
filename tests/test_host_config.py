@@ -12,8 +12,6 @@ offline -- the scheme/path probe is deferred to connect time -- and
 
 import pytest
 
-pytest.importorskip("hostctl")
-
 from hostctl.host import HostConfig  # noqa: E402
 
 from pytruenas.auth import ApiKeyAuth, BasicAuth, LocalAuth, TokenAuth  # noqa: E402

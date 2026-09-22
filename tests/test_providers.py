@@ -11,8 +11,6 @@ from unittest.mock import MagicMock
 
 import pytest
 
-pytest.importorskip("hostctl")
-
 from hostctl.provider import (  # noqa: E402
     ExecutorProvider,
     OperationNotStarted,

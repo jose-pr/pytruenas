@@ -29,6 +29,7 @@ def generated(tmp_path):
     return out
 
 
+@pytest.mark.requires("jinja2")
 def test_all_stubs_parse(generated):
     files = list(generated.rglob("*.pyi"))
     assert files, "no stubs generated"
@@ -37,6 +38,7 @@ def test_all_stubs_parse(generated):
         ast.parse(src)  # raises SyntaxError on any invalid stub
 
 
+@pytest.mark.requires("jinja2")
 def test_no_undefined_uppercase_return_types(generated):
     for path in generated.rglob("*.pyi"):
         src = path.read_text(encoding="utf-8")
@@ -58,6 +60,7 @@ def test_no_undefined_uppercase_return_types(generated):
                 ), f"{path.name}: undefined return type {name!r}"
 
 
+@pytest.mark.requires("jinja2")
 def test_expected_namespaces_and_methods(generated):
     user = (generated / "user" / "__init__.pyi").read_text(encoding="utf-8")
     assert "class User(_NS):" in user
@@ -72,6 +75,7 @@ def test_expected_namespaces_and_methods(generated):
     assert "def info(" in system
 
 
+@pytest.mark.requires("jinja2")
 def test_root_namespace_valid_class_name(generated):
     root = (generated / "__init__.pyi").read_text(encoding="utf-8")
     # version v25.04.0 must not become `class 0`

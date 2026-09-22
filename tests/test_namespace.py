@@ -69,11 +69,24 @@ def test_get_id_and_filter_together_raises():
 
 
 def test_get_missing_returns_none():
-    client = _client()
-    # get_instance raising FileNotFoundError (via _ioerror) -> None
-    ns = Namespace(client, "user")
-    ns.get_instance = MagicMock(side_effect=FileNotFoundError())
-    assert ns._get(999) is None
+    """A missing id is `None`, as the middleware reports it: ENOENT on the wire.
+
+    Goes through the real `Namespace` over a faked `conn.call`, so it pins the
+    whole chain -- `_get` asking `get_instance` for `_ioerror=True` and the
+    ENOENT -> FileNotFoundError mapping. A stubbed `get_instance` could not see
+    either, and dropping the keyword turns every upsert of a missing row into
+    an exception.
+    """
+    from pytruenas.connection import ClientException
+
+    client = MagicMock()
+
+    def call(method, *args, **kwds):
+        assert (method, args) == ("user.get_instance", (999,))
+        raise ClientException("[ENOENT] User 999 does not exist", 2)
+
+    client.conn.call.side_effect = call
+    assert Namespace(client, "user")._get(999) is None
 
 
 # -- DbAction.execute decision tree -------------------------------------------

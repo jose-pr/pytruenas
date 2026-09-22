@@ -58,12 +58,12 @@ class _FakeWS:
             self._cond.notify_all()
 
 
-def _client_with(fake):
+def _client_with(fake, call_timeout=2):
     """Build a Client whose _connect returns ``fake`` (no real connection)."""
     orig = Client._connect
     Client._connect = lambda self: fake
     try:
-        return Client("ws://x/api/current", call_timeout=2)
+        return Client("ws://x/api/current", call_timeout=call_timeout)
     finally:
         Client._connect = orig
 
@@ -143,10 +143,11 @@ def test_timeout_raises_calltimeout():
 
 def test_timeout_none_waits_for_a_delayed_response():
     # timeout=None must wait indefinitely (used by core.job_wait for long jobs),
-    # NOT fall back to the default and time out. A response arriving after the
-    # client's short default call_timeout (2s here) must still be returned.
+    # NOT fall back to the default and time out. The reply arrives at 0.3 s,
+    # well AFTER the client's default call_timeout of 0.1 s -- so a regression
+    # that treated None as "use the default" raises CallTimeout here.
     fake = _FakeWS()
-    c = _client_with(fake)  # call_timeout=2
+    c = _client_with(fake, call_timeout=0.1)
 
     def _answer_late(req):
         # respond after longer than the default timeout would allow
@@ -179,17 +180,35 @@ def test_unexpected_kwarg_is_logged_not_swallowed(caplog):
 
 
 def test_closed_connection_fails_pending():
+    """Closing under a waiting call fails it with ECONNABORTED, promptly.
+
+    `timeout=None` so only the close can end the call: a CallTimeout (a
+    ClientException subclass) can no longer satisfy the test by accident, and
+    the call runs in a thread so a regression hangs the thread, not the suite.
+    """
+    import errno
+
     fake = _FakeWS()
     c = _client_with(fake)
-    try:
-        # close while a call is waiting -> the waiter is failed with ECONNABORTED.
-        def _close_soon():
-            time.sleep(0.1)
-            fake.close()
+    outcome = {}
 
-        threading.Thread(target=_close_soon, daemon=True).start()
-        with pytest.raises(ClientException):
-            c.call("core.ping", timeout=2)
+    def _call():
+        try:
+            c.call("core.ping", timeout=None)
+        except ClientException as exc:
+            outcome["exc"] = exc
+
+    try:
+        worker = threading.Thread(target=_call, daemon=True)
+        worker.start()
+        time.sleep(0.1)
+        started = time.monotonic()
+        fake.close()
+        worker.join(5)
+        assert not worker.is_alive(), "the pending call was never failed"
+        assert time.monotonic() - started < 2
+        assert not isinstance(outcome["exc"], CallTimeout)
+        assert outcome["exc"].errno == errno.ECONNABORTED
     finally:
         c.close()
 

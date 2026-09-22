@@ -47,8 +47,9 @@ def test_download_buffered_builds_target_and_waits(monkeypatch):
     out = c.download("config.save", filename="cfg", buffered=True, wait=True)
     assert out == b"payload"
     assert "/_download/11" in captured["url"]
-    # buffered=True must block on the job before fetching
-    c.api.core.job_wait.assert_called_once()
+    # buffered=True must block on THE job it started (11) before fetching
+    assert c.api.core.job_wait.call_count == 1
+    assert c.api.core.job_wait.call_args[0][0] == 11
 
 
 def test_download_no_wait_returns_jobid(monkeypatch):
@@ -272,6 +273,7 @@ def test_webshell_sslopt_follows_the_flag(monkeypatch):
     assert _webshell_sslopt(monkeypatch) == {}
 
 
+@pytest.mark.requires("asyncssh")
 def test_shell_string_becomes_an_ssh_leg():
     c = TrueNASClient("wss://nas", autologin=False, shell="ssh://root:pw@nas")
     ssh = c._config.ssh

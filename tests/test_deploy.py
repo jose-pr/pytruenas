@@ -153,6 +153,7 @@ def _args(**overrides):
     return args
 
 
+@pytest.mark.requires("pathspec")
 def test_repo_contents_detects_pythonpath_automatically(tmp_path):
     (tmp_path / "src" / "pkg").mkdir(parents=True)
     (tmp_path / "src" / "pkg" / "__init__.py").write_text("X = 1\n")
@@ -165,6 +166,7 @@ def test_repo_contents_detects_pythonpath_automatically(tmp_path):
     assert any(n.endswith("src/pkg/__init__.py") for n in names)
 
 
+@pytest.mark.requires("pathspec")
 def test_repo_contents_explicit_pythonpath_overrides_detection(tmp_path):
     (tmp_path / "src" / "pkg").mkdir(parents=True)
     (tmp_path / "src" / "pkg" / "__init__.py").write_text("")
@@ -176,6 +178,7 @@ def test_repo_contents_explicit_pythonpath_overrides_detection(tmp_path):
     assert pythonpath == ["custom"]
 
 
+@pytest.mark.requires("pathspec")
 def test_repo_contents_raises_when_package_cannot_be_found(tmp_path):
     (tmp_path / "unrelated.txt").write_text("x")
     with pytest.raises(BundleError, match="could not find"):
@@ -184,6 +187,7 @@ def test_repo_contents_raises_when_package_cannot_be_found(tmp_path):
         )
 
 
+@pytest.mark.requires("pathspec")
 def test_repo_contents_survives_a_repo_with_no_declared_dependencies(tmp_path):
     """Advisory logging must not turn into a hard failure for a repo with
     neither pyproject.toml nor requirements.txt -- copying the tree is the
@@ -254,6 +258,7 @@ class _FakeClient:
         return _FakeResult()
 
 
+@pytest.mark.requires("pathspec")
 def test_source_repo_mode_dir_deploys_a_working_launcher(tmp_path):
     (tmp_path / "src" / "pkg").mkdir(parents=True)
     (tmp_path / "src" / "pkg" / "__init__.py").write_text("X = 1\n")

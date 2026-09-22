@@ -11,8 +11,6 @@ from unittest.mock import MagicMock
 
 import pytest
 
-pytest.importorskip("hostctl")
-
 from hostctl.host import HostConfig, PosixHost, SshConfig  # noqa: E402
 from hostctl.shell import POSIX_SHELL  # noqa: E402
 
@@ -28,7 +26,7 @@ SSH = SshConfig(host="nas")
 
 
 def _host(target="wss://nas", **options):
-    return TrueNASHost(TrueNASConfig.from_target(target), client=MagicMock(), **options)
+    return TrueNASHost(TrueNASConfig.from_target(target), **options)
 
 
 def _names(providers):
@@ -89,6 +87,7 @@ def test_string_construction_accepts_every_target_form(target, expected):
     assert TrueNASHost(target).connection_uri == expected
 
 
+@pytest.mark.requires("asyncssh")
 def test_string_construction_takes_config_options():
     host = TrueNASHost("wss://nas", ssh=SSH, executor=["ssh"])
     assert _names(host._executor_selector.providers) == ["ssh"]
@@ -117,6 +116,12 @@ def test_config_options_alongside_a_config_are_rejected():
     config = TrueNASConfig.from_target("wss://nas")
     with pytest.raises(TypeError, match="may not be combined"):
         TrueNASHost(config, executor=["ssh"])
+
+
+def test_client_keyword_is_accepted_and_ignored():
+    """`client=` predates the host/client merge; old callers must not break."""
+    host = TrueNASHost("wss://nas", client=object())
+    assert host.client is host
 
 
 def test_truenasclient_is_the_same_class():
@@ -339,7 +344,7 @@ def test_without_ssh_the_webshell_stands_in():
 
 
 def _built(target="wss://nas", **options):
-    return TrueNASHost(TrueNASConfig.from_target(target, **options), client=MagicMock())
+    return TrueNASHost(TrueNASConfig.from_target(target, **options))
 
 
 # -- explicit provider overrides -------------------------------------------
@@ -420,7 +425,7 @@ def test_local_target_uses_only_hostctls_local_providers():
     through the HTTP side channel, which resolves to https://localhost and
     trips the appliance's self-signed certificate.
     """
-    host = TrueNASHost(TrueNASConfig.from_target(None), client=MagicMock())
+    host = TrueNASHost(TrueNASConfig.from_target(None))
     assert _names(host._executor_selector.providers) == ["local"]
     assert _names(host._path_selector.providers) == ["local"]
 
@@ -430,11 +435,12 @@ def test_local_target_ignores_an_ssh_config():
     from hostctl.host import SshConfig
 
     config = TrueNASConfig.from_target(None, ssh=SshConfig(host="nas"))
-    host = TrueNASHost(config, client=MagicMock())
+    host = TrueNASHost(config)
     assert _names(host._executor_selector.providers) == ["local"]
     assert _names(host._path_selector.providers) == ["local"]
 
 
+@pytest.mark.requires("asyncssh")
 def test_with_ssh_the_ssh_providers_come_first():
     """SSH must outrank the middleware -- it is the only remote exec channel,
     and its path surface (symlink/rename/realpath) is richer."""
@@ -442,7 +448,6 @@ def test_with_ssh_the_ssh_providers_come_first():
 
     host = TrueNASHost(
         TrueNASConfig.from_target("wss://nas", ssh=SshConfig(host="nas")),
-        client=MagicMock(),
     )
     assert _names(host._executor_selector.providers) == ["ssh", "webshell"]
     assert _names(host._path_selector.providers) == ["sftp", "tnasws"]
@@ -470,16 +475,14 @@ def test_remote_without_ssh_still_has_run_via_the_webshell():
 
 def test_remote_without_any_executor_reports_no_run():
     """With every executor excluded, the honest answer is "no run"."""
-    host = TrueNASHost(
-        TrueNASConfig.from_target("wss://nas", executor=[]), client=MagicMock()
-    )
+    host = TrueNASHost(TrueNASConfig.from_target("wss://nas", executor=[]))
     assert "run" not in host.capabilities
     # Paths still work -- the websocket serves those.
     assert "path" in host.capabilities
 
 
 def test_local_target_reports_run():
-    host = TrueNASHost(TrueNASConfig.from_target(None), client=MagicMock())
+    host = TrueNASHost(TrueNASConfig.from_target(None))
     assert "run" in host.capabilities
 
 
@@ -488,7 +491,6 @@ def test_remote_with_ssh_reports_run():
 
     host = TrueNASHost(
         TrueNASConfig.from_target("wss://nas", ssh=SshConfig(host="nas")),
-        client=MagicMock(),
     )
     assert "run" in host.capabilities
 
@@ -632,6 +634,7 @@ def test_install_sshcreds_uses_the_configured_known_hosts(keyed_host):
     assert keyed_host._config.ssh.known_hosts is None
 
 
+@pytest.mark.requires("asyncssh")
 def test_install_sshcreds_rebuilds_the_providers(keyed_host):
     """Gaining an SSH transport must change what the host can do.
 
@@ -694,8 +697,8 @@ def test_building_a_host_does_no_network_io(monkeypatch):
 
     monkeypatch.setattr(requests, "get", explode)
     monkeypatch.setattr(requests, "post", explode)
-    TrueNASHost(TrueNASConfig.from_target("wss://nas"), client=MagicMock())
-    TrueNASHost(TrueNASConfig.from_target("nas"), client=MagicMock())
+    TrueNASHost(TrueNASConfig.from_target("wss://nas"))
+    TrueNASHost(TrueNASConfig.from_target("nas"))
 
 
 # -- HTTP side-channel URLs -----------------------------------------------
@@ -706,7 +709,7 @@ def test_building_a_host_does_no_network_io(monkeypatch):
 
 
 def test_http_target_keeps_a_download_links_query_string():
-    host = TrueNASHost(TrueNASConfig.from_target("wss://nas"), client=MagicMock())
+    host = TrueNASHost(TrueNASConfig.from_target("wss://nas"))
     target = host._http_target("/_download/12345?auth_token=abc")
 
     assert target.path == "/_download/12345"
@@ -716,7 +719,7 @@ def test_http_target_keeps_a_download_links_query_string():
 
 
 def test_http_target_without_a_query_is_unchanged():
-    host = TrueNASHost(TrueNASConfig.from_target("wss://nas"), client=MagicMock())
+    host = TrueNASHost(TrueNASConfig.from_target("wss://nas"))
     assert host._http_target("/_upload").uri == "https://nas/_upload"
 
 
@@ -735,7 +738,7 @@ def test_default_providers_drop_ssh_when_asyncssh_is_missing(monkeypatch):
 
     monkeypatch.setattr(host_module, "_ssh_available", lambda: False)
     config = TrueNASConfig.from_target("wss://nas", ssh=SshConfig(host="nas"))
-    host = TrueNASHost(config, client=MagicMock())
+    host = TrueNASHost(config)
 
     assert [p.name for p in host._path_selector.providers] == ["tnasws"]
     assert [p.name for p in host._executor_selector.providers] == ["webshell"]
@@ -754,7 +757,7 @@ def test_an_explicitly_named_ssh_provider_is_still_honored(monkeypatch):
     config = TrueNASConfig.from_target(
         "wss://nas", ssh=SshConfig(host="nas"), path=["sftp"], executor=["ssh"]
     )
-    host = TrueNASHost(config, client=MagicMock())
+    host = TrueNASHost(config)
 
     assert [p.name for p in host._path_selector.providers] == ["sftp"]
     assert [p.name for p in host._executor_selector.providers] == ["ssh"]
