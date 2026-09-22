@@ -374,6 +374,12 @@ module-level `path(client, *segments, backend=None)` is what it delegates to.
   that column breaks `iterdir`/`glob`/`walk` off-pool. `listdir` reports no
   `mtime` on any filesystem, so stats seeded from a listing carry `st_mtime`
   0; `stat()` uses `filesystem.stat`, which does report it.
+  `mkdir(mode=None, parents=False, exist_ok=False)` — an omitted `mode` is
+  `0o755` (the middleware applies the mode it is sent, with no umask; an
+  explicit mode is sent as given); `parents=True` creates missing parents.
+  Two paths are the same filesystem (for pathlib_next's same-file and overlap
+  guards) when their backends talk to the same client or to clients with the
+  same `connection_uri` — not merely when they share a backend object.
 - **`TruenasPath`** (`pytruenas.fs.truenas`) — subclasses `TnasWsPath`; five
   operations — `unlink`/`rmdir`/`rename`/`symlink_to`/`readlink` — try an SFTP
   leg first (via `pathlib_next`'s `SftpPath`, requires the `ssh` extra +
@@ -381,7 +387,10 @@ module-level `path(client, *segments, backend=None)` is what it delegates to.
   raise `NotImplementedError` for ops SFTP alone can do — rename, symlink_to,
   readlink). **`resolve` is not one of them**: `SftpPath` has no `resolve`, so
   the attempt always raises `NotImplementedError` and `resolve()` returns
-  `self` on every host, SFTP configured or not.
+  `self` on every host, SFTP configured or not. `rename(target)` accepts a
+  `str` or a path on the SAME host and returns the new `TruenasPath`; a target
+  on another host (or of another type) raises `NotImplementedError`, so
+  `move()` copies and deletes instead of renaming on the source host.
   `symlink_to(..., force=False, onremove=None)` adds a
   pytruenas-specific convenience: `force` (bool, a file-type string, or a set
   of `"file"/"link"/"directory"`) removes a conflicting existing target first;

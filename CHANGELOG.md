@@ -30,6 +30,21 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
+- `TruenasPath.rename()` ignored the destination's host:
+  `fs.path(nasA, x).move(fs.path(nasB, y))` renamed the file on nasA under `y`
+  and reported success, and with `overwrite=True` also deleted nasB's copy.
+  `rename()` now refuses a destination on another host, so `move()` copies and
+  deletes. `rename()` returns the new `TruenasPath` (it returned the SFTP
+  leg's own path object).
+- Moving or copying a remote file onto a separately built path for the same
+  file (`fs.path(c, x).move(fs.path(c, x), overwrite=True)`) deleted it; a
+  recursive copy into its own subtree recursed until `RecursionError`. Such
+  paths are now recognised as the same file.
+- `mkdir()` on the websocket leg created world-writable (`0o777`) directories,
+  because the middleware applies the requested mode without a umask; the
+  default is now `0o755`. `mkdir(parents=True)` failed with `ClientException
+  [Errno 2]` instead of creating the parents: a middleware error of the form
+  `[Errno N] ...` is now mapped to the matching `OSError` subclass.
 - `deploy --mode dir` replaced whatever directory `--path` named: an existing
   directory that was not a previous deploy was moved aside and deleted, and
   the run reported "Deployed". A `--path` without a previous deploy's digest

@@ -104,6 +104,28 @@ class TnasWsPath(_UriPath):
         """The middleware ``filesystem`` API namespace for this path's client."""
         return self.backend.client.api.filesystem
 
+    def _host_client(self):
+        """The client this path talks to, or ``None`` for a bare-URI path."""
+        return getattr(getattr(self, "_backend", None), "client", None)
+
+    def _same_filesystem(self, other) -> bool:
+        """Whether ``other`` names files on the same TrueNAS host.
+
+        pathlib_next's default compares supplied backend objects, and
+        ``fs.path()`` gives every path its own backend -- so two spellings of
+        one file on one host read as two trees, and its same-file guard never
+        fired: ``move(overwrite=True)`` onto a second ``fs.path()`` for the same
+        file deleted it. The host is what the backend talks to: the same client,
+        or clients for the same (credential-free) connection URI.
+        """
+        mine, theirs = self._host_client(), other._host_client()
+        if mine is None or theirs is None:
+            return super()._same_filesystem(other)
+        if mine is theirs:
+            return True
+        uri = getattr(mine, "connection_uri", None)
+        return isinstance(uri, str) and uri == getattr(theirs, "connection_uri", None)
+
     # -- stat / listing ----------------------------------------------------
 
     def stat(self, *, follow_symlinks=True) -> "_FileStat":
@@ -149,6 +171,18 @@ class TnasWsPath(_UriPath):
         return len(data)
 
     # -- mutation ----------------------------------------------------------
+
+    def mkdir(self, mode=None, parents=False, exist_ok=False):
+        """Create this directory; ``mode`` defaults to ``0o755``.
+
+        pathlib's ``0o777`` default is safe only because the kernel masks it
+        with the process umask. The middleware applies the mode it is sent
+        verbatim (measured live: a default ``mkdir()`` made a ``0o777``
+        directory), so the conventional ``022`` umask is applied here. An
+        explicit ``mode`` is sent as given.
+        """
+        mode = 0o777 & ~0o022 if mode is None else mode
+        return super().mkdir(mode, parents=parents, exist_ok=exist_ok)
 
     def _mkdir(self, mode):
         self._fs.mkdir(

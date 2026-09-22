@@ -318,6 +318,166 @@ def test_truenaspath_rename_without_sftp_raises():
         p.rename("/g")
 
 
+# -- mkdir: the mode actually applied, and parents ------------------------------
+
+
+def _mkdir_client(existing=("/", "/mnt", "/mnt/tank")):
+    """A real Namespace over a `filesystem.mkdir` that behaves like 26.0's.
+
+    Measured live: the middleware applies the mode it is sent (no umask), and
+    a missing parent fails with `[Errno 2] No such file or directory: '...'`.
+    """
+    from pytruenas.connection import ClientException
+    from pytruenas.namespace import Namespace
+
+    dirs = set(existing)
+    sent = []
+
+    def call(method, *args, **kwds):
+        assert method == "filesystem.mkdir", method
+        spec = args[0]
+        path = spec["path"]
+        sent.append((path, spec["options"]["mode"]))
+        parent = path.rsplit("/", 1)[0] or "/"
+        if parent not in dirs:
+            raise ClientException(f"[Errno 2] No such file or directory: '{path}'", 2)
+        if path in dirs:
+            raise ClientException(f"[Errno 17] File exists: '{path}'", 17)
+        dirs.add(path)
+        return {"path": path}
+
+    client = MagicMock()
+    client.config = SimpleNamespace(ssh=None)
+    client.conn.call.side_effect = call
+    client.api = Namespace(client)
+    return client, sent, dirs
+
+
+def test_mkdir_default_mode_is_not_world_writable():
+    """pathlib's default 0o777 relies on a umask; the middleware applies none.
+
+    Measured live: a default `mkdir()` produced a 0o777 directory.
+    """
+    client, sent, _ = _mkdir_client()
+    TnasWsPath("truenas+ws://nas/mnt/tank/d", backend=TnasWsBackend(client)).mkdir()
+    assert sent == [("/mnt/tank/d", "0o755")]
+
+
+def test_mkdir_explicit_mode_is_sent_as_given():
+    client, sent, _ = _mkdir_client()
+    p = TnasWsPath("truenas+ws://nas/mnt/tank/d", backend=TnasWsBackend(client))
+    p.mkdir(mode=0o750)
+    assert sent == [("/mnt/tank/d", "0o750")]
+
+
+def test_mkdir_parents_creates_the_missing_parents():
+    """`[Errno 2] ...` from the middleware must read as FileNotFoundError.
+
+    It stayed a ClientException, so pathlib_next's parents=True never ran and
+    the call failed with ENOENT (measured live).
+    """
+    client, sent, dirs = _mkdir_client()
+    p = TnasWsPath("truenas+ws://nas/mnt/tank/a/b", backend=TnasWsBackend(client))
+    p.mkdir(parents=True)
+    assert {"/mnt/tank/a", "/mnt/tank/a/b"} <= dirs
+    assert all(mode == "0o755" for _, mode in sent)
+
+
+def test_bracketed_errno_numbers_map_to_the_matching_oserror():
+    from pytruenas.connection import ClientException
+    from pytruenas.namespace import ioerror
+
+    err = ioerror(ClientException("[Errno 2] No such file or directory: '/x'", 2))
+    assert isinstance(err, FileNotFoundError)
+    assert isinstance(ioerror(ClientException("[EEXIST] exists", 17)), FileExistsError)
+    unknown = ClientException("[EWHATEVER] odd", None)
+    assert ioerror(unknown) is unknown
+
+
+# -- one host vs two hosts: rename, move and the same-file guard ---------------
+
+
+def _host_client(name, **fs):
+    """A fake host with a real-looking identity (`_config.host`, a URI)."""
+    client = _client(**fs)
+    client._config = SimpleNamespace(host=name, is_local=False)
+    client.connection_uri = f"truenas+wss://{name}"
+    return client
+
+
+class _RecordingSftp:
+    """An SFTP leg that records renames/unlinks instead of doing them."""
+
+    def __init__(self):
+        self.renamed, self.unlinked = [], []
+
+    def rename(self, target):
+        self.renamed.append(target)
+        return SimpleNamespace(path=target)
+
+    def unlink(self, missing_ok=False):
+        self.unlinked.append(True)
+
+
+def test_paths_built_separately_on_one_host_are_one_filesystem():
+    """`fs.path()` gives each path its own backend; the host is what counts.
+
+    With pathlib_next's default (compare backend objects) the same-file guard
+    never fired, so `move(overwrite=True)` onto a second `fs.path()` of the
+    same file deleted it.
+    """
+    client = _host_client("nasA", stat={"mode": 0o100644}, get=b"data")
+    a = fs_path(client, "/mnt/tank/a.txt")
+    b = fs_path(client, "/mnt/tank/a.txt")
+    assert a._backend is not b._backend
+    assert a._same_filesystem(b)
+    with pytest.raises(OSError, match="same file"):
+        a.copy(b, overwrite=True)
+    assert not client.api.filesystem.put.called
+
+
+def test_paths_on_two_hosts_are_two_filesystems():
+    a = fs_path(_host_client("nasA"), "/mnt/tank/a.txt")
+    b = fs_path(_host_client("nasB"), "/mnt/tank/a.txt")
+    assert not a._same_filesystem(b)
+    assert not a._rename_compatible(b)
+
+
+def test_rename_refuses_another_host_and_move_copies_instead(monkeypatch):
+    """`rename()` sends the SFTP leg only the destination's PATH.
+
+    Across hosts that renamed the file on the SOURCE host: it left nasA, never
+    reached nasB, and no error was raised. `rename()` now refuses, so
+    `move()` takes its copy + delete path.
+    """
+    sftp = _RecordingSftp()
+    monkeypatch.setattr(TruenasPath, "_sftp", lambda self: sftp)
+    src_client = _host_client("nasA", stat={"mode": 0o100644}, get=b"payload")
+    dst_client = _host_client("nasB")
+    dst_client.api.filesystem.stat.side_effect = FileNotFoundError(2, "absent")
+    src = fs_path(src_client, "/mnt/tank/export.csv")
+    dst = fs_path(dst_client, "/mnt/tank/export.csv")
+
+    with pytest.raises(NotImplementedError, match="across hosts"):
+        src.rename(dst)
+    src.move(dst)
+
+    assert sftp.renamed == []
+    assert dst_client.api.filesystem.put.called  # the bytes reached nasB
+    assert sftp.unlinked  # and the source was removed afterwards
+
+
+def test_rename_on_one_host_returns_the_new_truenaspath(monkeypatch):
+    sftp = _RecordingSftp()
+    monkeypatch.setattr(TruenasPath, "_sftp", lambda self: sftp)
+    client = _host_client("nasA")
+    moved = fs_path(client, "/mnt/tank/a.txt").rename("/mnt/tank/b.txt")
+    assert sftp.renamed == ["/mnt/tank/b.txt"]
+    assert isinstance(moved, TruenasPath)
+    assert moved.path == "/mnt/tank/b.txt"
+    assert moved._host_client() is client
+
+
 @pytest.mark.requires("asyncssh")
 def test_truenaspath_resolve_falls_back_when_sftp_lacks_op():
     # pathlib_next's SftpPath has no resolve(); _try_sftp must surface that as

@@ -149,11 +149,35 @@ class TruenasPath(_TnasWsPath):
         except (_NoSftp, NotImplementedError):
             return super().rmdir()
 
+    def _on_this_host(self, target) -> bool:
+        """Whether a rename destination is on this path's host.
+
+        A ``str`` names a path on this host. A path object must be a
+        ``TnasWsPath`` for the same host: renaming hands the SFTP leg only the
+        destination's PATH, so any other target would be renamed on THIS host
+        under that name -- the file leaves the source, never reaches the
+        destination, and no error is raised.
+        """
+        if isinstance(target, str):
+            return True
+        return isinstance(target, _TnasWsPath) and self._same_filesystem(target)
+
+    def _rename_compatible(self, target) -> bool:
+        # `move()` asks this first and copies + deletes when it is False.
+        return self._on_this_host(target)
+
     def rename(self, target):
+        if not self._on_this_host(target):
+            raise NotImplementedError(
+                f"cannot rename across hosts ({self} -> {target}); use move()"
+            )
         try:
-            return self._try_sftp("rename", _as_posix(target))
+            moved = self._try_sftp("rename", _as_posix(target))
         except (_NoSftp, NotImplementedError):
             raise NotImplementedError("rename requires the SFTP backend")
+        # Return the new path on THIS host, as pathlib does -- not the SFTP
+        # leg's own path object, which carries a private per-call backend.
+        return self.with_segments(_as_posix(moved if moved is not None else target))
 
     def readlink(self):
         try:

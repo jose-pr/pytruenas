@@ -22,24 +22,30 @@ class _Unset:
 #: real value meaning "wait indefinitely", so it cannot double as the default.
 _UNSET = _Unset()
 
-_ERRNO_PATTERN = _re.compile(r"^\[([^]]*)\]\s*(.*)")
+_ERRNO_PATTERN = _re.compile(r"^\[([^]]*)\]\s*(.*)", _re.S)
+_ERRNO_NUMBER = _re.compile(r"Errno (\d+)")
 
 
 def ioerror(error: _connection.ClientException) -> Exception:
-    """Map a middleware ``[ERRNO] message`` error to the matching ``OSError``.
+    """Map a middleware ``[ENAME] message`` error to the matching ``OSError``.
 
-    Only errors whose bracketed prefix names a real POSIX errno become an
-    ``OSError`` (with that ``errno``); anything else is returned unchanged. The
-    prior ``if error is not None`` guard was always true, so an unrecognised
-    prefix produced ``IOError(None, msg)`` — losing the original exception type.
+    The bracketed prefix comes in two spellings: a symbolic name
+    (``[ENOENT] ...``) and a relayed Python ``OSError`` (``[Errno 2] ...`` --
+    what ``filesystem.mkdir`` sends for a missing parent). Both become an
+    ``OSError`` with that ``errno``, so the caller gets the builtin subclass
+    (``FileNotFoundError``...) that pathlib code branches on; anything else is
+    returned unchanged.
     """
     match = _ERRNO_PATTERN.match(error.error)
     if match:
         name = match[1]
         msg = match[2]
         errno = getattr(_errno, name, None)
+        if errno is None:
+            number = _ERRNO_NUMBER.fullmatch(name)
+            errno = int(number[1]) if number else None
         if errno is not None:
-            return IOError(errno, msg)
+            return OSError(errno, msg)
 
     return error
 
