@@ -188,6 +188,51 @@ def test_int_result_triggers_job_wait():
     assert out == {"id": 7, "done": True}
 
 
+# -- DbAction over a real Namespace ------------------------------------------
+#
+# These go through the real `Namespace` with only `conn.call` faked, so the
+# assertions are about what reaches the middleware.
+
+
+def _wire(routes):
+    """A client whose `conn.call` answers from `routes` and records each call."""
+    client = MagicMock()
+    client.sent = []
+
+    def call(method, *args, **kwds):
+        client.sent.append((method, args))
+        answer = routes[method]
+        return answer(*args) if callable(answer) else answer
+
+    client.conn.call.side_effect = call
+    return client
+
+
+def test_upsert_refuses_a_selector_with_nothing_to_match_on():
+    """Only `!`-prefixed names leave no filter: never update "the first record".
+
+    Before, `_upsert(("!uid",), ...)` queried with an empty filter, took the
+    first row the collection returned (root, uid 0) and renamed it.
+    """
+    client = _wire({})
+    with pytest.raises(ValueError, match="nothing to match"):
+        Namespace(client, "user")._upsert(("!uid",), username="bob", uid=1001)
+    assert client.sent == []
+
+
+def test_update_can_clear_a_field_to_none():
+    """A field set to `None` is sent, not silently dropped."""
+    client = _wire(
+        {
+            "user.get_instance": {"id": 2, "email": "a@example.com"},
+            "user.update": lambda _id, fields: {"id": _id, **fields},
+        }
+    )
+    out = Namespace(client, "user")._update(2, email=None)
+    assert ("user.update", (2, {"email": None})) in client.sent
+    assert out["email"] is None
+
+
 # -- repr -----------------------------------------------------------------
 #
 # `__repr__` read `client._api`, a pre-hostctl leftover that exists nowhere

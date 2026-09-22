@@ -251,11 +251,14 @@ than the dunder-safe helpers below raise `AttributeError` normally.
   match of a `{"limit": 1}` query by filter kwargs.
 - **`._create(*opts, **fields)`** — call `.create(fields)`; raises
   `FileExistsError` if the middleware reports "already exists".
-- **`._update(selector=None, *opts, **fields)`** — update by id (int/str) or
-  by a filter (mapping, or a sequence of field names to match on, each
-  optionally `!`-prefixed to require *absence*). Diffs against the current
-  record first unless `force=True` (an `Option`/tuple opt) is given, so a
-  no-op update sends nothing.
+- **`._update(selector=None, *opts, **fields)`** — update by id (a bare
+  int/str selector is always an id) or by a filter (mapping, or a sequence of
+  field names matched against the passed values). A `!`-prefixed name is left
+  out of the match and not changed on update; a selector with only `!` names
+  raises `ValueError` rather than matching the first record. Diffs against the
+  current record first unless `force=True` (an `Option`/tuple opt) is given, so
+  a no-op update sends nothing. A field set to `None` is sent (it clears the
+  value).
 - **`._upsert(selector=None, callback=None, *opts, **fields)`** — `._update`
   if a matching record exists, else `._create`. `callback(action, id,
   result)` (`action` is a `DbAction` — `CREATE`/`UPDATE`/`UPSERT`) fires after

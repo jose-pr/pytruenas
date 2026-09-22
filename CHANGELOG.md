@@ -30,6 +30,15 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
+- `_upsert()`/`_update()` with a selector made only of `!`-prefixed names
+  (`("!uid",)`) queried the whole collection and updated its first record
+  (`_upsert(("!uid",), username="bob", uid=1001)` renamed root). It now raises
+  `ValueError`.
+- `_update()`/`_upsert()` silently dropped any field set to `None`, so a
+  nullable field could not be cleared (`_update(2, email=None)` sent nothing).
+- The README and guide `_upsert("username", ...)` example passed the field name
+  as a bare string, which is read as a record id and raises; the examples now
+  use `("username",)`.
 - With SSH unreachable or its host key untrusted, `client.path()` operations
   raised the connection error instead of falling back to the websocket leg, and
   every `run()` re-dialled SSH before falling back (~9 s per call).

@@ -87,6 +87,14 @@ class DbAction(str, _enum.Enum):
                     for selector in __selector
                 }
             )
+            # A `!name` selector is left out of the match (and of the update),
+            # so a selector made only of those has nothing to match on. An empty
+            # filter would query the whole collection and act on its first row.
+            if selectors and all(v is _q.EXCLUDE for v in selectors.values()):
+                raise ValueError(
+                    f"selector {list(__selector)!r} has nothing to match on: "
+                    "name at least one field without a '!' prefix"
+                )
 
         if _id is None and selectors:
             current = __namespace._get(**selectors)
@@ -110,10 +118,18 @@ class DbAction(str, _enum.Enum):
             if __action not in (DbAction.UPDATE, DbAction.UPSERT):
                 raise FileExistsError(_id)
             exclude = (idkey, *(opts.get("update_exclude") or []))
+            # Drop a field only when it is a selector the record already
+            # matches, or a `!` selector. `selectors.get(name)` alone read a
+            # non-selector as `None`, which silently dropped every field being
+            # set TO None -- a nullable field could never be cleared.
             fields = {
                 name: val
                 for name, val in fields.items()
-                if name not in exclude and selectors.get(name) not in (val, _q.EXCLUDE)
+                if name not in exclude
+                and not (
+                    name in selectors
+                    and (selectors[name] is _q.EXCLUDE or selectors[name] == val)
+                )
             }
 
             if not force:
