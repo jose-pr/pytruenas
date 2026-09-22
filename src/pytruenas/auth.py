@@ -146,15 +146,18 @@ class _CredentialsMeta(type):
 
 
 class AuthenticationError(Exception):
-    """A modern ``auth.login_ex`` login was refused.
+    """A login was refused.
 
     ``response_type`` is the server's discriminator (``AUTH_ERR``/``DENIED``/
     ``EXPIRED``/…); ``response`` is the full response dict for callers that need
-    the detail (e.g. a ``REDIRECT`` target).
+    the detail (e.g. a ``REDIRECT`` target). A refused legacy login -- whose
+    only answer is ``False`` -- is ``AUTH_ERR`` with ``{"method": ...}``.
     """
 
-    def __init__(self, response_type: str, response: dict) -> None:
-        super().__init__(f"login_ex failed: {response_type}")
+    def __init__(
+        self, response_type: str, response: dict, method: str = "login_ex"
+    ) -> None:
+        super().__init__(f"{method} failed: {response_type}")
         self.response_type = response_type
         self.response = response
 
@@ -175,10 +178,21 @@ class Credentials(metaclass=_CredentialsMeta):
         raise NotImplementedError()
 
     def login(self, client: "TrueNASClient"):
-        """Legacy login via ``auth.login``/``login_with_*`` (unchanged)."""
-        if self.METHOD:
-            return client.api.auth[self.METHOD](*self._args())
-        return None
+        """Legacy login via ``auth.login``/``login_with_*``.
+
+        Those methods answer a refusal with ``False``, not an error (measured
+        on 26.0: a wrong API key or password returned ``False`` and left the
+        session unauthenticated), so ``False`` raises
+        :class:`AuthenticationError` here.
+        """
+        if not self.METHOD:
+            return None
+        ok = client.api.auth[self.METHOD](*self._args())
+        if ok is False:
+            raise AuthenticationError(
+                "AUTH_ERR", {"method": self.METHOD}, method=self.METHOD
+            )
+        return ok
 
     # -- modern login_ex path ----------------------------------------------
 

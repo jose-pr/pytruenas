@@ -30,6 +30,7 @@ import inspect as _inspect
 import json as _js
 import logging as _logging
 import os as _os
+import threading as _threading
 import typing as _ty
 from functools import cached_property as _cached_property
 from urllib.parse import unquote as _unquote
@@ -825,6 +826,12 @@ class TrueNASHost(_PosixHost, _ty.Generic[ApiVersion]):
         #: Providers already reported as fallen back from (see `run`), so the
         #: warning is logged once per provider rather than on every call.
         self._fallback_warned: "set[str]" = set()
+        #: Guards opening, replacing and dropping `_conn`. Reentrant: logging
+        #: in calls `auth.*` through `api`, which reads `conn` again.
+        self._conn_lock = _threading.RLock()
+        #: How the session last authenticated -- `login()`'s arguments -- so a
+        #: reconnect repeats *that* login, not whatever the config would do.
+        self._last_login: "tuple[object, dict] | None" = None
         #: HTTP(S) session for the side channels; see `_http`.
         self._http_session: "_req.Session | None" = None
         # `client=` is accepted and ignored: the host *is* the client now.
@@ -1009,14 +1016,25 @@ class TrueNASHost(_PosixHost, _ty.Generic[ApiVersion]):
         """The live JSON-RPC connection; opens on first access.
 
         Logs in first when ``autologin`` is set (the default) and there is no
-        live connection. Reconnects if the previous one closed.
+        live connection. Reconnects if the previous one closed; after a
+        successful :meth:`login`, a reconnect repeats that login -- the same
+        credentials and mechanism -- whatever ``autologin`` says.
+
+        Thread-safe: concurrent first use opens one connection, not one per
+        thread.
         """
-        if self._conn is None or self._conn._closed.is_set():
-            if self._config.autologin:
-                self.login()
-            else:
-                self._conn = self._openwss()
-        return _ty.cast("_connection.TrueNASWSConnection", self._conn)
+        with self._conn_lock:
+            conn = self._conn
+            if conn is None or conn._closed.is_set():
+                if self._last_login is not None:
+                    creds, options = self._last_login
+                    self.login(_ty.cast(_ty.Any, creds), **_ty.cast(_ty.Any, options))
+                elif self._config.autologin:
+                    self.login()
+                else:
+                    self._conn = self._openwss()
+                conn = self._conn
+            return _ty.cast("_connection.TrueNASWSConnection", conn)
 
     @property
     def websocket(self) -> "_connection.TrueNASWSConnection":
@@ -1044,21 +1062,41 @@ class TrueNASHost(_PosixHost, _ty.Generic[ApiVersion]):
         ``OTP_REQUIRED`` continuation: the OTP comes from the credential's own
         ``otp_token`` if set, else from ``otp_provider()``. A credential with no
         login_ex form (e.g. local-socket auth) falls back automatically.
+
+        Refused credentials raise :class:`~pytruenas.auth.AuthenticationError`
+        on both paths, and the connection is closed rather than left open and
+        unauthenticated. After a success, a reconnect repeats this login; a
+        one-time OTP cannot be replayed, so give a session that must survive a
+        reconnect an ``otp_provider``.
         """
-        if self._conn and not self._conn._closed.is_set():
+        options = {
+            "login_ex": login_ex,
+            "login_options": login_options,
+            "otp_provider": otp_provider,
+        }
+        with self._conn_lock:
+            if self._conn and not self._conn._closed.is_set():
+                try:
+                    self._conn.close()
+                except Exception:
+                    pass
+            self._conn = self._openwss()
+            creds = creds or _ty.cast(_auth.Credentials, self._config.credentials)
             try:
-                self._conn.close()
-            except Exception:
-                pass
-        self._conn = self._openwss()
-        creds = creds or _ty.cast(_auth.Credentials, self._config.credentials)
-        if login_ex:
-            return creds.login_ex(
-                _ty.cast(_ty.Any, self),
-                login_options=login_options,
-                otp_provider=otp_provider,
-            )
-        creds.login(_ty.cast(_ty.Any, self))
+                if login_ex:
+                    result = creds.login_ex(
+                        _ty.cast(_ty.Any, self),
+                        login_options=login_options,
+                        otp_provider=otp_provider,
+                    )
+                else:
+                    result = creds.login(_ty.cast(_ty.Any, self))
+            except BaseException:
+                conn, self._conn = self._conn, None
+                conn.close()
+                raise
+            self._last_login = (creds, options)
+            return result
 
     @_cached_property
     def api(self) -> "ApiVersion":

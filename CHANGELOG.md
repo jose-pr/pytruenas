@@ -44,6 +44,19 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
+- **A wrong password or API key logged in "successfully".** The legacy
+  `auth.login`/`login_with_api_key`/`login_with_token` answer a refusal with
+  `False` (measured on 26.0), which was ignored: every later call failed with
+  `ENOTAUTHENTICATED` far from the cause. `login()` — and so the first call
+  under `autologin` — now raises `AuthenticationError` and closes the
+  connection.
+- **A reconnect did not log in the way the session had.** After a dropped
+  connection, `conn` used the config's credentials under `autologin`, or none
+  at all without it, so a session opened with `login(other_creds)` or
+  `login_ex=True` came back as someone else or unauthenticated. It now
+  repeats the last successful `login()` call.
+- Concurrent first use of a client opened one connection per thread and
+  leaked all but one; opening the connection is now locked.
 - **Secrets reached logs and messages.** The per-call TRACE record printed raw
   arguments, so `auth.login` passwords, API keys and the private key
   `install_sshcreds()` uploads were written to any log at TRACE; arguments to

@@ -79,6 +79,9 @@ version="current", executor=None, path=None, ssh=None, ...)`
 - **`.conn`** (alias `.websocket`) — the live
   `connection.TrueNASWSConnection`; connects (and logs in, if
   `autologin`) on first access, reconnects if the prior connection closed.
+  After a successful `.login(...)`, a reconnect repeats that login (same
+  credentials, `login_ex`, options, `otp_provider`) regardless of
+  `autologin`. Thread-safe: concurrent first use opens one connection.
 - **`.ssh`** — a lazily-opened `asyncssh` connection (requires the `ssh`
   extra), reached through the composed SSH transport. Raises if none is
   configured. For the raw connection only; `.run()`/`.path()` select a
@@ -113,7 +116,12 @@ version="current", executor=None, path=None, ssh=None, ...)`
   `auth.login_ex_continue` (OTP from the credential's `otp_token` or
   `otp_provider()`), raising `auth.AuthenticationError` on failure and returning
   the success response dict. `login_options` overrides the server defaults
-  (`{"user_info": True, "reconnect_token": False}`).
+  (`{"user_info": True, "reconnect_token": False}`). The legacy path returns
+  the server's answer (`True`) and raises `AuthenticationError` when it is
+  `False` (a wrong password or key -- the server does not error). On any
+  failure the new connection is closed, not left open unauthenticated. A
+  one-time OTP is not replayable, so a session that must survive a reconnect
+  needs `otp_provider`.
 - **`.me() -> dict`** (`auth.me`) / **`.logout() -> None`** (`auth.logout`) /
   **`.ping() -> str`** (`core.ping` -> `"pong"`) — convenience wrappers.
 - **`.path(*path, backend=None)`** — build a `pathlib_next` path rooted at
@@ -378,7 +386,9 @@ imports on Python 3.9.
   - Instantiating a `Credentials` **subclass** directly (e.g. `BasicAuth(...)`)
     bypasses the factory and behaves like a normal constructor.
 - **`.login(client)`** — legacy path: `client.api.auth[self.METHOD]
-  (*self._args())`; a no-op when `METHOD` is `None` (`LocalAuth`).
+  (*self._args())`, returning its result; raises
+  `AuthenticationError("AUTH_ERR", {"method": METHOD})` when that is `False`.
+  A no-op returning `None` when `METHOD` is `None` (`LocalAuth`).
 - **`.login_ex(client, *, login_options=None, otp_provider=None) -> dict|None`**
   — modern path via `auth.login_ex` using this credential's `MECHANISM`
   (`PASSWORD_PLAIN`/`API_KEY_PLAIN`/`TOKEN_PLAIN`). Handles `OTP_REQUIRED`
@@ -386,9 +396,10 @@ imports on Python 3.9.
   `otp_provider()`), returns the `SUCCESS` response dict, raises
   `AuthenticationError` otherwise. Falls back to legacy `.login()` for a
   credential with no login_ex form.
-- **`AuthenticationError(response_type, response)`** — raised by `login_ex` on a
-  non-`SUCCESS` response; `.response_type` is the server discriminator,
-  `.response` the full dict.
+- **`AuthenticationError(response_type, response, method="login_ex")`** —
+  raised by `login_ex` on a non-`SUCCESS` response and by legacy `login` on a
+  `False` answer; `.response_type` is the server discriminator, `.response`
+  the full dict; the message names `method`.
 - **`Credentials.from_env(env=None) -> Credentials`** — `Credentials(env.get("TN_CREDS"))`, defaulting `env` to `os.environ`.
 - **`LocalAuth`** — no-op auth (local socket). **`ApiKeyAuth(api_key,
   username=None)`** — `login_with_api_key` (legacy) / `API_KEY_PLAIN` (login_ex,
