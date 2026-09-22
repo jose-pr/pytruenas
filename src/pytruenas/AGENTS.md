@@ -649,8 +649,7 @@ TypedDict schemas only (no runtime behavior); import the submodules directly.
   per-target `__main__.py` client builder) and `PyTrueNASRunPathArgs` (the
   shared root every RunPath command inherits — supplies the target fields /
   fan-out methods and the trailing `TARGET` positional).
-- **`async_`, `io`** — internal helpers (`async_to_sync`, byte-like checks);
-  no stable external contract.
+- **`io`** — internal helpers (byte-like checks); no stable external contract.
 
 ## Environment variables
 
