@@ -24,8 +24,10 @@ print(result.stdout)
 - `capture_output` may be `True` (both streams), `"stdout"`, `"stderr"`, or
   `False`.
 - `input=` feeds stdin (str or bytes); a file-like `stdin=` is drained.
-- `cwd=`, `env=`, `check=`, `timeout=`, `encoding=`/`errors=` behave as with
+- `cwd=`, `check=`, `timeout=`, `encoding=`/`errors=` behave as with
   `subprocess.run`.
+- `env=` adds to the target's environment rather than replacing it, on every
+  transport (a local target included): `env={"A": "1"}` still leaves `PATH` set.
 - `executable=` overrides the shell.
 
 ```python

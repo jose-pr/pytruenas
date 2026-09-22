@@ -66,6 +66,23 @@ Omit it and the client falls back to the web shell for a remote target — see
 [Running commands](commands.md). `client.install_sshcreds()` provisions a
 keypair, installs it on root's `authorized_keys`, and wires it in for you.
 
+### Host keys
+
+The SSH leg — both commands and SFTP — verifies the server's host key against
+`~/.ssh/known_hosts`. For a NAS that is not listed there, either add it
+(`ssh-keyscan nas >> ~/.ssh/known_hosts`) or choose a policy with `known_hosts=`:
+
+```python
+TrueNASClient("nas", api_key, shell="ssh://root@nas", known_hosts=None)            # do not check
+TrueNASClient("nas", api_key, shell="ssh://root@nas", known_hosts="/srv/known_hosts")  # this file
+```
+
+`known_hosts=` applies to the SSH leg built from `shell=` and to the one
+`install_sshcreds()` wires in; an `ssh=SshConfig(...)` you build yourself keeps
+its own setting. When the key cannot be verified (or SSH is unreachable),
+commands and file operations fall back to the websocket transports, and the
+client logs a warning the first time `run()` does so.
+
 !!! note
     The `shell=` argument was also readable as `client.shell` before the move
     to [hostctl](https://github.com/jose-pr/hostctl). `.shell` now means the

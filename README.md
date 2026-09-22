@@ -66,7 +66,7 @@ client = TrueNASClient("nas.example.com", api_key, shell="ssh://root@nas.example
 client.run("zpool status", capture_output="stdout", encoding="utf-8").stdout
 client.path("/mnt/tank/notes.txt").read_text()
 
-client.capabilities      # {"run", "path"} -- what this target can actually do
+client.capabilities      # {"run", "path", ...} -- what this target can actually do
 client.last_selection    # which transport served the last run(), and why
 ```
 

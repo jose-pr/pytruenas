@@ -6,6 +6,41 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- `TrueNASClient(..., known_hosts=...)` — the host-key policy for the SSH leg
+  built from `shell=` or by `install_sshcreds()`: `()` (default) checks
+  `~/.ssh/known_hosts`, `None` skips the check, a path or list names the
+  file(s). An explicit `ssh=SshConfig(...)` keeps its own setting.
+- `run()` logs a warning, once per host, when it falls back from its first
+  transport (e.g. SSH unreachable or its host key untrusted) to the next.
+
+### Changed
+
+- **The SFTP leg now verifies the server's host key**, as the SSH command leg
+  already did. A NAS missing from `~/.ssh/known_hosts` is no longer silently
+  trusted: add it (`ssh-keyscan nas >> ~/.ssh/known_hosts`) or pass
+  `known_hosts=None`. Without either, `client.path()` operations are served by
+  the websocket leg instead of SFTP.
+- `env=` in `run()` now adds to the target's environment on a local target too,
+  instead of replacing it (`env={"A": "1"}` keeps `PATH`).
+- Dependencies: `hostctl>=0.3.1,<0.4`, `netimps>=0.3.0,<0.4`,
+  `pathlib_next[uri]>=0.9.10,<0.10`, `requests>=2.0,<3`,
+  `websocket-client>=1.0,<2`; the `ssh` extra is now `hostctl[ssh]>=0.3.1,<0.4`.
+
+### Fixed
+
+- With SSH unreachable or its host key untrusted, `client.path()` operations
+  raised the connection error instead of falling back to the websocket leg, and
+  every `run()` re-dialled SSH before falling back (~9 s per call).
+- `copy()`/`move()` between two NAS hosts were refused as "Source and target are
+  the same file" when the same path existed on both (the dependency set 0.4.6
+  resolved to on a fresh install).
+- A `rename()`/`symlink_to()` destination containing `?`, `#` or `%` landed on a
+  truncated or re-decoded name (`rn?b.txt` → `rn`) on the SFTP leg.
+- `p / "name"` read the name as URI syntax, so `p / "cache?v=2"` named `cache`,
+  and a recursive `rm()` could delete the wrong file for such names.
+
 ## [0.4.6] - 2026-08-17
 
 ### Fixed

@@ -101,9 +101,10 @@ still in place — rather than deleting it and then failing.
 
 !!! note
     SFTP concurrency and transport details come from `pathlib_next`; pytruenas
-    just selects and wires the backend. The `ssh` extra requires
-    `pathlib_next[sftp-async] >= 0.9.0, < 0.10`, and the core
-    `pathlib_next[uri] >= 0.9.1` floor applies on top of it — `symlink_to(force=)`
-    is a 0.9.1 addition.
+    just selects and wires the backend. The SFTP leg verifies the server's host
+    key (see [Host keys](connecting.md#host-keys)); when it cannot connect,
+    `client.path()` operations are served by the websocket leg instead.
+    `p / "name"` joins a literal file name, so `p / "cache?v=2"` names the file
+    `cache?v=2` — the same path `p.iterdir()` lists for it.
 
 See the [Filesystem API](../api/fs.md).
