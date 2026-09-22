@@ -268,11 +268,10 @@ def _connect_opts_from_ssh(ssh) -> "dict":
     ``connect_opts`` straight into ``asyncssh.connect()`` -- hostctl's own
     ``SftpPathProvider`` hands it the very same mapping.
 
-    Note ``SshConfig.known_hosts`` defaults to the ``()`` sentinel, which
-    ``connect_opts()`` omits; pathlib_next then applies its own
-    ``known_hosts=None`` default. That is unchanged here and matches hostctl's
-    SFTP leg exactly -- see
-    ``.agents/findings/2026-08-16_sftp_leg_default_disables_host_key_checking.md``.
+    ``connect_opts()`` always carries ``known_hosts``: the ``()`` default means
+    "check ``~/.ssh/known_hosts``", so this leg verifies the host key by
+    default, exactly as hostctl's own SFTP provider does. ``known_hosts=None``
+    (on the SshConfig, or ``TrueNASClient(..., known_hosts=None)``) opts out.
 
     The pre-hostctl ``"client_keys|root"`` username packing is unpacked once,
     in :func:`pytruenas.host._ssh_config_from`, on the way into the config --

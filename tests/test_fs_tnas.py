@@ -595,7 +595,8 @@ def test_connect_opts_delegate_to_sshconfig_connect_opts():
 
     ssh = _ssh_config(username="admin", password="pw")
     assert _connect_opts_from_ssh(ssh) == ssh.connect_opts()
-    assert _connect_opts_from_ssh(ssh) == {"username": "admin", "password": "pw"}
+    opts = _connect_opts_from_ssh(ssh)
+    assert (opts["username"], opts["password"]) == ("admin", "pw")
 
     keyed = _ssh_config(client_keys=["PRIVATE"])
     assert _connect_opts_from_ssh(keyed) == keyed.connect_opts()
@@ -616,12 +617,14 @@ def test_connect_opts_carry_known_hosts():
     opts = _connect_opts_from_ssh(_ssh_config(known_hosts="/etc/ssh/known_hosts"))
     assert opts["known_hosts"] == "/etc/ssh/known_hosts"
 
-    # `None` means "do not verify" and is a real, deliberate choice -- distinct
-    # from the `()` default, which SshConfig treats as "unset" and omits.
+    # `None` means "do not verify" and is a real, deliberate choice.
     disabled = _connect_opts_from_ssh(_ssh_config(known_hosts=None))
     assert "known_hosts" in disabled and disabled["known_hosts"] is None
 
-    assert "known_hosts" not in _connect_opts_from_ssh(_ssh_config())
+    # The `()` default is passed through (hostctl >= 0.3.0): asyncssh reads it
+    # as "use ~/.ssh/known_hosts". Omitting it let pathlib_next's SFTP connect
+    # seed `known_hosts=None` -- no verification at all.
+    assert _connect_opts_from_ssh(_ssh_config())["known_hosts"] == ()
 
 
 def test_sftp_backend_is_built_with_the_configured_known_hosts():

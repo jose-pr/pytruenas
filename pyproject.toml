@@ -30,157 +30,32 @@ classifiers = [
     "Typing :: Typed",
 ]
 dependencies = [
-    # >=0.4.0: duho.runpath now carries register(base=...) (shared-root METHOD
-    # inheritance, not just data fields), the __main__.py init/success/finally_
-    # lifecycle, the corrected enable/!enable token spelling, and the Extend()
-    # nested-list fix that flattens `--cmdspath a:b` to ['a','b']. Earlier fixes
-    # (>=0.3.2: global option before subcommand not shadowed; '%' in a Cmd
-    # docstring no longer crashes parser build; directly-built Cmd seeds field
-    # defaults) are subsumed.
-    # >=0.4.1: a module command may declare its own `Args` class (fields added
-    # to the subparser before register() runs), so cmd/*.py declare their CLI
-    # fields instead of hand-syncing an inert Args class against an imperative
-    # register(); and the register hook is gated/introspected on the object
-    # actually called, which is what lets main._with_targets wrap
-    # ModuleCommand.register to add the shared trailing targets positional
-    # app-wide -- including for a command that defines no register of its own.
-    # >=0.5.0 (BREAKING in duho itself, not here): a list/set/tuple field used
-    # as an OPTION (call.py's -p/--param, query.py's -f/--filter) now takes one
-    # value per occurrence by default (`-f a -f b`, action="append",
-    # nargs=None) instead of space-separated multi-value in one occurrence
-    # (`-f a b`, nargs="*") -- cmd/*.py no longer pin an explicit
-    # NS(action=..., nargs=...) override to get that. 0.5.0 also shipped a
-    # flag-between-positionals reorder fix, but it only covered duho's own
-    # declarative subcommand tree, not a module command's subparser (this
-    # project's entire command set) -- fixed in 0.5.1, which extends the same
-    # reorder to a module command's subparser too, so e.g.
-    # `pytruenas call method -p '{"a":1}' nas1` (flag BETWEEN the method and
-    # the trailing targets) now parses; earlier duho required the flag before
-    # the method or after the targets. See the duho findings
-    # 2026-07-24_optional_between_positional_groups_breaks_trailing_nargs_star.md
-    # and 2026-07-24_module_command_subparsers_bypass_positional_reorder.md for
-    # the history. Validated on 0.5.1.
-    # >=0.5.2: `runpath.register(step_adapter=...)`, which is how a RunPath step
-    # gets this app's `(client, args, logger)` signature without a decorator in
-    # every step file (see utils.runpath.step_adapter). Not optional -- main.py
-    # passes the keyword at import, so 0.5.1 raises TypeError on startup. This
-    # is the one reason the floor sits above 0.5.0 rather than at it; nothing
-    # added in 0.5.3 (DUHO_TRACEBACK, per-subsystem framework logger names) or
-    # 0.5.4 (__version__ sync, `Env.bool` accepting `on`) is used here, so
-    # demanding one of those would exclude working installs for nothing.
-    # Capped below 0.6: duho is 0.x, where a minor bump may break -- 0.5.0
-    # itself was such a bump (a list-typed OPTION changed arity). Validated on
-    # 0.5.4.
+    # Ranges follow one rule: a 0.x dependency is capped below its next minor
+    # (where 0.x may break) and floored at the base of the series unless this
+    # package's own code needs an API from a later patch -- then the comment
+    # names that API and patch. 1.x+ dependencies are major-scoped. Version
+    # history lives in CHANGELOG.md, not here.
+    # 0.5.2: `runpath.register(step_adapter=...)`, passed by main.py at import.
     "duho>=0.5.2,<0.6",
-    # Network utilities. Wanted for the built-in scheme->port table (there since
-    # 0.0.2), which is what resolves ws/wss: no system services database knows
-    # those schemes, so getservbyname raises and a websocket URL would
-    # otherwise carry port 0.
-    # `get_default_port` in utils/target.py is the ONLY thing used from this
-    # package. (It also once backed the adapter discovery in pytruenas.ops.host,
-    # replacing ifaddr; that module is gone, but the scheme table alone keeps
-    # this a core dependency.)
-    # Capped below 0.3: netimps is 0.x, where a minor bump may break -- 0.2.0
-    # reworked resolve() and made dnspython optional. Neither touches
-    # get_default_port.
-    # The floor is the base of the capped minor series (0.2.0), not the oldest
-    # release that happens to work: `get_default_port` has been there since
-    # 0.0.2 and nothing added in 0.2.1 (AddressLike, rdtype auto-selection) or
-    # 0.2.2 (resolve_system's real wall-time deadline, the IPv6 ping/multicast
-    # fixes) is used here, so there is no API reason to floor higher inside the
-    # series. Validated on 0.2.2.
-    "netimps>=0.2.0,<0.3",
-    # >=0.8.2: SftpPath importable/usable without paramiko (asyncssh-only). The
-    # 'uri' extra (uritools) is needed by TnasWsPath/TruenasPath, which are
-    # UriPaths.
-    # >=0.9.0: `UriPath.__fspath__` returns the host-local path for a scheme
-    # marked `_host_filesystem_path` (TnasWsPath/TruenasPath set it) instead of
-    # raising for every non-`file` scheme, so `os.fspath()` is the one way to
-    # name a remote path in a command line -- `patch.zfs.host_path` relies on
-    # it rather than unwrapping the URI by hand. 0.9.0 also stopped
-    # `Source.__str__`/`__repr__` leaking the password, which matters because
-    # `repr` is what a traceback frame renders. Both came from findings filed
-    # here. Capped below 0.10: pathlib_next is 0.x, where a minor bump may
-    # break. Validated on 0.9.0.
-    # >=0.9.1: `symlink_to(force=)` as a generic Path extension over a
-    # `_symlink_to` backend primitive. Not merely nice-to-have here: the path
-    # provider hands back a TruenasPath specifically so its documented
-    # `symlink_to(force=, onremove=)` survives, and below 0.9.1 the kwarg is
-    # rejected at hostctl's composite boundary -- so the documented API would
-    # be advertised and not deliverable. Came from a finding filed here. That
-    # `Path.symlink_to(force=)` extension (over the `_symlink_to()` backend
-    # primitive) is the one API this project needs from above 0.9.0, and it is
-    # why the floor is not the base of the series: `client.path(...)` hands
-    # symlink operations to hostctl's own SftpPath, a plain pathlib_next Path,
-    # which only accepts the keyword from 0.9.1 on.
-    # The floor stops there rather than following the latest patch: 0.9.2 is
-    # all fixes (MemPath open-over-directory, Pathname.__eq__/__hash__,
-    # is_relative_to normalization, LocalPath.chown on Windows) and adds no API
-    # used here, so requiring it would exclude working installs. Validated on
-    # 0.9.2.
-    "pathlib_next[uri]>=0.9.1,<0.10",
-    "requests",
-    "websocket-client",
-    # Generic host machinery: TrueNASHost is a hostctl PosixHost, and run()/
-    # path() are inherited from it. A hard import in pytruenas.host,
-    # pytruenas.providers, and pytruenas.webshell -- not optional.
-    #
-    # >=0.1.0 is the first release, and everything this depends on landed in
-    # it: `ssh_providers`/`winrm_providers` (composing SSH into a non-
-    # SystemConfig host without importing privates), `normalize_input` (a
-    # bytes `input=` with a text `encoding=` otherwise deadlocks the call), the
-    # `uri_credentials` fail-closed check, and the exported URI helpers.
-    # >=0.1.2: `uri_hostname()` -- the host as *written*, not as urlsplit
-    # case-folded it. Both this and the 0.1.1 fix it completes came out of a
-    # finding filed from here (2026-07-28_redact_uri_case_folds_the_hostname):
-    # 0.1.1 stopped `redact_uri`'s rebuild from folding, which had made one
-    # machine render two ways depending on whether the URI carried a password;
-    # 0.1.2 exported the helper so a config stores the typed spelling in the
-    # first place. `TrueNASConfig` uses it for `host`, which `name` and
-    # `connection_uri` render back out -- without it a `nasA` fan-out logs
-    # `[nasa]`. NOTE the deliberate trade-off it carries: `.host` is the given
-    # spelling, not a canonical one, so two spellings of one machine are not
-    # equal configs (routing still case-folds; only display keeps the case).
-    # Ceiling raised to <0.3 for hostctl 0.2.x: 0.2.1 added ConnectionString
-    # (from a finding filed here) and 0.2.2 widened its own dependency ranges
-    # to admit pathlib_next 0.9 / netimps 0.2 -- which pathlib_next 0.9's `uri`
-    # extra requires, so the old `<0.2` cap made the four packages
-    # unresolvable together. Nothing pytruenas imports changed; every symbol it
-    # uses is still present. The floor stays at 0.1.2 rather than rising: none
-    # of the 0.2 API is used here, and demanding a version the code does not
-    # need would exclude working installs. Validated on 0.2.2.
-    # >=0.2.3 raises that floor for the first time, for the same reason as
-    # pathlib_next 0.9.1: composite path dispatch now forwards a backend's
-    # keyword arguments (signature-aware -- a kwarg the backend declares is
-    # passed, one it does not is still rejected at the boundary). Below 0.2.3
-    # every extension is stripped there, so `client.path(...).symlink_to(...,
-    # force=True)` raises TypeError however good the backend is. Came from a
-    # finding filed here.
-    # >=0.2.5 raises it again: `webshell.py` imports `write_output` (with
-    # `capture_streams`) from the PUBLIC `hostctl.executor`, and 0.2.5 is where
-    # it became public -- before that it lived in `_common` and pytruenas
-    # imported it privately. Sharing these is a correctness requirement, not
-    # tidiness: a host can dispatch one call through different providers on
-    # different attempts, so an executor handling output differently returns
-    # results that vary by which transport won. Also from a finding filed here.
-    # 0.2.5 is where the floor stops. It does not follow the latest patch:
-    # 0.2.6 added `wants_text` (which webshell.py does not import) and fixed
-    # direct-execution NameErrors, `hostctl cp` URI-port parsing, native WinRM
-    # cert-ignore and exit codes, cross-provider text-mode agreement, SFTP URI
-    # percent-encoding, PSRP pool ownership and GC-time write-back -- all
-    # welcome, none of it API this project calls. Requiring it would exclude
-    # working installs for nothing. Validated on 0.2.6.
-    "hostctl>=0.2.5,<0.3",
+    # Series base; only `get_default_port` (utils/target.py) is used.
+    "netimps>=0.3.0,<0.4",
+    # 0.9.10: `Path._same_filesystem()`, the hook hostctl 0.3's composite paths
+    # answer (and the minimum hostctl 0.3 itself requires).
+    "pathlib_next[uri]>=0.9.10,<0.10",
+    "requests>=2.0,<3",
+    "websocket-client>=1.0,<2",
+    # 0.3.1: a composite path falls back to the next provider when SFTP cannot
+    # connect (refused port, untrusted host key), and a declined SSH leg is not
+    # re-dialled on every run(). TrueNASHost is a hostctl PosixHost.
+    "hostctl>=0.3.1,<0.4",
 ]
 
 [project.optional-dependencies]
 # Config-file support for the CLI (YAML targets/config).
 config = ["pyyaml"]
-# Remote shell + SFTP filesystem leg (asyncssh via pathlib_next's sftp-async).
-# >=0.8.3: AsyncsshSftpBackend default concurrency 8->16 (faster recursive SFTP).
-# This names only what the extra itself needs; the effective floor is the
-# stricter core `pathlib_next[uri]` one above, since it is the same package.
-ssh = ["asyncssh", "pathlib_next[sftp-async]>=0.9.0,<0.10"]
+# Remote shell + SFTP filesystem leg: the SSH providers are hostctl's, so its
+# own `ssh` extra (asyncssh, pathlib_next's sftp-async) is exactly what is needed.
+ssh = ["hostctl[ssh]>=0.3.1,<0.4"]
 # Typings generator (`pytruenas generate-typings`).
 codegen = ["jinja2"]
 # Repo-tree bundling (`pytruenas deploy --source repo`): gitignore-style
@@ -191,10 +66,7 @@ codegen = ["jinja2"]
 # so 3.11+ never installs a redundant package for what it already has built
 # in -- `pytruenas.utils.bundle` tries tomllib first regardless.
 repo = ["pathspec", "tomli; python_version<'3.11'"]
-# NOTE: there is no 'host' extra. It installed ifaddr for pytruenas.ops.host's
-# adapter discovery; that moved to netimps (a core dependency) and the module
-# has since been removed entirely. Nothing to install, nothing to add back.
-dev = ["black", "build", "hatchling", "pytest", "pytest-cov", "twine", "pyyaml", "asyncssh", "jinja2", "pathspec", "tomli; python_version<'3.11'"]
+dev =["black", "build", "hatchling", "pytest", "pytest-cov", "twine", "pyyaml", "hostctl[ssh]>=0.3.1,<0.4", "jinja2", "pathspec", "tomli; python_version<'3.11'"]
 docs = ["mkdocs", "mkdocs-material", "mkdocstrings[python]"]
 
 [project.scripts]
@@ -215,9 +87,9 @@ Repository = "https://github.com/jose-pr/pytruenas"
 "README.md" = "pytruenas/README.md"
 
 [tool.hatch.build.targets.sdist]
-# `/.*` already covers every dot-entry at the root -- .agents, .github, .venv,
-# .pytest_cache, .coverage. (.gitignore still ships: hatchling includes it for
-# sdists by design, so the archive reproduces the source tree.)
+# `/.*` covers every dot-entry at the root (.github, .venv, .pytest_cache,
+# .coverage, private tool directories). .gitignore still ships: hatchling
+# includes it for sdists by design, so the archive reproduces the source tree.
 exclude = ["/.*"]
 
 [tool.hatch.build.targets.wheel]
