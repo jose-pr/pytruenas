@@ -31,6 +31,16 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Changed
 
+- **The CLI verifies TLS certificates by default.** `pytruenas <cmd> ... nas`
+  sent its credentials over a connection whose certificate it never checked
+  (`sslverify` defaulted to `False`, the opposite of the library). Turn it off
+  per run with `-k`/`--insecure` or `--no-sslverify`, or set `sslverify` in
+  the config file or `$PYTRUENAS_SSLVERIFY` (`false`, or a CA bundle path).
+  **A self-signed NAS now fails until one of those is given.**
+- **The CLI takes credentials from `$TN_CREDS` or the config file** when the
+  target string carries none — before, a remote target with no userinfo
+  connected unauthenticated and every call failed with `ENOTAUTHENTICATED`.
+  A config file may set `credentials:` to a connection string or a mapping.
 - **The SFTP leg now verifies the server's host key**, as the SSH command leg
   already did. A NAS missing from `~/.ssh/known_hosts` is no longer silently
   trusted: add it (`ssh-keyscan nas >> ~/.ssh/known_hosts`) or pass

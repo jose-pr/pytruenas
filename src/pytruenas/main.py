@@ -330,7 +330,7 @@ def _run_module_on_target(
         if callable(init):
             client = init(args, logger)
         if client is None:
-            client = TrueNASClient(target, sslverify=args.sslverify)
+            client = args._client_(target)
         rc = module.run(client, args, logger)
         result = 0 if rc is None else int(rc)
         if callable(success):

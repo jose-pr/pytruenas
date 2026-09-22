@@ -6,8 +6,15 @@ import sys
 from types import SimpleNamespace
 from unittest.mock import MagicMock
 
+import pytruenas.host
 import pytruenas.main as main
 from duho.discovery import ModuleCommand
+from pytruenas.utils.cmd import PyTrueNASArgs
+
+
+def _fake_clients(monkeypatch):
+    """Patch where the client is actually built (args._client_ imports it)."""
+    monkeypatch.setattr(pytruenas.host, "TrueNASHost", lambda *a, **k: MagicMock())
 
 
 def _cli(*args):
@@ -70,19 +77,32 @@ def _module_command(run):
     return ModuleCommand(mod, name="fake", entrypoint=run)
 
 
+class _Args(PyTrueNASArgs):
+    """The real args class -- it is what builds each target's client -- with
+    the logger and target list a parse would have filled in."""
+
+    def __init__(self, targets, parallel):
+        self._targets = targets
+        self.parallel = parallel
+        self.sslverify = None
+        self.insecure = False
+        self.logto = "-"
+
+    @property
+    def _logger_(self):
+        return logging.getLogger("pytruenas.test")
+
+    def _expanded_targets_(self):
+        return self._targets
+
+
 def _instance(targets, parallel=2):
-    return SimpleNamespace(
-        _logger_=logging.getLogger("pytruenas.test"),
-        parallel=parallel,
-        sslverify=False,
-        logto="-",
-        _expanded_targets_=lambda: targets,
-    )
+    return _Args(targets, parallel)
 
 
 def test_dispatch_runs_command_per_target(monkeypatch):
     seen = []
-    monkeypatch.setattr(main, "TrueNASClient", lambda *a, **k: MagicMock())
+    _fake_clients(monkeypatch)
     command = _module_command(lambda client, args, logger: seen.append(1) or 0)
 
     rc = main._dispatch(command, _instance(["h1", "h2", "h3"]))
@@ -92,7 +112,7 @@ def test_dispatch_runs_command_per_target(monkeypatch):
 
 
 def test_dispatch_aggregates_worst_exit_code(monkeypatch):
-    monkeypatch.setattr(main, "TrueNASClient", lambda *a, **k: MagicMock())
+    _fake_clients(monkeypatch)
     # A target returning a nonzero code surfaces in the aggregate (max policy).
     command = _module_command(lambda client, args, logger: 2)
     rc = main._dispatch(command, _instance(["h1", "h2", "h3"]))
@@ -100,7 +120,7 @@ def test_dispatch_aggregates_worst_exit_code(monkeypatch):
 
 
 def test_dispatch_isolates_target_failure(monkeypatch):
-    monkeypatch.setattr(main, "TrueNASClient", lambda *a, **k: MagicMock())
+    _fake_clients(monkeypatch)
     ran = []
 
     def run(client, args, logger):

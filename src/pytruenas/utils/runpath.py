@@ -208,7 +208,7 @@ def default_init(cmd: "_ty.Any", logger: "_Logger") -> "TrueNASClient":
     parsed RunPath command instance for one target
     (:func:`pytruenas.main._dispatch` has set ``cmd.target`` to this fan-out
     iteration's target). Returns a :class:`TrueNASClient` connected to that
-    target, honoring ``cmd.sslverify`` -- the
+    target, honoring ``cmd`` s TLS and credential options -- the
     same client :func:`pytruenas.main._run_module_on_target` builds for a plain
     module command, and the ``ctx`` every 2-arg step (``main(cmd, ctx)``)
     receives. Re-export it as a directory's ``init`` (``from
@@ -217,9 +217,9 @@ def default_init(cmd: "_ty.Any", logger: "_Logger") -> "TrueNASClient":
     (``def init(cmd, logger): c = default_init(cmd, logger); cmd.context = ...;
     return c``).
     """
-    # `cmd.sslverify` is read directly rather than via getattr: every RunPath
-    # command inherits PyTrueNASRunPathArgs -> PyTrueNASArgs, so the field is
-    # always present. A `getattr(..., False)` fallback would turn a missing
-    # field into "silently stop verifying TLS", which is the wrong direction to
-    # fail -- and would hide the real error (a command built off the wrong base).
-    return TrueNASClient(cmd.target, sslverify=cmd.sslverify)
+    # `cmd._client_` is called directly rather than via getattr: every RunPath
+    # command inherits PyTrueNASRunPathArgs -> PyTrueNASArgs, so the method is
+    # always present. A fallback would turn a missing field into "silently stop
+    # verifying TLS", which is the wrong direction to fail -- and would hide the
+    # real error (a command built off the wrong base).
+    return cmd._client_(cmd.target)

@@ -18,11 +18,13 @@ client/logger threading are ``pytruenas``-specific and live here + in
 
 from __future__ import annotations
 
+import os as _os
 import typing as _ty
 from logging import Logger as _Logger
 from pathlib import Path as _Path
 
 from argparse import SUPPRESS as _SUPPRESS
+from argparse import BooleanOptionalAction as _BooleanOptional
 
 from duho import Arg, Extend, LoggingArgs, NS
 from duho.env import Env as _Env
@@ -109,9 +111,21 @@ class PyTrueNASArgs(LoggingArgs):
     "Extra directories/packages to search for commands"
     ("--cmdspath",)  # type: ignore
 
-    sslverify: bool = False
-    "Verify the server's TLS certificate"
+    # Tri-state: unset (None) falls through to $PYTRUENAS_SSLVERIFY, then the
+    # config file, then the library default. The CLI used to default to False,
+    # so every `pytruenas call ... nas` sent its credentials over a connection
+    # it did not verify -- the opposite of what the library does.
+    # `_ty.Optional`, not `bool | None`: duho evaluates this annotation when
+    # the class is built, and a PEP 604 union is a TypeError on the 3.9 floor.
+    sslverify: "Arg[_ty.Optional[bool], NS(action=_BooleanOptional, default=None)]" = (
+        None
+    )
+    "Verify the server's TLS certificate (default: yes)"
     ("--sslverify",)  # type: ignore
+
+    insecure: bool = False
+    "Do not verify the server's TLS certificate (curl's -k)"
+    ("--insecure", "-k")  # type: ignore
 
     # Targets are supplied as the TRAILING POSITIONAL arguments of the command
     # (after any command-specific positionals), not a -t/--target flag. The
@@ -134,6 +148,67 @@ class PyTrueNASArgs(LoggingArgs):
         if isinstance(config, _Path):
             return _load_config(config)
         return config or {}
+
+    def _sslverify_(self) -> "bool | str":
+        """TLS verification for clients this CLI builds.
+
+        ``-k``/``--insecure`` wins, then ``--sslverify``/``--no-sslverify``,
+        then ``$PYTRUENAS_SSLVERIFY``, then the config file's ``sslverify``,
+        then the library default (verify). A string is a CA bundle path, as it
+        is for ``TrueNASClient(sslverify=...)``.
+        """
+        if self.insecure:
+            return False
+        if self.sslverify is not None:
+            return self.sslverify
+        value = ENV.get("SSLVERIFY")
+        if value is None:
+            value = self._config_dict_().get("sslverify")
+        if value is None:
+            return True
+        if isinstance(value, str):
+            lowered = value.strip().casefold()
+            if lowered in ("1", "true", "yes", "on"):
+                return True
+            if lowered in ("0", "false", "no", "off", ""):
+                return False
+            return value  # a CA bundle path
+        return bool(value)
+
+    def _credentials_(self) -> object:
+        """Credentials for a target that carries none.
+
+        ``$TN_CREDS`` (the spelling :meth:`Credentials.from_env` documents),
+        else the config file's ``credentials`` -- a connection string or a
+        mapping of keyword arguments. ``None`` when neither is set, which is
+        what a local socket wants.
+        """
+        from ..auth import Credentials
+
+        raw: object = _os.environ.get("TN_CREDS")
+        if not raw:
+            raw = self._config_dict_().get("credentials")
+        if not raw:
+            return None
+        if isinstance(raw, _ty.Mapping):
+            return Credentials(**raw)
+        return Credentials(raw)
+
+    def _client_(self, target: str) -> "TrueNASClient":
+        """The client this CLI builds for one target.
+
+        One place, so a plain command and a RunPath step connect alike: TLS
+        per :meth:`_sslverify_`, and credentials from the environment or the
+        config file only when the target itself carries none (passing both
+        raises).
+        """
+        from ..host import TrueNASHost
+        from .target import Target
+
+        credentials = None
+        if not Target.parse(target, resolve_port=False).password:
+            credentials = self._credentials_()
+        return TrueNASHost(target, credentials, sslverify=self._sslverify_())
 
     def _expanded_targets_(self) -> "list[str]":
         """Return the target list with commas split and range patterns expanded.

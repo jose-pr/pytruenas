@@ -27,7 +27,8 @@ import os
 
 import pytest
 
-import pytruenas.utils.runpath as _runpath_utils
+import pytruenas.host
+import pytruenas.utils.runpath as _runpath_utils  # noqa: F401
 
 _RECORD_ENV = "PYTRUENAS_TEST_RECORD"
 
@@ -35,9 +36,10 @@ _RECORD_ENV = "PYTRUENAS_TEST_RECORD"
 class _FakeClient:
     """A stand-in TrueNASClient that records its target instead of connecting."""
 
-    def __init__(self, target, *args, **kwargs):
+    def __init__(self, target, credentials=None, *args, **kwargs):
         self.target = target
-        self.sslverify = kwargs.get("sslverify", False)
+        self.credentials = credentials
+        self.sslverify = kwargs.get("sslverify", True)
 
 
 def _write_runpath(directory):
@@ -96,7 +98,8 @@ def record_path(tmp_path, monkeypatch):
     # `runpath` is the module that constructs the client, so patching its name
     # is what matters. (There used to be a second patch of `pytruenas.client`,
     # a re-export shim that no longer exists.)
-    monkeypatch.setattr(_runpath_utils, "TrueNASClient", _FakeClient)
+    # Patched where `cmd._client_()` resolves it, not on the runpath module.
+    monkeypatch.setattr(pytruenas.host, "TrueNASHost", _FakeClient)
     monkeypatch.delenv("PYTRUENAS_PATH", raising=False)
     return path
 

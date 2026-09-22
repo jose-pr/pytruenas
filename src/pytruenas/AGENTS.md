@@ -522,11 +522,26 @@ A command is a plain module exposing:
 
 `pytruenas.utils.cmd.PyTrueNASArgs` (a `duho.LoggingArgs` mixin) carries the
 global fields every command sees: `config` (path, default
-`$PYTRUENAS_CFG` or `./pytruenas.yaml`), `cmdspath`, `sslverify` (default
-`False`), `parallel` (default `1`), `logto` (default `-` for stderr, or a
-`{target}`/`{isodate}` path template), plus `targets` (the trailing
-positionals, not a flag) and helper methods
+`$PYTRUENAS_CFG` or `./pytruenas.yaml`), `cmdspath`, `sslverify`
+(`--sslverify`/`--no-sslverify`, unset by default), `insecure`
+(`--insecure`/`-k`), `parallel` (default `1`), `logto` (default `-` for
+stderr, or a `{target}`/`{isodate}` path template), plus `targets` (the
+trailing positionals, not a flag) and helper methods
 `._config_dict_()`/`._expanded_targets_()`.
+
+Three more methods decide how a command connects, and are the only supported
+way to build a client from parsed args:
+
+- **`._sslverify_() -> bool|str`** — `-k`/`--insecure`, else
+  `--sslverify`/`--no-sslverify`, else `$PYTRUENAS_SSLVERIFY`, else the config
+  file's `sslverify`, else `True`. A string is a CA bundle path.
+- **`._credentials_() -> Credentials|None`** — `$TN_CREDS`, else the config
+  file's `credentials` (a connection string, or a mapping of keyword
+  arguments), else `None`.
+- **`._client_(target) -> TrueNASClient`** — the client for one target: the
+  above, with the credentials applied **only** when the target string carries
+  none (passing both raises). `main` and `runpath.default_init` both use it,
+  so a plain command and a RunPath step connect alike.
 
 ### Built-in commands (`pytruenas.cmd`)
 
@@ -599,7 +614,7 @@ one with:
   `cmd.target`, and any per-target state a step needs — e.g. `cmd.context = …`
   stashed in `init` and read by later steps, isolated per target). Re-export
   `pytruenas.utils.runpath.default_init` as `init` to build
-  `TrueNASClient(cmd.target, sslverify=cmd.sslverify)` with no boilerplate.
+  `cmd._client_(cmd.target)` with no boilerplate.
 - **`NN-name.py`** step files — each exposes a `main`/`run`/`call` entrypoint;
   written `main(cmd, ctx)` it receives the `__main__.py` context, written
   `main(cmd)` it does not (arity-detected). A step may set module-level
@@ -772,8 +787,11 @@ a directory the user does not control.
 - **`PYTRUENAS_PKG_ROOT` / `PYTRUENAS_PKG_NAME`** — the distribution `deploy`
   bundles, and the package the deployed copy runs. For when pytruenas is a
   *dependency* of the thing being deployed rather than the deliverable.
-- **`TN_CREDS`** — read by `Credentials.from_env()`. Not prefixed, and not
-  routed through `ENV`.
+- **`TN_CREDS`** — read by `Credentials.from_env()`, and by the CLI
+  (`PyTrueNASArgs._credentials_`) for a target that carries no credentials of
+  its own. Not prefixed, and not routed through `ENV`.
+- **`PYTRUENAS_SSLVERIFY`** — the CLI's TLS default when no flag is given:
+  `true`/`false`/`1`/`0`/`yes`/`no`/`on`/`off`, or a CA bundle path.
 - **`CALL_TIMEOUT`** — default per-call JSON-RPC timeout in seconds, read at
   import time by `pytruenas.connection`. Also unprefixed.
 

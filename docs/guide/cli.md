@@ -27,6 +27,30 @@ pytruenas query user nas1,nas2
 `--parallel N` runs several targets concurrently, each with its own connected
 client and its own log prefix.
 
+## Credentials and TLS
+
+Credentials come from the target string (`wss://root:pw@nas`,
+`wss://nas` with `1-<api-key>` as the password). A target that carries none
+falls back to `$TN_CREDS`, then to `credentials:` in the config file — either
+a connection string or a mapping of keyword arguments:
+
+```bash
+export TN_CREDS='1-<64-char-api-key>'
+pytruenas call system.version nas.example.com
+```
+
+TLS certificates are verified, against the same trust store the library uses.
+A lab box with a self-signed certificate needs an explicit opt-out, or a CA
+bundle:
+
+```bash
+pytruenas call -k system.version nas            # or --insecure / --no-sslverify
+PYTRUENAS_SSLVERIFY=/etc/pki/lab-ca.pem pytruenas call system.version nas
+```
+
+The config file's `sslverify` (`false`, or a bundle path) sets the default for
+a whole site; a flag on the command line still wins.
+
 ## Commands
 
 ### `query` — read a namespace
@@ -65,4 +89,10 @@ See [Generating typings](typings.md).
 ## Config file
 
 With the `config` extra, `--config file.yaml` (`-c`) supplies targets and
-defaults so you don't repeat the target hosts every invocation.
+defaults so you don't repeat the target hosts every invocation. It also
+carries `credentials:` and `sslverify:` for the hosts it names:
+
+```yaml
+credentials: 1-<64-char-api-key>   # or a mapping: {username: root, password: ...}
+sslverify: /etc/pki/lab-ca.pem     # or false
+```
