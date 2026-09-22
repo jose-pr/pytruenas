@@ -30,6 +30,15 @@ def redact(connectionstring: str) -> str:
         # No userinfo delimiter -> nothing to strip; also the fast path for the
         # overwhelmingly common ``host``/``host:port`` positional.
         return connectionstring
+    if "://" not in connectionstring:
+        # Scheme-less ("root:pw@nas"): redact_uri needs a scheme to find the
+        # userinfo, so it returned these whole -- password included -- and the
+        # fan-out label and --logto filename fell back to them. Everything
+        # before the LAST "@" is userinfo (a raw "@" or "/" in a password
+        # included); keep the user.
+        userinfo, _, rest = connectionstring.rpartition("@")
+        user = userinfo.split(":", 1)[0]
+        return f"{user}@{rest}" if user else rest
     try:
         return _redact_uri(connectionstring)
     except Exception:

@@ -44,6 +44,20 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
+- **Secrets reached logs and messages.** The per-call TRACE record printed raw
+  arguments, so `auth.login` passwords, API keys and the private key
+  `install_sshcreds()` uploads were written to any log at TRACE; arguments to
+  `auth.*` are now reduced to type names and secret-looking dict keys masked
+  at any depth (and nothing is formatted unless TRACE is on). `redact()` —
+  behind the CLI's per-target label and `--logto` file name — returned a
+  scheme-less `root:pw@nas` whole. A `Credentials(...)` error masked only a
+  fixed list of names (not `otp_token`, `private_key`); every value but the
+  user name is masked now.
+- **A password with a raw `/`, `?` or `#` in a target URI** was split by the
+  URL parser: `wss://root:123/rest@nas` connected to host `root`, port 123,
+  with the rest of the password as the API path, and other forms quoted the
+  password's start in a `ValueError`. Such a target is now refused with a
+  redacted message asking for percent-encoding.
 - **The TLS legs trusted different certificates.** The API websocket verified
   against the OS trust store and the HTTP side channels (upload, download, file
   reads over the websocket leg) against `requests`' certifi bundle, so a

@@ -175,6 +175,23 @@ def test_trace_is_forwarded_when_available_and_silent_when_not():
     assert seen == ["[nas1] hello"]
 
 
+def test_call_trace_never_carries_a_password():
+    """The per-call TRACE record rendered raw args: auth.login(user, password)
+    and the private key install_sshcreds uploads reached any log at TRACE."""
+    from unittest.mock import MagicMock
+
+    host = TrueNASClient("wss://nas1", autologin=False)
+    rendered = []
+    host.logger.trace = lambda msg, *a, **kw: rendered.append(msg % a)
+    host._conn = MagicMock(_closed=MagicMock(is_set=lambda: False))
+    host.api.auth.login("root", "hunter2")
+    host.api.keychaincredential.create({"attributes": {"private_key": "PEM-SECRET"}})
+    assert rendered and not any(
+        "hunter2" in r or "PEM-SECRET" in r for r in rendered
+    ), rendered
+    assert "auth.login" in rendered[0] and "<str>" in rendered[0]
+
+
 def test_connection_shares_the_hosts_logger():
     """So a record from the transport layer names the host that owns it."""
     host = TrueNASClient("wss://nas1:8443", autologin=False)

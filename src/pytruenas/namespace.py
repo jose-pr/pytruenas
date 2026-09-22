@@ -7,6 +7,7 @@ import time as _time
 import re as _re
 import enum as _enum
 
+from . import auth as _auth
 from . import connection as _connection
 from .utils import query as _q, io as _ioutils
 
@@ -183,6 +184,19 @@ class DbAction(str, _enum.Enum):
         return result
 
 
+class _LoggedArgs:
+    """A call's arguments as a log record renders them: redacted, and only
+    when the record is actually emitted."""
+
+    __slots__ = ("method", "args")
+
+    def __init__(self, method: str, args: tuple) -> None:
+        self.method, self.args = method, args
+
+    def __str__(self) -> str:
+        return repr(_auth.redact_call_args(self.method, self.args))
+
+
 class Namespace:
     _client: "TrueNASClient"
 
@@ -258,8 +272,11 @@ class Namespace:
         last_exc: "_connection.ClientException | None" = None
         for attempt in range(attempts):
             try:
+                # Lazy and redacted: the args carry passwords, API keys and
+                # private keys (auth.login, install_sshcreds), and formatting
+                # them on every call cost time even with TRACE off.
                 self._client.logger.trace(  # type: ignore
-                    f"Calling method: {method} args: {args}"
+                    "Calling method: %s args: %s", method, _LoggedArgs(method, args)
                 )
                 return self._client.conn.call(method, *args, **kwds)
             except _connection.ClientException as e:

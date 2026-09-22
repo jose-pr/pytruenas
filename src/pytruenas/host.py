@@ -47,6 +47,7 @@ from .connection import DEFAULT_UNIX_SOCKET
 from .namespace import Namespace as _Namespace
 from .utils import tls as _tls
 from .utils.target import Target as _TGT
+from .utils.target import redact as _redact_target
 
 if _ty.TYPE_CHECKING:  # pragma: no cover - typing only
     from hostctl.host import Host
@@ -414,6 +415,18 @@ def _normalize_target(target: "str | None") -> str:
             f"{_SCHEME_PREFIX}unix:///{path}"
             if path
             else (f"{_SCHEME_PREFIX}unix://{DEFAULT_SOCKET_PATH}")
+        )
+
+    # urlsplit ends the authority at the first "/", "?" or "#", so a password
+    # holding one splits there: "root:123/rest@nas" became host "root", port
+    # 123 and API path "/rest@nas" -- the rest of the secret sent, as a path,
+    # to a host named by its first part. An "@" past that point can only be
+    # such a userinfo; refuse it rather than guess, and never quote it.
+    end = next((i for i, ch in enumerate(remainder) if ch in "/?#"), len(remainder))
+    if "@" in remainder[end:]:
+        raise ValueError(
+            "the credentials in this connection string contain a raw '/', '?' "
+            "or '#'; percent-encode them (%2F, %3F, %23): " + _redact_target(target)
         )
 
     # Split the authority to spot the local-without-port case. Re-parse via

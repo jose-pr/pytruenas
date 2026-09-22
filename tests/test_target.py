@@ -1,5 +1,7 @@
 """Connection-string parsing (utils.target.Target)."""
 
+import pytest
+
 from pytruenas.utils.target import Target, redact
 
 
@@ -111,6 +113,37 @@ def test_redact_helper_does_not_leak_even_when_unparseable():
     # a malformed target must still not leak the password
     out = redact("wss://a:b:c@d:e:f@host")
     assert "b:c" not in out
+
+
+@pytest.mark.parametrize(
+    "target,expected",
+    [
+        ("root:hunter2@nas", "root@nas"),
+        ("root:hunter2@nas:8443", "root@nas:8443"),
+        ("root:p@hunter2@nas", "root@nas"),
+        ("root:hun/hunter2@nas", "root@nas"),
+        (":hunter2@nas", "nas"),
+    ],
+)
+def test_redact_helper_removes_a_scheme_less_password(target, expected):
+    """redact_uri needs a scheme to find userinfo, so these came back whole --
+    and the CLI's fan-out label and --logto filename fell back to them."""
+    assert redact(target) == expected
+
+
+@pytest.mark.parametrize(
+    "target",
+    ["wss://root:123/hunter2@nas", "root:hun/hunter2@nas", "wss://root:a?hunter2@nas"],
+)
+def test_a_raw_reserved_character_in_the_password_is_refused(target):
+    """urlsplit ends the authority at '/', '?' or '#': "root:123/rest@nas" was
+    host "root", port 123, API path "/rest@nas"; others quoted the password's
+    first part in a ValueError."""
+    from pytruenas import TrueNASClient
+
+    with pytest.raises(ValueError, match="percent-encode") as ei:
+        TrueNASClient(target, autologin=False)
+    assert "hunter2" not in str(ei.value) and "123" not in str(ei.value)
 
 
 def test_replace_is_namedtuple():

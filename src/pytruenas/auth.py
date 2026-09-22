@@ -7,15 +7,60 @@ if _ty.TYPE_CHECKING:
     from . import TrueNASClient
 
 
-#: Keyword names whose value is a secret and must never reach an exception.
-_SECRET_KEYS = {"password", "passwd", "token", "api_key", "apikey", "secret"}
+#: Keyword names passed to ``Credentials(...)`` whose value may be shown. Every
+#: other value is credential material: an allowlist, because a list of secret
+#: names is only as good as its author's imagination (``otp_token`` and
+#: ``private_key`` were both missing from the old one).
+_SHOWN_KEYS = {"username", "user"}
 
 
 def _mask_kwargs(kwargs: dict) -> dict:
-    """Replace secret-bearing keyword values with ``***``, keeping the shape."""
+    """Replace every non-allowlisted keyword value with ``***``, keeping the shape."""
     return {
-        k: ("***" if k.lower() in _SECRET_KEYS and v else v) for k, v in kwargs.items()
+        k: (v if k.lower() in _SHOWN_KEYS or not v else "***")
+        for k, v in kwargs.items()
     }
+
+
+def _is_secret_key(key: str) -> bool:
+    key = key.lower()
+    return key in {
+        "password",
+        "passwd",
+        "secret",
+        "token",
+        "otp",
+        "key",
+    } or key.endswith(("password", "passwd", "secret", "token", "_key", "apikey"))
+
+
+def _redact(value: object) -> object:
+    if isinstance(value, dict):
+        return {
+            k: (
+                "***"
+                if isinstance(k, str) and _is_secret_key(k) and value[k]
+                else _redact(value[k])
+            )
+            for k in value
+        }
+    if isinstance(value, (list, tuple)):
+        return type(value)(_redact(v) for v in value)
+    return value
+
+
+def redact_call_args(method: str, args: tuple) -> tuple:
+    """``args`` of an RPC call, safe to log.
+
+    ``auth.*`` methods take credentials positionally (``auth.login(user,
+    password)``, ``login_with_api_key(key)``), so their arguments are reduced to
+    type names. Elsewhere, a dict value under a secret-looking key (``password``,
+    ``*_token``, ``private_key``, …) is masked at any depth -- which covers the
+    SSH private key ``install_sshcreds`` uploads.
+    """
+    if method.split(".", 1)[0] == "auth":
+        return _mask_args(args)
+    return _ty.cast(tuple, _redact(args))
 
 
 def _mask_args(args: tuple) -> tuple:

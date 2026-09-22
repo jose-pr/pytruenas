@@ -85,6 +85,29 @@ def test_unsupported_credentials_error_hides_the_secret():
         "username": "root",
         "password": "***",
     }
+    # An allowlist: names the old denylist missed are masked too.
+    assert _mask_kwargs({"otp_token": "123456", "private_key": "PEM"}) == {
+        "otp_token": "***",
+        "private_key": "***",
+    }
+
+
+def test_call_args_are_redacted_for_logging():
+    from pytruenas.auth import redact_call_args
+
+    assert redact_call_args("auth.login", ("root", "hunter2")) == ("<str>", "<str>")
+    assert redact_call_args("auth.login_ex", ({"password": "x"},)) == ("<dict>",)
+    args = (
+        {"name": "k", "attributes": {"private_key": "PEM", "public_key": ""}},
+        [{"otp_token": "1", "n": 2}],
+    )
+    assert redact_call_args("keychaincredential.create", args) == (
+        {"name": "k", "attributes": {"private_key": "***", "public_key": ""}},
+        [{"otp_token": "***", "n": 2}],
+    )
+    assert redact_call_args("pool.query", ([["name", "=", "tank"]],)) == (
+        [["name", "=", "tank"]],
+    )
 
 
 def test_from_env(monkeypatch):

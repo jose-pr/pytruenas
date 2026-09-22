@@ -31,7 +31,10 @@ version="current", executor=None, path=None, ssh=None, ...)`
   omitted / local-only resolves to the local middleware unix socket
   (`ws+unix:///var/run/middleware/middlewared.sock`); for a remote target the
   scheme (`ws`/`wss`) and API path are probed on first connect, **not** in the
-  constructor — building a client performs no network I/O.
+  constructor — building a client performs no network I/O. A password in the
+  userinfo must percent-encode `/`, `?` and `#` (`%2F`, `%3F`, `%23`); a raw
+  one raises `ValueError` (message redacted) instead of being split into a
+  host/port/path.
 - **`credentials`** (positional as `creds` historically) — passed to
   `Credentials(...)` (below); `None` means local-socket auth (no login call).
 - **`autologin`** (default `True`) — the first `.conn` access calls
