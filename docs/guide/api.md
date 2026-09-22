@@ -33,12 +33,17 @@ admins = client.api.user._query(uid=q.GT(0), locked=False)
 root = client.api.user._get(username="root")     # dict, or None if missing
 
 # Create-or-update by a selector field:
-client.api.user._upsert("username", username="svc", full_name="Service")
+client.api.user._upsert(("username",), username="svc", full_name="Service")
 ```
 
-`_upsert(selector, ...)` resolves the row by the `selector` field(s); if it
-exists the changed fields are updated (a no-op diff makes no call), otherwise the
-record is created. A middleware job returned by a mutating call is waited on by
+`_upsert(selector, ...)` resolves the row by the `selector` field(s) — a tuple
+or list of field names, matched against the values you pass; if it exists the
+changed fields are updated (a no-op diff makes no call), otherwise the record is
+created. A bare string or int selector is a **record id**, not a field name
+(`_upsert("username", ...)` looks up the record whose id is `"username"`). A
+`!`-prefixed name (`("username", "!uid")`) is left out of the match and is not
+changed on update; a selector made only of those is rejected, since it would
+match the first record in the collection. A middleware job returned by a mutating call is waited on by
 default (`wait=True`).
 
 ## Query filters

@@ -51,7 +51,7 @@ accordingly — so a script can run twice without erroring:
 
 ```python
 nas.api.user._upsert(
-    "username",
+    ("username",),
     username="svc-backup",
     full_name="Backup service",
     group_create=True,

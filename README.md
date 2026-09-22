@@ -48,7 +48,7 @@ for user in client.api.user.query():
     print(user["username"])
 
 # Convenience helpers for common DB patterns:
-client.api.user._upsert("username", username="svc", full_name="Service", group_create=True)
+client.api.user._upsert(("username",), username="svc", full_name="Service", group_create=True)
 
 # Running on the NAS itself talks to the local unix socket, no auth:
 local = TrueNASClient()            # ws+unix:///var/run/middleware/middlewared.sock
