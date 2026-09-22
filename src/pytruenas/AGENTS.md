@@ -589,7 +589,12 @@ Backs the `generate-typings` command; not typically used directly.
 - **`Codegen().generate(api: Version, root: Path | str)`** — write one
   `__init__.pyi` per API namespace under `root`, rendered from the
   `namespace.pyi.j2` Jinja template. `api` is one entry from
-  `client.dump_api()["versions"]` (see `pytruenas.models.apidump`).
+  `client.dump_api()["versions"]` (see `pytruenas.models.apidump`). Renders
+  into a temporary sibling and swaps it in only when complete, so a failure
+  leaves the previous output intact. `root` is replaced only if it is absent,
+  empty, a previous output (marked `.pytruenas-typings`), or holds nothing but
+  `.pyi` files; otherwise `FileExistsError`. Missing `jinja2` raises
+  `ImportError` naming the `codegen` extra before anything is touched.
 
 ## `models` (`pytruenas.models`)
 

@@ -83,6 +83,77 @@ def test_root_namespace_valid_class_name(generated):
     assert "class 0" not in root
 
 
+# -- the output directory is never destroyed by mistake -----------------------
+
+
+def _api_version():
+    return json.loads(FIXTURE.read_text(encoding="utf-8"))["versions"][0]
+
+
+def test_generate_refuses_a_directory_it_did_not_create(tmp_path):
+    """`--path .` (or any directory with other files) must not be emptied.
+
+    The generator used to `rmtree` the output path before rendering: pointed at
+    a checkout, it deleted `.git` and exited 0.
+    """
+    target = tmp_path / "project"
+    (target / ".git").mkdir(parents=True)
+    (target / ".git" / "HEAD").write_text("ref: refs/heads/main\n")
+    (target / "notes.txt").write_text("keep me")
+    with pytest.raises(FileExistsError, match="not a typings tree"):
+        Codegen().generate(_api_version(), target)
+    assert (target / ".git" / "HEAD").read_text() == "ref: refs/heads/main\n"
+    assert (target / "notes.txt").read_text() == "keep me"
+
+
+@pytest.mark.requires("jinja2")
+def test_generate_replaces_its_own_previous_output(tmp_path):
+    target = tmp_path / "typings"
+    Codegen().generate(_api_version(), target)
+    (target / "stale.pyi").write_text("# from an older API")
+    Codegen().generate(_api_version(), target)
+    assert (target / _INIT_NAME).exists()
+    assert not (target / "stale.pyi").exists()
+
+
+@pytest.mark.requires("jinja2")
+def test_a_failed_render_keeps_the_previous_output(tmp_path, monkeypatch):
+    target = tmp_path / "typings"
+    Codegen().generate(_api_version(), target)
+    before = sorted(p.relative_to(target) for p in target.rglob("*"))
+
+    from pytruenas.codegen import jinja
+
+    def boom(self, **ctx):
+        raise RuntimeError("render failed")
+
+    monkeypatch.setattr(jinja.Renderer, "render", boom)
+    with pytest.raises(RuntimeError, match="render failed"):
+        Codegen().generate(_api_version(), target)
+    assert sorted(p.relative_to(target) for p in target.rglob("*")) == before
+    assert [p.name for p in tmp_path.iterdir()] == ["typings"]  # no temp dir left
+
+
+def test_missing_jinja2_names_the_extra_and_touches_nothing(tmp_path, monkeypatch):
+    import sys
+
+    import pytruenas.codegen as codegen_pkg
+
+    # Both: `from . import jinja` finds an already-imported submodule as a
+    # package attribute before it ever consults sys.modules.
+    monkeypatch.setitem(sys.modules, "pytruenas.codegen.jinja", None)
+    monkeypatch.delattr(codegen_pkg, "jinja", raising=False)
+    target = tmp_path / "typings"
+    target.mkdir()
+    (target / "old.pyi").write_text("# previous")
+    with pytest.raises(ImportError, match=r"pytruenas\[codegen\]"):
+        Codegen().generate(_api_version(), target)
+    assert (target / "old.pyi").read_text() == "# previous"
+
+
+_INIT_NAME = "__init__.pyi"
+
+
 # -- unit tests on the helpers -------------------------------------------------
 
 

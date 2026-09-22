@@ -30,6 +30,12 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
+- `generate-typings` (`Codegen().generate()`) deleted the whole `--path`
+  directory before rendering — including a `.git` or any other files — and a
+  render error or a missing `jinja2` then left it empty. It now renders into a
+  temporary directory and swaps it in on success, and refuses a directory that
+  holds anything but stubs (`FileExistsError`). A missing `jinja2` raises an
+  `ImportError` naming `pytruenas[codegen]`.
 - `_upsert()`/`_update()` with a selector made only of `!`-prefixed names
   (`("!uid",)`) queried the whole collection and updated its first record
   (`_upsert(("!uid",), username="bob", uid=1001)` renamed root). It now raises
