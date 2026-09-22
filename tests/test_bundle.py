@@ -191,6 +191,7 @@ def test_native_extension_is_refused(tmp_path, monkeypatch):
 # clone of the repo would actually have" -- either because something ignored
 # leaked in, or because something that should survive (a negation) did not.
 
+
 @pytest.mark.requires("pathspec")
 def test_collect_repo_excludes_gitignored_files(tmp_path):
     repo = tmp_path / "repo"
@@ -295,9 +296,7 @@ def test_collect_repo_extra_ignores_layer_after_ignore_files(tmp_path):
     (repo / "secret.txt").write_text("x")
     (repo / "kept.txt").write_text("x")
 
-    names = {
-        n for n, _ in bundle.collect_repo(repo, extra_ignores=["secret.txt"])
-    }
+    names = {n for n, _ in bundle.collect_repo(repo, extra_ignores=["secret.txt"])}
     assert "repo/secret.txt" not in names
     assert "repo/kept.txt" in names
 
@@ -507,6 +506,6 @@ def test_repo_requirements_missing_toml_parser_raises_a_clear_error(
         return real_import(name, *a, **k)
 
     monkeypatch.setattr(builtins, "__import__", blocked)
-    (tmp_path / "pyproject.toml").write_text('[project]\ndependencies = []\n')
+    (tmp_path / "pyproject.toml").write_text("[project]\ndependencies = []\n")
     with pytest.raises(bundle.BundleError, match="TOML parser"):
         bundle.repo_requirements(tmp_path)

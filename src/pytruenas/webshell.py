@@ -215,9 +215,7 @@ def _with_input(script: str, value: object, *, encoding: object = None) -> str:
     line by the time it reaches the pty.
     """
     if isinstance(value, bytes):
-        value = value.decode(
-            _ty.cast(str, encoding) or "utf-8", "replace"
-        )
+        value = value.decode(_ty.cast(str, encoding) or "utf-8", "replace")
     text = str(value)
     delimiter = "PYTNIN" + _uuid.uuid4().hex[:8]
     if delimiter in text:  # pragma: no cover - a random 8-hex collision
@@ -337,9 +335,7 @@ class WebShellSession:
         the PTY ends up running. ``None`` when the API cannot answer.
         """
         try:
-            return _ty.cast(
-                "str | None", self.client.api.auth.me().get("pw_shell")
-            )
+            return _ty.cast("str | None", self.client.api.auth.me().get("pw_shell"))
         except Exception:
             return None
 
@@ -494,9 +490,7 @@ class WebShellSession:
             # where it is an ordinary next command. Everything else keeps `;`,
             # which is what makes the status apply to the command just run.
             separator = "\n" if heredoc else "; "
-            ws.send_binary(
-                f'{script}{separator}printf "{end}%s\\n" "$?"\n'.encode()
-            )
+            ws.send_binary(f'{script}{separator}printf "{end}%s\\n" "$?"\n'.encode())
 
             if stdin is not None:
                 self._pump_stdin(ws, stdin)
@@ -517,12 +511,10 @@ class WebShellSession:
             # otherwise reach the terminal as escape-sequence garbage AND put
             # the following bytes on the wrong stream, so the longest marker
             # bounds how much is withheld, not just the sentinel.
-            hold = (
-                max(
-                    len(end.encode()) + 12,  # + room for the status digits
-                    len(_ERR_START),
-                    len(_ERR_END),
-                )
+            hold = max(
+                len(end.encode()) + 12,  # + room for the status digits
+                len(_ERR_START),
+                len(_ERR_END),
             )
             flush_at = _time.monotonic() + _FLUSH_INTERVAL
             while _time.monotonic() < deadline:
@@ -816,9 +808,7 @@ class WebShellExecutorProvider(_ExecutorProvider):
             raise ValueError("stdin and input arguments may not both be used")
         heredoc = False
         if payload is not None:
-            script = _with_input(
-                script, payload, encoding=options.get("encoding")
-            )
+            script = _with_input(script, payload, encoding=options.get("encoding"))
             heredoc = True
         if isinstance(stdin, int):
             raise NotImplementedError(
@@ -895,9 +885,7 @@ class WebShellExecutorProvider(_ExecutorProvider):
         # the two, and that merged text is already on stdout. Putting it in
         # stderr as well would duplicate every line.
         stderr = (
-            _value(err_text)
-            if split and stderr_target == _subprocess.PIPE
-            else None
+            _value(err_text) if split and stderr_target == _subprocess.PIPE else None
         )
         result = _subprocess.CompletedProcess(script, returncode, stdout, stderr)
         if options.get("check") and returncode:

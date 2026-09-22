@@ -514,9 +514,15 @@ def _dependency_name(raw: str) -> str:
 
         return Requirement(raw).name
     except ImportError:  # pragma: no cover - packaging ships with pip/setuptools
-        return raw.split(";")[0].split("[")[0].split("=")[0].split("<")[0].split(
-            ">"
-        )[0].split("~")[0].strip()
+        return (
+            raw.split(";")[0]
+            .split("[")[0]
+            .split("=")[0]
+            .split("<")[0]
+            .split(">")[0]
+            .split("~")[0]
+            .strip()
+        )
 
 
 def _parse_pyproject(
@@ -616,15 +622,11 @@ def repo_requirements(
     reqtxt = root / "requirements.txt"
 
     if pyproject.is_file():
-        names = _parse_pyproject(
-            pyproject.read_text(encoding="utf-8"), extras
-        )
+        names = _parse_pyproject(pyproject.read_text(encoding="utf-8"), extras)
     elif reqtxt.is_file():
         names = _parse_requirements_txt(reqtxt.read_text(encoding="utf-8"))
     else:
-        raise BundleError(
-            f"no pyproject.toml or requirements.txt found under {root}"
-        )
+        raise BundleError(f"no pyproject.toml or requirements.txt found under {root}")
 
     result = list(dict.fromkeys(names))  # de-duplicate, keep first occurrence
     for item in include:

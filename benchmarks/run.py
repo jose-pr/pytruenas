@@ -15,6 +15,7 @@ reported as min/median/max ms-per-call, so run-to-run noise is visible rather
 than averaged away. Counts are fixed so numbers stay comparable across commits.
 Requires pytruenas importable (PYTHONPATH=src, or installed).
 """
+
 import argparse
 import json
 import platform
@@ -37,10 +38,20 @@ REPEAT = 5
 
 # A response row shaped like a real middleware record (user.query element).
 PLAIN_ROW = {
-    "id": 1, "username": "root", "uid": 0, "gid": 0, "home": "/root",
-    "shell": "/usr/bin/zsh", "full_name": "root", "builtin": True,
-    "smb": False, "groups": [0, 544, 545], "sshpubkey": None,
-    "email": None, "locked": False, "sudo_commands": [],
+    "id": 1,
+    "username": "root",
+    "uid": 0,
+    "gid": 0,
+    "home": "/root",
+    "shell": "/usr/bin/zsh",
+    "full_name": "root",
+    "builtin": True,
+    "smb": False,
+    "groups": [0, 544, 545],
+    "sshpubkey": None,
+    "email": None,
+    "locked": False,
+    "sudo_commands": [],
 }
 # A payload exercising every extended (ejson) type.
 EXT_OBJ = {
@@ -77,8 +88,12 @@ def _build_method_name():
 
 def measure():
     return {
-        "ejson.dumps.plain": sample(lambda: jsonrpc.dumps([PLAIN_ROW] * 20), EJSON_INNER // 4),
-        "ejson.loads.plain": sample(lambda: jsonrpc.loads(PLAIN_JSON), EJSON_INNER // 4),
+        "ejson.dumps.plain": sample(
+            lambda: jsonrpc.dumps([PLAIN_ROW] * 20), EJSON_INNER // 4
+        ),
+        "ejson.loads.plain": sample(
+            lambda: jsonrpc.loads(PLAIN_JSON), EJSON_INNER // 4
+        ),
         "ejson.dumps.extended": sample(lambda: jsonrpc.dumps(EXT_OBJ), EJSON_INNER),
         "ejson.loads.extended": sample(lambda: jsonrpc.loads(EXT_JSON), EJSON_INNER),
         "namespace.methodname": sample(_build_method_name, BUILD_INNER // 10),
@@ -91,8 +106,12 @@ def measure():
 
 def main(argv=None):
     ap = argparse.ArgumentParser(description="Run pytruenas benchmarks")
-    ap.add_argument("--save", action="store_true", help="write result to benchmarks/results/")
-    ap.add_argument("--name", default=None, help="result name (default pytruenas-<ver>-py<ver>)")
+    ap.add_argument(
+        "--save", action="store_true", help="write result to benchmarks/results/"
+    )
+    ap.add_argument(
+        "--name", default=None, help="result name (default pytruenas-<ver>-py<ver>)"
+    )
     args = ap.parse_args(argv)
 
     pyver = f"py{sys.version_info.major}{sys.version_info.minor}"
@@ -105,8 +124,12 @@ def main(argv=None):
         "platform": platform.platform(),
         "processor": platform.processor() or platform.machine(),
         "timestamp": datetime.now(timezone.utc).isoformat(timespec="seconds"),
-        "iterations": {"ejson_inner": EJSON_INNER, "build_inner": BUILD_INNER,
-                       "filter_inner": FILTER_INNER, "repeat": REPEAT},
+        "iterations": {
+            "ejson_inner": EJSON_INNER,
+            "build_inner": BUILD_INNER,
+            "filter_inner": FILTER_INNER,
+            "repeat": REPEAT,
+        },
         "metrics": metrics,
     }
 
@@ -114,7 +137,9 @@ def main(argv=None):
     print(f"{name}  ({result['python']} on {result['processor']})")
     print(f"{'metric':24s} {'median':>11s} {'min':>11s} {'max':>11s}   (ms/call)")
     for key, m in metrics.items():
-        print(f"{key:24s} {m['median_ms']:11.6f} {m['min_ms']:11.6f} {m['max_ms']:11.6f}")
+        print(
+            f"{key:24s} {m['median_ms']:11.6f} {m['min_ms']:11.6f} {m['max_ms']:11.6f}"
+        )
 
     if args.save:
         dest = Path(__file__).resolve().parent / "results"

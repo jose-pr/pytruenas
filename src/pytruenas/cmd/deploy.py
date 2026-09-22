@@ -116,7 +116,9 @@ class Args(PyTrueNASArgs):
     "Reinstall even when the target already has this exact bundle"
     ("--force",)  # type: ignore
 
-    source: "Arg[str, NS(choices=('installed', 'repo'), metavar='SOURCE')]" = "installed"
+    source: "Arg[str, NS(choices=('installed', 'repo'), metavar='SOURCE')]" = (
+        "installed"
+    )
     """Where the bundled content comes from: the installed dependency closure
     (default), or a repo working tree copied as-is, filtered by ignore files.
     Orthogonal to --mode, which decides the OUTPUT layout either way."""
@@ -509,7 +511,11 @@ def run(client: TrueNASClient, args: Args, logger: Logger):
                 # entry needs that prefix -- lib/<repo-name>/src, not lib/src.
                 repo_prefix = Path(args.repo_root).resolve().name
                 entries = ":".join(
-                    f"$here/lib/{repo_prefix}/{entry}" if entry else f"$here/lib/{repo_prefix}"
+                    (
+                        f"$here/lib/{repo_prefix}/{entry}"
+                        if entry
+                        else f"$here/lib/{repo_prefix}"
+                    )
                     for entry in pythonpath
                 )
                 launcher = _REPO_LAUNCHER_TEMPLATE.format(

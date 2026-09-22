@@ -225,6 +225,7 @@ def test_sink_is_incremental_not_one_final_write():
         def _f():
             events.append(("read", len(b"".join(written))))
             return data
+
         return _f
 
     session._ws = _FakeWS(
@@ -269,9 +270,7 @@ def test_returncode_is_recovered_from_the_sentinel():
 def test_no_sink_still_returns_the_output():
     """Omitting the sink keeps the previous buffered behaviour intact."""
     session = _session([])
-    session._ws = _FakeWS(
-        [b"hello\r\n", lambda: f"{_end(session)}0\r\n".encode()]
-    )
+    session._ws = _FakeWS([b"hello\r\n", lambda: f"{_end(session)}0\r\n".encode()])
     text, raw, code = session.run_script("echo hello")
     assert "hello" in text and b"hello" in raw and code == 0
 
@@ -310,9 +309,7 @@ def test_sinks_receive_their_own_streams():
     body = b"to-out" + _ERR_START + b"to-err" + _ERR_END
     session._ws = _FakeWS([body, lambda: f"{_end(session)}0\r\n".encode()])
 
-    session.run_script(
-        "cmd", sink=out_chunks.append, errsink=err_chunks.append
-    )
+    session.run_script("cmd", sink=out_chunks.append, errsink=err_chunks.append)
 
     assert b"to-out" in b"".join(out_chunks)
     assert b"to-err" in b"".join(err_chunks)
