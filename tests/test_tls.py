@@ -108,12 +108,16 @@ def test_the_websocket_gets_the_shared_context(monkeypatch, bundle):
         def __init__(self, sslopt=None):
             seen["sslopt"] = sslopt
 
-        def connect(self, uri):
-            pass
+        def connect(self, uri, timeout=None):
+            seen["timeout"] = timeout
+
+        def settimeout(self, value):
+            seen["settimeout"] = value
 
     monkeypatch.setattr(connection._websocket, "WebSocket", _WS)
     conn = connection.TrueNASWSConnection.__new__(connection.TrueNASWSConnection)
     conn.uri, conn.verify_ssl = "wss://nas/api/current", str(bundle)
+    conn.connect_timeout = connection.CONNECT_TIMEOUT
     conn._connect()
     assert len(seen["sslopt"]["context"].get_ca_certs()) == 1
     conn.verify_ssl = False

@@ -57,6 +57,10 @@ class _FakeWS:
             self._closed = True
             self._cond.notify_all()
 
+    def shutdown(self):
+        self.shutdowns = getattr(self, "shutdowns", 0) + 1
+        self.close()
+
 
 def _client_with(fake, call_timeout=2):
     """Build a Client whose _connect returns ``fake`` (no real connection)."""

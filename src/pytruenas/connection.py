@@ -57,8 +57,10 @@ __all__ = [
     "ClientException",
     "ValidationErrors",
     "CallTimeout",
+    "ConnectionClosed",
     "JobFailed",
     "CALL_TIMEOUT",
+    "CONNECT_TIMEOUT",
     "Event",
     "Subscription",
     "dumps",
@@ -72,6 +74,10 @@ DEFAULT_EVENT_QUEUE_SIZE = 1000
 
 #: Default per-call timeout in seconds (overridable via ``CALL_TIMEOUT`` env var).
 CALL_TIMEOUT = int(_os.environ.get("CALL_TIMEOUT", 60))
+
+#: Default timeout in seconds for opening the websocket (TCP/unix connect, TLS
+#: and the HTTP upgrade). Without one, an unresponsive host blocked forever.
+CONNECT_TIMEOUT = 30
 
 #: Default local middleware unix socket (used when the target is local).
 DEFAULT_UNIX_SOCKET = "/var/run/middleware/middlewared.sock"
@@ -238,6 +244,21 @@ class CallTimeout(ClientException):
 
     def __init__(self) -> None:
         super().__init__("Call timeout", _errno.ETIMEDOUT)
+
+
+class ConnectionClosed(ClientException):
+    """The connection closed before a call's response arrived.
+
+    ``errno`` is ``ECONNABORTED``, as before this class existed. ``sent`` says
+    whether the request had been written to the socket: ``False`` means the
+    server never saw it and the call can safely be made again; ``True`` means
+    the server may have run it -- a create, a delete, a job start -- and only
+    the caller knows whether repeating it is safe.
+    """
+
+    def __init__(self, sent: bool) -> None:
+        super().__init__("Connection closed", _errno.ECONNABORTED)
+        self.sent = sent
 
 
 def _parse_error(error: dict) -> ClientException:
@@ -418,6 +439,7 @@ class TrueNASWSConnection:
         *,
         verify_ssl: "bool | str | _os.PathLike[str]" = True,
         call_timeout: float = CALL_TIMEOUT,
+        connect_timeout: "float | None" = CONNECT_TIMEOUT,
         py_exceptions: bool = False,
         logger: "_logging.Logger | _logging.LoggerAdapter | None" = None,
     ) -> None:
@@ -426,6 +448,7 @@ class TrueNASWSConnection:
         self.uri = uri
         self.verify_ssl = verify_ssl
         self.call_timeout = call_timeout
+        self.connect_timeout = connect_timeout
         #: Where this connection's records go. A host passes its own
         #: name-bound logger, so "connection was closed" says *which* host
         #: closed even with several open at once; standalone use falls back to
@@ -446,6 +469,10 @@ class TrueNASWSConnection:
         # collection both receive it.
         self._subs: "dict[str, list[Subscription]]" = {}
         self._subs_lock = _threading.Lock()
+        # Whether the socket has been shut down; separate from `_closed`, which
+        # the reader sets on its own and which used to make close() a no-op
+        # that left the socket open.
+        self._released = False
 
         self._ws = self._connect()
         self._reader = _threading.Thread(target=self._read_loop, daemon=True)
@@ -457,11 +484,17 @@ class TrueNASWSConnection:
         if self.uri.startswith(_UNIX_PREFIX):
             path = self.uri[len(_UNIX_PREFIX) :]
             sock = _socket.socket(_socket.AF_UNIX, _socket.SOCK_STREAM)
+            sock.settimeout(self.connect_timeout)
             sock.connect(path)
             ws = _websocket.WebSocket()
             # A dummy hostname is used for the HTTP upgrade over the unix
             # socket, per the middleware docs.
-            ws.connect("ws://localhost/api/current", socket=sock)
+            ws.connect(
+                "ws://localhost/api/current",
+                socket=sock,
+                timeout=self.connect_timeout,
+            )
+            ws.settimeout(None)
             return ws
 
         # The trust decision is shared with every other leg: pytruenas.utils.tls.
@@ -470,56 +503,81 @@ class TrueNASWSConnection:
             {"cert_reqs": _ssl.CERT_NONE} if context is None else {"context": context}
         )
         ws = _websocket.WebSocket(sslopt=sslopt)
-        ws.connect(self.uri)
+        ws.connect(self.uri, timeout=self.connect_timeout)
+        # websocket-client keeps the connect timeout as the socket's read
+        # timeout; the reader blocks on recv() for as long as the connection
+        # is idle, so clear it.
+        ws.settimeout(None)
         return ws
 
     # -- reader -------------------------------------------------------------
 
     def _read_loop(self) -> None:
-        while not self._closed.is_set():
-            try:
-                raw = self._ws.recv()
-            except Exception:
-                break
-            if not raw:
-                break
-            try:
-                message = loads(raw)
-            except Exception:
-                continue
-            if not isinstance(message, dict):
-                continue
-            mid = message.get("id")
-            if mid is None:
-                # A JSON-RPC notification. The middleware sends
-                # ``collection_update`` for subscribed events; route it to the
-                # matching sinks (keyed by ``params.collection``) or drop it.
-                self._route_notification(message)
-                continue
-            with self._pending_lock:
-                pending = self._pending.pop(mid, None)
-            if pending is not None:
-                pending.resolve(message)
-        # Connection ended: fail every waiter so no call blocks forever, and
-        # wake every subscription's events() consumer.
-        self._closed.set()
+        try:
+            while not self._closed.is_set():
+                try:
+                    raw = self._ws.recv()
+                except Exception:
+                    break
+                if not raw:
+                    break
+                try:
+                    self._dispatch(raw)
+                except Exception:
+                    # One bad message (a notification of an unexpected shape, a
+                    # failing subscription callback) must not kill the reader:
+                    # that wedged the connection -- never marked closed, every
+                    # call waiting out its timeout.
+                    self.logger.warning("dropping a message", exc_info=True)
+        finally:
+            self._reader_ended()
+
+    def _dispatch(self, raw) -> None:
+        try:
+            message = loads(raw)
+        except Exception:
+            return
+        if not isinstance(message, dict):
+            return
+        mid = message.get("id")
+        if mid is None:
+            # A JSON-RPC notification. The middleware sends
+            # ``collection_update`` for subscribed events; route it to the
+            # matching sinks (keyed by ``params.collection``) or drop it.
+            self._route_notification(message)
+            return
         with self._pending_lock:
+            pending = self._pending.pop(mid, None)
+        if pending is not None:
+            pending.resolve(message)
+
+    def _reader_ended(self) -> None:
+        """Connection ended: fail every waiter so no call blocks forever, wake
+        every subscription's events() consumer, and release the socket."""
+        with self._pending_lock:
+            # Set under the lock call() registers under, so no call can slip
+            # in between and wait on a reader that is gone.
+            self._closed.set()
             pending_calls = list(self._pending.values())
             self._pending.clear()
         for pending in pending_calls:
-            pending.fail(ClientException("Connection closed", _errno.ECONNABORTED))
+            pending.fail(ConnectionClosed(sent=True))
         with self._subs_lock:
             sinks = [s for sinks in self._subs.values() for s in sinks]
             self._subs.clear()
         for sink in sinks:
             sink._close()
+        self._release()
 
     def _route_notification(self, message: dict) -> None:
         """Deliver a ``collection_update`` notification to its subscriptions."""
         if message.get("method") != "collection_update":
             self.logger.debug("ignoring notification method %r", message.get("method"))
             return
-        params = message.get("params") or {}
+        params = message.get("params")
+        if not isinstance(params, dict):
+            self.logger.debug("ignoring notification without params: %r", message)
+            return
         collection = params.get("collection")
         with self._subs_lock:
             sinks = list(self._subs.get(collection, ()))
@@ -555,38 +613,58 @@ class TrueNASWSConnection:
         keyword is logged at debug level rather than silently swallowed.
 
         Raises :class:`ValidationErrors`/:class:`ClientException` on a server
-        error, :class:`CallTimeout` on timeout, and :class:`ClientException`
-        with ``errno=ECONNABORTED`` if the connection dropped.
+        error, :class:`CallTimeout` on timeout, :class:`ConnectionClosed`
+        (``errno=ECONNABORTED``; ``.sent`` says whether the server may have run
+        the call) if the connection dropped, and :class:`TypeError` for a
+        parameter JSON cannot encode.
         """
         unexpected = [k for k in _ignored if k not in _COMPAT_KWARGS]
         if unexpected:
             self.logger.debug(
                 "call(%s): ignoring unexpected kwargs %s", method, unexpected
             )
-
-        if self._closed.is_set():
-            raise ClientException("Connection closed", _errno.ECONNABORTED)
+        if _threading.current_thread() is self._reader:
+            # The reader is the only thread that delivers responses; blocking
+            # it on one deadlocked until the call timed out.
+            raise RuntimeError(
+                f"{method}: cannot make a blocking call from a subscription "
+                "callback; consume Subscription.events() on another thread"
+            )
 
         call_id = str(_uuid.uuid4())
+        # Encoded before anything is registered or sent: a parameter JSON
+        # cannot encode is the caller's error, and it was reported as a
+        # dropped connection (ECONNABORTED) -- and so retried on a new one.
+        try:
+            request = dumps(
+                {
+                    "jsonrpc": "2.0",
+                    "method": method,
+                    "id": call_id,
+                    "params": list(params),
+                }
+            )
+        except (TypeError, ValueError) as exc:
+            raise TypeError(
+                f"{method}: parameters are not JSON-encodable: {exc}"
+            ) from None
+
         pending = _Pending()
         with self._pending_lock:
+            # Checked and registered atomically against _reader_ended/close,
+            # which set _closed under this lock: otherwise a call registered
+            # just after the reader failed every waiter waited forever.
+            if self._closed.is_set():
+                raise ConnectionClosed(sent=False)
             self._pending[call_id] = pending
 
-        request = {
-            "jsonrpc": "2.0",
-            "method": method,
-            "id": call_id,
-            "params": list(params),
-        }
         try:
             with self._send_lock:
-                self._ws.send(dumps(request))
+                self._ws.send(request)
         except Exception as exc:
             with self._pending_lock:
                 self._pending.pop(call_id, None)
-            raise ClientException(
-                f"Failed to send request: {exc}", _errno.ECONNABORTED
-            ) from exc
+            raise ConnectionClosed(sent=False) from exc
 
         wait_timeout = self.call_timeout if isinstance(timeout, _Unset) else timeout
         message = pending.wait(wait_timeout)
@@ -656,19 +734,38 @@ class TrueNASWSConnection:
     # -- lifecycle ----------------------------------------------------------
 
     def close(self) -> None:
-        """Close the websocket connection. Idempotent."""
-        if self._closed.is_set():
-            return
-        self._closed.set()
-        # Wake any events() consumers; the server drops server-side
-        # subscriptions when the socket closes.
-        with self._subs_lock:
-            sinks = [s for sinks in self._subs.values() for s in sinks]
-            self._subs.clear()
-        for sink in sinks:
-            sink._close()
+        """Close the websocket connection. Idempotent.
+
+        Also releases the socket when the reader already ended the connection
+        (the server closed it); that used to return early and leave it open.
+        """
+        with self._pending_lock:
+            was_closed = self._closed.is_set()
+            self._closed.set()
+        if not was_closed:
+            # Wake any events() consumers; the server drops server-side
+            # subscriptions when the socket closes.
+            with self._subs_lock:
+                sinks = [s for sinks in self._subs.values() for s in sinks]
+                self._subs.clear()
+            for sink in sinks:
+                sink._close()
+            try:
+                self._ws.close()
+            except Exception:
+                pass
+        self._release()
+
+    def _release(self) -> None:
+        """Shut the socket down, once. ``WebSocket.close()`` returns early once
+        websocket-client has marked the socket disconnected (as it does on a
+        server close), so this uses ``shutdown()``."""
+        with self._send_lock:
+            if self._released:
+                return
+            self._released = True
         try:
-            self._ws.close()
+            self._ws.shutdown()
         except Exception:
             pass
 

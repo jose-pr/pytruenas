@@ -44,6 +44,31 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
+- **A retry could run a call twice.** After a dropped connection, the default
+  one retry replayed the request — including `create`, `delete` and job
+  starts — even when it had already been sent and the server may have run it.
+  Only a call that never reached the socket is repeated now; the rest raise
+  `ConnectionClosed` with `sent=True`. The retry also closes the connection it
+  drops instead of leaking its socket and reader thread.
+- **One malformed message wedged the connection.** A notification whose
+  `params` was not a dict killed the reader thread outside its cleanup, so the
+  connection was never marked closed, never reconnected, and every later call
+  waited out its timeout (measured). The reader now logs and drops such a
+  message, and always runs its cleanup.
+- **A connection the server closed kept its socket.** `close()` returned early
+  once the reader had noticed, leaking the file descriptor for the life of the
+  process; the socket is now shut down in both paths, once.
+- Opening a connection had no timeout, so an unresponsive host blocked the
+  caller indefinitely (`connect_timeout`, default 30 s, on
+  `TrueNASWSConnection`). The reader is unaffected: an idle connection stays
+  open.
+- A call registered just as the reader failed the outstanding calls could wait
+  forever (with `timeout=None`); the check and registration are now atomic.
+- A parameter JSON cannot encode raised `ClientException(ECONNABORTED)` —
+  reported as a dropped connection, and so retried on a new one — instead of
+  `TypeError`.
+- A blocking call made from a subscription callback deadlocked the reader
+  until the call timed out; it now raises `RuntimeError` naming the fix.
 - **A wrong password or API key logged in "successfully".** The legacy
   `auth.login`/`login_with_api_key`/`login_with_token` answer a refusal with
   `False` (measured on 26.0), which was ignored: every later call failed with

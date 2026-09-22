@@ -237,8 +237,9 @@ class Namespace:
         """Invoke this namespace's middleware method.
 
         ``_tries`` is the number of *reconnect retries* after a dropped
-        connection (``ECONNABORTED``); with the default 1 the call is attempted
-        up to twice. ``_timeout`` is the per-call timeout in seconds; the
+        connection, made only when the request was never sent
+        (:class:`~pytruenas.connection.ConnectionClosed` with ``sent=False``);
+        with the default 1 the call is attempted up to twice. ``_timeout`` is the per-call timeout in seconds; the
         default sentinel uses the client's configured timeout, ``None`` waits
         indefinitely (used by ``core.job_wait`` for long jobs). ``_method``
         appends a leaf method name, ``_ioerror`` maps a middleware error to the
@@ -271,6 +272,7 @@ class Namespace:
         attempts = max(0, _tries) + 1
         last_exc: "_connection.ClientException | None" = None
         for attempt in range(attempts):
+            conn = None
             try:
                 # Lazy and redacted: the args carry passwords, API keys and
                 # private keys (auth.login, install_sshcreds), and formatting
@@ -278,17 +280,19 @@ class Namespace:
                 self._client.logger.trace(  # type: ignore
                     "Calling method: %s args: %s", method, _LoggedArgs(method, args)
                 )
-                return self._client.conn.call(method, *args, **kwds)
+                conn = self._client.conn
+                return conn.call(method, *args, **kwds)
             except _connection.ClientException as e:
                 last_exc = e
-                if e.errno == _errno.ECONNABORTED and attempt < attempts - 1:
+                # Only a call the server never received is repeated: one lost
+                # after it was sent may already have run, and replaying a
+                # create, delete or job start is not this layer's call.
+                unsent = getattr(e, "sent", True) is False
+                if unsent and attempt < attempts - 1:
                     self._client.logger.warning(
                         "Websocket connection was closed, trying again with new connection"
                     )
-                    # Drop the dead connection on the CLIENT so the next
-                    # `conn` access reconnects (setting it on self, a
-                    # Namespace, was a no-op that only worked by accident).
-                    self._client._conn = None
+                    self._client._drop_conn(conn)
                     _time.sleep(1)
                     continue
                 raise (ioerror(e) if _ioerror else e) from None

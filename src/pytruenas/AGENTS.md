@@ -118,7 +118,7 @@ version="current", executor=None, path=None, ssh=None, ...)`
   the success response dict. `login_options` overrides the server defaults
   (`{"user_info": True, "reconnect_token": False}`). The legacy path returns
   the server's answer (`True`) and raises `AuthenticationError` when it is
-  `False` (a wrong password or key -- the server does not error). On any
+  `False` (a wrong password or key — the server does not error). On any
   failure the new connection is closed, not left open unauthenticated. A
   one-time OTP is not replayable, so a session that must survive a reconnect
   needs `otp_provider`.
@@ -321,8 +321,9 @@ The synchronous JSON-RPC 2.0 websocket transport backing `TrueNASClient`
 imports on Python 3.9.
 
 - **`Client(uri=None, *, verify_ssl=True, call_timeout=CALL_TIMEOUT,
-  py_exceptions=False)`** — opens the websocket immediately (blocking) and
-  starts a background reader thread. `uri` is `wss://`/`ws://` or
+  connect_timeout=CONNECT_TIMEOUT, py_exceptions=False)`** — opens the
+  websocket immediately (blocking, bounded by `connect_timeout`: connect, TLS
+  and the HTTP upgrade) and starts a background reader thread. `uri` is `wss://`/`ws://` or
   `ws+unix://...`; `verify_ssl` takes the same values as the host's
   `sslverify` (bool or CA bundle path; see above); `None`/bare `ws+unix://` connects to
   `DEFAULT_UNIX_SOCKET` (`/var/run/middleware/middlewared.sock`).
@@ -333,14 +334,22 @@ imports on Python 3.9.
     are silently accepted (upstream-client compatibility); any other unknown
     kwarg is logged at debug level. Raises `ValidationErrors`/
     `ClientException` on a server error, `CallTimeout` on timeout,
-    `ClientException(errno=ECONNABORTED)` if the connection dropped.
+    `ConnectionClosed` (`errno=ECONNABORTED`) if the connection dropped,
+    `TypeError` for a parameter JSON cannot encode (nothing is sent), and
+    `RuntimeError` when called from the reader thread, i.e. from a
+    subscription callback (it would deadlock until the call timed out —
+    consume `Subscription.events()` on another thread instead).
   - **`.subscribe(event, callback=None, *, maxsize=1000) -> Subscription`** —
     issue `core.subscribe(event)` and route its `collection_update`
     notifications to a `Subscription`. The registry is keyed by event name
     (the notification's `params.collection`, the routing key — NOT the returned
     sub id); two subscribers to the same event both receive it.
   - **`.close()`** — idempotent; also usable as a context manager. Wakes every
-    subscription's `events()` iterator (as does a dropped connection).
+    subscription's `events()` iterator (as does a dropped connection), and
+    releases the socket even when the server closed the connection first.
+    A connection whose reader ended is `._closed`, so the owning host opens a
+    new one on next use; one bad message does not end it (it is logged and
+    dropped).
 - **`Subscription`** — one live subscription. **`.events(timeout=None)`** yields
   `Event`s from a bounded queue drained on the caller's thread (ends cleanly on
   unsubscribe/close/timeout); **`.unsubscribe()`** cancels it (idempotent, sends
@@ -354,6 +363,8 @@ imports on Python 3.9.
   event queue.
 - **`CALL_TIMEOUT`** — default per-call timeout in seconds (int; overridable
   via the `CALL_TIMEOUT` env var, read at import time).
+- **`CONNECT_TIMEOUT`** — default timeout in seconds (30) for opening a
+  connection. It is not the reader's timeout: an idle connection stays open.
 - **`ClientException(error, errno=None, trace=None, extra=None)`** — base
   error for any call/connection failure; `errno` carries a POSIX errno when
   the middleware's `[ERRNO] message` prefix maps to one.
@@ -364,6 +375,13 @@ imports on Python 3.9.
   `core.get_jobs` record, `.errno` the middleware's errno when it reports one.
 - **`CallTimeout()`** (`ClientException` subclass) — raised when a call
   exceeds its timeout.
+- **`ConnectionClosed(sent)`** (`ClientException` subclass, `errno` is
+  `ECONNABORTED`) — the connection closed before the response arrived.
+  **`.sent`** is `False` when the request never reached the socket (safe to
+  repeat: `Namespace` retries exactly these) and `True` when the server may
+  have run it — a create, a delete, a job start — so only the caller can
+  decide. A plain `ClientException(errno=ECONNABORTED)` carries no `.sent` and
+  is treated as "may have run".
 - **`dumps(obj, **kwargs) -> str`** / **`loads(data, **kwargs)`** — JSON
   (de)serialization with the middleware's extended-type wrappers
   (`datetime`/`date`/`time`/`set`/`IPv4Interface`/`IPv6Interface`)

@@ -1036,6 +1036,22 @@ class TrueNASHost(_PosixHost, _ty.Generic[ApiVersion]):
                 conn = self._conn
             return _ty.cast("_connection.TrueNASWSConnection", conn)
 
+    def _drop_conn(self, conn: "_connection.TrueNASWSConnection | None") -> None:
+        """Discard ``conn`` so the next :attr:`conn` access reconnects.
+
+        Only if it is still the current connection -- another thread may have
+        replaced it already -- and closed, not just forgotten: a dropped
+        reference used to leak its socket and reader thread.
+        """
+        with self._conn_lock:
+            if conn is not None and self._conn is conn:
+                self._conn = None
+        if conn is not None:
+            try:
+                conn.close()
+            except Exception:
+                pass
+
     @property
     def websocket(self) -> "_connection.TrueNASWSConnection":
         """Former name of :attr:`conn`, kept because it is public API.
