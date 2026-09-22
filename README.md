@@ -81,21 +81,11 @@ Shell page uses — so a host reachable on the API port but **not** on 22 (NAT, 
 firewall allowing only 443) can still run commands. Name providers explicitly
 with `executor=` / `path=` to force or exclude one.
 
-Because it is a real terminal rather than a pipe, a few things are worth
-knowing:
-
-- **Output you do not capture is streamed** to `stdout` (default
-  `sys.stdout.buffer`) as it arrives, in raw bytes — so a long command reports
-  progress, and colour survives. A captured `.stdout` is cleaned text.
-- **stderr is separated when it can be.** A PTY has one stream, so pytruenas
-  wraps the command to fence its stderr in terminal escape markers and splits
-  them back out. This needs a shell with process substitution (bash/zsh/ksh);
-  the shell is read from `auth.me()`, and output stays merged when it is
-  something else — `.stderr` is then `None`.
-- **Input works in two shapes.** `input=` is delivered as a here-document and
-  is the reliable one. `stdin=` accepts a readable object and pumps it in the
-  background, for data you are still producing; it races the terminal's echo,
-  so prefer `input=` when the data is known up front.
+Output is exact: commands and input travel base64-encoded and output is
+framed by markers the command prints, so the terminal's echo, prompt and banner
+never reach your result. Uncaptured stdout streams live; stderr is captured
+separately (delivered when the command ends); `input=`/`stdin=` are delivered
+through a temporary file, never typed into the terminal.
 
 ### Credentials
 

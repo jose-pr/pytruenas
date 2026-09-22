@@ -55,47 +55,39 @@ forwarded port, a firewall allowing only 443, an appliance behind a reverse
 proxy — has no SSH to fall back on. For those, `run()` uses `/websocket/shell`,
 the same PTY the web UI's Shell page drives.
 
-It is ranked below SSH deliberately, because a PTY is a single terminal stream
-rather than a pair of clean channels. Most of that is worked around, but not
-all of it:
+It is ranked below SSH deliberately: SSH has real channels, while the web
+shell drives an interactive terminal. It behaves like any other executor for
+`capture_output`, `stdout=`/`stderr=`, `input=`, `text`/`encoding`, `check` and
+`timeout`, with these differences:
 
-- **stdout and stderr are separated when the shell allows it.** A PTY has one
-  stream, so the command is wrapped to fence its stderr in terminal escape
-  markers, which are split back out into `.stderr`. This needs a shell with
-  process substitution — bash, zsh, or ksh. The login shell is read from
-  `auth.me()`; under anything else (`sh`, `dash`) the streams stay **merged**,
-  everything arrives on `stdout`, and `.stderr` is `None`. Merged output is
-  always correct, just less informative.
-
-    The wrapper is only applied when you ask for the distinction — a plain
-    `capture_output=True` costs nothing extra.
-
-- **Input works, in two shapes.**
+- **Output is exact.** The command and its input are sent base64-encoded and its
+  output is framed by markers the command itself prints, so nothing typed is
+  interpreted by the terminal and nothing the terminal draws (the echo, the
+  prompt, the login banner) reaches your result. Captured `.stdout` is the
+  program's own bytes.
+- **Uncaptured stdout is streamed as it arrives** to its target (default
+  `sys.stdout.buffer`), within about 0.1 s — a long-running command reports
+  progress live.
+- **stderr is captured separately** in any POSIX login shell. It is written to
+  the remote side and delivered when the command finishes, so a stderr
+  *target* receives it at the end rather than live. `stderr=subprocess.STDOUT`
+  merges the two as they are produced.
+- **stdin is always a file, never the terminal.** `input=` (bytes or str) and a
+  readable `stdin=` object — read to EOF first — are delivered through a
+  temporary file; with neither, stdin is `/dev/null`, so a command that prompts
+  gets EOF instead of hanging. Streaming stdin incrementally is not supported:
+  bytes typed into a terminal that the program does not read would be run by
+  the shell as the next command. A file *descriptor* (`subprocess.PIPE`) is
+  rejected.
 
     ```python
-    # Known up front -- delivered as a here-document. Prefer this.
     client.run("cat", input="hello\n", encoding="utf-8")
-
-    # Still being produced -- pumped in the background.
-    client.run("cat", stdin=open("big.bin", "rb"))
+    client.run("cat", stdin=open("big.bin", "rb"))   # read in full, then sent
     ```
 
-    `input=` is reliable; `stdin=` races the terminal's echo of the command
-    line and is mitigated by a short delay rather than fully cured. A file
-    *descriptor* (`subprocess.PIPE`) is rejected — there is no PTY fd to
-    attach one to.
-
-- **Output you do not capture is streamed as it arrives**, in raw bytes, to
-  `stdout` (default `sys.stdout.buffer`) — so a long-running command reports
-  progress instead of going silent, and colour and other escape sequences
-  survive. Anything you *do* capture is cleaned text.
-
-- **Commands must be single-line.** An embedded newline submits a partial line
-  to the terminal and desynchronises the session, so it is rejected rather than
-  silently mangled. A here-document is the exception, since its newlines are
-  the document's own — which is how `input=` is delivered.
-- The exit status is recovered from the terminal stream, and terminal escape
-  sequences are stripped from the captured output.
+- `timeout=None` waits indefinitely; on a timeout the command is interrupted,
+  the session is closed, and `subprocess.TimeoutExpired` carries the partial
+  output (and `orphaned=False`).
 
 ## Choosing the transport yourself
 
