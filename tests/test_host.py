@@ -211,6 +211,42 @@ def test_known_hosts_is_accepted_by_the_host_constructor():
     assert client.config.ssh.known_hosts is None
 
 
+def test_verify_defaults_to_every_check_on():
+    config = TrueNASConfig.from_target("wss://nas", shell="ssh://root@nas")
+    assert (config.verify, config.sslverify, config.known_hosts) == (True, True, ())
+    assert config.ssh.known_hosts == ()
+
+
+def test_verify_false_turns_off_tls_and_host_key_checks():
+    """One switch for a lab box: TLS certificates and SSH host keys alike."""
+    client = TrueNASHost("wss://nas", shell="ssh://root@nas", verify=False)
+    assert client.sslverify is False  # websocket, HTTP side channels, web shell
+    assert client.config.known_hosts is None
+    assert client.config.ssh.known_hosts is None  # SSH commands and SFTP
+
+
+def test_specific_settings_override_verify():
+    config = TrueNASConfig.from_target(
+        "wss://nas", shell="ssh://root@nas", verify=False, sslverify=True
+    )
+    assert config.sslverify is True and config.ssh.known_hosts is None
+    config = TrueNASConfig.from_target(
+        "wss://nas", shell="ssh://root@nas", verify=False, known_hosts="/k"
+    )
+    assert config.sslverify is False and config.ssh.known_hosts == "/k"
+
+
+def test_verify_false_reaches_an_explicit_ssh_config_left_at_its_default():
+    """A caller's SshConfig at the default policy follows `verify` -- on a copy."""
+    mine = SshConfig(host="nas")
+    config = TrueNASConfig.from_target("wss://nas", ssh=mine, verify=False)
+    assert config.ssh.known_hosts is None
+    assert mine.known_hosts == ()  # the caller's object is not mutated
+    named = SshConfig(host="nas", known_hosts="/srv/known_hosts")
+    config = TrueNASConfig.from_target("wss://nas", ssh=named, verify=False)
+    assert config.ssh.known_hosts == "/srv/known_hosts"
+
+
 def test_explicit_ssh_config_keeps_its_own_known_hosts():
     """A caller who built an SshConfig chose its policy; do not override it."""
     ssh = SshConfig(host="nas", known_hosts="/srv/known_hosts")

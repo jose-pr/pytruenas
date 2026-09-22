@@ -8,6 +8,10 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- `TrueNASClient(..., verify=False)` — one switch that turns off every check the
+  client makes: TLS certificate verification (websocket, HTTP side channels,
+  web shell) and SSH host-key verification (commands and SFTP). `sslverify=`
+  and `known_hosts=` override it individually.
 - `TrueNASClient(..., known_hosts=...)` — the host-key policy for the SSH leg
   built from `shell=` or by `install_sshcreds()`: `()` (default) checks
   `~/.ssh/known_hosts`, `None` skips the check, a path or list names the

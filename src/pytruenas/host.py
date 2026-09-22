@@ -241,6 +241,18 @@ def _public_key(private_key: str) -> str:
     )
 
 
+class _Default:
+    """Sentinel: an option was not given, so it follows ``verify``."""
+
+    def __repr__(self) -> str:
+        return "<follows verify>"
+
+
+#: ``known_hosts`` not given. Distinct from ``()`` (check the usual file) and
+#: from ``None`` (do not check), both of which are real choices.
+_DEFAULT: _ty.Any = _Default()
+
+
 def _shared_options(credentials: "_ty.Mapping[str, object]") -> "dict[str, object]":
     """Config options common to every branch of ``_from_parsed_uri``.
 
@@ -250,11 +262,12 @@ def _shared_options(credentials: "_ty.Mapping[str, object]") -> "dict[str, objec
     how ``webshell=False`` was once accepted and dropped.
     """
     return {
-        "sslverify": _ty.cast(bool, credentials.get("sslverify", True)),
+        "verify": _ty.cast(bool, credentials.get("verify", True)),
+        "sslverify": _ty.cast("bool | None", credentials.get("sslverify")),
         "version": _ty.cast(str, credentials.get("version", "current")),
         "ssh": credentials.get("ssh"),
         "shell": _ty.cast(_ty.Any, credentials.get("shell")),
-        "known_hosts": credentials.get("known_hosts", ()),
+        "known_hosts": credentials.get("known_hosts", _DEFAULT),
         "executor": _ty.cast(_ty.Any, credentials.get("executor")),
         "path": _ty.cast(_ty.Any, credentials.get("path")),
         "autologin": _ty.cast(bool, credentials.get("autologin", True)),
@@ -418,11 +431,12 @@ class TrueNASConfig(
         socket_path: "str | None" = None,
         api_path: "str | None" = None,
         version: str = "current",
-        sslverify: bool = True,
+        verify: bool = True,
+        sslverify: "bool | None" = None,
         credentials: object = None,
         ssh: object = None,
         shell: "str | None" = None,
-        known_hosts: object = (),
+        known_hosts: object = _DEFAULT,
         executor: "_ty.Iterable[str] | str | None" = None,
         path: "_ty.Iterable[str] | str | None" = None,
         autologin: bool = True,
@@ -450,7 +464,13 @@ class TrueNASConfig(
         self.socket_path = socket_path
         self.api_path = api_path
         self.version = version
-        self.sslverify = sslverify
+        #: One switch for every check the client makes: ``False`` turns off TLS
+        #: certificate verification (the API websocket, the HTTP side channels,
+        #: the web shell) and SSH host-key verification (commands and SFTP).
+        #: ``sslverify=`` / ``known_hosts=`` given explicitly override it.
+        self.verify = verify
+        #: TLS certificate verification; follows ``verify`` unless given.
+        self.sslverify = verify if sslverify is None else sslverify
         #: The SSH leg. Accepts a ready :class:`hostctl.host.SshConfig` or, via
         #: ``shell=``, the connection string ``TrueNASClient`` has always taken
         #: (``"ssh://root@nas"``, ``"root@nas:22"``) -- so a caller does not
@@ -459,9 +479,17 @@ class TrueNASConfig(
         #: ``known_hosts`` is the host-key policy for an SSH leg built here --
         #: from ``shell=`` or by :meth:`TrueNASHost.install_sshcreds`. It uses
         #: hostctl's values: ``()`` checks ``~/.ssh/known_hosts``, ``None``
-        #: disables the check, a path or list names the file(s). An explicit
-        #: ``ssh=SshConfig(...)`` keeps its own policy.
+        #: disables the check, a path or list names the file(s). Unset, it
+        #: follows ``verify`` (``()`` or ``None``). An explicit
+        #: ``ssh=SshConfig(...)`` keeps a policy it names; one left at the
+        #: ``()`` default gets ``None`` when ``verify=False`` (on a copy).
+        if known_hosts is _DEFAULT:
+            known_hosts = () if verify else None
         self.known_hosts = known_hosts
+        if ssh is not None and not verify and getattr(ssh, "known_hosts", None) == ():
+            import dataclasses
+
+            ssh = dataclasses.replace(_ty.cast(_ty.Any, ssh), known_hosts=None)
         self.ssh = ssh if ssh is not None else _ssh_config_from(shell, known_hosts)
         # Credentials are normalized once, here, so every downstream consumer
         # sees a Credentials instance rather than "maybe a string, maybe a
@@ -499,6 +527,7 @@ class TrueNASConfig(
         "api_key",
         "token",
         "credentials",
+        "verify",
         "sslverify",
         "ssh",
         "version",

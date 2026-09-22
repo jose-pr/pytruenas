@@ -23,9 +23,9 @@ called `client.host.run()`; `host.api` called `host.client.api`); that is gone.
 host half of the API is documented, and `.client`/`.host` both return the
 object itself.
 
-`TrueNASClient(target=None, credentials=None, *, sslverify=True, shell=None,
-known_hosts=(), logger=None, autologin=True, version="current", executor=None,
-path=None, ssh=None, ...)`
+`TrueNASClient(target=None, credentials=None, *, verify=True, sslverify=None,
+shell=None, known_hosts=<follows verify>, logger=None, autologin=True,
+version="current", executor=None, path=None, ssh=None, ...)`
 
 - **`target`** — a host, `"host:port"`, or full `scheme://...` URI. `None` /
   omitted / local-only resolves to the local middleware unix socket
@@ -36,12 +36,20 @@ path=None, ssh=None, ...)`
   `Credentials(...)` (below); `None` means local-socket auth (no login call).
 - **`autologin`** (default `True`) — the first `.conn` access calls
   `.login()` automatically when there's no live connection.
-- **`sslverify`** (default `True`) — TLS certificate verification for `wss://`
-  and the HTTP(S) side channels (upload/download probing).
+- **`verify`** (default `True`) — one switch for every check the client
+  makes. `verify=False` turns off TLS certificate verification (the API
+  websocket, the HTTP(S) side channels, the web shell) **and** SSH host-key
+  verification (commands and SFTP): `sslverify` becomes `False` and
+  `known_hosts` becomes `None`, including on an explicit `ssh=SshConfig(...)`
+  still at its `()` default (a copy is changed, not yours). A specific
+  `sslverify=` or `known_hosts=` overrides it.
+- **`sslverify`** (default: follows `verify`) — TLS certificate verification
+  for `wss://`, the HTTP(S) side channels and the web shell.
 - **`shell`** — connection string for the SSH leg (`"ssh://root@nas"`,
   `"root:pw@nas:22"`). Stored as an `SshConfig` on `.config.ssh`; pass
   `ssh=SshConfig(...)` to supply one directly.
-- **`known_hosts`** (default `()`) — host-key policy for the SSH leg built from
+- **`known_hosts`** (default: `()`, or `None` under `verify=False`) —
+  host-key policy for the SSH leg built from
   `shell=` or by `.install_sshcreds()`, with hostctl's values: `()` verifies
   against `~/.ssh/known_hosts`, `None` does not verify, a path or list of paths
   names the file(s). An explicit `ssh=SshConfig(...)` keeps its own. Both the

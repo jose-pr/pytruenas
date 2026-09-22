@@ -77,6 +77,16 @@ TrueNASClient("nas", api_key, shell="ssh://root@nas", known_hosts=None)         
 TrueNASClient("nas", api_key, shell="ssh://root@nas", known_hosts="/srv/known_hosts")  # this file
 ```
 
+For a lab box with a self-signed certificate and an unrecorded host key,
+`verify=False` turns off both checks at once (TLS certificate verification
+everywhere, and SSH host-key verification):
+
+```python
+TrueNASClient("nas", api_key, shell="ssh://root@nas", verify=False)
+```
+
+`sslverify=` and `known_hosts=` still override it individually.
+
 `known_hosts=` applies to the SSH leg built from `shell=` and to the one
 `install_sshcreds()` wires in; an `ssh=SshConfig(...)` you build yourself keeps
 its own setting. When the key cannot be verified (or SSH is unreachable),
