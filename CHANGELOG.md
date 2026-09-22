@@ -30,6 +30,44 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
+- **Web shell (`run()` without SSH) rewritten; measured against TrueNAS
+  26.0.0-BETA.1's zsh before and after.**
+  - A captured `stdout` contained the terminal's echo of the wrapped command and
+    the completion marker (`run("echo hi")` returned 242 bytes); output with no
+    trailing newline was dropped; the first command on a new session could
+    capture the login banner. Captured output is now exactly the program's
+    bytes.
+  - A `^C` inside `input=` ended the here-document and ran the rest of the
+    payload as a root command, and `stdin=` bytes the program did not read were
+    executed by the shell. The command and its input are now sent
+    base64-encoded and input is delivered through a temporary file; nothing
+    typed is interpreted by the terminal.
+  - `input=` combined with the default stderr capture never ended and hung until
+    the timeout; stderr lines could be lost under bash or leak into the next
+    command.
+  - Output handling was quadratic: 64 KiB took over 240 s. 1 MiB now takes about
+    2–5 s.
+  - `timeout=None` meant 120 s; it now waits indefinitely. A timeout raised
+    `SubprocessError` or took up to twice as long; it now interrupts the command
+    and raises `TimeoutExpired` (with `orphaned`) on time.
+  - `stderr=` sent to a file while stdout was captured was dropped, and
+    `capture_output="stderr"` wrote stderr into the stdout target.
+  - `CompletedProcess.args` and `CalledProcessError` carried the `input=`
+    payload; they now carry the command only.
+  - `bytearray`/`memoryview` input arrived as its `repr`.
+  - Opening the session had no timeout.
+
+### Changed
+
+- Web shell: `stdin=` is read to EOF and delivered like `input=` instead of
+  being pumped into the terminal while the command runs; with no input, stdin
+  is `/dev/null` (a prompting command gets EOF instead of hanging), and
+  `stdin=subprocess.DEVNULL` is accepted. stderr is captured in any POSIX login
+  shell (no longer only bash/zsh/ksh) but a separate stderr target receives it
+  when the command finishes; `stderr=subprocess.STDOUT` merges live.
+
+### Fixed (continued)
+
 - `patch` `FileTarget(baseline=True)`: the snapshot of an existing file was
   created with the default mode, so a copy of a `0640` `/etc/shadow` sat beside
   it at `0644`; `revert()` of a deleted target recreated it at `0644` too. Both

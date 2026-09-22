@@ -179,8 +179,16 @@ in particular would be a fallback that could only ever fail there —
 **`webshell`** runs commands over `/websocket/shell` — the same PTY the web
 UI's Shell page drives. It exists for a host reachable on the API port but not
 on 22 (NAT, a firewall allowing only 443, a reverse proxy), which would
-otherwise have no `run()` at all. It ranks below SSH because a PTY merges
-stdout and stderr and cannot take piped input.
+otherwise have no `run()` at all. It ranks below SSH, which has real
+channels: the web shell drives a terminal, sending the command and any
+`input=`/`stdin=` base64-encoded and framing output by markers the command
+prints, so captured stdout is exact bytes and nothing typed is interpreted.
+Uncaptured stdout streams live; stderr is captured separately but delivered
+when the command ends (`stderr=STDOUT` merges live); `stdin=` is read to EOF
+first (no incremental stdin); no input means `/dev/null`; `timeout=None`
+waits forever; a timeout interrupts, closes the session and raises
+`TimeoutExpired(orphaned=False)`. Requires a POSIX login shell with
+`base64`, `mktemp` and `stty` (TrueNAS root's zsh qualifies).
 
 **Overriding the selection.** `executor=` and `path=` name the providers to
 use, in preference order — a single name or a sequence:

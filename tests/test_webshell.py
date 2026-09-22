@@ -1,61 +1,63 @@
-"""The ``/_shell`` executor (step 10 of the hostctl migration).
+"""The web-shell executor: commands through a login-shell terminal.
 
-Only the parts that can be tested without a TrueNAS box: output cleaning, URI
-construction, and the guards on unsupported options. The wire protocol itself
-was verified live against 26.0.0-BETA.1 (18/18), which is the only way to check
-it -- a mocked PTY would just assert this module's own assumptions back at it.
+Three layers are tested separately:
+
+* what is TYPED (``command_lines``): nothing the terminal's line editor could
+  interpret -- the command and its input travel base64-encoded;
+* how output is FRAMED (``_Frame``): only markers the command printed count,
+  never the terminal's echo of what was typed;
+* the session and provider, against an emulator of the TrueNAS zsh terminal
+  (echo with redraw sequences, a banner, output cut into small fragments), and,
+  on a POSIX machine, against a real shell in a real pty.
+
+Everything the old implementation got wrong on a real appliance is pinned here
+(each was measured live on TrueNAS 26.0.0-BETA.1 before the rewrite): the echo
+and the completion marker came back inside stdout, output with no trailing
+newline was dropped, ``input=`` with a stderr split hung, a ``^C`` in ``input=``
+ran the rest as a root command, unread ``stdin=`` was executed by the shell, and
+output handling was quadratic.
 """
 
+import base64
 import io
+import os
+import re
 import shutil
 import subprocess
-import threading as _threading
+import sys
+import time
 from unittest.mock import MagicMock
 
 import pytest
 
-from pytruenas.webshell import (  # noqa: E402
+from hostctl.provider import OperationNotStarted
+
+import pytruenas.webshell as ws_mod
+from pytruenas.webshell import (
     WEBSHELL_PATH,
     WebShellExecutorProvider,
     WebShellSession,
+    _Frame,
     clean_output,
 )
 
-# -- output cleaning -------------------------------------------------------
+TOKEN = "0123456789abcdef"
+
+# -- output cleaning (a display helper; never applied to command output) ------
 
 
-def test_clean_output_strips_ansi():
-    # Trailing newlines are preserved -- this cleans the *rendering*, not the
-    # content; run_script() is what trims the final result.
-    raw = b"\x1b[1m\x1b[7mhello\x1b[27m\x1b[0m\r\n"
-    assert clean_output(raw).strip() == "hello"
+def test_clean_output_strips_ansi_prompt_and_cr():
+    raw = b"\x1b[1mhello\x1b[0m\r\nroot@TRUENAS[~]# \r\n"
+    text = clean_output(raw)
+    assert "hello" in text and "root@" not in text and "\r" not in text
 
 
-def test_clean_output_strips_the_prompt():
-    raw = b"output\r\nroot@TRUENAS[~]# \r\n"
-    assert "root@" not in clean_output(raw)
-    assert "output" in clean_output(raw)
+def test_clean_output_keeps_tabs_and_decodes_invalid_utf8():
+    assert "a\tb" in clean_output(b"a\tb\n")
+    assert isinstance(clean_output(b"\xff\xfe ok"), str)
 
 
-def test_clean_output_strips_a_bare_redraw_prompt():
-    """zsh redraws its line as a lone '#' padded to the terminal width.
-
-    Easy to miss -- it looks like blank output rather than a prompt, and left a
-    stray '#' on the end of every result until it was handled.
-    """
-    raw = b"real output\r\n#" + b" " * 60 + b"\r\n"
-    assert clean_output(raw).strip() == "real output"
-
-
-def test_clean_output_keeps_tabs_and_content():
-    assert clean_output(b"tab\there\r\n").strip() == "tab\there"
-
-
-def test_clean_output_decodes_invalid_utf8_without_raising():
-    assert "hi" in clean_output(b"hi\xff\xfe\r\n")
-
-
-# -- URI construction ------------------------------------------------------
+# -- connection target ---------------------------------------------------------
 
 
 def _client(scheme="https", host="nas"):
@@ -70,12 +72,7 @@ def _client(scheme="https", host="nas"):
 
 
 def test_uri_uses_the_public_websocket_path():
-    """nginx exposes the shell at /websocket/shell, not the internal /_shell.
-
-    Connecting to /_shell on 443 does not fail cleanly: nginx serves the web UI
-    there, so websocket-client follows a redirect into an https:// URL and its
-    own parse_url rejects it with "scheme https is invalid".
-    """
+    """nginx exposes the shell at /websocket/shell, not the internal /_shell."""
     client = _client()
     WebShellSession(client)._uri()
     client._http_target.assert_called_once_with(WEBSHELL_PATH)
@@ -87,392 +84,422 @@ def test_uri_maps_https_to_wss_and_http_to_ws():
     assert WebShellSession(_client("http"))._uri().startswith("ws://")
 
 
-# -- guards on what a PTY cannot do ---------------------------------------
+# -- what is typed -------------------------------------------------------------
+
+HOSTILE = "printf 'a\\tb'; echo \"!!\" `x`\n\x03\x04\x1b[A\tdone"
 
 
-def _provider():
-    client = MagicMock()
-    client.config = MagicMock(is_local=False)
-    return WebShellExecutorProvider(client)
+def _decoded_command(lines):
+    main = lines[-1]
+    encoded = re.search(r"printf %s '([^']*)' \| base64 -d", main).group(1)
+    return base64.b64decode(encoded).decode()
 
 
-def test_rejects_multi_line_scripts():
-    """An embedded newline submits a partial line and desyncs every later read."""
-    session = WebShellSession(MagicMock())
-    with pytest.raises(ValueError, match="single-line"):
-        session.run_script("echo a\necho b")
+def _decoded_input(lines):
+    chunks = [re.match(r"printf %s '([^']*)' >> ", line) for line in lines]
+    return base64.b64decode("".join(m.group(1) for m in chunks if m))
 
 
-def test_rejects_stdin_redirection():
-    """stdin stays rejected: the PTY has no input channel to attach to.
+def test_typed_lines_carry_nothing_a_line_editor_would_interpret():
+    """No control characters, TABs, `!` or embedded newlines are typed.
 
-    stdout/stderr are NOT rejected any more -- the merged stream is written
-    through to whatever the caller set, matching every other executor.
+    A `^C` inside `input=` used to break out of the here-document and run the
+    rest of the payload as a root command (measured live); a TAB triggered
+    completion; `!` history expansion.
     """
-    with pytest.raises(NotImplementedError, match="stdin"):
-        _provider()._execute("true", stdin=subprocess.PIPE)
+    payload = HOSTILE.encode() + bytes(range(256))
+    lines = WebShellSession.command_lines(HOSTILE, TOKEN, input=payload)
+    for line in lines:
+        assert all(32 <= ord(ch) < 127 for ch in line), line
+        assert "!" not in line
+    assert _decoded_command(lines) == HOSTILE
+    assert _decoded_input(lines) == payload
 
 
-def test_rejects_an_fd_for_stdin():
-    """An int fd has nothing to read and no pty fd to attach to."""
-    with pytest.raises(NotImplementedError, match="descriptor|readable"):
-        _provider()._execute("cat", stdin=subprocess.PIPE)
+def test_long_input_is_split_across_bounded_lines():
+    payload = os.urandom(20000)
+    lines = WebShellSession.command_lines("cat", TOKEN, input=payload)
+    assert len(lines) > 3
+    assert max(len(line) for line in lines[1:-2]) <= ws_mod._CHUNK + 64
+    assert _decoded_input(lines) == payload
 
 
-def test_rejects_stdin_and_input_together():
-    with pytest.raises(ValueError, match="may not both"):
-        _provider()._execute("cat", stdin=io.BytesIO(b"a"), input="b")
+def test_no_typed_line_contains_a_marker_contiguously():
+    """So the terminal's echo of the line can never be taken for output."""
+    for line in WebShellSession.command_lines("true", TOKEN, input=b"x"):
+        assert f"__ST{TOKEN}__" not in line
+        assert f"__OUT{TOKEN}__" not in line
+        assert not re.search(rf"__EN{TOKEN}_\d+_EN__", line)
 
 
-def test_rejects_argv_arguments():
-    # A PTY takes one line of shell text, so the provider declares no `args`
-    # capability and hostctl renders the whole invocation to a string.
-    with pytest.raises(NotImplementedError, match="argv"):
-        _provider()._execute("echo", "a", "b")
+def test_stdin_is_dev_null_without_input_and_stderr_mode_is_chosen():
+    plain = WebShellSession.command_lines("true", TOKEN)[-1]
+    assert "< /dev/null" in plain and "2>&1" not in plain
+    merged = WebShellSession.command_lines("true", TOKEN, merge_stderr=True)[-1]
+    assert "2>&1" in merged
 
 
-def test_declares_no_args_capability():
-    assert "args" not in _provider().capabilities
+# -- framing -------------------------------------------------------------------
 
 
-# -- streaming output ------------------------------------------------------
-#
-# These drive run_script() against a fake websocket rather than a real PTY:
-# the frames a PTY would send are exactly the input this logic has to handle,
-# and scripting them is the only way to test *incremental* delivery at all --
-# a live box hands back whatever timing it feels like.
+def _stream(out=b"", err=b"", rc=0, echo=True):
+    """The bytes a TrueNAS zsh terminal sends for one command."""
+    lines = WebShellSession.command_lines("cmd", TOKEN)
+    junk = b"Welcome to TrueNAS\r\nroot@TRUENAS[~]# "
+    if echo:
+        for line in lines:
+            # zsh redraws long lines with CR + erase-line inside the echo.
+            text = line.encode()
+            junk += text[:40] + b"\r\x1b[K" + text[40:] + b"\r\n"
+    body = (
+        f"__ST{TOKEN}__".encode()
+        + out
+        + f"__OUT{TOKEN}__".encode()
+        + err
+        + f"__EN{TOKEN}_{rc}_EN__".encode()
+    )
+    return junk + body + b"\r\nroot@TRUENAS[~]# "
 
 
-class _FakeWS:
-    """A websocket that replays a fixed frame sequence.
+def _feed_all(data, size):
+    frame = _Frame(TOKEN)
+    emitted_out = emitted_err = b""
+    for offset in range(0, len(data), size):
+        out, err = frame.feed(data[offset : offset + size])
+        emitted_out += out
+        emitted_err += err
+        if frame.state == "done":
+            break
+    return frame, emitted_out, emitted_err
 
-    `sent` records what run_script wrote, so a test can recover the generated
-    sentinel and build a matching completion frame.
+
+@pytest.mark.parametrize("size", [1, 2, 3, 5, 7, 13, 64, 100000])
+def test_frame_ignores_echo_and_banner_at_every_split(size):
+    data = _stream(out=b"hi\n", err=b"oops\n", rc=3)
+    frame, out, err = _feed_all(data, size)
+    assert (bytes(frame.out), bytes(frame.err), frame.returncode) == (
+        b"hi\n",
+        b"oops\n",
+        3,
+    )
+    assert (out, err) == (b"hi\n", b"oops\n")  # emitted == captured
+
+
+def test_frame_keeps_output_without_a_trailing_newline_and_exact_bytes():
+    payload = b"abc"
+    frame, _, _ = _feed_all(_stream(out=payload), 4)
+    assert bytes(frame.out) == b"abc"
+    binary = bytes(range(256)) + b"\r\n\r"
+    frame, _, _ = _feed_all(_stream(out=binary), 9)
+    assert bytes(frame.out) == binary
+
+
+def test_frame_emits_a_short_line_on_the_frame_that_carries_it():
+    """Streamed stdout is real-time: no whole-marker hold-back.
+
+    Holding back a marker's length (23 bytes) delayed every short line until
+    later output pushed it out -- measured live as four 1 s-apart lines arriving
+    together at the end.
+    """
+    frame = _Frame(TOKEN)
+    frame.feed(b"echo...\r\n" + f"__ST{TOKEN}__".encode())
+    for line in (b"line1\n", b"line2\n", b"line3\n"):
+        out, _ = frame.feed(line)
+        assert out == line
+
+
+def test_frame_holds_back_only_a_partial_marker():
+    frame = _Frame(TOKEN)
+    frame.feed(f"__ST{TOKEN}__".encode())
+    out, _ = frame.feed(b"data__OU")
+    assert out == b"data"
+    out, _ = frame.feed(f"T{TOKEN}__".encode())
+    assert out == b"" and frame.state == "err"
+
+
+def test_frame_is_linear_in_output_size():
+    """The old parser re-cleaned and re-scanned the whole buffer per frame:
+    64 KiB of output exceeded a 240 s timeout (measured live)."""
+    data = _stream(out=b"a" * (4 * 1024 * 1024))
+    started = time.monotonic()
+    frame, _, _ = _feed_all(data, 1024)
+    assert frame.returncode == 0 and len(frame.out) == 4 * 1024 * 1024
+    assert time.monotonic() - started < 10
+
+
+# -- session and provider against a terminal emulator --------------------------
+
+
+class _Terminal:
+    """Emulates the TrueNAS zsh web-shell terminal at the websocket boundary.
+
+    Understands exactly what `command_lines` types: echoes each line (with
+    redraw sequences), and when the main line arrives runs ``responder(command,
+    stdin_bytes, merged)`` -> ``(stdout, stderr, rc)`` and sends the framed
+    result in small fragments, like a real pty.
     """
 
-    def __init__(self, frames):
-        self._frames = list(frames)
+    def __init__(self, responder=None, fragment=5, delay=0.0, silent=False):
+        self.responder = responder or (lambda cmd, data, merged: (b"", b"", 0))
+        self.fragment = fragment
+        self.delay = delay
+        self.silent = silent
         self.sent = []
+        self.frames = [b"root@TRUENAS[~]# "]
         self.timeout = None
+        self.closed = False
+        self._lines = []
 
     def send_binary(self, data):
         self.sent.append(data)
+        if data == b"\x03":
+            return
+        line = data.decode().rstrip("\n")
+        self._lines.append(line)
+        self.frames.append(line[:30].encode() + b"\r\x1b[K" + line[30:].encode())
+        if "stty -opost" in line and not self.silent:
+            self._run(line)
+
+    def _run(self, main):
+        token = re.search(r'"__ST" "(\w+)__"', main).group(1)
+        command = _decoded_command([main])
+        data = (
+            _decoded_input(self._lines)
+            if 'base64 -d "$' in " ".join(self._lines)
+            else b""
+        )
+        merged = "2>&1" in main
+        out, err, rc = self.responder(command, data, merged)
+        body = (
+            f"__ST{token}__".encode()
+            + out
+            + f"__OUT{token}__".encode()
+            + err
+            + f"__EN{token}_{rc}_EN__\r\nroot@TRUENAS[~]# ".encode()
+        )
+        self._scheduled = time.monotonic() + self.delay
+        for offset in range(0, len(body), self.fragment):
+            self.frames.append(body[offset : offset + self.fragment])
 
     def settimeout(self, value):
         self.timeout = value
 
     def recv(self):
-        if not self._frames:
-            raise AssertionError("run_script read past the scripted frames")
-        frame = self._frames.pop(0)
-        return frame() if callable(frame) else frame
+        import websocket
+
+        if self.closed:
+            raise websocket.WebSocketConnectionClosedException("closed")
+        if self.delay and time.monotonic() < getattr(self, "_scheduled", 0):
+            time.sleep(min(self.timeout or 0.01, 0.01))
+            raise websocket.WebSocketTimeoutException("timed out")
+        if not self.frames:
+            time.sleep(min(self.timeout or 0.01, 0.05))
+            raise websocket.WebSocketTimeoutException("timed out")
+        return self.frames.pop(0)
 
     def close(self):
-        pass
+        self.closed = True
 
 
-def _session(frames):
+def _session(terminal):
     session = WebShellSession(MagicMock())
-    session._ws = _FakeWS(frames)
+    session._ws = terminal
     return session
 
 
-def _end(session):
-    """The sentinel run_script generated, recovered from what it sent."""
-    sent = session._ws.sent[0].decode()
-    return sent.split('printf "')[1].split("%s")[0]
+def _provider(terminal):
+    client = MagicMock()
+    client.config = MagicMock(is_local=False)
+    provider = WebShellExecutorProvider(client)
+    provider._session = _session(terminal)
+    return provider
 
 
-def test_sink_receives_raw_bytes_preserving_ansi():
-    """Colour must survive to the sink: raw bytes, not cleaned text.
-
-    clean_output() strips exactly these escape sequences, so a sink fed the
-    cleaned form would silently lose every colour the caller wanted to see.
-    """
-    session = _session([])
-    chunks = []
-    red = b"\x1b[31mDANGER\x1b[0m\r\n"
-    session._ws = _FakeWS([red, lambda: f"{_end(session)}0\r\n".encode()])
-
-    text, raw, code = session.run_script("echo x", sink=chunks.append)
-
-    joined = b"".join(chunks)
-    assert b"\x1b[31m" in joined, "ANSI was stripped before reaching the sink"
-    assert b"DANGER" in joined
-    assert code == 0
-    # The cleaned return value is the opposite contract -- no escapes.
-    assert "\x1b[31m" not in text and "DANGER" in text
-    assert b"\x1b[31m" in raw
+def _echo(cmd, data, merged):
+    """Respond like `sh -c`: stdout "out:<cmd>", stderr "err", stdin echoed."""
+    out = b"out:" + cmd.encode() + (b"|in:" + data if data else b"")
+    return (out + (b"err" if merged else b""), b"" if merged else b"err", 0)
 
 
-def test_sink_is_incremental_not_one_final_write():
-    """Output arrives as it happens, not all at once when the command ends.
+def test_default_capture_returns_exactly_what_the_command_printed():
+    """Live before the rewrite: stdout was the whole echoed wrapper + marker."""
+    result = _provider(_Terminal(_echo))._execute("echo hi")
+    assert result.stdout == b"out:echo hi"
+    assert result.stderr == b"err"
+    assert result.returncode == 0
+    assert result.args == "echo hi"
 
-    A single write at completion is the behaviour this replaces, so the test
-    asserts the sink saw data BEFORE the sentinel frame was ever read.
-    """
-    session = _session([])
-    # Ordering, not totals: record how much the sink had received at the moment
-    # each frame was read. Asserting only on the final total cannot distinguish
-    # streaming from a single flush at completion -- the completion branch
-    # writes the withheld remainder too, so both end with the same bytes.
-    written = []
-    events = []
 
-    big = b"x" * 8192  # over _BATCH, so it flushes on arrival
+def test_text_mode_decodes():
+    result = _provider(_Terminal(_echo))._execute("x", text=True)
+    assert result.stdout == "out:x" and result.stderr == "err"
 
-    def frame_then_mark(data):
-        def _f():
-            events.append(("read", len(b"".join(written))))
-            return data
 
-        return _f
+def test_stderr_to_stdout_merges():
+    result = _provider(_Terminal(_echo))._execute("x", stderr=subprocess.STDOUT)
+    assert result.stdout == b"out:xerr" and result.stderr is None
 
-    session._ws = _FakeWS(
-        [
-            frame_then_mark(big),
-            frame_then_mark(big),
-            lambda: f"{_end(session)}0\r\n".encode(),
-        ]
+
+@pytest.mark.parametrize(
+    "value",
+    ["hé\n\x03rm -rf /\n", b"\x00\x01\xff", bytearray(b"ba"), memoryview(b"mv")],
+)
+def test_input_reaches_the_command_byte_for_byte(value):
+    expected = value.encode() if isinstance(value, str) else bytes(value)
+    result = _provider(_Terminal(_echo))._execute("cat", input=value)
+    assert result.stdout == b"out:cat|in:" + expected
+
+
+def test_a_stdin_object_is_read_and_delivered_as_input():
+    """Pumping stdin into the terminal let unread bytes run as a root command."""
+    result = _provider(_Terminal(_echo))._execute("cat", stdin=io.BytesIO(b"data"))
+    assert result.stdout == b"out:cat|in:data"
+
+
+def test_devnull_stdin_is_no_input_and_pipes_or_fds_are_rejected():
+    result = _provider(_Terminal(_echo))._execute("true", stdin=subprocess.DEVNULL)
+    assert result.stdout == b"out:true"
+    for bad in (subprocess.PIPE, 7):
+        with pytest.raises(NotImplementedError):
+            _provider(_Terminal(_echo))._execute("cat", stdin=bad)
+
+
+def test_input_and_stdin_together_and_argv_are_rejected():
+    with pytest.raises(ValueError, match="may not both"):
+        _provider(_Terminal(_echo))._execute("cat", stdin=io.BytesIO(b"a"), input="b")
+    with pytest.raises(NotImplementedError, match="argv"):
+        _provider(_Terminal(_echo))._execute("echo", "a", "b")
+    assert "args" not in _provider(_Terminal(_echo)).capabilities
+
+
+def test_check_raises_with_the_command_not_the_input():
+    """The exception must not carry the input (it may be a password)."""
+    failing = _Terminal(lambda cmd, data, merged: (b"", b"bad", 2))
+    with pytest.raises(subprocess.CalledProcessError) as caught:
+        _provider(failing)._execute("login", input="hunter2", check=True)
+    assert caught.value.returncode == 2
+    assert "hunter2" not in repr(caught.value.cmd)
+
+
+def test_uncaptured_output_goes_to_its_targets():
+    out, err = io.BytesIO(), io.BytesIO()
+    result = _provider(_Terminal(_echo))._execute(
+        "x", capture_output=False, stdout=out, stderr=err
     )
-    session.run_script("run", sink=written.append)
-
-    # By the time the SECOND frame was read, the first must already have been
-    # written out. Under buffer-until-done this is still 0.
-    assert events[1][1] >= 4096, (
-        "sink had received %d bytes when the 2nd frame arrived -- output is "
-        "being buffered until completion, not streamed" % events[1][1]
-    )
+    assert result.stdout is None and result.stderr is None
+    assert out.getvalue() == b"out:x" and err.getvalue() == b"err"
 
 
-def test_sink_never_emits_the_sentinel():
-    """The sentinel is internal bookkeeping and must not reach a terminal."""
-    session = _session([])
-    chunks = []
-    session._ws = _FakeWS(
-        [b"real output\r\n", lambda: f"{_end(session)}0\r\n".encode()]
-    )
-
-    session.run_script("echo hi", sink=chunks.append)
-
-    joined = b"".join(chunks)
-    assert b"real output" in joined
-    assert b"__EN" not in joined, "the completion sentinel leaked to the sink"
+def test_timeout_interrupts_closes_and_raises_the_hostctl_shape():
+    terminal = _Terminal(silent=True)
+    session = _session(terminal)
+    with pytest.raises(subprocess.TimeoutExpired) as caught:
+        session.execute("sleep 100", timeout=0.3)
+    assert caught.value.orphaned is False
+    assert terminal.sent[-1] == b"\x03" and terminal.closed
+    assert session._ws is None
 
 
-def test_returncode_is_recovered_from_the_sentinel():
-    session = _session([])
-    session._ws = _FakeWS([lambda: f"{_end(session)}42\r\n".encode()])
-    _, _, code = session.run_script("false")
-    assert code == 42
+def test_timeout_none_waits_past_the_poll_interval(monkeypatch):
+    monkeypatch.setattr(ws_mod, "_POLL", 0.05)
+    terminal = _Terminal(_echo, delay=0.4)
+    out, err, rc = _session(terminal).execute("slow", timeout=None)
+    assert out == b"out:slow" and rc == 0
 
 
-def test_no_sink_still_returns_the_output():
-    """Omitting the sink keeps the previous buffered behaviour intact."""
-    session = _session([])
-    session._ws = _FakeWS([b"hello\r\n", lambda: f"{_end(session)}0\r\n".encode()])
-    text, raw, code = session.run_script("echo hello")
-    assert "hello" in text and b"hello" in raw and code == 0
+def test_a_connection_lost_before_the_command_started_did_not_run_it():
+    terminal = _Terminal(silent=True)
+    terminal.closed = True
+    with pytest.raises(OperationNotStarted):
+        _session(terminal).execute("true", timeout=5)
 
 
-# -- stderr splitting ------------------------------------------------------
-#
-# These test the SPLITTER against bytes shaped like what the wrapper asks the
-# shell to emit. That the appliance's shell actually produces those bytes is a
-# separate claim, only checkable live -- see the module docstring.
-
-_ERR_START = b"\x1b]1337;PytruenasStderr\x07"
-_ERR_END = b"\x1b]1337;PytruenasStdout\x07"
-
-
-def test_split_streams_separates_marked_regions():
-    raw = b"out1" + _ERR_START + b"err1" + _ERR_END + b"out2"
-    out, err = WebShellSession.split_streams(raw)
-    assert out == b"out1out2"
-    assert err == b"err1"
-
-
-def test_split_streams_handles_no_markers():
-    out, err = WebShellSession.split_streams(b"plain")
-    assert out == b"plain" and err == b""
-
-
-def test_split_streams_treats_an_unterminated_region_as_stderr():
-    """The stream said it switched and never said it switched back."""
-    out, err = WebShellSession.split_streams(b"a" + _ERR_START + b"boom")
-    assert out == b"a" and err == b"boom"
-
-
-def test_sinks_receive_their_own_streams():
-    session = _session([])
-    out_chunks, err_chunks = [], []
-    body = b"to-out" + _ERR_START + b"to-err" + _ERR_END
-    session._ws = _FakeWS([body, lambda: f"{_end(session)}0\r\n".encode()])
-
-    session.run_script("cmd", sink=out_chunks.append, errsink=err_chunks.append)
-
-    assert b"to-out" in b"".join(out_chunks)
-    assert b"to-err" in b"".join(err_chunks)
-    # Neither sink may see the other's bytes, nor the framing itself.
-    assert b"to-err" not in b"".join(out_chunks)
-    assert b"\x1b]1337" not in b"".join(out_chunks + err_chunks)
-
-
-def test_stderr_region_spanning_two_batches_stays_stderr():
-    """The in-region flag has to persist across emits.
-
-    A stderr burst longer than one batch would otherwise have its tail put
-    back on stdout the moment a boundary fell inside the region.
-    """
-    session = _session([])
-    out_chunks, err_chunks = [], []
-    big = b"E" * 9000  # spans several _BATCH-sized emits
-    session._ws = _FakeWS(
-        [
-            _ERR_START + big[:4500],
-            big[4500:] + _ERR_END,
-            lambda: f"{_end(session)}0\r\n".encode(),
-        ]
-    )
-
-    session.run_script("cmd", sink=out_chunks.append, errsink=err_chunks.append)
-
-    assert b"".join(err_chunks).count(b"E") == 9000
-    assert b"E" not in b"".join(out_chunks)
-
-
-def test_markers_are_stripped_when_there_is_no_errsink():
-    """Merged view still must not render the framing as garbage."""
-    session = _session([])
-    chunks = []
-    session._ws = _FakeWS(
-        [
-            b"a" + _ERR_START + b"b" + _ERR_END + b"c",
-            lambda: f"{_end(session)}0\r\n".encode(),
-        ]
-    )
-    session.run_script("cmd", sink=chunks.append)
-    joined = b"".join(chunks)
-    assert b"\x1b]1337" not in joined
-    # Both streams still arrive -- merged is the point, not dropped.
-    assert b"a" in joined and b"b" in joined and b"c" in joined
-
-
-def test_wrap_stderr_uses_a_read_loop_not_cat():
-    """cat's start/end only bracket the subshell's whole lifetime.
-
-    Verified live: `{ echo out1; echo err1 >&2; echo out2; echo err2 >&2; }`
-    wrapped with a bare `{ printf start; cat; printf end; }` puts BOTH out1
-    and out2 inside the bracket alongside the err lines, nondeterministically
-    -- the process substitution is a separate subshell whose own scheduling
-    decides when `start`/`end` fire, not the timing of the actual stderr
-    writes. A per-line read loop closes the bracket after every line instead,
-    so a stdout write in between cannot land inside an open one.
-    """
-    wrapped = WebShellSession.wrap_stderr("mycmd")
-    assert "2> >(" in wrapped
-    assert "while" in wrapped and "read" in wrapped
-    assert "mycmd" in wrapped
-
-
-def test_wrap_stderr_forwards_stdout_and_stderr_correctly_live():
-    """The gap the splitter tests above call out: does the real shell agree?
-
-    Everything else in this module tests the SPLITTER against synthetic bytes
-    shaped like what the wrapper is supposed to emit. This is the one test
-    that actually runs the wrapped script through bash and checks the two
-    streams come back attributed correctly -- skipped where bash is not on
-    PATH, since that live claim can only be checked where a real shell exists.
-    """
-    bash = shutil.which("bash")
-    if bash is None:
-        pytest.skip("no bash on PATH to verify wrap_stderr against")
-
-    script = "echo out1; echo err1 >&2; echo out2; echo err2 >&2"
-    wrapped = WebShellSession.wrap_stderr(script)
-    raw = subprocess.run(
-        [bash, "-c", wrapped], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL
-    ).stdout
-
-    out, err = WebShellSession.split_streams(raw)
-    assert out == b"out1\nout2\n"
-    assert err == b"err1\nerr2\n"
-
-
-# -- input delivery --------------------------------------------------------
-
-
-def test_with_input_builds_a_quoted_heredoc():
-    from pytruenas.webshell import _with_input
-
-    script = _with_input("cat", "$HOME `id`")
-    # Quoted delimiter: the payload must not be expanded by the shell.
-    assert "<<'" in script
-    assert "$HOME `id`" in script
-    # Opens and closes with the same generated delimiter.
-    delimiter = script.split("<<'")[1].split("'")[0]
-    assert script.rstrip().endswith(delimiter)
-
-
-def test_with_input_accepts_bytes():
-    from pytruenas.webshell import _with_input
-
-    assert "hello" in _with_input("cat", b"hello")
-
-
-def test_heredoc_newlines_are_allowed_through_run_script():
-    """A here-doc is the one legal multi-line form."""
-    session = _session([])
-    session._ws = _FakeWS([lambda: f"{_end(session)}0\r\n".encode()])
-    # Would raise without heredoc=True.
-    _, _, code = session.run_script("cat <<'X'\ndata\nX", heredoc=True)
-    assert code == 0
-
-
-def test_multi_line_still_rejected_without_heredoc():
-    session = WebShellSession(MagicMock())
-    with pytest.raises(ValueError, match="single-line"):
-        session.run_script("echo a\necho b")
-
-
-def test_stdin_is_pumped_to_the_websocket(monkeypatch):
-    """A readable handle is forwarded as binary frames, then EOF.
-
-    `_PUMP_DELAY` is patched out: it exists to lose a race against a REAL
-    pty's echo (see `_pump_stdin`), and there is no pty here -- left in, the
-    test would just sleep for it.
-    """
-    import pytruenas.webshell as ws_mod
-
-    monkeypatch.setattr(ws_mod, "_PUMP_DELAY", 0)
-    session = _session([])
-    session._ws = _FakeWS([lambda: f"{_end(session)}0\r\n".encode()])
-
-    session.run_script("cat", stdin=io.BytesIO(b"piped-payload"))
-
-    # The pump runs on its own thread; wait for it rather than assuming it
-    # won the race with this assertion.
-    for thread in _threading.enumerate():
-        if thread.name == "pytruenas-webshell-stdin":
-            thread.join(timeout=5)
-
-    # sent[0] is the command itself; the pump's writes follow.
-    pumped = b"".join(session._ws.sent[1:])
-    assert b"piped-payload" in pumped
-    assert pumped.endswith(b"\x04"), "no EOF sent; a reader would hang"
-
-
-# -- probe -----------------------------------------------------------------
-
-
-def test_probe_declines_for_a_local_target():
-    """A local target has the unix socket; a PTY would be strictly worse."""
+def test_probe_declines_for_a_local_target_and_accepts_a_remote_one():
     client = MagicMock()
     client.config = MagicMock(is_local=True)
     probe = WebShellExecutorProvider(client).probe()
-    assert not probe.usable
-    assert "local" in probe.reason
+    assert not probe.usable and "local" in probe.reason
+    assert _provider(_Terminal()).probe().usable
 
 
-def test_probe_is_available_for_a_remote_target():
-    assert _provider().probe().usable
+# -- a real shell in a real pty (POSIX) ----------------------------------------
+
+_REAL_PTY = sys.platform != "win32" and all(
+    shutil.which(tool) for tool in ("sh", "base64", "mktemp", "stty")
+)
+
+
+class _PtyWebSocket:
+    """A websocket whose far end is an interactive shell in a real pty.
+
+    Stands in for the middleware's ``os.forkpty()`` + login shell: real echo,
+    real line discipline, real parsing.
+    """
+
+    def __init__(self, shell="sh"):
+        import pty
+
+        self.pid, self.fd = pty.fork()
+        if self.pid == 0:  # pragma: no cover - child
+            os.environ["PS1"] = "root@TRUENAS[~]# "
+            os.execvp(shell, [shell, "-i"])
+        self.timeout = None
+        self.closed = False
+
+    def send_binary(self, data):
+        os.write(self.fd, data)
+
+    def settimeout(self, value):
+        self.timeout = value
+
+    def recv(self):
+        import select
+
+        import websocket
+
+        ready, _, _ = select.select([self.fd], [], [], self.timeout)
+        if not ready:
+            raise websocket.WebSocketTimeoutException("timed out")
+        try:
+            data = os.read(self.fd, 65536)
+        except OSError:
+            data = b""
+        if not data:
+            raise websocket.WebSocketConnectionClosedException("closed")
+        return data
+
+    def close(self):
+        if not self.closed:
+            self.closed = True
+            os.close(self.fd)
+            os.kill(self.pid, 9)
+            os.waitpid(self.pid, 0)
+
+
+@pytest.fixture
+def real_shell():
+    ws = _PtyWebSocket()
+    provider = _provider(_Terminal())
+    provider._session._ws = ws
+    yield provider
+    ws.close()
+
+
+@pytest.mark.skipif(not _REAL_PTY, reason="needs a POSIX pty and sh/base64/mktemp/stty")
+def test_real_pty_round_trip(real_shell, tmp_path):
+    run = real_shell._execute
+    assert run("echo hi").stdout == b"hi\n"
+    assert run("printf abc").stdout == b"abc"
+    split = run("echo out; echo err >&2")
+    assert (split.stdout, split.stderr) == (b"out\n", b"err\n")
+    assert run("sh -c 'exit 3'").returncode == 3
+
+    marker = tmp_path / "injected"
+    hostile = f"x\x03touch {marker}\n\ttab !! end\n"
+    assert run("cat", input=hostile).stdout == hostile.encode()
+    run("true", stdin=io.BytesIO(f"touch {marker}\n".encode()))
+    time.sleep(0.5)
+    assert not marker.exists(), "input reached the shell as a command"
+
+    big = run("head -c 262144 /dev/zero | tr '\\0' a").stdout
+    assert big == b"a" * 262144

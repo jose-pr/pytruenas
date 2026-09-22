@@ -228,8 +228,8 @@ def _webshell_sslopt(monkeypatch, **kwargs) -> dict:
         def __init__(self, sslopt=None):
             seen["sslopt"] = sslopt
 
-        def connect(self, uri):
-            pass
+        def connect(self, uri, **options):
+            seen["connect_timeout"] = options.get("timeout")
 
         def send(self, payload):
             pass
@@ -259,6 +259,8 @@ def _webshell_sslopt(monkeypatch, **kwargs) -> dict:
         ),
     )
     WebShellSession(client).connect()
+    # Opening the shell must not block forever on an unresponsive endpoint.
+    assert seen["connect_timeout"] and seen["connect_timeout"] > 0
     return seen["sslopt"]
 
 
