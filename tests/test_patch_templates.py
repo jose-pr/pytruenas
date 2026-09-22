@@ -497,3 +497,119 @@ def test_a_backend_without_chmod_warns_rather_than_failing(caplog):
         assert target.write("content\n") is True
     assert store["/etc/new.conf"] == b"content\n"
     assert any("could not set mode" in r.getMessage() for r in caplog.records)
+
+
+# -- baselines: our own output is not an original; copies keep their modes -----
+
+
+class _RecordingModedPath(_ModedPath):
+    """A `_ModedPath` that records (path, content, mode) after every write."""
+
+    def __init__(self, store, modes, path, log):
+        super().__init__(store, modes, path)
+        self._log = log
+
+    def write_bytes(self, data):
+        super().write_bytes(data)
+        self._log.append((self._path, data, self._modes[self._path]))
+
+    def with_name(self, name):
+        return _RecordingModedPath(
+            self._store,
+            self._modes,
+            self._path.rsplit("/", 1)[0] + "/" + name,
+            self._log,
+        )
+
+
+def _layer(target, line):
+    """What a layering template does: read the original, append, write."""
+    try:
+        base = target.read()
+    except FileNotFoundError:
+        base = b""
+    return target.write(base + line)
+
+
+def test_reapplying_to_a_file_this_target_created_is_idempotent():
+    """The second write used to snapshot this target's OWN output as the original.
+
+    Layering onto a file that did not exist then produced `line`, `line line`,
+    ... and revert() "restored" patched content.
+    """
+    from pytruenas.patch.templates import FileTarget
+
+    P = _fake_path_factory()
+    store = {}
+    target = FileTarget(P(store, "/etc/new.conf"), baseline=True)
+    for _ in range(3):
+        _layer(target, b"line\n")
+    assert store["/etc/new.conf"] == b"line\n"
+    assert "/etc/new.conf.baseline" not in store
+    assert not target.is_patched()  # nothing was displaced
+
+
+def test_revert_of_a_created_file_leaves_it_and_drops_the_marker():
+    from pytruenas.patch.templates import FileTarget
+
+    P = _fake_path_factory()
+    store = {}
+    target = FileTarget(P(store, "/etc/new.conf"), baseline=True)
+    target.write("created\n")
+    assert "/etc/new.conf.baseline.absent" in store
+    assert target.revert() is False
+    assert store["/etc/new.conf"] == b"created\n"
+    assert "/etc/new.conf.baseline.absent" not in store
+
+
+def test_the_baseline_snapshot_keeps_the_originals_mode_throughout():
+    """A copy of /etc/shadow must never exist at the default 0644.
+
+    The snapshot used to be written with the backend's default mode and kept
+    it, leaving the original hashes world-readable beside the file.
+    """
+    from pytruenas.patch.templates import FileTarget
+
+    store = {"/etc/shadow": b"root:$6$hash\n"}
+    modes = {"/etc/shadow": 0o640}
+    log = []
+    target = FileTarget(
+        _RecordingModedPath(store, modes, "/etc/shadow", log), baseline=True
+    )
+    target.write("patched\n")
+    assert modes["/etc/shadow.baseline"] == 0o640
+    exposed = [
+        (path, mode)
+        for path, data, mode in log
+        if path == "/etc/shadow.baseline" and data and mode != 0o640
+    ]
+    assert exposed == []
+
+
+def test_revert_recreates_a_deleted_file_with_the_originals_mode():
+    from pytruenas.patch.templates import FileTarget
+
+    store = {"/etc/shadow": b"orig\n"}
+    modes = {"/etc/shadow": 0o640}
+    log = []
+    path = _RecordingModedPath(store, modes, "/etc/shadow", log)
+    target = FileTarget(path, baseline=True)
+    target.write("patched\n")
+    path.unlink()
+    assert target.is_patched()  # a snapshot, and the file is gone
+    assert target.revert() is True
+    assert store["/etc/shadow"] == b"orig\n"
+    assert modes["/etc/shadow"] == 0o640
+    assert not [m for p, d, m in log if p == "/etc/shadow" and d and m != 0o640]
+
+
+def test_a_new_file_with_a_mode_never_holds_content_at_a_wider_one():
+    from pytruenas.patch.templates import FileTarget
+
+    store, modes, log = {}, {}, []
+    target = FileTarget(
+        _RecordingModedPath(store, modes, "/etc/secret", log), mode=0o600
+    )
+    target.write("token\n")
+    assert modes["/etc/secret"] == 0o600
+    assert [m for p, d, m in log if d] == [0o600]

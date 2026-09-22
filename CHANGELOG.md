@@ -30,6 +30,17 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
+- `patch` `FileTarget(baseline=True)`: the snapshot of an existing file was
+  created with the default mode, so a copy of a `0640` `/etc/shadow` sat beside
+  it at `0644`; `revert()` of a deleted target recreated it at `0644` too. Both
+  now keep the original's mode, and a new file written with `mode=` is chmod'ed
+  before its content is written rather than after.
+- `patch` `FileTarget(baseline=True)` on a file that did not exist yet: the
+  second write snapshotted the target's own first output as the "original", so
+  a layering template duplicated its additions on every apply and `revert()`
+  restored patched content. The first write now records that the original was
+  absent (a `.absent` marker); `read()` then raises `FileNotFoundError` for
+  that file, as it did before the first write.
 - `TruenasPath.rename()` ignored the destination's host:
   `fs.path(nasA, x).move(fs.path(nasB, y))` renamed the file on nasA under `y`
   and reported success, and with `overwrite=True` also deleted nasB's copy.

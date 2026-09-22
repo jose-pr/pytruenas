@@ -570,11 +570,18 @@ Everything is built to be repeatable and undoable:
   changed; every caller keys expensive follow-up work off that boolean.
   `FileTarget(path, baseline=True)` snapshots the original on first write and
   `read()`s *that* thereafter, so a patch layers onto the stock file rather
-  than onto its own previous output. Also `revert(remove_baseline=True)`
-  (restore + clear the snapshot; a no-op without a baseline, since a file the
-  patch created is not provably ours to delete), `is_patched()`,
-  `would_change(content)` (dry run), and `mode=` for a created file — an
-  *existing* file keeps its own mode across a rewrite, so patching
+  than onto its own previous output. The snapshot keeps the original's mode
+  (it is created empty, chmod'ed, then filled, so a copy of `/etc/shadow` is
+  never readable at a wider mode). When the file did not exist at the first
+  write, a `<name><suffix>.absent` marker records that instead, and `read()`
+  raises `FileNotFoundError` from then on (the original was "no file"), so
+  re-applying a layering template to a file it created is idempotent. Also
+  `revert(remove_baseline=True)` (restore content and mode + clear the
+  snapshot; for a file the target created it removes only the marker and
+  leaves the file, which returns `False`), `is_patched()` (also `True` for a
+  snapshotted file that was deleted), `would_change(content)` (dry run), and
+  `mode=` for a created file — applied before the content is written — while
+  an *existing* file keeps its own mode across a rewrite, so patching
   `/etc/shadow` cannot silently widen it from `0640`.
 - **`systemd`** — `unitfile` (pure text: unit syntax is case-sensitive,
   `=`-only, and `%` belongs to systemd, so all three `ConfigParser` defaults
