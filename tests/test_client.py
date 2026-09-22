@@ -83,11 +83,16 @@ def test_upload_builds_upload_target(monkeypatch):
     def fake_post(url, headers=None, verify=None, files=None):
         captured["url"] = url
         captured["headers"] = headers
+        captured["verify"] = verify
         return MagicMock(json=lambda: {"job_id": 7})
 
-    monkeypatch.setattr("requests.post", fake_post)
+    monkeypatch.setattr(
+        "requests.Session.post", lambda self, *a, **k: fake_post(*a, **k)
+    )
     # a pre-supplied token avoids the auth.generate_token API round trip
     c.api = MagicMock()
     c.upload(b"data", "config.upload", token="tok", wait=False)
     assert "/_upload" in captured["url"]
     assert captured["headers"]["Authorization"] == "Token tok"
+    # Always passed per request -- see TrueNASHost._http_verify.
+    assert captured["verify"] is True

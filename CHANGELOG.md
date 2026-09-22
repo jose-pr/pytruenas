@@ -18,6 +18,10 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   client makes: TLS certificate verification (websocket, HTTP side channels,
   web shell) and SSH host-key verification (commands and SFTP). `sslverify=`
   and `known_hosts=` override it individually.
+- `sslverify=` accepts a CA bundle path (a PEM file or a hashed directory),
+  trusted instead of the OS store. With `sslverify=True`, `$SSL_CERT_FILE`,
+  `$REQUESTS_CA_BUNDLE`, `$CURL_CA_BUNDLE` or `$WEBSOCKET_CLIENT_CA_BUNDLE`
+  (first one set) does the same.
 - `TrueNASClient(..., known_hosts=...)` — the host-key policy for the SSH leg
   built from `shell=` or by `install_sshcreds()`: `()` (default) checks
   `~/.ssh/known_hosts`, `None` skips the check, a path or list names the
@@ -40,6 +44,12 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
+- **The TLS legs trusted different certificates.** The API websocket verified
+  against the OS trust store and the HTTP side channels (upload, download, file
+  reads over the websocket leg) against `requests`' certifi bundle, so a
+  certificate trusted by the OS — a private CA — connected the API and failed
+  every download with `SSLError` (measured). All legs now share one context:
+  the OS store, or the CA bundle above; certifi is no longer consulted.
 - A non-default API port (`wss://nas:8443`) was dropped for every HTTP side
   channel — uploads, downloads, file reads over the websocket leg and the web
   shell went to port 443, with their auth tokens. On the NAS itself those URLs

@@ -47,6 +47,7 @@ from ipaddress import IPv6Interface as _IPv6Interface
 
 import websocket as _websocket
 
+from .utils import tls as _tls
 from .utils.io import json_scalar as _json_scalar
 
 _LOGGER = _logging.getLogger("pytruenas.connection")
@@ -415,7 +416,7 @@ class TrueNASWSConnection:
         self,
         uri: "str | None" = None,
         *,
-        verify_ssl: bool = True,
+        verify_ssl: "bool | str | _os.PathLike[str]" = True,
         call_timeout: float = CALL_TIMEOUT,
         py_exceptions: bool = False,
         logger: "_logging.Logger | _logging.LoggerAdapter | None" = None,
@@ -463,7 +464,11 @@ class TrueNASWSConnection:
             ws.connect("ws://localhost/api/current", socket=sock)
             return ws
 
-        sslopt = None if self.verify_ssl else {"cert_reqs": _ssl.CERT_NONE}
+        # The trust decision is shared with every other leg: pytruenas.utils.tls.
+        context = _tls.context(self.verify_ssl)
+        sslopt = (
+            {"cert_reqs": _ssl.CERT_NONE} if context is None else {"context": context}
+        )
         ws = _websocket.WebSocket(sslopt=sslopt)
         ws.connect(self.uri)
         return ws

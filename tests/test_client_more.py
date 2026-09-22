@@ -42,7 +42,7 @@ def test_download_buffered_builds_target_and_waits(monkeypatch):
         captured["verify"] = verify
         return MagicMock(content=b"payload", raise_for_status=lambda: None)
 
-    monkeypatch.setattr("requests.get", fake_get)
+    monkeypatch.setattr("requests.Session.get", lambda self, *a, **k: fake_get(*a, **k))
     monkeypatch.setattr("time.sleep", lambda _s: None)
     # The job is still running on the first poll: the fetch must wait for it.
     states = iter(["RUNNING", "SUCCESS"])
@@ -68,7 +68,7 @@ def test_download_no_wait_returns_jobid(monkeypatch):
     c.api.core.download.return_value = (22, "/_download/22")
     # wait=False must NOT touch requests.get at all
     monkeypatch.setattr(
-        "requests.get", MagicMock(side_effect=AssertionError("should not GET"))
+        "requests.Session.get", MagicMock(side_effect=AssertionError("should not GET"))
     )
     assert c.download("config.save", wait=False) == 22
 
@@ -84,7 +84,9 @@ def test_upload_generates_token_when_absent(monkeypatch):
         captured["files"] = files
         return MagicMock(json=lambda: {"job_id": 3})
 
-    monkeypatch.setattr("requests.post", fake_post)
+    monkeypatch.setattr(
+        "requests.Session.post", lambda self, *a, **k: fake_post(*a, **k)
+    )
     # a str file is encoded; no token supplied -> generate_token path
     jobid = c.upload("hello", "filesystem.put", wait=False)
     assert jobid == 3
@@ -282,7 +284,8 @@ def test_webshell_sslopt_follows_the_flag(monkeypatch):
     assert _webshell_sslopt(monkeypatch, sslverify=False) == {
         "cert_reqs": ssl.CERT_NONE
     }
-    assert _webshell_sslopt(monkeypatch) == {}
+    # Verifying: the shared context (pytruenas.utils.tls), not ad-hoc options.
+    assert set(_webshell_sslopt(monkeypatch)) == {"context"}
 
 
 @pytest.mark.requires("asyncssh")

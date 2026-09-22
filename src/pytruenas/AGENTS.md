@@ -44,7 +44,14 @@ version="current", executor=None, path=None, ssh=None, ...)`
   still at its `()` default (a copy is changed, not yours). A specific
   `sslverify=` or `known_hosts=` overrides it.
 - **`sslverify`** (default: follows `verify`) — TLS certificate verification
-  for `wss://`, the HTTP(S) side channels and the web shell.
+  for `wss://`, the HTTP(S) side channels and the web shell, all through one
+  context (`pytruenas.utils.tls.context`). `True` trusts the OS store only
+  (never certifi), unless `$SSL_CERT_FILE`, `$REQUESTS_CA_BUNDLE`,
+  `$CURL_CA_BUNDLE` or `$WEBSOCKET_CLIENT_CA_BUNDLE` is set — the first one
+  set is trusted *instead*. A path (`str` / `PathLike`, a PEM file or hashed
+  directory) is the CA bundle, trusted instead of the OS store; it is stored
+  as a `str`. A missing bundle raises `FileNotFoundError` naming the path and
+  its source at connect time.
 - **`shell`** — connection string for the SSH leg (`"ssh://root@nas"`,
   `"root:pw@nas:22"`). Stored as an `SshConfig` on `.config.ssh`; pass
   `ssh=SshConfig(...)` to supply one directly.
@@ -305,7 +312,8 @@ imports on Python 3.9.
 - **`Client(uri=None, *, verify_ssl=True, call_timeout=CALL_TIMEOUT,
   py_exceptions=False)`** — opens the websocket immediately (blocking) and
   starts a background reader thread. `uri` is `wss://`/`ws://` or
-  `ws+unix://...`; `None`/bare `ws+unix://` connects to
+  `ws+unix://...`; `verify_ssl` takes the same values as the host's
+  `sslverify` (bool or CA bundle path; see above); `None`/bare `ws+unix://` connects to
   `DEFAULT_UNIX_SOCKET` (`/var/run/middleware/middlewared.sock`).
   - **`.call(method, *params, timeout=UNSET, **_ignored) -> Any`** — send a
     request and block for the matching response. `timeout=None` waits

@@ -290,7 +290,15 @@ class WebShellSession:
 
             import ssl
 
-            sslopt = {} if self.client.sslverify else {"cert_reqs": ssl.CERT_NONE}
+            from .utils import tls
+
+            # The same trust as the API websocket -- see pytruenas.utils.tls.
+            context = tls.context(self.client.sslverify)
+            sslopt = (
+                {"cert_reqs": ssl.CERT_NONE}
+                if context is None
+                else {"context": context}
+            )
             ws = _websocket.WebSocket(sslopt=sslopt)
             ws.connect(self._uri(), timeout=CONNECT_TIMEOUT)
 

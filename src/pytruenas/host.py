@@ -29,6 +29,7 @@ import importlib.util as _importlib_util
 import inspect as _inspect
 import json as _js
 import logging as _logging
+import os as _os
 import typing as _ty
 from functools import cached_property as _cached_property
 from urllib.parse import unquote as _unquote
@@ -44,6 +45,7 @@ from . import auth as _auth
 from . import connection as _connection
 from .connection import DEFAULT_UNIX_SOCKET
 from .namespace import Namespace as _Namespace
+from .utils import tls as _tls
 from .utils.target import Target as _TGT
 
 if _ty.TYPE_CHECKING:  # pragma: no cover - typing only
@@ -263,7 +265,7 @@ def _shared_options(credentials: "_ty.Mapping[str, object]") -> "dict[str, objec
     """
     return {
         "verify": _ty.cast(bool, credentials.get("verify", True)),
-        "sslverify": _ty.cast("bool | None", credentials.get("sslverify")),
+        "sslverify": _ty.cast(_ty.Any, credentials.get("sslverify")),
         "version": _ty.cast(str, credentials.get("version", "current")),
         "ssh": credentials.get("ssh"),
         "shell": _ty.cast(_ty.Any, credentials.get("shell")),
@@ -273,6 +275,30 @@ def _shared_options(credentials: "_ty.Mapping[str, object]") -> "dict[str, objec
         "autologin": _ty.cast(bool, credentials.get("autologin", True)),
         "logger": credentials.get("logger"),
     }
+
+
+class _TrustAdapter(_req.adapters.HTTPAdapter):
+    """HTTPS verified against exactly the context the websocket legs use.
+
+    ``requests`` otherwise verifies against its own certifi bundle, which is how
+    the side channels once disagreed with the API websocket -- see
+    :mod:`pytruenas.utils.tls`, which makes the one trust decision.
+    """
+
+    def __init__(self, context: "_ty.Any") -> None:
+        self._context = context
+        super().__init__()
+
+    def init_poolmanager(self, *args, **kwargs):
+        kwargs["ssl_context"] = self._context
+        return super().init_poolmanager(*args, **kwargs)
+
+    def cert_verify(self, conn, url, verify, cert):
+        super().cert_verify(conn, url, bool(verify), cert)
+        # requests points a verifying connection at a CA bundle file (certifi,
+        # or its env vars); drop it so the context is the only trust source.
+        conn.ca_certs = None
+        conn.ca_cert_dir = None
 
 
 def _ssh_config_from(shell: "str | None", known_hosts: object = ()):
@@ -432,7 +458,7 @@ class TrueNASConfig(
         api_path: "str | None" = None,
         version: str = "current",
         verify: bool = True,
-        sslverify: "bool | None" = None,
+        sslverify: "bool | str | _os.PathLike[str] | None" = None,
         credentials: object = None,
         ssh: object = None,
         shell: "str | None" = None,
@@ -469,8 +495,16 @@ class TrueNASConfig(
         #: the web shell) and SSH host-key verification (commands and SFTP).
         #: ``sslverify=`` / ``known_hosts=`` given explicitly override it.
         self.verify = verify
-        #: TLS certificate verification; follows ``verify`` unless given.
-        self.sslverify = verify if sslverify is None else sslverify
+        #: TLS certificate verification; follows ``verify`` unless given. A
+        #: path is a CA bundle (file or hashed directory) trusted instead of
+        #: the OS store; with ``True``, ``$SSL_CERT_FILE`` and the other
+        #: :data:`~pytruenas.utils.tls.CA_BUNDLE_ENV` variables are consulted
+        #: first. certifi is never used.
+        if sslverify is None:
+            sslverify = verify
+        elif not isinstance(sslverify, bool):
+            sslverify = _os.fspath(sslverify)
+        self.sslverify: "bool | str" = sslverify
         #: The SSH leg. Accepts a ready :class:`hostctl.host.SshConfig` or, via
         #: ``shell=``, the connection string ``TrueNASClient`` has always taken
         #: (``"ssh://root@nas"``, ``"root@nas:22"``) -- so a caller does not
@@ -778,6 +812,8 @@ class TrueNASHost(_PosixHost, _ty.Generic[ApiVersion]):
         #: Providers already reported as fallen back from (see `run`), so the
         #: warning is logged once per provider rather than on every call.
         self._fallback_warned: "set[str]" = set()
+        #: HTTP(S) session for the side channels; see `_http`.
+        self._http_session: "_req.Session | None" = None
         # `client=` is accepted and ignored: the host *is* the client now.
         # Kept so existing callers (and tests that injected a stand-in) do not
         # break on an unexpected keyword.
@@ -1115,10 +1151,10 @@ class TrueNASHost(_PosixHost, _ty.Generic[ApiVersion]):
         if not token:
             token = self.api.auth.generate_token(5, {}, False, **kwargs)
 
-        resp = _req.post(
+        resp = self._http.post(
             target.uri,
             headers={"Authorization": f"Token {token}"},
-            verify=self._config.sslverify,
+            verify=self._http_verify,
             files={"data": _js.dumps(data).encode(), "file": file},
         )
         jobid = resp.json()["job_id"]
@@ -1221,7 +1257,7 @@ class TrueNASHost(_PosixHost, _ty.Generic[ApiVersion]):
         if wait:
             if buffered:
                 self.wait(jobid, callback=wait if callable(wait) else None)
-            resp = _req.get(target.uri, verify=self._config.sslverify)
+            resp = self._http.get(target.uri, verify=self._http_verify)
             resp.raise_for_status()
             return resp.content
         return jobid
@@ -1363,7 +1399,7 @@ class TrueNASHost(_PosixHost, _ty.Generic[ApiVersion]):
         return self._config.name
 
     @property
-    def sslverify(self) -> bool:
+    def sslverify(self) -> "bool | str":
         """TLS verification for this host -- see :attr:`TrueNASConfig.sslverify`.
 
         Read from the config rather than stored, so every transport -- the
@@ -1372,12 +1408,41 @@ class TrueNASHost(_PosixHost, _ty.Generic[ApiVersion]):
         """
         return self._config.sslverify
 
+    @property
+    def _http(self) -> "_req.Session":
+        """The HTTP(S) session behind the side channels (upload, download).
+
+        With verification on, HTTPS trusts exactly what the API websocket
+        does (see :mod:`pytruenas.utils.tls`).
+        """
+        if self._http_session is None:
+            session = _req.Session()
+            context = _tls.context(self._config.sslverify)
+            if context is not None:
+                session.mount("https://", _TrustAdapter(context))
+            self._http_session = session
+        return self._http_session
+
+    @property
+    def _http_verify(self) -> bool:
+        """``verify=`` for each side-channel request.
+
+        Passed per request, never set on the session: ``requests`` replaces a
+        request-level ``None`` with ``$REQUESTS_CA_BUNDLE`` *before* merging the
+        session's ``verify=False``, so a session-level ``False`` verifies anyway
+        whenever that variable is set (measured).
+        """
+        return bool(self._config.sslverify)
+
     def close(self) -> None:
         """Close the transports, then the websocket.
 
         Order matters: the ``tnasws`` path provider talks over the websocket,
         so it must be torn down before the connection it depends on.
         """
+        session, self._http_session = self._http_session, None
+        if session is not None:
+            session.close()
         try:
             super().close()
         finally:
