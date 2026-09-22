@@ -30,6 +30,15 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
+- `deploy --mode dir` replaced whatever directory `--path` named: an existing
+  directory that was not a previous deploy was moved aside and deleted, and
+  the run reported "Deployed". A `--path` without a previous deploy's digest
+  marker is now refused (`FileExistsError`) in both modes, `--force` included.
+- A `dir` deploy interrupted between its two renames left the last good tree
+  only at `<path>.old`, which the next deploy deleted first. It is now restored.
+- `deploy --mode pyz` overwrote the live zipapp in place; it is now written
+  beside it and renamed over it. A `--path` with a trailing slash no longer
+  stages inside the target.
 - `generate-typings` (`Codegen().generate()`) deleted the whole `--path`
   directory before rendering — including a `.git` or any other files — and a
   render error or a missing `jinja2` then left it empty. It now renders into a

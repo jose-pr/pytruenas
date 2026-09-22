@@ -247,6 +247,22 @@ def _current_digest(client: TrueNASClient, marker: str) -> "str | None":
         return None
 
 
+def _refuse_foreign(client: TrueNASClient, target: str, marker: str) -> None:
+    """Refuse to replace ``target`` unless a previous deploy wrote ``marker``.
+
+    Replacing means deleting whatever is there, and ``--path`` is free text: a
+    typo, or a directory that merely has the right name, would otherwise be
+    removed wholesale -- and reported as "Deployed". ``--force`` does not
+    override this; it only skips the "already current" check.
+    """
+    if client.path(target).exists() and not client.path(marker).exists():
+        raise FileExistsError(
+            f"refusing to replace {target}: it exists but is not a previous "
+            f"deploy (no {PurePosixPath(marker).name}); remove it or choose "
+            "another --path"
+        )
+
+
 def _deploy_pyz(
     client: TrueNASClient,
     payload: bytes,
@@ -260,13 +276,18 @@ def _deploy_pyz(
     if not args.force and _current_digest(client, marker) == digest:
         logger.info("Already current (%s); nothing to do", digest[:12])
         return False
+    _refuse_foreign(client, target, marker)
 
     _ensure_parent(client, target)
     logger.info("Writing %s (%d bytes)", target, len(payload))
-    client.path(target).write_bytes(payload)
+    # Written beside the target and renamed over it: a rename is atomic, so
+    # anything already running the zipapp never reads a half-written file.
+    incoming = f"{target}.new"
+    client.path(incoming).write_bytes(payload)
     # argv as a list, not a shell string: no quoting to get wrong, and no shell
     # involved to reinterpret a path that happens to contain a metacharacter.
-    client.run(["chmod", "755", target], check=True)
+    client.run(["chmod", "755", incoming], check=True)
+    client.run(["mv", "-f", incoming, target], check=True)
     # Bytes, so a Windows controller does not write "\r\n" into a file that
     # lives on a POSIX host (see the launcher below).
     client.path(marker).write_bytes(f"{digest}\n".encode())
@@ -283,9 +304,22 @@ def _deploy_dir(
 ) -> bool:
     """Install an unpacked tree from a tar payload. Returns whether it wrote."""
     marker = f"{target}/{DIGEST_NAME}"
+    incoming, previous = f"{target}.new", f"{target}.old"
+
+    # A deploy interrupted between its two renames leaves the last good tree
+    # only at `.old`. Put it back before anything else: the steps below delete
+    # `.old`, and that would destroy the only copy.
+    if (
+        not client.path(target).exists()
+        and client.path(f"{previous}/{DIGEST_NAME}").exists()
+    ):
+        logger.warning("Restoring %s from an interrupted deploy", target)
+        client.run(["mv", previous, target], check=True)
+
     if not args.force and _current_digest(client, marker) == digest:
         logger.info("Already current (%s); nothing to do", digest[:12])
         return False
+    _refuse_foreign(client, target, marker)
 
     staging = f"{target}.incoming.tar"
     _ensure_parent(client, target)
@@ -297,20 +331,21 @@ def _deploy_dir(
     # from. Each step is its own argv list -- no shell, so nothing here depends
     # on how a path would be quoted. The sequencing that a `&&` chain provided
     # comes from check=True instead: the first failure raises.
-    incoming, previous = f"{target}.new", f"{target}.old"
-    client.run(["rm", "-rf", incoming, previous], check=True)
+    client.run(["rm", "-rf", incoming], check=True)
     client.run(["mkdir", "-p", incoming], check=True)
     client.run(
         ["tar", "-xf", staging, "-C", incoming, "--strip-components=1"], check=True
     )
+    # The marker goes INTO the new tree before it is swapped in, so whatever
+    # sits at the target always carries it -- a later deploy can then tell its
+    # own output from someone else's directory. Bytes, so a Windows controller
+    # does not write "\r\n" into a file that lives on a POSIX host.
+    client.path(f"{incoming}/{DIGEST_NAME}").write_bytes(f"{digest}\n".encode())
     if client.path(target).exists():
+        client.run(["rm", "-rf", previous], check=True)
         client.run(["mv", target, previous], check=True)
     client.run(["mv", incoming, target], check=True)
     client.run(["rm", "-rf", previous, staging], check=True)
-
-    # Bytes, so a Windows controller does not write "\r\n" into a file that
-    # lives on a POSIX host (see the launcher below).
-    client.path(marker).write_bytes(f"{digest}\n".encode())
     return True
 
 
@@ -468,7 +503,9 @@ def run(client: TrueNASClient, args: Args, logger: Logger):
         else:
             logger.info("Bundling %s", ", ".join(sorted(missing)))
 
-    target = args.path
+    # A trailing slash would make `f"{target}.new"` a hidden entry INSIDE the
+    # target and turn the swap into a move of a directory into itself.
+    target = args.path.rstrip("/") or args.path
     if args.mode == "pyz":
         # A zipapp is one file; name it as one even if a directory was given.
         if not target.endswith(".pyz"):

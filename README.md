@@ -148,6 +148,8 @@ destination is under `/var/db/system`, which is a dataset on a *data* pool and
 so survives an update — unlike `/var/db` itself, `/root` or `/data`, which live
 in the boot environment and are replaced by one. A digest is recorded beside
 the payload, so redeploying verifies instead of re-copying; `--force` overrides.
+An existing `--path` that a previous deploy did not create is refused rather
+than replaced.
 
 When pytruenas is a *dependency* of your own tool rather than the thing being
 deployed, name yours as the root: `--pkg-root mytool` (or `PYTRUENAS_PKG_ROOT`),

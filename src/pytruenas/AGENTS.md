@@ -468,6 +468,12 @@ positionals, not a flag) and helper methods
   an update, unlike `/var/db` itself (boot environment). Anything after `--`
   runs on the target afterwards (read from `main.PASSTHROUGH`, split before
   argparse; see there for why it cannot be an argparse field).
+  An existing `--path` is replaced only if a previous deploy wrote its digest
+  marker (`<path>/.digest` for `dir`, `<path>.digest` for `pyz`); anything else
+  raises `FileExistsError` and is left alone — `--force` only skips the
+  "already current" check. Both layouts are written beside the target and
+  renamed into place, and a `dir` deploy interrupted between its renames is
+  restored from `<path>.old` on the next run.
 
   `--source` picks **what** gets bundled; `--mode` is orthogonal and picks the
   output **layout** (zipapp or unpacked tree) either way.

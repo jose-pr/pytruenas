@@ -318,3 +318,175 @@ def test_source_installed_path_never_calls_repo_contents(monkeypatch):
     )
     with pytest.raises(AssertionError, match="reached the installed path"):
         deploy_cmd.run(_FakeClient(), args, _logger())
+
+
+# -- the install step against a modelled remote filesystem -------------------
+#
+# `_RemoteFS` executes the argv lists deploy issues (rm -rf, mkdir -p, tar -xf,
+# mv, chmod) against an in-memory tree, so these tests assert what the TARGET
+# looks like afterwards -- not merely which commands were sent.
+
+
+class _RemoteFS:
+    def __init__(self, files=None):
+        self.files = dict(files or {})
+        self.dirs = set()
+        self.ran = []
+
+    def path(self, path):
+        fs = self
+
+        class _P:
+            def exists(self):
+                return fs._exists(path)
+
+            def mkdir(self, **_kw):
+                fs.dirs.add(path)
+
+            def write_bytes(self, data):
+                fs.files[path] = data
+
+            def read_text(self):
+                return fs.files[path].decode()
+
+        return _P()
+
+    def _exists(self, path):
+        prefix = path.rstrip("/") + "/"
+        return (
+            path in self.files
+            or path in self.dirs
+            or any(k.startswith(prefix) for k in [*self.files, *self.dirs])
+        )
+
+    def _under(self, path):
+        prefix = path + "/"
+        return [k for k in self.files if k == path or k.startswith(prefix)]
+
+    def run(self, cmd, **_kw):
+        import io
+        import tarfile
+
+        self.ran.append(list(cmd))
+        op = cmd[0]
+        if op == "rm":
+            for target in cmd[2:]:
+                for key in self._under(target):
+                    del self.files[key]
+                self.dirs = {
+                    d
+                    for d in self.dirs
+                    if d != target and not d.startswith(target + "/")
+                }
+        elif op == "mkdir":
+            self.dirs.add(cmd[-1])
+        elif op == "tar":
+            staging, dest = cmd[2], cmd[4]
+            with tarfile.open(fileobj=io.BytesIO(self.files[staging])) as tf:
+                for member in tf.getmembers():
+                    if member.isfile():
+                        rel = member.name.split("/", 1)[1]
+                        self.files[f"{dest}/{rel}"] = tf.extractfile(member).read()
+        elif op == "mv":
+            src, dst = cmd[-2], cmd[-1]
+            for key in self._under(src):
+                self.files[dst + key[len(src) :]] = self.files.pop(key)
+            self.dirs = {
+                dst + d[len(src) :] if d == src or d.startswith(src + "/") else d
+                for d in self.dirs
+            }
+        return _FakeResult()
+
+
+def _tar(**files):
+    import io
+    import tarfile
+
+    buf = io.BytesIO()
+    with tarfile.open(fileobj=buf, mode="w") as tf:
+        for name, data in files.items():
+            info = tarfile.TarInfo(f"top/{name}")
+            info.size = len(data)
+            tf.addfile(info, io.BytesIO(data))
+    return buf.getvalue()
+
+
+def _install_args(force=False):
+    from types import SimpleNamespace
+
+    return SimpleNamespace(force=force)
+
+
+T = "/mnt/tank/app"
+
+
+def test_dir_deploy_installs_a_fresh_tree_with_its_marker():
+    fs = _RemoteFS()
+    payload = _tar(**{"bin/app": b"#!"})
+    assert deploy_cmd._deploy_dir(fs, payload, "d1", T, _install_args(), _logger())
+    assert fs.files[f"{T}/bin/app"] == b"#!"
+    assert fs.files[f"{T}/.digest"] == b"d1\n"
+    leftovers = (f"{T}.new", f"{T}.old", f"{T}.incoming")
+    assert not [k for k in fs.files if k.startswith(leftovers)]
+
+
+def test_dir_deploy_replaces_a_previous_deploy():
+    fs = _RemoteFS(
+        {f"{T}/.digest": b"d0\n", f"{T}/bin/app": b"old", f"{T}/stale": b"x"}
+    )
+    deploy_cmd._deploy_dir(
+        fs, _tar(**{"bin/app": b"new"}), "d1", T, _install_args(), _logger()
+    )
+    assert fs.files[f"{T}/bin/app"] == b"new"
+    assert f"{T}/stale" not in fs.files
+    assert fs.files[f"{T}/.digest"] == b"d1\n"
+
+
+def test_dir_deploy_refuses_a_directory_it_did_not_create():
+    """`--path` pointed at somebody's directory must not delete it.
+
+    Before, the swap moved it aside and `rm -rf`'d it, then reported success.
+    """
+    fs = _RemoteFS({f"{T}/notes.txt": b"mine", f"{T}/sub/data.db": b"mine too"})
+    payload = _tar(**{"bin/app": b"#!"})
+    with pytest.raises(FileExistsError, match="not a previous deploy"):
+        deploy_cmd._deploy_dir(
+            fs, payload, "d1", T, _install_args(force=True), _logger()
+        )
+    assert fs.files[f"{T}/notes.txt"] == b"mine"
+    assert fs.files[f"{T}/sub/data.db"] == b"mine too"
+    assert not [cmd for cmd in fs.ran if cmd[0] in ("rm", "mv")]
+
+
+def test_dir_deploy_recovers_an_interrupted_swap_instead_of_deleting_it():
+    """Only `.old` left (killed between the renames): it is the good copy."""
+    fs = _RemoteFS({f"{T}.old/.digest": b"d0\n", f"{T}.old/bin/app": b"good"})
+    deploy_cmd._deploy_dir(
+        fs, _tar(**{"bin/app": b"new"}), "d0", T, _install_args(), _logger()
+    )
+    # Same digest: restored and verified, nothing re-uploaded.
+    assert fs.files[f"{T}/bin/app"] == b"good"
+    assert f"{T}.incoming.tar" not in fs.files
+
+
+def test_dir_deploy_with_an_unchanged_digest_uploads_nothing():
+    fs = _RemoteFS({f"{T}/.digest": b"d1\n", f"{T}/bin/app": b"current"})
+    payload = _tar(**{"bin/app": b"new"})
+    assert not deploy_cmd._deploy_dir(fs, payload, "d1", T, _install_args(), _logger())
+    assert fs.ran == []
+    assert f"{T}.incoming.tar" not in fs.files
+
+
+def test_pyz_deploy_renames_into_place_and_refuses_a_foreign_file():
+    target = "/mnt/tank/tool.pyz"
+    fs = _RemoteFS()
+    deploy_cmd._deploy_pyz(fs, b"PK", "d1", target, _install_args(), _logger())
+    assert fs.files[target] == b"PK" and fs.files[f"{target}.digest"] == b"d1\n"
+    assert ["mv", "-f", f"{target}.new", target] in fs.ran
+
+    other = _RemoteFS({target: b"somebody else's"})
+    with pytest.raises(FileExistsError):
+        deploy_cmd._deploy_pyz(
+            other, b"PK", "d1", target, _install_args(force=True), _logger()
+        )
+    assert other.files[target] == b"somebody else's"
