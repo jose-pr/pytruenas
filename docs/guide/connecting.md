@@ -87,6 +87,17 @@ TrueNASClient("nas", api_key, shell="ssh://root@nas", verify=False)
 
 `sslverify=` and `known_hosts=` still override it individually.
 
+Certificates are checked against the operating system's trust store, the same
+for the API websocket, uploads/downloads and the web shell. To trust a private
+CA without adding it to the OS, point `sslverify=` at its bundle, or set
+`SSL_CERT_FILE` (also honored: `REQUESTS_CA_BUNDLE`, `CURL_CA_BUNDLE`,
+`WEBSOCKET_CLIENT_CA_BUNDLE`, first one set wins). A bundle replaces the OS
+store rather than adding to it.
+
+```python
+TrueNASClient("nas", api_key, sslverify="/etc/pki/lab-ca.pem")
+```
+
 `known_hosts=` applies to the SSH leg built from `shell=` and to the one
 `install_sshcreds()` wires in; an `ssh=SshConfig(...)` you build yourself keeps
 its own setting. When the key cannot be verified (or SSH is unreachable),
