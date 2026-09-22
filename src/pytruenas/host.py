@@ -254,6 +254,7 @@ def _shared_options(credentials: "_ty.Mapping[str, object]") -> "dict[str, objec
         "version": _ty.cast(str, credentials.get("version", "current")),
         "ssh": credentials.get("ssh"),
         "shell": _ty.cast(_ty.Any, credentials.get("shell")),
+        "known_hosts": credentials.get("known_hosts", ()),
         "executor": _ty.cast(_ty.Any, credentials.get("executor")),
         "path": _ty.cast(_ty.Any, credentials.get("path")),
         "autologin": _ty.cast(bool, credentials.get("autologin", True)),
@@ -261,13 +262,17 @@ def _shared_options(credentials: "_ty.Mapping[str, object]") -> "dict[str, objec
     }
 
 
-def _ssh_config_from(shell: "str | None"):
+def _ssh_config_from(shell: "str | None", known_hosts: object = ()):
     """Build an :class:`hostctl.host.SshConfig` from a shell connection string.
 
     Accepts what ``TrueNASClient(shell=...)`` has always taken --
     ``"ssh://root@nas"``, ``"root:pw@nas:22"``, a bare host -- so reaching the
     SSH leg does not require importing and assembling an SshConfig by hand.
     ``None`` or a local target yields ``None``: no SSH leg.
+
+    ``known_hosts`` is hostctl's own field, passed through unchanged: ``()``
+    (the default) checks the host key against the usual ``~/.ssh/known_hosts``,
+    ``None`` does not check it, a path or list names the file(s) to use.
     """
     if not shell:
         return None
@@ -296,6 +301,7 @@ def _ssh_config_from(shell: "str | None"):
         password=password,
         client_keys=client_keys,
         executable=target.path or None,
+        known_hosts=_ty.cast(_ty.Any, known_hosts),
     )
 
 
@@ -416,6 +422,7 @@ class TrueNASConfig(
         credentials: object = None,
         ssh: object = None,
         shell: "str | None" = None,
+        known_hosts: object = (),
         executor: "_ty.Iterable[str] | str | None" = None,
         path: "_ty.Iterable[str] | str | None" = None,
         autologin: bool = True,
@@ -448,7 +455,14 @@ class TrueNASConfig(
         #: ``shell=``, the connection string ``TrueNASClient`` has always taken
         #: (``"ssh://root@nas"``, ``"root@nas:22"``) -- so a caller does not
         #: have to import and assemble an SshConfig for the common case.
-        self.ssh = ssh if ssh is not None else _ssh_config_from(shell)
+        #:
+        #: ``known_hosts`` is the host-key policy for an SSH leg built here --
+        #: from ``shell=`` or by :meth:`TrueNASHost.install_sshcreds`. It uses
+        #: hostctl's values: ``()`` checks ``~/.ssh/known_hosts``, ``None``
+        #: disables the check, a path or list names the file(s). An explicit
+        #: ``ssh=SshConfig(...)`` keeps its own policy.
+        self.known_hosts = known_hosts
+        self.ssh = ssh if ssh is not None else _ssh_config_from(shell, known_hosts)
         # Credentials are normalized once, here, so every downstream consumer
         # sees a Credentials instance rather than "maybe a string, maybe a
         # tuple, maybe None".
@@ -489,6 +503,7 @@ class TrueNASConfig(
         "ssh",
         "version",
         "shell",
+        "known_hosts",
         "executor",
         "path",
         "autologin",
@@ -731,6 +746,9 @@ class TrueNASHost(_PosixHost, _ty.Generic[ApiVersion]):
         #: The live JSON-RPC connection, opened on first `.conn` access.
         self._conn: "_connection.TrueNASWSConnection | None" = None
         self.logger = _resolve_logger(config.logger, config.name)
+        #: Providers already reported as fallen back from (see `run`), so the
+        #: warning is logged once per provider rather than on every call.
+        self._fallback_warned: "set[str]" = set()
         # `client=` is accepted and ignored: the host *is* the client now.
         # Kept so existing callers (and tests that injected a stand-in) do not
         # break on an unexpected keyword.
@@ -1165,6 +1183,7 @@ class TrueNASHost(_PosixHost, _ty.Generic[ApiVersion]):
                 host=self._config.host,
                 username="root",
                 client_keys=[private_key.encode()],
+                known_hosts=_ty.cast(_ty.Any, self._config.known_hosts),
             )
         elif not existing.password and not existing.client_keys:
             existing.client_keys = [private_key.encode()]
@@ -1179,6 +1198,36 @@ class TrueNASHost(_PosixHost, _ty.Generic[ApiVersion]):
         self._executor_selector = ProviderSelector(executors)
         self._path_selector = ProviderSelector(paths)
         return private_key
+
+    def run(self, *cmds, **options):
+        """Run a command -- :meth:`hostctl.host.PosixHost.run`, plus a warning.
+
+        When the preferred executor cannot start (an SSH leg that is
+        unreachable or whose host key is not trusted) hostctl quietly serves
+        the call from the next one, usually the web shell. That downgrade is
+        worth knowing about, so it is logged once per provider.
+        """
+        try:
+            return super().run(*cmds, **options)
+        finally:
+            self._warn_fallback()
+
+    def _warn_fallback(self) -> None:
+        trace = self.last_selection
+        if not trace or trace[0].get("chosen"):
+            return
+        first = str(trace[0].get("provider"))
+        chosen = next((str(t["provider"]) for t in trace if t.get("chosen")), None)
+        if chosen is None or first in self._fallback_warned:
+            return
+        self._fallback_warned.add(first)
+        self.logger.warning(
+            "run() fell back from %s to %s: %s. If the SSH host key is not in "
+            "known_hosts, add it, or pass known_hosts=None to skip the check",
+            first,
+            chosen,
+            trace[0].get("reason") or "unavailable",
+        )
 
     @property
     def name(self) -> str:

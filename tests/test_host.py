@@ -185,6 +185,100 @@ def test_shell_string_unpacks_the_legacy_client_keys_form():
     assert config.ssh.password is None
 
 
+def test_known_hosts_defaults_to_the_standard_lookup():
+    """``()`` is hostctl's "check ~/.ssh/known_hosts" value -- the safe default."""
+    config = TrueNASConfig.from_target("wss://nas", shell="ssh://root@nas")
+    assert config.known_hosts == ()
+    assert config.ssh.known_hosts == ()
+
+
+@pytest.mark.parametrize("known_hosts", [None, "/etc/ssh/ssh_known_hosts"])
+def test_known_hosts_reaches_the_ssh_leg_built_from_shell(known_hosts):
+    """``known_hosts=None`` is the opt-out; a path names the file to trust."""
+    config = TrueNASConfig.from_target(
+        "wss://nas", shell="ssh://root@nas", known_hosts=known_hosts
+    )
+    assert config.ssh.known_hosts == known_hosts
+
+
+def test_known_hosts_is_accepted_by_the_host_constructor():
+    client = TrueNASHost("wss://nas", shell="ssh://root@nas", known_hosts=None)
+    assert client.config.ssh.known_hosts is None
+
+
+def test_explicit_ssh_config_keeps_its_own_known_hosts():
+    """A caller who built an SshConfig chose its policy; do not override it."""
+    ssh = SshConfig(host="nas", known_hosts="/srv/known_hosts")
+    config = TrueNASConfig.from_target("wss://nas", ssh=ssh, known_hosts=None)
+    assert config.ssh.known_hosts == "/srv/known_hosts"
+
+
+def test_path_falls_back_to_tnasws_when_sftp_cannot_connect(monkeypatch):
+    """An unreachable SSH leg must not take the file API down with it.
+
+    This is why the hostctl floor is 0.3.1: on 0.3.0 the composite path let
+    the SFTP connect error escape (`ConnectionRefusedError`, or
+    `HostKeyNotVerifiable` for a host missing from known_hosts) instead of
+    trying `tnasws`, while `run()` on the same host fell back. Offline: SSH
+    points at a refused loopback port, and the websocket leg is a real
+    `Namespace` over a faked `conn.call`.
+    """
+    pytest.importorskip("asyncssh")
+    from types import SimpleNamespace
+
+    calls = []
+
+    def call(method, *args, **kwds):
+        calls.append(method)
+        if method == "filesystem.stat":
+            return {"mode": 0o100644, "size": 3, "mtime": 0, "uid": 0, "gid": 0}
+        raise AssertionError(method)
+
+    host = TrueNASHost(
+        "wss://nas", ssh=SshConfig(host="127.0.0.1", port=1, username="root")
+    )
+    conn = SimpleNamespace(call=call, close=lambda: None)
+    monkeypatch.setattr(TrueNASHost, "conn", property(lambda self: conn))
+    assert host.path("/mnt/tank/f.txt").exists()
+    assert calls == ["filesystem.stat"]
+
+
+def _trace(*entries):
+    return property(lambda self: tuple(dict(e) for e in entries))
+
+
+def test_run_warns_once_when_it_falls_back_from_the_first_executor(monkeypatch, caplog):
+    host = _built()
+    monkeypatch.setattr(PosixHost, "run", lambda self, *a, **k: "ok", raising=False)
+    monkeypatch.setattr(
+        type(host),
+        "last_selection",
+        _trace(
+            {"provider": "ssh", "chosen": False, "reason": "SSH connection failed"},
+            {"provider": "webshell", "chosen": True, "reason": ""},
+        ),
+    )
+    with caplog.at_level("WARNING"):
+        assert host.run("true") == "ok"
+        assert host.run("true") == "ok"
+    warnings = [r for r in caplog.records if "fell back from ssh" in r.getMessage()]
+    assert len(warnings) == 1
+    assert "known_hosts=None" in warnings[0].getMessage()
+
+
+def test_run_does_not_warn_when_the_first_executor_serves(monkeypatch, caplog):
+    host = _built()
+    monkeypatch.setattr(PosixHost, "run", lambda self, *a, **k: "ok", raising=False)
+    monkeypatch.setattr(
+        type(host),
+        "last_selection",
+        _trace({"provider": "ssh", "chosen": True, "reason": ""}),
+    )
+    with caplog.at_level("WARNING"):
+        host.run("true")
+    assert not [r for r in caplog.records if "fell back" in r.getMessage()]
+
+
 def test_autologin_and_logger_are_honoured(monkeypatch):
     import requests
 
@@ -529,6 +623,13 @@ def test_install_sshcreds_creates_an_ssh_config(keyed_host):
     assert ssh.host == "nas"
     assert ssh.username == "root"
     assert ssh.client_keys == [PRIVATE_KEY.encode()]
+
+
+def test_install_sshcreds_uses_the_configured_known_hosts(keyed_host):
+    """The provisioned SSH leg follows the client's host-key policy."""
+    keyed_host._config.known_hosts = None
+    keyed_host.install_sshcreds()
+    assert keyed_host._config.ssh.known_hosts is None
 
 
 def test_install_sshcreds_rebuilds_the_providers(keyed_host):

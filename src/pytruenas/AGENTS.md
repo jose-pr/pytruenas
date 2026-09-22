@@ -24,8 +24,8 @@ host half of the API is documented, and `.client`/`.host` both return the
 object itself.
 
 `TrueNASClient(target=None, credentials=None, *, sslverify=True, shell=None,
-logger=None, autologin=True, version="current", executor=None, path=None,
-ssh=None, ...)`
+known_hosts=(), logger=None, autologin=True, version="current", executor=None,
+path=None, ssh=None, ...)`
 
 - **`target`** — a host, `"host:port"`, or full `scheme://...` URI. `None` /
   omitted / local-only resolves to the local middleware unix socket
@@ -41,6 +41,13 @@ ssh=None, ...)`
 - **`shell`** — connection string for the SSH leg (`"ssh://root@nas"`,
   `"root:pw@nas:22"`). Stored as an `SshConfig` on `.config.ssh`; pass
   `ssh=SshConfig(...)` to supply one directly.
+- **`known_hosts`** (default `()`) — host-key policy for the SSH leg built from
+  `shell=` or by `.install_sshcreds()`, with hostctl's values: `()` verifies
+  against `~/.ssh/known_hosts`, `None` does not verify, a path or list of paths
+  names the file(s). An explicit `ssh=SshConfig(...)` keeps its own. Both the
+  command and SFTP halves verify by default; an unverifiable key (or an
+  unreachable SSH port) makes `run()` and `path()` fall back to the websocket
+  providers, and `run()` logs one WARNING per host when it does.
 - **`executor`/`path`** — name the providers to use, in preference order.
   Replaces `fsbackend`, which could only pick a filesystem backend; see the
   provider table below.
@@ -63,8 +70,9 @@ ssh=None, ...)`
   as it does throughout hostctl.
 - **`.client`** / **`.host`** — both return the object itself, kept so code
   written against the two-object model keeps working.
-- **`.capabilities`** — `{"run", "path"}` as available; a remote target with no
-  SSH and no web shell honestly reports no `run`.
+- **`.capabilities`** — `{"run", "path"}` as available, plus `"spawn"`/`"tty"`
+  when an SSH leg is configured; a remote target with no SSH and no web shell
+  honestly reports no `run`.
 - **`.last_selection`** — the redacted provider trace for the most recent
   `run()`: what was tried, what was chosen, and why.
 - **`.name`** — the host's short label: the hostname, plus the port only when
@@ -669,7 +677,8 @@ a directory the user does not control.
 
 ## Optional extras and their gating imports
 
-- **`ssh`** (`asyncssh`, `pathlib_next[sftp-async]>=0.9.0,<0.10`) — required for
+- **`ssh`** (`hostctl[ssh]>=0.3.1,<0.4`, i.e. asyncssh + pathlib_next's
+  sftp-async) — required for
   `.ssh`, `.run()` over SSH, and the SFTP leg of `TruenasPath`. Missing it
   raises a clear `ImportError` naming the extra at first use, not at import
   time. **Not** required by `.install_sshcreds`, which provisions over the
