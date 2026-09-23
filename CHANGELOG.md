@@ -31,6 +31,19 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
+- **Arguments after `--` were parsed twice.** pytruenas split `argv` itself
+  and carried the tail in a module global, duplicating duho's own
+  `_passthrough_` capture; `deploy` reads it off the parsed instance now.
+  A tail that no command reads, or a target placed *after* the separator
+  (where it becomes part of the remote command and the run silently falls back
+  to `localhost`), is reported instead of dropped.
+- A RunPath step whose third parameter has a default — or which takes `*args`
+  — was mistaken for the 3-argument module-command shape and had its
+  arguments swapped by the adapter. Only *required* positionals count now.
+- Command discovery read global options off the default app root, so a derived
+  tool's own options were invisible to it, and the RunPath base registration
+  was skipped for the default args — leaving a derived tool's base registered
+  process-wide for whatever ran next.
 - **Concurrent targets shared one `args` object.** Per-target state a command
   wrote on it (and `args.target`, which did not exist at all) belonged to
   whichever target ran last; `init` hooks had no way to know which target they

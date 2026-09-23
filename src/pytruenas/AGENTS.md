@@ -602,8 +602,10 @@ way to build a client from parsed args:
   ON the target so it can run there. Defaults to
   `/var/db/system/pytruenas.pyz` — a dataset on a *data* pool, which survives
   an update, unlike `/var/db` itself (boot environment). Anything after `--`
-  runs on the target afterwards (read from `main.PASSTHROUGH`, split before
-  argparse; see there for why it cannot be an argparse field).
+  runs on the target afterwards, read from duho's `args._passthrough_` (the
+  parsed instance carries everything after the first bare `--`). Targets must
+  come **before** the separator; a stray tail, or a command that reads none,
+  is reported rather than dropped.
   An existing `--path` is replaced only if a previous deploy wrote its digest
   marker (`<path>/.digest` for `dir`, `<path>.digest` for `pyz`); anything else
   raises `FileExistsError` and is left alone — `--force` only skips the

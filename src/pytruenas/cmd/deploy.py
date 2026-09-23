@@ -352,12 +352,11 @@ def _deploy_dir(
 def _passthrough(args: Args) -> "list[str]":
     """Arguments after ``--``, to run on the target after installing.
 
-    Read from :data:`pytruenas.main.PASSTHROUGH`, which is split off before
-    argparse runs -- see there for why an argparse field cannot express this.
+    duho captures them on the parsed instance as ``_passthrough_``; pytruenas
+    used to split ``argv`` itself and carry the result in a module global,
+    which was the same work done twice and could not see per-command parsing.
     """
-    from pytruenas.main import PASSTHROUGH
-
-    return list(PASSTHROUGH)
+    return list(getattr(args, "_passthrough_", ()) or ())
 
 
 #: Directories checked, in order, for an importable ``<package>`` when

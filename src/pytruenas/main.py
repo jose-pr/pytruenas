@@ -29,6 +29,7 @@ from duho.runpath import RunPathCmd, is_runpath_dir
 
 from .host import TrueNASConfig
 from .host import TrueNASHost as TrueNASClient
+from .utils._introspect import positional_arity
 from .utils.cmd import ENV, PyTrueNASArgs, register_targets
 from .utils.runpath import PyTrueNASRunPathArgs, step_adapter as _step_adapter
 from .utils.target import redact as _redact
@@ -175,27 +176,14 @@ def _wants_logger(hook: "_ty.Callable[..., object]") -> bool:
     Mirrors duho's own arity tolerance for the ``register`` hook (2-arg
     ``(parser, args)`` or 3-arg ``(parser, args, logger)``), which
     :func:`_with_targets` must reproduce because it calls the module's hook
-    itself. Duplicated rather than imported: duho's version is private
-    (``duho.runtime._wants_logger_arg``, absent from its ``__all__``). A
-    ``*args`` hook can absorb the logger; a signature ``inspect`` refuses falls
-    back to the 2-arg call, which never over-supplies an argument.
+    itself. duho's version is private (``duho.runtime._wants_logger_arg``,
+    absent from its ``__all__``), so the walk lives in
+    :mod:`pytruenas.utils._introspect` -- once, rather than in the two copies
+    that had drifted apart. A ``*args`` hook can absorb the logger; a signature
+    ``inspect`` refuses falls back to the 2-arg call, which never
+    over-supplies an argument.
     """
-    import inspect as _inspect
-
-    try:
-        params = _inspect.signature(hook).parameters
-    except (TypeError, ValueError):  # pragma: no cover - builtins/C callables
-        return False
-    positional = 0
-    for param in params.values():
-        if param.kind is _inspect.Parameter.VAR_POSITIONAL:
-            return True
-        if param.kind in (
-            _inspect.Parameter.POSITIONAL_ONLY,
-            _inspect.Parameter.POSITIONAL_OR_KEYWORD,
-        ):
-            positional += 1
-    return positional >= 3
+    return positional_arity(hook, cap=3, varargs=3, unknown=0) >= 3
 
 
 def _with_targets(command: object) -> object:
@@ -240,7 +228,9 @@ def _with_targets(command: object) -> object:
     return command
 
 
-def _discover(argv: "_ty.Sequence[str] | None") -> "list":
+def _discover(
+    argv: "_ty.Sequence[str] | None", root: "type[PyTrueNAS] | None" = None
+) -> "list":
     """Resolve the command set: built-ins, then env/CLI/config-provided paths.
 
     Uses :func:`duho.parse_globals` to read the config-file / ``--cmdspath`` /
@@ -251,7 +241,10 @@ def _discover(argv: "_ty.Sequence[str] | None") -> "list":
     Each source is resolved through :func:`_commands_from_source`, which layers
     RunPath-directory discovery on top of ``duho.discover_commands`` (see there).
     """
-    globals_ = parse_globals(PyTrueNAS, argv)
+    # The resolved root, not the default one: a derived tool's own global
+    # options (and its `_ARGS_`) are part of what has to be parsed here, and
+    # reading them off `PyTrueNAS` silently ignored them.
+    globals_ = parse_globals(root or PyTrueNAS, argv)
     config = globals_._config_dict_()
     sources: "list[str]" = [_BUILTIN_COMMANDS]
     # `ENV.paths` splits on os.pathsep and yields [] for a missing/empty value,
@@ -547,6 +540,7 @@ def _dispatch(command: object, instance: "PyTrueNAS") -> int:
     logger = instance._logger_
     for name, level in DEFAULT_LOGLEVELS.items():
         _pylogging.getLogger(name).setLevel(level)
+    _warn_stray_passthrough(command, instance, logger)
 
     # A RunPath command reaches dispatch as (class, parsed-instance): ``app``
     # calls ``dispatch(type(instance), instance)`` for a class command. Check the
@@ -580,32 +574,38 @@ def _dispatch(command: object, instance: "PyTrueNAS") -> int:
     )
 
 
-#: Everything after a bare ``--`` on the command line. A command that supports
-#: a passthrough reads this rather than an argparse field.
-#:
-#: Split before argparse rather than declared as ``nargs=REMAINDER``, which does
-#: not work here and fails *silently*: the shared trailing ``targets``
-#: positional is ``nargs="*"``, so it greedily consumes the whole tail --
-#: argparse drops the ``--`` separator and folds ``query user`` into the target
-#: list, leaving the remainder empty. A passthrough that quietly runs nothing is
-#: worse than one that errors, so the separator is handled where it is
-#: unambiguous: before any parser sees it.
-PASSTHROUGH: "list[str]" = []
+#: Commands that read the arguments after ``--`` (duho's ``_passthrough_``).
+_PASSTHROUGH_COMMANDS = frozenset({"deploy"})
 
 
-def _split_passthrough(
-    argv: "_ty.Sequence[str] | None",
-) -> "tuple[_ty.Sequence[str] | None, list[str]]":
-    """Split ``argv`` at the first bare ``--``; return ``(head, tail)``."""
-    if argv is None:
-        import sys
+def _warn_stray_passthrough(
+    command: object, instance: "PyTrueNAS", logger: "_pylogging.Logger"
+) -> None:
+    """Warn when a ``--`` tail cannot be used, rather than dropping it silently.
 
-        argv = sys.argv[1:]
-    argv = list(argv)
-    if "--" not in argv:
-        return argv, []
-    index = argv.index("--")
-    return argv[:index], argv[index + 1 :]
+    duho captures the tail on the parsed instance as ``_passthrough_`` (verified
+    with the trailing ``targets`` positional in play: `deploy nas1 -- call x`
+    gives targets ``["nas1"]`` and the tail intact). Two ways to lose it:
+    naming a command that reads none, and putting the target after ``--``
+    (`deploy -- call x nas1`), where the target becomes part of the remote
+    command and the run falls back to ``localhost``.
+    """
+    extra = list(getattr(instance, "_passthrough_", ()) or ())
+    if not extra:
+        return
+    name = getattr(command, "_parsername_", None) or getattr(
+        command, "__name__", str(command)
+    )
+    if name not in _PASSTHROUGH_COMMANDS:
+        logger.warning(
+            "ignoring the %d argument(s) after '--': %s reads none", len(extra), name
+        )
+        return
+    if not getattr(instance, "targets", None):
+        logger.warning(
+            "no target before '--': the command after it runs on localhost "
+            "(targets must precede the separator)"
+        )
 
 
 def _app_root(
@@ -651,6 +651,11 @@ def _runpath_base(args: "type[PyTrueNASArgs]") -> type:
     """
     if issubclass(args, PyTrueNASRunPathArgs):
         return args
+    if issubclass(PyTrueNASRunPathArgs, args):
+        # The shared root itself (or anything PyTrueNASRunPathArgs already
+        # derives from): it needs nothing added, and combining the two in this
+        # order is an impossible MRO.
+        return PyTrueNASRunPathArgs
     return type(args.__name__ + "RunPath", (args, PyTrueNASRunPathArgs), {})
 
 
@@ -698,20 +703,14 @@ def main(
         )
 
     root = _app_root(root, args)
-    # Only re-register when the caller actually changed the base: the default
-    # was already registered at import, and a redundant call would rebuild the
-    # RunPath base for no reason.
-    if args is not PyTrueNASArgs:
-        _runpath.register(base=_runpath_base(args), step_adapter=_step_adapter)
+    # Always register, not only for a custom base: the registration is global
+    # and persists, so a previous main() call with a derived base leaked into a
+    # later default one (and into anything else in the process).
+    _runpath.register(base=_runpath_base(args), step_adapter=_step_adapter)
 
-    argv, passthrough = _split_passthrough(argv)
-    # Module-global rather than threaded through: `app` builds the parsed
-    # instance itself, so there is no seam to pass this along, and a command
-    # reads it at run time from one obvious place.
-    PASSTHROUGH[:] = passthrough
     return app(
         root,
-        commands=_discover(argv),
+        commands=_discover(argv, root),
         argv=argv,
         name=name,
         description=root.__doc__,

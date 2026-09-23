@@ -47,6 +47,8 @@ from __future__ import annotations
 
 import functools as _functools
 import inspect as _inspect
+
+from ._introspect import positional_arity
 import typing as _ty
 from logging import Logger as _Logger
 
@@ -122,27 +124,17 @@ def step_adapter(
 
 
 def _positional_count(entrypoint: "_ty.Callable[..., object]") -> int:
-    """How many of ``(client, args, logger)`` a decorated step will accept.
+    """How many of ``(client, args, logger)`` a step *requires*.
 
-    Capped at 3 -- the full module-command signature -- and 3 for a ``*args``
-    catch-all, which can take all of them. Falls back to 3 when the signature
-    cannot be introspected, matching the documented shape rather than silently
-    dropping the logger.
+    Only parameters without a default count, and ``*args`` does not count as
+    three: a duho-native ``main(cmd, ctx, extra=None)`` or ``main(*args)`` used
+    to look like the 3-arg module-command shape and had its arguments swapped
+    by the adapter. Falls back to 3 when the signature cannot be read, matching
+    the documented shape rather than silently dropping the logger.
     """
-    try:
-        params = _inspect.signature(entrypoint).parameters
-    except (TypeError, ValueError):  # pragma: no cover - builtins/C callables
-        return 3
-    count = 0
-    for param in params.values():
-        if param.kind is _inspect.Parameter.VAR_POSITIONAL:
-            return 3
-        if param.kind in (
-            _inspect.Parameter.POSITIONAL_ONLY,
-            _inspect.Parameter.POSITIONAL_OR_KEYWORD,
-        ):
-            count += 1
-    return min(count, 3)
+    return positional_arity(
+        entrypoint, required_only=True, cap=3, varargs=None, unknown=3
+    )
 
 
 def step(entrypoint: "_ty.Callable[..., object]") -> "_ty.Callable[..., object]":
