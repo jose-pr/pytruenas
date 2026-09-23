@@ -34,6 +34,18 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
+- **Generated stubs describe `enum`/`const` and maps.** Both rendered as
+  `JsonValue` while the appliance's dump uses them 6413 and 6420 times; they
+  are `Literal[...]` now (with `None` as a union member), and an object whose
+  `additionalProperties` carries a schema is `Mapping[str, T]` rather than
+  "some object". On TrueNAS 26.0 that is 1275 `Literal` annotations where there
+  were none.
+- **A middleware method whose name is also a `Namespace` method is no longer
+  emitted.** `core.subscribe` redefined the real `Namespace.subscribe`, so a
+  checker accepted `ns.subscribe(event)` — which at runtime calls the real
+  method with a positional callback — and rejected the correct `ns.subscribe()`.
+  Reach the middleware one as `ns(_method="subscribe", ...)`, as the runtime
+  documents; generation logs which methods it skipped.
 - **Generated signatures offered the call options positionally.**
   `_method`, `_ioerror` and `_filetransfer` appeared as ordinary parameters
   while the runtime takes middleware parameters positionally and now rejects

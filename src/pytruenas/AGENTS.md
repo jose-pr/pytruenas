@@ -905,6 +905,13 @@ a directory the user does not control.
 - Every method's call options (`_method`, `_ioerror`, `_filetransfer`,
   `_timeout`, `_tries`) are **keyword-only** in the stub, matching the runtime:
   middleware parameters are positional and any other keyword raises.
+- `enum`/`const` become `typing.Literal[...]` (a `None` value becomes a union
+  member), and an object whose `additionalProperties` is a schema becomes
+  `Mapping[str, T]`.
+- A middleware method whose name is also a real `Namespace` method
+  (`core.subscribe`) is **not** emitted — the stub would redefine the class
+  member. Call it as `ns(_method="subscribe", ...)`; generation logs each one
+  it skipped at INFO.
 
 ## Optional extras and their gating imports
 

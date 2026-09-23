@@ -65,12 +65,60 @@ class Schema(_ty.TypedDict, total=False):
         )
 
 
+def _literal_declaration(schema: "_ty.Mapping[str, object]") -> "str | None":
+    """``Literal[...]`` for a ``const``/``enum`` schema, or ``None``.
+
+    ``None`` among the values becomes a union member rather than a Literal
+    argument (`Literal[None]` is legal but reads worse than `| None`, and a
+    checker treats them the same). A value no Literal can carry -- a list, a
+    dict, a float -- falls back to the ordinary ``type`` handling.
+    """
+    if "const" in schema:
+        values = [schema["const"]]
+    elif "enum" in schema:
+        values = list(schema.get("enum") or [])
+        if not values:
+            return None
+    else:
+        return None
+    literals = []
+    optional = False
+    for value in values:
+        if value is None:
+            optional = True
+        elif isinstance(value, bool) or isinstance(value, (str, int)):
+            # bool first: it is an int, and `Literal[True]` is not `Literal[1]`.
+            literals.append(repr(value))
+        else:
+            return None
+    if not literals:
+        return "None" if optional else None
+    rendered = f"_ty.Literal[{', '.join(literals)}]"
+    return f"{rendered}|None" if optional else rendered
+
+
 class BaseType(Schema):
     type: _ty.NotRequired[str]
 
     def python_declaration(
         self, typeddicts: dict[str, object], namespace: _qn.PythonName
     ):
+        # `enum`/`const` say more than `type` does, and the appliance's dump
+        # is full of them (6413 and 6420 occurrences on 26.0): rendering them
+        # as `Literal` is the difference between "some string" and the five
+        # strings the method actually accepts.
+        literal = _literal_declaration(self)
+        if literal is not None:
+            return literal
+        if "allOf" in self:
+            members = [
+                Schema.python_declaration(member, typeddicts, namespace)
+                for member in self.get("allOf") or []
+            ]
+            # One member is just that member; several would need a real
+            # intersection type, which Python has no syntax for.
+            if len(members) == 1:
+                return members[0]
         type = self.get("type", "any")
         if isinstance(type, str) and type.startswith("!"):
             return type.removeprefix("!")
@@ -186,8 +234,12 @@ class String(BaseType):
 
 class Object(BaseType):
     type: _ty.Literal["object"] = "object"  # type: ignore
-    properties: dict[str, Schema]
-    additional_properties: _ty.NotRequired[bool]
+    properties: _ty.NotRequired[dict[str, Schema]]
+    #: The dump's own spelling. A bool ("anything"/"nothing else allowed") or a
+    #: schema the extra VALUES must match, which is how the middleware writes a
+    #: map. The old declaration named it `additional_properties` and typed it
+    #: `bool`, neither of which appears in a dump.
+    additionalProperties: _ty.NotRequired["bool | Schema"]
     required: _ty.NotRequired[list[str]]
 
     def python_declaration(
@@ -195,6 +247,13 @@ class Object(BaseType):
     ):  # type: ignore
         properties = self.get("properties")
         if not properties:
+            extra = self.get("additional_properties", self.get("additionalProperties"))
+            if isinstance(extra, dict) and extra:
+                # A free-form object whose VALUES have a schema: the dump uses
+                # this for maps (19309 occurrences on 26.0), and they all read
+                # as "some JSON object" before.
+                value = Schema.python_declaration(extra, typeddicts, namespace)
+                return f"_ty.Mapping[str, {value}]"
             return "_jsonschema.JsonObject"
 
         # Absent (or empty) `required` means NOTHING is required -- JSON
@@ -241,8 +300,11 @@ class Any(BaseType):
 
 class Array(BaseType):
     type: _ty.Literal["array"] = "array"  # type: ignore
-    items: Schema | bool
-    prefixItems: list[Schema]
+    #: A schema every item matches, or a bool (`True`/`{}` any item,
+    #: `False` none). Absent for an array with no item constraint at all.
+    items: _ty.NotRequired["Schema | bool"]
+    #: Positional item schemas (the middleware's call-parameter lists).
+    prefixItems: _ty.NotRequired[list[Schema]]
 
     def python_declaration(
         self, typeddicts: dict[str, object], namespace: _qn.PythonName

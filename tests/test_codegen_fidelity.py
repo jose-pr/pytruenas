@@ -7,6 +7,7 @@ Every case here comes from a real API dump shape.
 import ast
 import copy
 import json
+import logging
 import sys
 from pathlib import Path
 
@@ -242,3 +243,73 @@ def test_no_parameter_is_named_all(tmp_path):
     for path in (tmp_path / "out").rglob("*.pyi"):
         src = path.read_text(encoding="utf-8")
         assert "all:_jsonschema" not in src, path
+
+
+# -- precision ------------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    "schema,expected",
+    [
+        ({"enum": ["a", "b"]}, "_ty.Literal['a', 'b']"),
+        ({"enum": ["a", None]}, "_ty.Literal['a']|None"),
+        ({"enum": [1, 2, 3]}, "_ty.Literal[1, 2, 3]"),
+        ({"const": 5}, "_ty.Literal[5]"),
+        ({"const": True}, "_ty.Literal[True]"),
+        # What a Literal cannot carry falls back to the ordinary handling.
+        ({"enum": [[1], [2]]}, "_jsonschema.JsonValue"),
+        ({"enum": []}, "_jsonschema.JsonValue"),
+        # A typed `additionalProperties` is a map, not "some object".
+        (
+            {"type": "object", "additionalProperties": {"type": "string"}},
+            "_ty.Mapping[str, str]",
+        ),
+        ({"type": "object", "additionalProperties": True}, "_jsonschema.JsonObject"),
+        ({"allOf": [{"type": "string"}]}, "str"),
+    ],
+)
+def test_enum_const_and_maps_render_precisely(schema, expected):
+    """All of these read as `JsonValue`/`JsonObject` before -- and the
+    appliance's dump uses enum 6413 times and const 6420 times, so this is most
+    of what the stubs describe."""
+    assert js.Schema.python_declaration(schema, {}, None) == expected
+
+
+def test_a_literal_annotation_is_valid_python():
+    rendered = js.Schema.python_declaration({"enum": ["a", None]}, {}, None)
+    ast.parse(f"x: {rendered}")
+
+
+# -- the runtime wins a name clash ----------------------------------------
+
+
+def test_a_method_named_like_a_namespace_method_is_not_emitted(tmp_path, caplog):
+    """`core.subscribe` is a middleware method AND `Namespace.subscribe` is a
+    real one. Emitting it redefined the class member, so a checker accepted
+    `ns.subscribe(event)` -- which at runtime calls the real method with a
+    positional callback -- and rejected the correct `ns.subscribe()`."""
+    api = _api()
+    api["methods"].append(
+        {
+            "name": "user.subscribe",
+            "doc": "",
+            "roles": [],
+            "schemas": {
+                "type": "object",
+                "properties": {
+                    "Call parameters": {
+                        "type": "array",
+                        "prefixItems": [{"title": "event", "type": "string"}],
+                    },
+                    "Return value": {"type": "string"},
+                },
+            },
+        }
+    )
+    with caplog.at_level(logging.INFO, logger="pytruenas.codegen"):
+        codegen.Codegen().generate(api, tmp_path / "out")
+    src = (tmp_path / "out" / "user" / "__init__.pyi").read_text(encoding="utf-8")
+    assert "def subscribe" not in src
+    assert "_method=" in caplog.text  # it says how to reach it instead
+    # The synthetic helpers, whose names also exist on Namespace, stay.
+    assert "def _update" in src and "def _get" in src

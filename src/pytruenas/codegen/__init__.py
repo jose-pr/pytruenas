@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path as _P
 import copy as _copy
+import logging as _logging
 import re as _re
 import shutil
 import tempfile
@@ -16,6 +17,9 @@ class _Missing:
     """Sentinel: a parameter has no default at all (distinct from a ``None``
     default, which is a real, emittable value)."""
 
+
+#: Generation is a library call; it has no host logger to borrow.
+_LOGGER = _logging.getLogger("pytruenas.codegen")
 
 _MISSING = _Missing()
 
@@ -526,6 +530,29 @@ def _check_replaceable(root: _P) -> None:
         )
 
 
+def _runtime_namespace_attributes() -> "frozenset[str]":
+    """Names a generated namespace class must not redefine.
+
+    The real `Namespace` methods (`subscribe`, and the `_query`/`_get`/...
+    helpers, which are generated deliberately from the schema and so are
+    excluded by the caller).
+    """
+    from ..namespace import Namespace as _RuntimeNamespace
+
+    return frozenset(
+        name for name in dir(_RuntimeNamespace) if not name.startswith("__")
+    )
+
+
+def _shadows_runtime(declaration: "Method") -> bool:
+    """Whether this dump method would redefine a real ``Namespace`` member."""
+    name = declaration.pyname.name
+    if name.startswith("_"):
+        # The synthetic helpers are meant to describe the runtime ones.
+        return False
+    return name in _runtime_namespace_attributes()
+
+
 def _check_inside(root: _P, path: _P) -> None:
     """Refuse a generated path that escapes ``root``.
 
@@ -564,7 +591,24 @@ class Codegen:
         version_ns = Namespace(version)
         for method in api["methods"]:
             method["name"] = version / method["name"]
-            declarations.append(Method(method))
+            declaration = Method(method)
+            if _shadows_runtime(declaration):
+                # A middleware method whose name is also a real `Namespace`
+                # method (`core.subscribe` vs `Namespace.subscribe`). Emitting
+                # it redefined the class member, so a checker accepted
+                # `ns.subscribe(event)` -- which at runtime calls the REAL
+                # method with a positional callback -- and rejected the correct
+                # `ns.subscribe()`. The runtime way to reach the middleware one
+                # is `ns(_method="subscribe", ...)`, which needs no stub.
+                _LOGGER.info(
+                    "%s is shadowed by Namespace.%s; call it as "
+                    '_method="%s" (no stub emitted)',
+                    method["name"],
+                    declaration.pyname.name,
+                    declaration.pyname.name,
+                )
+                continue
+            declarations.append(declaration)
 
         namespaces: list[Namespace] = [version_ns]
         for decl in declarations:
