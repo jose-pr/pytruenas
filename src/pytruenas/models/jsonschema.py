@@ -175,7 +175,10 @@ class Object(BaseType):
         if not properties:
             return "_jsonschema.JsonObject"
 
-        required = self.get("required", [])
+        # Absent (or empty) `required` means NOTHING is required -- JSON
+        # Schema's own rule. Reading a missing list as "all required" made
+        # every update payload and query-options TypedDict demand every key.
+        required = self.get("required") or []
         title = self.get("_name", self.get("title"))
         if not title:
             # An anonymous inline object with properties: derive a stable name
@@ -186,8 +189,8 @@ class Object(BaseType):
         typedict = {}
         for prop, defintion in properties.items():
             typedef = Schema.python_declaration(defintion, typeddicts, namespace)
-            if required and prop not in required:
-                typedef = f"_ty.NotRequired[{typedef}]"
+            if prop not in required:
+                typedef = f"_NotRequired[{typedef}]"
             typedict[prop] = typedef
 
         typeddicts[name] = typedict

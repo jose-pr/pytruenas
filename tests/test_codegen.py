@@ -174,3 +174,44 @@ def test_typeddict_name_from_spacey_title():
     name = _typeddict_name(ns, "Filesystem Count")
     assert name.isidentifier()
     assert " " not in name
+
+
+@pytest.mark.requires("jinja2")
+def test_properties_not_listed_in_required_are_optional(generated):
+    """A schema with no `required` list requires nothing (JSON Schema), but
+    every property was rendered as required -- so an update payload, a
+    query-options dict and a _get filter all demanded every field."""
+    src = (generated / "user" / "__init__.pyi").read_text(encoding="utf-8")
+    update = re.search(r"UpdateUserUpdate = .*?\}\)", src, re.S).group(0)
+    fields = [line for line in update.splitlines() if line.startswith('    "')]
+    assert fields and all("_NotRequired[" in line for line in fields), update
+    # A field the dump DOES list as required stays required.
+    create = re.search(r"CreateUserCreate = .*?\}\)", src, re.S).group(0)
+    assert '"username": str' in create
+    assert '"full_name": _NotRequired[str]' in create
+
+
+@pytest.mark.requires("jinja2")
+def test_optionality_markers_resolve_on_the_39_floor(generated):
+    """typing.NotRequired/Unpack exist only from 3.11; a consumer checking
+    against 3.9 (this project's floor) could not resolve the stubs at all."""
+    for path in generated.rglob("*.pyi"):
+        src = path.read_text(encoding="utf-8")
+        assert "_ty.NotRequired" not in src and "_ty.Unpack" not in src
+        if "_NotRequired[" in src or "_Unpack[" in src:
+            assert "from typing_extensions import" in src
+            assert "_sys.version_info >= (3, 11)" in src
+
+
+@pytest.mark.requires("jinja2")
+def test_the_root_module_exports_current(generated):
+    """`TrueNASClient[Current]` is the documented spelling, but the generated
+    root class is named after the version, so nothing resolved."""
+    root = (generated / "__init__.pyi").read_text(encoding="utf-8")
+    alias = re.search(r"^Current = (\w+)$", root, re.M)
+    assert alias, root
+    assert f"class {alias.group(1)}(_NS)" in root
+    # Only in the root module -- not repeated per namespace.
+    assert "Current = " not in (generated / "user" / "__init__.pyi").read_text(
+        encoding="utf-8"
+    )

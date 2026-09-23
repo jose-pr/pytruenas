@@ -2,7 +2,15 @@ from __future__ import annotations
 
 from pytruenas import Namespace as _NS
 from pytruenas.models import jsonschema as _jsonschema
+import sys as _sys
 import typing as _ty
+
+# NotRequired and Unpack are typing members only from 3.11; this project's
+# floor -- and so a consumer's checking target -- is 3.9.
+if _sys.version_info >= (3, 11):
+    from typing import NotRequired as _NotRequired, Unpack as _Unpack
+else:
+    from typing_extensions import NotRequired as _NotRequired, Unpack as _Unpack
 
 {%- set typeddicts = {} -%}
 
@@ -35,3 +43,9 @@ class {{ ns.classname }}(_NS):
 {%- endfor %}
 })
 {% endfor %}
+{%- if alias %}
+
+#: The documented spelling: `TrueNASClient[Current]`, so a consumer pins "the
+#: version these typings were generated from" without naming it.
+{{ alias }} = {{ ns.classname }}
+{%- endif %}

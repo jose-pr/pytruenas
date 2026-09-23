@@ -103,7 +103,7 @@ class Parameter:
         if name.startswith("**"):
             # ``**kwargs`` unpacks a TypedDict and can never carry a default --
             # ``**k: T = ...`` is a syntax error.
-            return f"{name}:_ty.Unpack[{typedef}]"
+            return f"{name}:_Unpack[{typedef}]"
         decl = f"{name}:{typedef}"
         default = self.schema.get("default", _MISSING)
         # ``_MISSING`` (key absent) and ``...`` (the synthetic "required"
@@ -546,6 +546,14 @@ class Codegen:
             # UTF-8 explicitly: docstrings from the dump contain non-ASCII, and
             # the platform default (cp1252 on Windows) would raise or mangle.
             ns_path.write_text(
-                renderer.render(ns=ns, path=ns_path, modpath=ns_path.parent),
+                renderer.render(
+                    ns=ns,
+                    path=ns_path,
+                    modpath=ns_path.parent,
+                    # The root module also gets the documented `Current` alias:
+                    # the generated class is named after the version (V26000),
+                    # so `TrueNASClient[Current]` had nothing to resolve to.
+                    alias="Current" if ns.qualname == version else None,
+                ),
                 encoding="utf-8",
             )
