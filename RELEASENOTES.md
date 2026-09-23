@@ -6,6 +6,15 @@ user-facing; this file is the durable record.
 
 ---
 
+## [Unreleased]
+
+Next performance target: a CI benchmark baseline, so the next release has a
+previous->current table. The ejson codec is the hot path worth watching
+(`ejson.loads.plain` is the largest per-call cost); the `benchmark` job in
+test.yml produces the numbers.
+
+---
+
 ## [0.5.0] - 2026-09-23
 
 ### What changed
@@ -112,12 +121,6 @@ benchmark jobs and the docs build. Two failures the matrix caught first, fixed
 before the tag: the web shell decoded its input file with a positional argument
 that BSD base64 (macOS) ignores, so input arrived empty there; and the deploy
 tests had been reading pre-`packaging` metadata from a local editable install.
-
-### [Unreleased]
-
-Next performance target: a CI benchmark baseline for this release, so the
-following one has a previous->current table. The ejson codec is the hot path
-worth watching (`ejson.loads.plain` is the largest per-call cost).
 
 ---
 
