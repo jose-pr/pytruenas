@@ -1,43 +1,54 @@
-# Agent configs / private notes — never tracked in this repo
+# Category rule: nothing dot-prefixed at the repo root gets tracked except the
+# files re-included below (a category beats a list). Root-anchored on purpose;
+# nested dotfiles are governed by the specific rules further down.
+/.*
+!/.gitignore
+!/.gitattributes
+!/.github/
+
+# Private agent config, always excluded. No trailing slash on .agents: it may be
+# a symlink, which git treats as a file, so a directory-only `.agents/` would not
+# match it. These repeat what /.* already covers at the root because they also
+# catch nested copies. `*.local.*` is the unshared, machine- or user-specific
+# override -- it must never be committed or packaged.
 .agents
-*.local.md
+*.local.*
 CLAUDE*
-.claude/
+.claude
 
-# Virtualenvs
-.venv*/
-venv/
-env/
-.env/
-
-# Byte-compiled / optimized
-__pycache__/
-*.py[cod]
-*$py.class
-
-# Distribution / packaging
+# Build / dist output and the generated docs site
 build/
 dist/
+site/
 *.egg-info/
 *.egg
 .eggs/
 
-# Test / coverage
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
 .pytest_cache/
-.coverage
+.hypothesis/
+.mypy_cache/
+.ruff_cache/
+.coverage*
 htmlcov/
 .tox/
+.venv*/
+.pyvenv/
+venv/
+env/
 
-# Docs site build
-/site
+# Docs build output (mkdocs' own `site/` is above)
 docs/_build/
 
-# Editors / OS
-.vscode/
-.idea/
-*.swp
+# OS / editor
 .DS_Store
+*.swp
+.idea/
+.vscode/
 
-# Local pytruenas config / generated typings
+# Local pytruenas config and generated typings, which are per-machine
 pytruenas.yaml
 /typings/

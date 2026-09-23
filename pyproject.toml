@@ -10,13 +10,16 @@ description = "A typed, Pythonic client and CLI for the TrueNAS middleware API"
 readme = "README.md"
 keywords = ["truenas", "middleware", "jsonrpc", "websocket", "sysadmin", "cli"]
 requires-python = ">=3.9"
-license = { file = "LICENSE" }
+# PEP 639: an SPDX expression plus the files themselves. The legacy
+# `License ::` classifier is gone -- carrying both is an error for modern
+# build backends and installers.
+license = "MIT"
+license-files = ["LICENSE"]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Environment :: Console",
     "Intended Audience :: Developers",
     "Intended Audience :: System Administrators",
-    "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
@@ -97,7 +100,12 @@ Repository = "https://github.com/jose-pr/pytruenas"
 # `/.*` covers every dot-entry at the root (.github, .venv, .pytest_cache,
 # .coverage, private tool directories). .gitignore still ships: hatchling
 # includes it for sdists by design, so the archive reproduces the source tree.
-exclude = ["/.*"]
+#
+# `*.local.*` is separate on purpose and matches at any depth: a dotfile
+# pattern does NOT match `AGENTS.local.md`, whose name does not start with a
+# dot -- and it sits in the same directory as the `AGENTS.md` that is meant to
+# ship. Same directory, nearly the same name, opposite destinations.
+exclude = ["/.*", "*.local.*"]
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/pytruenas"]

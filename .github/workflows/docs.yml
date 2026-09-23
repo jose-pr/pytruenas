@@ -1,0 +1,81 @@
+name: Docs
+
+# Owns EVERY Pages deploy. Kept separate from release.yml so the site can be
+# rebuilt without cutting a release, and so a release is never the first time
+# the docs build runs: release.yml only GATES on a strict build and creates the
+# release object; publishing that release fires `release: published`, which
+# triggers this workflow to deploy the docs for the version just shipped.
+#
+# Triggers:
+#   - release published (a v* release ships its matching docs);
+#   - push to main touching docs sources (main = latest, between releases);
+#   - workflow_dispatch, for a manual redeploy of any ref.
+on:
+  release:
+    types: [published]
+  push:
+    branches: ["main"]
+    paths:
+      - "docs/**"
+      - "mkdocs.yml"
+      - "src/**"
+      - "README.md"
+      - "CHANGELOG.md"
+      - ".github/workflows/docs.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Serialize deploys; never cancel one mid-publish.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  docs-build:
+    name: Build documentation site
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      # configure-pages needs this to turn Pages on by itself (below).
+      pages: write
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.x"
+      - uses: actions/configure-pages@v6
+        with:
+          # Turn Pages on (source: GitHub Actions) rather than assuming someone
+          # clicked it once: without this the step dies on a fresh clone or fork
+          # with "Get Pages site failed ... Not Found", which names the REST
+          # endpoint instead of the missing setting.
+          enablement: true
+      - name: Install package with docs tooling
+        # mkdocstrings imports pytruenas, so the package and its docs extra
+        # both have to be installed, not just mkdocs.
+        run: python -m pip install -e ".[dev,docs,config,ssh,codegen]"
+      - name: Build docs
+        run: mkdocs build --strict
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: site/
+
+  docs-deploy:
+    name: Deploy documentation to GitHub Pages
+    needs: docs-build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      # A YAML schema linter may flag this value as invalid; GitHub reserves the
+      # name and it is correct. Do not "fix" it.
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5
