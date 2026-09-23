@@ -3,13 +3,20 @@ name: Docs
 # Owns EVERY Pages deploy. Kept separate from release.yml so the site can be
 # rebuilt without cutting a release, and so a release is never the first time
 # the docs build runs: release.yml only GATES on a strict build and creates the
-# release object; publishing that release fires `release: published`, which
-# triggers this workflow to deploy the docs for the version just shipped.
+# release object, then asks this workflow to deploy the docs for the version it
+# just shipped.
 #
 # Triggers:
-#   - release published (a v* release ships its matching docs);
+#   - release published (kept for a release published by a human or a PAT);
 #   - push to main touching docs sources (main = latest, between releases);
-#   - workflow_dispatch, for a manual redeploy of any ref.
+#   - workflow_dispatch, which is how a TAG release gets here: a release created
+#     by release.yml's own GITHUB_TOKEN starts no workflow runs, so that
+#     workflow dispatches this one explicitly (its docs-dispatch job).
+#
+# The `github-pages` environment must allow tag refs, or a tag deploy is
+# rejected after a green build:
+#   gh api -X POST repos/<org>/<repo>/environments/github-pages/deployment-branch-policies \
+#     -f name='v*' -f type=tag
 on:
   release:
     types: [published]

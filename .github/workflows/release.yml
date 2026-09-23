@@ -125,6 +125,24 @@ jobs:
           prerelease: ${{ contains(github.ref_name, '-') }}
           body_path: release_notes.md
 
+  # A release created with the workflow's own GITHUB_TOKEN does NOT start new
+  # workflow runs, so docs.yml's `release: published` trigger never fires for a
+  # tag release (measured across several repos: zero `release`-triggered docs
+  # runs against many tag releases). Dispatch it explicitly instead, pinned to
+  # the tag, so the shipped version's docs actually deploy.
+  docs-dispatch:
+    name: Deploy docs for this tag
+    needs: [github-release, docs-gate]
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+    steps:
+      - uses: actions/checkout@v7
+      - name: Trigger the docs workflow for this tag
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run docs.yml --ref "${{ github.ref_name }}"
+
   publish-pypi:
     name: Publish to PyPI
     needs: github-release
