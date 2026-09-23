@@ -35,6 +35,7 @@ import logging as _logging
 import os as _os
 import threading as _threading
 import typing as _ty
+import weakref as _weakref
 from functools import cached_property as _cached_property
 from urllib.parse import unquote as _unquote
 from urllib.parse import urlsplit as _urlsplit
@@ -143,6 +144,32 @@ class _HostLogger(_logging.LoggerAdapter):
             return
         msg, kwargs = self.process(msg, kwargs)
         inner(msg, *args, **kwargs)
+
+
+def _close_quietly(closeable: object) -> None:
+    """Close something during garbage collection, where raising is useless."""
+    close = getattr(closeable, "close", None)
+    if not callable(close):
+        return
+    try:
+        close()
+    except Exception:  # pragma: no cover - interpreter teardown
+        pass
+
+
+def _close_provider(provider: object) -> None:
+    """Close a provider's transport, if it has one that can be closed."""
+    transport = getattr(provider, "transport", None)
+    for candidate in (transport, provider):
+        close = getattr(candidate, "close", None)
+        if callable(close):
+            try:
+                close()
+            except Exception:  # pragma: no cover - teardown must not raise
+                _logging.getLogger("pytruenas").debug(
+                    "closing %r failed", candidate, exc_info=True
+                )
+            return
 
 
 def _resolve_logger(logger: object, name: "str | None" = None):
@@ -850,6 +877,12 @@ class TrueNASHost(_PosixHost, _ty.Generic[ApiVersion]):
         #: How the session last authenticated -- `login()`'s arguments -- so a
         #: reconnect repeats *that* login, not whatever the config would do.
         self._last_login: "tuple[object, dict] | None" = None
+        #: Closes the websocket if this host is collected without close().
+        self._conn_finalizer: "_weakref.finalize | None" = None
+        #: One warning per host about credentials over plaintext ws://.
+        self._plaintext_warned = False
+        #: Cached SFTP backend, keyed on the SSH settings (see fs.truenas).
+        self._sftp_backend_cache: "tuple[str, object] | None" = None
         #: HTTP(S) session for the side channels; see `_http`.
         self._http_session: "_req.Session | None" = None
         # `client=` is accepted and ignored: the host *is* the client now.
@@ -1050,9 +1083,23 @@ class TrueNASHost(_PosixHost, _ty.Generic[ApiVersion]):
                 elif self._config.autologin:
                     self.login()
                 else:
-                    self._conn = self._openwss()
+                    self._track(self._openwss())
                 conn = self._conn
             return _ty.cast("_connection.TrueNASWSConnection", conn)
+
+    def _track(self, conn: "_connection.TrueNASWSConnection") -> None:
+        """Adopt ``conn`` as this host's connection, closing it on collection.
+
+        A client dropped without ``close()`` (or its ``with`` block) left the
+        websocket open and its reader thread alive for the life of the process.
+        The finalizer holds the CONNECTION, never the host, so it does not keep
+        the host alive; :meth:`close` detaches it.
+        """
+        self._conn = conn
+        finalizer, self._conn_finalizer = self._conn_finalizer, None
+        if finalizer is not None:
+            finalizer.detach()
+        self._conn_finalizer = _weakref.finalize(self, _close_quietly, conn)
 
     def _drop_conn(self, conn: "_connection.TrueNASWSConnection | None") -> None:
         """Discard ``conn`` so the next :attr:`conn` access reconnects.
@@ -1114,8 +1161,9 @@ class TrueNASHost(_PosixHost, _ty.Generic[ApiVersion]):
                     self._conn.close()
                 except Exception:
                     pass
-            self._conn = self._openwss()
+            self._track(self._openwss())
             creds = creds or _ty.cast(_auth.Credentials, self._config.credentials)
+            self._warn_if_plaintext(creds)
             try:
                 if login_ex:
                     result = creds.login_ex(
@@ -1234,7 +1282,9 @@ class TrueNASHost(_PosixHost, _ty.Generic[ApiVersion]):
             file = file.encode()
 
         if not token:
-            token = self.api.auth.generate_token(5, {}, False, **kwargs)
+            # See the web shell: the server defaults match_origin to True and
+            # this token is used once, by one HTTP request from this machine.
+            token = self.api.auth.generate_token(5, {}, True, True, **kwargs)
 
         resp = self._http.post(
             target.uri,
@@ -1451,12 +1501,51 @@ class TrueNASHost(_PosixHost, _ty.Generic[ApiVersion]):
             # is not silently overridden by a provisioning call.
             return private_key
 
-        executors, paths = self._build_providers(self._config)
         from hostctl.provider import ProviderSelector
 
-        self._executor_selector = ProviderSelector(executors)
-        self._path_selector = ProviderSelector(paths)
+        executors, paths = self._build_providers(self._config)
+        with self._conn_lock:
+            # Under the lock, and closing what is replaced: the two selectors
+            # were swapped one after the other (so a concurrent call could see
+            # a half-swapped pair), and the transports they dropped -- an open
+            # SSH connection among them -- were never closed.
+            replaced = (self._executor_selector, self._path_selector)
+            self._executor_selector = ProviderSelector(executors)
+            self._path_selector = ProviderSelector(paths)
+            # The SFTP backend is cached per client and keyed on the SSH
+            # settings, which just changed; drop it so the next path call does
+            # not authenticate with the previous credentials.
+            self._sftp_backend_cache = None
+        for selector in replaced:
+            for provider in getattr(selector, "providers", ()):
+                _close_provider(provider)
         return private_key
+
+    def _warn_if_plaintext(self, creds: object) -> None:
+        """Warn once when credentials would travel over plain ``ws://``.
+
+        Not a refusal: ``ws://`` is documented and legitimate for a loopback
+        target or a tunnel, and pytruenas cannot know which one this is. But a
+        password or API key on a plaintext socket to another machine is worth a
+        line in the log, since the usual cause is a target typed without its
+        scheme somewhere that defaults to ws.
+        """
+        config = self._config
+        if config.is_local or config.secure is not False:
+            return
+        host = (config.host or "").lower()
+        if host in _LOCAL_HOSTS or host in ("::1", "[::1]"):
+            return
+        if creds is None or isinstance(creds, _auth.LocalAuth):
+            return
+        if self._plaintext_warned:
+            return
+        self._plaintext_warned = True
+        self.logger.warning(
+            "sending credentials over plaintext ws:// to %s; use wss:// (or a "
+            "tunnel) unless this link is already private",
+            config.name,
+        )
 
     def run(self, *cmds, **options):
         """Run a command -- :meth:`hostctl.host.PosixHost.run`, plus a warning.
@@ -1535,6 +1624,10 @@ class TrueNASHost(_PosixHost, _ty.Generic[ApiVersion]):
         Order matters: the ``tnasws`` path provider talks over the websocket,
         so it must be torn down before the connection it depends on.
         """
+        finalizer, self._conn_finalizer = self._conn_finalizer, None
+        if finalizer is not None:
+            # Closing explicitly; nothing left for the collector to do.
+            finalizer.detach()
         session, self._http_session = self._http_session, None
         if session is not None:
             session.close()

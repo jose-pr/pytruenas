@@ -99,12 +99,8 @@ class TruenasPath(_TnasWsPath):
         # NEITHER is installed (the ssh extra wasn't installed) building it
         # raises ImportError -- treat that as "no SFTP leg" so callers fall back
         # to the websocket leg rather than crashing.
-        connect_opts = _connect_opts_from_ssh(ssh)
-        try:
-            from pathlib_next.uri.schemes.sftp import AsyncsshSftpBackend
-
-            backend = AsyncsshSftpBackend(connect_opts=connect_opts)
-        except ImportError:
+        backend = _sftp_backend(self.backend.client, ssh)
+        if backend is None:
             return None
         # The path becomes part of a URI, so it has to be encoded as one.
         # ``SftpPath`` parses this string and uridecodes the components: a raw
@@ -269,6 +265,40 @@ def _as_posix(value: object) -> str:
         if isinstance(candidate, str):
             return candidate
     return str(value)
+
+
+def _sftp_backend(client: object, ssh: object):
+    """One SFTP backend per client, or ``None`` without the ``ssh`` extra.
+
+    Cached on the client because pathlib_next keys its connection cache on the
+    backend OBJECT: a fresh backend per call never hit that cache, so five
+    ``readlink()`` calls opened five concurrent SSH sessions and closed none
+    (measured), accumulating to the cache's LRU bound for the life of the
+    process. hostctl caches one backend per transport for the same reason.
+
+    The cache is invalidated when the SSH settings change, so
+    ``install_sshcreds()`` (which rewrites them) cannot leave a backend
+    authenticating with the previous credentials.
+    """
+    try:
+        from pathlib_next.uri.schemes.sftp import AsyncsshSftpBackend
+    except ImportError:
+        return None
+    connect_opts = _connect_opts_from_ssh(ssh)
+    # A dict is not hashable and asyncssh options are not comparable by
+    # identity, so the key is the rendered settings.
+    key = repr(sorted((str(k), repr(v)) for k, v in connect_opts.items()))
+    cached = getattr(client, "_sftp_backend_cache", None)
+    if cached is not None and cached[0] == key:
+        return cached[1]
+    backend = AsyncsshSftpBackend(connect_opts=connect_opts)
+    try:
+        client._sftp_backend_cache = (key, backend)  # type: ignore[attr-defined]
+    except Exception:
+        # A client stand-in that refuses attributes (a Mock with spec, a
+        # frozen object): work uncached rather than fail the operation.
+        pass
+    return backend
 
 
 def _connect_opts_from_ssh(ssh) -> "dict":

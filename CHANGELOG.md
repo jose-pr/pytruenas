@@ -8,6 +8,15 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Changed
 
+- **Tokens for the web shell and the HTTP side channels are now origin-bound
+  and single-use.** pytruenas passed `match_origin=False` where the server's
+  own default is `True`, so a leaked token was usable from anywhere; both
+  flags are on now. A setup whose HTTP request leaves from a different IP than
+  its websocket (multi-homed, or proxied) would be refused where it used to
+  work.
+- Credentials sent over plaintext `ws://` to a non-loopback host log one
+  warning per host. Not a refusal: `ws://` is legitimate for a loopback target
+  or an already-private link.
 - Dependency: `hostctl>=0.3.2,<0.4` (and the `ssh` extra). 0.3.2's `redact_uri`
   leaves a well-formed URI alone, which this package's redaction and its
   "does this target parse?" check both rely on.
@@ -34,6 +43,22 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
+- **A client dropped without `close()` leaked its websocket and reader thread**
+  for the life of the process; it is closed when the client is collected.
+  `close()` (or a `with` block) is still the right way — the finalizer is a
+  safety net, not a substitute.
+- **The SFTP leg built a fresh backend on every call**, and pathlib_next keys
+  its connection cache on the backend object — so nothing ever hit that cache:
+  five `readlink()` calls opened five concurrent SSH sessions and closed none
+  (measured). One backend per client now, keyed on the SSH settings so
+  `install_sshcreds()` cannot leave one authenticating with old credentials.
+- `install_sshcreds()` swapped the provider selectors one at a time without the
+  lifecycle lock and never closed the transports it replaced, leaking the old
+  SSH connection.
+- **An OTP written the documented way was mis-parsed.** `"root:pw\notp:123456"`
+  produced the token `"otp:123456"`; the raw credential string is now split by
+  the same `hostctl.host.parse_credentials` the URI path already used, so both
+  spellings mean the same thing. A bare token on its own line still works.
 - **Generated stubs describe `enum`/`const` and maps.** Both rendered as
   `JsonValue` while the appliance's dump uses them 6413 and 6420 times; they
   are `Literal[...]` now (with `None` as a union member), and an object whose

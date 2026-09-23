@@ -74,6 +74,38 @@ def _mask_args(args: tuple) -> tuple:
     return tuple(f"<{type(a).__name__}>" if a is not None else None for a in args)
 
 
+def _split_extras(raw: str) -> "tuple[str, str | None]":
+    """``(credential, otp)`` from a raw credential string.
+
+    Split by :func:`hostctl.host.parse_credentials`, the same function the URI
+    path already used -- so the documented ``otp:<token>`` line means the same
+    thing in both. Parsing it here by hand read that key as part of the token
+    (``otp_token="otp:123456"``), which the server then rejected.
+
+    A bare token on the second line (``"user:pw\n123456"``, which this package
+    accepted before) still works: hostctl reports a valueless extra, and a
+    single one of those is taken as the OTP.
+    """
+    try:
+        from hostctl.host import parse_credentials
+    except ImportError:  # pragma: no cover - hostctl is a hard dependency
+        return raw, None
+    try:
+        credential, extras = parse_credentials(raw)
+    except Exception:  # pragma: no cover - never worse than not splitting
+        return raw, None
+    if not extras:
+        return credential, None
+    otp = extras.get("otp")
+    if otp:
+        return credential, otp
+    valueless = [key for key, value in extras.items() if not value]
+    if len(valueless) == 1 and len(extras) == 1:
+        # The historical shape: the OTP alone on its own line.
+        return credential, valueless[0]
+    return credential, None
+
+
 class _CredentialsMeta(type):
     def __call__(cls: "type[Credentials]", *args, **kwargs):  # type: ignore
         if cls is not Credentials:
@@ -104,15 +136,11 @@ class _CredentialsMeta(type):
             if isinstance(cred, (list, tuple)):
                 return BasicAuth(*cred)
             cred = _ioutils.str_(cred)
+            cred, otp = _split_extras(cred)
             if ":" in cred:
-                # : is not valid char in key or token assume is user/pass
+                # ":" is not valid in a key or a token, so this is user:password.
                 usr, pwd = cred.split(":", maxsplit=1)
-                if "\n" in pwd:
-                    # assume newline not a common/valid password char
-                    pwd, token = pwd.split("\n", maxsplit=1)
-                else:
-                    token = None
-                return BasicAuth(usr, pwd, token)
+                return BasicAuth(usr, pwd, otp)
             else:
                 #
                 # An api key looks like <id>-<64 alphanumeric chars>; anything

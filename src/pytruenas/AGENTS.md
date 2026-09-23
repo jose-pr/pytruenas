@@ -62,6 +62,9 @@ version="current", executor=None, path=None, ssh=None, ...)`
 - **`shell`** — connection string for the SSH leg (`"ssh://root@nas"`,
   `"root:pw@nas:22"`). Stored as an `SshConfig` on `.config.ssh`; pass
   `ssh=SshConfig(...)` to supply one directly.
+- **`verify`/`sslverify` and plaintext** — a credential sent over plain
+  `ws://` to a non-loopback host logs one warning per host. `ws://` is not
+  refused: it is legitimate for a loopback target or an already-private link.
 - **`known_hosts`** (default: `()`, or `None` under `verify=False`) —
   host-key policy for the SSH leg built from
   `shell=` or by `.install_sshcreds()`, with hostctl's values: `()` verifies
@@ -126,6 +129,12 @@ version="current", executor=None, path=None, ssh=None, ...)`
   failure the new connection is closed, not left open unauthenticated. A
   one-time OTP is not replayable, so a session that must survive a reconnect
   needs `otp_provider`.
+- **`.close()`** — closes the transports and then the websocket; also a
+  context manager (`with TrueNASClient(...) as client:`). A client that is
+  garbage-collected without it closes its connection from a finalizer, so a
+  forgotten `close()` no longer leaks the socket and its reader thread — but
+  the finalizer runs whenever the collector gets to it, so `close()` is still
+  how you decide *when*.
 - **`.me() -> dict`** (`auth.me`) / **`.logout() -> None`** (`auth.logout`) /
   **`.ping() -> str`** (`core.ping` -> `"pong"`) — convenience wrappers.
 - **`.path(*path, backend=None)`** — build a `pathlib_next` path rooted at

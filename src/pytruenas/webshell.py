@@ -302,7 +302,11 @@ class WebShellSession:
             ws = _websocket.WebSocket(sslopt=sslopt)
             ws.connect(self._uri(), timeout=CONNECT_TIMEOUT)
 
-            token = self.client.api.auth.generate_token(60, {}, False)
+            # match_origin=True, single_use=True: the middleware's own default
+            # for the first is True and pytruenas was passing False, which
+            # made a leaked token usable from anywhere. This one is handed
+            # straight to a websocket WE open, from this machine, exactly once.
+            token = self.client.api.auth.generate_token(60, {}, True, True)
             ws.send(_json.dumps({"token": token, "options": self.options}))
 
             # Catch a rejected token before the first command; the banner that
