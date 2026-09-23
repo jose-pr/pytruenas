@@ -50,6 +50,7 @@ from . import auth as _auth
 from . import connection as _connection
 from .connection import DEFAULT_UNIX_SOCKET
 from .namespace import Namespace as _Namespace
+from .fs._uri import quote_uri_path as _quote_uri_path
 from .utils import tls as _tls
 from .utils.target import Target as _TGT
 from .utils.target import redact as _redact_target
@@ -658,7 +659,13 @@ class TrueNASConfig(
         if scheme == "truenas+unix":
             # urlsplit puts a leading "///path" entirely in .path; a
             # "truenas+unix://var/run/..." spelling lands in .netloc instead.
-            socket_path = parsed.path or f"/{parsed.netloc}"
+            #
+            # Unquoted, as a URI path must be: `unix:///run/a%3Fb/x.sock` names
+            # the file `/run/a?b/x.sock`, and connecting to the literal
+            # `%3F` spelling would open a different one (or nothing). The
+            # encoded form is how such a path is written in a URI at all --
+            # raw, the `?` would end the path.
+            socket_path = _unquote(parsed.path) or f"/{_unquote(parsed.netloc)}"
             return cls(
                 socket_path=socket_path or DEFAULT_SOCKET_PATH,
                 credentials=creds,
@@ -1018,7 +1025,15 @@ class TrueNASHost(_PosixHost, _ty.Generic[ApiVersion]):
         """
         config = self._config
         if config.is_local:
-            return _TGT.parse(f"ws+unix://{config.socket_path}", scheme="ws+unix")
+            # Encoded, not interpolated raw: `Target.parse` unquotes what it
+            # reads, so a socket path holding a "?" or "#" was truncated there
+            # (`/run/a?b/x.sock` became `/run/a`). Nothing reads this branch's
+            # path today -- `_openwss` uses `config.socket_path` directly -- but
+            # a property that renders a wrong path is a trap for whoever does.
+            socket_path = config.socket_path or DEFAULT_SOCKET_PATH
+            return _TGT.parse(
+                f"ws+unix://{_quote_uri_path(socket_path)}", scheme="ws+unix"
+            )
         scheme = "ws" if config.secure is False else "wss"
         authority = config.host
         if ":" in authority and not authority.startswith("["):

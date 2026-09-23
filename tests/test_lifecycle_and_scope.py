@@ -190,3 +190,44 @@ def test_an_otp_is_split_the_documented_way(raw, otp):
     assert isinstance(cred, BasicAuth)
     assert cred.password == "hunter2"
     assert cred.otp_token == otp
+
+
+# -- the unix socket path -------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    "path",
+    [
+        "/var/run/middleware/middlewared.sock",
+        "/run/a?b/x.sock",
+        "/run/w#h/x.sock",
+        "/run/sp ace/x.sock",
+    ],
+)
+def test_a_socket_path_survives_being_rendered(path):
+    """`_target` interpolated it raw into a `ws+unix://` URI and `Target.parse`
+    then unquoted what it read, so `/run/a?b/x.sock` rendered as `/run/a` --
+    a property describing a different socket than the one in use."""
+    from pytruenas.host import TrueNASConfig
+
+    config = TrueNASConfig(socket_path=path, autologin=False)
+    host = TrueNASClient(config)
+    assert host.config.socket_path == path
+    assert host._target.path == path
+
+
+def test_a_socket_path_in_a_uri_is_percent_decoded():
+    """A URI path is encoded by definition: `%3F` names a `?` in the file name,
+    and connecting to the literal `%3F` spelling would open a different file."""
+    host = TrueNASClient("unix:///run/a%3Fb/x.sock", autologin=False)
+    assert host.config.socket_path == "/run/a?b/x.sock"
+    # And it renders back to the form it came from.
+    assert host._target.path == "/run/a?b/x.sock"
+
+
+def test_the_default_socket_is_unchanged():
+    from pytruenas.host import DEFAULT_SOCKET_PATH
+
+    host = TrueNASClient(None, autologin=False)
+    assert host.config.socket_path == DEFAULT_SOCKET_PATH
+    assert host.config.is_local

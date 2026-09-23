@@ -43,6 +43,11 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
+- **A unix socket path was mangled by the URI layer.** `_target` interpolated it
+  raw, so `/run/a?b/x.sock` rendered as `/run/a`; a `unix://` URI's path is
+  percent-decoded now, as a URI path must be (`unix:///run/a%3Fb/x.sock`
+  names `/run/a?b/x.sock`, where the literal `%3F` spelling would open a
+  different file).
 - **A client dropped without `close()` leaked its websocket and reader thread**
   for the life of the process; it is closed when the client is collected.
   `close()` (or a `with` block) is still the right way — the finalizer is a

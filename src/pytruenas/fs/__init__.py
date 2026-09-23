@@ -1,12 +1,25 @@
 """Filesystem paths for a :class:`~pytruenas.TrueNASClient`.
 
-``client.path(...)`` returns a `pathlib_next` path:
+``client.path(...)`` is hostctl's ``PosixHost.path``: it returns a
+``CompositePosixPath`` over this host's path providers, which try in order and
+fall through to the next when one cannot serve the call. For a remote host that
+is ``sftp`` then ``tnasws``, so the *type* you get back is a composite -- an
+``isinstance(..., TruenasPath)`` check on it does not hold, even though the
+operation may well be served by one.
+
+The path types themselves, for a caller building one directly or reading the
+provider table:
 
 * **local** client (running on the NAS) -> a plain
   :class:`pathlib_next.LocalPath` (no extra dependencies);
-* **remote** client -> a :class:`~pytruenas.fs.truenas.TruenasPath`, which
-  prefers SFTP and falls back to the middleware ``filesystem.*`` websocket API
-  (:class:`~pytruenas.fs.tnasws.TnasWsPath`).
+* **remote** -> :class:`~pytruenas.fs.truenas.TruenasPath`, which prefers SFTP
+  and falls back to the middleware ``filesystem.*`` websocket API
+  (:class:`~pytruenas.fs.tnasws.TnasWsPath`). It keeps an SFTP leg of its own
+  so it is useful without a host to compose it -- see the decision log (D01).
+* ``pytruenas.fs.path(client, *segments, backend=...)`` builds one of these
+  types directly; its ``backend=`` vocabulary (``"local"``/``"ws"``/``"api"``/
+  ``"truenas"``/``"auto"``) is NOT the provider-name vocabulary
+  ``client.path(backend=...)`` takes.
 
 The old bespoke multi-backend ``Path`` proxy is gone; these are real
 `pathlib_next` path types, so every generic operation (``read_bytes``/``walk``/
