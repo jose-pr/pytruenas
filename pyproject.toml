@@ -48,6 +48,13 @@ dependencies = [
     # connect (refused port, untrusted host key), and a declined SSH leg is not
     # re-dialled on every run(). TrueNASHost is a hostctl PosixHost.
     "hostctl>=0.3.1,<0.4",
+    # `deploy` reads PEP 508 requirement lines and environment markers to build
+    # its dependency closure; without it the closure silently lost duho,
+    # hostctl and netimps. Capped above the newest tested (26.x) rather than at
+    # the next major as the rule says: packaging bumps its major every release,
+    # so a major-scoped cap would pin one calendar year. Floor 21.3 is where
+    # `Requirement`/`markers` took their current shape.
+    "packaging>=21.3,<27",
 ]
 
 [project.optional-dependencies]

@@ -5,6 +5,8 @@ import on the target -- every bug found while getting this working was of that
 shape, and none of them raised locally.
 """
 
+import io
+import time
 import zipfile
 
 import pytest
@@ -509,3 +511,47 @@ def test_repo_requirements_missing_toml_parser_raises_a_clear_error(
     (tmp_path / "pyproject.toml").write_text("[project]\ndependencies = []\n")
     with pytest.raises(bundle.BundleError, match="TOML parser"):
         bundle.repo_requirements(tmp_path)
+
+
+def test_payloads_are_reproducible(tmp_path):
+    """Both payload digests are recorded on the target to skip an unchanged
+    deploy, but each build stamped entries with its own clock -- the tar from
+    the files export() had just copied -- so the skip never fired."""
+    import tarfile
+    import zipfile
+
+    src = tmp_path / "pkg"
+    (src / "bin").mkdir(parents=True)
+    (src / "mod.py").write_text("x = 1\n")
+    (src / "bin" / "run").write_text("#!/bin/sh\n")
+    contents = [("mod.py", src / "mod.py"), ("bin/run", src / "bin" / "run")]
+
+    first = bundle.build(tmp_path / "a.pyz", package="p", contents=contents)
+    data = first.read_bytes()
+    time.sleep(1.1)
+    second = bundle.build(tmp_path / "b.pyz", package="p", contents=contents)
+    assert data == second.read_bytes()
+
+    with zipfile.ZipFile(io.BytesIO(data[data.index(b"PK\x03\x04") :])) as zf:
+        assert {i.date_time[:3] for i in zf.infolist()} == {(1980, 1, 1)}
+
+    # The same top-level name in two staging directories, which is what
+    # deploy does (it names the tree after the remote target).
+    tree = bundle.export(tmp_path / "s1" / "pkg", contents=contents)
+    digest, payload = bundle.tar_digest(tree)
+    time.sleep(1.1)
+    tree2 = bundle.export(tmp_path / "s2" / "pkg", contents=contents)
+    assert bundle.tar_digest(tree2)[0] == digest
+    with tarfile.open(fileobj=io.BytesIO(payload)) as tar:
+        assert {m.mtime for m in tar.getmembers()} == {bundle._EPOCH}
+
+
+def test_the_closure_needs_packaging(monkeypatch):
+    """It was imported with a fallback that fed a whole requirement line to
+    distribution(), which raises -- so duho, hostctl and netimps silently
+    vanished from the payload."""
+    import importlib.metadata as md
+
+    assert md.version("packaging")  # a declared dependency now
+    closure = bundle.requirements("pytruenas")
+    assert {"duho", "hostctl", "netimps"} <= set(closure)

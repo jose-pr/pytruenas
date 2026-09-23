@@ -152,10 +152,11 @@ def requirements(root: str, extras: "_ty.Sequence[str]" = ()) -> "dict[str, obje
     """
     from importlib.metadata import PackageNotFoundError, distribution
 
-    try:
-        from packaging.requirements import Requirement
-    except ImportError:  # pragma: no cover - packaging ships with pip/setuptools
-        Requirement = None  # type: ignore[assignment]
+    # A declared dependency (see pyproject): the old fallback fed a whole
+    # requirement line ("duho (>=0.5.2,<0.6)") to distribution(), which raises
+    # PackageNotFoundError -- so a missing `packaging` silently dropped duho,
+    # hostctl and netimps from the closure instead of degrading.
+    from packaging.requirements import Requirement
 
     found: "dict[str, object]" = {}
     pending = [root]
@@ -170,9 +171,6 @@ def requirements(root: str, extras: "_ty.Sequence[str]" = ()) -> "dict[str, obje
             continue
         found[key] = dist
         for raw in dist.requires or []:
-            if Requirement is None:  # pragma: no cover - degraded fallback
-                pending.append(raw.split(";")[0].split("[")[0].strip())
-                continue
             requirement = Requirement(raw)
             marker = requirement.marker
             if marker is not None:
@@ -700,6 +698,21 @@ def export(
     return destination
 
 
+#: Fixed timestamp for every archive entry. 1980-01-01 is the earliest a zip
+#: entry can carry; the tar uses the same instant so both payloads depend only
+#: on their contents.
+_ZIP_DATE = (1980, 1, 1, 0, 0, 0)
+_EPOCH = 315532800  # 1980-01-01T00:00:00Z
+
+
+def _zipwrite(archive, arcname: str, data: bytes) -> None:
+    """Add ``data`` with a fixed timestamp and mode, for a reproducible zip."""
+    info = _zipfile.ZipInfo(arcname, date_time=_ZIP_DATE)
+    info.compress_type = _zipfile.ZIP_DEFLATED
+    info.external_attr = 0o644 << 16
+    archive.writestr(info, data)
+
+
 def tar_tree(
     path: "str | _Path", executable_dirs: "_ty.Sequence[str]" = ("bin",)
 ) -> bytes:
@@ -729,6 +742,11 @@ def tar_tree(
             return None
         tarinfo.uid = tarinfo.gid = 0
         tarinfo.uname = tarinfo.gname = "root"
+        # A fixed timestamp: export() copies files, so their mtimes are the
+        # build's own clock and every rebuild produced a different archive --
+        # which is why the recorded digest never matched and the "already
+        # current" skip never fired.
+        tarinfo.mtime = _EPOCH
         if tarinfo.isdir():
             tarinfo.mode = 0o755
         elif len(parts) == 2 and parts[0] in executable:
@@ -811,9 +829,15 @@ def build(
 
     raw = destination.with_suffix(destination.suffix + ".tmp")
     with _zipfile.ZipFile(raw, "w", _zipfile.ZIP_DEFLATED) as archive:
-        for arcname, source in contents:
-            archive.write(source, arcname)
-        archive.writestr("__main__.py", _MAIN_TEMPLATE.format(package=package))
+        # Sorted, with fixed timestamps and modes: `write()` stamps each entry
+        # with the source file's mtime (the build's own clock, since export()
+        # copies them) and `writestr` with *now*, so two builds of the same
+        # inputs differed and the deploy-time digest skip never fired.
+        for arcname, source in sorted(contents):
+            _zipwrite(archive, arcname, _Path(source).read_bytes())
+        _zipwrite(
+            archive, "__main__.py", _MAIN_TEMPLATE.format(package=package).encode()
+        )
 
     # Prepend the shebang by hand rather than using `zipapp.create_archive`:
     # the sources here are individual files from several distributions, not one
