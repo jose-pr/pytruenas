@@ -238,6 +238,27 @@ def _discover(argv: "_ty.Sequence[str] | None") -> "list":
     return [_with_targets(command) for command in by_name.values()]
 
 
+#: Characters Windows refuses in a filename (and ``/`` everywhere).
+_ILLEGAL_IN_FILENAME = ':/\\*?"<>|'
+
+
+def _logto_path(template: str, shown: str) -> str:
+    """Render a ``--logto`` template into a filename that can be created.
+
+    Both substitutions carry colons -- ``{target}`` for a non-default port
+    (``nas:8443``) and ``{isodate}`` always -- which Windows rejects outright,
+    so ``--logto`` failed there for exactly the targets that need it. The
+    substituted VALUES are sanitized, not the template: its own directory
+    separators are the caller's.
+    """
+
+    def _safe(value: str) -> str:
+        return "".join("_" if ch in _ILLEGAL_IN_FILENAME else ch for ch in value)
+
+    now = _dt.datetime.now().isoformat(timespec="seconds")
+    return template.format(target=_safe(shown), isodate=_safe(now))
+
+
 def _target_label(target: str) -> str:
     """The short name to tag this target's log records with.
 
@@ -306,18 +327,17 @@ def _run_module_on_target(
     finally_ = getattr(module, "finally_", None)
 
     # ``shown`` is the ``--logto`` filename's {target}: the host's short name,
-    # which is credential-free AND a legal filename component -- a raw URI is
-    # neither. Log records get the same name from the fan-out prefix.
+    # which is credential-free. Log records get the same name from the fan-out
+    # prefix. It is NOT automatically a legal filename (an earlier comment here
+    # claimed it was): `nas:8443` and an {isodate} both carry colons, which
+    # Windows refuses -- see _logto_path.
     if isinstance(target, _Target):
         target, shown = target.target, target.label
     else:
         shown = _redact(target)
     file_handler = None
     if args.logto and args.logto != "-":
-        now = _dt.datetime.now()
-        file_handler = _pylogging.FileHandler(
-            args.logto.format(target=shown, isodate=now.isoformat())
-        )
+        file_handler = _pylogging.FileHandler(_logto_path(args.logto, shown))
         file_handler.setFormatter(_logging.DefaultFormatter())
         logger.addHandler(file_handler)
 
@@ -333,7 +353,10 @@ def _run_module_on_target(
             client = args._client_(target)
         rc = module.run(client, args, logger)
         result = 0 if rc is None else int(rc)
-        if callable(success):
+        # Only on success, as duho's own lifecycle does: a command that
+        # returned a non-zero exit code still ran its success hook, so a
+        # "deploy succeeded" notification fired for a failed deploy.
+        if result == 0 and callable(success):
             success(client, args, logger)
     finally:
         if callable(finally_):
@@ -383,10 +406,7 @@ def _run_runpath_on_target(
     per_target.target = target
     file_handler = None
     if instance.logto and instance.logto != "-":
-        now = _dt.datetime.now()
-        file_handler = _pylogging.FileHandler(
-            instance.logto.format(target=shown, isodate=now.isoformat())
-        )
+        file_handler = _pylogging.FileHandler(_logto_path(instance.logto, shown))
         file_handler.setFormatter(_logging.DefaultFormatter())
         logger.addHandler(file_handler)
 

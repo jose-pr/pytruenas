@@ -31,6 +31,22 @@ from duho.env import Env as _Env
 
 from . import io as _ioutils  # noqa: F401
 
+
+def json_value(raw: str):
+    """A CLI value as its JSON type, falling back to the raw string.
+
+    Shared by ``call -p`` and ``query -f``: a filter value is otherwise always
+    a string, so a filter on a numeric or boolean field silently matches
+    nothing (``-f uid=0`` compares ``"0"`` against ``0``).
+    """
+    import json
+
+    try:
+        return json.loads(raw)
+    except (ValueError, TypeError):
+        return raw
+
+
 if _ty.TYPE_CHECKING:
     from ..host import TrueNASHost as TrueNASClient
 
@@ -101,7 +117,11 @@ class PyTrueNASArgs(LoggingArgs):
     # `CONFIG` first, `CFG` for compatibility: both spellings existed (`CFG`
     # here, `CONFIG` in `ops.main`), which is exactly the drift a single
     # accessor is meant to stop. `CONFIG` wins as the spelled-out name.
-    config: "Arg[dict, NS(type=_Path)]" = _Path(
+    # A PATH field, not `dict`: duho hands a dict-typed option its KEY=VALUE
+    # UpdateAction, so every `--config file.yaml` died in argparse
+    # ("'WindowsPath' object is not iterable") before a command could run.
+    # `_config_dict_()` is what turns it into the mapping.
+    config: "Arg[_Path, NS(metavar='FILE')]" = _Path(
         ENV.get("CONFIG") or ENV.get("CFG") or "./pytruenas.yaml"
     )
     "Config file to use"
@@ -244,4 +264,4 @@ class CommandModule(_ty.Protocol):
     ) -> object: ...
 
 
-__all__ = ["PyTrueNASArgs", "CommandModule"]
+__all__ = ["PyTrueNASArgs", "CommandModule", "json_value"]

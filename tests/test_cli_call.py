@@ -5,6 +5,7 @@ from unittest.mock import MagicMock, patch
 
 import pytruenas.main as main
 from pytruenas.cmd import call as call_cmd
+from pytruenas.utils.cmd import json_value
 
 
 def _parse(argv):
@@ -44,11 +45,11 @@ def test_params_are_options_not_positionals():
 
 
 def test_param_json_parsing():
-    assert call_cmd._parse_param('{"a": 1}') == {"a": 1}
-    assert call_cmd._parse_param("5") == 5
-    assert call_cmd._parse_param("true") is True
+    assert json_value('{"a": 1}') == {"a": 1}
+    assert json_value("5") == 5
+    assert json_value("true") is True
     # non-JSON falls back to the raw string
-    assert call_cmd._parse_param("plain-string") == "plain-string"
+    assert json_value("plain-string") == "plain-string"
 
 
 def test_run_invokes_method_and_prints(capsys):
