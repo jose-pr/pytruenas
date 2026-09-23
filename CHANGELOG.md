@@ -54,6 +54,33 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
+- **`--config` crashed on every use.** The field was typed `dict`, so it got
+  duho's `KEY=VALUE` action and argparse raised before any command ran
+  (`'WindowsPath' object is not iterable`).
+- **`python -m pytruenas` always exited 0**, discarding `main()`'s exit code,
+  so no shell or CI step could tell a failed run from a successful one.
+- **`query -f` values were always strings**, so a filter on a numeric or
+  boolean field silently matched nothing (`-f uid=0`). They are decoded as
+  JSON with a string fallback, the same as `call -p`; a filter that is not
+  `KEY=VALUE` is now an error instead of a filter on `""`.
+- **`--logto` could not create its file on Windows**: both `{isodate}` and a
+  `{target}` with a port carry colons. The substituted values are sanitized
+  (the template's own separators are left alone).
+- A command's `success` hook ran even when it returned a non-zero exit code.
+- **Generated stubs made every property required.** A schema with no
+  `required` list requires nothing (JSON Schema), so update payloads,
+  query-options and `_get` filters all demanded every field. They also used
+  `typing.NotRequired`/`Unpack`, which do not exist before 3.11 — the stubs now
+  import them from `typing_extensions` below that — and the root module exports
+  `Current`, so the documented `TrueNASClient[Current]` resolves.
+- **`deploy`'s "already current" skip never fired.** Both payloads carried
+  per-build timestamps (the tar from the files `export()` had just copied), so
+  the digest changed on every build and every deploy re-uploaded everything.
+  Archive entries now use a fixed timestamp and mode.
+- **`packaging` is a declared dependency.** It was imported with a fallback
+  that could not work — it fed a whole requirement line to
+  `importlib.metadata.distribution()` — so without it `deploy` silently
+  shipped a payload missing duho, hostctl and netimps.
 - **Keyword credentials produced local-socket auth.** `Credentials(api_key=…)`,
   `(token=…)` and `(username=…, password=…)` all returned `LocalAuth`, so the
   client connected without authenticating and every call failed with

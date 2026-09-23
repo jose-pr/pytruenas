@@ -797,6 +797,17 @@ a directory the user does not control.
 - **`CALL_TIMEOUT`** — default per-call JSON-RPC timeout in seconds, read at
   import time by `pytruenas.connection`. Also unprefixed.
 
+### Generated typings (`generate-typings` output)
+
+- The package root exports **`Current`**, an alias for the generated version
+  class (`V26000`), so the documented `TrueNASClient[Current]` resolves.
+- Optional TypedDict keys are `NotRequired`, imported from `typing_extensions`
+  below Python 3.11 (a `sys.version_info` guard in every stub). A checking
+  target older than 3.11 needs `typing_extensions` installed.
+- A property absent from a schema's `required` list is optional — including
+  when the schema has no `required` list at all, which is most update
+  payloads, query-options and `_get` filters.
+
 ## Optional extras and their gating imports
 
 - **`ssh`** (`hostctl[ssh]>=0.3.1,<0.4`, i.e. asyncssh + pathlib_next's
