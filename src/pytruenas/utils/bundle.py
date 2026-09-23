@@ -56,9 +56,13 @@ every existing caller, keeps working with nothing extra installed.
 
 from __future__ import annotations
 
+import logging as _logging
 import typing as _ty
 import zipfile as _zipfile
 from pathlib import Path as _Path
+
+#: This module is library code with no host of its own to borrow a logger from.
+_LOGGER = _logging.getLogger("pytruenas.bundle")
 
 __all__ = [
     "PROBE_SOURCE",
@@ -102,11 +106,34 @@ _NEVER_BUNDLE = frozenset({"pip", "setuptools", "wheel", "pkg-resources"})
 #: ``python3 -`` over any transport, before pytruenas exists there. It prints
 #: one normalized distribution name per line; the caller diffs.
 PROBE_SOURCE = """\
+import json
+import os
+import platform
 import sys
 try:
     from importlib.metadata import distributions
 except ImportError:  # pragma: no cover - Python < 3.8
     sys.exit("probe requires Python 3.8+")
+# First line: the target's PEP 508 marker environment, so a platform- or
+# version-gated requirement is resolved for the machine that will RUN the
+# bundle. Built by hand rather than with packaging.markers (the target need
+# not have packaging installed). Every later line is a distribution name,
+# which is what older callers read.
+version = ".".join(str(p) for p in sys.version_info[:3])
+print(json.dumps({
+    "__marker_environment__": {
+        "implementation_name": sys.implementation.name,
+        "implementation_version": version,
+        "os_name": os.name,
+        "platform_machine": platform.machine(),
+        "platform_release": platform.release(),
+        "platform_system": platform.system(),
+        "platform_version": platform.version(),
+        "python_full_version": platform.python_version(),
+        "python_version": ".".join(str(p) for p in sys.version_info[:2]),
+        "sys_platform": sys.platform,
+    }
+}))
 seen = set()
 for dist in distributions():
     name = (dist.metadata["Name"] or "").strip()
@@ -138,7 +165,39 @@ def default_package(root: str) -> str:
     return root.replace("-", "_")
 
 
-def requirements(root: str, extras: "_ty.Sequence[str]" = ()) -> "dict[str, object]":
+def parse_probe(output: "str | _ty.Iterable[str]") -> "tuple[list[str], dict]":
+    """``(installed_names, marker_environment)`` from :data:`PROBE_SOURCE`.
+
+    The environment line is optional: a target probed by an older copy of this
+    package prints names only, and then the caller's own environment is used
+    (what every caller did before).
+    """
+    import json
+
+    lines = output.splitlines() if isinstance(output, str) else list(output)
+    environment: dict = {}
+    names: "list[str]" = []
+    for line in lines:
+        line = line.strip()
+        if not line:
+            continue
+        if not environment and line.startswith("{"):
+            try:
+                payload = json.loads(line)
+            except ValueError:
+                payload = {}
+            if isinstance(payload, dict) and "__marker_environment__" in payload:
+                environment = payload["__marker_environment__"] or {}
+                continue
+        names.append(line)
+    return names, environment
+
+
+def requirements(
+    root: str,
+    extras: "_ty.Sequence[str]" = (),
+    environment: "_ty.Mapping[str, str] | None" = None,
+) -> "dict[str, object]":
     """Resolve ``root``'s full transitive dependency closure, from metadata.
 
     Returns ``{canonical_name: Distribution}``, including ``root`` itself. A
@@ -159,29 +218,39 @@ def requirements(root: str, extras: "_ty.Sequence[str]" = ()) -> "dict[str, obje
     from packaging.requirements import Requirement
 
     found: "dict[str, object]" = {}
-    pending = [root]
+    # (name, extras-of-THAT-requirement). The root's extras used to be applied
+    # to every distribution in the closure, so `extras=("ssh",)` pulled in any
+    # dependency of any package gated on an extra called "ssh", while a
+    # requirement's own extras (`hostctl[ssh]`) were dropped entirely.
+    pending: "list[tuple[str, tuple[str, ...]]]" = [(root, tuple(extras))]
+    seen: "set[tuple[str, tuple[str, ...]]]" = set()
     while pending:
-        name = pending.pop()
+        name, wanted = pending.pop()
         key = _canonical(name)
-        if key in found or key in _NEVER_BUNDLE:
+        if (key, wanted) in seen or key in _NEVER_BUNDLE:
             continue
+        seen.add((key, wanted))
         try:
             dist = distribution(name)
         except PackageNotFoundError:
             continue
-        found[key] = dist
+        found.setdefault(key, dist)
         for raw in dist.requires or []:
             requirement = Requirement(raw)
             marker = requirement.marker
             if marker is not None:
-                # An extra-gated requirement is included only when that extra
-                # was asked for. Evaluating with extra="" answers the plain
-                # environment markers (python_version, sys_platform).
-                contexts = [{"extra": extra} for extra in extras] or []
+                # An extra-gated requirement is included only when THIS
+                # distribution was pulled in with that extra. Evaluating with
+                # extra="" answers the plain environment markers, which are
+                # resolved against the TARGET when its environment is known.
+                contexts = [{"extra": extra} for extra in wanted] or []
                 contexts.append({"extra": ""})
-                if not any(marker.evaluate(ctx) for ctx in contexts):
+                if not any(
+                    marker.evaluate({**dict(environment or {}), **ctx})
+                    for ctx in contexts
+                ):
                     continue
-            pending.append(requirement.name)
+            pending.append((requirement.name, tuple(requirement.extras)))
     return found
 
 
@@ -295,10 +364,13 @@ def missing_on(
     comparison is on canonical names, so ``pathlib_next`` and ``pathlib-next``
     are one package.
     """
-    have = {_canonical(name) for name in installed}
+    names, environment = parse_probe(list(installed))
+    have = {_canonical(name) for name in names}
     have.update(_canonical(name) for name in skip)
     return {
-        key: dist for key, dist in requirements(root, extras).items() if key not in have
+        key: dist
+        for key, dist in requirements(root, extras, environment).items()
+        if key not in have
     }
 
 
@@ -400,6 +472,15 @@ def _load_ignore(
         path = root / name
         if path.is_file():
             lines.extend(path.read_text(encoding="utf-8").splitlines())
+        elif files is not None:
+            # Silence is only right for the DEFAULTS (a repo need not have all
+            # three). A file the caller named and that is not there means the
+            # filtering they asked for is not happening -- which is how a
+            # gitignored secret ships.
+            raise BundleError(
+                f"ignore file {name!r} not found in {root}: nothing would be "
+                "filtered by it"
+            )
     spec = pathspec.PathSpec.from_lines(_PATTERN_FACTORY, lines)
     if extra_patterns:
         spec = spec + pathspec.PathSpec.from_lines(_PATTERN_FACTORY, extra_patterns)
@@ -449,31 +530,75 @@ def collect_repo(
     spec = _load_ignore(root, ignore_files, extra_ignores)
     name = prefix if prefix is not None else root.name
 
-    def _ignored(relative: str, *, is_dir: bool) -> bool:
+    def _ignored(relative: str, *, is_dir: bool, spec) -> bool:
         parts = _Path(relative).parts
-        if parts and parts[0] in _ALWAYS_IGNORED:
+        # ANY component, not just the first: a nested repository's `.git`
+        # (a submodule, a vendored checkout) used to ship in full.
+        if any(part in _ALWAYS_IGNORED for part in parts):
             return True
         candidate = relative + "/" if is_dir else relative
         return spec.match_file(candidate)
 
     contents: "list[tuple[str, _Path]]" = []
 
-    def _walk(directory: "_Path") -> None:
+    def _walk(directory: "_Path", spec) -> None:
+        # git applies a directory's own ignore file to everything beneath it;
+        # only the root's was read, so a nested .gitignore was ignored.
+        spec = _extend_ignore(spec, directory, ignore_files, root)
         for child in sorted(directory.iterdir()):
             relative = child.relative_to(root).as_posix()
+            if child.is_symlink():
+                # Never followed: a symlink or junction pointing outside the
+                # repo shipped whatever it pointed at (and a loop inside it
+                # recursed forever). git stores the link, and a bundle cannot,
+                # so it is skipped.
+                _LOGGER.debug("skipping symlink %s", relative)
+                continue
             if child.is_dir():
-                if _ignored(relative, is_dir=True):
+                if _ignored(relative, is_dir=True, spec=spec):
                     continue
-                _walk(child)
+                _walk(child, spec)
             elif child.is_file():
-                if _ignored(relative, is_dir=False):
+                if _ignored(relative, is_dir=False, spec=spec):
                     continue
                 contents.append((f"{name}/{relative}", child))
-            # Anything else (a symlink to nowhere, a socket, ...) is skipped:
-            # neither a directory to descend into nor a file to ship.
+            # Anything else (a socket, a device node) is skipped: neither a
+            # directory to descend into nor a file to ship.
 
-    _walk(root)
+    _walk(root, spec)
     return contents
+
+
+def _extend_ignore(spec, directory: "_Path", files, root: "_Path"):
+    """``spec`` plus any ignore file sitting in ``directory`` itself.
+
+    The root's own files are already in ``spec``; below the root each
+    directory's patterns are layered on, which is what git does.
+    """
+    if directory == root:
+        return spec
+    names = files if files is not None else DEFAULT_IGNORE_FILES
+    lines: "list[str]" = []
+    for name in names:
+        path = directory / name
+        if path.is_file():
+            lines.extend(path.read_text(encoding="utf-8").splitlines())
+    if not lines:
+        return spec
+    pathspec = _require_pathspec()
+    # Anchored to this directory, as git anchors a nested .gitignore: a bare
+    # "build/" in src/.gitignore means src/build, not every build/ in the tree.
+    relative = directory.relative_to(root).as_posix()
+    anchored = []
+    for line in lines:
+        stripped = line.strip()
+        if not stripped or stripped.startswith("#"):
+            continue
+        negated = stripped.startswith("!")
+        body = stripped[1:] if negated else stripped
+        body = body[1:] if body.startswith("/") else body
+        anchored.append(("!" if negated else "") + f"{relative}/{body}")
+    return spec + pathspec.PathSpec.from_lines(_PATTERN_FACTORY, anchored)
 
 
 def _toml_loader():
@@ -502,16 +627,16 @@ def _toml_loader():
 def _dependency_name(raw: str) -> str:
     """The bare distribution name from one PEP 508 requirement string.
 
-    Degrades the same way :func:`requirements` does when ``packaging`` is
-    absent (bundle.py:118-121): a plain split on the marker/extras/version
-    delimiters. Good enough for a name; not a substitute for real parsing if
-    the caller needs the marker or the extras too.
+    ``packaging`` is a declared dependency; the split fallback remains only
+    for a vendored copy of this module running without it. Good enough for a
+    name; not a substitute for real parsing if the caller needs the marker or
+    the extras too.
     """
     try:
         from packaging.requirements import Requirement
 
         return Requirement(raw).name
-    except ImportError:  # pragma: no cover - packaging ships with pip/setuptools
+    except ImportError:  # pragma: no cover - a declared dependency
         return (
             raw.split(";")[0]
             .split("[")[0]
@@ -574,11 +699,31 @@ def _parse_requirements_txt(text: str) -> "list[str]":
     should read the file themselves; this covers the common case.
     """
     names: "list[str]" = []
-    for line in text.splitlines():
-        line = line.strip()
+    joined: "list[str]" = []
+    buffer = ""
+    for raw in text.splitlines():
+        # A backslash continuation is one requirement spread over lines; it
+        # used to be read as two, each of them malformed.
+        line = buffer + raw.rstrip()
+        if line.endswith("\\"):
+            buffer = line[:-1]
+            continue
+        buffer = ""
+        joined.append(line)
+    if buffer:
+        joined.append(buffer)
+    for line in joined:
+        # An inline comment is a comment: `requests  # for the api` named a
+        # distribution called "requests  # for the api".
+        line = line.split(" #", 1)[0].split("\t#", 1)[0].strip()
         if not line or line.startswith("#") or line.startswith("-"):
             continue
-        names.append(_dependency_name(line))
+        try:
+            names.append(_dependency_name(line))
+        except Exception as exc:  # noqa: BLE001
+            # This list is advisory (deploy prints it as a heads-up), so one
+            # line nobody can parse must not abort the whole deploy.
+            _LOGGER.warning("ignoring unparseable requirement %r: %s", line, exc)
     return names
 
 

@@ -806,7 +806,15 @@ TypedDict schemas only (no runtime behavior); import the submodules directly.
   value, falling back to the raw string), and **`ENV`**, the
   single `duho.env.Env("pytruenas")` accessor every `PYTRUENAS_*` setting is
   read through (`autoload=False`; see "Environment variables").
-- **`bundle`** — deliberately generic, and knows nothing about pytruenas or
+- **`bundle`** — see also `parse_probe(output) -> (names, marker_environment)`,
+  which reads what `PROBE_SOURCE` printed on the target: the first line is that
+  machine's PEP 508 marker environment (pass it as `requirements(...,
+  environment=...)` so a gated dependency is resolved for the target), the rest
+  are distribution names. `requirements()` follows each requirement's OWN
+  extras; `collect_repo()` never follows a symlink out of the tree, honours a
+  nested ignore file below its own directory, excludes `.git` at any depth, and
+  raises `BundleError` for an `ignore_files` entry that does not exist.
+  Deliberately generic, and knows nothing about pytruenas or
   TrueNAS so it can be lifted out later. `requirements(root, extras)` resolves
   a transitive closure from installed *distribution metadata* (not an import
   scan — `import yaml` does not name `pyyaml`); `PROBE_SOURCE` is stdlib-only

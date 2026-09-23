@@ -31,6 +31,29 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
+- **A deployed bundle was missing `uritools`.** The dependency closure dropped
+  a requirement's own extras, and pytruenas depends on `pathlib_next[uri]`,
+  whose extra requires it. The appliance does not ship it (measured on
+  26.0.0-BETA.1, 386 distributions), so `pathlib_next.uri` — which every
+  remote path is built on — could not import on the target. A requirement's
+  extras are followed now, and the root's extras are no longer applied to
+  every distribution in the closure.
+- **Environment markers were evaluated against the machine running `deploy`**,
+  not the target, so a platform- or version-gated dependency was decided by the
+  wrong environment. The probe reports the target's marker environment
+  (`bundle.parse_probe` reads it; an older probe that prints names only still
+  works) and the closure is resolved with it.
+- **`deploy --source repo` shipped things a clone would not.** `.git` was
+  matched only as the first path component, so a nested checkout's history was
+  included; a nested `.gitignore` was ignored entirely (git applies one per
+  directory); and a symlink or junction pointing outside the repo was followed,
+  shipping whatever it pointed at.
+- **A missing `--ignore-file` silently disabled all filtering** — the fastest
+  way to ship a gitignored secret. A file the caller names and that is not
+  there is now an error; the defaults stay forgiving.
+- An unparseable line in a `requirements.txt` aborted the whole deploy, though
+  that list is only printed as a heads-up; it is skipped with a warning.
+  Backslash continuations and inline comments are read correctly.
 - **Arguments after `--` were parsed twice.** pytruenas split `argv` itself
   and carried the tail in a module global, duplicating duho's own
   `_passthrough_` capture; `deploy` reads it off the parsed instance now.

@@ -61,9 +61,23 @@ def test_extras_are_excluded_unless_asked_for():
 
 
 def test_missing_on_subtracts_what_the_target_has():
-    """The whole point of probing: ship only the difference."""
+    """The whole point of probing: ship only the difference.
+
+    `uritools` belongs in the payload: pytruenas depends on
+    `pathlib_next[uri]`, whose own extra requires it, and the appliance does
+    not have it (measured on 26.0.0-BETA.1). A closure that dropped a
+    requirement's own extras shipped without it, so `pathlib_next.uri` -- what
+    every remote path is built on -- could not import on the target.
+    """
     missing = bundle.missing_on(TRUENAS_HAS, "pytruenas")
-    assert set(missing) == {"duho", "hostctl", "netimps", "pathlib-next", "pytruenas"}
+    assert set(missing) == {
+        "duho",
+        "hostctl",
+        "netimps",
+        "pathlib-next",
+        "pytruenas",
+        "uritools",
+    }
 
 
 def test_missing_on_normalizes_names():
@@ -155,10 +169,14 @@ def test_probe_source_is_stdlib_only_and_runs(tmp_path):
         text=True,
         check=True,
     )
-    reported = {line.strip() for line in result.stdout.splitlines() if line.strip()}
+    names, environment = bundle.parse_probe(result.stdout)
+    reported = set(names)
     assert "pytruenas" in reported
     # Normalized, so the caller can diff without further massaging.
     assert not [name for name in reported if name != name.lower() or "_" in name]
+    # The first line describes the TARGET's marker environment, so a gated
+    # requirement is resolved for the machine that will run the bundle.
+    assert environment["sys_platform"] and environment["python_version"]
 
 
 def test_data_only_distribution_is_refused(tmp_path, monkeypatch):
