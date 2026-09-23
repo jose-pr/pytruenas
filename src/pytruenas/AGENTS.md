@@ -282,6 +282,11 @@ than the dunder-safe helpers below raise `AttributeError` normally.
 - **`__call__(*args, _tries=1, _method=None, _ioerror=False,
   _filetransfer=False, _timeout=UNSET, **kwds)`** — invoke this namespace's
   middleware method (`self._namespace`, optionally suffixed with `_method`).
+  Middleware methods take **positional** parameters: any other keyword raises
+  `TypeError` naming it. (It used to be swallowed, so
+  `client.api.user.query(filters=[...])` sent no filters and returned every
+  row.) `timeout` and the upstream-compatibility names are still accepted, and
+  the `_query`/`_get`/`_update` helpers below take keywords by design.
   - **`_tries`** — reconnect retries after a dropped connection
     (`ECONNABORTED`); default `1` means up to 2 attempts total. The call
     **always** returns or raises — never silently returns `None` on a
@@ -315,7 +320,10 @@ than the dunder-safe helpers below raise `AttributeError` normally.
   raises `ValueError` rather than matching the first record. Diffs against the
   current record first unless `force=True` (an `Option`/tuple opt) is given, so
   a no-op update sends nothing. A field set to `None` is sent (it clears the
-  value).
+  value). An id with no matching record raises `FileNotFoundError` naming the
+  collection and the id. A middleware **property** — reported as
+  `{"value": ..., "parsed": ...}` while a caller sets the scalar — counts as
+  unchanged when either half matches, so it is not rewritten on every call.
 - **`._upsert(selector=None, callback=None, *opts, **fields)`** — `._update`
   if a matching record exists, else `._create`. `callback(action, id,
   result)` (`action` is a `DbAction` — `CREATE`/`UPDATE`/`UPSERT`) fires after
@@ -344,6 +352,9 @@ imports on Python 3.9.
     kwarg is logged at debug level. Raises `ValidationErrors`/
     `ClientException` on a server error, `CallTimeout` on timeout,
     `ConnectionClosed` (`errno=ECONNABORTED`) if the connection dropped,
+    `ClientException` with `errno=EPROTO` when the response arrived but could
+    not be decoded (the call fails at once rather than waiting out its
+    timeout),
     `TypeError` for a parameter JSON cannot encode (nothing is sent), and
     `RuntimeError` when called from the reader thread, i.e. from a
     subscription callback (it would deadlock until the call timed out —
@@ -761,7 +772,10 @@ TypedDict schemas only (no runtime behavior); import the submodules directly.
   `EQ`); `EXCLUDE` sentinel to drop a kwarg from a filter/update entirely;
   `Option(name, value)` + `Option.options(*opts)` merge dict/tuple/`Option`
   opts passed to `_query`/`_upsert`/etc.; `diff(base, against) -> dict` (keys
-  in `against` whose value differs from `base`);
+  in `against` whose value differs from `base`, comparing a property-shaped
+  `{"value"/"parsed"/"rawvalue"}` current against a scalar, and a partial dict
+  on its own keys only); `MISSING`, the "not reported at all" sentinel (an
+  instance, like `EXCLUDE`);
   `filter_from_kwargs(**kwargs) -> list[QueryFilter]`, which builds the
   middleware's filter list those kwargs stand for —
   `[("username", "=", "root"), ("uid", ">", 0)]` — what `_query` uses

@@ -101,18 +101,16 @@ class Option:
         return opts_
 
 
-def merge(*partials: _ty.Mapping, **partial):
-    merged = {}
-    for partial in [*partials, partial]:
-        if partial:
-            merged.update(partial)
-    return merged
+class _Missing:
+    def __repr__(self) -> str:  # pragma: no cover - debugging aid
+        return "MISSING"
 
 
-class _Missing: ...
-
-
-MISSING = _Missing
+#: Sentinel for "the API did not report this field at all", distinct from a
+#: reported ``None``. An instance, like :data:`EXCLUDE`: the two are used the
+#: same way, and one being a class made `is MISSING` checks read differently
+#: from `is EXCLUDE` for no reason.
+MISSING = _Missing()
 
 
 def diff(base: _ty.Mapping, against: _ty.Mapping):
@@ -146,6 +144,21 @@ def _same(current, wanted) -> bool:
     """
     if current == wanted:
         return True
+    if isinstance(current, dict) and not isinstance(wanted, dict):
+        # A middleware *property* is reported as a dict -- `{"value": "10G",
+        # "parsed": 10737418240, "rawvalue": "..."}` (pool.dataset) -- while a
+        # caller sets it with the scalar. Comparing the dict against the scalar
+        # made every such field look changed, so an upsert rewrote it forever.
+        for key in ("value", "parsed", "rawvalue"):
+            if key in current and _same(current[key], wanted):
+                return True
+        return False
+    if isinstance(wanted, dict) and isinstance(current, dict):
+        # A partial dict means "these keys", not "replace the whole object".
+        return all(
+            key in current and _same(current[key], value)
+            for key, value in wanted.items()
+        )
     try:
         return _json_scalar(current) == _json_scalar(wanted)
     except Exception:

@@ -142,6 +142,13 @@ class DbAction(str, _enum.Enum):
             if not force:
                 if not current:
                     current = _ty.cast(dict[str, object], __namespace._get(_id))
+                if not current:
+                    # Without this the miss surfaced as `AttributeError: 'NoneType'
+                    # object has no attribute 'get'` from diff(), naming neither
+                    # the record nor the collection.
+                    raise FileNotFoundError(
+                        f"{__namespace._namespace}: no record with {idkey}={_id!r}"
+                    )
                 fields = _q.diff(current, fields)
 
             if fields:
@@ -169,7 +176,9 @@ class DbAction(str, _enum.Enum):
             action = DbAction.CREATE
 
         wait = opts.get("wait", True)
-        if isinstance(result, int) and (wait is None or wait):
+        # `type(...) is int`, not isinstance: bool is a subclass of int, so a
+        # method answering True had its answer treated as job id 1.
+        if type(result) is int and (wait is None or wait):
             # A job id: block until the job finishes and return its result
             # (`core.job_wait` is itself a job and returns immediately).
             result = __namespace._client.wait(
@@ -264,6 +273,18 @@ class Namespace:
 
         if _timeout is not _UNSET:
             kwds["timeout"] = _timeout
+
+        # Middleware methods take POSITIONAL parameters. A keyword went into
+        # `**kwds`, reached `TrueNASWSConnection.call`'s `**_ignored` and was
+        # logged at debug -- so `client.api.user.query(filters=[...])` sent no
+        # filters at all and returned every row, which then drove an update.
+        stray = sorted(set(kwds) - {"timeout"} - _connection._COMPAT_KWARGS)
+        if stray:
+            raise TypeError(
+                f"{method}: middleware methods take positional parameters only; "
+                f"got keyword(s) {', '.join(stray)}. Pass them in order, e.g. "
+                f"query([['uid', '=', 0]]), or use the _query/_get helpers."
+            )
 
         # One initial attempt plus `_tries` reconnect retries after an aborted
         # connection. The loop always ends in a return or a raise -- it must

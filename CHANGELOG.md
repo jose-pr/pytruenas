@@ -6,6 +6,39 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Changed
+
+- **A keyword argument to a middleware call now raises `TypeError`.** Those
+  methods take positional parameters; a keyword was swallowed and logged at
+  debug level, so `client.api.user.query(filters=[["uid", "=", 0]])` sent no
+  filters and returned **every** row — which then drove an update. Pass
+  parameters in order (`query([["uid", "=", 0]])`) or use the `_query`/`_get`
+  helpers, which take keywords by design. `timeout` and the
+  upstream-compatibility names (`job`, `background`, …) are still accepted.
+
+### Fixed
+
+- **A timestamp came back late by its own milliseconds**: the sub-second part
+  was added twice, so `…T03:42:00.600Z` decoded as `…T03:42:01.200Z`. Negative
+  timestamps (before 1970) decode correctly now too.
+- **A response that could not be decoded was dropped**, leaving its caller to
+  wait out the whole timeout (or forever, with `timeout=None`) for a reply that
+  had already arrived. It fails that one call with `ClientException`
+  (`errno=EPROTO`); the connection stays usable.
+- **`_update`/`_upsert` on an id with no record** raised
+  `AttributeError: 'NoneType' object has no attribute 'get'`, naming neither
+  the record nor the collection; it raises `FileNotFoundError` naming both.
+- **A `True`/`False` result was treated as a job id** (`bool` is an `int`), so
+  the client waited on "job 1" and returned that job's result instead of the
+  answer.
+- **A no-op update rewrote middleware properties forever.** `pool.dataset`
+  reports a property as `{"value": "10G", "parsed": 10737418240, …}` while a
+  caller sets `"10G"`, so the field looked changed on every call and `_upsert`
+  reported a change that never happened. A partial dict is now compared on its
+  own keys only.
+- `utils.query.MISSING` is an instance, matching `EXCLUDE`; the untested,
+  unused `utils.query.merge()` is gone.
+
 ## [0.5.0] - 2026-09-23
 
 ### Added

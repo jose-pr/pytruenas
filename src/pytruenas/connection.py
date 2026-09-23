@@ -98,6 +98,9 @@ _UNSET = _Unset()
 #: client simply ignores (it does not track jobs client-side).
 _COMPAT_KWARGS = frozenset({"job", "background", "callback", "register_call", "raise_"})
 
+#: Reference point for ``$date`` decoding (the middleware sends milliseconds).
+_EPOCH = _datetime(1970, 1, 1, tzinfo=_timezone.utc)
+
 # JSON-RPC 2.0 + TrueNAS custom error codes.
 _INVALID_PARAMS = -32602
 _TRUENAS_CALL_ERROR = -32001
@@ -143,10 +146,10 @@ def _object_hook(obj: dict):
     """Decode the middleware's extended-JSON wrapper objects back to Python."""
     if len(obj) == 1:
         if "$date" in obj:
-            ms = obj["$date"]
-            return _datetime.fromtimestamp(ms / 1000, tz=_timezone.utc) + _timedelta(
-                milliseconds=ms % 1000
-            )
+            # From the epoch, not fromtimestamp() plus the remainder: that
+            # counted the sub-second part twice (a .600 timestamp came back
+            # 1.2 s late). This is also correct for a negative value.
+            return _EPOCH + _timedelta(milliseconds=obj["$date"])
         if "$time" in obj:
             return _time(*[int(i) for i in obj["$time"].split(":")[:4]])
         if "$set" in obj:
@@ -535,7 +538,13 @@ class TrueNASWSConnection:
     def _dispatch(self, raw) -> None:
         try:
             message = loads(raw)
-        except Exception:
+        except Exception as exc:
+            # The response DID arrive; only decoding it failed (a malformed
+            # `$date`, say). Dropping it left the caller waiting out its whole
+            # timeout, so find the id with a plain json.loads and fail that one
+            # call instead.
+            self.logger.warning("undecodable response: %s", exc)
+            self._fail_undecodable(raw, exc)
             return
         if not isinstance(message, dict):
             return
@@ -550,6 +559,20 @@ class TrueNASWSConnection:
             pending = self._pending.pop(mid, None)
         if pending is not None:
             pending.resolve(message)
+
+    def _fail_undecodable(self, raw, exc: Exception) -> None:
+        """Fail the one call a response belongs to when it cannot be decoded."""
+        try:
+            plain = _json.loads(raw)
+            mid = plain.get("id") if isinstance(plain, dict) else None
+        except Exception:
+            return
+        if mid is None:
+            return
+        with self._pending_lock:
+            pending = self._pending.pop(mid, None)
+        if pending is not None:
+            pending.fail(ClientException(f"undecodable response: {exc}", _errno.EPROTO))
 
     def _reader_ended(self) -> None:
         """Connection ended: fail every waiter so no call blocks forever, wake
