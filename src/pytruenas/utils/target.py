@@ -30,21 +30,36 @@ def redact(connectionstring: str) -> str:
         # No userinfo delimiter -> nothing to strip; also the fast path for the
         # overwhelmingly common ``host``/``host:port`` positional.
         return connectionstring
-    if "://" not in connectionstring:
+    scheme, sep, tail = connectionstring.partition("://")
+    if not sep:
         # Scheme-less ("root:pw@nas"): redact_uri needs a scheme to find the
         # userinfo, so it returned these whole -- password included -- and the
         # fan-out label and --logto filename fell back to them. Everything
         # before the LAST "@" is userinfo (a raw "@" or "/" in a password
         # included); keep the user.
-        userinfo, _, rest = connectionstring.rpartition("@")
-        user = userinfo.split(":", 1)[0]
-        return f"{user}@{rest}" if user else rest
+        return _strip_userinfo("", connectionstring)
     try:
         return _redact_uri(connectionstring)
     except Exception:
         # A malformed target must never turn a log call into a crash; fall back
         # to dropping any ``:pass@`` run so we still don't leak.
         return _re.sub(r"://([^/@]*):([^/@]*)@", r"://\1@", connectionstring)
+
+
+def _strip_userinfo(prefix: str, rest: str) -> str:
+    """``prefix`` + ``rest`` with everything before the last ``@`` dropped.
+
+    The user name (up to the first ``:``) is kept, as in a well-formed URI.
+
+    Only for a string that has no scheme, where there is no authority to read:
+    a URI that parses is taken at face value, because
+    `ssh://nas:22/mail/user@example.com` carries no credential and naming
+    `nas@example.com` in a diagnostic would point at a different host. hostctl
+    0.3.2 confines the same guess to input that does not parse.
+    """
+    userinfo, _, host = rest.rpartition("@")
+    user = userinfo.split(":", 1)[0]
+    return f"{prefix}{user}@{host}" if user else f"{prefix}{host}"
 
 
 class Target(_ty.NamedTuple):

@@ -47,10 +47,12 @@ dependencies = [
     "pathlib_next[uri]>=0.9.10,<0.10",
     "requests>=2.0,<3",
     "websocket-client>=1.0,<2",
-    # 0.3.1: a composite path falls back to the next provider when SFTP cannot
-    # connect (refused port, untrusted host key), and a declined SSH leg is not
-    # re-dialled on every run(). TrueNASHost is a hostctl PosixHost.
-    "hostctl>=0.3.1,<0.4",
+    # 0.3.2: `redact_uri` leaves a well-formed URI alone, which this package's
+    # own redaction and its "does this target parse?" check both rely on (0.3.1
+    # rewrote `ssh://nas:22/mail/user@example.com` into a different host). 0.3.1
+    # brought the composite-path fallback when SFTP cannot connect and stopped
+    # re-dialling a declined SSH leg. TrueNASHost is a hostctl PosixHost.
+    "hostctl>=0.3.2,<0.4",
     # `deploy` reads PEP 508 requirement lines and environment markers to build
     # its dependency closure; without it the closure silently lost duho,
     # hostctl and netimps. Capped above the newest tested (26.x) rather than at
@@ -65,7 +67,7 @@ dependencies = [
 config = ["pyyaml"]
 # Remote shell + SFTP filesystem leg: the SSH providers are hostctl's, so its
 # own `ssh` extra (asyncssh, pathlib_next's sftp-async) is exactly what is needed.
-ssh = ["hostctl[ssh]>=0.3.1,<0.4"]
+ssh = ["hostctl[ssh]>=0.3.2,<0.4"]
 # Typings generator (`pytruenas generate-typings`).
 # Series base: `Environment`/`DictLoader`/`tojson` have been stable since 3.0,
 # and 4.x may break them. Validated against 3.1.x.
@@ -78,7 +80,7 @@ codegen = ["jinja2>=3.0,<4"]
 # so 3.11+ never installs a redundant package for what it already has built
 # in -- `pytruenas.utils.bundle` tries tomllib first regardless.
 repo = ["pathspec", "tomli; python_version<'3.11'"]
-dev =["black", "build", "hatchling", "pytest", "pytest-cov", "twine", "pyyaml", "hostctl[ssh]>=0.3.1,<0.4", "jinja2", "pathspec", "tomli; python_version<'3.11'"]
+dev =["black", "build", "hatchling", "pytest", "pytest-cov", "twine", "pyyaml", "hostctl[ssh]>=0.3.2,<0.4", "jinja2", "pathspec", "tomli; python_version<'3.11'"]
 docs = ["mkdocs", "mkdocs-material", "mkdocstrings[python]"]
 
 [project.scripts]

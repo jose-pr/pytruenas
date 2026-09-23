@@ -34,9 +34,11 @@ version="current", executor=None, path=None, ssh=None, ...)`
   `wss://nas/api/current`; `ws://`/`http://` selects plaintext. Nothing is
   probed and building a client performs no network I/O, so a bad host raises on
   first use. A password in the
-  userinfo must percent-encode `/`, `?` and `#` (`%2F`, `%3F`, `%23`); a raw
-  one raises `ValueError` (message redacted) instead of being split into a
-  host/port/path.
+  userinfo must percent-encode `/`, `?`, `#` and `@` (`%2F`, `%3F`, `%23`,
+  `%40`). A string that does not parse as a URI raises `ValueError` with the
+  credentials stripped from the message; one that *does* parse is used as the
+  URI it is (an `@` in a path is a path — indistinguishable from an unencoded
+  password, so neither this package nor hostctl guesses).
 - **`credentials`** (positional as `creds` historically) — passed to
   `Credentials(...)` (below); `None` means local-socket auth (no login call).
 - **`autologin`** (default `True`) — the first `.conn` access calls

@@ -8,6 +8,9 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Changed
 
+- Dependency: `hostctl>=0.3.2,<0.4` (and the `ssh` extra). 0.3.2's `redact_uri`
+  leaves a well-formed URI alone, which this package's redaction and its
+  "does this target parse?" check both rely on.
 - **`call`/`query`/`dump-api` attribute their output when there is more than
   one target**: each line becomes `{"target": "<host>", "result": <result>}`
   (credentials removed). A single target still prints the bare result, so
@@ -287,11 +290,13 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   scheme-less `root:pw@nas` whole. A `Credentials(...)` error masked only a
   fixed list of names (not `otp_token`, `private_key`); every value but the
   user name is masked now.
-- **A password with a raw `/`, `?` or `#` in a target URI** was split by the
-  URL parser: `wss://root:123/rest@nas` connected to host `root`, port 123,
-  with the rest of the password as the API path, and other forms quoted the
-  password's start in a `ValueError`. Such a target is now refused with a
-  redacted message asking for percent-encoding.
+- **A connection string that does not parse as a URI is refused**, with a
+  message that does not quote the credentials it just rejected (an unencoded
+  `/`, `?` or `#` in a password ends the authority early, so `user:secret` is
+  read as host:port). A URI that *does* parse is taken at face value: an `@`
+  in a path is a path, and nothing can distinguish it from a password someone
+  forgot to encode — the same contract hostctl states for `ConnectionString`
+  and `redact_uri`.
 - **The TLS legs trusted different certificates.** The API websocket verified
   against the OS trust store and the HTTP side channels (upload, download, file
   reads over the websocket leg) against `requests`' certifi bundle, so a

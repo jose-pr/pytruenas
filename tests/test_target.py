@@ -133,17 +133,47 @@ def test_redact_helper_removes_a_scheme_less_password(target, expected):
 
 @pytest.mark.parametrize(
     "target",
-    ["wss://root:123/hunter2@nas", "root:hun/hunter2@nas", "wss://root:a?hunter2@nas"],
+    ["wss://root:hun/hunter2@nas", "root:hun/hunter2@nas", "wss://root:a?hunter2@nas"],
 )
-def test_a_raw_reserved_character_in_the_password_is_refused(target):
-    """urlsplit ends the authority at '/', '?' or '#': "root:123/rest@nas" was
-    host "root", port 123, API path "/rest@nas"; others quoted the password's
-    first part in a ValueError."""
+def test_a_target_that_does_not_parse_is_refused_without_quoting_it(target):
+    """An unencoded '/', '?' or '#' in a password ends the authority early, so
+    `user:secret` is read as host:port and the port is not a number. The
+    message must not carry the secret it just refused."""
     from pytruenas import TrueNASClient
 
     with pytest.raises(ValueError, match="percent-encode") as ei:
         TrueNASClient(target, autologin=False)
-    assert "hunter2" not in str(ei.value) and "123" not in str(ei.value)
+    assert "hunter2" not in str(ei.value)
+
+
+@pytest.mark.parametrize(
+    "target,host,port,path",
+    [
+        # A valid URI means what it says -- an "@" in a PATH is a path, not a
+        # credential, and nothing can tell it from a password someone forgot to
+        # encode. Same contract hostctl states for ConnectionString/redact_uri.
+        ("wss://nas/api/v1@x", "nas", 0, "/api/v1@x"),
+        ("wss://root:123/rest@nas", "root", 123, "/rest@nas"),
+    ],
+)
+def test_a_valid_uri_is_taken_at_face_value(target, host, port, path):
+    from pytruenas import TrueNASClient
+
+    config = TrueNASClient(target, autologin=False).config
+    assert (config.host, config.port, config.api_path) == (host, port, path)
+
+
+def test_redaction_leaves_a_well_formed_uri_alone():
+    """Over-redacting renames the host: `ssh://nas:22/mail/user@example.com`
+    carries no credential, and rewriting it to `nas@example.com` would point a
+    diagnostic at a different machine (hostctl 0.3.2)."""
+    assert redact("ssh://nas:22/mail/user@example.com") == (
+        "ssh://nas:22/mail/user@example.com"
+    )
+    assert redact("wss://nas/api/v1@x") == "wss://nas/api/v1@x"
+    # Input that does not parse is still stripped, since there is nothing
+    # better to go on.
+    assert "hunter2" not in redact("wss://root:hun/hunter2@nas")
 
 
 def test_replace_is_namedtuple():

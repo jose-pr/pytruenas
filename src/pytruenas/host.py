@@ -421,17 +421,24 @@ def _normalize_target(target: "str | None") -> str:
             else (f"{_SCHEME_PREFIX}unix://{DEFAULT_SOCKET_PATH}")
         )
 
-    # urlsplit ends the authority at the first "/", "?" or "#", so a password
-    # holding one splits there: "root:123/rest@nas" became host "root", port
-    # 123 and API path "/rest@nas" -- the rest of the secret sent, as a path,
-    # to a host named by its first part. An "@" past that point can only be
-    # such a userinfo; refuse it rather than guess, and never quote it.
-    end = next((i for i, ch in enumerate(remainder) if ch in "/?#"), len(remainder))
-    if "@" in remainder[end:]:
+    # A URI that PARSES is taken at face value -- the same contract hostctl
+    # states for `ConnectionString`/`redact_uri` (0.3.2). `wss://nas/x@y` is a
+    # path containing an "@", not a credential, and no amount of guessing can
+    # tell that from a password someone forgot to encode.
+    #
+    # What is refused is input that does not parse at all: an unencoded "/",
+    # "?" or "#" in a password ends the authority early, so `user:secret` is
+    # read as host:port and the port is not a number. Touching `.port` is what
+    # detects it (it is a property that raises), and the message renders
+    # through `redact`, whose own fallback handles exactly this shape.
+    try:
+        _urlsplit(f"{canonical}://{remainder}").port
+    except ValueError:
         raise ValueError(
-            "the credentials in this connection string contain a raw '/', '?' "
-            "or '#'; percent-encode them (%2F, %3F, %23): " + _redact_target(target)
-        )
+            "this connection string does not parse as a URI; percent-encode "
+            "any '/', '?', '#' or '@' in the credentials (%2F, %3F, %23, "
+            "%40): " + _redact_target(target)
+        ) from None
 
     # Split the authority to spot the local-without-port case. Re-parse via
     # urlsplit on a normalized string so userinfo/IPv6 are handled properly.
