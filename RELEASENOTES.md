@@ -6,7 +6,7 @@ user-facing; this file is the durable record.
 
 ---
 
-## [Unreleased]
+## [0.5.0] - 2026-09-23
 
 ### What changed
 
@@ -106,9 +106,18 @@ The measured performance change in this cycle is the web shell above (64 KiB:
 
 ### Publication state
 
-Prepared only. Nothing is pushed and no tag exists; the version number and the
-release itself are the owner's call. The on-demand test workflow has not run
-for this cycle -- it needs a `ci-*` tag pushed to the remote.
+Released as 0.5.0 on the owner's instruction. The full matrix ran green before
+tagging: 9 test jobs (3.9, 3.13, 3.14 across Linux, Windows and macOS), both
+benchmark jobs and the docs build. Two failures the matrix caught first, fixed
+before the tag: the web shell decoded its input file with a positional argument
+that BSD base64 (macOS) ignores, so input arrived empty there; and the deploy
+tests had been reading pre-`packaging` metadata from a local editable install.
+
+### [Unreleased]
+
+Next performance target: a CI benchmark baseline for this release, so the
+following one has a previous->current table. The ejson codec is the hot path
+worth watching (`ejson.loads.plain` is the largest per-call cost).
 
 ---
 
