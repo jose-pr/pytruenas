@@ -6,6 +6,112 @@ user-facing; this file is the durable record.
 
 ---
 
+## [Unreleased]
+
+### What changed
+
+A review of the whole package, fixed in place. The themes: **verification is on
+by default and means one thing everywhere**, **a command's output is exactly
+what the command wrote**, **a dropped connection cannot silently repeat a
+request**, and **destructive operations refuse ambiguous input**.
+
+### Verification
+
+`verify=True` is the default and now covers every check the client makes: TLS
+for the API websocket, the HTTP side channels and the web shell, and SSH
+host-key verification for commands and SFTP. `verify=False` turns all of them
+off in one place. The three TLS legs previously disagreed -- the websocket
+trusted the operating system's store, `requests` trusted its own certifi bundle
+-- so against a NAS with a privately signed certificate the API connected and
+every download failed with `SSLError`. They now share one context: the OS store,
+or a CA bundle from `sslverify=` or `$SSL_CERT_FILE` / `$REQUESTS_CA_BUNDLE` /
+`$CURL_CA_BUNDLE` / `$WEBSOCKET_CLIENT_CA_BUNDLE`.
+
+The CLI verified nothing at all. It now matches the library, with `-k` /
+`--insecure` / `--no-sslverify` as the opt-out. **This is the one deliberate
+break in the cycle**: a self-signed appliance that worked yesterday fails until
+one of those is given, or `sslverify` is set in the config file or
+`$PYTRUENAS_SSLVERIFY`.
+
+### The web shell
+
+The `/websocket/shell` executor was rewritten. The old one built a shell command
+by interpolation and read back whatever the terminal echoed, which meant the
+echoed wrapper came back as output, leftover input could execute as root, and
+16 KiB of output took 19 s while 64 KiB never finished. Commands and input are
+now base64, output is framed by printed markers with `stty -opost` so the bytes
+are exact, and parsing is linear. Measured on the appliance afterwards: 64 KiB
+in 1.5 s, 1 MiB in 2-5 s, and output can be streamed to a callback as it
+arrives rather than waited for.
+
+### Jobs, logins and dropped connections
+
+`core.job_wait` is itself a job, so it returned a *new job id* immediately
+(0.4 s, measured) and every `wait=True` returned before the work finished, with
+its failure lost. Waiting now polls `core.get_jobs`: `client.wait(job_id,
+callback=...)` returns the result, raises `JobFailed`, and reports progress.
+
+The legacy `auth.login*` methods answer wrong credentials with `False` rather
+than an error; that was ignored, so a bad password produced a client whose every
+later call failed with `ENOTAUTHENTICATED`. It raises `AuthenticationError` now.
+A reconnect repeats the login that was actually used, rather than the configured
+credentials or none.
+
+A dropped call is only retried when the request never reached the socket
+(`ConnectionClosed.sent`). Before, the default retry could replay a create, a
+delete or a job start that the server may already have run.
+
+### Migration
+
+- A self-signed appliance needs `-k` (CLI) or `verify=False` / `sslverify=`
+  (library). The SFTP leg also verifies host keys now: add the host to
+  `~/.ssh/known_hosts`, or pass `known_hosts=None`.
+- `client.wait_job(...)` is `client.wait(...)`.
+- Catching `ClientException` with `errno == ECONNABORTED` still works;
+  `ConnectionClosed` is a subclass and carries `.sent`.
+- A URI password containing `/`, `?` or `#` must be percent-encoded.
+- Generated typings: optional keys are now `NotRequired`, imported from
+  `typing_extensions` below Python 3.11, and the root module exports `Current`.
+
+### Performance
+
+No CI benchmark numbers for this cycle yet: the benchmark runner had imported a
+module removed in 0.2.0, so the suite -- and its CI job -- had been dead since
+then. It runs again and reports the same six metrics, which makes the tracked
+0.1.0 results comparable again. Numbers for the next release come from the
+`benchmark` job (one fixed runner and interpreter per result), not a developer
+machine; local runs on Windows ARM64 were used only to confirm the runner works.
+
+The measured performance change in this cycle is the web shell above (64 KiB:
+>240 s to 1.5 s), which is protocol work rather than a micro-benchmark metric.
+
+### Validation
+
+- Suite: 748 passed / 6 skipped on Python 3.14.7 and on the 3.9 floor, both
+  native ARM64; 694 passed / 58 skipped with no optional extras installed (it
+  used to error rather than skip). The skips are the POSIX-shell and
+  extra-gated tests.
+- `mkdocs build --strict` clean; `black --check src tests benchmarks examples`
+  clean (89 files).
+- Built artifacts checked as a pair: `AGENTS.md` ships in the sdist and the
+  wheel, `AGENTS.local.md` in neither, `py.typed` present, and the metadata is
+  PEP 639 (`License-Expression: MIT`).
+- Live against a TrueNAS 26.0.0-BETA.1 appliance: TLS trust (default, a CA
+  bundle, and an unrelated CA that correctly fails), refused logins, a dropped
+  session reconnecting authenticated, `close()` in 0.31 s, an unresponsive host
+  failing instead of hanging, the web shell's throughput and streaming, `mkdir`
+  modes and parents, and the CLI authenticating from `$TN_CREDS`.
+- Typings generated from that appliance: 129 stubs, all parsing on the 3.9
+  floor.
+
+### Publication state
+
+Prepared only. Nothing is pushed and no tag exists; the version number and the
+release itself are the owner's call. The on-demand test workflow has not run
+for this cycle -- it needs a `ci-*` tag pushed to the remote.
+
+---
+
 ## [0.3.0] - 2026-07-29
 
 ### What changed
