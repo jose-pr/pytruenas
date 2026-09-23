@@ -8,17 +8,18 @@ per-call CPU cost, not the round-trip latency that dominates real use.
 ## Running
 
 ```bash
-# print summary only
-PYTHONPATH=src .venv39/Scripts/python benchmarks/run.py
+# print summary only (from an installed package, or PYTHONPATH=src)
+python benchmarks/run.py
 
 # also write benchmarks/results/pytruenas-<ver>-py<ver>.json
-PYTHONPATH=src .venv39/Scripts/python benchmarks/run.py --save
-PYTHONPATH=src .venv314/Scripts/python benchmarks/run.py --save
+python benchmarks/run.py --save
 ```
 
 Run without `--save` to just print. `--name <x>` overrides the filename stem.
 Compare files only across the **same machine + interpreter**, or the numbers
-aren't meaningful.
+aren't meaningful — which is why the numbers quoted in release notes come from
+the `benchmark` job in `.github/workflows/test.yml` (one fixed runner, one
+interpreter per result) rather than from a developer machine.
 
 ## Schema
 

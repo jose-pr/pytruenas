@@ -27,7 +27,11 @@ from ipaddress import IPv4Interface
 from pathlib import Path
 
 import pytruenas
-from pytruenas import jsonrpc
+
+# The ejson codec lives in pytruenas.connection; `pytruenas.jsonrpc` was
+# removed in 0.2.0, which left this runner unimportable (and its CI job
+# failing) until it was ported.
+from pytruenas import connection as ejson
 from pytruenas.namespace import Namespace
 from pytruenas.utils import query as q
 
@@ -62,8 +66,8 @@ EXT_OBJ = {
     "net": IPv4Interface("192.0.2.21/24"),
     "nested": [{"created": datetime(2026, 1, 1, tzinfo=timezone.utc)}],
 }
-PLAIN_JSON = jsonrpc.dumps([PLAIN_ROW] * 20)
-EXT_JSON = jsonrpc.dumps(EXT_OBJ)
+PLAIN_JSON = ejson.dumps([PLAIN_ROW] * 20)
+EXT_JSON = ejson.dumps(EXT_OBJ)
 
 _client_stub = type("C", (), {"logger": None, "_api": None})()
 _ns = Namespace(_client_stub, "pool")
@@ -89,13 +93,11 @@ def _build_method_name():
 def measure():
     return {
         "ejson.dumps.plain": sample(
-            lambda: jsonrpc.dumps([PLAIN_ROW] * 20), EJSON_INNER // 4
+            lambda: ejson.dumps([PLAIN_ROW] * 20), EJSON_INNER // 4
         ),
-        "ejson.loads.plain": sample(
-            lambda: jsonrpc.loads(PLAIN_JSON), EJSON_INNER // 4
-        ),
-        "ejson.dumps.extended": sample(lambda: jsonrpc.dumps(EXT_OBJ), EJSON_INNER),
-        "ejson.loads.extended": sample(lambda: jsonrpc.loads(EXT_JSON), EJSON_INNER),
+        "ejson.loads.plain": sample(lambda: ejson.loads(PLAIN_JSON), EJSON_INNER // 4),
+        "ejson.dumps.extended": sample(lambda: ejson.dumps(EXT_OBJ), EJSON_INNER),
+        "ejson.loads.extended": sample(lambda: ejson.loads(EXT_JSON), EJSON_INNER),
         "namespace.methodname": sample(_build_method_name, BUILD_INNER // 10),
         "query.filter_from_kwargs": sample(
             lambda: q.filter_from_kwargs(username="root", uid=q.GT(0), locked=False),
