@@ -1,11 +1,11 @@
 # Connecting
 
-`TrueNASClient(target, creds=None, ...)` opens (lazily) a websocket to the
+`TrueNASClient(target, credentials=None, ...)` opens (lazily) a websocket to the
 middleware. The transport is chosen from `target`:
 
 | `target` | Transport |
 | --- | --- |
-| `"nas.example.com"` | `wss://` (TLS) or `ws://`, auto-probed |
+| `"nas.example.com"` | `wss://nas.example.com/api/current` (TLS) |
 | `"wss://nas/api/current"` | explicit TLS websocket |
 | `"ws+unix:///var/run/middleware/middlewared.sock"` | local unix socket |
 | `None` / omitted | the local unix socket |
@@ -47,10 +47,12 @@ By default the client logs in lazily on first use (`autologin=True`). Pass
 `autologin=False` to construct without connecting — useful in tests, or when you
 only want `client.path(...)` / `client.run(...)` and no API call.
 
-Construction never touches the network: when the scheme (`ws` vs `wss`) or the
-API path is not given explicitly, both are probed on first connect rather than
-in the constructor. A bad hostname therefore raises on first *use*, not at
-construction.
+Construction never touches the network, so a bad hostname raises on first
+*use*, not at construction. A target that names neither scheme nor API path
+resolves to **TLS and the current API**: `nas.example.com` means
+`wss://nas.example.com/api/current`. Plaintext is never chosen for you — ask
+for it with `ws://` (or `http://`, the same transport) — and a different API
+version comes from `version=` or a path in the target.
 
 ## The SSH leg
 

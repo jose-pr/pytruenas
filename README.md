@@ -98,8 +98,14 @@ through a temporary file, never typed into the terminal.
 - `None` / omitted → local socket auth.
 
 `Credentials.from_env()` reads `TN_CREDS`. Credentials may also travel in the
-target (`wss://root:secret@nas`); an OTP follows the password after a newline,
-percent-encoded in a URI as `%0A`.
+target (`wss://root:secret@nas`). In a **URI** an OTP follows the password after
+a newline as a keyed line — `otp:<token>`, with the newline percent-encoded:
+`wss://root:secret%0Aotp:123456@nas`. In the plain credential string above the
+token follows the newline on its own (`"user:password\n123456"`).
+
+A password containing `/`, `?` or `#` must be percent-encoded (`%2F`, `%3F`,
+`%23`); a raw one is refused, because the URL parser would otherwise read the
+rest of it as a host, port and path.
 
 ## CLI
 
@@ -148,10 +154,11 @@ and your package ships with pytruenas bundled underneath it.
 `--source repo` ships a working tree as-is instead of an installed dependency
 closure — the files a clone would have, filtered by whichever of `.gitignore`,
 `.ignore` and `.bundleignore` are present, with nothing needing to be installed
-locally first (needs `pytruenas[repo]`):
+locally first (needs `pytruenas[repo]`). It requires `--mode dir`: a zipapp
+needs an importable package root, which a working tree does not have.
 
 ```sh
-pytruenas deploy --source repo --repo-root . nas.example.com
+pytruenas deploy --source repo --mode dir --repo-root . nas.example.com
 ```
 
 ## Typings generator

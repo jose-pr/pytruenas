@@ -18,9 +18,12 @@ Scheme handling has two deliberately separate layers:
   ``None`` -- by rewriting it to a ``truenas+*`` URI first. That rewrite is
   :func:`_normalize_target`: one pure string function, no I/O.
 
-The scheme and API-path probes that :class:`TrueNASClient` historically ran
-inside ``__init__`` are *recorded* here (:attr:`~TrueNASConfig.needs_scheme_probe`,
-:attr:`~TrueNASConfig.needs_path_probe`) and performed later, on connect.
+The scheme and API path a target leaves out are *defaulted*, not probed: a
+remote target with neither resolves to ``wss://<host>/api/<version>``, and only
+an explicit ``ws``/``http`` selects plaintext. :attr:`~TrueNASConfig.needs_scheme_probe`
+and :attr:`~TrueNASConfig.needs_path_probe` record that the caller did not say,
+which is what makes the default visible to a caller that wants to ask the
+server itself; nothing in this package performs such a request.
 """
 
 from __future__ import annotations
@@ -66,9 +69,9 @@ else:
 #: rather than redefined, so the two can never drift apart.
 DEFAULT_SOCKET_PATH = DEFAULT_UNIX_SOCKET
 
-#: Scheme meaning "probe on first connect" -- a real registered scheme, not a
-#: placeholder. It preserves the historical behavior of resolving ws vs wss (and
-#: the API path) by asking the server, just deferred out of construction.
+#: Scheme meaning "the caller did not say" -- a real registered scheme, not a
+#: placeholder, so a config round-trips through its URI. It resolves to wss and
+#: the configured API version at connect time (see `needs_scheme_probe`).
 AUTO_SCHEME = "truenas+auto"
 
 _SCHEME_PREFIX = "truenas+"
@@ -499,7 +502,7 @@ class TrueNASConfig(
         self.paths = _as_names(path)
         self.host = host
         self.port = int(port or 0)
-        #: ``True`` -> wss, ``False`` -> ws, ``None`` -> probe on connect.
+        #: ``True`` -> wss, ``False`` -> ws, ``None`` -> not given, use wss.
         self.secure = secure
         self.socket_path = socket_path
         self.api_path = api_path
@@ -661,12 +664,20 @@ class TrueNASConfig(
 
     @property
     def needs_scheme_probe(self) -> bool:
-        """Whether ws-vs-wss still has to be resolved against the server."""
+        """Whether the target left ws-vs-wss unsaid (so TLS is assumed).
+
+        Not a pending action: this package never asks the server. It answers
+        "was this decided by the caller or defaulted", which is what a caller
+        that wants to probe for itself needs to know.
+        """
         return not self.is_local and self.secure is None
 
     @property
     def needs_path_probe(self) -> bool:
-        """Whether the API path still has to be resolved against the server."""
+        """Whether the target left the API path unsaid (so ``version`` is used).
+
+        As with :attr:`needs_scheme_probe`, nothing here queries the server.
+        """
         return not self.is_local and self.api_path is None
 
     @property
@@ -962,7 +973,7 @@ class TrueNASHost(_PosixHost, _ty.Generic[ApiVersion]):
     def _target(self):
         """The resolved websocket target as a :class:`~pytruenas.utils.target.Target`.
 
-        Built from the config rather than stored, so a probe that resolves the
+        Built from the config rather than stored, so a change that resolves the
         scheme or API path later is picked up without re-syncing two copies.
         """
         config = self._config

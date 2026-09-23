@@ -9,21 +9,29 @@ git clone https://github.com/jose-pr/pytruenas.git
 cd pytruenas
 
 # Create a virtual environment (project targets Python 3.9+)
-python -m venv .venv39
-.venv39/Scripts/activate      # Windows; on Unix: source .venv39/bin/activate
+python -m venv .venv
+.venv/Scripts/activate        # Windows; on Unix: source .venv/bin/activate
 
-# Install in development mode with the test dependencies
-pip install -e ".[dev]"
+# Install in development mode with every extra the tests exercise
+pip install -e ".[dev,config,ssh,codegen]"
 ```
 
-The `ssh`, `config`, `codegen`, and `host` extras enable optional features; add
-the ones whose tests you want to run (e.g. `-e ".[dev,ssh]"`).
+The optional extras are `ssh` (remote commands and the SFTP filesystem leg),
+`config` (YAML config files), `codegen` (generating typings), `docs` and
+`repo` (`deploy --source repo`). The `dev` extra already carries the SSH
+dependencies, so a plain `-e ".[dev]"` runs the whole suite; the others turn on
+the features those tests cover. Tests for a missing extra **skip**, so a
+partial install still reports green -- install them all before concluding
+anything about a change.
 
 ## Running Tests
 
 ```bash
 pytest -q
 ```
+
+Before a release or a large change, run the floor too (Python 3.9) — a
+3.9-only breakage does not show up on a newer interpreter.
 
 With coverage:
 
@@ -56,8 +64,11 @@ mkdocs build --strict   # what CI gates on
 ## Code Style
 
 - Follow PEP 8; use type hints.
-- `from __future__ import annotations` in any module using `X | Y` unions at
-  runtime — the project supports Python 3.9.
+- `from __future__ import annotations` in any module using `X | Y` unions in
+  annotations — the floor is Python 3.9, which cannot evaluate them. Where an
+  annotation is evaluated at runtime anyway (a `duho` args field, a
+  `TypedDict` built by a call), write `typing.Optional[X]` / `typing.Union`
+  instead: the future import does not help there.
 - Keep the vendored-free, minimal-dependency posture: guard optional imports and
   degrade gracefully rather than hard-crashing on a missing extra.
 

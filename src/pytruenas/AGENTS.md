@@ -29,9 +29,11 @@ version="current", executor=None, path=None, ssh=None, ...)`
 
 - **`target`** — a host, `"host:port"`, or full `scheme://...` URI. `None` /
   omitted / local-only resolves to the local middleware unix socket
-  (`ws+unix:///var/run/middleware/middlewared.sock`); for a remote target the
-  scheme (`ws`/`wss`) and API path are probed on first connect, **not** in the
-  constructor — building a client performs no network I/O. A password in the
+  (`ws+unix:///var/run/middleware/middlewared.sock`). A remote target with no
+  scheme or path resolves to **TLS and the current API** — `"nas"` means
+  `wss://nas/api/current`; `ws://`/`http://` selects plaintext. Nothing is
+  probed and building a client performs no network I/O, so a bad host raises on
+  first use. A password in the
   userinfo must percent-encode `/`, `?` and `#` (`%2F`, `%3F`, `%23`); a raw
   one raises `ValueError` (message redacted) instead of being split into a
   host/port/path.
@@ -69,8 +71,8 @@ version="current", executor=None, path=None, ssh=None, ...)`
 - **`executor`/`path`** — name the providers to use, in preference order.
   Replaces `fsbackend`, which could only pick a filesystem backend; see the
   provider table below.
-- **`version`** — API path version probed when auto-resolving the websocket
-  path (default `"current"`, i.e. `/api/current`).
+- **`version`** — API path used when the target carries none (default
+  `"current"`, i.e. `/api/current`).
 
 ### Attributes / properties
 
@@ -125,8 +127,13 @@ version="current", executor=None, path=None, ssh=None, ...)`
 - **`.me() -> dict`** (`auth.me`) / **`.logout() -> None`** (`auth.logout`) /
   **`.ping() -> str`** (`core.ping` -> `"pong"`) — convenience wrappers.
 - **`.path(*path, backend=None)`** — build a `pathlib_next` path rooted at
-  `path`; `backend` names one provider for this call. Inherited from
-  `hostctl.host.Host`. See `pytruenas.fs`.
+  `path`. `backend` names one **path provider** for this call, from the names
+  in the provider table below (`"tnasws"`, `"sftp"`, `"local"`), and raises
+  `ValueError: unknown path provider` for anything else — including a provider
+  this host has not got (`"sftp"` without an SSH leg, `"local"` on a remote
+  host). Not the `pytruenas.fs.path()` vocabulary (`"ws"`/`"api"`/`"truenas"`),
+  which is a different function documented under `fs` below. Inherited from
+  `hostctl.host.Host`.
 - **`.run(*cmds, **kwargs) -> subprocess.CompletedProcess`** — run commands on
   the target. Inherited from `hostctl.host.Host.run`; see that for the full
   signature (`stdin`/`stdout`/`stderr`, `cwd`, `env`, `capture_output`,
@@ -249,7 +256,7 @@ also raises. `None` (the default) means "decide from the target".
 string `TrueNASClient` does and normalizes to a `truenas+*` scheme
 (`truenas+auto`, `+ws`, `+wss`, `+unix`); `HostConfig("truenas+wss://nas")`
 works from hostctl's own registry. Constructing one performs **no network
-I/O** — the ws-vs-wss and API-path probes happen on first connect, not in the
+I/O** — the scheme and API path are resolved from the string alone, not in the
 constructor.
 
 An OTP travels in the URI password field after a newline
@@ -574,8 +581,10 @@ way to build a client from parsed args:
   renamed into place, and a `dir` deploy interrupted between its renames is
   restored from `<path>.old` on the next run.
 
-  `--source` picks **what** gets bundled; `--mode` is orthogonal and picks the
-  output **layout** (zipapp or unpacked tree) either way.
+  `--source` picks **what** gets bundled and `--mode` the output **layout**
+  (zipapp or unpacked tree), with one constraint: `--source repo` requires
+  `--mode dir` and is refused with the default `pyz`, because a zipapp needs an
+  importable package root and a working tree has none.
   - `installed` (default) — the resolved dependency closure. Probes what the
     host already has via `utils.bundle.PROBE_SOURCE` and bundles only the
     difference. `--pkg-root`/`--pkg-name` name the distribution and its import
@@ -644,6 +653,27 @@ arg layer never built a `list[T]` splitter) — `duho`'s richer list-type
 dispatch would have made it live, and it is already fixed there (the same fix
 that flattens `--cmdspath a:b` to `['a', 'b']`). Do not read this support as
 exact behavioral parity where `duho` intentionally improved on the original.
+
+## Transport providers (`pytruenas.providers`, `pytruenas.webshell`)
+
+The objects behind the table above. A caller never needs them to use a host --
+`executor=`/`path=` name them by string -- but they are public, so a consumer
+can compose a host of its own.
+
+- **`providers.local_providers()`** — hostctl's stock local executor/path pair,
+  as this package configures them.
+- **`providers.TnasWsPathProvider(client)`** — the `filesystem.*` path provider
+  (`"tnasws"`), which works over the API websocket with no SSH.
+- **`webshell.WebShellExecutorProvider(client)`** — the `"webshell"` executor.
+- **`webshell.WebShellSession(client, **options)`** — one `/websocket/shell`
+  session. `.execute(command, input=None, merge_stderr=False, timeout=None,
+  sink=None, errsink=None) -> (stdout, stderr, returncode)` runs one command
+  and can stream: `sink`/`errsink` are called with decoded chunks as they
+  arrive. `.command_lines(...)` yields output lines. A `timeout` raises
+  `subprocess.TimeoutExpired` carrying whatever arrived; a connection lost
+  before the command starts raises `OperationNotStarted`.
+- **`webshell.clean_output(text)`** — strips the terminal's own control
+  sequences from captured output.
 
 ## `patch` (`pytruenas.patch`)
 
@@ -731,8 +761,14 @@ TypedDict schemas only (no runtime behavior); import the submodules directly.
   `EQ`); `EXCLUDE` sentinel to drop a kwarg from a filter/update entirely;
   `Option(name, value)` + `Option.options(*opts)` merge dict/tuple/`Option`
   opts passed to `_query`/`_upsert`/etc.; `diff(base, against) -> dict` (keys
-  in `against` whose value differs from `base`).
-- **`cmd`** — see "Writing a command module" above. Also holds **`ENV`**, the
+  in `against` whose value differs from `base`);
+  `filter_from_kwargs(**kwargs) -> list[QueryFilter]`, which builds the
+  middleware's filter list those kwargs stand for —
+  `[("username", "=", "root"), ("uid", ">", 0)]` — what `_query` uses
+  internally, and the way to build a filter without a client.
+- **`cmd`** — see "Writing a command module" above. Also holds
+  **`json_value(raw)`**, the decoding `call -p` and `query -f` share (a JSON
+  value, falling back to the raw string), and **`ENV`**, the
   single `duho.env.Env("pytruenas")` accessor every `PYTRUENAS_*` setting is
   read through (`autoload=False`; see "Environment variables").
 - **`bundle`** — deliberately generic, and knows nothing about pytruenas or
@@ -769,6 +805,12 @@ TypedDict schemas only (no runtime behavior); import the submodules directly.
   per-target `__main__.py` client builder) and `PyTrueNASRunPathArgs` (the
   shared root every RunPath command inherits — supplies the target fields /
   fan-out methods and the trailing `TARGET` positional).
+- **`tls`** — the one TLS trust decision every leg uses.
+  **`context(sslverify) -> ssl.SSLContext | None`** (`None` when verification
+  is off) and **`ca_bundle(sslverify) -> (path, source) | None`**, which says
+  which bundle is trusted and where it came from (`"sslverify"` or the
+  environment variable's name). `CA_BUNDLE_ENV` is that variable list, in
+  precedence order.
 - **`io`** — internal helpers (byte-like checks); no stable external contract.
 
 ## Environment variables

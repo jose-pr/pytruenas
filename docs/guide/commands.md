@@ -19,13 +19,17 @@ print(result.stdout)
 `run()` returns a `subprocess.CompletedProcess`. Highlights:
 
 - Multiple positional commands are joined by the shell's separator. A command
-  given as a `list`/`tuple` is shell-quoted piece by piece; a leading
-  `pathlib.PurePath` marks a direct executable whose trailing values are argv.
+  given as a `list`/`tuple` is shell-quoted piece by piece. For a program run
+  with **no shell layer**, pass `hostctl.Exec("/bin/ls", "-l")`; a path object
+  anywhere else is an ordinary value that stringifies, so one command in a
+  sequence cannot silently become the executable.
 - `capture_output` may be `True` (both streams), `"stdout"`, `"stderr"`, or
   `False`.
 - `input=` feeds stdin (str or bytes); a file-like `stdin=` is drained.
-- `cwd=`, `check=`, `timeout=`, `encoding=`/`errors=` behave as with
-  `subprocess.run`.
+- `cwd=`, `timeout=`, `encoding=`/`errors=` behave as with `subprocess.run`.
+  **`check` and `capture_output` do not: both default to `True`** here, so a
+  non-zero exit raises `CalledProcessError` unless you pass `check=False`, and
+  output is captured rather than inherited.
 - `env=` adds to the target's environment rather than replacing it, on every
   transport (a local target included): `env={"A": "1"}` still leaves `PATH` set.
 - `executable=` overrides the shell.
