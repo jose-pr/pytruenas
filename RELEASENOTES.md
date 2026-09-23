@@ -8,10 +8,126 @@ user-facing; this file is the durable record.
 
 ## [Unreleased]
 
-Next performance target: a CI benchmark baseline, so the next release has a
-previous->current table. The ejson codec is the hot path worth watching
+Next performance target: still a CI benchmark baseline, so the following release
+has a previous->current table. The ejson codec is the hot path worth watching
 (`ejson.loads.plain` is the largest per-call cost); the `benchmark` job in
 test.yml produces the numbers.
+
+---
+
+## [0.5.1] - 2026-09-23
+
+### What changed
+
+The medium- and low-severity items the 2026-09-22 review had deliberately
+deferred, worked through in five passes. No documented API was removed or
+renamed, so this is a patch; two behaviours did change on purpose, and both are
+listed under Migration.
+
+### Wrong answers, not wrong messages
+
+The rpc layer returned or recorded the wrong value in six places. The one that
+matters most: **a keyword argument to a middleware call was silently dropped**,
+so `client.api.user.query(filters=[["uid", "=", 0]])` sent no filters and
+returned *every* row — which then drove an update. Middleware methods take
+positional parameters, and a stray keyword now raises `TypeError`; the
+`_query`/`_get`/`_update` helpers still take keywords, by design.
+
+Alongside it: a timestamp decoded late by its own milliseconds (`.600` came back
+`1.200`); a response that failed to decode was dropped, leaving its caller to
+wait out the whole timeout for a reply that had already arrived; `True`/`False`
+was treated as a job id, because `bool` is an `int`; and a middleware *property*
+(`{"value": "10G", "parsed": ...}`) was compared against the scalar a caller
+sets, so `_upsert` rewrote the field forever and reported a change that never
+happened.
+
+### What actually reaches the appliance
+
+**Every deployed bundle was missing `uritools`.** The dependency closure dropped
+each requirement's own extras, and pytruenas depends on `pathlib_next[uri]`,
+whose extra requires it — and the appliance does not ship it (measured: 386
+distributions installed, `uritools` not among them). So `pathlib_next.uri`, the
+base of every remote path type, could not import on the target. Environment
+markers were also evaluated against the machine running `deploy` rather than the
+target; the probe now reports the target's marker environment.
+
+`--source repo` shipped things a clone would not: a nested checkout's `.git`, a
+nested `.gitignore` ignored entirely, and anything a symlink pointed at outside
+the repo. A missing `--ignore-file` silently disabled *all* filtering, which is
+the fastest way to ship a gitignored secret; it is an error now.
+
+A deployed copy can also answer `--version`, which it never could: a zipapp
+carries no installed metadata, so the flag answered with a usage error. The
+payload now carries a minimal `.dist-info` per bundled distribution.
+
+### Stubs that disagreed with the runtime
+
+Generation crashed outright on schema forms the middleware sends (a list `type`,
+`items: true`) and produced files that would not parse (a docstring ending in
+`"""`). Names from the dump became invalid identifiers, two different shapes
+could claim one TypedDict name with the later silently replacing the earlier, and
+a string default of `"0"` became the integer `0`.
+
+The stubs are also more precise than before: `enum`/`const` render as
+`Literal[...]` (6413 and 6420 occurrences in the 26.0 dump — 1275 `Literal`
+annotations where there were none), a typed `additionalProperties` as
+`Mapping[str, T]`, and the call options are keyword-only, matching the runtime.
+
+### Scope
+
+Side-channel tokens are now origin-bound and single-use: pytruenas had been
+passing `match_origin=False` where the server's own default is `True`. A client
+dropped without `close()` no longer leaks its websocket and reader thread. The
+SFTP leg built a fresh backend per call, which defeated pathlib_next's
+connection cache entirely — five `readlink()` calls opened five sessions and
+closed none.
+
+### The CLI's fan-out
+
+Concurrent targets shared one `args` object, so per-target state belonged to
+whichever target ran last; clients were never closed; `--logto` files missed the
+library records they exist for; and concurrent result lines interleaved mid-line
+so neither parsed as JSON. Target expansion also split passwords —
+`root:secret@nas1,nas2` gave the second host no credentials at all.
+
+### Migration
+
+- **A keyword argument to a middleware call raises `TypeError`.** Pass
+  parameters positionally (`query([["uid", "=", 0]])`) or use the `_query`/`_get`
+  helpers. `timeout` and the upstream-compatibility names still work.
+- **`call`/`query`/`dump-api` attribute their output when there is more than one
+  target**: each line becomes `{"target": ..., "result": ...}`. A single target
+  still prints the bare result.
+- A config file found rather than named (`./pytruenas.yaml`) no longer supplies
+  `commandspath`; pass `--config` to load commands from one.
+- A setup whose HTTP request leaves from a different IP than its websocket will
+  now be refused by the origin-bound token.
+- Dependency floor: `hostctl>=0.3.2`.
+
+### Performance
+
+No CI benchmark numbers for this cycle either: the runner was repaired in 0.5.0
+and its baseline is still the next release's job. The measurable change here is
+the SFTP backend cache (five sessions per five `readlink()` calls, down to one
+connection) — a resource fix rather than a throughput one.
+
+### Validation
+
+- Suite: 893 passed / 6 skipped on Python 3.14.7 and on the 3.9 floor, both
+  native ARM64; 769 passed / 130 skipped with no optional extras.
+- `mkdocs build --strict` and `black --check src tests benchmarks examples`
+  clean; `pip check` clean on both venvs.
+- Live against a TrueNAS 26.0.0-BETA.1 appliance throughout: the repaired
+  payload imports `pathlib_next.uri` and answers `call system.version` from the
+  target; `--version` works from a deployed pyz and a deployed dir launcher;
+  origin-bound tokens work on the web shell, uploads and downloads; 129 typing
+  stubs generated from the appliance's own dump parse on the 3.9 floor.
+- Every fix has a test that fails on 0.5.0.
+
+### Publication state
+
+Released as 0.5.1 on the owner's instruction (patch: no documented API was
+removed or renamed).
 
 ---
 
