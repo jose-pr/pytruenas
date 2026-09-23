@@ -18,6 +18,7 @@ client/logger threading are ``pytruenas``-specific and live here + in
 
 from __future__ import annotations
 
+import logging as _pylogging
 import os as _os
 import typing as _ty
 from logging import Logger as _Logger
@@ -82,7 +83,18 @@ def _load_config(path: "_Path") -> dict:
             "reading a config file requires the 'config' extra: "
             "pip install pytruenas[config]"
         ) from exc
-    return yaml.safe_load(path.read_text()) or {}
+    # read_bytes(), not read_text(): PyYAML detects UTF-8/16 itself, while
+    # read_text() uses the locale encoding and raised UnicodeDecodeError on a
+    # UTF-8 config file under a cp1252 default.
+    loaded = yaml.safe_load(path.read_bytes()) or {}
+    if not isinstance(loaded, dict):
+        _pylogging.getLogger("pytruenas").warning(
+            "ignoring config %s: expected a mapping, got %s",
+            path,
+            type(loaded).__name__,
+        )
+        return {}
+    return loaded
 
 
 def register_targets(parser) -> None:
@@ -169,6 +181,23 @@ class PyTrueNASArgs(LoggingArgs):
             return _load_config(config)
         return config or {}
 
+    def _config_is_implicit_(self) -> bool:
+        """Whether the config file was found rather than asked for.
+
+        ``./pytruenas.yaml`` in the process's working directory is a default,
+        and a CLI is routinely run from a directory its user does not control.
+        Which matters for one key only -- ``commandspath``, i.e. "import code
+        from here" -- so the caller can refuse *that* from an implicit file
+        while still reading targets and options from it. Same reasoning as
+        ``ENV``'s ``autoload=False``.
+        """
+        if ENV.get("CONFIG") or ENV.get("CFG"):
+            return False
+        default = type(self).__dict__.get("config", None)
+        if default is None:  # pragma: no cover - the field always has a default
+            return False
+        return _Path(self.config) == _Path(default)
+
     def _sslverify_(self) -> "bool | str":
         """TLS verification for clients this CLI builds.
 
@@ -248,12 +277,43 @@ class PyTrueNASArgs(LoggingArgs):
                     yield value
 
         items = list(_flatten(self.targets)) or ["localhost"]
-        # A single positional may still be a comma-list (nas1,nas2).
-        raw = [part for item in items for part in str(item).split(",") if part]
         expanded: "list[str]" = []
-        for target in raw:
-            expanded.extend(expand(target))
+        for item in items:
+            expanded.extend(_expand_target(str(item), expand))
         return expanded
+
+
+def _split_userinfo(target: str) -> "tuple[str, str]":
+    """``(prefix, hostpart)`` where ``prefix`` is scheme + userinfo, if any.
+
+    Everything up to and including the last ``@`` of the authority is
+    credentials, and nothing in it is target syntax.
+    """
+    scheme, sep, tail = target.partition("://")
+    # Without a scheme, partition puts everything in the first field.
+    prefix, rest = (scheme + sep, tail) if sep else ("", target)
+    if "@" not in rest:
+        return prefix, rest
+    # The authority ends at the first "/", "?" or "#"; an "@" after that belongs
+    # to a path, not to userinfo.
+    end = next((i for i, ch in enumerate(rest) if ch in "/?#"), len(rest))
+    if "@" not in rest[:end]:
+        return prefix, rest
+    userinfo, _, hostpart = rest[:end].rpartition("@")
+    return prefix + userinfo + "@", hostpart + rest[end:]
+
+
+def _expand_target(item: str, expand) -> "list[str]":
+    """One positional into its targets, expanding only the HOST part.
+
+    A comma separates targets and ``[A-Z]``/``[0-9]`` is a range -- but only
+    outside the credentials. Running either over the whole string turned
+    ``wss://root:pw,with,commas@nas`` into three bogus targets and made
+    ``root:secret@nas1,nas2`` a second target with no credentials at all.
+    """
+    prefix, hostpart = _split_userinfo(item)
+    parts = [part for part in hostpart.split(",") if part]
+    return [prefix + host for part in parts for host in expand(part)]
 
 
 class CommandModule(_ty.Protocol):

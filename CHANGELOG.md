@@ -8,6 +8,11 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Changed
 
+- **A config file found rather than asked for no longer supplies
+  `commandspath`.** An implicit `./pytruenas.yaml` belongs to whatever
+  directory the CLI runs in, and that key names code to import. Pass
+  `--config` (or set `$PYTRUENAS_CONFIG`) to load commands from a config file;
+  every other key of an implicit file is read as before.
 - **A keyword argument to a middleware call now raises `TypeError`.** Those
   methods take positional parameters; a keyword was swallowed and logged at
   debug level, so `client.api.user.query(filters=[["uid", "=", 0]])` sent no
@@ -18,6 +23,20 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
+- **Target expansion split passwords.** Commas and `[A-Z]`/`[0-9]` ranges were
+  expanded over the whole target, so `wss://root:pw,with,commas@nas` became
+  three targets (two of them nonsense) and `root:secret@nas1,nas2` gave the
+  second host no credentials at all. Only the host part is expanded now, and
+  credentials are carried to every expanded target.
+- A config file was read with the console's encoding, so a UTF-8 file with a
+  non-ASCII value raised `UnicodeDecodeError` on Windows; a config whose top
+  level is not a mapping is now ignored with a warning instead of crashing.
+- A string `commandspath` in a config file was iterated per character, turning
+  `mycmds` into six one-letter sources. A relative entry that exists beside the
+  config file now resolves against it rather than against the process's
+  working directory.
+- A command source that is neither a directory nor an importable name crashed
+  the CLI; it is skipped with a warning, as a bad command already was.
 - **A timestamp came back late by its own milliseconds**: the sub-second part
   was added twice, so `…T03:42:00.600Z` decoded as `…T03:42:01.200Z`. Negative
   timestamps (before 1970) decode correctly now too.

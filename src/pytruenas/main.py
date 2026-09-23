@@ -18,6 +18,7 @@ import copy as _copy
 import datetime as _dt
 import logging as _pylogging
 import typing as _ty
+from pathlib import Path
 
 import duho.runpath as _runpath
 from duho import AUTO, Cli, app, parse_globals
@@ -87,6 +88,40 @@ class PyTrueNAS(PyTrueNASArgs, Cli):
     _ARGS_: "type[PyTrueNASArgs]" = PyTrueNASArgs
 
 
+def _config_sources(value: object, config_path: object) -> "list[str]":
+    """The config file's ``commandspath``, normalized.
+
+    A string is ONE source: `list("mycmds")` made it six single-letter ones.
+    A relative entry resolves against the config file's own directory, since
+    that is what the author was looking at -- not the process's CWD.
+    """
+    if value is None:
+        return []
+    if isinstance(value, str):
+        entries = [value]
+    elif isinstance(value, (list, tuple)):
+        entries = [str(entry) for entry in value]
+    else:
+        _pylogging.getLogger("pytruenas").warning(
+            "ignoring config commandspath: expected a string or a list, got %s",
+            type(value).__name__,
+        )
+        return []
+    base = getattr(config_path, "parent", None)
+    resolved = []
+    for entry in entries:
+        path = Path(entry)
+        # Only an entry that EXISTS beside the config file is rewritten. A
+        # dotted package name (`mytool.commands`) looks like a file with a
+        # suffix, so testing the name's shape resolved it into a path that
+        # cannot exist; testing the filesystem cannot make that mistake.
+        if base is not None and not path.is_absolute() and (base / path).exists():
+            resolved.append(str(base / path))
+        else:
+            resolved.append(entry)
+    return resolved
+
+
 def _commands_from_source(source: str) -> "list":
     """Yield the commands one source contributes, RunPath directories included.
 
@@ -122,7 +157,7 @@ def _commands_from_source(source: str) -> "list":
 
     try:
         commands: "list" = list(discover_commands(source))
-    except (ImportError, NotImplementedError) as exc:
+    except (ImportError, NotImplementedError, TypeError, ValueError) as exc:
         _pylogging.getLogger("pytruenas").warning(
             "skipping command source %r: %s", source, exc
         )
@@ -223,7 +258,18 @@ def _discover(argv: "_ty.Sequence[str] | None") -> "list":
     # so neither the presence check nor the manual split is needed here.
     sources += ENV.paths("PATH")
     sources += list(globals_.cmdspath or [])
-    sources += list(config.get("commandspath") or [])
+    if config.get("commandspath") and globals_._config_is_implicit_():
+        # An implicit ./pytruenas.yaml is whatever directory the CLI happens to
+        # run in; letting it name command sources means importing code from
+        # there. `--config`/$PYTRUENAS_CONFIG is a deliberate choice and still
+        # contributes. Every other key of an implicit file is read as before.
+        _pylogging.getLogger("pytruenas").warning(
+            "ignoring commandspath from %s: name it with --config to load "
+            "commands from a config file",
+            globals_.config,
+        )
+    else:
+        sources += _config_sources(config.get("commandspath"), globals_.config)
 
     by_name: "dict[str, object]" = {}
     for source in sources:

@@ -547,11 +547,18 @@ global fields every command sees: `config` (path, default
 (`--insecure`/`-k`), `parallel` (default `1`), `logto` (default `-` for
 stderr, or a `{target}`/`{isodate}` path template), plus `targets` (the
 trailing positionals, not a flag) and helper methods
-`._config_dict_()`/`._expanded_targets_()`.
+`._config_dict_()`/`._expanded_targets_()`. Target expansion (commas and
+`[A-Z]`/`[0-9]` ranges) applies to the HOST part only -- a comma or a range
+inside credentials is part of them -- and credentials are carried onto every
+expanded host.
 
 Three more methods decide how a command connects, and are the only supported
 way to build a client from parsed args:
 
+- **`._config_is_implicit_() -> bool`** — whether the config file was found
+  (`./pytruenas.yaml`) rather than named by `--config`/`$PYTRUENAS_CONFIG`.
+  `main` refuses `commandspath` from an implicit file: that key names code to
+  import, and a CLI often runs in a directory its user does not control.
 - **`._sslverify_() -> bool|str`** — `-k`/`--insecure`, else
   `--sslverify`/`--no-sslverify`, else `$PYTRUENAS_SSLVERIFY`, else the config
   file's `sslverify`, else `True`. A string is a CA bundle path.
