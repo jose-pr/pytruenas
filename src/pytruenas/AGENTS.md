@@ -817,7 +817,12 @@ TypedDict schemas only (no runtime behavior); import the submodules directly.
   value, falling back to the raw string), and **`ENV`**, the
   single `duho.env.Env("pytruenas")` accessor every `PYTRUENAS_*` setting is
   read through (`autoload=False`; see "Environment variables").
-- **`bundle`** — see also `parse_probe(output) -> (names, marker_environment)`,
+- **`bundle`** — `metadata_entries(distributions) -> [(arcname, bytes)]` builds
+  the minimal `.dist-info` set a payload carries, which is what lets a deployed
+  copy answer `--version` (a zipapp has no installed metadata otherwise);
+  `build()`/`export()` write it automatically for the closure path and omit it
+  for `contents=` (repo mode). See also
+  `parse_probe(output) -> (names, marker_environment)`,
   which reads what `PROBE_SOURCE` printed on the target: the first line is that
   machine's PEP 508 marker environment (pass it as `requirements(...,
   environment=...)` so a gated dependency is resolved for the target), the rest

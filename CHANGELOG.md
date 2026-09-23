@@ -43,6 +43,14 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
+- **A deployed copy could not report its own version.** A zipapp carries no
+  installed metadata, so `importlib.metadata` raised `PackageNotFoundError`:
+  `__version__` read `0.0.0.dev0` and `pytruenas --version` answered with a
+  usage error (exit 2) instead of a version. A bundle now carries a minimal
+  `.dist-info` for every distribution in it — the real `METADATA` where it can
+  be read — so `--version` works in both layouts and the versions of everything
+  bundled are visible on the target. `--source repo` carries none: there is no
+  installed metadata to copy, and inventing a version would be a lie.
 - **A unix socket path was mangled by the URI layer.** `_target` interpolated it
   raw, so `/run/a?b/x.sock` rendered as `/run/a`; a `unix://` URI's path is
   percent-decoded now, as a URI path must be (`unix:///run/a%3Fb/x.sock`

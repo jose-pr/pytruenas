@@ -173,3 +173,83 @@ def test_a_requirements_file_survives_its_own_oddities(tmp_path, caplog):
     assert "pathlib_next" in names  # the raw declared name, not canonicalized
     assert "some-package" in names  # the backslash continuation is one line
     assert "ignoring unparseable requirement" in caplog.text
+
+
+# -- the deployed copy knows its own version ------------------------------
+
+
+def _fake_dist(name, version, metadata_text=None):
+    class _Dist:
+        def __init__(self):
+            self.version = version
+            self.metadata = {"Name": name, "Version": version}
+
+        def read_text(self, filename):
+            if filename == "METADATA":
+                return metadata_text
+            return None
+
+    return _Dist()
+
+
+def test_a_bundle_carries_a_dist_info_per_distribution():
+    """A zipapp has no installed metadata, so a deployed copy could not answer
+    --version at all: importlib.metadata raised PackageNotFoundError, which made
+    __version__ read 0.0.0.dev0 and the CLI's flag vanish (measured on the
+    appliance: rc=2 and a usage message)."""
+    entries = dict(
+        bundle.metadata_entries(
+            {
+                "demo": _fake_dist(
+                    "demo-dist",
+                    "1.2.3",
+                    "Metadata-Version: 2.1\nName: demo-dist\nVersion: 1.2.3\nSummary: real\n",
+                ),
+                "other": _fake_dist("other", "9.0"),
+            }
+        )
+    )
+    # PEP 503 escaping in the directory name, the real METADATA when readable.
+    assert b"Summary: real" in entries["demo_dist-1.2.3.dist-info/METADATA"]
+    # Synthesized when it is not.
+    assert entries["other-9.0.dist-info/METADATA"] == (
+        b"Metadata-Version: 2.1\nName: other\nVersion: 9.0\n"
+    )
+    assert entries["demo_dist-1.2.3.dist-info/INSTALLER"] == b"pytruenas-bundle\n"
+
+
+def test_a_distribution_without_a_version_is_skipped():
+    assert bundle.metadata_entries({"x": _fake_dist("x", "")}) == []
+
+
+def test_a_repo_bundle_carries_no_metadata(tmp_path):
+    """`--source repo` ships a working tree: there is no installed metadata to
+    copy, and inventing a version would be a lie."""
+    (tmp_path / "mod.py").write_text("x = 1\n")
+    out = bundle.build(
+        tmp_path / "a.pyz",
+        package="p",
+        contents=[("mod.py", tmp_path / "mod.py")],
+    )
+    data = out.read_bytes()
+    assert b"dist-info" not in data
+
+
+def test_the_built_zipapp_reports_its_version(tmp_path):
+    """End to end, with this package's own installed metadata."""
+    import importlib.metadata as md
+    import subprocess
+    import sys
+
+    closure = {"pytruenas": md.distribution("pytruenas")}
+    out = bundle.build(tmp_path / "app.pyz", closure, package="pytruenas")
+    probe = (
+        "import sys, importlib.metadata as md;"
+        "sys.path.insert(0, sys.argv[1]);"
+        "print(md.version('pytruenas'))"
+    )
+    result = subprocess.run(
+        [sys.executable, "-c", probe, str(out)], capture_output=True, text=True
+    )
+    assert result.returncode == 0, result.stderr[-400:]
+    assert result.stdout.strip() == md.version("pytruenas")

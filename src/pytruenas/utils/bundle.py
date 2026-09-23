@@ -806,6 +806,76 @@ def repo_requirements(
     return result
 
 
+#: Written into each bundled distribution's ``.dist-info``, so it is obvious on
+#: the target where the metadata came from.
+_INSTALLER = b"pytruenas-bundle\n"
+
+
+def metadata_entries(
+    distributions: "_ty.Mapping[str, object]",
+) -> "list[tuple[str, bytes]]":
+    """``[(arcname, contents)]`` of a ``.dist-info`` per bundled distribution.
+
+    A zipapp carries no installed metadata, so a deployed copy could not answer
+    ``--version`` at all: ``importlib.metadata.version()`` raised
+    ``PackageNotFoundError``, which made ``__version__`` read ``0.0.0.dev0``
+    and (measured) made the CLI's ``--version`` flag vanish entirely, leaving
+    argparse to answer with a usage error.
+
+    ``importlib.metadata`` DOES read a ``dist-info`` that lives inside a zip on
+    ``sys.path`` (verified on 3.9 and 3.14), so carrying one is all that is
+    needed -- no version is baked into the source, and nothing in this package
+    or in duho has to know about the bundle.
+
+    The distribution's own ``METADATA`` is copied when it is readable, so the
+    versions of everything bundled are visible on the target too; a
+    distribution whose metadata cannot be read gets a minimal ``Name``/
+    ``Version`` file synthesized from what the closure already knows.
+    """
+    entries: "list[tuple[str, bytes]]" = []
+    for dist in distributions.values():
+        name = _dist_name(dist)
+        version = _dist_version(dist)
+        if not name or not version:
+            continue
+        # PEP 427/503: the directory name uses the escaped (underscored) form.
+        folder = f"{name.replace('-', '_')}-{version}.dist-info"
+        text = None
+        try:
+            text = dist.read_text("METADATA")  # type: ignore[attr-defined]
+        except Exception:  # pragma: no cover - unreadable metadata
+            text = None
+        if not text:
+            text = f"Metadata-Version: 2.1\nName: {name}\nVersion: {version}\n"
+        entries.append((f"{folder}/METADATA", text.encode("utf-8")))
+        entries.append((f"{folder}/INSTALLER", _INSTALLER))
+    return sorted(entries)
+
+
+def _dist_name(dist: object) -> str:
+    metadata = getattr(dist, "metadata", None)
+    name = ""
+    if metadata is not None:
+        try:
+            name = (metadata["Name"] or "").strip()
+        except Exception:  # pragma: no cover - exotic metadata objects
+            name = ""
+    return name or str(getattr(dist, "name", "") or "")
+
+
+def _dist_version(dist: object) -> str:
+    version = getattr(dist, "version", "") or ""
+    if version:
+        return str(version)
+    metadata = getattr(dist, "metadata", None)
+    if metadata is not None:
+        try:
+            return (metadata["Version"] or "").strip()
+        except Exception:  # pragma: no cover - exotic metadata objects
+            return ""
+    return ""
+
+
 def export(
     destination: "str | _Path",
     distributions: "_ty.Mapping[str, object] | None" = None,
@@ -831,8 +901,11 @@ def export(
 
     if (distributions is None) == (contents is None):
         raise TypeError("pass exactly one of distributions= or contents=")
+    metadata: "list[tuple[str, bytes]]" = []
     if contents is None:
-        contents = _collect(_ty.cast("_ty.Mapping[str, object]", distributions))
+        resolved = _ty.cast("_ty.Mapping[str, object]", distributions)
+        contents = _collect(resolved)
+        metadata = metadata_entries(resolved)
 
     destination = _Path(destination)
     destination.mkdir(parents=True, exist_ok=True)
@@ -840,6 +913,13 @@ def export(
         target = destination / arcname
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(source, target)
+    for arcname, blob in metadata:
+        # The same `.dist-info` the zipapp carries: a `--mode dir` deployment
+        # puts these directories on PYTHONPATH, so `importlib.metadata` finds
+        # them there too and the deployed copy can answer --version.
+        target = destination / arcname
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_bytes(blob)
     return destination
 
 
@@ -966,8 +1046,12 @@ def build(
         raise TypeError("package is required")
     if (distributions is None) == (contents is None):
         raise TypeError("pass exactly one of distributions= or contents=")
+    metadata: "list[tuple[str, bytes]]" = []
     if contents is None:
-        contents = _collect(_ty.cast("_ty.Mapping[str, object]", distributions))
+        resolved = _ty.cast("_ty.Mapping[str, object]", distributions)
+        contents = _collect(resolved)
+        # So the deployed copy can answer --version; see metadata_entries.
+        metadata = metadata_entries(resolved)
 
     destination = _Path(destination)
     destination.parent.mkdir(parents=True, exist_ok=True)
@@ -980,6 +1064,8 @@ def build(
         # inputs differed and the deploy-time digest skip never fired.
         for arcname, source in sorted(contents):
             _zipwrite(archive, arcname, _Path(source).read_bytes())
+        for arcname, blob in metadata:
+            _zipwrite(archive, arcname, blob)
         _zipwrite(
             archive, "__main__.py", _MAIN_TEMPLATE.format(package=package).encode()
         )
