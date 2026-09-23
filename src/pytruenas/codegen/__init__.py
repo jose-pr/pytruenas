@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 from pathlib import Path as _P
+import copy as _copy
+import re as _re
 import shutil
 import tempfile
 import typing as _ty
@@ -18,6 +20,16 @@ class _Missing:
 _MISSING = _Missing()
 
 
+class Source(str):
+    """A default that is already Python SOURCE, not a string value.
+
+    The synthetic helpers below emit defaults like ``None``; everything coming
+    from the API dump is data. Without this marker the two were told apart by
+    trying to parse the string, which quietly turned a default of ``"0"`` into
+    the integer ``0``.
+    """
+
+
 def _camelcase(name: str) -> str:
     """CamelCase a single identifier, tolerating empty/trailing segments.
 
@@ -27,10 +39,17 @@ def _camelcase(name: str) -> str:
     it is kept because it is a one-liner and the empty-part handling is exactly
     what the codegen names (which may carry pysafe suffixes) rely on.
     """
-    result = name
-    for sep in (".", "_", "-"):
-        result = "".join(p[:1].upper() + p[1:] for p in result.split(sep) if p)
-    return result
+    # Every non-alphanumeric character is a word boundary (underscore
+    # included -- `\W` treats it as a word character) -- a real dump has
+    # titles like "Filesystem Count", "query-options", "acl(nfs4)" and
+    # "smb:share"; parens, colons, quotes and brackets used to survive into the
+    # name. A leading digit gets a prefix, since no identifier may start with
+    # one.
+    parts = [part for part in _re.split(r"[^0-9A-Za-z]+", name) if part]
+    result = "".join(part[:1].upper() + part[1:] for part in parts)
+    if not result:
+        return "Unnamed"
+    return f"N{result}" if result[0].isdigit() else result
 
 
 def docstring(text: str) -> str:
@@ -43,10 +62,10 @@ def docstring(text: str) -> str:
     ("source code string cannot contain null bytes") and appear in some dumps.
     """
     text = (text or "").replace("\x00", "")
-    text = text.replace("\\", "\\\\").replace('"""', '\\"\\"\\"')
-    if text.endswith('"'):
-        text = text[:-1] + '\\"'
-    return text
+    # Every double quote, not just a `"""` run or a single trailing one: a doc
+    # ending in `"""` produced `\"\"\\"`, which does not compile at all.
+    # Escaping them all is correct for any position and needs no special case.
+    return text.replace("\\", "\\\\").replace('"', '\\"')
 
 
 def _default_literal(default: object) -> str:
@@ -62,20 +81,15 @@ def _default_literal(default: object) -> str:
     """
     if default is ... or default is _MISSING:
         return "..."
+    if isinstance(default, Source):
+        # Python source this package wrote itself (a synthetic helper's `None`).
+        return str(default)
     if isinstance(default, str):
-        stripped = default.strip()
-        # A default already written as Python source (the synthetic helpers, or
-        # a schema author who wrote ``"None"``/``"[]"``) is used verbatim when it
-        # parses; otherwise it is a genuine string value and gets quoted.
-        if stripped in ("None", "True", "False", "...", "[]", "{}"):
-            return stripped
-        try:
-            import ast
-
-            ast.literal_eval(default)
-            return default
-        except (ValueError, SyntaxError):
-            return repr(default)
+        # A plain string from the dump is a STRING VALUE. It used to be handed
+        # to ast.literal_eval and returned verbatim when that parsed, so a
+        # default of "0" became the int literal 0 and "true"/"None" changed
+        # meaning -- the stub then disagreed with the API about the type.
+        return repr(default)
     # A real JSON value (list/dict/number/bool/None): repr() is valid Python.
     return repr(default)
 
@@ -207,7 +221,7 @@ class Method(PyDeclaration):
                         self.pyname,
                         title="_method",
                         anyOf=["string", "null"],
-                        default="None",
+                        default=Source("None"),
                     ),
                     Parameter(
                         {},
@@ -397,6 +411,7 @@ class Namespace(PyDeclaration):
                 )
                 self.childs.append(update)
             elif method.qualname.name == "get_instance":
+                idtype = None
                 for param in method.parameters:
                     if param.name == "id":
                         idtype = {
@@ -480,6 +495,24 @@ def _check_replaceable(root: _P) -> None:
         )
 
 
+def _check_inside(root: _P, path: _P) -> None:
+    """Refuse a generated path that escapes ``root``.
+
+    Every component of it comes from the API dump (namespace and method names),
+    so a name carrying a separator or a ``..`` would otherwise write outside the
+    output directory.
+    """
+    try:
+        resolved = path.resolve()
+        resolved.relative_to(root.resolve())
+    except ValueError:
+        raise BadApiName(f"{path} would be written outside {root}") from None
+
+
+class BadApiName(ValueError):
+    """A name from the API dump cannot be used as a Python/file name."""
+
+
 class Codegen:
     def __init__(self) -> None: ...
     def generate(
@@ -487,6 +520,11 @@ class Codegen:
         api: _api.Version,
         root: _P | str,
     ):
+        # A copy: this used to prefix the method names of the CALLER's dump
+        # (`user.query` -> `v26_0_0.user.query`) and overwrite its return
+        # titles, so a caller generating twice from one dump got different
+        # output the second time.
+        api = _copy.deepcopy(api)
         declarations: list[PyDeclaration] = []
         # The version string (e.g. ``v26.0.0``) is ONE opaque root segment, not a
         # dotted qualname -- collapse its dots so it does not split into three
@@ -537,6 +575,7 @@ class Codegen:
         renderer = jinja.Renderer("namespace.pyi")
         for ns in sorted(namespaces, key=lambda ns: ns.qualname):
             ns_path = ns.pyname.relative_to(version).as_path(root) / _INIT
+            _check_inside(root, ns_path)
             ns_path.parent.mkdir(exist_ok=True, parents=True)
             for decl in [*declarations, *namespaces]:
                 decl: PyDeclaration

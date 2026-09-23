@@ -892,6 +892,14 @@ a directory the user does not control.
 - A property absent from a schema's `required` list is optional — including
   when the schema has no `required` list at all, which is most update
   payloads, query-options and `_get` filters.
+- Names are sanitized to identifiers (every non-alphanumeric character is a
+  word boundary; a leading digit gets an `N` prefix), and two different shapes
+  wanting one TypedDict name get numbered variants rather than one silently
+  replacing the other.
+- A schema form this generator cannot express degrades to `JsonValue` instead
+  of failing the run; `JsonValue`/`JsonObject`/`JsonArray` are real aliases.
+- Generation never mutates the dump it is given, and never writes outside the
+  output directory (`codegen.BadApiName` if a dump name would escape it).
 
 ## Optional extras and their gating imports
 

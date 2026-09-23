@@ -1,12 +1,19 @@
 from __future__ import annotations
 
+import re as _re
 import typing as _ty
 from duho import qualname as _qn
 
 JsonNumber = _ty.Union[float, int]
-JsonValue = "str|int|float|bool|None|JsonArray|JsonObject"
-JsonObject = "dict[str, JsonValue]"
-JsonArray = "list[JsonValue]"
+# Real aliases, not strings: a stub annotation naming `_jsonschema.JsonValue`
+# used to resolve to a `str` VARIABLE, which is not a type at all. Written with
+# `_ty.Any` at the leaves because a recursive alias needs 3.12 to be expressed
+# directly, and the stubs must resolve on the 3.9 floor.
+JsonValue = _ty.Union[
+    str, int, float, bool, None, _ty.Sequence[_ty.Any], _ty.Mapping[str, _ty.Any]
+]
+JsonObject = _ty.Mapping[str, JsonValue]
+JsonArray = _ty.Sequence[JsonValue]
 
 
 def _typeddict_name(namespace: "_qn.PythonName", title: str) -> str:
@@ -20,14 +27,12 @@ def _typeddict_name(namespace: "_qn.PythonName", title: str) -> str:
     """
     raw = "/".join([*namespace.parts, title])
     parts = []
-    for chunk in (
-        raw.replace(".", " ")
-        .replace("_", " ")
-        .replace("-", " ")
-        .replace("/", " ")
-        .split()
-    ):
-        parts.append(chunk[:1].upper() + chunk[1:])
+    # Split on every non-alphanumeric character (underscore included, which
+    # `\W` would keep), not only . _ - /: a title like
+    # "acl(nfs4)" or "smb:share" otherwise produced a name no stub can define.
+    for chunk in _re.split(r"[^0-9A-Za-z]+", raw):
+        if chunk:
+            parts.append(chunk[:1].upper() + chunk[1:])
     name = "".join(parts) or "Anon"
     # Ensure a valid identifier start (a title beginning with a digit, etc.).
     if not (name[0].isalpha() or name[0] == "_"):
@@ -69,13 +74,30 @@ class BaseType(Schema):
         type = self.get("type", "any")
         if isinstance(type, str) and type.startswith("!"):
             return type.removeprefix("!")
+        if isinstance(type, (list, tuple)):
+            # A list of types is a union of them (JSON Schema allows it, and the
+            # middleware dump uses it); this used to raise NotImplementedError
+            # and abort the whole generation.
+            members = []
+            for member in type:
+                rendered = BaseType.python_declaration(
+                    _ty.cast(_ty.Any, {**self, "type": member}), typeddicts, namespace
+                )
+                if rendered not in members:
+                    members.append(rendered)
+            return "|".join(members) if members else "_jsonschema.JsonValue"
         for ty in TYPES:
             if ty.type == type:  # type: ignore
                 return ty.python_declaration(self, typeddicts, namespace)
-        raise NotImplementedError(type)
+        # An unknown type name is imprecise, not fatal: the stub says "some
+        # JSON value" rather than failing to generate at all.
+        return "_jsonschema.JsonValue"
 
         ...
 
+
+#: `typing.Never` is 3.11+; the stubs must resolve on the 3.9 floor.
+_HAS_NEVER = hasattr(_ty, "Never")
 
 TypeDeclaration = _ty.Union[BaseType, str]
 
@@ -193,6 +215,16 @@ class Object(BaseType):
                 typedef = f"_NotRequired[{typedef}]"
             typedict[prop] = typedef
 
+        existing = typeddicts.get(name)
+        if existing is not None and existing != typedict:
+            # Two different shapes wanted the same name (two namespaces with
+            # the same title, or a title that sanitizes to an existing name).
+            # The later one used to overwrite the earlier, leaving every
+            # reference to the first pointing at the wrong shape.
+            suffix = 2
+            while typeddicts.get(f"{name}{suffix}") not in (None, typedict):
+                suffix += 1
+            name = f"{name}{suffix}"
         typeddicts[name] = typedict
 
         return name
@@ -215,11 +247,13 @@ class Array(BaseType):
     def python_declaration(
         self, typeddicts: dict[str, object], namespace: _qn.PythonName
     ):  # type: ignore
-        items = None
-        for key in ["items"]:
-            if key in self:
-                items = _ty.cast(Schema, self[key])
-                break
+        items = self.get("items")
+        if items is True or items == {}:
+            # "any item is allowed" -- a list of anything.
+            return "_jsonschema.JsonArray"
+        if items is False:
+            # Nothing may appear in the array; the only valid value is empty.
+            return "list[_ty.Never]" if _HAS_NEVER else "list"
         if not items:
             return "_jsonschema.JsonArray"
         return f"list[{Schema.python_declaration(items, typeddicts, namespace)}]"

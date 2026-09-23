@@ -31,6 +31,34 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
+- **Generation crashed on valid schemas.** A list `type`
+  (`{"type": ["string", "null"]}`) raised `NotImplementedError` and
+  `{"items": true}` a `TypeError`, each aborting the whole run; they render as
+  a union and as a list of anything. An unknown type name degrades to
+  `JsonValue` instead of failing.
+- **A docstring ending in `"""` produced a stub that would not parse.** Every
+  double quote is escaped now, not just an interior run or a single trailing one.
+- **Names from the dump became invalid identifiers.** Only `.`, `_` and `-`
+  were treated as word boundaries, so `acl(nfs4)`, `smb:share`, `bracket[x]`
+  and a leading digit went straight into a class name.
+- **Two different shapes could take the same TypedDict name**, and the later
+  definition silently replaced the earlier — so every reference to the first
+  pointed at the wrong shape. The second gets a numbered name.
+- **A string default changed type.** It was parsed with `literal_eval` and used
+  verbatim when that succeeded, so a schema default of `"0"` became the integer
+  `0` and `"true"`/`"None"` changed meaning. Only this package's own synthetic
+  defaults are Python source now (`codegen.Source`).
+- **`JsonValue`/`JsonObject`/`JsonArray` were plain strings**, so every stub
+  annotation naming them resolved to a `str` variable rather than a type.
+- `generate()` renamed the methods of the **caller's** dump and overwrote its
+  return titles, so generating twice from one dump gave different output.
+- `get_instance` without an `id` parameter raised `UnboundLocalError` (or
+  reused the previous namespace's id type).
+- A name from the dump could write **outside the output directory**; such a
+  path now raises `codegen.BadApiName`.
+- **The stub template could not be read from a zipapp** — the shape
+  `deploy --mode pyz` installs — because it was loaded by filesystem path.
+- The `codegen` extra pins `jinja2>=3.0,<4`, per the project's own convention.
 - **A deployed bundle was missing `uritools`.** The dependency closure dropped
   a requirement's own extras, and pytruenas depends on `pathlib_next[uri]`,
   whose extra requires it. The appliance does not ship it (measured on

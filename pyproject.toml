@@ -67,7 +67,9 @@ config = ["pyyaml"]
 # own `ssh` extra (asyncssh, pathlib_next's sftp-async) is exactly what is needed.
 ssh = ["hostctl[ssh]>=0.3.1,<0.4"]
 # Typings generator (`pytruenas generate-typings`).
-codegen = ["jinja2"]
+# Series base: `Environment`/`DictLoader`/`tojson` have been stable since 3.0,
+# and 4.x may break them. Validated against 3.1.x.
+codegen = ["jinja2>=3.0,<4"]
 # Repo-tree bundling (`pytruenas deploy --source repo`): gitignore-style
 # filtering via pathspec's GitWildMatch (accurate on `**`/negation, which a
 # hand-rolled matcher gets wrong at the edges), and a parser for
