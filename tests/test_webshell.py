@@ -265,7 +265,8 @@ class _Terminal:
         command = _decoded_command([main])
         data = (
             _decoded_input(self._lines)
-            if 'base64 -d "$' in " ".join(self._lines)
+            # Matches the decode line whether or not the file is redirected.
+            if 'base64 -d < "$' in " ".join(self._lines)
             else b""
         )
         merged = "2>&1" in main

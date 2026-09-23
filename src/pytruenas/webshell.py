@@ -364,7 +364,10 @@ class WebShellSession:
             for offset in range(0, len(encoded), _CHUNK):
                 chunk = encoded[offset : offset + _CHUNK]
                 lines.append(f"printf %s '{chunk}' >> \"${v}i\"")
-            lines.append(f'base64 -d "${v}i" > "${v}f"')
+            # `< file`, not `base64 -d file`: BSD base64 (macOS) takes no
+            # positional file argument and reads stdin instead, so the decoded
+            # input came out empty and the command ran with no input at all.
+            lines.append(f'base64 -d < "${v}i" > "${v}f"')
             stdin = f'"${v}f"'
         else:
             stdin = "/dev/null"

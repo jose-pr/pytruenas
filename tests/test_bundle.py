@@ -19,11 +19,14 @@ from pytruenas.utils import bundle
 #: bundleable: `charset-normalizer` ships a mypyc-compiled `.pyd`, which the
 #: native-extension guard rightly refuses. Building the full closure would
 #: therefore fail for a reason deployment never encounters.
+# What the appliance already has, so the payload is only the difference.
+# Verified on TrueNAS 26.0.0-BETA.1: 386 distributions, these among them.
 TRUENAS_HAS = [
     "certifi",
     "charset-normalizer",
     "dnspython",
     "idna",
+    "packaging",
     "requests",
     "urllib3",
     "websocket-client",
