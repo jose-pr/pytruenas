@@ -8,7 +8,7 @@ from logging import Logger
 from duho import Arg, NS
 
 from pytruenas import TrueNASClient
-from pytruenas.utils.cmd import PyTrueNASArgs, json_value
+from pytruenas.utils.cmd import PyTrueNASArgs, emit_json, json_value
 
 
 class Args(PyTrueNASArgs):
@@ -45,4 +45,4 @@ def run(client: TrueNASClient, args: Args, logger: Logger):
     logger.info("Querying %s with %s", args.namespace, filter or "no filter")
     result = client.api[args.namespace]._query(**filter)
     # default=str so ejson-decoded datetimes/sets serialize instead of raising.
-    print(json.dumps(result, default=str))
+    emit_json(result, args)

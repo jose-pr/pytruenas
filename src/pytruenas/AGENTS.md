@@ -523,7 +523,19 @@ there really is a query; encode the path yourself if you go around `path()`.
 A command is a plain module exposing:
 
 - **`run(client, args, logger)`** — required; the command body, called once
-  per target with a connected `TrueNASClient`.
+  per target with a connected `TrueNASClient`. A module without it is skipped
+  at discovery (with a warning) rather than offered and then failing.
+  `args` is a **per-target copy** carrying **`args.target`** (this target's
+  connection string), so state a command writes on it cannot reach another
+  target. The CLI closes a client it built when the command finishes; one an
+  `init` hook returned is left alone. Return an exit code — never raise
+  `SystemExit` from a command body: it runs in a fan-out worker, where raising
+  it aborts the whole run and discards the other targets' codes.
+  Write results through `utils.cmd.emit_json(value, args)` (or `emit(text)`):
+  one locked write, so concurrent targets cannot interleave mid-line, and with
+  more than one target each line is `{"target": ..., "result": ...}` with the
+  credentials removed. `utils.cmd.json_default` is the encoder fallback (sets
+  become sorted lists, dates ISO strings).
 - **`Args`** — optional; a `PyTrueNASArgs` subclass declaring the command's own
   CLI fields (duho ≥0.4.1 adds them to the subparser before `register` runs).
   Preferred over `register`: an annotated attr + docstring + bare flags-tuple

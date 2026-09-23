@@ -45,9 +45,14 @@ def run(client: TrueNASClient, args: Args, logger: Logger):
     if args.api_version:
         version = next((v for v in versions if v["version"] == args.api_version), None)
         if version is None:
-            raise SystemExit(
-                f"version {args.api_version!r} not found; available: {', '.join(available)}"
+            # `return 2`, not SystemExit: this runs inside a fan-out worker, and
+            # raising there aborted the whole run instead of failing one target.
+            logger.error(
+                "version %r not found; available: %s",
+                args.api_version,
+                ", ".join(available),
             )
+            return 2
     else:
         # The dump lists versions newest-first; default to the newest.
         version = versions[0]

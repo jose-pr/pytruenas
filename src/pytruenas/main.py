@@ -279,9 +279,30 @@ def _discover(argv: "_ty.Sequence[str] | None") -> "list":
             name = getattr(command, "_parsername_", None) or getattr(
                 command, "__name__", None
             )
-            if name:
+            if name and _is_runnable(command, name):
                 by_name[name] = command  # later source wins
     return [_with_targets(command) for command in by_name.values()]
+
+
+def _is_runnable(command: object, name: str) -> bool:
+    """Whether a discovered module command can actually run a target.
+
+    A module without a ``run`` (one whose entrypoint is ``main``, say) was
+    offered in ``--help`` and then failed on every target with an
+    ``AttributeError``. Only module commands are checked: a class/RunPath
+    command has no ``run`` by design.
+    """
+    module = getattr(command, "module", None)
+    if module is None:
+        return True
+    if callable(getattr(module, "run", None)):
+        return True
+    _pylogging.getLogger("pytruenas").warning(
+        "skipping command %r: %s defines no run(client, args, logger)",
+        name,
+        getattr(module, "__name__", module),
+    )
+    return False
 
 
 #: Characters Windows refuses in a filename (and ``/`` everywhere).
@@ -303,6 +324,38 @@ def _logto_path(template: str, shown: str) -> str:
 
     now = _dt.datetime.now().isoformat(timespec="seconds")
     return template.format(target=_safe(shown), isodate=_safe(now))
+
+
+def _attach_logto(
+    logto: str, shown: str, logger: "_pylogging.Logger"
+) -> "_pylogging.Handler | None":
+    """Attach a per-target ``--logto`` file handler, or return ``None``.
+
+    On the ``pytruenas`` library logger as well as the command's own: the
+    library's records (a transport fallback WARNING, a connection error) are
+    exactly what a per-target file is wanted for, and they never pass through
+    the command's logger.
+    """
+    if not logto or logto == "-":
+        return None
+    handler = _pylogging.FileHandler(_logto_path(logto, shown))
+    handler.setFormatter(_logging.DefaultFormatter())
+    logger.addHandler(handler)
+    library = _pylogging.getLogger("pytruenas")
+    if library is not logger:
+        library.addHandler(handler)
+    return handler
+
+
+def _detach_logto(
+    handler: "_pylogging.Handler | None", logger: "_pylogging.Logger"
+) -> None:
+    """Remove a handler :func:`_attach_logto` added, from both loggers."""
+    if handler is None:
+        return
+    logger.removeHandler(handler)
+    _pylogging.getLogger("pytruenas").removeHandler(handler)
+    handler.close()
 
 
 def _target_label(target: str) -> str:
@@ -372,6 +425,13 @@ def _run_module_on_target(
     success = getattr(module, "success", None)
     finally_ = getattr(module, "finally_", None)
 
+    # A per-target copy, as the RunPath branch already made: `args` was shared
+    # by every concurrent target, so a command that recorded per-target state on
+    # it (or read `.target`) saw another target's value. `.target` is set here
+    # for the same reason -- an `init` hook had no way to know which target it
+    # was building a client for.
+    args = _copy.copy(args)
+
     # ``shown`` is the ``--logto`` filename's {target}: the host's short name,
     # which is credential-free. Log records get the same name from the fan-out
     # prefix. It is NOT automatically a legal filename (an earlier comment here
@@ -381,22 +441,23 @@ def _run_module_on_target(
         target, shown = target.target, target.label
     else:
         shown = _redact(target)
-    file_handler = None
-    if args.logto and args.logto != "-":
-        file_handler = _pylogging.FileHandler(_logto_path(args.logto, shown))
-        file_handler.setFormatter(_logging.DefaultFormatter())
-        logger.addHandler(file_handler)
+    args.target = target
+    file_handler = _attach_logto(args.logto, shown, logger)
 
     # The target is already on every record as the ``[name]`` prefix, so naming
     # it again here would just read "[nas1] Started: nas1".
     logger.info("Started")
     client = None
+    ours = False
     result = 0
     try:
         if callable(init):
             client = init(args, logger)
         if client is None:
             client = args._client_(target)
+            # Only a client this function built is closed below: one an `init`
+            # hook returned belongs to the hook, which may be caching it.
+            ours = True
         rc = module.run(client, args, logger)
         result = 0 if rc is None else int(rc)
         # Only on success, as duho's own lifecycle does: a command that
@@ -410,10 +471,16 @@ def _run_module_on_target(
                 finally_(client, args, logger)
             except Exception:
                 logger.error("Cleanup failed", exc_info=True)
+        if ours and client is not None:
+            # Without this every target leaked its websocket and reader thread
+            # for the life of the process -- which under `--parallel` is every
+            # target at once.
+            try:
+                client.close()
+            except Exception:
+                logger.debug("closing the client failed", exc_info=True)
         logger.info("Finished")
-        if file_handler is not None:
-            logger.removeHandler(file_handler)
-            file_handler.close()
+        _detach_logto(file_handler, logger)
     return result
 
 
@@ -450,11 +517,7 @@ def _run_runpath_on_target(
 
     per_target = _copy.copy(instance)
     per_target.target = target
-    file_handler = None
-    if instance.logto and instance.logto != "-":
-        file_handler = _pylogging.FileHandler(_logto_path(instance.logto, shown))
-        file_handler.setFormatter(_logging.DefaultFormatter())
-        logger.addHandler(file_handler)
+    file_handler = _attach_logto(instance.logto, shown, logger)
 
     # Already on every record as the ``[name]`` prefix -- see
     # _run_module_on_target.
@@ -464,9 +527,7 @@ def _run_runpath_on_target(
         return 0 if rc is None else int(rc)
     finally:
         logger.info("Finished")
-        if file_handler is not None:
-            logger.removeHandler(file_handler)
-            file_handler.close()
+        _detach_logto(file_handler, logger)
 
 
 def _dispatch(command: object, instance: "PyTrueNAS") -> int:

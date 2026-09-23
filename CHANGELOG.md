@@ -8,6 +8,14 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Changed
 
+- **`call`/`query`/`dump-api` attribute their output when there is more than
+  one target**: each line becomes `{"target": "<host>", "result": <result>}`
+  (credentials removed). A single target still prints the bare result, so
+  existing one-host scripts are unaffected. Interleaved unattributed lines
+  could not be matched to a host at all.
+- A command module's `args` is a per-target copy carrying `args.target`, and a
+  client the CLI built is closed when the command finishes. A client returned
+  by an `init` hook is left alone — it belongs to the hook.
 - **A config file found rather than asked for no longer supplies
   `commandspath`.** An implicit `./pytruenas.yaml` belongs to whatever
   directory the CLI runs in, and that key names code to import. Pass
@@ -23,6 +31,25 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
+- **Concurrent targets shared one `args` object.** Per-target state a command
+  wrote on it (and `args.target`, which did not exist at all) belonged to
+  whichever target ran last; `init` hooks had no way to know which target they
+  were building a client for.
+- **Per-target clients were never closed**, so every target leaked its
+  websocket and reader thread for the life of the process — under `--parallel`,
+  all of them at once.
+- **`--logto` files missed the records they exist for.** The handler was
+  attached to the command's logger only, so a transport fallback warning or a
+  connection error from the library never reached the per-target file.
+- **Concurrent result lines interleaved mid-line** (`print()` is two writes),
+  so neither line parsed as JSON. Results are written through one lock.
+- A set in a result serialized as its Python repr (`"{1, 2}"`), and a datetime
+  as whatever `str()` produced; they are a sorted list and an ISO timestamp.
+- `generate-typings` with an unknown `--api-version` raised `SystemExit` inside
+  a fan-out worker, aborting the whole run and discarding the other targets'
+  exit codes; it fails that target with exit code 2.
+- A discovered command module with no `run(client, args, logger)` was offered
+  in `--help` and failed on every target; it is skipped with a warning.
 - **Target expansion split passwords.** Commas and `[A-Z]`/`[0-9]` ranges were
   expanded over the whole target, so `wss://root:pw,with,commas@nas` became
   three targets (two of them nonsense) and `root:secret@nas1,nas2` gave the

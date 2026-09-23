@@ -20,6 +20,7 @@ from __future__ import annotations
 
 import logging as _pylogging
 import os as _os
+import threading as _threading
 import typing as _ty
 from logging import Logger as _Logger
 from pathlib import Path as _Path
@@ -46,6 +47,55 @@ def json_value(raw: str):
         return json.loads(raw)
     except (ValueError, TypeError):
         return raw
+
+
+#: Serializes result writes. `print()` is two writes (the text, then the
+#: newline), so under `--parallel` two targets' JSON interleaved mid-line and
+#: neither line parsed.
+_WRITE_LOCK = _threading.Lock()
+
+
+def json_default(obj):
+    """JSON fallback for what the middleware sends back.
+
+    `default=str` turned a set into its Python repr (`"{1, 2}"`) and a datetime
+    into whatever `str()` gives, neither of which round-trips as JSON.
+    """
+    import datetime
+
+    if isinstance(obj, (set, frozenset)):
+        return sorted(obj, key=str)
+    if isinstance(obj, (datetime.datetime, datetime.date, datetime.time)):
+        return obj.isoformat()
+    if isinstance(obj, (bytes, bytearray)):
+        return obj.decode("utf-8", "replace")
+    return str(obj)
+
+
+def emit(text: str) -> None:
+    """Write one result line to stdout atomically."""
+    import sys
+
+    with _WRITE_LOCK:
+        sys.stdout.write(text + "\n")
+        sys.stdout.flush()
+
+
+def emit_json(value: object, args: "PyTrueNASArgs | None" = None) -> None:
+    """Write ``value`` as one JSON line, attributed when fanning out.
+
+    With more than one target the lines are interleaved and were
+    indistinguishable, so each becomes ``{"target": ..., "result": ...}``. A
+    single target keeps the bare result, which is what scripts already parse.
+    """
+    import json
+
+    target = getattr(args, "target", None)
+    if target is not None and args is not None and len(args._expanded_targets_()) > 1:
+        from .target import redact
+
+        value = {"target": redact(str(target)), "result": value}
+    emit(json.dumps(value, default=json_default))
 
 
 if _ty.TYPE_CHECKING:
@@ -324,4 +374,11 @@ class CommandModule(_ty.Protocol):
     ) -> object: ...
 
 
-__all__ = ["PyTrueNASArgs", "CommandModule", "json_value"]
+__all__ = [
+    "PyTrueNASArgs",
+    "CommandModule",
+    "json_value",
+    "json_default",
+    "emit",
+    "emit_json",
+]
