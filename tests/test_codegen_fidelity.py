@@ -203,3 +203,42 @@ def test_the_template_loads_without_a_filesystem_path(monkeypatch):
     assert jinja._TEMPLATES["namespace.pyi.j2"].strip()
     renderer = jinja.Renderer("namespace.pyi")
     assert renderer.template is not None
+
+
+# -- the call options -----------------------------------------------------
+
+
+def test_the_call_options_are_keyword_only_and_complete(tmp_path):
+    """The stub offered `_method`/`_ioerror`/`_filetransfer` POSITIONALLY while
+    the runtime takes middleware parameters positionally and raises TypeError
+    for any other keyword -- so following the stub shifted a real parameter.
+    `_timeout` and `_tries` were missing entirely."""
+    codegen.Codegen().generate(_api(), tmp_path / "out")
+    src = (tmp_path / "out" / "user" / "__init__.pyi").read_text(encoding="utf-8")
+    tree = ast.parse(src)
+    cls = next(n for n in tree.body if isinstance(n, ast.ClassDef))
+    query = next(
+        n for n in cls.body if isinstance(n, ast.FunctionDef) and n.name == "query"
+    )
+    kwonly = [a.arg for a in query.args.kwonlyargs]
+    assert kwonly == ["_method", "_ioerror", "_filetransfer", "_timeout", "_tries"]
+    # And none of them is positional any more.
+    assert not [a.arg for a in query.args.args if a.arg.startswith("_")]
+
+
+def test_the_option_defaults_are_python_not_strings(tmp_path):
+    """`_ioerror:bool='False'` (a string!) is what quoting every string default
+    would produce if the synthetic options were not marked as source."""
+    codegen.Codegen().generate(_api(), tmp_path / "out")
+    src = (tmp_path / "out" / "user" / "__init__.pyi").read_text(encoding="utf-8")
+    assert "_ioerror:bool=False" in src.replace(" ", "")
+    assert "_ioerror:bool='False'" not in src.replace(" ", "")
+
+
+def test_no_parameter_is_named_all(tmp_path):
+    """`duho.text.pysafe("*")` is `"all"`, so a `*` faked as a parameter turned
+    into a bogus `all:` argument in every signature."""
+    codegen.Codegen().generate(_api(), tmp_path / "out")
+    for path in (tmp_path / "out").rglob("*.pyi"):
+        src = path.read_text(encoding="utf-8")
+        assert "all:_jsonschema" not in src, path

@@ -107,6 +107,10 @@ class Parameter:
         else:
             schema = __schema
 
+        #: Rendered after a ``*`` separator, i.e. not positional. The call
+        #: options are keyword-only at runtime, so a stub that offered them
+        #: positionally invited a call that shifts a real parameter.
+        self.keyword_only = False
         self.namespace = __namespace or _qn.PythonName("")
         self.schema = _ty.cast(_schema.Schema, schema or {})
         self.schema.update(kwargs)  # type: ignore
@@ -212,33 +216,53 @@ class Method(PyDeclaration):
         for item in items:
             params.append(Parameter(item, self.pyname.relative_to(self.pyname.parent)))
 
-        # _ty.Sequence[str] | None | _q._Exclude
         if not self.pyname.name.startswith("_"):
-            params.extend(
-                [
-                    Parameter(
-                        {},
-                        self.pyname,
-                        title="_method",
-                        anyOf=["string", "null"],
-                        default=Source("None"),
-                    ),
-                    Parameter(
-                        {},
-                        self.pyname,
-                        title="_ioerror",
-                        type="boolean",
-                        default="False",
-                    ),
-                    Parameter(
-                        {},
-                        self.pyname,
-                        title="_filetransfer",
-                        anyOf=["boolean", "!bytes"],
-                        default="False",
-                    ),
-                ]
-            )
+            # The call options `Namespace.__call__` accepts. They are
+            # KEYWORD-ONLY in the stub (the `*` below): the runtime takes
+            # middleware parameters positionally and raises TypeError for any
+            # other keyword, so a stub offering these positionally invited a
+            # call that shifts a real parameter. `_timeout` and `_tries` were
+            # missing entirely.
+            options = [
+                Parameter(
+                    {},
+                    self.pyname,
+                    title="_method",
+                    anyOf=["string", "null"],
+                    default=Source("None"),
+                ),
+                Parameter(
+                    {},
+                    self.pyname,
+                    title="_ioerror",
+                    type="boolean",
+                    default=Source("False"),
+                ),
+                Parameter(
+                    {},
+                    self.pyname,
+                    title="_filetransfer",
+                    anyOf=["boolean", "!bytes"],
+                    default=Source("False"),
+                ),
+                Parameter(
+                    {},
+                    self.pyname,
+                    title="_timeout",
+                    anyOf=["number", "null"],
+                    default=Source("..."),
+                ),
+                Parameter(
+                    {},
+                    self.pyname,
+                    title="_tries",
+                    type="integer",
+                    default=Source("1"),
+                ),
+            ]
+            for option in options:
+                option.keyword_only = True
+            params.extend(options)
         return params
 
     @_ftools.cached_property
@@ -260,7 +284,14 @@ class Method(PyDeclaration):
         """
         decls: "list[str]" = []
         seen_default = False
+        star_emitted = False
         for param in self.parameters:
+            if getattr(param, "keyword_only", False) and not star_emitted:
+                # Everything after this is keyword-only, which also ends the
+                # "a default must follow a default" rule.
+                decls.append("*")
+                star_emitted = True
+                seen_default = False
             decl = param.argument_declaration(typeddicts)
             is_var = param.name.startswith("*")
             if not is_var:

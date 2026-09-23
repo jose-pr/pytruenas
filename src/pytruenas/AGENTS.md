@@ -900,6 +900,9 @@ a directory the user does not control.
   of failing the run; `JsonValue`/`JsonObject`/`JsonArray` are real aliases.
 - Generation never mutates the dump it is given, and never writes outside the
   output directory (`codegen.BadApiName` if a dump name would escape it).
+- Every method's call options (`_method`, `_ioerror`, `_filetransfer`,
+  `_timeout`, `_tries`) are **keyword-only** in the stub, matching the runtime:
+  middleware parameters are positional and any other keyword raises.
 
 ## Optional extras and their gating imports
 

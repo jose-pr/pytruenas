@@ -31,6 +31,12 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
+- **Generated signatures offered the call options positionally.**
+  `_method`, `_ioerror` and `_filetransfer` appeared as ordinary parameters
+  while the runtime takes middleware parameters positionally and now rejects
+  stray keywords — following the stub shifted a real parameter. They are
+  keyword-only (after a `*`), and `_timeout`/`_tries`, which were missing
+  entirely, are included.
 - **Generation crashed on valid schemas.** A list `type`
   (`{"type": ["string", "null"]}`) raised `NotImplementedError` and
   `{"items": true}` a `TypeError`, each aborting the whole run; they render as
