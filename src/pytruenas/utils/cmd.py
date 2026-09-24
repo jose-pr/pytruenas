@@ -49,6 +49,26 @@ def json_value(raw: str):
         return raw
 
 
+def split_assignment(token: str) -> "tuple[str, str]":
+    """``NAME=VALUE`` -> ``(name, value)``; raises :class:`ValueError` otherwise.
+
+    The one spelling every value-taking option in this CLI uses -- ``query -f``,
+    and the ``--field=value`` fields ``call`` accepts after a literal ``--``. A
+    leading ``--`` is stripped so both spellings of a field are the same token.
+    An empty name or a missing ``=`` is refused rather than guessed: a field
+    always needs a value, booleans included, because the middleware
+    distinguishes ``false`` from "not sent".
+    """
+    raw = token[2:] if token.startswith("--") else token
+    name, sep, value = raw.partition("=")
+    if not sep or not name:
+        raise ValueError(
+            f"expected NAME=VALUE, got {token!r} "
+            "(a value is always required, booleans included: name=false)"
+        )
+    return name, value
+
+
 #: Serializes result writes. `print()` is two writes (the text, then the
 #: newline), so under `--parallel` two targets' JSON interleaved mid-line and
 #: neither line parsed.

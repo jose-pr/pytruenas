@@ -8,7 +8,7 @@ from logging import Logger
 from duho import Arg, NS
 
 from pytruenas import TrueNASClient
-from pytruenas.utils.cmd import PyTrueNASArgs, emit_json, json_value
+from pytruenas.utils.cmd import PyTrueNASArgs, emit_json, json_value, split_assignment
 
 
 class Args(PyTrueNASArgs):
@@ -34,9 +34,10 @@ def run(client: TrueNASClient, args: Args, logger: Logger):
     for entry in args.query or []:
         if not entry:
             continue
-        key, sep, value = entry.partition("=")
-        if not sep or not key:
-            logger.error("filter %r is not KEY=VALUE", entry)
+        try:
+            key, value = split_assignment(entry)
+        except ValueError as exc:
+            logger.error("%s", exc)
             return 2
         # Typed like `call -p`: a filter value was always a string, so
         # `-f uid=0` or `-f locked=true` matched nothing at all.
