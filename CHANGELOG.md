@@ -6,6 +6,53 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- **`pytruenas help <method>`** — CLI-style help for any middleware method,
+  read from the appliance's own API definition: every field with its type,
+  whether it is required, its default, and the values an enum allows. Also
+  `help <namespace>` to list a namespace's methods and `help` alone for the
+  index of namespaces; `--json` emits the definition slice for tooling.
+- **`call` takes fields instead of hand-written JSON.** After a literal `--`,
+  `--field=value` and bare `field=value` are interchangeable and typed from the
+  method's schema:
+
+  ```sh
+  pytruenas call user.create nas1 -- --username=svc --full_name='Svc' --group_create=true
+  ```
+
+  Booleans, integers, nullable fields, arrays (a comma list or a repeated flag)
+  and nested objects (`--options.acl=true`) are coerced; `--name:json=...` and
+  `--name=@file` are the escape hatches. An unknown field name or a bad enum
+  value is an error naming the alternatives, raised before anything is called.
+  `--no-schema` skips the definition, `--refresh-api` re-fetches it.
+- `examples/provision/` — a dry-run-by-default provisioning flow (users, DNS,
+  datasets and encryption, shares and services), plus `examples/README.md`
+  indexing every example.
+- `$PYTRUENAS_CACHE` — where the fetched API definition is cached (default: the
+  platform user cache directory), keyed by host and API version.
+
+### Fixed
+
+- **`dump_api()` could not work on a host with no SSH leg.** It captured
+  `middlewared --dump-api` from `run()`'s stdout, and that output is
+  24,103,000 bytes on 26.0 — enough to lose the web shell's connection every
+  time, i.e. exactly the host the web shell exists for. The dump is now built
+  and gzipped on the target (2,025,240 bytes, 11.9x) and fetched over SFTP when
+  there is an SSH leg, otherwise in 256 KiB chunks through the command channel,
+  with the transfer checked against the target's own sha256. The `filesystem.get`
+  HTTP side channel is deliberately not used: it truncated both the 23 MB file
+  and the 2 MB one.
+- `dump_api()` caches its result per host and API version, so a second call (or
+  a second `help`) does not spend ~75 s rebuilding it. `cache=False` and
+  `refresh=True` control that.
+
+### Changed
+
+- `query -f` and the new `call` fields share one `NAME=VALUE` parser
+  (`utils.cmd.split_assignment`), so a malformed one is reported the same way
+  everywhere.
+
 ## [0.5.1] - 2026-09-23
 
 ### Changed

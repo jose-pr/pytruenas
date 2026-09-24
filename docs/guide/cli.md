@@ -64,23 +64,78 @@ pytruenas query pool.dataset nas.example.com
 `query` issues `<namespace>.query`, so it works on queryable namespaces
 (`user`, `pool.dataset`, …), not on plain methods like `system.info`.
 
+### `help` — what does this method take?
+
+```bash
+pytruenas help user.create nas.example.com    # one method, in full
+pytruenas help user nas.example.com           # a namespace's methods
+pytruenas help nas.example.com                # every namespace, with counts
+```
+
+Prints every field with its type, whether it is required, its default, and the
+values an enum allows — read from the appliance's own API definition, so it
+matches the version in front of you rather than the docs. `--json` emits the
+definition slice instead of prose.
+
+The first run against a host fetches and caches that definition; later runs read
+the cache. `--refresh-api` re-fetches (needed only after upgrading an appliance
+in place), and `--api-version` describes an older version the dump still carries.
+
 ### `call` — invoke any method
 
 ```bash
 pytruenas call system.info nas.example.com
 pytruenas call core.ping nas.example.com
-pytruenas call -p '{"username": "svc"}' user.create nas.example.com
 ```
 
 `call` invokes any middleware method by its dotted name (unlike `query`, which
 only covers `<namespace>.query`). Parameters are JSON values via `-p/--param`
 (repeatable), in any position relative to the method and the targets.
 
+For anything that **writes**, pass fields after a literal `--` instead of
+hand-written JSON:
+
+```bash
+pytruenas call user.create nas.example.com -- \
+    --username=svc --full_name='Svc account' --group_create=true
+
+pytruenas call user.update -p 1 nas.example.com -- --full_name='New name'
+```
+
+`--field=value` and bare `field=value` are the same thing there, and each value
+is typed from the method's schema: booleans, integers, `null` for a nullable
+field, arrays from a comma list *or* a repeated flag, and nested objects from
+dotted names (`--options.acl=true`). Two escape hatches: `--name:json=<json>`
+for a literal JSON value, and `--name=@path` to read one from a file — which is
+what you want for a key or a certificate.
+
+An unknown field name or a bad enum value is an error that names the
+alternatives, raised **before** anything is called, so a typo cannot reach the
+appliance as a half-filled payload.
+
+!!! note
+    The `--` separator is required rather than decorative: the valid field names
+    are only known once the method name is parsed, so bare top-level `--flags`
+    would collide with the global options — a middleware field named `config` or
+    `parallel` would be unreachable. Targets go **before** the separator, as
+    they do for `deploy`.
+
+    `--no-schema` skips the definition entirely (values are typed the way `-p`
+    types them, and no name is checked).
+
+See [Provisioning](provisioning.md) for worked examples.
+
 ### `dump-api` — dump the API definition
 
 ```bash
 pytruenas dump-api nas.example.com > api.json
 ```
+
+The dump is built and compressed on the target, then fetched over SFTP when the
+host has an SSH leg and in verified chunks through the command channel
+otherwise. It is ~24 MB on 26.0 and takes about 75 s to produce, so it is cached
+per host and API version under `$PYTRUENAS_CACHE` and shared with `help` and
+`generate-typings`.
 
 ### `generate-typings` — build `.pyi` stubs
 

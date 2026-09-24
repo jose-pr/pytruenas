@@ -34,6 +34,7 @@ nav:
       - Filesystem paths: guide/filesystem.md
       - Running commands: guide/commands.md
       - Recipes: guide/recipes.md
+      - Provisioning: guide/provisioning.md
       - CLI: guide/cli.md
       - Generating typings: guide/typings.md
   - API Reference:

@@ -184,8 +184,19 @@ version="current", executor=None, path=None, ssh=None, ...)`
   `.events(timeout=None)` iterator and/or the inline `callback`. Bound to the
   current connection; does **not** survive a reconnect (the `events()` iterator
   ends on disconnect — that's the re-subscribe signal). See `connection` below.
-- **`.dump_api() -> dict`** — run `middlewared --dump-api` on the target and
-  return the parsed JSON (see `pytruenas.models.apidump.Api`).
+- **`.dump_api(*, cache=True, refresh=False) -> dict`** — the middleware API
+  definition (see `pytruenas.models.apidump.Api`). The dump is built **and
+  gzipped on the target**, then fetched over SFTP when the host has an SSH leg
+  and in verified 256 KiB chunks through the command channel otherwise; the
+  transfer is checked against the target's own sha256 and a mismatch raises
+  `utils.apicache.ApiDumpError`. It is not captured from `run()`'s stdout: the
+  dump is 24 MB on 26.0, which loses a web shell connection outright, and the
+  `filesystem.get` HTTP side channel truncates it at both 23 MB and 2 MB.
+  Building it costs ~75 s, so the result is cached per host and API version
+  under `$PYTRUENAS_CACHE`; `cache=False` skips the cache entirely (and with it
+  the `system.info()` version lookup), `refresh=True` re-fetches and overwrites.
+  A full `core.get_methods()` is **not** an alternative — the server closes the
+  websocket on it, and there is no per-method accessor.
 - **`.install_sshcreds(name=None, private_key=None)`** — generate/reuse an SSH
   keypair via `keychaincredential`, install the public half on `root`'s
   `authorized_keys`, and store the private half on `.config.ssh` as a real
@@ -598,9 +609,33 @@ way to build a client from parsed args:
 - **`query <namespace> [-f/--filter KEY=VALUE ...] [targets...]`** — prints
   `client.api[namespace]._query(**filters)` as JSON. Only works on queryable
   namespaces (`<namespace>.query` must exist), e.g. `user`, `pool.dataset`.
-- **`call <method> [-p/--param JSON ...] [targets...]`** — prints
+- **`call <method> [-p/--param JSON ...] [--no-schema] [--refresh-api]
+  [targets...] [-- --field=value ...]`** — prints
   `client.api[method](*params)` as JSON; works for any dotted method name,
   including non-queryable ones like `system.info`.
+  After a literal `--`, **fields** replace hand-written JSON:
+  `--field=value` and bare `field=value` are interchangeable, and each is
+  typed from the method's own schema (booleans from the strict true/false
+  sets, integers, `null` for a nullable field, arrays from a comma list *or* a
+  repeated flag, nested objects from dotted names). `--name:json=<json>` takes a
+  literal JSON value and `--name=@path` reads one from a file. Fields fill the
+  **last object-typed parameter**, so `call user.update -p 1 nas1 --
+  --full_name=x` still reads its id from `-p`. An unknown field name or a bad
+  enum value is an error naming the alternatives, raised **before** anything is
+  called — nothing partial reaches the appliance. The separator is required
+  because the valid names are only known after the method is parsed, so
+  top-level flags would collide with the globals. `--no-schema` types fields the
+  way `-p` does and validates nothing; `--refresh-api` re-fetches the
+  definition.
+- **`help [NAME] [--json] [--api-version V] [--refresh-api] [targets...]`** —
+  CLI-style help from the cached API definition. `NAME` is a method
+  (`user.create`: usage, every field with type/required/default/enum values,
+  and the return type), a namespace (`user`: its methods with their first doc
+  line), or omitted (the index of namespaces with counts). `--json` emits the
+  definition slice instead of prose. Help reads the **dump**, not generated
+  stubs: a `.pyi` carries names and types only, while descriptions, defaults,
+  enum values and required-ness exist solely in the definition the stubs are
+  generated from.
 - **`dump-api [targets...]`** — prints `client.dump_api()` as JSON.
 - **`generate-typings [--api-version V] [--path DIR] [--api-cache FILE]
   [targets...]`** — dumps (or reads a cached) API definition and writes
@@ -864,6 +899,32 @@ TypedDict schemas only (no runtime behavior); import the submodules directly.
   per-target `__main__.py` client builder) and `PyTrueNASRunPathArgs` (the
   shared root every RunPath command inherits — supplies the target fields /
   fan-out methods and the trailing `TARGET` positional).
+- **`apicache`** — fetch and cache the API definition. `load(client, *,
+  refresh=False, version=None) -> Api` is what every consumer uses (the `help`
+  command and `generate-typings` share one cache); `fetch(client, *,
+  keep_remote=False)` always goes to the target; `path_for(host, version)` is
+  the cache file; `store(api, path)` writes one atomically; `ApiDumpError` is
+  raised when a transfer does not reproduce the target's sha256.
+  `CHUNK_SIZE`/`CHUNK_ATTEMPTS` tune the fallback fetch, `REMOTE_DIR` is where
+  the dump is built on the target (`/var/db/system` — on a data pool, so it
+  survives an update, and not `noexec` the way `/tmp` is).
+- **`apihelp`** — render help from a dump slice; pure functions, no client.
+  `find(version, name)` (raises `UnknownMethod` with near-misses),
+  `methods(version)`, `namespaces(names)`, `parameters(method)`,
+  `returns(method)`, `payload_index(method)` (the **last** object-typed
+  parameter — the payload), `fields(method)` (the `--field=value` names),
+  `type_label(schema)`, `usage(name, method)`, `render(name, method)`,
+  `render_namespace(version, ns)`, `render_index(version)`. A parameter list is
+  `schemas.properties["Call parameters"].prefixItems`; the result is
+  `["Return value"]`.
+- **`fields`** — coerce `--field=value` text per a property's schema.
+  `collect(tokens, fields) -> dict` builds a payload (dotted names nest, a
+  repeated name accumulates, `name:json=` takes literal JSON, `name=@file` reads
+  a file); `coerce(name, schema, raw)` casts one value; `split(token)` accepts
+  both spellings via `cmd.split_assignment`; `FieldError` carries the message,
+  and an unknown name or bad enum value names the alternatives. `TRUE`/`FALSE`
+  are the accepted boolean spellings — strict sets, because `bool("false")` is
+  `True` and would send the wrong value.
 - **`tls`** — the one TLS trust decision every leg uses.
   **`context(sslverify) -> ssl.SSLContext | None`** (`None` when verification
   is off) and **`ca_bundle(sslverify) -> (path, source) | None`**, which says
@@ -893,6 +954,11 @@ a directory the user does not control.
 - **`TN_CREDS`** — read by `Credentials.from_env()`, and by the CLI
   (`PyTrueNASArgs._credentials_`) for a target that carries no credentials of
   its own. Not prefixed, and not routed through `ENV`.
+- **`PYTRUENAS_CACHE`** — directory for the cached API definition (read by
+  `utils.apicache`), one gzipped file per host and API version. Default: the
+  platform user cache directory (`$XDG_CACHE_HOME/pytruenas`, or
+  `%LOCALAPPDATA%\pytruenas\cache`). A host label is sanitized to a single path
+  component, so a connection string cannot choose where the file lands.
 - **`PYTRUENAS_SSLVERIFY`** — the CLI's TLS default when no flag is given:
   `true`/`false`/`1`/`0`/`yes`/`no`/`on`/`off`, or a CA bundle path.
 - **`CALL_TIMEOUT`** — default per-call JSON-RPC timeout in seconds, read at
