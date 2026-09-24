@@ -1422,16 +1422,26 @@ class TrueNASHost(_PosixHost, _ty.Generic[ApiVersion]):
             return resp.content
         return jobid
 
-    def dump_api(self):
-        """Run ``middlewared --dump-api`` on the target and parse the JSON."""
-        import json
+    def dump_api(self, *, cache: bool = True, refresh: bool = False):
+        """Return the middleware API definition (``middlewared --dump-api``).
 
-        from .models.apidump import Api
+        The dump is built and **compressed on the target**, then fetched over
+        SFTP when this host has an SSH leg and in verified chunks otherwise.
+        It used to capture the raw output through ``run()``, which cannot work:
+        the dump is 24,103,000 bytes on 26.0, and pushing that through the web
+        shell's PTY lost the connection every time -- so a host with no SSH, the
+        exact case the web shell exists for, could not dump its API at all.
 
-        api: Api = json.loads(
-            self.run("middlewared --dump-api", capture_output=True).stdout
-        )
-        return api
+        ``cache=True`` (the default) reads and writes the per-host, per-version
+        cache under ``$PYTRUENAS_CACHE``; building the dump costs about 75
+        seconds, which is not a price to pay twice. ``refresh=True`` re-fetches
+        and overwrites it. See :mod:`pytruenas.utils.apicache`.
+        """
+        from .utils import apicache as _apicache
+
+        if not cache:
+            return _apicache.fetch(self)
+        return _apicache.load(self, refresh=refresh)
 
     def install_sshcreds(
         self, name: "str | None" = None, private_key: "str | None" = None

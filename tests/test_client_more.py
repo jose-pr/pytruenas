@@ -98,14 +98,49 @@ def test_upload_generates_token_when_absent(monkeypatch):
 # --------------------------------------------------------------- dump_api ----
 
 
-def test_dump_api_parses_run_output(monkeypatch):
-    c = TrueNASClient(None, autologin=False)
+def test_dump_api_compresses_on_the_target_and_verifies_the_transfer(
+    monkeypatch, tmp_path
+):
+    """The dump is built and gzipped on the target, then fetched and checked.
+
+    It used to capture ``middlewared --dump-api`` straight from ``run()``'s
+    stdout, which cannot work: the dump is 24 MB on 26.0 and pushing that
+    through the web shell's PTY lost the connection, so a host with no SSH --
+    the case the web shell exists for -- could not dump its API at all.
+    """
+    import gzip
+    import hashlib
+    import json
+
+    monkeypatch.setenv("PYTRUENAS_CACHE", str(tmp_path))
+    blob = gzip.compress(json.dumps({"versions": []}).encode())
+    digest = hashlib.sha256(blob).hexdigest()
+    commands = []
+
+    def fake_run(self, cmd, *a, **k):
+        commands.append(cmd)
+        if "--dump-api" in cmd:
+            return subprocess.CompletedProcess(cmd, 0, f"{len(blob)}\n{digest}\n", "")
+        return subprocess.CompletedProcess(cmd, 0, "", "")
+
+    monkeypatch.setattr(TrueNASClient, "run", fake_run)
     monkeypatch.setattr(
-        TrueNASClient,
-        "run",
-        lambda self, *a, **k: subprocess.CompletedProcess(a, 0, stdout=b"{}"),
+        TrueNASClient, "path", lambda self, p, backend=None: _FakeBlob(blob)
     )
-    assert c.dump_api() == {}
+
+    c = TrueNASClient(None, autologin=False)
+    # cache=False keeps this off the version lookup, which would need a live API.
+    assert c.dump_api(cache=False) == {"versions": []}
+    assert any("gzip -9" in cmd for cmd in commands)
+    assert any(cmd.startswith("rm -f ") for cmd in commands)
+
+
+class _FakeBlob:
+    def __init__(self, blob):
+        self._blob = blob
+
+    def read_bytes(self):
+        return self._blob
 
 
 # -------------------------------------------------------------------- run ----
