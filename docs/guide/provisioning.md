@@ -27,10 +27,9 @@ Fields (after --):
 Returns: integer
 ```
 
-`pytruenas help user` lists a namespace; `pytruenas help` alone lists every
-namespace with its method count. The first `help` against a host fetches the
-API definition and caches it (see [Where the schema comes
-from](#where-the-schema-comes-from)); later runs read the cache.
+`pytruenas help user` lists a namespace; `pytruenas help all` lists every
+namespace. The schema comes from the API itself and needs no shell access — see
+[Where the schema comes from](#where-the-schema-comes-from).
 
 ## Users and groups
 
@@ -170,13 +169,19 @@ pytruenas --cmdspath examples provision nas1 -- --apply   # make the changes
 
 ## Where the schema comes from
 
-`help` and `call`'s field typing read the appliance's own API definition, cached
-per host and API version under `$PYTRUENAS_CACHE` (default: the platform user
-cache directory).
+`help` and `call`'s field typing ask the API for **one namespace at a time**
+(`core.get_services`, then `core.get_methods(<service>)`). Both middleware
+methods declare no roles and need no command access, so this works for an
+API-key account with **no shell, no SSH and no web shell** — and one namespace is
+a small answer (13 methods, ~100 KB for `user` on 26.0). Answers are cached under
+`$PYTRUENAS_CACHE`, per host, version and namespace.
 
-The first fetch is not cheap — the definition is ~24 MB on 26.0 and takes about
-75 s to build — so it is compressed on the target and pulled over SFTP when
-there is an SSH leg, or in verified chunks through the command channel
-otherwise. `--refresh-api` re-fetches, which you need only after upgrading an
-appliance in place. `--no-schema` skips it entirely and types fields the way
-`-p` does.
+`--refresh-api` re-fetches, which you need only after upgrading an appliance in
+place. `--no-schema` (on `call`) skips the schema entirely and types fields the
+way `-p` does.
+
+`help --dump` reads the full `middlewared --dump-api` definition instead. That
+needs command access on the target and is ~24 MB taking about 75 s to build, so
+it is only worth it for `--api-version` — describing an API version older than
+the one running, which the live API cannot report. It is also what
+`generate-typings` consumes.

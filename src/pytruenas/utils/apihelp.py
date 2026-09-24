@@ -48,6 +48,50 @@ def namespaces(names: "_ty.Iterable[str]") -> "dict[str, int]":
     return dict(sorted(counts.items()))
 
 
+def from_get_methods(name: str, entry: "_ty.Mapping[str, _ty.Any]") -> dict:
+    """Normalize a ``core.get_methods`` entry into the dump's method shape.
+
+    The two sources carry the same content in different envelopes, and only the
+    envelope differs -- so everything below renders either one once it has been
+    through here:
+
+    | ``core.get_methods``      | the dump                                    |
+    |---------------------------|---------------------------------------------|
+    | ``accepts`` (list)        | ``schemas.properties["Call parameters"].prefixItems`` |
+    | ``returns`` (list or one) | ``schemas.properties["Return value"]``      |
+    | ``description``           | ``doc``                                     |
+    | ``roles``                 | ``roles``                                   |
+
+    ``core.get_methods`` also reports ``job``, which the dump does not, so it is
+    carried through and :func:`render` says so -- a caller who does not know a
+    method is a job waits for a result that never comes.
+    """
+    accepts = entry.get("accepts")
+    if isinstance(accepts, dict):  # a lone schema rather than a list
+        accepts = [accepts]
+    returns = entry.get("returns")
+    if isinstance(returns, (list, tuple)):
+        returns = returns[0] if returns else {}
+    return {
+        "name": name,
+        "roles": list(entry.get("roles") or []),
+        "doc": entry.get("description") or entry.get("cli_description") or "",
+        "job": bool(entry.get("job")),
+        "schemas": {
+            "type": "object",
+            "properties": {
+                _CALL_PARAMS: {"type": "array", "prefixItems": list(accepts or [])},
+                _RETURN: returns or {},
+            },
+        },
+    }
+
+
+def methods_from_get_methods(found: "_ty.Mapping[str, _ty.Any]") -> "dict[str, dict]":
+    """Normalize a whole ``core.get_methods`` answer, keyed by method name."""
+    return {name: from_get_methods(name, entry) for name, entry in found.items()}
+
+
 def find(version: "_ty.Mapping[str, _ty.Any]", name: str) -> dict:
     """The method entry for ``name``, or :class:`UnknownMethod` with near-misses."""
     found = methods(version)
@@ -249,6 +293,15 @@ def _field_lines(
 def render(name: str, method: "_ty.Mapping[str, _ty.Any]") -> str:
     """Full help for one method."""
     out: "list[str]" = [usage(name, method), ""]
+
+    if method.get("job"):
+        # Above the doc on purpose: only `core.get_methods` reports this, and it
+        # changes how a caller must treat the result -- a job returns an id, not
+        # an answer. Some docs are hundreds of words, and this must not be
+        # buried in them.
+        out.append("JOB: returns a job id, not a result -- wait on it")
+        out.append("     (client.wait(jobid); `call` prints the id).")
+        out.append("")
 
     doc = " ".join(str(method.get("doc") or "").split())
     if doc:

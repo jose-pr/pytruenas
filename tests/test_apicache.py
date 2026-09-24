@@ -133,6 +133,55 @@ def test_a_chunk_that_keeps_failing_is_an_error_not_a_short_dump():
         apicache.fetch(client)
 
 
+def test_every_command_carries_a_timeout():
+    """A stalled channel must not hang the call.
+
+    The web shell waits *forever* by default, so an unbounded `run()` turns a
+    stalled PTY into an indefinite wait and the chunk retry never gets a turn.
+    Measured the hard way: a 17-minute wait that burned 0.5 s of CPU.
+    """
+    timeouts = []
+
+    class Recording(FakeClient):
+        def run(self, cmd, **kwargs):
+            timeouts.append((cmd.split()[0], kwargs.get("timeout")))
+            return super().run(cmd, **kwargs)
+
+    client = Recording(sftp=None)
+    apicache.fetch(client)
+    assert timeouts, "no commands ran"
+    for first_word, timeout in timeouts:
+        assert timeout is not None, f"{first_word} ran without a timeout"
+
+
+def test_a_chunk_that_times_out_is_retried():
+    # subprocess.TimeoutExpired is what a bounded `run()` raises, and it has to
+    # be retryable like any other transport failure.
+    class Stalling(FakeClient):
+        def __init__(self):
+            super().__init__(sftp=None)
+            self._stalled = False
+
+        def run(self, cmd, **kwargs):
+            if "tail -c" in cmd and not self._stalled:
+                self._stalled = True
+                raise subprocess.TimeoutExpired(cmd, kwargs.get("timeout") or 1)
+            return super().run(cmd, **kwargs)
+
+    assert apicache.fetch(Stalling()) == API
+
+
+def test_failing_cleanup_does_not_mask_the_result():
+    # Removing the temporary files is courtesy; the next fetch overwrites them.
+    class BadCleanup(FakeClient):
+        def run(self, cmd, **kwargs):
+            if cmd.startswith("rm -f"):
+                raise OSError("channel gone")
+            return super().run(cmd, **kwargs)
+
+    assert apicache.fetch(BadCleanup(sftp=FakePath(BLOB))) == API
+
+
 def test_a_truncated_transfer_is_refused():
     # The HTTP side channel really did return a short read; a dump that does
     # not match the target's digest must never be returned or cached.

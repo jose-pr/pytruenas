@@ -71,25 +71,37 @@ class Args(PyTrueNASArgs):
 
 
 def _schema_fields(client: TrueNASClient, args: Args, logger: Logger):
-    """``(fields, payload_index)`` from the cached API definition, or ``({}, None)``.
+    """``(fields, payload_index)`` for ``args.method``, or ``({}, None)``.
 
-    A cache miss costs a dump, so this is only reached when the caller actually
-    passed fields. Failing to load the definition is a warning, not an error:
-    the untyped path still works, and refusing to call because help metadata is
-    unavailable would be worse than calling.
+    Asks the API for just this method's **service**
+    (``core.get_methods(<service>)``): it declares no roles and needs no command
+    access, so it works for an API-key account with no shell -- and one
+    namespace is a small answer rather than the 24 MB whole definition.
+
+    Failing to read the schema is a warning, not an error: the untyped path
+    still works, and refusing to call because help metadata is unavailable would
+    be worse than calling. A field name that does not exist is still caught --
+    by the appliance's own validation rather than locally.
     """
     from pytruenas.utils import apicache
 
+    service = args.method.rpartition(".")[0]
+    if not service:
+        return {}, None
     try:
-        api = apicache.load(client, refresh=args.refresh_api)
-        # The dump lists versions newest-first.
-        version = api["versions"][0]
-        method = apihelp.find(version, args.method)
+        found = apicache.service_methods(client, service, refresh=args.refresh_api)
+        method = apihelp.from_get_methods(args.method, found[args.method])
+    except KeyError:
+        import difflib
+
+        close = difflib.get_close_matches(args.method, list(found), n=5)
+        hint = f"; did you mean: {', '.join(close)}" if close else ""
+        raise apihelp.UnknownMethod(f"no method named {args.method!r}{hint}") from None
     except apihelp.UnknownMethod:
         raise
     except Exception as exc:  # noqa: BLE001
         logger.warning(
-            "Could not load the API definition (%s); typing fields as plain JSON", exc
+            "Could not read %s's schema (%s); typing fields as plain JSON", service, exc
         )
         return {}, None
     return apihelp.fields(method), apihelp.payload_index(method)

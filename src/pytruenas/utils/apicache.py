@@ -1,32 +1,43 @@
 """Fetch and cache the middleware API definition.
 
 The API definition is the only machine-readable description of what a
-middleware method accepts, and getting it off an appliance is harder than it
-looks. Measured against TrueNAS 26.0.0-BETA.1:
+middleware method accepts. There are two ways to get it, and the cheap one is
+the default.
 
-* ``core.get_methods()`` makes the **server** close the websocket. That is not
-  a timeout and not this client -- a raw ``websocket-client`` socket sending a
-  hand-written JSON-RPC frame loses the connection the same way. There is no
-  per-method accessor to fall back on either: ``core.get_methods("user.create")``
-  returns ``{}`` (the argument is not a name filter) and
-  ``core.get_method_info`` does not exist.
-* ``middlewared --dump-api`` therefore is the source, and its output is
-  **24,103,000 bytes** produced in about 75 seconds.
-* Streaming that through a command channel's stdout loses a web shell
-  connection outright, and fetching it through the ``filesystem.get`` HTTP side
-  channel breaks mid-stream (``IncompleteRead``) at 23 MB *and* at 2 MB. So the
-  side channel cannot be the transport, whatever the size.
+**Per service, over the API** -- :func:`service_methods` and :func:`services`,
+built on ``core.get_methods(<service>)`` and ``core.get_services``. Both declare
+**no roles** and need **no command access**, so they work for an API-key account
+with no shell, no SSH and no web shell -- which plenty of accounts are. One
+namespace is a small answer: measured on 26.0, ``user`` is 13 methods / 100 KB /
+14.5 s, ``network.configuration`` 3 methods / 18 KB / 1.9 s, and
+``core.get_services`` 121 services / 79 KB / 5.5 s.
 
-What works is to compress on the target (``gzip -9`` takes it to 2,025,240
-bytes, 11.9x) and pull the compressed file over a leg that can carry it:
-:func:`fetch` prefers SFTP -- an in-process ``scp``, with no dependency on an
-``scp`` or ``rsync`` binary existing locally -- and falls back to reading the
-file in verified chunks through whatever command channel the host has, which is
-what makes a host reachable only on 443 work at all.
+Note the filter is by **service**, not by method name --
+``core.get_methods("user.create")`` returns ``{}``, which is what made this
+whole route look like a dead end at first. Asking for everything at once
+(``core.get_methods()`` with no argument) is also not an option: the **server**
+closes the websocket on that payload, and not because of this client -- a raw
+``websocket-client`` socket sending a hand-written JSON-RPC frame loses the
+connection the same way.
 
-Because that costs ~75 seconds and a couple of megabytes, the result is cached
-per host and API version. :func:`load` is the entry point every consumer uses;
-``generate-typings`` and the ``help`` command read the same cache.
+**The whole definition** -- :func:`load`/:func:`fetch`, built on ``middlewared
+--dump-api``. This needs command access and is 24,103,000 bytes produced in
+about 75 s, so it is the fallback, not the default. It is still the only source
+for *older* API versions, which the live API cannot report, and it is what
+``generate-typings`` consumes.
+
+Moving that 24 MB is its own problem. Streaming it through a command channel's
+stdout loses a web shell connection outright, and the ``filesystem.get`` HTTP
+side channel breaks mid-stream (``IncompleteRead``) at 23 MB *and* at 2 MB, so
+the side channel cannot be the transport whatever the size. What works: compress
+on the target (``gzip -9`` gives 2,025,240 bytes, 11.9x) and pull the compressed
+file over a leg that can carry it -- SFTP when the host has an SSH leg (an
+in-process ``scp``, needing no ``scp``/``rsync`` binary), else verified 256 KiB
+chunks through the command channel, which is what carries a host reachable only
+on 443.
+
+Everything is cached under ``$PYTRUENAS_CACHE``, per host and API version, with
+per-service answers in their own small files beside the dump's.
 """
 
 from __future__ import annotations
@@ -54,6 +65,25 @@ CHUNK_SIZE = 256 * 1024
 
 #: Attempts per chunk before giving up on the whole fetch.
 CHUNK_ATTEMPTS = 3
+
+#: Seconds allowed for the dump-and-compress command. Generous: it took ~75 s on
+#: 26.0 and an appliance under load takes longer.
+DUMP_TIMEOUT = 900
+
+#: Seconds allowed for **one** chunk. Every command here needs a timeout,
+#: because the web shell waits *forever* by default -- a stalled PTY session
+#: otherwise hangs the whole call and the retry below never gets a turn (which
+#: is exactly what it did: a 17-minute wait burning 0.5 s of CPU, indefinite
+#: rather than slow).
+CHUNK_TIMEOUT = 180
+
+#: Seconds allowed for removing the temporary files.
+CLEANUP_TIMEOUT = 60
+
+#: Seconds allowed for one ``core.get_methods``/``core.get_services`` call. The
+#: default per-call timeout is 60 and a big namespace really takes longer:
+#: ``pool.dataset`` measured 36.9 s and 348 KB on 26.0.
+SERVICE_TIMEOUT = 300
 
 
 class ApiDumpError(RuntimeError):
@@ -114,6 +144,7 @@ def _build_remote(client: "TrueNASHost") -> "tuple[str, int, str]":
         capture_output=True,
         encoding="utf-8",
         check=False,
+        timeout=DUMP_TIMEOUT,
     )
     if result.returncode != 0:
         raise ApiDumpError(
@@ -159,14 +190,28 @@ def _fetch_chunked(client: "TrueNASHost", remote: str, size: int) -> bytes:
 
     out = bytearray()
     offset = 0
+    chunks = (size + CHUNK_SIZE - 1) // CHUNK_SIZE
+    client.logger.info(
+        "Fetching %d bytes in %d chunk(s) through the command channel", size, chunks
+    )
     while offset < size:
         count = min(CHUNK_SIZE, size - offset)
+        # Progress matters here: this is minutes of work over a PTY, and a silent
+        # wait is indistinguishable from the hang this used to be.
+        client.logger.info(
+            "chunk %d/%d (%d bytes at %d)",
+            offset // CHUNK_SIZE + 1,
+            chunks,
+            count,
+            offset,
+        )
         for attempt in range(1, CHUNK_ATTEMPTS + 1):
             try:
                 encoded = client.run(
                     f"tail -c +{offset + 1} < {remote} | head -c {count} | base64 -w0",
                     capture_output=True,
                     encoding="utf-8",
+                    timeout=CHUNK_TIMEOUT,
                 ).stdout
                 chunk = _base64.b64decode(encoded)
                 if len(chunk) != count:
@@ -214,7 +259,12 @@ def fetch(client: "TrueNASHost", *, keep_remote: bool = False) -> "Api":
     finally:
         if not keep_remote:
             raw, gz = _remote_paths(client)
-            client.run(f"rm -f {raw} {gz}", check=False)
+            try:
+                client.run(f"rm -f {raw} {gz}", check=False, timeout=CLEANUP_TIMEOUT)
+            except Exception as exc:  # noqa: BLE001
+                # Cleanup is courtesy: failing it must not mask the fetch's own
+                # result (or its exception), and the next fetch overwrites these.
+                client.logger.debug("could not remove %s/%s: %s", raw, gz, exc)
 
 
 def load(
@@ -244,6 +294,82 @@ def load(
     store(api, cache)
     client.logger.info("Cached the API definition at %s", cache)
     return api
+
+
+def _version_of(client: "TrueNASHost") -> str:
+    return str(client.api.system.info()["version"])
+
+
+def _sibling(client: "TrueNASHost", version: str, kind: str) -> "_pathlib.Path":
+    """A cache file beside the dump's, named for what it holds.
+
+    ``<version>.<kind>.json.gz`` -- built from the version rather than from
+    ``path_for``'s filename, which already carries ``.json.gz`` and would
+    otherwise double it (``26.0.json.services.json.gz``).
+    """
+    return path_for(client.name, version).with_name(
+        f"{_safe_component(version)}.{kind}.json.gz"
+    )
+
+
+def services(client: "TrueNASHost", *, refresh: bool = False) -> "dict":
+    """Every service (namespace) the appliance exposes, via ``core.get_services``.
+
+    Shell-free and role-free, so this works for an API-key account that cannot
+    run commands at all. 121 services / 79 KB / ~5.5 s measured on 26.0.
+    """
+    cache = _sibling(client, _version_of(client), "services")
+    if not refresh and cache.exists():
+        try:
+            return _json.loads(_gzip.decompress(cache.read_bytes()))
+        except Exception as exc:  # noqa: BLE001
+            client.logger.warning("Ignoring an unreadable cache at %s: %s", cache, exc)
+    client.logger.info("Listing services (core.get_services)")
+    found = client.api.core.get_services(_timeout=SERVICE_TIMEOUT)
+    store(found, cache)
+    return found
+
+
+def service_methods(
+    client: "TrueNASHost", service: str, *, refresh: bool = False
+) -> "dict":
+    """The methods of one service, via ``core.get_methods(service)``.
+
+    **This is the shell-free path, and the one to prefer.** ``core.get_methods``
+    declares no roles and filters by *service* (a namespace -- passing a method
+    name returns ``{}``, which is what made it look useless at first), so a
+    single namespace is a small payload: 13 methods / 100 KB / 14.5 s for
+    ``user`` on 26.0, against 24 MB and ~75 s plus a shell for the whole dump.
+
+    That matters for more than speed: `middlewared --dump-api` needs command
+    access, and an API-key account may have no shell, no SSH and no web shell at
+    all. This path needs none of them.
+
+    The envelope differs from the dump's (``accepts``/``returns``/``description``
+    rather than ``schemas``); :func:`pytruenas.utils.apihelp.from_get_methods`
+    normalizes it.
+
+    Asking for the whole set at once (``core.get_methods()`` with no service) is
+    **not** an option: the server closes the websocket on that payload.
+    """
+    version = _version_of(client)
+    cache = _sibling(client, version, f"svc.{_safe_component(service)}")
+    if not refresh and cache.exists():
+        try:
+            data = _json.loads(_gzip.decompress(cache.read_bytes()))
+            client.logger.debug("Using the cached methods for %s", service)
+            return data
+        except Exception as exc:  # noqa: BLE001
+            client.logger.warning("Ignoring an unreadable cache at %s: %s", cache, exc)
+    client.logger.info("Fetching the methods of %s (core.get_methods)", service)
+    found = client.api.core.get_methods(service, _timeout=SERVICE_TIMEOUT)
+    if not found:
+        raise LookupError(
+            f"no service named {service!r} (core.get_methods filters by SERVICE, "
+            "not by method name)"
+        )
+    store(found, cache)
+    return found
 
 
 def store(api: "Api", cache: "_pathlib.Path") -> None:

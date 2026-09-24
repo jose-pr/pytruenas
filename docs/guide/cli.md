@@ -69,17 +69,28 @@ pytruenas query pool.dataset nas.example.com
 ```bash
 pytruenas help user.create nas.example.com    # one method, in full
 pytruenas help user nas.example.com           # a namespace's methods
-pytruenas help nas.example.com                # every namespace, with counts
+pytruenas help all nas.example.com            # every namespace
 ```
 
-Prints every field with its type, whether it is required, its default, and the
-values an enum allows — read from the appliance's own API definition, so it
-matches the version in front of you rather than the docs. `--json` emits the
-definition slice instead of prose.
+Prints every field with its type, whether it is required, its default, the
+values an enum allows, and whether the method is a **job** (a job returns an id,
+not a result) — read from the appliance's own API definition, so it matches the
+version in front of you rather than the docs. `--json` emits the definition slice
+instead of prose.
 
-The first run against a host fetches and caches that definition; later runs read
-the cache. `--refresh-api` re-fetches (needed only after upgrading an appliance
-in place), and `--api-version` describes an older version the dump still carries.
+`NAME` is required and comes first, like `query`'s namespace — hence `all` for
+the index, rather than omitting it. (Omitting it cannot work: argparse would
+claim the only remaining word, leaving no target.)
+
+The schema is fetched from the API one namespace at a time, which needs **no
+shell access and no special role** — it works with a plain API key on an account
+that cannot run commands at all. Answers are cached per host, version and
+namespace. `--refresh-api` re-fetches, needed only after upgrading an appliance
+in place.
+
+`--dump` instead reads the whole `middlewared --dump-api` definition. That needs
+command access and weighs ~24 MB, so use it only for `--api-version`, to
+describe a version older than the one running.
 
 ### `call` — invoke any method
 

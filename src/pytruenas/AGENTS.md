@@ -627,15 +627,22 @@ way to build a client from parsed args:
   top-level flags would collide with the globals. `--no-schema` types fields the
   way `-p` does and validates nothing; `--refresh-api` re-fetches the
   definition.
-- **`help [NAME] [--json] [--api-version V] [--refresh-api] [targets...]`** —
-  CLI-style help from the cached API definition. `NAME` is a method
-  (`user.create`: usage, every field with type/required/default/enum values,
-  and the return type), a namespace (`user`: its methods with their first doc
-  line), or omitted (the index of namespaces with counts). `--json` emits the
-  definition slice instead of prose. Help reads the **dump**, not generated
-  stubs: a `.pyi` carries names and types only, while descriptions, defaults,
-  enum values and required-ness exist solely in the definition the stubs are
-  generated from.
+- **`help NAME [--json] [--dump] [--api-version V] [--refresh-api]
+  [targets...]`** — CLI-style help. `NAME` is a method (`user.create`: usage,
+  every field with type/required/default/enum values, whether it is a job, and
+  the return type), a namespace (`user`: its methods with their first doc line),
+  or **`all`**/`.` for the index of namespaces. `NAME` is **required** and comes
+  first, like `query`'s namespace: made optional, argparse claims the lone token
+  of `help nas1` and leaves no target, so the index form could only run against
+  the local socket — hence the `all` sentinel.
+  The source is the **API itself**, per namespace (`core.get_services` +
+  `core.get_methods(<service>)`), which needs no roles and **no command access** —
+  it works for an API-key account with no shell. `--dump` uses the full
+  `middlewared --dump-api` instead (needs command access; required only for
+  `--api-version`, which the live API cannot report). Either way it reads the
+  definition, never generated stubs: a `.pyi` carries names and types only, while
+  descriptions, defaults, enum values and required-ness exist solely in the
+  definition the stubs are generated from.
 - **`dump-api [targets...]`** — prints `client.dump_api()` as JSON.
 - **`generate-typings [--api-version V] [--path DIR] [--api-cache FILE]
   [targets...]`** — dumps (or reads a cached) API definition and writes
@@ -899,15 +906,27 @@ TypedDict schemas only (no runtime behavior); import the submodules directly.
   per-target `__main__.py` client builder) and `PyTrueNASRunPathArgs` (the
   shared root every RunPath command inherits — supplies the target fields /
   fan-out methods and the trailing `TARGET` positional).
-- **`apicache`** — fetch and cache the API definition. `load(client, *,
-  refresh=False, version=None) -> Api` is what every consumer uses (the `help`
-  command and `generate-typings` share one cache); `fetch(client, *,
-  keep_remote=False)` always goes to the target; `path_for(host, version)` is
-  the cache file; `store(api, path)` writes one atomically; `ApiDumpError` is
-  raised when a transfer does not reproduce the target's sha256.
-  `CHUNK_SIZE`/`CHUNK_ATTEMPTS` tune the fallback fetch, `REMOTE_DIR` is where
-  the dump is built on the target (`/var/db/system` — on a data pool, so it
-  survives an update, and not `noexec` the way `/tmp` is).
+- **`apicache`** — fetch and cache the API definition, two ways.
+  **Preferred, over the API alone:** `services(client, *, refresh=False)`
+  (`core.get_services` — the namespace index) and `service_methods(client,
+  service, *, refresh=False)` (`core.get_methods(<service>)`). Both middleware
+  methods declare **no roles** and need **no command access**, so they work for
+  an API-key account with no shell, no SSH and no web shell; one namespace is a
+  small answer (`user`: 13 methods / 100 KB on 26.0). The filter is by
+  **service**, not method name — `core.get_methods("user.create")` returns `{}` —
+  and the unfiltered call is not usable at all, because the server closes the
+  websocket on that payload.
+  **The whole definition:** `load(client, *, refresh=False, version=None) -> Api`
+  and `fetch(client, *, keep_remote=False)`, via `middlewared --dump-api`. Needs
+  command access and weighs 24 MB, so it is the fallback — but it is the only
+  source for an *older* API version, and what `generate-typings` consumes.
+  Also `path_for(host, version)`, `store(api, path)` (atomic),
+  `ApiDumpError` (raised when a transfer does not reproduce the target's
+  sha256), `CHUNK_SIZE`/`CHUNK_ATTEMPTS`/`CHUNK_TIMEOUT`/`DUMP_TIMEOUT`/
+  `SERVICE_TIMEOUT`, and `REMOTE_DIR` (`/var/db/system` — on a data pool so it
+  survives an update, and not `noexec` the way `/tmp` is). Every command carries
+  a timeout on purpose: the web shell waits forever by default, which turns a
+  stalled channel into an indefinite hang instead of a retry.
 - **`apihelp`** — render help from a dump slice; pure functions, no client.
   `find(version, name)` (raises `UnknownMethod` with near-misses),
   `methods(version)`, `namespaces(names)`, `parameters(method)`,
@@ -917,6 +936,13 @@ TypedDict schemas only (no runtime behavior); import the submodules directly.
   `render_namespace(version, ns)`, `render_index(version)`. A parameter list is
   `schemas.properties["Call parameters"].prefixItems`; the result is
   `["Return value"]`.
+  `from_get_methods(name, entry)` and `methods_from_get_methods(found)`
+  normalize the **other** envelope — what `core.get_methods` returns, where the
+  parameters are `accepts`, the result is `returns` (a list), the doc is
+  `description`, and a `job` flag exists that the dump does not carry. Both
+  envelopes render through one path afterwards; `render` calls a job out **above**
+  the doc, because a job returns an id rather than a result and some docs run to
+  hundreds of words.
 - **`fields`** — coerce `--field=value` text per a property's schema.
   `collect(tokens, fields) -> dict` builds a payload (dotted names nest, a
   repeated name accumulates, `name:json=` takes literal JSON, `name=@file` reads

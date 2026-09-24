@@ -10,9 +10,17 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - **`pytruenas help <method>`** — CLI-style help for any middleware method,
   read from the appliance's own API definition: every field with its type,
-  whether it is required, its default, and the values an enum allows. Also
-  `help <namespace>` to list a namespace's methods and `help` alone for the
-  index of namespaces; `--json` emits the definition slice for tooling.
+  whether it is required, its default, the values an enum allows, and whether
+  the method is a job. Also `help <namespace>` to list a namespace's methods and
+  `help all` for the index of namespaces; `--json` emits the definition slice
+  for tooling.
+
+  It asks the API per namespace (`core.get_services` and
+  `core.get_methods(<service>)`), which requires **no roles and no command
+  access** — so it works for an API-key account with no shell, no SSH and no web
+  shell. `--dump` reads the full `middlewared --dump-api` definition instead,
+  which needs command access and is only necessary for `--api-version` (the live
+  API cannot describe an older version).
 - **`call` takes fields instead of hand-written JSON.** After a literal `--`,
   `--field=value` and bare `field=value` are interchangeable and typed from the
   method's schema:
@@ -30,7 +38,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   datasets and encryption, shares and services), plus `examples/README.md`
   indexing every example.
 - `$PYTRUENAS_CACHE` — where the fetched API definition is cached (default: the
-  platform user cache directory), keyed by host and API version.
+  platform user cache directory), keyed by host and API version, with
+  per-namespace answers in their own small files.
 
 ### Fixed
 

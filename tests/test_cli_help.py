@@ -177,6 +177,98 @@ def test_an_unknown_method_suggests_near_misses():
         apihelp.find(VERSION, "user.creat")
 
 
+# -- the shell-free source: core.get_methods --------------------------------
+
+# What `core.get_methods("user")` really returns for one method, reduced to the
+# keys that matter. The envelope differs from the dump's: `accepts` is the
+# positional parameter list, `returns` a list, the doc is `description`, and
+# `job` exists here and nowhere else.
+GET_METHODS_ENTRY = {
+    "description": "Create a new user.",
+    "cli_description": "Create a new user",
+    "roles": ["ACCOUNT_WRITE"],
+    "job": False,
+    "accepts": [
+        {
+            "title": "user_create",
+            "type": "object",
+            "additionalProperties": False,
+            "required": ["username"],
+            "properties": {
+                "username": {"type": "string", "description": "The name."},
+                "shell": {"type": "string", "enum": ["/usr/bin/zsh", "/usr/bin/bash"]},
+            },
+        }
+    ],
+    "returns": [{"type": "integer", "description": "The new user id."}],
+}
+
+
+def test_get_methods_entry_normalizes_to_the_dump_shape():
+    method = apihelp.from_get_methods("user.create", GET_METHODS_ENTRY)
+    assert method["doc"] == "Create a new user."
+    assert method["roles"] == ["ACCOUNT_WRITE"]
+    # `accepts` becomes the positional parameter list
+    assert apihelp.payload_index(method) == 0
+    assert sorted(apihelp.fields(method)) == ["shell", "username"]
+    # `returns` is a list here, a single schema in the dump
+    assert apihelp.type_label(apihelp.returns(method)) == "integer"
+
+
+def test_a_normalized_entry_renders_like_a_dump_one():
+    text = apihelp.render(
+        "user.create", apihelp.from_get_methods("user.create", GET_METHODS_ENTRY)
+    )
+    assert "--username=<string>" in text
+    assert "(required)" in text
+    assert "'/usr/bin/bash'" in text
+    assert "Returns: integer" in text
+
+
+def test_a_job_is_called_out_before_the_doc():
+    """`job` decides how a caller must treat the result, so it goes first.
+
+    Only core.get_methods reports it. Some docs run to hundreds of words --
+    pool.dataset.unlock's does -- and the fact that a job returns an id rather
+    than an answer must not be buried in them.
+    """
+    entry = {**GET_METHODS_ENTRY, "job": True, "description": "word " * 200}
+    text = apihelp.render("pool.dataset.unlock", apihelp.from_get_methods("x", entry))
+    lines = [line for line in text.splitlines() if line.strip()]
+    assert "JOB" in lines[1]
+    assert lines[1].index("JOB") < 10
+    # ... and a non-job says nothing about jobs at all.
+    plain = apihelp.render(
+        "user.create", apihelp.from_get_methods("x", GET_METHODS_ENTRY)
+    )
+    assert "JOB" not in plain
+
+
+def test_accepts_may_be_a_lone_schema_not_a_list():
+    entry = {**GET_METHODS_ENTRY, "accepts": GET_METHODS_ENTRY["accepts"][0]}
+    method = apihelp.from_get_methods("user.create", entry)
+    assert sorted(apihelp.fields(method)) == ["shell", "username"]
+
+
+def test_a_method_with_no_parameters_normalizes():
+    method = apihelp.from_get_methods(
+        "core.ping", {"description": "pong", "accepts": [], "returns": []}
+    )
+    assert apihelp.parameters(method) == []
+    assert apihelp.payload_index(method) is None
+    text = apihelp.render("core.ping", method)
+    # No payload parameter at all, so no Fields section and no `--` in the usage:
+    # offering `-- --field=value` for a method that takes nothing would be a lie.
+    assert "Fields" not in text
+    assert "--field=value" not in text
+
+
+def test_methods_from_get_methods_keys_by_name():
+    found = apihelp.methods_from_get_methods({"user.create": GET_METHODS_ENTRY})
+    assert list(found) == ["user.create"]
+    assert found["user.create"]["name"] == "user.create"
+
+
 # -- fields ----------------------------------------------------------------
 
 
