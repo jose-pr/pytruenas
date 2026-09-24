@@ -15,6 +15,108 @@ test.yml produces the numbers.
 
 ---
 
+## [0.5.2] - 2026-09-25
+
+### What changed
+
+Two additions that make the CLI usable for writing, and one fix to a method that
+could not work at all on a host without shell access. Nothing documented was
+removed or renamed, so this is a patch.
+
+### You can ask the appliance what a method takes
+
+`pytruenas help user.create nas1` prints every field with its type, whether it is
+required, its default, the values an enum allows, and whether the method is a
+**job** (a job returns an id, not a result). `help <namespace>` lists a
+namespace; `help all` lists all 121 of them.
+
+It reads the appliance's own definition, so it describes the version in front of
+you. Crucially it does so **without shell access**: `core.get_services` and
+`core.get_methods(<service>)` declare no roles and run no commands, so a plain
+API key on an account that cannot open a shell works fine. One namespace is a
+small answer -- 13 methods and 100 KB for `user` on 26.0 -- against 24 MB and a
+shell for the whole definition.
+
+### `call` no longer needs hand-written JSON
+
+    pytruenas call user.create nas1 -- --username=svc --full_name='Svc' --group_create=true
+
+After a literal `--`, `--field=value` and bare `field=value` are interchangeable
+and each value is typed from the method's schema: booleans, integers, `null` for
+a nullable field, arrays from a comma list or a repeated flag, nested objects
+from dotted names. `--name:json=...` and `--name=@file` are the escape hatches --
+the second is what you want for a key or a certificate.
+
+A wrong field name or a bad enum value is an error that names the alternatives,
+raised **before** anything is called, so a typo cannot reach an appliance as a
+half-filled payload. Fields land on the method's payload parameter, so a method
+taking `(id, payload)` still reads its id from `-p`:
+
+    pytruenas call user.update -p 1 nas1 -- --full_name='New name'
+
+The separator is required rather than decorative: the valid field names are only
+known once the method name is parsed, so bare top-level flags would collide with
+the global options and a middleware field called `config` or `parallel` would be
+unreachable.
+
+### `dump_api()` was broken on any host without SSH
+
+It captured `middlewared --dump-api` straight from `run()`'s stdout. That output
+is 24,103,000 bytes on 26.0, which loses the web shell's connection every time --
+so a host reachable only on 443, the exact case the web shell exists for, could
+not dump its API at all.
+
+The dump is now built and gzipped on the target (2,025,240 bytes, 11.9x) and
+fetched over SFTP when there is an SSH leg, otherwise in 256 KiB chunks through
+the command channel, with the result checked against the target's own sha256. The
+`filesystem.get` HTTP side channel is deliberately not used: it truncated both
+the 23 MB file and the 2 MB one, and a truncated dump still parses into something
+plausible, which is what makes the digest check load-bearing rather than tidy.
+
+Building it costs ~75 s, so it is cached per host and API version under
+`$PYTRUENAS_CACHE`, shared with `generate-typings`. `help --dump` opts into it,
+and it remains the only way to describe an *older* API version.
+
+### Migration
+
+- Nothing to do. `help` and the `call` fields are new, and `-p` works exactly as
+  before.
+- `dump_api()` now writes a temporary file under `/var/db/system` on the target
+  (removed afterwards) and returns a cached answer when it has one. `cache=False`
+  restores the always-fetch behaviour; `refresh=True` re-fetches.
+- `help`'s `NAME` is required, so the index is spelled `help all`. Omitting it
+  cannot work: argparse would claim the only remaining word and leave no target.
+
+### Performance
+
+No CI benchmark numbers this cycle either -- the baseline is still the next
+release's job. The figures quoted above are single measurements against one
+appliance under real load, recorded because they decided the design, not as
+benchmarks: the first schema fetch for a namespace took 1.9-36.9 s depending on
+its size, and a cache hit is local.
+
+### Validation
+
+- Suite: 942 passed / 6 skipped on Python 3.14 and on the 3.9 floor, both native
+  ARM64. `mkdocs build --strict` and `black --check` clean over 108 files.
+- Live against TrueNAS 26.0.0-BETA.1 throughout: `help` for a method, a
+  namespace, the index and a job; a near-miss returning exit 2; and a real write
+  cycle -- a user created with seven typed fields (booleans arriving as JSON
+  booleans), renamed through the `-p id` form, then deleted, with its
+  auto-created group confirmed gone.
+- The three fetch legs for the full dump (SFTP, one-shot base64, chunked base64)
+  each reproduce the target's own sha256.
+- `examples/provision/` ships **not yet run end to end against an appliance**:
+  it is dry-run by default and its field names were read off live records, but
+  the apply path is unexercised. Stated here rather than implied.
+
+### Publication state
+
+Released as 0.5.2 on the owner's instruction (patch: every change is additive or
+a fix; no documented API was removed or renamed).
+
+---
+
 ## [0.5.1] - 2026-09-23
 
 ### What changed
