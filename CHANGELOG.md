@@ -6,6 +6,17 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Changed
+
+- **Dependency floor `duho>=0.5.2,<0.6` → `duho>=0.6.0,<0.7`.** Every
+  documented `[minor]` break was checked against actual pytruenas usage and
+  against the full test suite on both supported interpreters; none apply, and
+  no pytruenas code changed. Since 0.6.0, `PYTRUENAS_MCP=stdio` makes
+  `pytruenas` serve MCP over stdio instead of its normal CLI dispatch,
+  exposing `call`/`query`/`deploy`/etc. as MCP tools — this is `duho`'s own
+  opt-in trigger, and pytruenas does not opt out of it. See the "MCP" section
+  of the CLI guide.
+
 ## [0.5.2] - 2026-09-25
 
 ### Added

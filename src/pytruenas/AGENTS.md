@@ -987,6 +987,14 @@ a directory the user does not control.
   component, so a connection string cannot choose where the file lands.
 - **`PYTRUENAS_SSLVERIFY`** — the CLI's TLS default when no flag is given:
   `true`/`false`/`1`/`0`/`yes`/`no`/`on`/`off`, or a CA bundle path.
+- **`PYTRUENAS_MCP`** — not read by pytruenas itself, nor through `ENV`:
+  `duho`'s (≥0.6.0) own `<PREFIX>_MCP` launch trigger, keyed off this app's
+  `Env` prefix. Setting `PYTRUENAS_MCP=stdio` makes `main()` serve MCP over
+  stdio instead of the normal CLI dispatch, exposing every built-in command
+  (`call`, `query`, `deploy`, ...) as an MCP tool. Checked in both `duho.main`
+  and `duho.app`, so it applies here regardless of entry point. No opt-out is
+  set — `_mcp_ = False` on `PyTrueNAS` (`main.py`) or `app(mcp=False)` in its
+  `app(...)` call would disable it — so this is accepted, documented behavior.
 - **`CALL_TIMEOUT`** — default per-call JSON-RPC timeout in seconds, read at
   import time by `pytruenas.connection`. Also unprefixed.
 

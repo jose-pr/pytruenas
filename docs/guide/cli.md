@@ -162,3 +162,17 @@ carries `credentials:` and `sslverify:` for the hosts it names:
 credentials: 1-<64-char-api-key>   # or a mapping: {username: root, password: ...}
 sslverify: /etc/pki/lab-ca.pem     # or false
 ```
+
+## MCP
+
+Since `duho` 0.6.0, setting `PYTRUENAS_MCP=stdio` makes `pytruenas` serve MCP
+over stdio instead of running its normal CLI dispatch, exposing `call`,
+`query`, `deploy` and the rest as MCP tools for an agent to call directly —
+with no extra wiring on pytruenas's side. This is `duho`'s own trigger (checked
+in both `duho.main` and `duho.app`, so it applies here too), keyed off the
+app's `Env` prefix (`PYTRUENAS_`); pytruenas does not opt out of it.
+
+```bash
+PYTRUENAS_MCP=stdio pytruenas   # serves MCP tools over stdio
+pytruenas --help                # unaffected: the env var is unset here
+```
