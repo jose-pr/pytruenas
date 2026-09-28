@@ -15,6 +15,40 @@ test.yml produces the numbers.
 
 ---
 
+## [0.5.3] - 2026-09-28
+
+### What changed
+
+A dependency bump only, no source code change: the `duho` floor moves from
+`>=0.5.2,<0.6` to `>=0.6.0,<0.7`. Every documented `[minor]` break in that
+release was checked against pytruenas's actual usage and against the full
+test suite on both supported interpreters; none apply.
+
+Since 0.6.0, `PYTRUENAS_MCP=stdio` makes `pytruenas` serve MCP over stdio
+instead of its normal CLI dispatch, exposing `call`/`query`/`deploy`/etc. as
+MCP tools. This is duho's own opt-in trigger — pytruenas does not opt out of
+it, so an operator gets it for free by setting the variable, and normal CLI
+dispatch is unaffected when it is unset. See the "MCP" section of the CLI
+guide.
+
+### Validation
+
+- Suite: 942 passed / 6 skipped on Python 3.14 and on the 3.9 floor, both
+  native ARM64 — matches the pre-bump baseline exactly, zero diff, against
+  the released PyPI wheel.
+- `pip check`, `mkdocs build --strict`, and `black --check` all clean.
+- CLI entry points (`--help`/`--version`/`query --help`/`call --help`/
+  `deploy --help`) diffed against the pre-bump baseline: only cosmetic
+  differences from duho's own additive/fix changes, none requiring a
+  pytruenas code change.
+
+### Publication state
+
+Released as 0.5.3 on the owner's instruction (patch: a dependency floor bump
+with no documented API change).
+
+---
+
 ## [0.5.2] - 2026-09-25
 
 ### What changed

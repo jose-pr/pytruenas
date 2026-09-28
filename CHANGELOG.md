@@ -6,6 +6,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.5.3] - 2026-09-28
+
 ### Changed
 
 - **Dependency floor `duho>=0.5.2,<0.6` → `duho>=0.6.0,<0.7`.** Every
@@ -1562,7 +1564,8 @@ below is simply what the package contains.
   `ssh` extra); the middleware API has no command-exec method. SFTP is handled by
   `pathlib_next`.
 
-[Unreleased]: https://github.com/jose-pr/pytruenas/compare/v0.5.2...HEAD
+[Unreleased]: https://github.com/jose-pr/pytruenas/compare/v0.5.3...HEAD
+[0.5.3]: https://github.com/jose-pr/pytruenas/compare/v0.5.2...v0.5.3
 [0.5.2]: https://github.com/jose-pr/pytruenas/compare/v0.5.1...v0.5.2
 [0.5.1]: https://github.com/jose-pr/pytruenas/compare/v0.5.0...v0.5.1
 [0.5.0]: https://github.com/jose-pr/pytruenas/compare/v0.4.6...v0.5.0
