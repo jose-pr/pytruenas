@@ -38,8 +38,13 @@ dependencies = [
     # package's own code needs an API from a later patch -- then the comment
     # names that API and patch. 1.x+ dependencies are major-scoped. Version
     # history lives in CHANGELOG.md, not here.
-    # 0.5.2: `runpath.register(step_adapter=...)`, passed by main.py at import.
-    "duho>=0.5.2,<0.6",
+    # Series base; the 0.5.2-era `runpath.register(step_adapter=...)` need is
+    # long satisfied. Verified against the released 0.6.0 wheel: every
+    # documented [minor] break checked against actual usage and the full test
+    # suite on both interpreters, none apply. 0.6.0 also adds opt-in
+    # MCP-over-stdio launch (`PYTRUENAS_MCP=stdio`); not opted out, see
+    # "Environment variables" in src/pytruenas/AGENTS.md.
+    "duho>=0.6.0,<0.7",
     # Series base; only `get_default_port` (utils/target.py) is used.
     "netimps>=0.3.0,<0.4",
     # 0.9.10: `Path._same_filesystem()`, the hook hostctl 0.3's composite paths
