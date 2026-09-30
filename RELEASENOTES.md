@@ -15,6 +15,29 @@ test.yml produces the numbers.
 
 ---
 
+## [0.5.4] - 2026-10-01
+
+### What changed
+
+A bug fix: `-v`/`-q` now change the level of the `pytruenas` logger. The root
+command had no declared name, so the verbosity flags set a logger named after
+the class (`PyTrueNAS`) that nothing logs to. The command now declares its name,
+`pytruenas`. The CLI's usage and `--version` output are unchanged, because the
+name already came from the program name.
+
+### Validation
+
+- Suite: 945 passed / 6 skipped on Python 3.14 and on the 3.9 floor (942 plus
+  3 new regression tests for `-v`, `-q` and the default).
+- `mkdocs build --strict` and `black --check` clean. The CI test workflow ran
+  at the release commit before tagging.
+
+### Publication state
+
+Released as 0.5.4 on the owner's instruction (patch: a bug fix).
+
+---
+
 ## [0.5.3] - 2026-09-28
 
 ### What changed

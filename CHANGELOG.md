@@ -6,6 +6,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.5.4] - 2026-10-01
+
 ### Fixed
 
 - **`-v`/`-q` now change the `pytruenas` logger.** The root command had no
@@ -1572,7 +1574,8 @@ below is simply what the package contains.
   `ssh` extra); the middleware API has no command-exec method. SFTP is handled by
   `pathlib_next`.
 
-[Unreleased]: https://github.com/jose-pr/pytruenas/compare/v0.5.3...HEAD
+[Unreleased]: https://github.com/jose-pr/pytruenas/compare/v0.5.4...HEAD
+[0.5.4]: https://github.com/jose-pr/pytruenas/compare/v0.5.3...v0.5.4
 [0.5.3]: https://github.com/jose-pr/pytruenas/compare/v0.5.2...v0.5.3
 [0.5.2]: https://github.com/jose-pr/pytruenas/compare/v0.5.1...v0.5.2
 [0.5.1]: https://github.com/jose-pr/pytruenas/compare/v0.5.0...v0.5.1
