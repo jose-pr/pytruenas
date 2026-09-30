@@ -147,3 +147,20 @@ def test_an_explicitly_decorated_step_is_still_adapted():
         return (client, args)
 
     assert callable(two)
+
+
+@pytest.mark.parametrize(
+    "argv, level",
+    [(["-v"], logging.DEBUG), (["-q"], logging.WARNING), ([], logging.INFO)],
+)
+def test_verbosity_flags_set_the_pytruenas_logger(argv, level):
+    library = logging.getLogger("pytruenas")
+    original = library.level
+    try:
+        library.setLevel(logging.NOTSET)
+        ns = main.PyTrueNAS._parser_().parse_args(argv)
+        ns._set_loglevels_()
+        assert ns._logger_.name == "pytruenas"
+        assert library.level == level
+    finally:
+        library.setLevel(original)

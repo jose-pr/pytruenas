@@ -68,6 +68,11 @@ _BUILTIN_COMMANDS = "pytruenas.cmd"
 class PyTrueNAS(PyTrueNASArgs, Cli):
     """Utility tool to manage and configure TrueNAS systems."""
 
+    # The command's own name. Without it the name fell back to the class name,
+    # so `-v`/`-q` set the level on a `PyTrueNAS` logger nothing logs to,
+    # instead of the package's `pytruenas` logger.
+    _parsername_ = "pytruenas"
+
     # Resolve --version from the installed package metadata (single source of
     # truth: pyproject's version), rather than duplicating the literal here.
     _version_ = AUTO

@@ -6,6 +6,14 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Fixed
+
+- **`-v`/`-q` now change the `pytruenas` logger.** The root command had no
+  declared name, so the verbosity flags set the level on a logger named after
+  the class (`PyTrueNAS`) that nothing logs to. The command now declares its
+  name, `pytruenas`, so `-v` makes the package's own logging more verbose and
+  `-q` quieter. The CLI's usage and `--version` output are unchanged.
+
 ## [0.5.3] - 2026-09-28
 
 ### Changed
