@@ -66,7 +66,7 @@ import typing as _ty
 from logging import Logger
 from pathlib import Path, PurePosixPath
 
-from duho import Arg, NS
+from duho import Arg, Meta
 
 from pytruenas import TrueNASClient
 from pytruenas.utils.cmd import PyTrueNASArgs
@@ -84,31 +84,31 @@ DIGEST_NAME = ".digest"
 class Args(PyTrueNASArgs):
     """Declared CLI fields for ``deploy``."""
 
-    path: "Arg[str, NS(metavar='PATH')]" = DEFAULT_PREFIX
+    path: "Arg[str, Meta(metavar='PATH')]" = DEFAULT_PREFIX
     """Where to install on the target. Defaults to a location on the
     persistent system dataset, which survives a TrueNAS update."""
     ("--path",)  # type: ignore
 
-    mode: "Arg[str, NS(choices=('pyz', 'dir'), metavar='MODE')]" = "pyz"
+    mode: "Arg[str, Meta(choices=('pyz', 'dir'), metavar='MODE')]" = "pyz"
     "Layout to install: a single executable zipapp, or an unpacked tree"
     ("--mode",)  # type: ignore
 
-    pkg_root: "Arg[str, NS(metavar='DIST')]" = ""
+    pkg_root: "Arg[str, Meta(metavar='DIST')]" = ""
     """Distribution to deploy, with its dependencies (default: the
     PYTRUENAS_PKG_ROOT environment variable, else pytruenas itself). Set this
     when pytruenas is a *dependency* of the thing being deployed."""
     ("--pkg-root",)  # type: ignore
 
-    pkg_name: "Arg[str, NS(metavar='PACKAGE')]" = ""
+    pkg_name: "Arg[str, Meta(metavar='PACKAGE')]" = ""
     """Package the deployed bundle runs (default: PYTRUENAS_PKG_NAME, else the
     root's name). Only needed when the distribution and import names differ."""
     ("--pkg-name",)  # type: ignore
 
-    extras: "Arg[list[str], NS(metavar='EXTRA')]" = []
+    extras: "Arg[list[str], Meta(metavar='EXTRA')]" = []
     "Include an extra's dependencies in the bundle (repeatable)"
     ("--extra",)  # type: ignore
 
-    skip: "Arg[list[str], NS(metavar='DIST')]" = []
+    skip: "Arg[list[str], Meta(metavar='DIST')]" = []
     "Never bundle this distribution, even if the target lacks it (repeatable)"
     ("--skip",)  # type: ignore
 
@@ -116,7 +116,7 @@ class Args(PyTrueNASArgs):
     "Reinstall even when the target already has this exact bundle"
     ("--force",)  # type: ignore
 
-    source: "Arg[str, NS(choices=('installed', 'repo'), metavar='SOURCE')]" = (
+    source: "Arg[str, Meta(choices=('installed', 'repo'), metavar='SOURCE')]" = (
         "installed"
     )
     """Where the bundled content comes from: the installed dependency closure
@@ -124,34 +124,34 @@ class Args(PyTrueNASArgs):
     Orthogonal to --mode, which decides the OUTPUT layout either way."""
     ("--source",)  # type: ignore
 
-    repo_root: "Arg[str, NS(metavar='PATH')]" = "."
+    repo_root: "Arg[str, Meta(metavar='PATH')]" = "."
     "Repo directory to copy, for --source repo (default: the current directory)"
     ("--repo-root",)  # type: ignore
 
-    ignore_files: "Arg[list[str], NS(metavar='FILE')]" = []
+    ignore_files: "Arg[list[str], Meta(metavar='FILE')]" = []
     """Ignore file(s) to apply for --source repo (repeatable; default:
     .gitignore, .ignore, and .bundleignore, whichever exist)."""
     ("--ignore-file",)  # type: ignore
 
-    ignore_pattern: "Arg[list[str], NS(metavar='PATTERN')]" = []
+    ignore_pattern: "Arg[list[str], Meta(metavar='PATTERN')]" = []
     """An extra gitignore-style pattern for --source repo, applied AFTER the
     ignore file(s) -- so it can exclude something they keep, or (with a
     leading '!') un-ignore something they exclude (repeatable)."""
     ("--ignore-pattern",)  # type: ignore
 
-    include: "Arg[list[str], NS(metavar='NAME')]" = []
+    include: "Arg[list[str], Meta(metavar='NAME')]" = []
     """Include a dependency or '[extra]' in the names --source repo LOGS as a
     heads-up (repeatable) -- it does not vendor anything or change which files
     are copied. Has no effect on --source installed."""
     ("--include",)  # type: ignore
 
-    exclude: "Arg[list[str], NS(metavar='NAME')]" = []
+    exclude: "Arg[list[str], Meta(metavar='NAME')]" = []
     """Exclude a dependency or '[extra]' from that same logged list, overriding
     --include (repeatable). Has no effect on --source installed -- use --skip
     there instead."""
     ("--exclude",)  # type: ignore
 
-    pythonpath: "Arg[list[str], NS(metavar='DIR')]" = []
+    pythonpath: "Arg[list[str], Meta(metavar='DIR')]" = []
     """Directory (relative to --repo-root) to put on PYTHONPATH for --source
     repo, so the launcher can find the package (repeatable; default: whichever
     of src/, lib/, vendor/, and the repo root itself contain an importable

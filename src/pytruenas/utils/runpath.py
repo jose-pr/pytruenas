@@ -82,8 +82,8 @@ class PyTrueNASRunPathArgs(PyTrueNASArgs):
     """
 
     @classmethod
-    def _initparser_(cls, parser, *args, **kwargs):  # type: ignore[override]
-        result = super()._initparser_(parser, *args, **kwargs)
+    def _initparser_(cls, parser, **kwargs):  # type: ignore[override]
+        result = super()._initparser_(parser, **kwargs)
         # Add the trailing positional only once (a parents=/re-entrant build may
         # revisit the same parser); register_targets would otherwise duplicate it.
         if not any(action.dest == "targets" for action in parser._actions):

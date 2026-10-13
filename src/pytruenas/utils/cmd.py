@@ -28,7 +28,7 @@ from pathlib import Path as _Path
 from argparse import SUPPRESS as _SUPPRESS
 from argparse import BooleanOptionalAction as _BooleanOptional
 
-from duho import Arg, Extend, LoggingArgs, NS
+from duho import Arg, Extend, LoggingArgs, Meta
 from duho.env import Env as _Env
 
 from . import io as _ioutils  # noqa: F401
@@ -203,7 +203,7 @@ class PyTrueNASArgs(LoggingArgs):
     # UpdateAction, so every `--config file.yaml` died in argparse
     # ("'WindowsPath' object is not iterable") before a command could run.
     # `_config_dict_()` is what turns it into the mapping.
-    config: "Arg[_Path, NS(metavar='FILE')]" = _Path(
+    config: "Arg[_Path, Meta(metavar='FILE')]" = _Path(
         ENV.get("CONFIG") or ENV.get("CFG") or "./pytruenas.yaml"
     )
     "Config file to use"
@@ -219,7 +219,7 @@ class PyTrueNASArgs(LoggingArgs):
     # it did not verify -- the opposite of what the library does.
     # `_ty.Optional`, not `bool | None`: duho evaluates this annotation when
     # the class is built, and a PEP 604 union is a TypeError on the 3.9 floor.
-    sslverify: "Arg[_ty.Optional[bool], NS(action=_BooleanOptional, default=None)]" = (
+    sslverify: "Arg[_ty.Optional[bool], Meta(action=_BooleanOptional, default=None)]" = (
         None
     )
     "Verify the server's TLS certificate (default: yes)"

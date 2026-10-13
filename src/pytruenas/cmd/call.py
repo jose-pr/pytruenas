@@ -40,7 +40,7 @@ from __future__ import annotations
 
 from logging import Logger
 
-from duho import Arg, NS
+from duho import Arg, Meta
 
 from pytruenas import TrueNASClient
 from pytruenas.utils import apihelp, fields as _fields
@@ -56,7 +56,7 @@ class Args(PyTrueNASArgs):
 
     # duho >=0.5.0 defaults a list-typed OPTION to action="append", nargs=None
     # (one value per occurrence, `-p a -p b`) -- no explicit override needed.
-    params: "Arg[list[str], NS(metavar='JSON')]" = []
+    params: "Arg[list[str], Meta(metavar='JSON')]" = []
     """A parameter as a JSON value (repeatable); a value that is not valid JSON
     is passed as a plain string."""
     ("--param", "-p")  # type: ignore

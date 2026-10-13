@@ -34,7 +34,7 @@ from __future__ import annotations
 
 from logging import Logger
 
-from duho import Arg, NS
+from duho import Arg
 
 from pytruenas import TrueNASClient
 from pytruenas.utils import apicache, apihelp

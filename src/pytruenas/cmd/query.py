@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 from logging import Logger
 
-from duho import Arg, NS
+from duho import Arg, Meta
 
 from pytruenas import TrueNASClient
 from pytruenas.utils.cmd import PyTrueNASArgs, emit_json, json_value, split_assignment
@@ -23,8 +23,8 @@ class Args(PyTrueNASArgs):
     # and would collide.
     # duho 0.5.0+ already defaults a list-typed OPTION to action="append",
     # nargs=None (one value per occurrence, `-f a -f b`) -- no explicit
-    # NS(action=..., nargs=...) needed here.
-    query: "Arg[list[str], NS(metavar='KEY=VALUE')]" = []
+    # Meta(action=..., nargs=...) needed here.
+    query: "Arg[list[str], Meta(metavar='KEY=VALUE')]" = []
     "Filter on a field (repeatable), e.g. -f username=root"
     ("--filter", "-f")  # type: ignore
 
