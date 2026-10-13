@@ -6,6 +6,16 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Changed
+
+- **Dependency floor `duho>=0.6.0,<0.7` → `duho>=0.7.3,<0.8`.** The command
+  line is unchanged: its help, flags, `--version` and exit statuses are the same
+  as under duho 0.6. Internally, field metadata is written `Meta(...)` (duho
+  removed `NS`), and the RunPath base's `_initparser_` forwards its build
+  keywords by name, as duho now requires. A derived tool that imports `NS` from
+  `duho` or overrides `_initparser_(cls, parser, *args, **kwargs)` must make the
+  same two changes.
+
 ## [0.5.4] - 2026-10-01
 
 ### Fixed
