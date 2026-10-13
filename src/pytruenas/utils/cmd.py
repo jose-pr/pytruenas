@@ -219,9 +219,9 @@ class PyTrueNASArgs(LoggingArgs):
     # it did not verify -- the opposite of what the library does.
     # `_ty.Optional`, not `bool | None`: duho evaluates this annotation when
     # the class is built, and a PEP 604 union is a TypeError on the 3.9 floor.
-    sslverify: "Arg[_ty.Optional[bool], Meta(action=_BooleanOptional, default=None)]" = (
-        None
-    )
+    sslverify: (
+        "Arg[_ty.Optional[bool], Meta(action=_BooleanOptional, default=None)]"
+    ) = None
     "Verify the server's TLS certificate (default: yes)"
     ("--sslverify",)  # type: ignore
 
