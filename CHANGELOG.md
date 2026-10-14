@@ -15,6 +15,10 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   keywords by name, as duho now requires. A derived tool that imports `NS` from
   `duho` or overrides `_initparser_(cls, parser, *args, **kwargs)` must make the
   same two changes.
+- **The `dev` extra requires `duho>=0.7.4,<0.8`.** The test suite restores the
+  RunPath registration with `duho.runpath.preserve_registration()` (new in duho
+  0.7.4) instead of saving and assigning duho's private module state. Only the
+  tests need it: the package keeps the `duho>=0.7.3,<0.8` runtime floor.
 
 ## [0.5.4] - 2026-10-01
 

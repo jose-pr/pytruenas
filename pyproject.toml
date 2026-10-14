@@ -85,7 +85,8 @@ codegen = ["jinja2>=3.0,<4"]
 # so 3.11+ never installs a redundant package for what it already has built
 # in -- `pytruenas.utils.bundle` tries tomllib first regardless.
 repo = ["pathspec", "tomli; python_version<'3.11'"]
-dev =["black", "build", "hatchling", "pytest", "pytest-cov", "twine", "pyyaml", "hostctl[ssh]>=0.3.2,<0.4", "jinja2", "pathspec", "tomli; python_version<'3.11'"]
+# The tests call `duho.runpath.preserve_registration()` (duho 0.7.4); the package itself runs on the floor above.
+dev =["black", "build", "hatchling", "pytest", "pytest-cov", "twine", "pyyaml", "hostctl[ssh]>=0.3.2,<0.4", "duho>=0.7.4,<0.8", "jinja2", "pathspec", "tomli; python_version<'3.11'"]
 docs = ["mkdocs", "mkdocs-material", "mkdocstrings[python]"]
 
 [project.scripts]
