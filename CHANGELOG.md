@@ -15,10 +15,16 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   keywords by name, as duho now requires. A derived tool that imports `NS` from
   `duho` or overrides `_initparser_(cls, parser, *args, **kwargs)` must make the
   same two changes.
-- **The `dev` extra requires `duho>=0.7.4,<0.8`.** The test suite restores the
-  RunPath registration with `duho.runpath.preserve_registration()` (new in duho
-  0.7.4) instead of saving and assigning duho's private module state. Only the
-  tests need it: the package keeps the `duho>=0.7.3,<0.8` runtime floor.
+- **Dependency floor raised to `duho>=0.7.5,<0.8`.** `main()` now goes through
+  `duho.run(..., exit="parse")`: `--help`, `--version` and usage errors still
+  raise `SystemExit` from `main()`, and every other outcome is still returned as
+  an `int`. New for the program: Ctrl-C ends with status 130 and a broken pipe
+  (the reader of standard output went away) with status 1, both without a
+  traceback.
+- The test suite restores the RunPath registration with
+  `duho.runpath.preserve_registration()` and reads it with
+  `duho.runpath.registration()`, and tests the step arity with
+  `duho.runpath.step_wants_context`, instead of duho's private names.
 
 ## [0.5.4] - 2026-10-01
 
