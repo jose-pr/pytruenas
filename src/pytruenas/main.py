@@ -1,8 +1,9 @@
 """The ``pytruenas`` command-line application.
 
 Thin driver over :func:`duho.run` (which calls :func:`duho.app`): ``app`` owns
-command discovery, parser build, per-command ``register``, config/env layering, parsing and logging setup; the one
-piece it hands off is *dispatch*, which pytruenas overrides to run the selected
+command discovery, parser build, per-command ``register``, config/env layering,
+parsing and logging setup; the one piece it hands off is *dispatch*, which
+pytruenas overrides to run the selected
 command against every target positional -- concurrently, via :mod:`duho.fanout` --
 giving each target its own connected :class:`~pytruenas.TrueNASClient`.
 
