@@ -12,8 +12,7 @@ session, and the failure surfaces somewhere unrelated.
 """
 
 import pytest
-from duho.discovery import CmdBuilder
-from duho.runpath import preserve_registration
+from duho.runpath import preserve_registration, registration
 
 from pytruenas.main import PyTrueNAS, main
 from pytruenas.utils.cmd import PyTrueNASArgs
@@ -36,16 +35,9 @@ def _restore_runpath_registration():
 
 
 @pytest.fixture
-def _runpath_base(tmp_path):
-    """A callable returning the base a RunPath command is built from right now.
-
-    duho has no accessor for the registered base; a command built from a step
-    directory inherits it as its first base class, so the built class shows it.
-    """
-    steps = tmp_path / "steps"
-    steps.mkdir()
-    (steps / "01-step.py").write_bytes(b"def main(cmd):\n    pass\n")
-    return lambda: CmdBuilder("steps", steps).command.__bases__[0]
+def _runpath_base():
+    """A callable returning the base a RunPath command is built from right now."""
+    return lambda: registration().base
 
 
 # -- the default is unchanged ---------------------------------------------

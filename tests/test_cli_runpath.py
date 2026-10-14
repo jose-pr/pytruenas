@@ -276,7 +276,7 @@ def test_step_decorator_preserves_arity_detection():
     # DECORATED function. duho decides the call arity from exactly that, so a
     # 1-arg `@step def main(client)` would take duho's 1-arg branch and receive
     # ctx=None -- a silently None client rather than an error.
-    from duho.runpath import _step_wants_ctx
+    from duho.runpath import step_wants_context
 
     from pytruenas.utils.runpath import step
 
@@ -289,7 +289,7 @@ def test_step_decorator_preserves_arity_detection():
         return client
 
     for entrypoint in (one, three):
-        assert _step_wants_ctx(entrypoint) is True
+        assert step_wants_context(entrypoint) is True
 
     # The wrapper still reports the original name for tracebacks.
     assert one.__name__ == "one"
