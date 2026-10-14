@@ -697,7 +697,7 @@ A **RunPath** is a directory of numbered `NN-name.py` *step* files run in
 order, with no `__init__.py` — placed among the command sources
 (`PYTRUENAS_PATH` / `--cmdspath` / config `commandspath`, or nested one level
 inside a source directory) it becomes a subcommand named after the directory.
-`pytruenas` adopts `duho.runpath` (declared floor `duho>=0.7.3,<0.8`; `runpath`
+`pytruenas` adopts `duho.runpath` (declared floor `duho>=0.7.5,<0.8`; `runpath`
 itself arrived in 0.4.0, `register(step_adapter=...)` in 0.5.2) and fans the whole
 step directory out **once per target**, each target getting its own connected
 `TrueNASClient` — the same per-target fan-out the built-in commands get. Author

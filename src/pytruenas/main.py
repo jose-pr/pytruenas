@@ -1,7 +1,7 @@
 """The ``pytruenas`` command-line application.
 
-Thin driver over :func:`duho.app`: ``app`` owns command discovery, parser build,
-per-command ``register``, config/env layering, parsing and logging setup; the one
+Thin driver over :func:`duho.run` (which calls :func:`duho.app`): ``app`` owns
+command discovery, parser build, per-command ``register``, config/env layering, parsing and logging setup; the one
 piece it hands off is *dispatch*, which pytruenas overrides to run the selected
 command against every target positional -- concurrently, via :mod:`duho.fanout` --
 giving each target its own connected :class:`~pytruenas.TrueNASClient`.
@@ -21,7 +21,7 @@ import typing as _ty
 from pathlib import Path
 
 import duho.runpath as _runpath
-from duho import AUTO, Cli, app, parse_globals
+from duho import AUTO, Cli, parse_globals, run
 from duho import logging as _logging
 from duho.discovery import CmdBuilder, ModuleCommand, discover_commands
 from duho.fanout import run_targets
@@ -713,10 +713,11 @@ def main(
     # later default one (and into anything else in the process).
     _runpath.register(base=_runpath_base(args), step_adapter=_step_adapter)
 
-    return app(
+    return run(
         root,
+        argv,
+        exit="parse",
         commands=_discover(argv, root),
-        argv=argv,
         name=name,
         description=root.__doc__,
         dispatch=_dispatch,
