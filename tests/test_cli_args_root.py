@@ -11,8 +11,9 @@ restores it -- otherwise a custom base leaks into every later test in the
 session, and the failure surfaces somewhere unrelated.
 """
 
-import duho.runpath as _runpath
 import pytest
+from duho.discovery import CmdBuilder
+from duho.runpath import preserve_registration
 
 from pytruenas.main import PyTrueNAS, main
 from pytruenas.utils.cmd import PyTrueNASArgs
@@ -28,16 +29,23 @@ class MyArgs(PyTrueNASArgs):
 
 
 @pytest.fixture(autouse=True)
-def _restore_runpath_base():
+def _restore_runpath_registration():
     """Undo any register() a test performs (see the module docstring)."""
-    saved = _runpath._BASE
-    yield
-    _runpath._BASE = saved
+    with preserve_registration():
+        yield
 
 
-def _runpath_base():
-    """The base a RunPath command would currently be built from."""
-    return _runpath._BASE
+@pytest.fixture
+def _runpath_base(tmp_path):
+    """A callable returning the base a RunPath command is built from right now.
+
+    duho has no accessor for the registered base; a command built from a step
+    directory inherits it as its first base class, so the built class shows it.
+    """
+    steps = tmp_path / "steps"
+    steps.mkdir()
+    (steps / "01-step.py").write_bytes(b"def main(cmd):\n    pass\n")
+    return lambda: CmdBuilder("steps", steps).command.__bases__[0]
 
 
 # -- the default is unchanged ---------------------------------------------
@@ -47,7 +55,7 @@ def test_default_args_is_pytruenasargs():
     assert PyTrueNAS._ARGS_ is PyTrueNASArgs
 
 
-def test_no_args_leaves_the_registered_base_alone():
+def test_no_args_leaves_the_registered_base_alone(_runpath_base):
     """The import-time registration already set this; don't churn it."""
     before = _runpath_base()
     with pytest.raises(SystemExit):
@@ -58,13 +66,13 @@ def test_no_args_leaves_the_registered_base_alone():
 # -- args= reaches both places --------------------------------------------
 
 
-def test_args_subclass_reaches_the_runpath_base():
+def test_args_subclass_reaches_the_runpath_base(_runpath_base):
     with pytest.raises(SystemExit):
         main("mytool", ["--help"], args=MyArgs)
     assert issubclass(_runpath_base(), MyArgs)
 
 
-def test_runpath_base_keeps_the_trailing_targets_override():
+def test_runpath_base_keeps_the_trailing_targets_override(_runpath_base):
     """Without this a derived tool's RunPath commands lose TARGET entirely.
 
     `targets` is SUPPRESS-ed on a plain class command; only
@@ -90,7 +98,7 @@ def test_default_parser_has_no_derived_flag(capsys):
 # -- _ARGS_ on a subclassed root ------------------------------------------
 
 
-def test_root_subclass_supplies_args_via_dunder(capsys):
+def test_root_subclass_supplies_args_via_dunder(_runpath_base, capsys):
     """Setting _ARGS_ once is enough -- no second argument to main()."""
 
     class MyApp(PyTrueNAS):
