@@ -1,7 +1,7 @@
 """hostctl providers for a TrueNAS target (step 3 of the migration).
 
 The load-bearing behaviour here is *declining honestly*: a provider that cannot
-serve a request must say so via ``probe()``/``OperationNotStarted`` so hostctl's
+serve a request must say so via ``probe()``/``OperationNotStartedError`` so hostctl's
 selector falls through to the next one. These tests pin that, and pin the
 SFTP -> websocket ordering the selector reproduces.
 """
@@ -11,9 +11,9 @@ from unittest.mock import MagicMock
 
 import pytest
 
+from hostctl.exceptions import OperationNotStartedError  # noqa: E402
 from hostctl.provider import (  # noqa: E402
     ExecutorProvider,
-    OperationNotStarted,
     PathProvider,
     ProviderSelector,
 )
@@ -166,7 +166,7 @@ def test_ws_path_provider_builds_a_ws_path(monkeypatch):
 
 
 def test_local_providers_are_hostctls_own():
-    from hostctl.executor import LocalExecutor
+    from hostctl import LocalExecutor
 
     executor, path = local_providers()
     assert isinstance(executor, ExecutorProvider)

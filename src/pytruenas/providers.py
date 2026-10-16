@@ -137,7 +137,7 @@ def local_providers():
     guard only duplicated the decision the caller had already made by choosing
     to build it.)
     """
-    from hostctl.executor import LocalExecutor
+    from hostctl import LocalExecutor
     from pathlib_next import Path as _LocalPath
 
     return (

@@ -264,7 +264,7 @@ def test_a_local_target_gets_no_ssh_leg(client):
 
 
 def test_a_remote_target_gets_the_key_wired_in(monkeypatch):
-    """It lands on a real `SshConfig.client_keys` field.
+    """It lands on a real `SSHConfig.client_keys` field.
 
     Not the `"client_keys|root"` string the pre-hostctl client packed into a
     username.
@@ -280,14 +280,14 @@ def test_a_remote_target_gets_the_key_wired_in(monkeypatch):
 
 def test_does_not_overwrite_explicit_credentials(monkeypatch):
     """A caller who configured their own SSH auth keeps it."""
-    from hostctl.host import SshConfig
+    from hostctl import SSHConfig
 
     remote = TrueNASClient("wss://nas", autologin=False)
     monkeypatch.setattr("pytruenas.host._public_key", lambda _key: PUBLIC_KEY)
     monkeypatch.setattr(type(remote), "api", MagicMock())
     _wire(remote)
 
-    remote._config.ssh = SshConfig(host="nas", password="hunter2")
+    remote._config.ssh = SSHConfig(host="nas", password="hunter2")
     remote.install_sshcreds()
     assert remote._config.ssh.password == "hunter2"
     assert remote._config.ssh.client_keys is None

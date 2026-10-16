@@ -83,9 +83,9 @@ from hostctl.executor import (
     expired as _expired,
     write_output as _write_output,
 )
+from hostctl.exceptions import OperationNotStartedError as _OperationNotStartedError
 from hostctl.provider import (
     ExecutorProvider as _ExecutorProvider,
-    OperationNotStarted as _OperationNotStarted,
     ProviderProbe as _ProviderProbe,
 )
 
@@ -326,7 +326,7 @@ class WebShellSession:
                         self.shell_id = message.get("id")
                     elif message.get("msg") == "failed":
                         ws.close()
-                        raise _OperationNotStarted(
+                        raise _OperationNotStartedError(
                             "web shell rejected the token: "
                             f"{message.get('error', {}).get('reason', 'unknown')}"
                         )
@@ -408,7 +408,7 @@ class WebShellSession:
         and a ``TimeoutExpired`` carrying the partial output is raised.
 
         A connection lost before the command's opening marker arrived raises
-        ``OperationNotStarted``: nothing ran, so another provider may retry.
+        ``OperationNotStartedError``: nothing ran, so another provider may retry.
         """
         token = _uuid.uuid4().hex[:16]
         frame = _Frame(token)
@@ -422,7 +422,7 @@ class WebShellSession:
                     ws.send_binary((line + "\n").encode("ascii"))
             except Exception as exc:
                 self.close()
-                raise _OperationNotStarted(
+                raise _OperationNotStartedError(
                     f"web shell send failed: {type(exc).__name__}", cause=exc
                 ) from exc
 
@@ -452,7 +452,7 @@ class WebShellSession:
                         continue
                     self.close()
                     if not frame.started:
-                        raise _OperationNotStarted(
+                        raise _OperationNotStartedError(
                             f"web shell connection lost: {type(exc).__name__}",
                             cause=exc,
                         ) from exc
@@ -520,10 +520,10 @@ class WebShellExecutorProvider(_ExecutorProvider):
     def connect(self) -> None:
         try:
             self.session.connect()
-        except _OperationNotStarted:
+        except _OperationNotStartedError:
             raise
         except Exception as exc:
-            raise _OperationNotStarted(
+            raise _OperationNotStartedError(
                 f"web shell unavailable: {type(exc).__name__}", cause=exc
             ) from exc
 

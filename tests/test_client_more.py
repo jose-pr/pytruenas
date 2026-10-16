@@ -333,7 +333,7 @@ def test_shell_string_becomes_an_ssh_leg():
 
 
 def test_client_keys_encoding_is_unpacked_into_a_real_field():
-    """`client_keys|root` was a string hack; SshConfig has a real field."""
+    """`client_keys|root` was a string hack; SSHConfig has a real field."""
     c = TrueNASClient(
         "wss://nas", autologin=False, shell="ssh://client_keys|root:PRIVATEKEY@nas"
     )

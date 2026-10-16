@@ -3,7 +3,7 @@ import typing as _ty
 import urllib.parse as _urlparse
 
 import netimps as _netimps
-from hostctl.host import redact_uri as _redact_uri
+from hostctl.uri import redact_uri as _redact_uri
 
 # ws/wss default ports (80/443) come from netimps' built-in scheme table; no
 # system services database knows the websocket schemes, so they need no

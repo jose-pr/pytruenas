@@ -11,7 +11,8 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from hostctl.host import HostConfig, PosixHost, SshConfig  # noqa: E402
+from hostctl import PosixHost, SSHConfig
+from hostctl.host import HostConfig  # noqa: E402
 from hostctl.shell import POSIX_SHELL  # noqa: E402
 
 from pytruenas.host import (  # noqa: E402
@@ -22,7 +23,7 @@ from pytruenas.host import (  # noqa: E402
 from pytruenas.providers import TnasWsPathProvider  # noqa: E402
 
 #: A minimal SSH leg, for the cases that need one to exist.
-SSH = SshConfig(host="nas")
+SSH = SSHConfig(host="nas")
 
 
 def _host(target="wss://nas", **options):
@@ -173,7 +174,7 @@ def test_every_historical_client_setting_is_accepted():
 def test_shell_string_builds_the_ssh_leg(shell, expected):
     """`shell=` takes the connection string the client always took.
 
-    Requiring a prebuilt SshConfig for the common case would be a step
+    Requiring a prebuilt SSHConfig for the common case would be a step
     backwards from `TrueNASClient(shell="ssh://root@nas")`.
     """
     config = TrueNASConfig.from_target("wss://nas", shell=shell)
@@ -181,7 +182,7 @@ def test_shell_string_builds_the_ssh_leg(shell, expected):
 
 
 def test_shell_string_unpacks_the_legacy_client_keys_form():
-    """`client_keys|root` was a string hack; SshConfig has a real field."""
+    """`client_keys|root` was a string hack; SSHConfig has a real field."""
     config = TrueNASConfig.from_target(
         "wss://nas", shell="ssh://client_keys|root:PRIVATEKEY@nas"
     )
@@ -237,19 +238,19 @@ def test_specific_settings_override_verify():
 
 
 def test_verify_false_reaches_an_explicit_ssh_config_left_at_its_default():
-    """A caller's SshConfig at the default policy follows `verify` -- on a copy."""
-    mine = SshConfig(host="nas")
+    """A caller's SSHConfig at the default policy follows `verify` -- on a copy."""
+    mine = SSHConfig(host="nas")
     config = TrueNASConfig.from_target("wss://nas", ssh=mine, verify=False)
     assert config.ssh.known_hosts is None
     assert mine.known_hosts == ()  # the caller's object is not mutated
-    named = SshConfig(host="nas", known_hosts="/srv/known_hosts")
+    named = SSHConfig(host="nas", known_hosts="/srv/known_hosts")
     config = TrueNASConfig.from_target("wss://nas", ssh=named, verify=False)
     assert config.ssh.known_hosts == "/srv/known_hosts"
 
 
 def test_explicit_ssh_config_keeps_its_own_known_hosts():
-    """A caller who built an SshConfig chose its policy; do not override it."""
-    ssh = SshConfig(host="nas", known_hosts="/srv/known_hosts")
+    """A caller who built an SSHConfig chose its policy; do not override it."""
+    ssh = SSHConfig(host="nas", known_hosts="/srv/known_hosts")
     config = TrueNASConfig.from_target("wss://nas", ssh=ssh, known_hosts=None)
     assert config.ssh.known_hosts == "/srv/known_hosts"
 
@@ -276,7 +277,7 @@ def test_path_falls_back_to_tnasws_when_sftp_cannot_connect(monkeypatch):
         raise AssertionError(method)
 
     host = TrueNASHost(
-        "wss://nas", ssh=SshConfig(host="127.0.0.1", port=1, username="root")
+        "wss://nas", ssh=SSHConfig(host="127.0.0.1", port=1, username="root")
     )
     conn = SimpleNamespace(call=call, close=lambda: None)
     monkeypatch.setattr(TrueNASHost, "conn", property(lambda self: conn))
@@ -468,9 +469,9 @@ def test_local_target_uses_only_hostctls_local_providers():
 
 def test_local_target_ignores_an_ssh_config():
     """SSH to reach the machine you are already on is never the right answer."""
-    from hostctl.host import SshConfig
+    from hostctl import SSHConfig
 
-    config = TrueNASConfig.from_target(None, ssh=SshConfig(host="nas"))
+    config = TrueNASConfig.from_target(None, ssh=SSHConfig(host="nas"))
     host = TrueNASHost(config)
     assert _names(host._executor_selector.providers) == ["local"]
     assert _names(host._path_selector.providers) == ["local"]
@@ -480,10 +481,10 @@ def test_local_target_ignores_an_ssh_config():
 def test_with_ssh_the_ssh_providers_come_first():
     """SSH must outrank the middleware -- it is the only remote exec channel,
     and its path surface (symlink/rename/realpath) is richer."""
-    from hostctl.host import SshConfig
+    from hostctl import SSHConfig
 
     host = TrueNASHost(
-        TrueNASConfig.from_target("wss://nas", ssh=SshConfig(host="nas")),
+        TrueNASConfig.from_target("wss://nas", ssh=SSHConfig(host="nas")),
     )
     assert _names(host._executor_selector.providers) == ["ssh", "webshell"]
     assert _names(host._path_selector.providers) == ["sftp", "tnasws"]
@@ -523,10 +524,10 @@ def test_local_target_reports_run():
 
 
 def test_remote_with_ssh_reports_run():
-    from hostctl.host import SshConfig
+    from hostctl import SSHConfig
 
     host = TrueNASHost(
-        TrueNASConfig.from_target("wss://nas", ssh=SshConfig(host="nas")),
+        TrueNASConfig.from_target("wss://nas", ssh=SSHConfig(host="nas")),
     )
     assert "run" in host.capabilities
 
@@ -616,7 +617,7 @@ def test_close_survives_a_websocket_that_raises():
     host.close()
 
 
-# -- install_sshcreds wires a real SshConfig -------------------------------
+# -- install_sshcreds wires a real SSHConfig -------------------------------
 
 PRIVATE_KEY = "-----BEGIN PRIVATE KEY-----\nfake\n-----END PRIVATE KEY-----"
 
@@ -657,7 +658,7 @@ def test_install_sshcreds_creates_an_ssh_config(keyed_host):
     keyed_host.install_sshcreds()
 
     ssh = keyed_host._config.ssh
-    assert isinstance(ssh, SshConfig)
+    assert isinstance(ssh, SSHConfig)
     assert ssh.host == "nas"
     assert ssh.username == "root"
     assert ssh.client_keys == [PRIVATE_KEY.encode()]
@@ -694,15 +695,15 @@ def test_install_sshcreds_installs_the_public_half(keyed_host):
 
 
 def test_install_sshcreds_does_not_override_explicit_credentials(keyed_host):
-    keyed_host._config.ssh = SshConfig(host="nas", password="hunter2")
+    keyed_host._config.ssh = SSHConfig(host="nas", password="hunter2")
     keyed_host.install_sshcreds()
     assert keyed_host._config.ssh.password == "hunter2"
     assert keyed_host._config.ssh.client_keys is None
 
 
 def test_install_sshcreds_fills_an_ssh_config_lacking_auth(keyed_host):
-    """An SshConfig with no credentials gets the new key; one with keeps them."""
-    keyed_host._config.ssh = SshConfig(host="nas")
+    """An SSHConfig with no credentials gets the new key; one with keeps them."""
+    keyed_host._config.ssh = SSHConfig(host="nas")
     keyed_host.install_sshcreds()
     assert keyed_host._config.ssh.client_keys == [PRIVATE_KEY.encode()]
 
@@ -770,10 +771,10 @@ def test_default_providers_drop_ssh_when_asyncssh_is_missing(monkeypatch):
     the next path call.
     """
     import pytruenas.host as host_module
-    from hostctl.host import SshConfig
+    from hostctl import SSHConfig
 
     monkeypatch.setattr(host_module, "_ssh_available", lambda: False)
-    config = TrueNASConfig.from_target("wss://nas", ssh=SshConfig(host="nas"))
+    config = TrueNASConfig.from_target("wss://nas", ssh=SSHConfig(host="nas"))
     host = TrueNASHost(config)
 
     assert [p.name for p in host._path_selector.providers] == ["tnasws"]
@@ -787,11 +788,11 @@ def test_an_explicitly_named_ssh_provider_is_still_honored(monkeypatch):
     own bug -- and quieter than the failure it replaces.
     """
     import pytruenas.host as host_module
-    from hostctl.host import SshConfig
+    from hostctl import SSHConfig
 
     monkeypatch.setattr(host_module, "_ssh_available", lambda: False)
     config = TrueNASConfig.from_target(
-        "wss://nas", ssh=SshConfig(host="nas"), path=["sftp"], executor=["ssh"]
+        "wss://nas", ssh=SSHConfig(host="nas"), path=["sftp"], executor=["ssh"]
     )
     host = TrueNASHost(config)
 

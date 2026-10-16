@@ -54,7 +54,7 @@ class TruenasPath(_TnasWsPath):
     ``resolve`` -- so it always returns ``self``. Carries the same
     ``TnasWsBackend`` (holding the client); the SFTP leg is built lazily from
     the host's SSH configuration (``client.config.ssh``, an
-    :class:`hostctl.host.SshConfig`).
+    :class:`hostctl.SSHConfig`).
     """
 
     __SCHEMES = ("truenas",)
@@ -63,7 +63,7 @@ class TruenasPath(_TnasWsPath):
     # -- SFTP leg ----------------------------------------------------------
 
     def _ssh_config(self):
-        """The client's :class:`hostctl.host.SshConfig`, or ``None``.
+        """The client's :class:`hostctl.SSHConfig`, or ``None``.
 
         The SSH leg lives on the host's config (``client.config.ssh``) since
         ``TrueNASClient`` was merged into ``TrueNASHost``. This used to read
@@ -302,9 +302,9 @@ def _sftp_backend(client: object, ssh: object):
 
 
 def _connect_opts_from_ssh(ssh) -> "dict":
-    """asyncssh connect options for an :class:`hostctl.host.SshConfig`.
+    """asyncssh connect options for an :class:`hostctl.SSHConfig`.
 
-    Delegates to ``SshConfig.connect_opts()`` -- the single source of truth the
+    Delegates to ``SSHConfig.connect_opts()`` -- the single source of truth the
     host's own SSH executor and SFTP path provider both use -- so this leg
     authenticates *and applies the host-key policy* exactly the way
     ``client.run()`` does.
@@ -325,7 +325,7 @@ def _connect_opts_from_ssh(ssh) -> "dict":
     ``connect_opts()`` always carries ``known_hosts``: the ``()`` default means
     "check ``~/.ssh/known_hosts``", so this leg verifies the host key by
     default, exactly as hostctl's own SFTP provider does. ``known_hosts=None``
-    (on the SshConfig, or ``TrueNASClient(..., known_hosts=None)``) opts out.
+    (on the SSHConfig, or ``TrueNASClient(..., known_hosts=None)``) opts out.
 
     The pre-hostctl ``"client_keys|root"`` username packing is unpacked once,
     in :func:`pytruenas.host._ssh_config_from`, on the way into the config --

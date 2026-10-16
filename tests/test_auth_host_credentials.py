@@ -97,7 +97,7 @@ def test_precedence_is_deterministic(kwargs, expected):
 
 # -- agreement with hostctl's parser ---------------------------------------
 
-from hostctl.host import parse_credentials  # noqa: E402
+from hostctl.uri import parse_credentials  # noqa: E402
 
 
 @pytest.mark.parametrize(

@@ -41,10 +41,10 @@ from urllib.parse import unquote as _unquote
 from urllib.parse import urlsplit as _urlsplit
 
 import requests as _req
+from hostctl import PosixHost as _PosixHost
+from hostctl import uri_host as _uri_host
+from hostctl import uri_hostname as _uri_hostname
 from hostctl.host import HostConfig as _HostConfig
-from hostctl.host import PosixHost as _PosixHost
-from hostctl.host import uri_host as _uri_host
-from hostctl.host import uri_hostname as _uri_hostname
 
 from . import auth as _auth
 from . import connection as _connection
@@ -335,11 +335,11 @@ class _TrustAdapter(_req.adapters.HTTPAdapter):
 
 
 def _ssh_config_from(shell: "str | None", known_hosts: object = ()):
-    """Build an :class:`hostctl.host.SshConfig` from a shell connection string.
+    """Build an :class:`hostctl.SSHConfig` from a shell connection string.
 
     Accepts what ``TrueNASClient(shell=...)`` has always taken --
     ``"ssh://root@nas"``, ``"root:pw@nas:22"``, a bare host -- so reaching the
-    SSH leg does not require importing and assembling an SshConfig by hand.
+    SSH leg does not require importing and assembling an SSHConfig by hand.
     ``None`` or a local target yields ``None``: no SSH leg.
 
     ``known_hosts`` is hostctl's own field, passed through unchanged: ``()``
@@ -349,7 +349,7 @@ def _ssh_config_from(shell: "str | None", known_hosts: object = ()):
     if not shell:
         return None
 
-    from hostctl.host import SshConfig
+    from hostctl import SSHConfig
 
     target = _TGT.parse(shell, scheme="ssh")
     if target.scheme == "local" or not target.host:
@@ -360,13 +360,13 @@ def _ssh_config_from(shell: "str | None", known_hosts: object = ()):
     client_keys = None
     # The pre-hostctl client packed the auth type into the username as
     # "client_keys|root"; accept it so an existing connection string keeps
-    # working, but unpack it into SshConfig's real fields.
+    # working, but unpack it into SSHConfig's real fields.
     if "|" in username:
         logintype, username = username.split("|", maxsplit=1)
         if logintype == "client_keys" and password:
             client_keys = [password.encode() if isinstance(password, str) else password]
             password = None
-    return SshConfig(
+    return SSHConfig(
         host=target.host,
         port=target.port or 22,
         username=username or "root",
@@ -557,17 +557,17 @@ class TrueNASConfig(
         elif not isinstance(sslverify, bool):
             sslverify = _os.fspath(sslverify)
         self.sslverify: "bool | str" = sslverify
-        #: The SSH leg. Accepts a ready :class:`hostctl.host.SshConfig` or, via
+        #: The SSH leg. Accepts a ready :class:`hostctl.SSHConfig` or, via
         #: ``shell=``, the connection string ``TrueNASClient`` has always taken
         #: (``"ssh://root@nas"``, ``"root@nas:22"``) -- so a caller does not
-        #: have to import and assemble an SshConfig for the common case.
+        #: have to import and assemble an SSHConfig for the common case.
         #:
         #: ``known_hosts`` is the host-key policy for an SSH leg built here --
         #: from ``shell=`` or by :meth:`TrueNASHost.install_sshcreds`. It uses
         #: hostctl's values: ``()`` checks ``~/.ssh/known_hosts``, ``None``
         #: disables the check, a path or list names the file(s). Unset, it
         #: follows ``verify`` (``()`` or ``None``). An explicit
-        #: ``ssh=SshConfig(...)`` keeps a policy it names; one left at the
+        #: ``ssh=SSHConfig(...)`` keeps a policy it names; one left at the
         #: ``()`` default gets ``None`` when ``verify=False`` (on a copy).
         if known_hosts is _DEFAULT:
             known_hosts = () if verify else None
@@ -968,7 +968,7 @@ class TrueNASHost(_PosixHost, _ty.Generic[ApiVersion]):
             if config.ssh is None:
                 raise ValueError(
                     "ssh/sftp providers were requested but no SSH configuration "
-                    "is set; pass ssh=SshConfig(...) or call install_sshcreds()"
+                    "is set; pass ssh=SSHConfig(...) or call install_sshcreds()"
                 )
             from hostctl import ssh_providers
 
@@ -1219,7 +1219,7 @@ class TrueNASHost(_PosixHost, _ty.Generic[ApiVersion]):
                 return transport.ssh
         raise RuntimeError(
             "no SSH transport is configured for this host; pass shell=... or "
-            "ssh=SshConfig(...), or call install_sshcreds()"
+            "ssh=SSHConfig(...), or call install_sshcreds()"
         )
 
     # -- convenience wrappers over common auth/core methods ----------------
@@ -1451,7 +1451,7 @@ class TrueNASHost(_PosixHost, _ty.Generic[ApiVersion]):
         Generates (or reuses) a ``SSH_KEY_PAIR`` keychain credential, installs
         the public half on root's ``authorized_keys``, and stores the private
         half on :attr:`TrueNASConfig.ssh` as a real
-        :class:`hostctl.host.SshConfig` -- with ``client_keys`` as an actual
+        :class:`hostctl.SSHConfig` -- with ``client_keys`` as an actual
         field rather than the ``"client_keys|root"`` string that the pre-hostctl
         client packed into a username.
 
@@ -1502,7 +1502,7 @@ class TrueNASHost(_PosixHost, _ty.Generic[ApiVersion]):
 
         private_key = _ty.cast(str, keypair["attributes"]["private_key"])
 
-        from hostctl.host import SshConfig
+        from hostctl import SSHConfig
 
         # A local target has no host to SSH *to*, and needs none -- commands
         # already run here. The keypair is still provisioned (it is installed
@@ -1513,7 +1513,7 @@ class TrueNASHost(_PosixHost, _ty.Generic[ApiVersion]):
 
         existing = self._config.ssh
         if existing is None:
-            self._config.ssh = SshConfig(
+            self._config.ssh = SSHConfig(
                 host=self._config.host,
                 username="root",
                 client_keys=[private_key.encode()],

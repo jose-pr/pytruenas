@@ -19,7 +19,7 @@ def _client(ssh=None, **fs):
     """A fake host: websocket-only by default, or carrying an SSH leg.
 
     The shape matters -- `TruenasPath._sftp()` reads the SSH target off
-    `client.config.ssh` (a real `hostctl.host.SshConfig`), exactly as a live
+    `client.config.ssh` (a real `hostctl.SSHConfig`), exactly as a live
     `TrueNASHost` carries it. A bare `MagicMock` would auto-vivify *any*
     attribute name and make the leg look configured no matter what it read,
     which is how the dead `client.ssh_config` lookup stayed green for a
@@ -33,11 +33,11 @@ def _client(ssh=None, **fs):
 
 
 def _ssh_config(**overrides):
-    from hostctl.host import SshConfig
+    from hostctl import SSHConfig
 
     opts = dict(host="nas", port=22, username="root", password=None)
     opts.update(overrides)
-    return SshConfig(**opts)
+    return SSHConfig(**opts)
 
 
 # -- TnasWsPath ---------------------------------------------------------------
@@ -297,7 +297,7 @@ def test_stat_from_listdir_entry_without_mode():
 # -- TruenasPath fallback -----------------------------------------------------
 
 
-# The SSH target is `client.config.ssh`, an `hostctl.host.SshConfig`. It was
+# The SSH target is `client.config.ssh`, an `hostctl.SSHConfig`. It was
 # `client.ssh_config` before `TrueNASClient` merged into `TrueNASHost`, and
 # that name no longer exists anywhere -- see
 # `test_truenaspath_ignores_the_pre_merge_ssh_config_attribute`.
@@ -739,14 +739,14 @@ def test_symlink_to_force_rejects_a_kind_it_was_not_allowed(monkeypatch):
 @pytest.mark.requires("asyncssh")
 def test_truenaspath_sftp_leg_reachable_on_a_real_host():
     """Construction only -- no network. Pins the real class's attribute shape."""
-    from hostctl.host import SshConfig
+    from hostctl import SSHConfig
 
     from pytruenas import TrueNASClient
 
     host = TrueNASClient(
         "wss://nas",
         autologin=False,
-        ssh=SshConfig(host="nas", port=22, username="root", password="pw"),
+        ssh=SSHConfig(host="nas", port=22, username="root", password="pw"),
     )
     p = TruenasPath("truenas://nas/etc/hosts", backend=TnasWsBackend(host))
     assert p._sftp() is not None
@@ -756,7 +756,7 @@ def test_connect_opts_delegate_to_sshconfig_connect_opts():
     """The mapping is hostctl's, not a hand-rolled copy of its field list.
 
     A local copy is how `known_hosts` went missing (see the test below), so
-    pin the delegation itself: whatever `SshConfig.connect_opts()` produces is
+    pin the delegation itself: whatever `SSHConfig.connect_opts()` produces is
     what the SFTP leg connects with.
     """
     from pytruenas.fs.truenas import _connect_opts_from_ssh
@@ -775,7 +775,7 @@ def test_connect_opts_carry_known_hosts():
 
     `_connect_opts_from_ssh` hand-mapped username/client_keys/password only, so
     `known_hosts` never reached `asyncssh.connect()`. The SSH executor (which
-    uses `SshConfig.connect_opts()`) enforced the configured policy while this
+    uses `SSHConfig.connect_opts()`) enforced the configured policy while this
     leg ignored it -- proven live: a `known_hosts` file with no entry for the
     host made hostctl's ssh executor refuse to connect, and the SFTP leg
     connected anyway.

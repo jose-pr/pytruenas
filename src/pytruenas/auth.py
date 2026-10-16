@@ -77,7 +77,7 @@ def _mask_args(args: tuple) -> tuple:
 def _split_extras(raw: str) -> "tuple[str, str | None]":
     """``(credential, otp)`` from a raw credential string.
 
-    Split by :func:`hostctl.host.parse_credentials`, the same function the URI
+    Split by :func:`hostctl.uri.parse_credentials`, the same function the URI
     path already used -- so the documented ``otp:<token>`` line means the same
     thing in both. Parsing it here by hand read that key as part of the token
     (``otp_token="otp:123456"``), which the server then rejected.
@@ -87,7 +87,7 @@ def _split_extras(raw: str) -> "tuple[str, str | None]":
     single one of those is taken as the OTP.
     """
     try:
-        from hostctl.host import parse_credentials
+        from hostctl.uri import parse_credentials
     except ImportError:  # pragma: no cover - hostctl is a hard dependency
         return raw, None
     try:
@@ -340,7 +340,7 @@ class Credentials(metaclass=_CredentialsMeta):
             return ApiKeyAuth(api_key, username)
         if password:
             # username defaults to root to match the rest of the stack: hostctl's
-            # SshConfig and pytruenas' own shell handling both treat a missing
+            # SSHConfig and pytruenas' own shell handling both treat a missing
             # user as root, and BasicAuth requires one positionally.
             return BasicAuth(username or "root", password, otp)
         # An OTP with nothing to attach it to cannot authenticate anything, and

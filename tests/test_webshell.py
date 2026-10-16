@@ -30,7 +30,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from hostctl.provider import OperationNotStarted
+from hostctl.exceptions import OperationNotStartedError
 
 import pytruenas.webshell as ws_mod
 from pytruenas.webshell import (
@@ -411,7 +411,7 @@ def test_timeout_none_waits_past_the_poll_interval(monkeypatch):
 def test_a_connection_lost_before_the_command_started_did_not_run_it():
     terminal = _Terminal(silent=True)
     terminal.closed = True
-    with pytest.raises(OperationNotStarted):
+    with pytest.raises(OperationNotStartedError):
         _session(terminal).execute("true", timeout=5)
 
 
