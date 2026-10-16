@@ -13,6 +13,40 @@ has a previous->current table. The ejson codec is the hot path worth watching
 (`ejson.loads.plain` is the largest per-call cost); the `benchmark` job in
 test.yml produces the numbers.
 
+### What changed
+
+The port to hostctl 0.4. hostctl replaced `pathlib_next` with `pathapi` (and
+its SFTP leg with `sftppath`), renamed most of its public names, and requires
+netimps 0.4; pytruenas follows all three. The documented API changes where the
+path types surface (`pathapi` classes in place of `pathlib_next` ones), in
+`TruenasPath.resolve()`, which now resolves over SFTP, and in the class of the
+web shell's "not started" error. Under this project's pre-1.0 rule that is a
+minor-version change.
+
+### Migration
+
+See CHANGELOG "Upgrade notes". In code: replace `pathlib_next` imports with
+`pathapi` (`LocalPath`, `Path`, `FileStat`) or `uripath` (`URIPath`); spell
+`hostctl.SSHConfig` with keyword arguments; catch `ConnectionError` (or
+`hostctl.OperationNotStartedError`) where `RuntimeError` caught a web shell
+that never started.
+
+### Validation
+
+- Suite against the hostctl checkout at `aa11442` (pathapi 0.1.1, pathapi-uri
+  0.1.0, sftppath 0.1.0, netimps 0.4.1): 951 passed / 6 skipped / 1 expected
+  failure on Python 3.14 and on the 3.9 floor (Windows ARM64), against 945 /
+  6 on hostctl 0.3.2. The expected failure is the `wss://root:123/rest@nas`
+  case hostctl 0.4 refuses. The 6 POSIX-shell skips pass under WSL.
+- Exercised against a TrueNAS 26.0 host: `run()` and `path()` with a trusted
+  key, an unknown host key, `known_hosts=None` and a refused SSH port (each
+  falling back to the web shell and `tnasws` where it should); names with `?`,
+  `#`, `%20` over both legs; `TruenasPath` readlink, resolve, rename and
+  unlink over SFTP; a `tnasws` write stream committed on close and discarded
+  on an exception.
+- hostctl 0.4.0 is not on PyPI yet, so these pins do not resolve from the
+  index until it is released.
+
 ---
 
 ## [0.5.4] - 2026-10-01

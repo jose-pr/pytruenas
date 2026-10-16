@@ -117,7 +117,7 @@ TrueNASConfig.from_target("wss://nas", executor=[])
 Valid names are `local`, `ssh`, and `webshell` for executors, and `local`,
 `sftp`, and `tnasws` for paths. An unknown name raises rather than quietly
 composing a host with no provider, and asking for `ssh`/`sftp` without an
-`SshConfig` raises too. Omit them (the default) to decide from the target.
+`SSHConfig` raises too. Omit them (the default) to decide from the target.
 
 !!! note
     SSH execution and the SFTP leg of `client.path(...)` need the `ssh` extra:

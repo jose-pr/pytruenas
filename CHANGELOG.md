@@ -6,7 +6,48 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Upgrade notes
+
+pytruenas now runs on hostctl 0.4, which moves from `pathlib_next` to
+`pathapi`. These change what a caller sees:
+
+- **Path types are `pathapi` paths.** `pytruenas.fs.LocalPath` is
+  `pathapi.LocalPath`; `TnasWsPath` and `TruenasPath` are `uripath.URIPath`
+  subclasses (distribution `pathapi-uri`); `client.path()` returns hostctl's
+  `CompositePosixPath` on `pathapi`. Code importing `pathlib_next`, or testing
+  `isinstance(..., pathlib_next.Path)` against these, must use `pathapi.Path`.
+- **`TruenasPath.resolve()` resolves symlinks over the SFTP leg.** It returned
+  the path unchanged on every host; it still does on a host with no SFTP leg.
+- **hostctl 0.4 names.** `hostctl.host.SshConfig` is `hostctl.SSHConfig`
+  (keyword arguments after the host); the "not started" error a web shell
+  connection raises is `hostctl.OperationNotStartedError`, a `ConnectionError`
+  where `hostctl.provider.OperationNotStarted` was a `RuntimeError`. The rest
+  of hostctl's renames are in its own changelog, "Migrating from 0.3".
+- **SSH settings follow hostctl 0.4.** Neither SSH leg reads `~/.ssh/config`
+  unless `SSHConfig(ssh_config=...)` names it, and an `SSHConfig` you build
+  yourself defaults to the local account name rather than `root` (`shell=` and
+  `install_sshcreds()` still use `root`).
+- **A target with a port and an `@` after it is refused.** hostctl 0.4 reads
+  `wss://nas:443/api@x` as a password cut short by an unencoded `/` and raises
+  the redacted `ValueError`; percent-encode the `@` (`%40`).
+
 ### Changed
+
+- **Dependencies: `hostctl>=0.4.0,<0.5`, `netimps>=0.4.0,<0.5`,
+  `pathapi>=0.1.0,<0.2` and `pathapi-uri>=0.1.0,<0.2`**, replacing
+  `hostctl<0.4`, `netimps<0.4` and `pathlib_next[uri]`. The `ssh` extra is
+  `hostctl[ssh]>=0.4.0,<0.5` plus `sftppath[asyncssh]>=0.1.0,<0.2`. A deploy
+  payload carries `pathapi` and `pathapi-uri` where it carried `pathlib-next`
+  and `uritools`.
+- `TruenasPath`'s SFTP leg is an `sftppath.SFTPPath` on one connection per
+  client, given the decoded path rather than an `sftp://` URI.
+- A `TnasWsPath` write stream whose `with` block raises uploads nothing; it
+  uploaded what had been written.
+- A relative path on a remote target, and `client.path()` with no segments,
+  stay rooted at `/` on every leg (hostctl 0.4's SSH hosts read them against
+  the login directory instead).
+- `install_sshcreds()` swaps the providers through hostctl's
+  `replace_providers()`, which closes each replaced transport once.
 
 - **Dependency floor `duho>=0.6.0,<0.7` → `duho>=0.7.3,<0.8`.** The command
   line is unchanged: its help, flags, `--version` and exit statuses are the same
@@ -25,6 +66,17 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   `duho.runpath.preserve_registration()` and reads it with
   `duho.runpath.registration()`, and tests the step arity with
   `duho.runpath.step_wants_context`, instead of duho's private names.
+
+### Fixed
+
+- **`client.path(..., backend=name)` uses that provider for every operation.**
+  It chose the provider that built the path, and each operation then selected
+  again from the first capable one: on a host with an SSH leg,
+  `backend="tnasws"` wrote over SFTP.
+- **A lost connection during a patch template's `chmod` stops the write.**
+  `FileTarget` took any `OSError` from `stat()`/`chmod()` for "this backend
+  has no modes" and wrote the content anyway, which a reconnect could leave at
+  the wider mode the `chmod` was meant to prevent.
 
 ## [0.5.4] - 2026-10-01
 

@@ -151,7 +151,7 @@ nas = TrueNASClient("nas.example.com", api_key)
 nas.capabilities            # {"path", "run"} -- run via the web shell
 
 nas.install_sshcreds()
-nas.config.ssh              # now an SshConfig with client_keys set
+nas.config.ssh              # now an SSHConfig with client_keys set
 nas.last_selection          # subsequent run() calls report 'ssh'
 ```
 

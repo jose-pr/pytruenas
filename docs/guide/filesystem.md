@@ -1,6 +1,6 @@
 # Filesystem paths
 
-`client.path(...)` returns a [`pathlib_next`](https://pypi.org/project/pathlib_next/)
+`client.path(...)` returns a [`pathapi`](https://pypi.org/project/pathapi/)
 `Path` object for a location on the target:
 
 ```python
@@ -13,10 +13,13 @@ p.with_name("report.bak").write_bytes(data)
 ## Local vs remote backends
 
 - For a **local** target, `client.path(...)` is an ordinary local `Path`.
-- For a **remote** target it is a `TruenasPath`, which prefers **SFTP** (via the
-  `ssh` extra's `asyncssh` backend) and falls back to the middleware
-  `filesystem.*` websocket API for operations SFTP doesn't cover cleanly
-  (delete/rename/symlink).
+- For a **remote** target it prefers **SFTP** (the `ssh` extra: asyncssh and
+  `sftppath`) and falls back to the middleware `filesystem.*` websocket API
+  when SFTP is not configured or cannot connect.
+- A relative path, and `client.path()` with no segments, is rooted at `/` on
+  a remote target, whichever leg serves it.
+- `client.path(p, backend="tnasws")` (or `"sftp"`, `"local"`) pins the path to
+  that leg for every operation on it.
 
 ```bash
 pip install pytruenas[ssh]     # enables the SFTP backend
@@ -52,7 +55,7 @@ for root, dirs, files in src.walk():
     for name in files:
         print(root / name)
 
-# `pathlib_next` copies across backends, so this crosses machines
+# `pathapi` copies across backends, so this crosses machines
 local_copy = pathlib.Path("/tmp/app.conf")
 client.path("/mnt/tank/config/app.conf").copy(local_copy)
 ```
@@ -79,12 +82,10 @@ need the `ssh` extra and a reachable SSH leg. Without one they raise
 | `unlink`/`rmdir` | ✅ | ✅ (shells out) |
 | `rename` | ✅ | ❌ |
 | `symlink_to` / `readlink` | ✅ | ❌ |
-| `resolve` | ❌ | ❌ — returns the path unchanged |
+| `resolve` | ✅ | ❌ — returns the path unchanged |
 
-`resolve()` is the one exception to "SFTP first": neither leg can do it.
-`pathlib_next`'s `SftpPath` implements no `resolve` and the middleware has no
-`realpath`, so `resolve()` returns the path unchanged on **every** host,
-whether or not SFTP is configured.
+`resolve()` replaces every symlink in the path over SFTP. The middleware has no
+`realpath`, so on a host with no SFTP leg it returns the path unchanged.
 
 `symlink_to` takes a pytruenas-specific `force=` that removes a conflicting
 target first — a bool, a file-type string, or a set of
@@ -100,7 +101,7 @@ cannot create the link raises `NotImplementedError` with the existing target
 still in place — rather than deleting it and then failing.
 
 !!! note
-    SFTP concurrency and transport details come from `pathlib_next`; pytruenas
+    SFTP concurrency and transport details come from `sftppath`; pytruenas
     just selects and wires the backend. The SFTP leg verifies the server's host
     key (see [Host keys](connecting.md#host-keys)); when it cannot connect,
     `client.path()` operations are served by the websocket leg instead.

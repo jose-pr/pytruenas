@@ -37,8 +37,10 @@ version="current", executor=None, path=None, ssh=None, ...)`
   userinfo must percent-encode `/`, `?`, `#` and `@` (`%2F`, `%3F`, `%23`,
   `%40`). A string that does not parse as a URI raises `ValueError` with the
   credentials stripped from the message; one that *does* parse is used as the
-  URI it is (an `@` in a path is a path — indistinguishable from an unencoded
-  password, so neither this package nor hostctl guesses).
+  URI it is (an `@` in a path is a path). One exception comes from hostctl
+  0.4: an authority with a port followed by an `@` anywhere after it
+  (`wss://nas:443/api@x`) is refused as a password cut short by an unencoded
+  `/`, with the same redacted `ValueError`.
 - **`credentials`** (positional as `creds` historically) — passed to
   `Credentials(...)` (below); `None` means local-socket auth (no login call).
 - **`autologin`** (default `True`) — the first `.conn` access calls
@@ -47,7 +49,7 @@ version="current", executor=None, path=None, ssh=None, ...)`
   makes. `verify=False` turns off TLS certificate verification (the API
   websocket, the HTTP(S) side channels, the web shell) **and** SSH host-key
   verification (commands and SFTP): `sslverify` becomes `False` and
-  `known_hosts` becomes `None`, including on an explicit `ssh=SshConfig(...)`
+  `known_hosts` becomes `None`, including on an explicit `ssh=SSHConfig(...)`
   still at its `()` default (a copy is changed, not yours). A specific
   `sslverify=` or `known_hosts=` overrides it.
 - **`sslverify`** (default: follows `verify`) — TLS certificate verification
@@ -60,8 +62,8 @@ version="current", executor=None, path=None, ssh=None, ...)`
   as a `str`. A missing bundle raises `FileNotFoundError` naming the path and
   its source at connect time.
 - **`shell`** — connection string for the SSH leg (`"ssh://root@nas"`,
-  `"root:pw@nas:22"`). Stored as an `SshConfig` on `.config.ssh`; pass
-  `ssh=SshConfig(...)` to supply one directly.
+  `"root:pw@nas:22"`). Stored as a `hostctl.SSHConfig` on `.config.ssh`; pass
+  `ssh=SSHConfig(...)` to supply one directly.
 - **`verify`/`sslverify` and plaintext** — a credential sent over plain
   `ws://` to a non-loopback host logs one warning per host. `ws://` is not
   refused: it is legitimate for a loopback target or an already-private link.
@@ -69,7 +71,7 @@ version="current", executor=None, path=None, ssh=None, ...)`
   host-key policy for the SSH leg built from
   `shell=` or by `.install_sshcreds()`, with hostctl's values: `()` verifies
   against `~/.ssh/known_hosts`, `None` does not verify, a path or list of paths
-  names the file(s). An explicit `ssh=SshConfig(...)` keeps its own. Both the
+  names the file(s). An explicit `ssh=SSHConfig(...)` keeps its own. Both the
   command and SFTP halves verify by default; an unverifiable key (or an
   unreachable SSH port) makes `run()` and `path()` fall back to the websocket
   providers, and `run()` logs one WARNING per host when it does.
@@ -137,14 +139,20 @@ version="current", executor=None, path=None, ssh=None, ...)`
   how you decide *when*.
 - **`.me() -> dict`** (`auth.me`) / **`.logout() -> None`** (`auth.logout`) /
   **`.ping() -> str`** (`core.ping` -> `"pong"`) — convenience wrappers.
-- **`.path(*path, backend=None)`** — build a `pathlib_next` path rooted at
-  `path`. `backend` names one **path provider** for this call, from the names
-  in the provider table below (`"tnasws"`, `"sftp"`, `"local"`), and raises
-  `ValueError: unknown path provider` for anything else — including a provider
-  this host has not got (`"sftp"` without an SSH leg, `"local"` on a remote
-  host). Not the `pytruenas.fs.path()` vocabulary (`"ws"`/`"api"`/`"truenas"`),
-  which is a different function documented under `fs` below. Inherited from
-  `hostctl.host.Host`.
+- **`.path(*path, backend=None) -> pathapi.Path`** — build a path on the
+  target: a hostctl `CompositePosixPath` over the path providers, which picks a
+  provider per operation (annotate with `pathapi.Path`). On a remote target a
+  relative path, and `path()` with no segments, is rooted at `/` on every leg
+  (hostctl's own SSH hosts read it against the login directory; pytruenas
+  does not, because the websocket leg cannot). `backend` names one **path
+  provider**, from the names in the provider table below (`"tnasws"`,
+  `"sftp"`, `"local"`), and pins the returned path to it for every operation
+  (`.via(backend)`); it raises `ValueError: unknown path provider` for anything
+  else — including a provider this host has not got (`"sftp"` without an SSH
+  leg, `"local"` on a remote host) — and `OperationNotStartedError` when that
+  provider is unavailable. Not the `pytruenas.fs.path()` vocabulary
+  (`"ws"`/`"api"`/`"truenas"`), which is a different function documented under
+  `fs` below. Wraps `hostctl.host.Host.path`.
 - **`.run(*cmds, **kwargs) -> subprocess.CompletedProcess`** — run commands on
   the target. Inherited from `hostctl.host.Host.run`; see that for the full
   signature (`stdin`/`stdout`/`stderr`, `cwd`, `env`, `capture_output`,
@@ -200,7 +208,7 @@ version="current", executor=None, path=None, ssh=None, ...)`
 - **`.install_sshcreds(name=None, private_key=None)`** — generate/reuse an SSH
   keypair via `keychaincredential`, install the public half on `root`'s
   `authorized_keys`, and store the private half on `.config.ssh` as a real
-  `SshConfig.client_keys`. Returns the private key. Needs **no** optional
+  `SSHConfig.client_keys`. Returns the private key. Needs **no** optional
   extra: provisioning runs over the middleware API and opens no SSH
   connection. Passing `private_key=` for a key the host does not already know
   is the exception — the public half is derived locally, which needs
@@ -220,7 +228,7 @@ TrueNASHost("nas", credentials="1-...", executor=["ssh"])
 TrueNASHost()                       # the local middleware socket
 ```
 
-It is a `hostctl.host.PosixHost`, so `run`, `path`, `spawn`, `info`, `connect`,
+It is a `hostctl.PosixHost`, so `run`, `path`, `spawn`, `info`, `connect`,
 `close`, `shell`, `capabilities`, and `last_selection` are all inherited; the
 middleware surface (`api`, `websocket`, `login`, `logout`, `me`, `ping`,
 `subscribe`, `upload`, `download`, `dump_api`, `install_sshcreds`) is what this
@@ -271,7 +279,7 @@ TrueNASConfig.from_target("wss://nas", executor=[])                   # no run c
 
 Valid names are `local`/`ssh`/`webshell` for executors and
 `local`/`sftp`/`tnasws` for paths; an unknown one raises rather than silently
-composing a host with nothing. Requesting `ssh`/`sftp` without an `SshConfig`
+composing a host with nothing. Requesting `ssh`/`sftp` without an `SSHConfig`
 also raises. `None` (the default) means "decide from the target".
 
 `TrueNASConfig` is the `hostctl.host.HostConfig`. It accepts every connection
@@ -472,10 +480,11 @@ imports on Python 3.9.
 `client.path(*segments, backend=None)` is the intended entry point; the
 module-level `path(client, *segments, backend=None)` is what it delegates to.
 
-- **`LocalPath`** — re-exported `pathlib_next.LocalPath`, used for a local
+- **`LocalPath`** — re-exported `pathapi.LocalPath`, used for a local
   client with no client-specific behavior.
-- **`TnasWsPath`** (`pytruenas.fs.tnasws`) — a `pathlib_next` `UriPath`
-  (scheme `truenas+ws`) backed entirely by the middleware `filesystem.*` API
+- **`TnasWsPath`** (`pytruenas.fs.tnasws`) — a `uripath.URIPath` (distribution
+  `pathapi-uri`; scheme `truenas+ws`) backed entirely by the middleware
+  `filesystem.*` API
   via a `TnasWsBackend(client)`. Implements stat/listdir/open/read/write/
   mkdir/chmod/chown; `unlink`/`rmdir` shell out (`rm -f` / `rmdir`) because
   `filesystem.*` has no delete op. Built from a bare URI (no backend) raises
@@ -489,20 +498,24 @@ module-level `path(client, *segments, backend=None)` is what it delegates to.
   that column breaks `iterdir`/`glob`/`walk` off-pool. `listdir` reports no
   `mtime` on any filesystem, so stats seeded from a listing carry `st_mtime`
   0; `stat()` uses `filesystem.stat`, which does report it.
+  A write stream (`open("w")`/`"a"`, `write_bytes`) is one `filesystem.put`
+  when it closes; a `with` block that raises discards it, so a failed write
+  uploads nothing (`pathapi.providers.CommitOnClose`).
   `mkdir(mode=None, parents=False, exist_ok=False)` — an omitted `mode` is
   `0o755` (the middleware applies the mode it is sent, with no umask; an
   explicit mode is sent as given); `parents=True` creates missing parents.
-  Two paths are the same filesystem (for pathlib_next's same-file and overlap
+  Two paths are the same filesystem (for pathapi's same-file and overlap
   guards) when their backends talk to the same client or to clients with the
   same `connection_uri` — not merely when they share a backend object.
-- **`TruenasPath`** (`pytruenas.fs.truenas`) — subclasses `TnasWsPath`; five
-  operations — `unlink`/`rmdir`/`rename`/`symlink_to`/`readlink` — try an SFTP
-  leg first (via `pathlib_next`'s `SftpPath`, requires the `ssh` extra +
-  `client.config.ssh` host) and fall back to `TnasWsPath`'s websocket behavior (or
-  raise `NotImplementedError` for ops SFTP alone can do — rename, symlink_to,
-  readlink). **`resolve` is not one of them**: `SftpPath` has no `resolve`, so
-  the attempt always raises `NotImplementedError` and `resolve()` returns
-  `self` on every host, SFTP configured or not. `rename(target)` accepts a
+- **`TruenasPath`** (`pytruenas.fs.truenas`) — subclasses `TnasWsPath`; six
+  operations — `unlink`/`rmdir`/`rename`/`symlink_to`/`readlink`/`resolve` —
+  try an SFTP leg first (an `sftppath.SFTPPath` on one `AsyncSSHBackend` per
+  client, built from `client.config.ssh.connect_opts()`; requires the `ssh`
+  extra) and fall back to `TnasWsPath`'s websocket behavior (or raise
+  `NotImplementedError` for ops SFTP alone can do — rename, symlink_to,
+  readlink). `resolve()` replaces every symlink over SFTP and returns `self`
+  unchanged on a host with no SFTP leg (the middleware has no `realpath`).
+  The SFTP leg takes the decoded `.path`, not a URI. `rename(target)` accepts a
   `str` or a path on the SAME host and returns the new `TruenasPath`; a target
   on another host (or of another type) raises `NotImplementedError`, so
   `move()` copies and deletes instead of renaming on the source host.
@@ -520,10 +533,10 @@ module-level `path(client, *segments, backend=None)` is what it delegates to.
 for a local client).
 
 **Segments are filesystem paths, not URIs** (since 0.4.5). Both remote types are
-`UriPath`s, so `path()` percent-encodes each segment into the `truenas://` /
+`URIPath`s, so `path()` percent-encodes each segment into the `truenas://` /
 `truenas+ws://` URI it builds: a name containing `?`, `#`, `%`, a space or
-non-ASCII survives `p.path` unchanged, and the SFTP leg re-encodes the decoded
-name exactly once. Before 0.4.5 the segments were interpolated raw and
+non-ASCII survives `p.path` unchanged, and the SFTP leg is given that decoded
+name. Before 0.4.5 the segments were interpolated raw and
 `client.path("/mnt/tank/cache?v=2")` addressed `/mnt/tank/cache` silently, on
 **both** legs. Constructing a path type *directly* from a URI string
 (`TruenasPath("truenas://nas/...")`) is unchanged and still URI syntax — `?`
@@ -745,8 +758,8 @@ The objects behind the table above. A caller never needs them to use a host --
 `executor=`/`path=` name them by string -- but they are public, so a consumer
 can compose a host of its own.
 
-- **`providers.local_providers()`** — hostctl's stock local executor/path pair,
-  as this package configures them.
+- **`providers.local_providers()`** — `hostctl.local_providers()` unchanged: a
+  fresh `(executor_provider, path_provider)` pair, both named `"local"`.
 - **`providers.TnasWsPathProvider(client)`** — the `filesystem.*` path provider
   (`"tnasws"`), which works over the API websocket with no SSH.
 - **`webshell.WebShellExecutorProvider(client)`** — the `"webshell"` executor.
@@ -756,7 +769,8 @@ can compose a host of its own.
   and can stream: `sink`/`errsink` are called with decoded chunks as they
   arrive. `.command_lines(...)` yields output lines. A `timeout` raises
   `subprocess.TimeoutExpired` carrying whatever arrived; a connection lost
-  before the command starts raises `OperationNotStarted`.
+  before the command starts raises `hostctl.OperationNotStartedError` (a
+  `ConnectionError`).
 - **`webshell.clean_output(text)`** — strips the terminal's own control
   sequences from captured output.
 
@@ -804,10 +818,11 @@ Everything is built to be repeatable and undoable:
   on the backing dataset and **restores it however the block exits**. Required
   for anything under `/usr`. `dataset_for` walks up to an existing ancestor,
   because `findmnt --target` fails on a path that does not exist yet — the
-  ordinary "create this file" case. `host_path` unwraps a path for argv: a
-  `UriPath` renders as a URI via `str()`, scp syntax via `as_posix()`, and
-  raises from `os.fspath()`, so only `.path` is usable (filed upstream as
-  `2026-07-29_uripath_fspath_refuses_remote_schemes`).
+  ordinary "create this file" case. `host_path(path) -> str` unwraps a path
+  for argv through `os.fspath()`: a `client.path(...)` composite gives its
+  logical path, and a URI path gives the host path when its scheme names a
+  host filesystem (`truenas`, `truenas+ws`, `sftp`); a `str` passes through.
+  Any other scheme raises rather than putting a URI into a command line.
 
 ## `codegen` (`pytruenas.codegen`)
 
@@ -1029,8 +1044,8 @@ a directory the user does not control.
 
 ## Optional extras and their gating imports
 
-- **`ssh`** (`hostctl[ssh]>=0.3.1,<0.4`, i.e. asyncssh + pathlib_next's
-  sftp-async) — required for
+- **`ssh`** (`hostctl[ssh]>=0.4.0,<0.5` and `sftppath[asyncssh]>=0.1.0,<0.2`,
+  i.e. asyncssh + sftppath) — required for
   `.ssh`, `.run()` over SSH, and the SFTP leg of `TruenasPath`. Missing it
   raises a clear `ImportError` naming the extra at first use, not at import
   time. **Not** required by `.install_sshcreds`, which provisions over the

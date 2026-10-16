@@ -101,10 +101,15 @@ TrueNASClient("nas", api_key, sslverify="/etc/pki/lab-ca.pem")
 ```
 
 `known_hosts=` applies to the SSH leg built from `shell=` and to the one
-`install_sshcreds()` wires in; an `ssh=SshConfig(...)` you build yourself keeps
+`install_sshcreds()` wires in; an `ssh=SSHConfig(...)` you build yourself keeps
 its own setting. When the key cannot be verified (or SSH is unreachable),
 commands and file operations fall back to the websocket transports, and the
 client logs a warning the first time `run()` does so.
+
+Neither SSH leg reads `~/.ssh/config`: a host alias, `IdentityFile` or
+`ProxyCommand` there is ignored. Pass the host, key and known-hosts file to
+`shell=`/`SSHConfig(...)`, or name the file explicitly with
+`ssh=SSHConfig(host, username="root", ssh_config="~/.ssh/config")`.
 
 !!! note
     The `shell=` argument was also readable as `client.shell` before the move
