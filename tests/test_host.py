@@ -317,6 +317,44 @@ def test_a_relative_remote_path_is_rooted_at_slash_on_every_leg(
     assert seen == [("filesystem.stat", expected)]
 
 
+def test_path_backend_pins_every_operation_to_that_provider(monkeypatch):
+    """`path(..., backend="tnasws")` writes through the websocket leg.
+
+    Without the pin, hostctl builds the path with the named provider and then
+    routes each operation from the first capable one again -- a write asked of
+    `tnasws` went out over SFTP (measured live).
+    """
+    from types import SimpleNamespace
+
+    from hostctl.provider import PathProvider
+    from pathapi import MemPath
+
+    from pytruenas.providers import TnasWsPathProvider
+
+    puts = []
+
+    def call(method, *args, **kwds):
+        puts.append(method)
+        return None
+
+    host = TrueNASHost("wss://nas", autologin=False)
+    memory = MemPath("/")
+    first = PathProvider("sftp", lambda *segments: memory.joinpath(*segments))
+    host.replace_providers(path=(first, TnasWsPathProvider(host)))
+    conn = SimpleNamespace(call=call, close=lambda: None)
+    monkeypatch.setattr(TrueNASHost, "conn", property(lambda self: conn))
+    monkeypatch.setattr(
+        TrueNASHost,
+        "upload",
+        lambda self, data, method, *params, **kw: puts.append(method),
+    )
+
+    host.path("/f.txt", backend="tnasws").write_bytes(b"x")
+
+    assert not memory.joinpath("f.txt").exists()
+    assert puts == ["filesystem.put"]
+
+
 def _trace(*entries):
     return property(lambda self: tuple(dict(e) for e in entries))
 

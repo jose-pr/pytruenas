@@ -1575,12 +1575,17 @@ class TrueNASHost(_PosixHost, _ty.Generic[ApiVersion]):
         the websocket leg cannot know, and asks the server for it while the
         path is built. A local target keeps local semantics (the process's
         working directory).
+
+        ``backend`` pins the path to that provider for every operation on it
+        (``.via(backend)``); hostctl's own ``backend=`` only chooses the
+        provider that builds the path, and later operations re-select.
         """
         if not self._config.is_local and (
             not segments or not str(segments[0]).startswith("/")
         ):
             segments = ("/", *segments)
-        return super().path(*segments, backend=backend)
+        path = super().path(*segments, backend=backend)
+        return path if backend is None else path.via(backend)
 
     def _warn_fallback(self) -> None:
         trace = self.last_selection
