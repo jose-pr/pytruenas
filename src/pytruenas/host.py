@@ -1192,17 +1192,27 @@ class TrueNASHost(_PosixHost, _ty.Generic[ApiVersion]):
 
     @property
     def ssh(self):
-        """The underlying ``asyncssh`` connection (requires the ``ssh`` extra).
+        """The ``asyncssh`` connection ``run()`` uses (requires the ``ssh`` extra).
 
         For the rare caller that needs the raw connection -- port forwarding,
         an SFTP client of its own. Ordinary command and path work should go
         through :meth:`run` and :meth:`path`, which pick a transport rather
         than assuming this one exists.
+
+        It is :attr:`hostctl.transports.ssh.SSHExecutorProvider.connection`:
+        the first access connects (raising ``PermissionError``,
+        ``ConnectionError``, ``TimeoutError`` or ``OSError``), and the
+        connection is bound to that provider's ``loop``, hostctl's
+        process-wide event-loop thread -- run its coroutines with
+        ``asyncio.run_coroutine_threadsafe(coro, provider.loop).result()``.
+        :meth:`close` closes it. Raises ``RuntimeError`` when this host has no
+        SSH executor.
         """
+        from hostctl.transports.ssh import SSHExecutorProvider
+
         for provider in self.executor_providers:
-            transport = getattr(provider, "transport", None)
-            if transport is not None and hasattr(transport, "ssh"):
-                return transport.ssh
+            if isinstance(provider, SSHExecutorProvider):
+                return provider.connection
         raise RuntimeError(
             "no SSH transport is configured for this host; pass shell=... or "
             "ssh=SSHConfig(...), or call install_sshcreds()"
@@ -1571,21 +1581,18 @@ class TrueNASHost(_PosixHost, _ty.Generic[ApiVersion]):
 
         On a remote target a relative path (and ``path()`` with no segments)
         names the same file on every leg: ``/`` joined with it. hostctl's SFTP
-        leg would read a relative path against the SSH login directory, which
-        the websocket leg cannot know, and asks the server for it while the
-        path is built. A local target keeps local semantics (the process's
-        working directory).
+        leg reads a relative path against the SSH login directory, which the
+        websocket leg cannot know, so left relative the same path would name
+        different files depending on which leg serves it. A local target keeps
+        local semantics (the process's working directory).
 
-        ``backend`` pins the path to that provider for every operation on it
-        (``.via(backend)``); hostctl's own ``backend=`` only chooses the
-        provider that builds the path, and later operations re-select.
+        ``backend`` pins the path to that provider for every operation on it.
         """
         if not self._config.is_local and (
             not segments or not str(segments[0]).startswith("/")
         ):
             segments = ("/", *segments)
-        path = super().path(*segments, backend=backend)
-        return path if backend is None else path.via(backend)
+        return super().path(*segments, backend=backend)
 
     def _warn_fallback(self) -> None:
         trace = self.last_selection

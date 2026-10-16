@@ -37,10 +37,8 @@ version="current", executor=None, path=None, ssh=None, ...)`
   userinfo must percent-encode `/`, `?`, `#` and `@` (`%2F`, `%3F`, `%23`,
   `%40`). A string that does not parse as a URI raises `ValueError` with the
   credentials stripped from the message; one that *does* parse is used as the
-  URI it is (an `@` in a path is a path). One exception comes from hostctl
-  0.4: an authority with a port followed by an `@` anywhere after it
-  (`wss://nas:443/api@x`) is refused as a password cut short by an unencoded
-  `/`, with the same redacted `ValueError`.
+  URI it is (an `@` in a path is a path — indistinguishable from an unencoded
+  password, so neither this package nor hostctl guesses).
 - **`credentials`** (positional as `creds` historically) — passed to
   `Credentials(...)` (below); `None` means local-socket auth (no login call).
 - **`autologin`** (default `True`) — the first `.conn` access calls
@@ -91,10 +89,19 @@ version="current", executor=None, path=None, ssh=None, ...)`
   After a successful `.login(...)`, a reconnect repeats that login (same
   credentials, `login_ex`, options, `otp_provider`) regardless of
   `autologin`. Thread-safe: concurrent first use opens one connection.
-- **`.ssh`** — a lazily-opened `asyncssh` connection (requires the `ssh`
-  extra), reached through the composed SSH transport. Raises if none is
-  configured. For the raw connection only; `.run()`/`.path()` select a
-  transport instead of assuming this one.
+- **`.ssh`** — the `asyncssh.SSHClientConnection` that `.run()` uses over
+  SSH (requires the `ssh` extra): `hostctl.transports.ssh.SSHExecutorProvider.connection`
+  of the provider in `.executor_providers`. The first access connects and
+  raises what connecting raises (`PermissionError`, `ConnectionError`,
+  `TimeoutError`, or the `OSError` of a refused or unresolvable host);
+  `RuntimeError` when the host has no SSH executor. The connection is bound to
+  hostctl's process-wide event loop (the provider's `.loop`, thread
+  `hostctl-asyncssh-loop`), not yours: run its coroutines with
+  `asyncio.run_coroutine_threadsafe(coro, provider.loop).result()`, never await
+  them on another loop, and never block that loop. `.close()` closes it; a read
+  after that opens a new connection the host no longer tracks. For the raw
+  connection only (port forwarding, an SFTP client of your own);
+  `.run()`/`.path()` select a transport instead of assuming this one.
 - **`.config`** — the `TrueNASConfig` this was built from. `.config.ssh` is the
   SSH leg; `.shell` means the *bound shell object* (`client.shell.run(...)`),
   as it does throughout hostctl.
@@ -147,7 +154,7 @@ version="current", executor=None, path=None, ssh=None, ...)`
   does not, because the websocket leg cannot). `backend` names one **path
   provider**, from the names in the provider table below (`"tnasws"`,
   `"sftp"`, `"local"`), and pins the returned path to it for every operation
-  (`.via(backend)`); it raises `ValueError: unknown path provider` for anything
+  (hostctl's own `backend=`); it raises `ValueError: unknown path provider` for anything
   else — including a provider this host has not got (`"sftp"` without an SSH
   leg, `"local"` on a remote host) — and `OperationNotStartedError` when that
   provider is unavailable. Not the `pytruenas.fs.path()` vocabulary

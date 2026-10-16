@@ -292,10 +292,8 @@ def test_a_relative_remote_path_is_rooted_at_slash_on_every_leg(
 ):
     """A relative path names one file whichever leg serves it.
 
-    hostctl's SFTP leg reads a relative path against the SSH login directory
-    and connects to ask for it while the path is built -- with SSH down that
-    raised `ConnectionRefusedError` from `path()` itself, before the websocket
-    leg could serve the call.
+    hostctl's SFTP leg reads a relative path against the SSH login directory,
+    which the websocket leg cannot know.
     """
     pytest.importorskip("asyncssh")
     from types import SimpleNamespace
@@ -320,9 +318,8 @@ def test_a_relative_remote_path_is_rooted_at_slash_on_every_leg(
 def test_path_backend_pins_every_operation_to_that_provider(monkeypatch):
     """`path(..., backend="tnasws")` writes through the websocket leg.
 
-    Without the pin, hostctl builds the path with the named provider and then
-    routes each operation from the first capable one again -- a write asked of
-    `tnasws` went out over SFTP (measured live).
+    An unpinned path routes each operation from the first capable provider
+    again, so a write asked of `tnasws` would go out over SFTP.
     """
     from types import SimpleNamespace
 
@@ -413,6 +410,18 @@ def test_autologin_and_logger_are_honoured(monkeypatch):
 def test_ssh_property_raises_clearly_without_a_transport():
     with pytest.raises(RuntimeError, match="no SSH transport"):
         _host().ssh
+
+
+def test_ssh_property_is_the_ssh_executor_providers_connection(monkeypatch):
+    """`.ssh` is hostctl's public accessor, read from the SSH executor."""
+    from hostctl.transports.ssh import SSHExecutorProvider
+
+    connection = object()
+    monkeypatch.setattr(
+        SSHExecutorProvider, "connection", property(lambda self: connection)
+    )
+    host = TrueNASHost("wss://nas", autologin=False, shell="ssh://root@nas")
+    assert host.ssh is connection
 
 
 @pytest.mark.parametrize("typo", ["passwrd", "sslverfy", "nonsense"])
