@@ -361,7 +361,7 @@ def missing_on(
     """The closure entries that ``installed`` does not already provide.
 
     ``installed`` is what :data:`PROBE_SOURCE` printed on the target. The
-    comparison is on canonical names, so ``pathlib_next`` and ``pathlib-next``
+    comparison is on canonical names, so ``pathapi_uri`` and ``pathapi-uri``
     are one package.
     """
     names, environment = parse_probe(list(installed))

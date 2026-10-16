@@ -19,13 +19,19 @@ pytestmark = pytest.mark.requires("pathspec")
 # -- the closure ----------------------------------------------------------
 
 
+@pytest.mark.requires("mkdocstrings")
 def test_a_requirements_own_extras_are_followed():
-    """pytruenas depends on `pathlib_next[uri]`; that extra's own requirement
-    (uritools) was dropped, and the appliance does not have it -- so a deployed
-    bundle could not import `pathlib_next.uri`, which every remote path uses."""
-    closure = bundle.requirements("pytruenas")
-    assert "uritools" in closure
-    assert "pathlib-next" in closure
+    """A requirement's own extras are part of the closure.
+
+    The docs extra asks for `mkdocstrings[python]`, and only that extra of
+    mkdocstrings requires `mkdocstrings-python`. A closure that dropped a
+    requirement's own extras would ship a package that cannot import what it
+    was asked to bring.
+    """
+    closure = bundle.requirements("pytruenas", extras=("docs",))
+    assert "mkdocstrings" in closure
+    assert "mkdocstrings-python" in closure
+    assert "mkdocstrings-python" not in bundle.requirements("pytruenas")
 
 
 def test_the_roots_extras_are_not_applied_to_everything():
@@ -34,7 +40,7 @@ def test_the_roots_extras_are_not_applied_to_everything():
     core = bundle.requirements("pytruenas")
     with_ssh = bundle.requirements("pytruenas", extras=("ssh",))
     assert "asyncssh" not in core and "asyncssh" in with_ssh
-    # pathlib_next has `sftp`/`s3`/`az` extras; none of them are pulled in.
+    # sftppath has a `paramiko` extra; asking for `asyncssh` does not pull it.
     assert not {"paramiko", "boto3", "azure-identity"} & set(with_ssh)
 
 

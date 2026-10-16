@@ -46,18 +46,17 @@ dependencies = [
     # "Environment variables" in src/pytruenas/AGENTS.md.
     "duho>=0.7.5,<0.8",
     # Series base; only `get_default_port` (utils/target.py) is used.
-    "netimps>=0.3.0,<0.4",
-    # 0.9.10: `Path._same_filesystem()`, the hook hostctl 0.3's composite paths
-    # answer (and the minimum hostctl 0.3 itself requires).
-    "pathlib_next[uri]>=0.9.10,<0.10",
+    "netimps>=0.4.0,<0.5",
+    # Series base: `LocalPath`, `FileStat` and `providers.CommitOnClose`.
+    "pathapi>=0.1.0,<0.2",
+    # Series base; import name `uripath`. `URIPath` is the base of the
+    # `truenas://` and `truenas+ws://` path types.
+    "pathapi-uri>=0.1.0,<0.2",
     "requests>=2.0,<3",
     "websocket-client>=1.0,<2",
-    # 0.3.2: `redact_uri` leaves a well-formed URI alone, which this package's
-    # own redaction and its "does this target parse?" check both rely on (0.3.1
-    # rewrote `ssh://nas:22/mail/user@example.com` into a different host). 0.3.1
-    # brought the composite-path fallback when SFTP cannot connect and stopped
-    # re-dialling a declined SSH leg. TrueNASHost is a hostctl PosixHost.
-    "hostctl>=0.3.2,<0.4",
+    # Series base. TrueNASHost is a hostctl PosixHost; every path a provider
+    # returns must be a pathapi path.
+    "hostctl>=0.4.0,<0.5",
     # `deploy` reads PEP 508 requirement lines and environment markers to build
     # its dependency closure; without it the closure silently lost duho,
     # hostctl and netimps. Capped above the newest tested (26.x) rather than at
@@ -70,9 +69,10 @@ dependencies = [
 [project.optional-dependencies]
 # Config-file support for the CLI (YAML targets/config).
 config = ["pyyaml"]
-# Remote shell + SFTP filesystem leg: the SSH providers are hostctl's, so its
-# own `ssh` extra (asyncssh, pathlib_next's sftp-async) is exactly what is needed.
-ssh = ["hostctl[ssh]>=0.3.2,<0.4"]
+# Remote shell + SFTP filesystem leg: the SSH providers are hostctl's (its
+# `ssh` extra is asyncssh and sftppath), and TruenasPath's own SFTP leg builds
+# sftppath's `SFTPPath` and `AsyncSSHBackend` directly.
+ssh = ["hostctl[ssh]>=0.4.0,<0.5", "sftppath[asyncssh]>=0.1.0,<0.2"]
 # Typings generator (`pytruenas generate-typings`).
 # Series base: `Environment`/`DictLoader`/`tojson` have been stable since 3.0,
 # and 4.x may break them. Validated against 3.1.x.
@@ -85,7 +85,7 @@ codegen = ["jinja2>=3.0,<4"]
 # so 3.11+ never installs a redundant package for what it already has built
 # in -- `pytruenas.utils.bundle` tries tomllib first regardless.
 repo = ["pathspec", "tomli; python_version<'3.11'"]
-dev =["black", "build", "hatchling", "pytest", "pytest-cov", "twine", "pyyaml", "hostctl[ssh]>=0.3.2,<0.4", "duho>=0.7.5,<0.8", "jinja2", "pathspec", "tomli; python_version<'3.11'"]
+dev =["black", "build", "hatchling", "pytest", "pytest-cov", "twine", "pyyaml", "hostctl[ssh]>=0.4.0,<0.5", "sftppath[asyncssh]>=0.1.0,<0.2", "duho>=0.7.5,<0.8", "jinja2", "pathspec", "tomli; python_version<'3.11'"]
 docs = ["mkdocs", "mkdocs-material", "mkdocstrings[python]"]
 
 [project.scripts]

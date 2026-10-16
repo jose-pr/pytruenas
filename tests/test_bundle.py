@@ -44,7 +44,7 @@ def test_closure_is_transitive_and_includes_the_root():
     found = bundle.requirements("pytruenas")
     assert "pytruenas" in found
     # Direct dependencies.
-    for name in ("duho", "hostctl", "netimps", "pathlib-next"):
+    for name in ("duho", "hostctl", "netimps", "pathapi", "pathapi-uri"):
         assert name in found, f"{name} missing from the closure"
     # Transitive: these are required by requests/netimps, not by pytruenas.
     for name in ("certifi", "urllib3", "idna"):
@@ -63,26 +63,23 @@ def test_extras_are_excluded_unless_asked_for():
 def test_missing_on_subtracts_what_the_target_has():
     """The whole point of probing: ship only the difference.
 
-    `uritools` belongs in the payload: pytruenas depends on
-    `pathlib_next[uri]`, whose own extra requires it, and the appliance does
-    not have it (measured on 26.0.0-BETA.1). A closure that dropped a
-    requirement's own extras shipped without it, so `pathlib_next.uri` -- what
-    every remote path is built on -- could not import on the target.
+    `pathapi-uri` belongs in the payload: every remote path type is built on
+    its `URIPath`, and the appliance does not have it.
     """
     missing = bundle.missing_on(TRUENAS_HAS, "pytruenas")
     assert set(missing) == {
         "duho",
         "hostctl",
         "netimps",
-        "pathlib-next",
+        "pathapi",
+        "pathapi-uri",
         "pytruenas",
-        "uritools",
     }
 
 
 def test_missing_on_normalizes_names():
-    """`pathlib_next` and `pathlib-next` are one distribution."""
-    assert "pathlib-next" not in bundle.missing_on(["pathlib_next"], "pytruenas")
+    """`pathapi_uri` and `pathapi-uri` are one distribution."""
+    assert "pathapi-uri" not in bundle.missing_on(["pathapi_uri"], "pytruenas")
 
 
 def test_skip_excludes_even_when_the_target_lacks_it():
