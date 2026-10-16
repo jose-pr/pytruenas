@@ -51,11 +51,11 @@ def test_path_selection_local_vs_remote():
     is what identifies the leg, not the returned class.
     """
     local = TrueNASClient(None, autologin=False)
-    assert [p.name for p in local._path_selector.providers] == ["local"]
+    assert [p.name for p in local.path_providers] == ["local"]
     assert local.path("/etc/hosts").as_posix() == "/etc/hosts"
 
     remote = TrueNASClient("wss://nas", "1-" + "a" * 64, autologin=False)
-    assert [p.name for p in remote._path_selector.providers] == ["tnasws"]
+    assert [p.name for p in remote.path_providers] == ["tnasws"]
 
 
 @pytest.mark.skipif(

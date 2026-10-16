@@ -28,7 +28,6 @@ server itself; nothing in this package performs such a request.
 
 from __future__ import annotations
 
-import importlib.util as _importlib_util
 import inspect as _inspect
 import json as _js
 import logging as _logging
@@ -158,21 +157,6 @@ def _close_quietly(closeable: object) -> None:
         pass
 
 
-def _close_provider(provider: object) -> None:
-    """Close a provider's transport, if it has one that can be closed."""
-    transport = getattr(provider, "transport", None)
-    for candidate in (transport, provider):
-        close = getattr(candidate, "close", None)
-        if callable(close):
-            try:
-                close()
-            except Exception:  # pragma: no cover - teardown must not raise
-                _logging.getLogger("pytruenas").debug(
-                    "closing %r failed", candidate, exc_info=True
-                )
-            return
-
-
 def _resolve_logger(logger: object, name: "str | None" = None):
     """A ``Logger`` from a name, an instance, or ``None``.
 
@@ -205,15 +189,17 @@ def _asyncssh():
 def _ssh_available() -> bool:
     """Whether an SSH/SFTP leg can actually be built (the ``ssh`` extra).
 
-    Uses :func:`importlib.util.find_spec` rather than importing: this runs
-    during provider construction, which happens for every client including ones
-    that will never touch SSH, and importing asyncssh is not cheap.
+    :func:`hostctl.has_ssh` checks that asyncssh and sftppath are importable
+    without importing them: this runs during provider construction, which
+    happens for every client including ones that will never touch SSH.
 
     Deliberately answers "can it be imported", not "is it configured" -- those
     are different questions, and conflating them is what let a configured-but-
     uninstallable SSH leg reach the point of use before failing.
     """
-    return _importlib_util.find_spec("asyncssh") is not None
+    from hostctl import has_ssh
+
+    return has_ssh()
 
 
 def _public_key(private_key: str) -> str:
@@ -599,7 +585,7 @@ class TrueNASConfig(
         which strips and parses any credentials in the userinfo.
         """
         uri = _normalize_target(target)
-        config = _HostConfig._from_uri(uri, **options)
+        config = _HostConfig(uri, **options)
         if not isinstance(config, cls):  # pragma: no cover - registry misconfig
             raise TypeError(f"{uri!r} did not resolve to a {cls.__name__}")
         return config
@@ -1213,7 +1199,7 @@ class TrueNASHost(_PosixHost, _ty.Generic[ApiVersion]):
         through :meth:`run` and :meth:`path`, which pick a transport rather
         than assuming this one exists.
         """
-        for provider in self._executor_selector.providers:
+        for provider in self.executor_providers:
             transport = getattr(provider, "transport", None)
             if transport is not None and hasattr(transport, "ssh"):
                 return transport.ssh
@@ -1526,24 +1512,19 @@ class TrueNASHost(_PosixHost, _ty.Generic[ApiVersion]):
             # is not silently overridden by a provisioning call.
             return private_key
 
-        from hostctl.provider import ProviderSelector
-
         executors, paths = self._build_providers(self._config)
+        # Both sets in one call: hostctl swaps them together and closes each
+        # replaced transport (an open SSH connection among them) once.
+        self.replace_providers(executor=executors, path=paths)
         with self._conn_lock:
-            # Under the lock, and closing what is replaced: the two selectors
-            # were swapped one after the other (so a concurrent call could see
-            # a half-swapped pair), and the transports they dropped -- an open
-            # SSH connection among them -- were never closed.
-            replaced = (self._executor_selector, self._path_selector)
-            self._executor_selector = ProviderSelector(executors)
-            self._path_selector = ProviderSelector(paths)
             # The SFTP backend is cached per client and keyed on the SSH
             # settings, which just changed; drop it so the next path call does
             # not authenticate with the previous credentials.
-            self._sftp_backend_cache = None
-        for selector in replaced:
-            for provider in getattr(selector, "providers", ()):
-                _close_provider(provider)
+            cached, self._sftp_backend_cache = self._sftp_backend_cache, None
+        if cached is not None:
+            from .fs.truenas import _close_backend
+
+            _close_backend(cached[1])
         return private_key
 
     def _warn_if_plaintext(self, creds: object) -> None:
@@ -1584,6 +1565,22 @@ class TrueNASHost(_PosixHost, _ty.Generic[ApiVersion]):
             return super().run(*cmds, **options)
         finally:
             self._warn_fallback()
+
+    def path(self, *segments, backend=None):
+        """A path on the target -- :meth:`hostctl.host.Host.path`, rooted at ``/``.
+
+        On a remote target a relative path (and ``path()`` with no segments)
+        names the same file on every leg: ``/`` joined with it. hostctl's SFTP
+        leg would read a relative path against the SSH login directory, which
+        the websocket leg cannot know, and asks the server for it while the
+        path is built. A local target keeps local semantics (the process's
+        working directory).
+        """
+        if not self._config.is_local and (
+            not segments or not str(segments[0]).startswith("/")
+        ):
+            segments = ("/", *segments)
+        return super().path(*segments, backend=backend)
 
     def _warn_fallback(self) -> None:
         trace = self.last_selection

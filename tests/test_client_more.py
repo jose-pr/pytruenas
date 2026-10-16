@@ -239,7 +239,7 @@ def test_local_client_uses_the_socket_and_no_ssh_leg():
     assert c._config.is_local
     # Nothing to SSH to: commands already run on this machine.
     assert c._config.ssh is None
-    assert [p.name for p in c._executor_selector.providers] == ["local"]
+    assert [p.name for p in c.executor_providers] == ["local"]
 
 
 def test_remote_client_carries_the_target():
@@ -329,7 +329,7 @@ def test_shell_string_becomes_an_ssh_leg():
     ssh = c._config.ssh
     assert ssh is not None
     assert (ssh.host, ssh.username, ssh.password) == ("nas", "root", "pw")
-    assert "ssh" in [p.name for p in c._executor_selector.providers]
+    assert "ssh" in [p.name for p in c.executor_providers]
 
 
 def test_client_keys_encoding_is_unpacked_into_a_real_field():

@@ -91,9 +91,9 @@ def test_string_construction_accepts_every_target_form(target, expected):
 @pytest.mark.requires("asyncssh")
 def test_string_construction_takes_config_options():
     host = TrueNASHost("wss://nas", ssh=SSH, executor=["ssh"])
-    assert _names(host._executor_selector.providers) == ["ssh"]
+    assert _names(host.executor_providers) == ["ssh"]
     # The selectors are independent: overriding one leaves the other default.
-    assert _names(host._path_selector.providers) == ["sftp", "tnasws"]
+    assert _names(host.path_providers) == ["sftp", "tnasws"]
 
 
 def test_string_construction_takes_credentials():
@@ -258,12 +258,10 @@ def test_explicit_ssh_config_keeps_its_own_known_hosts():
 def test_path_falls_back_to_tnasws_when_sftp_cannot_connect(monkeypatch):
     """An unreachable SSH leg must not take the file API down with it.
 
-    This is why the hostctl floor is 0.3.1: on 0.3.0 the composite path let
-    the SFTP connect error escape (`ConnectionRefusedError`, or
-    `HostKeyNotVerifiable` for a host missing from known_hosts) instead of
-    trying `tnasws`, while `run()` on the same host fell back. Offline: SSH
-    points at a refused loopback port, and the websocket leg is a real
-    `Namespace` over a faked `conn.call`.
+    The composite path tries `tnasws` when the SFTP connect fails (a refused
+    port, or a host missing from known_hosts), as `run()` on the same host
+    falls back. Offline: SSH points at a refused loopback port, and the
+    websocket leg is a real `Namespace` over a faked `conn.call`.
     """
     pytest.importorskip("asyncssh")
     from types import SimpleNamespace
@@ -283,6 +281,40 @@ def test_path_falls_back_to_tnasws_when_sftp_cannot_connect(monkeypatch):
     monkeypatch.setattr(TrueNASHost, "conn", property(lambda self: conn))
     assert host.path("/mnt/tank/f.txt").exists()
     assert calls == ["filesystem.stat"]
+
+
+@pytest.mark.parametrize(
+    "segments,expected",
+    [(("mnt/tank", "f.txt"), "/mnt/tank/f.txt"), ((), "/"), (("/etc",), "/etc")],
+)
+def test_a_relative_remote_path_is_rooted_at_slash_on_every_leg(
+    monkeypatch, segments, expected
+):
+    """A relative path names one file whichever leg serves it.
+
+    hostctl's SFTP leg reads a relative path against the SSH login directory
+    and connects to ask for it while the path is built -- with SSH down that
+    raised `ConnectionRefusedError` from `path()` itself, before the websocket
+    leg could serve the call.
+    """
+    pytest.importorskip("asyncssh")
+    from types import SimpleNamespace
+
+    seen = []
+
+    def call(method, *args, **kwds):
+        seen.append((method, args[0]))
+        return {"mode": 0o100644, "size": 3, "mtime": 0, "uid": 0, "gid": 0}
+
+    host = TrueNASHost(
+        "wss://nas", ssh=SSHConfig(host="127.0.0.1", port=1, username="root")
+    )
+    conn = SimpleNamespace(call=call, close=lambda: None)
+    monkeypatch.setattr(TrueNASHost, "conn", property(lambda self: conn))
+    path = host.path(*segments)
+    assert str(path) == expected
+    assert path.exists()
+    assert seen == [("filesystem.stat", expected)]
 
 
 def _trace(*entries):
@@ -376,8 +408,8 @@ def test_without_ssh_the_webshell_stands_in():
     exactly the NAT/firewall case it exists for.
     """
     host = _host()
-    assert _names(host._executor_selector.providers) == ["webshell"]
-    assert _names(host._path_selector.providers) == ["tnasws"]
+    assert _names(host.executor_providers) == ["webshell"]
+    assert _names(host.path_providers) == ["tnasws"]
 
 
 def _built(target="wss://nas", **options):
@@ -394,24 +426,24 @@ def _built(target="wss://nas", **options):
 
 def test_executor_override_forces_a_single_provider():
     host = _built(ssh=SSH, executor="ssh")
-    assert _names(host._executor_selector.providers) == ["ssh"]
+    assert _names(host.executor_providers) == ["ssh"]
 
 
 def test_path_override_forces_a_single_provider():
     host = _built(ssh=SSH, path=["tnasws"])
-    assert _names(host._path_selector.providers) == ["tnasws"]
+    assert _names(host.path_providers) == ["tnasws"]
 
 
 def test_override_can_reorder_preference():
     """Order is the caller's, not ours -- webshell can be made to outrank SSH."""
     host = _built(ssh=SSH, executor=["webshell", "ssh"])
-    assert _names(host._executor_selector.providers) == ["webshell", "ssh"]
+    assert _names(host.executor_providers) == ["webshell", "ssh"]
 
 
 def test_excluding_the_webshell_leaves_a_host_with_no_executor():
     """What the old `webshell=False` did, now expressible without a flag."""
     host = _built(executor=[])
-    assert _names(host._executor_selector.providers) == []
+    assert _names(host.executor_providers) == []
     assert "run" not in host.capabilities
 
 
@@ -423,7 +455,7 @@ def test_override_can_add_tnasws_to_a_local_target():
     caller who wants it can ask.
     """
     host = _built(None, path=["local", "tnasws"])
-    assert _names(host._path_selector.providers) == ["local", "tnasws"]
+    assert _names(host.path_providers) == ["local", "tnasws"]
 
 
 def test_unknown_provider_name_is_rejected():
@@ -449,8 +481,8 @@ def test_ssh_providers_share_one_transport():
     closed -- which is why hostctl exposes them as a pair.
     """
     host = _built(ssh=SSH, executor=["ssh"], path=["sftp"])
-    executor = host._executor_selector.providers[0]
-    path = host._path_selector.providers[0]
+    executor = host.executor_providers[0]
+    path = host.path_providers[0]
     assert executor.transport is path.transport
 
 
@@ -463,8 +495,8 @@ def test_local_target_uses_only_hostctls_local_providers():
     trips the appliance's self-signed certificate.
     """
     host = TrueNASHost(TrueNASConfig.from_target(None))
-    assert _names(host._executor_selector.providers) == ["local"]
-    assert _names(host._path_selector.providers) == ["local"]
+    assert _names(host.executor_providers) == ["local"]
+    assert _names(host.path_providers) == ["local"]
 
 
 def test_local_target_ignores_an_ssh_config():
@@ -473,8 +505,8 @@ def test_local_target_ignores_an_ssh_config():
 
     config = TrueNASConfig.from_target(None, ssh=SSHConfig(host="nas"))
     host = TrueNASHost(config)
-    assert _names(host._executor_selector.providers) == ["local"]
-    assert _names(host._path_selector.providers) == ["local"]
+    assert _names(host.executor_providers) == ["local"]
+    assert _names(host.path_providers) == ["local"]
 
 
 @pytest.mark.requires("asyncssh")
@@ -486,13 +518,13 @@ def test_with_ssh_the_ssh_providers_come_first():
     host = TrueNASHost(
         TrueNASConfig.from_target("wss://nas", ssh=SSHConfig(host="nas")),
     )
-    assert _names(host._executor_selector.providers) == ["ssh", "webshell"]
-    assert _names(host._path_selector.providers) == ["sftp", "tnasws"]
+    assert _names(host.executor_providers) == ["ssh", "webshell"]
+    assert _names(host.path_providers) == ["sftp", "tnasws"]
 
 
 def test_provider_types():
     host = _host()
-    assert isinstance(host._path_selector.providers[0], TnasWsPathProvider)
+    assert isinstance(host.path_providers[0], TnasWsPathProvider)
 
 
 # -- capabilities are reported truthfully ----------------------------------
@@ -678,13 +710,13 @@ def test_install_sshcreds_rebuilds_the_providers(keyed_host):
     Before: a remote host with no SSH has only the web shell. After: SSH leads,
     and paths gain the richer SFTP leg.
     """
-    assert _names(keyed_host._executor_selector.providers) == ["webshell"]
-    assert _names(keyed_host._path_selector.providers) == ["tnasws"]
+    assert _names(keyed_host.executor_providers) == ["webshell"]
+    assert _names(keyed_host.path_providers) == ["tnasws"]
 
     keyed_host.install_sshcreds()
 
-    assert _names(keyed_host._executor_selector.providers) == ["ssh", "webshell"]
-    assert _names(keyed_host._path_selector.providers) == ["sftp", "tnasws"]
+    assert _names(keyed_host.executor_providers) == ["ssh", "webshell"]
+    assert _names(keyed_host.path_providers) == ["sftp", "tnasws"]
     assert "run" in keyed_host.capabilities
 
 
@@ -777,8 +809,8 @@ def test_default_providers_drop_ssh_when_asyncssh_is_missing(monkeypatch):
     config = TrueNASConfig.from_target("wss://nas", ssh=SSHConfig(host="nas"))
     host = TrueNASHost(config)
 
-    assert [p.name for p in host._path_selector.providers] == ["tnasws"]
-    assert [p.name for p in host._executor_selector.providers] == ["webshell"]
+    assert [p.name for p in host.path_providers] == ["tnasws"]
+    assert [p.name for p in host.executor_providers] == ["webshell"]
 
 
 def test_an_explicitly_named_ssh_provider_is_still_honored(monkeypatch):
@@ -796,8 +828,8 @@ def test_an_explicitly_named_ssh_provider_is_still_honored(monkeypatch):
     )
     host = TrueNASHost(config)
 
-    assert [p.name for p in host._path_selector.providers] == ["sftp"]
-    assert [p.name for p in host._executor_selector.providers] == ["ssh"]
+    assert [p.name for p in host.path_providers] == ["sftp"]
+    assert [p.name for p in host.executor_providers] == ["ssh"]
 
 
 # -- where the side channels and the websocket actually go ---------------------
