@@ -2,6 +2,8 @@
 
 from types import SimpleNamespace
 
+import pytest
+
 from pytruenas.patch.templates import (
     BasicTemplate,
     TextTemplate,
@@ -497,6 +499,36 @@ def test_a_backend_without_chmod_warns_rather_than_failing(caplog):
         assert target.write("content\n") is True
     assert store["/etc/new.conf"] == b"content\n"
     assert any("could not set mode" in r.getMessage() for r in caplog.records)
+
+
+class _DroppedChmodPath(_ModedPath):
+    """A `_ModedPath` whose chmod loses the connection."""
+
+    def chmod(self, mode):
+        raise ConnectionResetError("connection lost")
+
+
+def test_a_lost_connection_during_chmod_stops_the_write():
+    """A transport failure is not "no chmod": writing the content anyway could
+    reconnect and leave it at the wider mode the chmod was meant to prevent."""
+    from hostctl.exceptions import OperationNotStartedError
+
+    from pytruenas.patch.templates import FileTarget
+
+    store, modes = {}, {}
+    target = FileTarget(_DroppedChmodPath(store, modes, "/etc/new.conf"), mode=0o600)
+
+    with pytest.raises(ConnectionResetError):
+        target.write("secret\n")
+    assert store["/etc/new.conf"] == b""  # created empty, never filled
+
+    class _Declined(_ModedPath):
+        def stat(self):
+            raise OperationNotStartedError("no provider connected")
+
+    existing = FileTarget(_Declined({"/etc/x": b"a\n"}, {}, "/etc/x"))
+    with pytest.raises(OperationNotStartedError):
+        existing.write("b\n")
 
 
 # -- baselines: our own output is not an original; copies keep their modes -----

@@ -102,7 +102,7 @@ class FileTarget(TemplateTarget):
         baseline: "bool | str" = False,
         mode: "int | None" = None,
     ) -> None:
-        # Duck-typed rather than `isinstance(path, pathlib_next.Path)`: this
+        # Duck-typed rather than `isinstance(path, pathapi.Path)`: this
         # class only calls the methods below, and demanding one concrete type
         # rejected valid stand-ins (a test double, another backend's path) for
         # no benefit. The error still fires early, and names what is missing.
@@ -289,6 +289,11 @@ class FileTarget(TemplateTarget):
     def _mode_of(self, path) -> "int | None":
         try:
             return _stat.S_IMODE(path.stat().st_mode)
+        except ConnectionError:
+            # A lost or never-made connection (hostctl's
+            # OperationNotStartedError among them) is not "this backend has
+            # no modes"; reading it as one would let the write go ahead.
+            raise
         except (OSError, AttributeError, NotImplementedError):
             return None
 
@@ -309,6 +314,10 @@ class FileTarget(TemplateTarget):
     def _chmod(self, path, mode: int) -> None:
         try:
             path.chmod(mode)
+        except ConnectionError:
+            # The content write that follows may reconnect and succeed, which
+            # would leave it at the wider mode this chmod was meant to prevent.
+            raise
         except (OSError, AttributeError, NotImplementedError):
             LOGGER.warning(
                 "could not set mode %s on %s; it keeps whatever the write gave it",
