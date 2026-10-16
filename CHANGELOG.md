@@ -27,9 +27,6 @@ pytruenas now runs on hostctl 0.4, which moves from `pathlib_next` to
   unless `SSHConfig(ssh_config=...)` names it, and an `SSHConfig` you build
   yourself defaults to the local account name rather than `root` (`shell=` and
   `install_sshcreds()` still use `root`).
-- **A target with a port and an `@` after it is refused.** hostctl 0.4 reads
-  `wss://nas:443/api@x` as a password cut short by an unencoded `/` and raises
-  the redacted `ValueError`; percent-encode the `@` (`%40`).
 
 ### Changed
 
@@ -48,6 +45,9 @@ pytruenas now runs on hostctl 0.4, which moves from `pathlib_next` to
   the login directory instead).
 - `install_sshcreds()` swaps the providers through hostctl's
   `replace_providers()`, which closes each replaced transport once.
+- `client.ssh` is hostctl's `SSHExecutorProvider.connection`: the same
+  asyncssh connection, bound to hostctl's own event-loop thread (see the API
+  header for how to run its coroutines).
 
 - **Dependency floor `duho>=0.6.0,<0.7` → `duho>=0.7.3,<0.8`.** The command
   line is unchanged: its help, flags, `--version` and exit statuses are the same

@@ -33,11 +33,10 @@ that never started.
 
 ### Validation
 
-- Suite against the hostctl checkout at `aa11442` (pathapi 0.1.1, pathapi-uri
-  0.1.0, sftppath 0.1.0, netimps 0.4.1): 951 passed / 6 skipped / 1 expected
-  failure on Python 3.14 and on the 3.9 floor (Windows ARM64), against 945 /
-  6 on hostctl 0.3.2. The expected failure is the `wss://root:123/rest@nas`
-  case hostctl 0.4 refuses. The 6 POSIX-shell skips pass under WSL.
+- Suite against the hostctl checkout at `01f14a5` (`0.4.0.dev0`; pathapi
+  0.1.1, pathapi-uri 0.1.0, sftppath 0.1.0, netimps 0.4.1): 953 passed / 6
+  skipped on Python 3.14 and on the 3.9 floor (Windows ARM64), against 945 / 6
+  on hostctl 0.3.2. The 6 POSIX-shell skips pass under WSL.
 - Exercised against a TrueNAS 26.0 host: `run()` and `path()` with a trusted
   key, an unknown host key, `known_hosts=None` and a refused SSH port (each
   falling back to the web shell and `tnasws` where it should); names with `?`,
@@ -45,7 +44,8 @@ that never started.
   unlink over SFTP; a `tnasws` write stream committed on close and discarded
   on an exception.
 - hostctl 0.4.0 is not on PyPI yet, so these pins do not resolve from the
-  index until it is released.
+  index until it is released; the checkout (`0.4.0.dev0`) was installed with
+  `--no-deps`, and `pip check` reports the pin until 0.4.0 ships.
 
 ---
 
