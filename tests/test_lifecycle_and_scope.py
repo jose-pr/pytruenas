@@ -86,9 +86,8 @@ def test_reconnecting_tracks_the_new_connection():
 
 
 def test_the_sftp_backend_is_built_once_per_client():
-    """pathlib_next keys its connection cache on the backend OBJECT, so a fresh
-    backend per call never hit it: five readlink() calls opened five SSH
-    sessions and closed none (measured live)."""
+    """A backend owns its SSH connection, so a fresh backend per call opens a
+    session per operation (five readlink() calls, five sessions)."""
     pytest.importorskip("asyncssh")
     from pytruenas.fs.truenas import _sftp_backend
 

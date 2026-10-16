@@ -8,13 +8,11 @@ always available but exposes a narrower ``filesystem.*`` surface. ``TruenasPath`
 composes the two: five operations -- ``unlink``, ``rmdir``, ``rename``,
 ``symlink_to`` and ``readlink`` -- are tried on the SFTP leg first and fall back
 to the websocket leg when SFTP is unavailable or does not implement it.
-``resolve`` is *not* one of them despite calling into the same machinery:
-``pathlib_next``'s ``SftpPath`` has no ``resolve``, so that call always falls
-through and ``resolve()`` returns ``self`` on every host, SFTP or not.
+``resolve`` goes to the SFTP leg too, and returns ``self`` unchanged when there
+is none: the middleware has no ``realpath``.
 
-The SFTP leg is pluggable. When ``pathlib_next``'s ``SftpPath`` is importable
-(the ``sftp``/``sftp-async`` extra), it is used; otherwise this falls back to
-the websocket leg alone.
+The SFTP leg is an :class:`sftppath.SFTPPath` over ``asyncssh`` (the ``ssh``
+extra); without the extra this is the websocket leg alone.
 Construct via :meth:`~pytruenas.TrueNASClient.path`.
 """
 
@@ -22,7 +20,6 @@ from __future__ import annotations
 
 import typing as _ty
 
-from ._uri import quote_uri_path as _quote_uri_path
 from .tnasws import TnasWsPath as _TnasWsPath
 
 if _ty.TYPE_CHECKING:
@@ -32,16 +29,16 @@ _FTYPE = _ty.Literal["file", "link", "directory"]
 
 
 def _sftp_path_cls():
-    """Return pathlib_next's ``SftpPath`` if importable, else ``None``.
+    """Return ``sftppath.SFTPPath`` if importable, else ``None``.
 
     Kept lazy so importing this module never requires the SFTP extra; the caller
     treats ``None`` as "no SFTP leg -- websocket only".
     """
     try:
-        from pathlib_next.uri.schemes.sftp import SftpPath
+        from sftppath import SFTPPath
     except ImportError:
         return None
-    return SftpPath
+    return SFTPPath
 
 
 class TruenasPath(_TnasWsPath):
@@ -49,9 +46,8 @@ class TruenasPath(_TnasWsPath):
 
     Subclasses :class:`~pytruenas.fs.tnasws.TnasWsPath` so the always-available
     websocket backend is the base behaviour; the SFTP-preferred operations
-    (unlink/rmdir/rename/symlink_to/readlink) are overridden to try SFTP first.
-    ``resolve`` is overridden too but never reaches SFTP -- ``SftpPath`` has no
-    ``resolve`` -- so it always returns ``self``. Carries the same
+    (unlink/rmdir/rename/symlink_to/readlink/resolve) are overridden to try
+    SFTP first. Carries the same
     ``TnasWsBackend`` (holding the client); the SFTP leg is built lazily from
     the host's SSH configuration (``client.config.ssh``, an
     :class:`hostctl.SSHConfig`).
@@ -79,10 +75,10 @@ class TruenasPath(_TnasWsPath):
         return getattr(config, "ssh", None)
 
     def _sftp(self):
-        """Build an ``SftpPath`` for this path from the client's ssh config, or None.
+        """Build an ``SFTPPath`` for this path from the client's ssh config, or None.
 
-        Returns ``None`` when pathlib_next's SFTP is unavailable or the client has
-        no usable SSH target -- callers then use the websocket leg.
+        Returns ``None`` when sftppath is unavailable or the client has no
+        usable SSH target -- callers then use the websocket leg.
         """
         sftp_cls = _sftp_path_cls()
         if sftp_cls is None:
@@ -91,36 +87,23 @@ class TruenasPath(_TnasWsPath):
         host = getattr(ssh, "host", None)
         if not host:
             return None
-        port = getattr(ssh, "port", 0) or 22
         # Reuse the client's asyncssh connect options (key/password/known_hosts)
         # so the SFTP leg authenticates -- and checks the host key -- the same
-        # way the client's own ssh channel does. Let
-        # pathlib_next auto-select its SFTP backend (asyncssh or paramiko); if
-        # NEITHER is installed (the ssh extra wasn't installed) building it
-        # raises ImportError -- treat that as "no SFTP leg" so callers fall back
-        # to the websocket leg rather than crashing.
+        # way the client's own ssh channel does. Without asyncssh (no `ssh`
+        # extra) there is no backend, and callers use the websocket leg.
         backend = _sftp_backend(self.backend.client, ssh)
         if backend is None:
             return None
-        # The path becomes part of a URI, so it has to be encoded as one.
-        # ``SftpPath`` parses this string and uridecodes the components: a raw
-        # ``?`` or ``#`` in a filename was taken as the start of the query or
-        # fragment and silently truncated the path -- the operation then ran
-        # against a shorter, different file -- and a genuine ``%xx`` decoded
-        # into another name again. ``self.path`` is the *decoded* name (the
-        # ``truenas://`` URI encoded it on the way in), so this is the only
-        # encoding applied to it, not a second one.
-        return sftp_cls(
-            f"sftp://{host}:{port}{_quote_uri_path(self.path)}",
-            backend=backend,
-        )
+        # `self.path` is the decoded name and `SFTPPath` takes a plain path,
+        # not a URI, so it is passed as it is: `?`, `#` and `%` are filename
+        # characters on this leg.
+        return sftp_cls(self.path, backend=backend)
 
     def _try_sftp(self, op: str, *args, **kwargs):
         """Run ``op`` on the SFTP leg.
 
         Raises ``_NoSftp`` if there is no SFTP leg, and ``NotImplementedError`` if
-        the SFTP path type does not implement ``op`` at all (pathlib_next's
-        ``SftpPath`` has no ``resolve``, for instance) -- callers treat both as
+        the SFTP path type does not implement ``op`` -- callers treat both as
         "fall back to the websocket leg".
         """
         sftp = self._sftp()
@@ -194,7 +177,7 @@ class TruenasPath(_TnasWsPath):
 
         ``force`` removes a conflicting existing target first (a bool, a single
         file-type, or a set of file-types that may be replaced); ``onremove`` is a
-        callback consulted before each removal. Not part of pathlib_next -- kept
+        callback consulted before each removal. Not part of ``pathapi`` -- kept
         from the original pytruenas API. The link itself is created via the SFTP
         leg (``filesystem.*`` has no symlink op), so a host with no SFTP leg
         raises ``NotImplementedError`` -- and raises it *before* ``force``
@@ -235,15 +218,11 @@ class TruenasPath(_TnasWsPath):
         return create(_as_posix(target), target_is_directory)
 
     def resolve(self, strict=False):
-        """Always returns ``self`` -- neither leg can resolve symlinks.
+        """This path with every symlink replaced, over SFTP; else ``self``.
 
-        The SFTP attempt below is structural, not effective: ``pathlib_next``'s
-        ``SftpPath`` implements no ``resolve``, so ``_try_sftp`` raises
-        ``NotImplementedError`` on every host and the fallback runs even when
-        the SFTP leg is fully configured. The middleware has no ``realpath``
-        either, so returning the path unchanged is the best effort available --
-        matching a filesystem with no symlink resolution. The branch is kept so
-        the operation starts working the day ``SftpPath`` grows a ``resolve``.
+        The SFTP leg resolves the way ``pathapi`` does, by reading each link.
+        Without one the path is returned unchanged: the middleware has no
+        ``realpath``, so the websocket leg cannot see through a link.
         """
         try:
             resolved = self._try_sftp("resolve", strict=strict)
@@ -257,7 +236,7 @@ class _NoSftp(Exception):
 
 
 def _as_posix(value: object) -> str:
-    """Best-effort POSIX path string for a Uri/Path/str target."""
+    """Best-effort POSIX path string for a URI/path/str target."""
     for attr in ("path", "as_posix"):
         candidate = getattr(value, attr, None)
         if callable(candidate):
@@ -270,35 +249,51 @@ def _as_posix(value: object) -> str:
 def _sftp_backend(client: object, ssh: object):
     """One SFTP backend per client, or ``None`` without the ``ssh`` extra.
 
-    Cached on the client because pathlib_next keys its connection cache on the
-    backend OBJECT: a fresh backend per call never hit that cache, so five
-    ``readlink()`` calls opened five concurrent SSH sessions and closed none
-    (measured), accumulating to the cache's LRU bound for the life of the
-    process. hostctl caches one backend per transport for the same reason.
+    Cached on the client because a backend owns its connection: a fresh
+    backend per call opens a new SSH session for every operation. hostctl
+    caches one backend per transport for the same reason.
 
     The cache is invalidated when the SSH settings change, so
     ``install_sshcreds()`` (which rewrites them) cannot leave a backend
-    authenticating with the previous credentials.
+    authenticating with the previous credentials; the replaced backend is
+    closed.
     """
     try:
-        from pathlib_next.uri.schemes.sftp import AsyncsshSftpBackend
+        from sftppath import AsyncSSHBackend
     except ImportError:
         return None
+    host = ssh.host
+    port = getattr(ssh, "port", 0) or 22
     connect_opts = _connect_opts_from_ssh(ssh)
     # A dict is not hashable and asyncssh options are not comparable by
     # identity, so the key is the rendered settings.
-    key = repr(sorted((str(k), repr(v)) for k, v in connect_opts.items()))
+    key = repr((host, port, sorted((str(k), repr(v)) for k, v in connect_opts.items())))
     cached = getattr(client, "_sftp_backend_cache", None)
     if cached is not None and cached[0] == key:
         return cached[1]
-    backend = AsyncsshSftpBackend(connect_opts=connect_opts)
+    backend = AsyncSSHBackend(
+        host, port, user=connect_opts.get("username"), connect_opts=connect_opts
+    )
     try:
         client._sftp_backend_cache = (key, backend)  # type: ignore[attr-defined]
     except Exception:
         # A client stand-in that refuses attributes (a Mock with spec, a
         # frozen object): work uncached rather than fail the operation.
         pass
+    else:
+        if cached is not None:
+            _close_backend(cached[1])
     return backend
+
+
+def _close_backend(backend: object) -> None:
+    """Close a replaced SFTP backend's connections; never raises."""
+    close = getattr(backend, "close", None)
+    if callable(close):
+        try:
+            close()
+        except Exception:  # pragma: no cover - teardown must not raise
+            pass
 
 
 def _connect_opts_from_ssh(ssh) -> "dict":
@@ -307,25 +302,13 @@ def _connect_opts_from_ssh(ssh) -> "dict":
     Delegates to ``SSHConfig.connect_opts()`` -- the single source of truth the
     host's own SSH executor and SFTP path provider both use -- so this leg
     authenticates *and applies the host-key policy* exactly the way
-    ``client.run()`` does.
+    ``client.run()`` does. Do not hand-copy fields here: a copied list is how
+    a ``known_hosts`` policy reaches one leg and not the other.
 
-    It used to hand-map ``username``/``client_keys``/``password`` and silently
-    dropped ``known_hosts``: a caller configuring a ``known_hosts`` file (or
-    passing ``known_hosts=None`` to disable checking) had that policy enforced
-    on the SSH leg and ignored on the SFTP leg. Hand-copying the field list is
-    how that drifted, so do not reintroduce one -- extend
-    ``hostctl``'s ``connect_opts()`` instead.
-
-    No filtering is needed: every key ``connect_opts()`` emits (``username``,
-    ``password``, ``client_keys``, ``known_hosts``) is a real
-    ``asyncssh.connect()`` keyword, and ``AsyncsshSftpBackend`` forwards its
-    ``connect_opts`` straight into ``asyncssh.connect()`` -- hostctl's own
-    ``SftpPathProvider`` hands it the very same mapping.
-
-    ``connect_opts()`` always carries ``known_hosts``: the ``()`` default means
-    "check ``~/.ssh/known_hosts``", so this leg verifies the host key by
-    default, exactly as hostctl's own SFTP provider does. ``known_hosts=None``
-    (on the SSHConfig, or ``TrueNASClient(..., known_hosts=None)``) opts out.
+    ``connect_opts()`` always carries ``known_hosts`` (``()`` checks
+    ``~/.ssh/known_hosts``, ``None`` opts out) and ``config`` (``None`` unless
+    the ``SSHConfig`` names an ssh_config), and every key it emits is an
+    ``asyncssh.connect()`` keyword, which ``AsyncSSHBackend`` forwards as given.
 
     The pre-hostctl ``"client_keys|root"`` username packing is unpacked once,
     in :func:`pytruenas.host._ssh_config_from`, on the way into the config --

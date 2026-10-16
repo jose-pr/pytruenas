@@ -6,7 +6,7 @@ owns *connection* behaviour only, and leaves operating-system semantics to
 :class:`hostctl.host.PosixHost`.
 
 Local execution needs no adapter at all: :func:`local_providers` returns
-hostctl's stock pair. A target reached over the middleware unix socket *is*
+hostctl's stock pair (:func:`hostctl.local_providers`). A target reached over the middleware unix socket *is*
 this machine, so a command there is a plain ``subprocess`` call and a path is a
 plain local path -- there is nothing about TrueNAS to add.
 
@@ -39,13 +39,12 @@ from __future__ import annotations
 import typing as _ty
 
 from hostctl.provider import (
-    ExecutorProvider as _ExecutorProvider,
     PathProvider as _PathProvider,
     ProviderProbe as _ProviderProbe,
 )
 
 if _ty.TYPE_CHECKING:  # pragma: no cover - typing only
-    from pathlib_next import Path
+    from pathapi import Path
 
     from . import TrueNASClient
 
@@ -127,23 +126,14 @@ def local_providers():
 
     A target reached over the middleware unix socket *is* this machine, so a
     command there is a plain ``subprocess`` call and a path is a plain local
-    path. hostctl already provides both, and this is the same one-liner its own
-    ``system.py:_local_provider`` uses -- there is nothing TrueNAS-specific to
-    add, so pytruenas does not define a provider class for it.
-
-    (There was one. It wrapped ``LocalExecutor`` behind an ``is_local`` guard
-    and called itself ``MiddlewareExecutorProvider``, which was doubly
-    misleading: nothing about the dispatch involved ``middlewared``, and the
-    guard only duplicated the decision the caller had already made by choosing
-    to build it.)
+    path. This is :func:`hostctl.local_providers` unchanged: there is nothing
+    TrueNAS-specific to add, so pytruenas defines no provider class for it.
+    Returns a fresh ``(executor_provider, path_provider)`` pair, both named
+    ``"local"``.
     """
-    from hostctl import LocalExecutor
-    from pathlib_next import Path as _LocalPath
+    from hostctl import local_providers as _local_providers
 
-    return (
-        _ExecutorProvider("local", LocalExecutor()),
-        _PathProvider("local", lambda *parts: _LocalPath(*parts)),
-    )
+    return _local_providers()
 
 
 __all__ = [

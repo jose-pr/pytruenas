@@ -1,12 +1,12 @@
-"""``TnasWsPath`` -- a pathlib_next URI path backed by the TrueNAS middleware.
+"""``TnasWsPath`` -- a URI path backed by the TrueNAS middleware.
 
 The TrueNAS ``filesystem.*`` websocket API is a genuine filesystem accessible
-only through the middleware connection, so -- exactly like ``SftpPath`` carries an
-SFTP backend -- ``TnasWsPath`` is a :class:`~pathlib_next.uri.UriPath` whose
-**backend** holds the :class:`~pytruenas.TrueNASClient`. Path I/O is implemented
-by calling ``client.api.filesystem.<op>`` (``stat``/``mkdir``/``get``/``put``/
-``chown``/...); there is no equivalent in pathlib_next, which is why this backend
-stays custom while local/sftp delegate to pathlib_next's own path types.
+only through the middleware connection, so ``TnasWsPath`` is a
+:class:`uripath.URIPath` whose **backend** holds the
+:class:`~pytruenas.TrueNASClient`. Path I/O is implemented by calling
+``client.api.filesystem.<op>`` (``stat``/``mkdir``/``get``/``put``/
+``chown``/...); no path library has an equivalent, which is why this backend
+stays custom while local and SFTP paths are ``pathapi``'s and ``sftppath``'s.
 
 Construct one through :meth:`~pytruenas.TrueNASClient.path` (which threads the
 client in via the backend); a ``TnasWsPath`` built from a bare URI with no client
@@ -19,14 +19,15 @@ import io as _io
 import stat as _stat
 import typing as _ty
 
-from pathlib_next.uri import UriPath as _UriPath
-from pathlib_next.utils.stat import FileStat as _FileStat
+from pathapi import FileStat as _FileStat
+from pathapi.providers import CommitOnClose as _CommitOnClose
+from uripath import URIPath as _URIPath
 
 if _ty.TYPE_CHECKING:
     from .. import TrueNASClient
 
 #: URI scheme(s) that resolve to :class:`TnasWsPath`. Not a real network scheme --
-#: just a registration handle so the ``UriPath`` machinery + backend propagation
+#: just a registration handle so the ``URIPath`` machinery + backend propagation
 #: work; the connection lives on the backend, not in the URI.
 _SCHEME = "truenas+ws"
 
@@ -63,8 +64,8 @@ _LISTDIR_STAT = {"select": ["name", "type", "size", "mode"]}
 class TnasWsBackend:
     """Backend state for :class:`TnasWsPath`: it just holds the client.
 
-    Mirrors the role of ``SftpBackend``/``AsyncsshSftpBackend`` (which hold an
-    SSH/SFTP connection); here the "connection" is the middleware
+    Mirrors the role of an SFTP backend (which holds an SSH connection); here
+    the "connection" is the middleware
     :class:`~pytruenas.TrueNASClient`, whose ``api.filesystem`` namespace does the
     actual work.
     """
@@ -75,14 +76,14 @@ class TnasWsBackend:
         self.client = client
 
 
-class TnasWsPath(_UriPath):
+class TnasWsPath(_URIPath):
     """A path on a TrueNAS host, served by the middleware ``filesystem.*`` API."""
 
     __SCHEMES = (_SCHEME,)
     __slots__ = ()
 
     #: The path component names a real file *on the TrueNAS host*, so
-    #: ``os.fspath()`` may return it (pathlib_next >=0.9.0). Without this,
+    #: ``os.fspath()`` and ``host_fspath()`` may return it. Without this,
     #: fspath raises for this scheme and anything building a command line that
     #: names the file -- a `chmod`, a `systemctl` argument -- has to unwrap the
     #: URI by hand. It stays false for schemes whose path is not a filesystem
@@ -111,7 +112,7 @@ class TnasWsPath(_UriPath):
     def _same_filesystem(self, other) -> bool:
         """Whether ``other`` names files on the same TrueNAS host.
 
-        pathlib_next's default compares supplied backend objects, and
+        uripath's default compares supplied backend objects, and
         ``fs.path()`` gives every path its own backend -- so two spellings of
         one file on one host read as two trees, and its same-file guard never
         fired: ``move(overwrite=True)`` onto a second ``fs.path()`` for the same
@@ -153,8 +154,13 @@ class TnasWsPath(_UriPath):
         # itself). So ``mode`` here is one of ``r``/``w``/``a`` (+ maybe ``+``).
         if "r" in mode and "+" not in mode:
             return _io.BytesIO(self._read_bytes())
-        if "w" in mode or "a" in mode:
-            return _TnasWsWriteHandle(self, append="a" in mode)
+        if mode.rstrip("+") in ("w", "a"):
+            append = mode.startswith("a")
+            # One `filesystem.put` when the stream closes; a `with` block that
+            # raises discards the buffer, so a failed write uploads nothing.
+            return _CommitOnClose(
+                lambda buffer: self._write_bytes(buffer.getvalue(), append=append)
+            )
         raise NotImplementedError(mode)
 
     def _read_bytes(self) -> bytes:
@@ -249,36 +255,3 @@ def _stat_from_info(info: "dict") -> "_FileStat":
     size = info.get("size") or 0
     mtime = info.get("mtime") or 0
     return _FileStat(st_mode=int(mode), st_size=int(size), st_mtime=mtime)
-
-
-class _TnasWsWriteHandle(_io.IOBase):
-    """A write-only binary handle that buffers, then ``filesystem.put``s on close.
-
-    The middleware upload is a single call, so writes accumulate and flush once
-    at close (matching the old ``fs/api.py`` handle).
-    """
-
-    def __init__(self, path: "TnasWsPath", append: bool) -> None:
-        super().__init__()
-        self._path = path
-        self._append = append
-        self._buffer = bytearray()
-
-    def writable(self):
-        return True
-
-    def readable(self):
-        return False
-
-    def seekable(self):
-        return False
-
-    def write(self, data):
-        self._buffer.extend(data)
-        return len(data)
-
-    def close(self):
-        if self.closed:
-            return
-        self._path._write_bytes(bytes(self._buffer), append=self._append)
-        super().close()

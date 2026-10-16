@@ -2,7 +2,7 @@
 
 from types import SimpleNamespace
 
-from pathlib_next import LocalPath
+from pathapi import LocalPath
 
 from pytruenas.fs import TruenasPath, path
 

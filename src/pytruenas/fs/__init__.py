@@ -11,28 +11,27 @@ The path types themselves, for a caller building one directly or reading the
 provider table:
 
 * **local** client (running on the NAS) -> a plain
-  :class:`pathlib_next.LocalPath` (no extra dependencies);
+  :class:`pathapi.LocalPath` (no extra dependencies);
 * **remote** -> :class:`~pytruenas.fs.truenas.TruenasPath`, which prefers SFTP
   and falls back to the middleware ``filesystem.*`` websocket API
   (:class:`~pytruenas.fs.tnasws.TnasWsPath`). It keeps an SFTP leg of its own
   so that a directly constructed path -- one with no host to compose providers
-  for it -- can still use SFTP; the backend is built once per client, since
-  `pathlib_next` keys its connection cache on the backend object.
+  for it -- can still use SFTP; the backend is built once per client, since a
+  backend owns its connection.
 * ``pytruenas.fs.path(client, *segments, backend=...)`` builds one of these
   types directly; its ``backend=`` vocabulary (``"local"``/``"ws"``/``"api"``/
   ``"truenas"``/``"auto"``) is NOT the provider-name vocabulary
   ``client.path(backend=...)`` takes.
 
-The old bespoke multi-backend ``Path`` proxy is gone; these are real
-`pathlib_next` path types, so every generic operation (``read_bytes``/``walk``/
-``glob``/``copy``/...) comes from `pathlib_next` for free.
+These are real ``pathapi`` path types, so every generic operation
+(``read_bytes``/``walk``/``glob``/``copy``/...) comes from ``pathapi``.
 """
 
 from __future__ import annotations
 
 import typing as _ty
 
-from pathlib_next import LocalPath as LocalPath
+from pathapi import LocalPath as LocalPath
 
 from ._uri import quote_uri_path as _quote_uri_path
 from .tnasws import TnasWsBackend as TnasWsBackend
@@ -97,8 +96,8 @@ def _truenas_uri(client: "TrueNASClient", posix: str) -> str:
 def _uri_path(posix: str) -> str:
     """``posix`` as the absolute, percent-encoded path component of a URI.
 
-    Both path types here are ``UriPath``s: they parse the string built above
-    and uridecode it. Interpolated raw, a ``?`` or ``#`` in a filename began a
+    Both path types here are ``uripath.URIPath``s: they parse the string
+    built above and percent-decode it. Interpolated raw, a ``?`` or ``#`` in a filename began a
     query or fragment and truncated the path *at construction* --
     ``client.path("/mnt/tank/cache?v=2")`` yielded a path pointing at
     ``/mnt/tank/cache`` before any transport leg was chosen, so the websocket

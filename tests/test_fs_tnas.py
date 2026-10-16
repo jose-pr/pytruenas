@@ -373,8 +373,8 @@ def test_mkdir_explicit_mode_is_sent_as_given():
 def test_mkdir_parents_creates_the_missing_parents():
     """`[Errno 2] ...` from the middleware must read as FileNotFoundError.
 
-    It stayed a ClientException, so pathlib_next's parents=True never ran and
-    the call failed with ENOENT (measured live).
+    As a ClientException, `mkdir(parents=True)` never creates the parents and
+    the call fails with ENOENT (measured live).
     """
     client, sent, dirs = _mkdir_client()
     p = TnasWsPath("truenas+ws://nas/mnt/tank/a/b", backend=TnasWsBackend(client))
@@ -422,9 +422,9 @@ class _RecordingSftp:
 def test_paths_built_separately_on_one_host_are_one_filesystem():
     """`fs.path()` gives each path its own backend; the host is what counts.
 
-    With pathlib_next's default (compare backend objects) the same-file guard
-    never fired, so `move(overwrite=True)` onto a second `fs.path()` of the
-    same file deleted it.
+    With the URI layer's default (compare supplied backend objects) the
+    same-file guard never fires, so `move(overwrite=True)` onto a second
+    `fs.path()` of the same file deletes it.
     """
     client = _host_client("nasA", stat={"mode": 0o100644}, get=b"data")
     a = fs_path(client, "/mnt/tank/a.txt")
@@ -478,28 +478,56 @@ def test_rename_on_one_host_returns_the_new_truenaspath(monkeypatch):
     assert moved._host_client() is client
 
 
-@pytest.mark.requires("asyncssh")
-def test_truenaspath_resolve_falls_back_when_sftp_lacks_op():
-    # pathlib_next's SftpPath has no resolve(); _try_sftp must surface that as
-    # NotImplementedError so resolve() falls back to returning self, not crash
-    # with AttributeError.
+def test_truenaspath_resolve_uses_the_sftp_leg(monkeypatch):
+    """`resolve()` answers from the SFTP leg and keeps the TruenasPath type."""
     client = _client(ssh=_ssh_config())
+    p = TruenasPath("truenas://nas/a/link", backend=TnasWsBackend(client))
+    leg = MagicMock()
+    leg.resolve.return_value = SimpleNamespace(as_posix=lambda: "/a/target")
+    monkeypatch.setattr(TruenasPath, "_sftp", lambda self: leg)
+
+    resolved = p.resolve(strict=True)
+
+    leg.resolve.assert_called_once_with(strict=True)
+    assert isinstance(resolved, TruenasPath)
+    assert resolved.path == "/a/target"
+    assert resolved._host_client() is client
+
+
+def test_truenaspath_resolve_without_an_sftp_leg_returns_self():
+    """The middleware has no realpath: with no SSH leg the path is unchanged."""
+    client = _client()
     p = TruenasPath("truenas://nas/a/b", backend=TnasWsBackend(client))
-    assert p._sftp() is not None  # the leg really is built here
-    resolved = p.resolve()
-    assert resolved.path == "/a/b"  # returned self, no AttributeError
+    assert p.resolve().path == "/a/b"
 
 
 @pytest.mark.requires("asyncssh")
 def test_truenaspath_builds_the_sftp_leg_from_config_ssh():
+    from sftppath import SFTPPath
+
     client = _client(ssh=_ssh_config(host="nas", port=2222, username="admin"))
     p = TruenasPath("truenas://nas/a/b", backend=TnasWsBackend(client))
     sftp = p._sftp()
-    assert sftp is not None
-    assert str(sftp) == "sftp://nas:2222/a/b"
+    assert isinstance(sftp, SFTPPath)
+    assert str(sftp) == "/a/b"
+    assert sftp.backend.endpoint == ("nas", 2222, "admin")
 
 
-# -- the sftp:// URI must be built as a URI -----------------------------------
+@pytest.mark.requires("asyncssh")
+def test_sftp_backend_is_shared_per_client_and_replaced_when_ssh_changes():
+    """One backend (one connection) per client, rebuilt for new credentials."""
+    client = _client(ssh=_ssh_config(password="one"))
+    p = TruenasPath("truenas://nas/a/b", backend=TnasWsBackend(client))
+    first = p._sftp().backend
+    assert (p / "c")._sftp().backend is first
+
+    client.config.ssh = _ssh_config(password="two")
+    second = p._sftp().backend
+    assert second is not first
+    assert second.connect_opts["password"] == "two"
+
+
+# -- a filename with URI syntax reaches the SFTP leg unchanged ----------------
 
 
 # RFC 3986 `pchar` plus `/`, spelled out here rather than imported from the
@@ -512,9 +540,9 @@ _PCHAR = "/:@-._~!$&'()*+,;="
 def _truenas_path(client, remote):
     """A `TruenasPath` whose `.path` really is `remote`.
 
-    `TruenasPath` is itself a `UriPath`, so handing it a raw `truenas://` URI
-    truncates the same way the SFTP leg used to -- the fixture has to encode
-    too, or the precondition below fails before the leg is ever reached.
+    `TruenasPath` is a `uripath.URIPath`, so a raw `truenas://` URI is read as
+    URI syntax -- the fixture has to encode, or the precondition below fails
+    before the leg is ever reached.
     """
     from urllib.parse import quote
 
@@ -536,15 +564,11 @@ def _truenas_path(client, remote):
     ],
 )
 def test_sftp_leg_survives_uri_syntax_in_a_filename(remote):
-    """Regression: `_sftp()` interpolated the path into a URI unencoded.
+    """The SFTP leg addresses the decoded name, byte for byte.
 
-    `SftpPath` parses that string and uridecodes the parts, so a `?` or `#` in
-    a filename truncated the path into a query or fragment -- the operation
-    then ran against a *shorter, different* file with no error -- and a genuine
-    `%xx` decoded into another name again. hostctl fixed the identical defect
-    on its own SFTP leg in 0.2.6; this hand-built URI never got it.
-
-    What is pinned is the round-trip, not the encoded spelling.
+    A `?` or `#` read as URI syntax would truncate the name into a query or
+    fragment, and a genuine `%xx` decoded once more would name another file --
+    either way the operation runs against a different file with no error.
     """
     client = _client(ssh=_ssh_config(host="nas", port=2222))
     p = _truenas_path(client, remote)
@@ -552,21 +576,20 @@ def test_sftp_leg_survives_uri_syntax_in_a_filename(remote):
 
     sftp = p._sftp()
     assert sftp is not None
-    assert sftp.path == remote
+    assert str(sftp) == remote
 
 
 @pytest.mark.requires("asyncssh")
 def test_sftp_leg_encoding_leaves_uri_legal_characters_readable():
-    """Encoding is minimal: `:` is legal in a path segment, so it stays.
+    """`:` is legal in a path segment, so it stays.
 
     A naive `quote(path, safe="/")` would render a Windows-flavoured remote
     path as `/C%3A/Temp`, which is a different (and wrong) name.
     """
     client = _client(ssh=_ssh_config(host="nas", port=2222))
     p = _truenas_path(client, "/C:/Temp")
-    sftp = p._sftp()
-    assert str(sftp) == "sftp://nas:2222/C:/Temp"
-    assert sftp.path == "/C:/Temp"
+    assert str(p) == "truenas://nas/C:/Temp"
+    assert str(p._sftp()) == "/C:/Temp"
 
 
 # -- the truenas:// URI is built the same way, one layer up --------------------
@@ -606,8 +629,8 @@ _URI_SYNTAX_NAMES = [
 def test_path_construction_survives_uri_syntax_in_a_filename(remote, backend, expected):
     """Regression: `_ws_uri`/`_truenas_uri` interpolated the path unencoded.
 
-    Worse than the SFTP defect fixed in 0.4.4, because it corrupts `self.path`
-    at *construction* -- before any leg is chosen -- so the websocket leg
+    It corrupts `self.path` at *construction* -- before any leg is chosen --
+    so the websocket leg
     (`read_bytes`, `stat`, every `filesystem.*` call) addressed the truncated
     name too, not just the five SFTP-first operations.
 
@@ -635,14 +658,12 @@ def test_path_construction_joins_segments_before_encoding():
 @pytest.mark.requires("asyncssh")
 @pytest.mark.parametrize("remote", _URI_SYNTAX_NAMES)
 def test_sftp_leg_is_not_encoded_twice(remote):
-    """The two encoding sites compose to exactly one round of encoding.
+    """Construction encodes once and the SFTP leg takes the decoded name.
 
-    Construction encodes into the `truenas://` URI and `_sftp()` encodes again
-    into the `sftp://` one. That is correct only because `UriPath.path`
-    *decodes*: the SFTP leg quotes the decoded name, never the already-quoted
-    spelling. If either side were to encode an encoded value, `100%` would
-    reach the host as `100%25` and `report%20final.txt` as
-    `report%2520final.txt` -- a different file, silently.
+    `URIPath.path` *decodes* the `truenas://` spelling, and `SFTPPath` takes a
+    plain path. Encoding an encoded value anywhere would send `100%` as
+    `100%25` and `report%20final.txt` as `report%2520final.txt` -- a different
+    file, silently.
     """
     client = _path_client(ssh=_ssh_config(host="nas", port=2222))
     p = fs_path(client, remote, backend="auto")
@@ -650,7 +671,7 @@ def test_sftp_leg_is_not_encoded_twice(remote):
 
     sftp = p._sftp()
     assert sftp is not None
-    assert sftp.path == remote  # one decode of one encode, not two of two
+    assert str(sftp) == remote
 
 
 def test_truenaspath_ignores_the_pre_merge_ssh_config_attribute():
@@ -789,9 +810,9 @@ def test_connect_opts_carry_known_hosts():
     disabled = _connect_opts_from_ssh(_ssh_config(known_hosts=None))
     assert "known_hosts" in disabled and disabled["known_hosts"] is None
 
-    # The `()` default is passed through (hostctl >= 0.3.0): asyncssh reads it
-    # as "use ~/.ssh/known_hosts". Omitting it let pathlib_next's SFTP connect
-    # seed `known_hosts=None` -- no verification at all.
+    # The `()` default is passed through: asyncssh reads it as "use
+    # ~/.ssh/known_hosts". Omitting it would let an SFTP connect seed
+    # `known_hosts=None` -- no verification at all.
     assert _connect_opts_from_ssh(_ssh_config())["known_hosts"] == ()
 
 

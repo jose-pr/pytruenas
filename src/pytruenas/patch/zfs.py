@@ -60,12 +60,13 @@ __all__ = [
 def host_path(path: "PathLike") -> str:
     """The plain filesystem path ``path`` names *on the host*.
 
-    A remote path does not stringify to something usable in a command line:
-    ``str()`` on a ``UriPath`` gives a whole URI, and ``as_posix()`` gives scp
-    syntax (``root@nas:/usr/lib/x``). ``os.fspath()`` is the protocol for this,
-    and pathlib_next >=0.9.0 answers it with the host path for schemes marked
-    ``_host_filesystem_path`` -- ``sftp``, plus pytruenas' own
-    ``truenas``/``tnasws`` (see :mod:`pytruenas.fs.tnasws`).
+    A remote path does not always stringify to something usable in a command
+    line: ``str()`` on a ``uripath.URIPath`` gives a whole URI, and
+    ``as_posix()`` gives scp syntax (``root@nas:/usr/lib/x``). ``os.fspath()``
+    is the protocol for this: a ``client.path(...)`` composite answers with its
+    logical path, and a URI path answers with the host path when its scheme is
+    marked ``_host_filesystem_path`` -- ``sftp``, plus pytruenas' own
+    ``truenas``/``truenas+ws`` (see :mod:`pytruenas.fs.tnasws`).
 
     A plain ``str`` passes through. Anything else raises whatever ``fspath``
     raises: a scheme that has not opted in has no host-local path, and

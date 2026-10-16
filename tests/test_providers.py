@@ -18,7 +18,7 @@ from hostctl.provider import (  # noqa: E402
     ProviderSelector,
 )
 
-from pathlib_next import LocalPath  # noqa: E402
+from pathapi import LocalPath  # noqa: E402
 
 from pytruenas.providers import (  # noqa: E402
     WS_PATH_CAPABILITIES,
@@ -83,7 +83,7 @@ def test_ws_path_provider_unwraps_a_host(monkeypatch):
     `host.path(...)`. Caught only on a live target.
     """
     import pytruenas.fs as fs
-    from pathlib_next import LocalPath
+    from pathapi import LocalPath
 
     seen = {}
 
@@ -128,10 +128,10 @@ def test_ws_path_provider_always_uses_the_websocket_backend(monkeypatch):
 
 def test_ws_path_provider_builds_a_ws_path(monkeypatch):
     import pytruenas.fs as fs
-    from pathlib_next import LocalPath
+    from pathapi import LocalPath
 
     seen = {}
-    # PathProvider validates that the factory returns a real pathlib_next.Path,
+    # PathProvider validates that the factory returns a real pathapi.Path,
     # so the stand-in has to be one (LocalPath is the cheapest such value).
     sentinel = LocalPath("/etc/hosts")
 
@@ -202,7 +202,7 @@ def test_local_executor_declares_argv_support():
 
 
 def test_local_path_provider_returns_a_real_path():
-    from pathlib_next import Path
+    from pathapi import Path
 
     _, path = local_providers()
     assert isinstance(path.path("/etc/hostname"), Path)

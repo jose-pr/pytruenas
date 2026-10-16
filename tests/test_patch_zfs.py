@@ -241,18 +241,16 @@ def test_host_path_accepts_str_and_pure_paths():
 
 
 def test_host_path_unwraps_a_uripath_and_never_leaks_credentials():
-    """A UriPath renders several ways and most are wrong for argv.
+    """A URI path renders several ways and most are wrong for argv.
 
-    `str()` gives a whole URI -- which historically carried credentials into
-    the command line -- and `as_posix()` gives scp syntax. `os.fspath()` is the
-    protocol for this, and answers with the host-local path for a scheme marked
-    `_host_filesystem_path`. (Filed upstream as
-    2026-07-29_uripath_fspath_refuses_remote_schemes; fixed in 0.9.0, which is
-    the floor.)
+    `str()` gives a whole URI and `as_posix()` gives scp syntax. `os.fspath()`
+    is the protocol for this, and answers with the host-local path for a
+    scheme marked `_host_filesystem_path` (`sftp:` is one).
     """
-    sftp = pytest.importorskip("pathlib_next.uri.schemes.sftp")
+    uripath = pytest.importorskip("uripath")
+    pytest.importorskip("sftppath.uri")
 
-    path = sftp.SftpPath("sftp://root:hunter2@nas/usr/lib/x.conf")
+    path = uripath.URIPath("sftp://root:hunter2@nas/usr/lib/x.conf")
     assert zfs.host_path(path) == "/usr/lib/x.conf"
     assert "hunter2" not in zfs.host_path(path)
     assert "nas" not in zfs.host_path(path)
@@ -276,10 +274,10 @@ def test_host_path_handles_pytruenas_own_path_types():
 def test_host_path_refuses_to_invent_a_path_for_a_non_host_scheme():
     """Falling back to `str()` would put a URI -- possibly with credentials --
     into an argv. Raising is the correct outcome."""
-    uri = pytest.importorskip("pathlib_next.uri")
+    uripath = pytest.importorskip("uripath")
 
     with pytest.raises((NotImplementedError, TypeError)):
-        zfs.host_path(uri.Uri("https://example.com/some/path"))
+        zfs.host_path(uripath.URI("https://example.com/some/path"))
 
 
 def test_dataset_for_walks_up_to_an_existing_ancestor():
