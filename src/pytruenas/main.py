@@ -18,6 +18,7 @@ from __future__ import annotations
 import copy as _copy
 import datetime as _dt
 import logging as _pylogging
+import sys as _sys
 import typing as _ty
 from pathlib import Path
 
@@ -725,12 +726,18 @@ def main(
     # later default one (and into anything else in the process).
     _runpath.register(base=_runpath_base(args), step_adapter=_step_adapter)
 
-    return run(
-        root,
-        argv,
-        exit="parse",
-        commands=_discover(argv, root),
-        name=name,
-        description=root.__doc__,
-        dispatch=_dispatch,
-    )
+    try:
+        return run(
+            root,
+            argv,
+            exit="parse",
+            commands=_discover(argv, root),
+            name=name,
+            description=root.__doc__,
+            dispatch=_dispatch,
+        )
+    except _MissingExtraError as exc:
+        # Raised before any target runs (reading the config file): one line
+        # and the status a target's missing extra gets.
+        print(f"{name}: {exc}", file=_sys.stderr)
+        return _MISSING_EXTRA_STATUS

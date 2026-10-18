@@ -175,9 +175,11 @@ def _asyncssh():
     """Import ``asyncssh`` on demand (the optional ``ssh`` extra)."""
     try:
         import asyncssh
-    except ImportError as exc:  # pragma: no cover - only without the extra
-        raise ImportError(
-            "SSH/SFTP support requires the 'ssh' extra: pip install pytruenas[ssh]"
+    except ImportError as exc:
+        from hostctl import MissingExtraError
+
+        raise MissingExtraError(
+            "ssh", "deriving an SSH public key", distribution="pytruenas"
         ) from exc
     return asyncssh
 

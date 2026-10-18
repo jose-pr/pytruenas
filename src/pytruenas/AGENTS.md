@@ -599,9 +599,12 @@ A command is a plain module exposing:
   `init` hook returned is left alone. Return an exit code — never raise
   `SystemExit` from a command body: it runs in a fan-out worker, where raising
   it aborts the whole run and discards the other targets' codes. A
-  `hostctl.MissingExtraError` out of `run` (an optional extra not installed)
-  ends that target with one ERROR line and status 125, as hostctl's own
-  command line does; any other exception keeps its traceback.
+  `hostctl.MissingExtraError` out of `run` (an optional extra not installed,
+  hostctl's or pytruenas's) ends that target with one ERROR line and status
+  125, as hostctl's own command line does; any other exception keeps its
+  traceback. One raised before any target runs (a `--config` file without
+  the `config` extra) makes `main()` print `pytruenas: MESSAGE` to stderr and
+  return 125.
   Write results through `utils.cmd.emit_json(value, args)` (or `emit(text)`):
   one locked write, so concurrent targets cannot interleave mid-line, and with
   more than one target each line is `{"target": ..., "result": ...}` with the
@@ -892,7 +895,8 @@ Backs the `generate-typings` command; not typically used directly.
   leaves the previous output intact. `root` is replaced only if it is absent,
   empty, a previous output (marked `.pytruenas-typings`), or holds nothing but
   `.pyi` files; otherwise `FileExistsError`. Missing `jinja2` raises
-  `ImportError` naming the `codegen` extra before anything is touched.
+  `hostctl.MissingExtraError` naming `pytruenas[codegen]` before anything is
+  touched.
 
 ## `models` (`pytruenas.models`)
 
@@ -1058,16 +1062,24 @@ a directory the user does not control.
 
 ## Optional extras and their gating imports
 
+A missing extra raises `hostctl.MissingExtraError` (an `ImportError`) at first
+use, never at import time: `FEATURE needs the 'EXTRA' extra: pip install
+"pytruenas[EXTRA]"` for pytruenas's own (`.distribution == "pytruenas"`),
+`"hostctl[EXTRA]"` for hostctl's.
+
 - **`ssh`** (`hostctl[ssh]>=0.4.0,<0.5`, i.e. asyncssh + sftppath) —
-  required for `.ssh`, `.run()` over SSH, and the `sftp` path leg. Missing it
-  raises a clear `ImportError` naming the extra at first use, not at import
-  time. **Not** required by `.install_sshcreds`, which provisions over the
-  middleware API; only deriving a public key from a caller-supplied
+  required for `.ssh`, `.run()` over SSH, and the `sftp` path leg; without
+  it the host has no `ssh`/`sftp` provider and `run()`/`path()` use the
+  websocket ones. **Not** required by `.install_sshcreds`, which provisions
+  over the middleware API; only deriving a public key from a caller-supplied
   `private_key=` needs a key library, and `cryptography` (which `asyncssh`
-  itself depends on) is preferred over `asyncssh` for that.
+  itself depends on) is preferred over `asyncssh` for that (with neither,
+  `MissingExtraError` names `pytruenas[ssh]`).
 - **`config`** (`pyyaml`) — required to read a CLI `--config` YAML file;
-  missing it with a config file present raises `ImportError`.
-- **`codegen`** (`jinja2`) — required by `pytruenas.codegen`/`generate-typings`.
+  missing it with a config file present raises `MissingExtraError` naming
+  `pytruenas[config]` and the file.
+- **`codegen`** (`jinja2`) — required by `pytruenas.codegen`/`generate-typings`;
+  `MissingExtraError` names `pytruenas[codegen]` before anything is written.
 - **`repo`** (`hostctl[deploy]`) — what `deploy --source repo` needs, which
   the core dependency `hostctl[deploy]` already installs; kept so an existing
   `pytruenas[repo]` requirement resolves. Without hostctl's `deploy` extra,

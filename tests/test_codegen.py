@@ -146,7 +146,9 @@ def test_missing_jinja2_names_the_extra_and_touches_nothing(tmp_path, monkeypatc
     target = tmp_path / "typings"
     target.mkdir()
     (target / "old.pyi").write_text("# previous")
-    with pytest.raises(ImportError, match=r"pytruenas\[codegen\]"):
+    from hostctl import MissingExtraError
+
+    with pytest.raises(MissingExtraError, match=r'"pytruenas\[codegen\]"'):
         Codegen().generate(_api_version(), target)
     assert (target / "old.pyi").read_text() == "# previous"
 

@@ -92,7 +92,13 @@ pytruenas now runs on hostctl 0.4, which moves from `pathlib_next` to
 - **A command that needs a missing optional extra fails its target in one
   line, with status 125**: the CLI reports `hostctl.MissingExtraError` (`FEATURE
   needs the 'EXTRA' extra: pip install "hostctl[EXTRA]"`) as hostctl's own
-  command line does, instead of a traceback.
+  command line does, instead of a traceback. pytruenas's own extras raise it
+  too, naming `pytruenas[...]`: `config` for a `--config` file (reported by
+  `main()` as `pytruenas: MESSAGE` with status 125, since it is read before
+  any target), `codegen` for `generate-typings`, and `ssh` for deriving a
+  public key with neither `cryptography` nor `asyncssh` installed. Each was a
+  plain `ImportError`; `MissingExtraError` is one, so `except ImportError`
+  still catches it.
 
 ### Changed
 

@@ -625,8 +625,10 @@ class Codegen:
         try:
             from . import jinja
         except ImportError as exc:
-            raise ImportError(
-                "generating typings needs jinja2: pip install pytruenas[codegen]"
+            from hostctl import MissingExtraError
+
+            raise MissingExtraError(
+                "codegen", "generating typings", distribution="pytruenas"
             ) from exc
         # Render into a sibling first and swap it in only once every stub is
         # written: a failure part-way leaves the previous output untouched.

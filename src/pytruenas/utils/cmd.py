@@ -148,10 +148,11 @@ def _load_config(path: "_Path") -> dict:
         return {}
     try:
         import yaml
-    except ImportError as exc:  # pragma: no cover - only without the extra
-        raise ImportError(
-            "reading a config file requires the 'config' extra: "
-            "pip install pytruenas[config]"
+    except ImportError as exc:
+        from hostctl import MissingExtraError
+
+        raise MissingExtraError(
+            "config", f"reading the config file {path}", distribution="pytruenas"
         ) from exc
     # read_bytes(), not read_text(): PyYAML detects UTF-8/16 itself, while
     # read_text() uses the locale encoding and raised UnicodeDecodeError on a
