@@ -806,8 +806,8 @@ def test_connect_opts_carry_known_hosts():
     opts = _connect_opts_from_ssh(_ssh_config(known_hosts="/etc/ssh/known_hosts"))
     assert opts["known_hosts"] == "/etc/ssh/known_hosts"
 
-    # `None` means "do not verify" and is a real, deliberate choice.
-    disabled = _connect_opts_from_ssh(_ssh_config(known_hosts=None))
+    # `verify=False` means "do not verify" and is a real, deliberate choice.
+    disabled = _connect_opts_from_ssh(_ssh_config(verify=False))
     assert "known_hosts" in disabled and disabled["known_hosts"] is None
 
     # The `()` default is passed through: asyncssh reads it as "use

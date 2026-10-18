@@ -24,7 +24,7 @@ host half of the API is documented, and `.client`/`.host` both return the
 object itself.
 
 `TrueNASClient(target=None, credentials=None, *, verify=True, sslverify=None,
-shell=None, known_hosts=<follows verify>, logger=None, autologin=True,
+shell=None, known_hosts=(), logger=None, autologin=True,
 version="current", executor=None, path=None, ssh=None, ...)`
 
 - **`target`** — a host, `"host:port"`, or full `scheme://...` URI. `None` /
@@ -46,10 +46,10 @@ version="current", executor=None, path=None, ssh=None, ...)`
 - **`verify`** (default `True`) — one switch for every check the client
   makes. `verify=False` turns off TLS certificate verification (the API
   websocket, the HTTP(S) side channels, the web shell) **and** SSH host-key
-  verification (commands and SFTP): `sslverify` becomes `False` and
-  `known_hosts` becomes `None`, including on an explicit `ssh=SSHConfig(...)`
-  still at its `()` default (a copy is changed, not yours). A specific
-  `sslverify=` or `known_hosts=` overrides it.
+  verification (commands and SFTP): `sslverify` becomes `False` and the SSH
+  leg is `SSHConfig(verify=False)`, including an explicit `ssh=SSHConfig(...)`
+  (a copy is changed, not yours). `sslverify=` overrides it for TLS; keys
+  named with `known_hosts=` are checked even under `verify=False`.
 - **`sslverify`** (default: follows `verify`) — TLS certificate verification
   for `wss://`, the HTTP(S) side channels and the web shell, all through one
   context (`pytruenas.utils.tls.context`). `True` trusts the OS store only
@@ -65,14 +65,14 @@ version="current", executor=None, path=None, ssh=None, ...)`
 - **`verify`/`sslverify` and plaintext** — a credential sent over plain
   `ws://` to a non-loopback host logs one warning per host. `ws://` is not
   refused: it is legitimate for a loopback target or an already-private link.
-- **`known_hosts`** (default: `()`, or `None` under `verify=False`) —
-  host-key policy for the SSH leg built from
-  `shell=` or by `.install_sshcreds()`, with hostctl's values: `()` verifies
-  against `~/.ssh/known_hosts`, `None` does not verify, a path or list of paths
-  names the file(s). An explicit `ssh=SSHConfig(...)` keeps its own. Both the
-  command and SFTP halves verify by default; an unverifiable key (or an
-  unreachable SSH port) makes `run()` and `path()` fall back to the websocket
-  providers, and `run()` logs one WARNING per host when it does.
+- **`known_hosts`** (default `()`) — the trusted host keys for the SSH leg
+  built from `shell=` or by `.install_sshcreds()`, with hostctl's values: `()`
+  is `~/.ssh/known_hosts` (skipped under `verify=False`), a path or list of
+  paths names the file(s), checked either way. `known_hosts=None` raises
+  `ValueError` naming `verify=False`. An explicit `ssh=SSHConfig(...)` keeps its
+  own. Both the command and SFTP halves verify by default; an unverifiable key
+  (or an unreachable SSH port) makes `run()` and `path()` fall back to the
+  websocket providers, and the host logs one WARNING per skipped provider.
 - **`executor`/`path`** — name the providers to use, in preference order.
   Replaces `fsbackend`, which could only pick a filesystem backend; see the
   provider table below.

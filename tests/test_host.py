@@ -198,60 +198,69 @@ def test_known_hosts_defaults_to_the_standard_lookup():
     assert config.ssh.known_hosts == ()
 
 
-@pytest.mark.parametrize("known_hosts", [None, "/etc/ssh/ssh_known_hosts"])
-def test_known_hosts_reaches_the_ssh_leg_built_from_shell(known_hosts):
-    """``known_hosts=None`` is the opt-out; a path names the file to trust."""
+def test_known_hosts_reaches_the_ssh_leg_built_from_shell():
+    """A path names the file of trusted host keys."""
     config = TrueNASConfig.from_target(
-        "wss://nas", shell="ssh://root@nas", known_hosts=known_hosts
+        "wss://nas", shell="ssh://root@nas", known_hosts="/etc/ssh/ssh_known_hosts"
     )
-    assert config.ssh.known_hosts == known_hosts
+    assert config.ssh.known_hosts == "/etc/ssh/ssh_known_hosts"
+    assert config.ssh.verify is True
 
 
-def test_known_hosts_is_accepted_by_the_host_constructor():
-    client = TrueNASHost("wss://nas", shell="ssh://root@nas", known_hosts=None)
-    assert client.config.ssh.known_hosts is None
+@pytest.mark.parametrize("make", [TrueNASHost, TrueNASConfig.from_target])
+def test_known_hosts_none_is_refused_and_names_verify_false(make):
+    """hostctl refuses ``known_hosts=None``; ``verify=False`` is the one switch."""
+    with pytest.raises(ValueError, match="verify=False"):
+        make("wss://nas", shell="ssh://root@nas", known_hosts=None)
 
 
 def test_verify_defaults_to_every_check_on():
     config = TrueNASConfig.from_target("wss://nas", shell="ssh://root@nas")
     assert (config.verify, config.sslverify, config.known_hosts) == (True, True, ())
-    assert config.ssh.known_hosts == ()
+    assert (config.ssh.verify, config.ssh.known_hosts) == (True, ())
 
 
 def test_verify_false_turns_off_tls_and_host_key_checks():
     """One switch for a lab box: TLS certificates and SSH host keys alike."""
     client = TrueNASHost("wss://nas", shell="ssh://root@nas", verify=False)
     assert client.sslverify is False  # websocket, HTTP side channels, web shell
-    assert client.config.known_hosts is None
-    assert client.config.ssh.known_hosts is None  # SSH commands and SFTP
+    assert client.config.ssh.verify is False  # SSH commands and SFTP
+    assert client.config.ssh.connect_opts()["known_hosts"] is None
 
 
 def test_specific_settings_override_verify():
     config = TrueNASConfig.from_target(
         "wss://nas", shell="ssh://root@nas", verify=False, sslverify=True
     )
-    assert config.sslverify is True and config.ssh.known_hosts is None
+    assert config.sslverify is True and config.ssh.verify is False
+    # Named keys are checked even under verify=False: the stricter setting wins.
     config = TrueNASConfig.from_target(
         "wss://nas", shell="ssh://root@nas", verify=False, known_hosts="/k"
     )
     assert config.sslverify is False and config.ssh.known_hosts == "/k"
+    assert config.ssh.connect_opts()["known_hosts"] == "/k"
+    # TLS off, host keys checked.
+    config = TrueNASConfig.from_target(
+        "wss://nas", shell="ssh://root@nas", sslverify=False
+    )
+    assert config.sslverify is False and config.ssh.verify is True
 
 
-def test_verify_false_reaches_an_explicit_ssh_config_left_at_its_default():
-    """A caller's SSHConfig at the default policy follows `verify` -- on a copy."""
+def test_verify_false_reaches_an_explicit_ssh_config():
+    """A caller's SSHConfig follows `verify=False` -- on a copy."""
     mine = SSHConfig(host="nas")
     config = TrueNASConfig.from_target("wss://nas", ssh=mine, verify=False)
-    assert config.ssh.known_hosts is None
-    assert mine.known_hosts == ()  # the caller's object is not mutated
+    assert config.ssh.verify is False
+    assert mine.verify is True  # the caller's object is not mutated
     named = SSHConfig(host="nas", known_hosts="/srv/known_hosts")
     config = TrueNASConfig.from_target("wss://nas", ssh=named, verify=False)
-    assert config.ssh.known_hosts == "/srv/known_hosts"
+    assert config.ssh.connect_opts()["known_hosts"] == "/srv/known_hosts"
 
 
 def test_explicit_ssh_config_keeps_its_own_known_hosts():
     """A caller who built an SSHConfig chose its policy; do not override it."""
     ssh = SSHConfig(host="nas", known_hosts="/srv/known_hosts")
-    config = TrueNASConfig.from_target("wss://nas", ssh=ssh, known_hosts=None)
+    config = TrueNASConfig.from_target("wss://nas", ssh=ssh, known_hosts="/other")
     assert config.ssh.known_hosts == "/srv/known_hosts"
 
 
@@ -372,7 +381,7 @@ def test_run_warns_once_when_it_falls_back_from_the_first_executor(monkeypatch, 
         assert host.run("true") == "ok"
     warnings = [r for r in caplog.records if "fell back from ssh" in r.getMessage()]
     assert len(warnings) == 1
-    assert "known_hosts=None" in warnings[0].getMessage()
+    assert "verify=False" in warnings[0].getMessage()
 
 
 def test_run_does_not_warn_when_the_first_executor_serves(monkeypatch, caplog):
@@ -745,9 +754,16 @@ def test_install_sshcreds_creates_an_ssh_config(keyed_host):
 
 def test_install_sshcreds_uses_the_configured_known_hosts(keyed_host):
     """The provisioned SSH leg follows the client's host-key policy."""
-    keyed_host._config.known_hosts = None
+    keyed_host._config.known_hosts = "/srv/known_hosts"
     keyed_host.install_sshcreds()
-    assert keyed_host._config.ssh.known_hosts is None
+    assert keyed_host._config.ssh.known_hosts == "/srv/known_hosts"
+    assert keyed_host._config.ssh.verify is True
+
+
+def test_install_sshcreds_follows_verify_false(keyed_host):
+    keyed_host._config.verify = False
+    keyed_host.install_sshcreds()
+    assert keyed_host._config.ssh.verify is False
 
 
 @pytest.mark.requires("asyncssh")

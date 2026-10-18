@@ -262,18 +262,6 @@ def _public_key(private_key: str) -> str:
     )
 
 
-class _Default:
-    """Sentinel: an option was not given, so it follows ``verify``."""
-
-    def __repr__(self) -> str:
-        return "<follows verify>"
-
-
-#: ``known_hosts`` not given. Distinct from ``()`` (check the usual file) and
-#: from ``None`` (do not check), both of which are real choices.
-_DEFAULT: _ty.Any = _Default()
-
-
 def _shared_options(credentials: "_ty.Mapping[str, object]") -> "dict[str, object]":
     """Config options common to every branch of ``_from_parsed_uri``.
 
@@ -288,7 +276,7 @@ def _shared_options(credentials: "_ty.Mapping[str, object]") -> "dict[str, objec
         "version": _ty.cast(str, credentials.get("version", "current")),
         "ssh": credentials.get("ssh"),
         "shell": _ty.cast(_ty.Any, credentials.get("shell")),
-        "known_hosts": credentials.get("known_hosts", _DEFAULT),
+        "known_hosts": credentials.get("known_hosts", ()),
         "executor": _ty.cast(_ty.Any, credentials.get("executor")),
         "path": _ty.cast(_ty.Any, credentials.get("path")),
         "autologin": _ty.cast(bool, credentials.get("autologin", True)),
@@ -320,7 +308,9 @@ class _TrustAdapter(_req.adapters.HTTPAdapter):
         conn.ca_cert_dir = None
 
 
-def _ssh_config_from(shell: "str | None", known_hosts: object = ()):
+def _ssh_config_from(
+    shell: "str | None", known_hosts: object = (), verify: bool = True
+):
     """Build an :class:`hostctl.SSHConfig` from a shell connection string.
 
     Accepts what ``TrueNASClient(shell=...)`` has always taken --
@@ -328,9 +318,10 @@ def _ssh_config_from(shell: "str | None", known_hosts: object = ()):
     SSH leg does not require importing and assembling an SSHConfig by hand.
     ``None`` or a local target yields ``None``: no SSH leg.
 
-    ``known_hosts`` is hostctl's own field, passed through unchanged: ``()``
-    (the default) checks the host key against the usual ``~/.ssh/known_hosts``,
-    ``None`` does not check it, a path or list names the file(s) to use.
+    ``known_hosts`` and ``verify`` are hostctl's own fields, passed through:
+    ``()`` checks the host key against ``~/.ssh/known_hosts`` unless
+    ``verify`` is false, and a path or list names the trusted keys, checked
+    either way.
     """
     if not shell:
         return None
@@ -359,6 +350,7 @@ def _ssh_config_from(shell: "str | None", known_hosts: object = ()):
         password=password,
         client_keys=client_keys,
         executable=target.path or None,
+        verify=verify,
         known_hosts=_ty.cast(_ty.Any, known_hosts),
     )
 
@@ -500,7 +492,7 @@ class TrueNASConfig(
         credentials: object = None,
         ssh: object = None,
         shell: "str | None" = None,
-        known_hosts: object = _DEFAULT,
+        known_hosts: object = (),
         executor: "_ty.Iterable[str] | str | None" = None,
         path: "_ty.Iterable[str] | str | None" = None,
         autologin: bool = True,
@@ -531,7 +523,7 @@ class TrueNASConfig(
         #: One switch for every check the client makes: ``False`` turns off TLS
         #: certificate verification (the API websocket, the HTTP side channels,
         #: the web shell) and SSH host-key verification (commands and SFTP).
-        #: ``sslverify=`` / ``known_hosts=`` given explicitly override it.
+        #: ``sslverify=`` given explicitly overrides it for TLS.
         self.verify = verify
         #: TLS certificate verification; follows ``verify`` unless given. A
         #: path is a CA bundle (file or hashed directory) trusted instead of
@@ -548,21 +540,25 @@ class TrueNASConfig(
         #: (``"ssh://root@nas"``, ``"root@nas:22"``) -- so a caller does not
         #: have to import and assemble an SSHConfig for the common case.
         #:
-        #: ``known_hosts`` is the host-key policy for an SSH leg built here --
-        #: from ``shell=`` or by :meth:`TrueNASHost.install_sshcreds`. It uses
-        #: hostctl's values: ``()`` checks ``~/.ssh/known_hosts``, ``None``
-        #: disables the check, a path or list names the file(s). Unset, it
-        #: follows ``verify`` (``()`` or ``None``). An explicit
-        #: ``ssh=SSHConfig(...)`` keeps a policy it names; one left at the
-        #: ``()`` default gets ``None`` when ``verify=False`` (on a copy).
-        if known_hosts is _DEFAULT:
-            known_hosts = () if verify else None
+        #: ``known_hosts`` names the trusted host keys for an SSH leg built
+        #: here -- from ``shell=`` or by :meth:`TrueNASHost.install_sshcreds`
+        #: -- with hostctl's values: ``()`` is ``~/.ssh/known_hosts``, a path
+        #: or list names the file(s). ``verify=False`` skips the ``()`` lookup;
+        #: named keys are checked either way. An explicit ``ssh=SSHConfig(...)``
+        #: keeps its ``known_hosts`` and gets ``verify=False`` on a copy.
+        if known_hosts is None:
+            raise ValueError(
+                "known_hosts=None is not accepted: pass verify=False to skip "
+                "the SSH host-key check (with sslverify=True to keep checking TLS)"
+            )
         self.known_hosts = known_hosts
-        if ssh is not None and not verify and getattr(ssh, "known_hosts", None) == ():
+        if ssh is not None and not verify and getattr(ssh, "verify", False):
             import dataclasses
 
-            ssh = dataclasses.replace(_ty.cast(_ty.Any, ssh), known_hosts=None)
-        self.ssh = ssh if ssh is not None else _ssh_config_from(shell, known_hosts)
+            ssh = dataclasses.replace(_ty.cast(_ty.Any, ssh), verify=False)
+        self.ssh = (
+            ssh if ssh is not None else _ssh_config_from(shell, known_hosts, verify)
+        )
         # Credentials are normalized once, here, so every downstream consumer
         # sees a Credentials instance rather than "maybe a string, maybe a
         # tuple, maybe None".
@@ -1513,6 +1509,7 @@ class TrueNASHost(_PosixHost, _ty.Generic[ApiVersion]):
                 host=self._config.host,
                 username="root",
                 client_keys=[private_key.encode()],
+                verify=self._config.verify,
                 known_hosts=_ty.cast(_ty.Any, self._config.known_hosts),
             )
         elif not existing.password and not existing.client_keys:
@@ -1605,7 +1602,7 @@ class TrueNASHost(_PosixHost, _ty.Generic[ApiVersion]):
         self._fallback_warned.add(first)
         self.logger.warning(
             "run() fell back from %s to %s: %s. If the SSH host key is not in "
-            "known_hosts, add it, or pass known_hosts=None to skip the check",
+            "known_hosts, add it, or pass verify=False to skip the check",
             first,
             chosen,
             trace[0].get("reason") or "unavailable",

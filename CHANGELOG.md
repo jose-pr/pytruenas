@@ -23,6 +23,12 @@ pytruenas now runs on hostctl 0.4, which moves from `pathlib_next` to
   connection raises is `hostctl.OperationNotStartedError`, a `ConnectionError`
   where `hostctl.provider.OperationNotStarted` was a `RuntimeError`. The rest
   of hostctl's renames are in its own changelog, "Migrating from 0.3".
+- **`verify=False` is the one way to skip the SSH host-key check.**
+  `known_hosts=None` raises `ValueError`; pass `verify=False` (add
+  `sslverify=True` to keep checking TLS). `verify=False` reaches the SSH leg
+  as `SSHConfig(verify=False)`, so `verify=False, known_hosts=()` no longer
+  checks `~/.ssh/known_hosts`; keys named with `known_hosts=` are still
+  checked. For host keys checked with TLS off, pass `sslverify=False`.
 - **SSH settings follow hostctl 0.4.** Neither SSH leg reads `~/.ssh/config`
   unless `SSHConfig(ssh_config=...)` names it, and an `SSHConfig` you build
   yourself defaults to the local account name rather than `root` (`shell=` and

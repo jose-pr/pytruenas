@@ -72,22 +72,26 @@ keypair, installs it on root's `authorized_keys`, and wires it in for you.
 
 The SSH leg — both commands and SFTP — verifies the server's host key against
 `~/.ssh/known_hosts`. For a NAS that is not listed there, either add it
-(`ssh-keyscan nas >> ~/.ssh/known_hosts`) or choose a policy with `known_hosts=`:
+(`ssh-keyscan nas >> ~/.ssh/known_hosts`) or name the file of trusted keys with
+`known_hosts=`:
 
 ```python
-TrueNASClient("nas", api_key, shell="ssh://root@nas", known_hosts=None)            # do not check
-TrueNASClient("nas", api_key, shell="ssh://root@nas", known_hosts="/srv/known_hosts")  # this file
+TrueNASClient("nas", api_key, shell="ssh://root@nas", known_hosts="/srv/known_hosts")
 ```
 
 For a lab box with a self-signed certificate and an unrecorded host key,
 `verify=False` turns off both checks at once (TLS certificate verification
-everywhere, and SSH host-key verification):
+everywhere, and SSH host-key verification). It is the only way to skip the
+host-key check; `known_hosts=None` raises `ValueError`.
 
 ```python
-TrueNASClient("nas", api_key, shell="ssh://root@nas", verify=False)
+TrueNASClient("nas", api_key, shell="ssh://root@nas", verify=False)                  # check nothing
+TrueNASClient("nas", api_key, shell="ssh://root@nas", verify=False, sslverify=True)  # TLS only
+TrueNASClient("nas", api_key, shell="ssh://root@nas", sslverify=False)               # host keys only
 ```
 
-`sslverify=` and `known_hosts=` still override it individually.
+`sslverify=` overrides `verify` for TLS. Keys named with `known_hosts=` are
+checked even under `verify=False`: the stricter setting wins.
 
 Certificates are checked against the operating system's trust store, the same
 for the API websocket, uploads/downloads and the web shell. To trust a private
@@ -102,7 +106,7 @@ TrueNASClient("nas", api_key, sslverify="/etc/pki/lab-ca.pem")
 
 `known_hosts=` applies to the SSH leg built from `shell=` and to the one
 `install_sshcreds()` wires in; an `ssh=SSHConfig(...)` you build yourself keeps
-its own setting. When the key cannot be verified (or SSH is unreachable),
+its own `known_hosts`, and `verify=False` reaches it on a copy. When the key cannot be verified (or SSH is unreachable),
 commands and file operations fall back to the websocket transports, and the
 client logs a warning the first time `run()` does so.
 
