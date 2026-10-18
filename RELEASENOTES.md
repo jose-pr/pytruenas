@@ -17,11 +17,25 @@ test.yml produces the numbers.
 
 The port to hostctl 0.4. hostctl replaced `pathlib_next` with `pathapi` (and
 its SFTP leg with `sftppath`), renamed most of its public names, and requires
-netimps 0.4; pytruenas follows all three. The documented API changes where the
-path types surface (`pathapi` classes in place of `pathlib_next` ones), in
-`TruenasPath.resolve()`, which now resolves over SFTP, and in the class of the
-web shell's "not started" error. Under this project's pre-1.0 rule that is a
-minor-version change.
+netimps 0.4; pytruenas follows all three. hostctl 0.4 also took in several
+pieces pytruenas had written for itself, and pytruenas now uses hostctl's:
+
+- the provider fallback WARNING, the host's name and its logger;
+- provider-name resolution (`TrueNASHost.provider_resolvers`,
+  `default_providers()`);
+- the web shell's framed command protocol (`hostctl.console.PosixConsoleProfile`)
+  and the executor call surface (`hostctl.executor.StreamingExecutor`);
+- composite paths whose SFTP leg is the host's own, on the one SSH connection
+  `run()` uses, in place of `TruenasPath`'s second SFTP leg;
+- the deploy bundler and installer (`hostctl.deploy`), in place of
+  `pytruenas.utils.bundle`;
+- `verify=False` as the one switch for the SSH host-key check, keyword
+  credentials over the URI's, and `MissingExtraError`.
+
+About 2,000 lines of pytruenas source and 950 of tests went with them (net). The
+documented API changes (path types, `TruenasPath` and `utils.bundle` removed,
+`known_hosts=None` refused, selection records, the web shell's errors) make
+this a minor-version change under the pre-1.0 rule.
 
 ### Migration
 
@@ -29,20 +43,36 @@ See CHANGELOG "Upgrade notes". In code: replace `pathlib_next` imports with
 `pathapi` (`LocalPath`, `Path`, `FileStat`) or `uripath` (`URIPath`); spell
 `hostctl.SSHConfig` with keyword arguments; catch `ConnectionError` (or
 `hostctl.OperationNotStartedError`) where `RuntimeError` caught a web shell
-that never started.
+that never started; pass `verify=False` where `known_hosts=None` was;
+read `client.last_selection` entries as records (`step.provider`); call
+`pytruenas.fs.symlink_to(path, target, force=...)` where
+`TruenasPath.symlink_to(..., force=...)` was; import `hostctl.deploy` where
+`pytruenas.utils.bundle` was.
 
 ### Validation
 
-- Suite against the hostctl checkout at `01f14a5` (`0.4.0.dev0`; pathapi
-  0.1.1, pathapi-uri 0.1.0, sftppath 0.1.0, netimps 0.4.1): 953 passed / 6
-  skipped on Python 3.14 and on the 3.9 floor (Windows ARM64), against 945 / 6
-  on hostctl 0.3.2. The 6 POSIX-shell skips pass under WSL.
+- Suite against the hostctl checkout at `893aaa9`, then `e401705`
+  (`0.4.0.dev0`; pathapi 0.1.1, pathapi-uri 0.1.0, sftppath 0.1.3, netimps
+  0.4.1, truststore 0.10.5 on 3.14): 883 passed / 6 skipped on Python 3.14 and
+  on the 3.9 floor (Windows ARM64). The skips are the five POSIX-shell `run()`
+  tests and the web shell's pty leg; the web shell tests, pty leg included,
+  pass under WSL (36). Its real-`sh` leg runs on Windows too (Git Bash).
 - Exercised against a TrueNAS 26.0 host: `run()` and `path()` with a trusted
-  key, an unknown host key, `known_hosts=None` and a refused SSH port (each
-  falling back to the web shell and `tnasws` where it should); names with `?`,
-  `#`, `%20` over both legs; `TruenasPath` readlink, resolve, rename and
-  unlink over SFTP; a `tnasws` write stream committed on close and discarded
-  on an exception.
+  key, an unknown host key, `verify=False` and a refused SSH port (falling back
+  to the web shell and `tnasws`, one WARNING per skipped provider); one SSH
+  login per host for commands and paths together (`Accepted publickey` in the
+  host's journal); names with `?`, `#` and spaces over both legs;
+  `fs.symlink_to` with and without `force=`, and refused before removing
+  anything on a websocket-only host; the web shell's framed commands (output,
+  stderr, status, binary input, live streaming one line per second, a 3 s
+  timeout raising in 3.8 s with the next command working, `exit 3`
+  reconnecting, a hostile `input=` never run); `deploy` of a zipapp and of a
+  tree into a scratch directory, each run with `--version`, re-deployed as
+  "verified", and a foreign path refused.
+- The web shell's `input=` is slower than before: hostctl's protocol waits for
+  an acknowledgement every 2 KiB typed, one round trip (about 0.5 s on the web
+  shell) each, so 64 KiB took 20.6 s against 3.8 s and 1 MiB 396 s against
+  63 s. Output and small commands are unaffected.
 - hostctl 0.4.0 is not on PyPI yet, so these pins do not resolve from the
   index until it is released; the checkout (`0.4.0.dev0`) was installed with
   `--no-deps`, and `pip check` reports the pin until 0.4.0 ships.
