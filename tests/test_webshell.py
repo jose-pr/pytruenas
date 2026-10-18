@@ -34,6 +34,7 @@ import pytest
 from hostctl.exceptions import OperationNotStartedError
 from hostctl.provider import ExecutorProvider
 
+import pytruenas.webshell as ws_mod
 from pytruenas.webshell import (
     WEBSHELL_PATH,
     WebShellExecutor,
@@ -132,6 +133,17 @@ def test_stream_encodes_a_text_frame_and_writes_binary():
     assert stream.read(timeout=1) == "é".encode()
     stream.write(bytearray(b"x"))
     assert socket.sent == [b"x"]
+
+
+def test_a_write_does_not_inherit_the_last_read_s_timeout():
+    """The socket has one timeout for both directions: a draining read leaves
+    it at a millisecond, and live a 2 KiB send of typed input then timed out."""
+    socket = _Socket()
+    stream = _WebSocketStream(socket)
+    stream.read(10, timeout=0)
+    stream.write(b"x")
+    assert socket.timeouts == [0.001, ws_mod._WRITE_TIMEOUT]
+    assert ws_mod._WRITE_TIMEOUT >= 10
 
 
 def test_stream_raises_connection_error_once_closed():

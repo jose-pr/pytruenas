@@ -85,6 +85,11 @@ _SETTLE = 1.0
 #: Opening the websocket and authenticating must not hang forever.
 CONNECT_TIMEOUT = 30.0
 
+#: Longest one write may block. The socket has one timeout for both
+#: directions, and a read just before may have left it at a millisecond, which
+#: fails a send that waits for the server to drain typed input.
+_WRITE_TIMEOUT = 30.0
+
 #: The **externally reachable** web-shell path. ``middlewared`` registers the
 #: handler at ``/_shell`` on its internal port; nginx exposes it as
 #: ``/websocket/shell``. Connecting to ``/_shell`` on 443 does not fail cleanly
@@ -143,6 +148,7 @@ class _WebSocketStream:
 
     def write(self, data: bytes) -> None:
         # Binary frames only: see the module docstring.
+        self._ws.settimeout(_WRITE_TIMEOUT)
         try:
             self._ws.send_binary(bytes(data))
         except OSError:
