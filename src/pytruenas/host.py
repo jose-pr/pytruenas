@@ -290,14 +290,6 @@ class _TrustAdapter(_req.adapters.HTTPAdapter):
         conn.ca_cert_dir = None
 
 
-#: The OpenSSH client configuration of an SSH leg whose ``shell=`` names no
-#: user: the user's own ``~/.ssh/config``, then ``root``, TrueNAS's
-#: administrative login, for a host that file gives no ``User``. OpenSSH (and
-#: asyncssh) keeps the first value it reads, so the file's ``User`` wins, and a
-#: missing file is skipped. It is configuration text, not a file name.
-_ROOT_UNLESS_CONFIGURED = "Include ~/.ssh/config\nHost *\n    User root\n"
-
-
 def _ssh_config_from(
     shell: "str | None", known_hosts: object = (), verify: bool = True
 ):
@@ -316,7 +308,7 @@ def _ssh_config_from(
 
     The user's ``~/.ssh/config`` applies, as it does for ``ssh``: a user or
     port in ``shell`` wins over its ``User``/``Port``, and with no ``User``
-    from either the login is ``root`` (see :data:`_ROOT_UNLESS_CONFIGURED`).
+    from either the login is ``root``, TrueNAS's administrative login.
     """
     if not shell:
         return None
@@ -338,9 +330,6 @@ def _ssh_config_from(
         if logintype == "client_keys" and password:
             client_keys = [password.encode() if isinstance(password, str) else password]
             password = None
-    options: "dict[str, _ty.Any]" = {}
-    if not username:
-        options["ssh_config"] = _ROOT_UNLESS_CONFIGURED
     return SSHConfig(
         host=target.host,
         port=target.port or None,
@@ -350,7 +339,7 @@ def _ssh_config_from(
         executable=target.path or None,
         verify=verify,
         known_hosts=_ty.cast(_ty.Any, known_hosts),
-        **options,
+        default_username="root",
     )
 
 

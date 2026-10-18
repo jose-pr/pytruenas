@@ -72,8 +72,9 @@ pytruenas now runs on hostctl 0.4, which moves from `pathlib_next` to
   `shell=` wins over the file; with no user in either the login is still
   `root`, and with no port 22 (`install_sshcreds()` always logs in as `root`,
   where it installed the key). So `.config.ssh.port` is `None` and, for a
-  `shell=` with no user, `.config.ssh.username` is `None`, where both read 22
-  and `"root"`. For a leg that reads no personal file, pass
+  `shell=` with no user, `.config.ssh.username` is `None` and
+  `.config.ssh.default_username` is `"root"`, where both read 22 and `"root"`.
+  For a leg that reads no personal file, pass
   `ssh=SSHConfig(host, username="root", ssh_config=None)`. An `SSHConfig` you
   build yourself defaults to the local account name rather than `root`, as in
   hostctl 0.4, and its `ssh_config=` takes a `pathlib.Path` for a file (a
