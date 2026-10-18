@@ -74,10 +74,10 @@ shell drives an interactive terminal. It behaves like any other executor for
 `timeout`, with these differences:
 
 - **Output is exact.** The command and its input are sent base64-encoded and its
-  output is framed by markers the command itself prints, so nothing typed is
-  interpreted by the terminal and nothing the terminal draws (the echo, the
-  prompt, the login banner) reaches your result. Captured `.stdout` is the
-  program's own bytes.
+  output is framed by markers the shell prints — hostctl's
+  `PosixConsoleProfile` protocol — so nothing typed is interpreted by the
+  terminal and nothing the terminal draws (the echo, the prompt, the login
+  banner) reaches your result. Captured `.stdout` is the program's own bytes.
 - **Uncaptured stdout is streamed as it arrives** to its target (default
   `sys.stdout.buffer`), within about 0.1 s — a long-running command reports
   progress live.
@@ -90,8 +90,8 @@ shell drives an interactive terminal. It behaves like any other executor for
   temporary file; with neither, stdin is `/dev/null`, so a command that prompts
   gets EOF instead of hanging. Streaming stdin incrementally is not supported:
   bytes typed into a terminal that the program does not read would be run by
-  the shell as the next command. A file *descriptor* (`subprocess.PIPE`) is
-  rejected.
+  the shell as the next command. `stdin=subprocess.PIPE` without `input=`
+  raises `ValueError`; a file descriptor is read to EOF like a stream.
 
     ```python
     client.run("cat", input="hello\n", encoding="utf-8")
@@ -101,6 +101,11 @@ shell drives an interactive terminal. It behaves like any other executor for
 - `timeout=None` waits indefinitely; on a timeout the command is interrupted,
   the session is closed, and `subprocess.TimeoutExpired` carries the partial
   output (and `orphaned=False`).
+- A connection that drops once the command line was typed raises
+  `ConnectionError` (the command may have run, so the host does not retry it
+  elsewhere); a web shell that cannot connect at all lets the host try the
+  next provider. A command that exits the shell (`exit 3`) ends the session
+  the same way, and the next call reconnects.
 
 ## Choosing the transport yourself
 

@@ -271,13 +271,15 @@ on 22 (NAT, a firewall allowing only 443, a reverse proxy), which would
 otherwise have no `run()` at all. It ranks below SSH, which has real
 channels: the web shell drives a terminal, sending the command and any
 `input=`/`stdin=` base64-encoded and framing output by markers the command
-prints, so captured stdout is exact bytes and nothing typed is interpreted.
-Uncaptured stdout streams live; stderr is captured separately but delivered
-when the command ends (`stderr=STDOUT` merges live); `stdin=` is read to EOF
-first (no incremental stdin); no input means `/dev/null`; `timeout=None`
-waits forever; a timeout interrupts, closes the session and raises
-`TimeoutExpired(orphaned=False)`. Requires a POSIX login shell with
-`base64`, `mktemp` and `stty` (TrueNAS root's zsh qualifies).
+prints (hostctl's `PosixConsoleProfile`), so captured stdout is exact bytes
+and nothing typed is interpreted. Uncaptured stdout streams live; stderr is
+captured separately but delivered when the command ends (`stderr=STDOUT`
+merges live); `stdin=` is read to EOF first (no incremental stdin); no input
+means `/dev/null`; `timeout=None` waits forever; a timeout interrupts, closes
+the session and raises `TimeoutExpired(orphaned=False)`; a connection lost
+after the command line was typed raises `ConnectionError` and is not retried
+on another provider. Requires a POSIX login shell with `base64`, `mktemp`,
+`stty`, `cat` and `rm` (TrueNAS root's zsh qualifies).
 
 **Overriding the selection.** `executor=` and `path=` name the providers to
 use, in preference order — a single name or a sequence:
@@ -781,17 +783,25 @@ can compose a host of its own.
   fresh `(executor_provider, path_provider)` pair, both named `"local"`.
 - **`providers.TnasWsPathProvider(client)`** — the `filesystem.*` path provider
   (`"tnasws"`), which works over the API websocket with no SSH.
-- **`webshell.WebShellExecutorProvider(client)`** — the `"webshell"` executor.
+- **`webshell.WebShellExecutorProvider(client)`** — the `"webshell"`
+  executor provider; `.executor` is a `webshell.WebShellExecutor`, a
+  `hostctl.executor.StreamingExecutor`, so its call surface is hostctl's
+  (`capture_output`, `stdout=`/`stderr=` targets, `input=`/`stdin=` read to
+  EOF, `stdin=PIPE` without `input=` raising `ValueError`, text rule, `check`,
+  `TimeoutExpired`). No `args`, `cwd` or `env`: hostctl renders them into the
+  command line. Uncaptured stdout is written as it arrives, in batches of up to
+  4 KiB or 0.1 s.
 - **`webshell.WebShellSession(client, **options)`** — one `/websocket/shell`
-  session. `.execute(command, input=None, merge_stderr=False, timeout=None,
+  session. `.execute(command, *, input=None, merge_stderr=False, timeout=None,
   sink=None, errsink=None) -> (stdout, stderr, returncode)` runs one command
-  and can stream: `sink`/`errsink` are called with decoded chunks as they
-  arrive. `.command_lines(...)` yields output lines. A `timeout` raises
-  `subprocess.TimeoutExpired` carrying whatever arrived; a connection lost
-  before the command starts raises `hostctl.OperationNotStartedError` (a
-  `ConnectionError`).
-- **`webshell.clean_output(text)`** — strips the terminal's own control
-  sequences from captured output.
+  through `hostctl.console.PosixConsoleProfile` over the websocket: `sink`
+  gets stdout bytes as they arrive, `errsink` stderr when the command ends. A
+  `timeout` interrupts, closes the session and raises
+  `subprocess.TimeoutExpired(orphaned=False)` carrying what arrived; a failure
+  before the command line was typed raises `hostctl.OperationNotStartedError`
+  (a `ConnectionError`; nothing ran), a connection lost after it a plain
+  `ConnectionError`; the session is closed either way. `.stream` is the
+  websocket as a `hostctl.console.ConsoleStream` (connects first).
 
 ## `patch` (`pytruenas.patch`)
 

@@ -31,6 +31,19 @@ pytruenas now runs on hostctl 0.4, which moves from `pathlib_next` to
   checked. For host keys checked with TLS off, pass `sslverify=False`.
 - **`client.last_selection` holds hostctl `SelectionStep` records**, not
   dicts: read `step.provider`/`step.chosen`, not `step["provider"]`.
+- **The web shell runs hostctl's framed console protocol.** Its executor is
+  `webshell.WebShellExecutor`, a hostctl `StreamingExecutor`, driving
+  `hostctl.console.PosixConsoleProfile` over the websocket.
+  `WebShellSession.command_lines()` is gone; `WebShellSession.execute()`
+  keeps its signature. What a caller can see: a connection lost after the
+  command line was typed raises `ConnectionError` (it raised
+  `OperationNotStartedError` until the command's first marker arrived, which
+  let the host replay a command that may have run) and a command that exits
+  the shell raises `ConnectionError` instead of `SubprocessError`;
+  `stdin=subprocess.PIPE` without `input=` raises `ValueError` and a file
+  descriptor is read to EOF, where both raised `NotImplementedError`; an
+  unknown `run()` option raises `TypeError`. Large `input=` costs one round
+  trip per 2 KiB typed, so a terminal's input queue never overflows.
 - **SSH settings follow hostctl 0.4.** Neither SSH leg reads `~/.ssh/config`
   unless `SSHConfig(ssh_config=...)` names it, and an `SSHConfig` you build
   yourself defaults to the local account name rather than `root` (`shell=` and
