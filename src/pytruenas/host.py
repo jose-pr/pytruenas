@@ -499,6 +499,8 @@ class TrueNASConfig(
         logger: object = None,
     ) -> None:
         super().__init__()
+        #: A label assigned to `name`, replacing the derived one.
+        self._name: "str | None" = None
         #: Whether the first websocket access logs in automatically.
         self.autologin = autologin
         #: Logger for the client built from this config; a name or a Logger.
@@ -715,8 +717,11 @@ class TrueNASConfig(
         ``localhost`` for the local middleware socket; the bare hostname
         otherwise, with the port appended only when it is non-default (a
         ``:8443`` is a real distinguisher between two entries for one host,
-        where ``:443`` just repeats the scheme).
+        where ``:443`` just repeats the scheme). Assigning it replaces the
+        label.
         """
+        if self._name is not None:
+            return self._name
         if self.is_local:
             return "localhost"
         host = _uri_host(self.host) if self.host else "localhost"
@@ -724,6 +729,10 @@ class TrueNASConfig(
         if self.port and self.port != default_port:
             return f"{host}:{self.port}"
         return host
+
+    @name.setter
+    def name(self, value: str) -> None:
+        self._name = str(value)
 
     @property
     def connection_uri(self) -> str:
@@ -856,10 +865,8 @@ class TrueNASHost(_PosixHost, _ty.Generic[ApiVersion]):
         self._config = config
         #: The live JSON-RPC connection, opened on first `.conn` access.
         self._conn: "_connection.TrueNASWSConnection | None" = None
+        # hostctl logs a provider fallback here too, once per skipped provider.
         self.logger = _resolve_logger(config.logger, config.name)
-        #: Providers already reported as fallen back from (see `run`), so the
-        #: warning is logged once per provider rather than on every call.
-        self._fallback_warned: "set[str]" = set()
         #: Guards opening, replacing and dropping `_conn`. Reentrant: logging
         #: in calls `auth.*` through `api`, which reads `conn` again.
         self._conn_lock = _threading.RLock()
@@ -1560,19 +1567,6 @@ class TrueNASHost(_PosixHost, _ty.Generic[ApiVersion]):
             config.name,
         )
 
-    def run(self, *cmds, **options):
-        """Run a command -- :meth:`hostctl.host.PosixHost.run`, plus a warning.
-
-        When the preferred executor cannot start (an SSH leg that is
-        unreachable or whose host key is not trusted) hostctl quietly serves
-        the call from the next one, usually the web shell. That downgrade is
-        worth knowing about, so it is logged once per provider.
-        """
-        try:
-            return super().run(*cmds, **options)
-        finally:
-            self._warn_fallback()
-
     def path(self, *segments, backend=None):
         """A path on the target -- :meth:`hostctl.host.Host.path`, rooted at ``/``.
 
@@ -1590,28 +1584,6 @@ class TrueNASHost(_PosixHost, _ty.Generic[ApiVersion]):
         ):
             segments = ("/", *segments)
         return super().path(*segments, backend=backend)
-
-    def _warn_fallback(self) -> None:
-        trace = self.last_selection
-        if not trace or trace[0].get("chosen"):
-            return
-        first = str(trace[0].get("provider"))
-        chosen = next((str(t["provider"]) for t in trace if t.get("chosen")), None)
-        if chosen is None or first in self._fallback_warned:
-            return
-        self._fallback_warned.add(first)
-        self.logger.warning(
-            "run() fell back from %s to %s: %s. If the SSH host key is not in "
-            "known_hosts, add it, or pass verify=False to skip the check",
-            first,
-            chosen,
-            trace[0].get("reason") or "unavailable",
-        )
-
-    @property
-    def name(self) -> str:
-        """This host's short label -- see :attr:`TrueNASConfig.name`."""
-        return self._config.name
 
     @property
     def sslverify(self) -> "bool | str":

@@ -111,16 +111,21 @@ version="current", executor=None, path=None, ssh=None, ...)`
   when an SSH leg is configured; a remote target with no SSH and no web shell
   honestly reports no `run`.
 - **`.last_selection`** — the redacted provider trace for the most recent
-  `run()`: what was tried, what was chosen, and why.
+  `run()`: hostctl `SelectionStep` records (`.provider`, `.chosen`,
+  `.availability`, `.reason`, ...), not dicts.
 - **`.name`** — the host's short label: the hostname, plus the port only when
   it is non-default (`nas1`, `nas1:8443`, `localhost` for the unix socket).
+  It is `.config.name` (hostctl's `Host.name`); assigning either replaces it.
   This is what identifies the host in logs; `.config.connection_uri` is the
   full canonical (and credential-free) URI.
-- **`.logger`** — a logger bound to `.name`, so every record it emits is
-  prefixed `[nas1]` — including records from the JSON-RPC connection, which
-  shares it. Defaults to `logging.getLogger("pytruenas")` underneath; pass
-  `logger=` (a name or a `Logger`) to redirect it. A `LoggerAdapter` you pass
-  in yourself is used as-is, unwrapped.
+- **`.logger`** — a logger bound to the name at construction, so every record
+  it emits is prefixed `[nas1]` — including records from the JSON-RPC
+  connection, which shares it, and hostctl's fallback WARNING (`run() fell
+  back from ssh to webshell: ssh: <reason>`, `path() fell back from sftp to
+  tnasws: ...`, once per skipped provider). Defaults to
+  `logging.getLogger("pytruenas")` underneath; pass `logger=` (a name or a
+  `Logger`) to redirect it, or assign `.logger` (hostctl's settable
+  attribute). A `LoggerAdapter` you pass in yourself is used as-is, unwrapped.
 
 ### Methods
 

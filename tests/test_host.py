@@ -361,40 +361,58 @@ def test_path_backend_pins_every_operation_to_that_provider(monkeypatch):
     assert puts == ["filesystem.put"]
 
 
-def _trace(*entries):
-    return property(lambda self: tuple(dict(e) for e in entries))
+def _executor_provider(name, available=True):
+    """A command provider answering every call with ``name``, or unavailable."""
+    import subprocess
+
+    from hostctl.provider import ExecutorProvider, ProviderProbe
+
+    def execute(command, *args, **options):
+        return subprocess.CompletedProcess(command, 0, name.encode(), b"")
+
+    class _Provider(ExecutorProvider):
+        def probe(self):
+            if available:
+                return ProviderProbe("available", capabilities=self.capabilities)
+            return ProviderProbe("unavailable", reason="Host key is not trusted")
+
+    return _Provider(name, execute, capabilities=())
 
 
-def test_run_warns_once_when_it_falls_back_from_the_first_executor(monkeypatch, caplog):
+def test_run_warns_once_when_it_falls_back_from_the_first_executor(caplog):
+    """hostctl logs the downgrade on ``host.logger``: pytruenas's, named."""
     host = _built()
-    monkeypatch.setattr(PosixHost, "run", lambda self, *a, **k: "ok", raising=False)
-    monkeypatch.setattr(
-        type(host),
-        "last_selection",
-        _trace(
-            {"provider": "ssh", "chosen": False, "reason": "SSH connection failed"},
-            {"provider": "webshell", "chosen": True, "reason": ""},
-        ),
+    host.replace_providers(
+        executor=(_executor_provider("ssh", False), _executor_provider("webshell"))
     )
     with caplog.at_level("WARNING"):
-        assert host.run("true") == "ok"
-        assert host.run("true") == "ok"
+        assert host.run("true").stdout == b"webshell"
+        assert host.run("true").stdout == b"webshell"
     warnings = [r for r in caplog.records if "fell back from ssh" in r.getMessage()]
     assert len(warnings) == 1
-    assert "verify=False" in warnings[0].getMessage()
+    message = warnings[0].getMessage()
+    assert message.startswith("[nas] run() fell back from ssh to webshell")
+    assert "Host key is not trusted" in message
+    assert warnings[0].name == "pytruenas"
 
 
-def test_run_does_not_warn_when_the_first_executor_serves(monkeypatch, caplog):
+def test_run_does_not_warn_when_the_first_executor_serves(caplog):
     host = _built()
-    monkeypatch.setattr(PosixHost, "run", lambda self, *a, **k: "ok", raising=False)
-    monkeypatch.setattr(
-        type(host),
-        "last_selection",
-        _trace({"provider": "ssh", "chosen": True, "reason": ""}),
+    host.replace_providers(
+        executor=(_executor_provider("ssh"), _executor_provider("webshell"))
     )
     with caplog.at_level("WARNING"):
-        host.run("true")
+        assert host.run("true").stdout == b"ssh"
     assert not [r for r in caplog.records if "fell back" in r.getMessage()]
+
+
+def test_host_name_is_the_config_label_and_assignable():
+    host = _built("wss://nas:8443")
+    assert host.name == host.config.name == "nas:8443"
+    host.config.name = "odin"
+    assert host.name == "odin"
+    host.name = "thor"
+    assert (host.name, host.config.name) == ("thor", "odin")
 
 
 def test_autologin_and_logger_are_honoured(monkeypatch):

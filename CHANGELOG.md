@@ -29,6 +29,8 @@ pytruenas now runs on hostctl 0.4, which moves from `pathlib_next` to
   as `SSHConfig(verify=False)`, so `verify=False, known_hosts=()` no longer
   checks `~/.ssh/known_hosts`; keys named with `known_hosts=` are still
   checked. For host keys checked with TLS off, pass `sslverify=False`.
+- **`client.last_selection` holds hostctl `SelectionStep` records**, not
+  dicts: read `step.provider`/`step.chosen`, not `step["provider"]`.
 - **SSH settings follow hostctl 0.4.** Neither SSH leg reads `~/.ssh/config`
   unless `SSHConfig(ssh_config=...)` names it, and an `SSHConfig` you build
   yourself defaults to the local account name rather than `root` (`shell=` and
@@ -51,6 +53,10 @@ pytruenas now runs on hostctl 0.4, which moves from `pathlib_next` to
   the login directory instead).
 - `install_sshcreds()` swaps the providers through hostctl's
   `replace_providers()`, which closes each replaced transport once.
+- The fallback WARNING comes from hostctl: `[nas] run() fell back from ssh
+  to webshell: ssh: <reason>`, once per skipped provider, and now also for a
+  path operation served by `tnasws` after `sftp` declined. Its message no
+  longer suggests a `known_hosts` setting.
 - `client.ssh` is hostctl's `SSHExecutorProvider.connection`: the same
   asyncssh connection, bound to hostctl's own event-loop thread (see the API
   header for how to run its coroutines).

@@ -41,13 +41,22 @@ client.run("cat > /tmp/x", input="hello\n", encoding="utf-8")
 ## Which transport ran it
 
 `client.last_selection` records what was tried and why, with credentials
-redacted — useful when a command took an unexpected route:
+redacted — useful when a command took an unexpected route. Each entry is a
+hostctl `SelectionStep` record (`.provider`, `.chosen`, `.availability`,
+`.reason`):
 
 ```python
 client.run("uptime")
-[t["provider"] for t in client.last_selection if t["chosen"]]
+[step.provider for step in client.last_selection if step.chosen]
 # ['ssh']
 ```
+
+When a command is served by a provider ranked below one that is unavailable —
+the web shell because SSH refused the connection or its host key is not
+trusted — the client logs one WARNING per skipped provider, on its own
+logger: `[nas] run() fell back from ssh to webshell: ssh: <reason>`. A path
+operation falling back from SFTP to the filesystem API logs the same way
+(`path() fell back from sftp to tnasws: ...`).
 
 `client.capabilities` reports whether `run` is available at all, so a
 caller can check up front instead of discovering it mid-command.
