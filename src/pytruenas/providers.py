@@ -10,7 +10,7 @@ hostctl's stock pair (:func:`hostctl.local_providers`). A target reached over th
 this machine, so a command there is a plain ``subprocess`` call and a path is a
 plain local path -- there is nothing about TrueNAS to add.
 
-**On ordering** (see ``TrueNASHost._build_providers``):
+**On ordering** (see ``TrueNASHost.default_providers``):
 
 ``local`` -> ``ssh`` -> ``webshell``, and ``local`` -> ``sftp`` -> ``tnasws``.
 

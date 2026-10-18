@@ -290,9 +290,16 @@ TrueNASConfig.from_target("wss://nas", executor=[])                   # no run c
 ```
 
 Valid names are `local`/`ssh`/`webshell` for executors and
-`local`/`sftp`/`tnasws` for paths; an unknown one raises rather than silently
-composing a host with nothing. Requesting `ssh`/`sftp` without an `SSHConfig`
-also raises. `None` (the default) means "decide from the target".
+`local`/`sftp`/`tnasws` for paths: hostctl descriptors, which `TrueNASHost`
+declares in `provider_resolvers` (`ssh` and `sftp` share one resolver, so
+one transport; hostctl's `winrm` is hidden) beside hostctl's global `local`.
+An unknown one raises hostctl's `ValueError` listing the known names rather
+than silently composing a host with nothing. Requesting `ssh`/`sftp` without
+an `SSHConfig` also raises. `None` (the default) means "decide from the
+target": `host.default_providers()` returns the table above, and hostctl
+drops a default `ssh`/`sftp` when its `ssh` extra is missing (a name you give
+is kept and fails at use). `host.resolve_providers()` builds the providers
+for the current config, for `host.replace_providers()`.
 
 `TrueNASConfig` is the `hostctl.host.HostConfig`. It accepts every connection
 string `TrueNASClient` does and normalizes to a `truenas+*` scheme

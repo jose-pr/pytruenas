@@ -104,10 +104,6 @@ _SCHEME_ALIASES = {
 #: local-socket shortcut behaves exactly as it does today.
 _LOCAL_HOSTS = {"", "localhost", "127.0.0.1"}
 
-#: Provider names accepted by the ``executor=``/``path=`` overrides.
-EXECUTOR_NAMES = ("local", "ssh", "webshell")
-PATH_NAMES = ("local", "sftp", "tnasws")
-
 
 class _HostLogger(_logging.LoggerAdapter):
     """A logger that prefixes every record with the host it belongs to.
@@ -184,22 +180,6 @@ def _asyncssh():
             "SSH/SFTP support requires the 'ssh' extra: pip install pytruenas[ssh]"
         ) from exc
     return asyncssh
-
-
-def _ssh_available() -> bool:
-    """Whether an SSH/SFTP leg can actually be built (the ``ssh`` extra).
-
-    :func:`hostctl.has_ssh` checks that asyncssh and sftppath are importable
-    without importing them: this runs during provider construction, which
-    happens for every client including ones that will never touch SSH.
-
-    Deliberately answers "can it be imported", not "is it configured" -- those
-    are different questions, and conflating them is what let a configured-but-
-    uninstallable SSH leg reach the point of use before failing.
-    """
-    from hostctl import has_ssh
-
-    return has_ssh()
 
 
 def _public_key(private_key: str) -> str:
@@ -355,23 +335,6 @@ def _ssh_config_from(
     )
 
 
-def _reject_unknown(
-    names: "_ty.Sequence[str]", allowed: "_ty.Sequence[str]", kind: str
-) -> None:
-    """Fail on an unrecognised provider name rather than silently ignoring it.
-
-    A typo (``executor=["shh"]``) would otherwise compose a host with no
-    executor at all and no complaint, surfacing much later as a confusing
-    "no provider is available".
-    """
-    unknown = [name for name in names if name not in allowed]
-    if unknown:
-        raise ValueError(
-            f"unknown {kind} provider: {unknown[0]!r} "
-            f"(available: {', '.join(allowed)})"
-        )
-
-
 def _as_names(value: "_ty.Iterable[str] | str | None") -> "tuple[str, ...] | None":
     """Normalize a provider override to a tuple of names, or ``None``.
 
@@ -507,7 +470,7 @@ class TrueNASConfig(
         self.logger = logger
         #: Explicit provider selection, overriding the defaults. Each is a name
         #: or a sequence of names, in preference order; ``None`` means "decide
-        #: from the target". See :meth:`TrueNASHost._build_providers`.
+        #: from the target". See :meth:`TrueNASHost.default_providers`.
         #:
         #: This replaced a ``webshell: bool`` flag, which was only ever the one
         #: hardcoded case of it (``executor=["ssh"]`` says the same thing, and
@@ -778,6 +741,37 @@ _HOST_OPTIONS = frozenset(
 ) | {"client"}
 
 
+def _ssh_pair(host: "TrueNASHost"):
+    """The ``ssh`` and ``sftp`` providers: one resolver, so both share a transport.
+
+    hostctl calls a resolver once per resolution however many names reach it;
+    two calls would open two connections, only one of which is ever closed.
+    """
+    ssh = host._config.ssh
+    if ssh is None:
+        raise ValueError(
+            "ssh/sftp providers were requested but no SSH configuration is set; "
+            "pass ssh=SSHConfig(...) or call install_sshcreds()"
+        )
+    from hostctl import ssh_providers
+
+    return ssh_providers(_ty.cast(_ty.Any, ssh))
+
+
+def _webshell(host: "TrueNASHost"):
+    from .webshell import WebShellExecutorProvider
+
+    return WebShellExecutorProvider(_ty.cast(_ty.Any, host)), None
+
+
+def _tnasws(host: "TrueNASHost"):
+    from .providers import TnasWsPathProvider
+
+    # The provider reaches the websocket lazily through the host, so building
+    # it connects nothing.
+    return None, TnasWsPathProvider(_ty.cast(_ty.Any, host))
+
+
 class TrueNASHost(_PosixHost, _ty.Generic[ApiVersion]):
     """A TrueNAS middleware host: POSIX semantics over composed transports.
 
@@ -812,6 +806,16 @@ class TrueNASHost(_PosixHost, _ty.Generic[ApiVersion]):
     """
 
     config_type = TrueNASConfig
+
+    #: The descriptor names ``executor=``/``path=`` accept, beside hostctl's
+    #: global ``local``. ``winrm`` is hidden: a TrueNAS host is POSIX.
+    provider_resolvers = {
+        "ssh": _ssh_pair,
+        "sftp": _ssh_pair,
+        "webshell": _webshell,
+        "tnasws": _tnasws,
+        "winrm": None,
+    }
 
     def __init__(
         self,
@@ -886,122 +890,28 @@ class TrueNASHost(_PosixHost, _ty.Generic[ApiVersion]):
         # break on an unexpected keyword.
         del client
 
-        executors, paths = self._build_providers(config)
-        super().__init__(
-            config,
-            executor_providers=executors,
-            path_providers=paths,
-            **_ty.cast(_ty.Any, options),
-        )
+        super().__init__(config, **_ty.cast(_ty.Any, options))
 
-    def _default_provider_names(self, config: "TrueNASConfig"):
-        """The provider names for a target, when nothing is overridden.
+    def default_providers(self):
+        """The provider names for this target when ``executor=``/``path=`` name none.
 
         A local target is served entirely by hostctl's stock local pair: plain
         subprocess and plain local paths. Reaching this same machine through
         SSH, a PTY, or the filesystem API would be slower and strictly less
-        capable, so no remote provider is offered -- they are all ways of
-        reaching a machine somewhere *else*.
+        capable, so no remote provider is offered.
 
         Remotely, SSH leads on capability (separate streams, real stdin, a rich
         POSIX path surface) and the websocket legs follow: the web shell as a
         command channel for a host with no reachable SSH, and ``tnasws`` for
-        paths.
+        paths. hostctl drops a default ``ssh``/``sftp`` when its ``ssh`` extra
+        is missing; a name the caller gives is kept and fails at use.
         """
+        config = self._config
         if config.is_local:
             return ("local",), ("local",)
-        executors = ("ssh", "webshell") if config.ssh is not None else ("webshell",)
-        paths = ("sftp", "tnasws") if config.ssh is not None else ("tnasws",)
-        return executors, paths
-
-    def _build_providers(self, config: "TrueNASConfig"):
-        """Build the ordered provider tuples for this host.
-
-        ``config.executors`` / ``config.paths`` override the defaults when set,
-        naming providers in preference order. That is what makes "force SSH",
-        "never use the web shell", or "websocket only" expressible without a
-        flag per transport.
-        """
-        default_executors, default_paths = self._default_provider_names(config)
-        explicit_executors = config.executors is not None
-        explicit_paths = config.paths is not None
-        executor_names = (
-            default_executors if config.executors is None else config.executors
-        )
-        path_names = default_paths if config.paths is None else config.paths
-
-        _reject_unknown(executor_names, EXECUTOR_NAMES, "executor")
-        _reject_unknown(path_names, PATH_NAMES, "path")
-
-        # An SSH leg needs asyncssh, which is the optional `ssh` extra. Decide
-        # that BEFORE building anything: the defaults offer ssh/sftp whenever a
-        # config.ssh exists, which asks whether SSH is *configured* and never
-        # whether it is *importable*. Without this, `install_sshcreds()` --
-        # which sets config.ssh and rebuilds -- hands a working client a broken
-        # SFTP provider, and the next `path()` dies on the import.
-        #
-        # Only DEFAULTS degrade. A caller who named "ssh"/"sftp" explicitly gets
-        # the ImportError: silently serving a different transport than the one
-        # asked for is its own bug, and quieter than the failure it replaces.
-        if not _ssh_available():
-            if not explicit_executors:
-                executor_names = tuple(n for n in executor_names if n != "ssh")
-            if not explicit_paths:
-                path_names = tuple(n for n in path_names if n != "sftp")
-
-        # Both SSH providers come from one factory call so they share a single
-        # transport: assembling them by hand type-checks but can silently open
-        # two connections, only one of which is ever closed.
-        ssh_pair = None
-        if "ssh" in executor_names or "sftp" in path_names:
-            if config.ssh is None:
-                raise ValueError(
-                    "ssh/sftp providers were requested but no SSH configuration "
-                    "is set; pass ssh=SSHConfig(...) or call install_sshcreds()"
-                )
-            from hostctl import ssh_providers
-
-            ssh_pair = ssh_providers(_ty.cast(_ty.Any, config.ssh))
-
-        local_pair = None
-        if "local" in executor_names or "local" in path_names:
-            from .providers import local_providers
-
-            local_pair = local_providers()
-
-        def _executor(name: str):
-            if name == "local":
-                return _ty.cast(_ty.Any, local_pair)[0]
-            if name == "ssh":
-                # None only when the name survived the filter above -- i.e. the
-                # caller asked for it explicitly. Dropped here rather than
-                # returned as None so the tuple never holds a hole.
-                if ssh_pair is None:
-                    return None
-                return _ty.cast(_ty.Any, ssh_pair)[0]
-            from .webshell import WebShellExecutorProvider
-
-            return WebShellExecutorProvider(_ty.cast(_ty.Any, self))
-
-        def _path(name: str):
-            if name == "local":
-                return _ty.cast(_ty.Any, local_pair)[1]
-            if name == "sftp":
-                if ssh_pair is None:
-                    return None
-                return _ty.cast(_ty.Any, ssh_pair)[1]
-            from .providers import TnasWsPathProvider
-
-            # `self` rather than the client: the provider only needs it lazily,
-            # which keeps construction free of a websocket connection.
-            return TnasWsPathProvider(_ty.cast(_ty.Any, self))
-
-        # Filtering None keeps a half-built SSH pair from putting a hole in the
-        # provider tuple, which would fail later and further from the cause.
-        return (
-            tuple(p for p in map(_executor, executor_names) if p is not None),
-            tuple(p for p in map(_path, path_names) if p is not None),
-        )
+        if config.ssh is not None:
+            return ("ssh", "webshell"), ("sftp", "tnasws")
+        return ("webshell",), ("tnasws",)
 
     # -- the TrueNAS surface ----------------------------------------------
 
@@ -1526,9 +1436,10 @@ class TrueNASHost(_PosixHost, _ty.Generic[ApiVersion]):
             # is not silently overridden by a provisioning call.
             return private_key
 
-        executors, paths = self._build_providers(self._config)
-        # Both sets in one call: hostctl swaps them together and closes each
-        # replaced transport (an open SSH connection among them) once.
+        # One resolution and one swap: the ssh and sftp legs share a
+        # transport, and hostctl closes each replaced one (an open SSH
+        # connection among them) once.
+        executors, paths = self.resolve_providers()
         self.replace_providers(executor=executors, path=paths)
         with self._conn_lock:
             # The SFTP backend is cached per client and keyed on the SSH

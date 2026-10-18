@@ -540,6 +540,21 @@ def test_unknown_provider_name_is_rejected():
         _built(path=["sftpp"])
 
 
+def test_winrm_is_not_a_truenas_provider():
+    """hostctl's global descriptors reach every host; this one is hidden here."""
+    with pytest.raises(ValueError, match="unknown executor provider"):
+        _built(executor=["winrm"])
+
+
+def test_the_resolved_names_are_hostctl_s_default_providers():
+    assert _built().default_providers() == (("webshell",), ("tnasws",))
+    assert _built(ssh=SSH).default_providers() == (
+        ("ssh", "webshell"),
+        ("sftp", "tnasws"),
+    )
+    assert _built(None).default_providers() == (("local",), ("local",))
+
+
 def test_requesting_ssh_without_a_config_is_an_error():
     """Better than silently yielding a host that cannot run anything."""
     with pytest.raises(ValueError, match="no SSH configuration"):
@@ -876,17 +891,38 @@ def test_http_target_without_a_query_is_unchanged():
 # -- degrading without the optional ssh extra ------------------------------
 
 
-def test_default_providers_drop_ssh_when_asyncssh_is_missing(monkeypatch):
+@pytest.fixture
+def no_ssh_extra(monkeypatch):
+    """hostctl's ``ssh`` extra reads as missing: asyncssh and sftppath unfound.
+
+    hostctl answers ``has_ssh()`` with ``importlib.util.find_spec`` and imports
+    nothing, so hiding the two specs is what a machine without the extra looks
+    like to it.
+    """
+    import importlib.util
+
+    import hostctl
+
+    real = importlib.util.find_spec
+
+    def find_spec(name, *args, **kwargs):
+        if name.split(".")[0] in ("asyncssh", "sftppath"):
+            return None
+        return real(name, *args, **kwargs)
+
+    monkeypatch.setattr(importlib.util, "find_spec", find_spec)
+    assert not hostctl.has_ssh()
+
+
+def test_default_providers_drop_ssh_when_asyncssh_is_missing(no_ssh_extra):
     """A configured-but-unimportable SSH leg must not break `path()`.
 
     `install_sshcreds()` sets config.ssh and rebuilds providers, so a client
     that worked over the websocket would gain a broken SFTP provider and die on
     the next path call.
     """
-    import pytruenas.host as host_module
     from hostctl import SSHConfig
 
-    monkeypatch.setattr(host_module, "_ssh_available", lambda: False)
     config = TrueNASConfig.from_target("wss://nas", ssh=SSHConfig(host="nas"))
     host = TrueNASHost(config)
 
@@ -894,16 +930,14 @@ def test_default_providers_drop_ssh_when_asyncssh_is_missing(monkeypatch):
     assert [p.name for p in host.executor_providers] == ["webshell"]
 
 
-def test_an_explicitly_named_ssh_provider_is_still_honored(monkeypatch):
+def test_an_explicitly_named_ssh_provider_is_still_honored(no_ssh_extra):
     """Only DEFAULTS degrade.
 
     Silently serving a different transport than the one the caller named is its
     own bug -- and quieter than the failure it replaces.
     """
-    import pytruenas.host as host_module
     from hostctl import SSHConfig
 
-    monkeypatch.setattr(host_module, "_ssh_available", lambda: False)
     config = TrueNASConfig.from_target(
         "wss://nas", ssh=SSHConfig(host="nas"), path=["sftp"], executor=["ssh"]
     )

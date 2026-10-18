@@ -52,7 +52,13 @@ pytruenas now runs on hostctl 0.4, which moves from `pathlib_next` to
   stay rooted at `/` on every leg (hostctl 0.4's SSH hosts read them against
   the login directory instead).
 - `install_sshcreds()` swaps the providers through hostctl's
-  `replace_providers()`, which closes each replaced transport once.
+  `resolve_providers()` and `replace_providers()`, which closes each replaced
+  transport once.
+- The provider names `executor=`/`path=` take are hostctl descriptors
+  (`TrueNASHost.provider_resolvers`), and `TrueNASHost.default_providers()`
+  answers which a target gets. An unknown name raises hostctl's `ValueError`
+  (`unknown executor provider descriptor: 'shh' (known: ...)`), and the module
+  constants `pytruenas.host.EXECUTOR_NAMES` and `PATH_NAMES` are gone.
 - The fallback WARNING comes from hostctl: `[nas] run() fell back from ssh
   to webshell: ssh: <reason>`, once per skipped provider, and now also for a
   path operation served by `tnasws` after `sftp` declined. Its message no
