@@ -24,18 +24,25 @@ pieces pytruenas had written for itself, and pytruenas now uses hostctl's:
 - provider-name resolution (`TrueNASHost.provider_resolvers`,
   `default_providers()`);
 - the web shell's framed command protocol (`hostctl.console.PosixConsoleProfile`)
-  and the executor call surface (`hostctl.executor.StreamingExecutor`);
+  and its executor (`hostctl.console.ConsoleExecutor`), which drives it with no
+  thread per command and declines whenever nothing was typed yet;
 - composite paths whose SFTP leg is the host's own, on the one SSH connection
   `run()` uses, in place of `TruenasPath`'s second SFTP leg;
 - the deploy bundler and installer (`hostctl.deploy`), in place of
   `pytruenas.utils.bundle`;
 - `verify=False` as the one switch for the SSH host-key check, keyword
-  credentials over the URI's, and `MissingExtraError`.
+  credentials over the URI's, and `MissingExtraError` (pytruenas's own extras
+  raise it too, naming `pytruenas[...]`);
+- reading `~/.ssh/config` on the SSH leg, as `ssh` does; pytruenas only adds
+  `root` as the login when neither `shell=` nor the file names a user;
+- the fallback WARNING's reason, which now names what refused SSH (an
+  untrusted host key with the remedy, a refused login or port, DNS, a timeout).
 
 About 2,000 lines of pytruenas source and 950 of tests went with them (net). The
 documented API changes (path types, `TruenasPath` and `utils.bundle` removed,
-`known_hosts=None` refused, selection records, the web shell's errors) make
-this a minor-version change under the pre-1.0 rule.
+`known_hosts=None` refused, selection records, the web shell's errors,
+`WebShellSession.execute()` removed, `config.ssh.port`/`username` left to the
+ssh_config) make this a minor-version change under the pre-1.0 rule.
 
 ### Migration
 
@@ -47,16 +54,21 @@ that never started; pass `verify=False` where `known_hosts=None` was;
 read `client.last_selection` entries as records (`step.provider`); call
 `pytruenas.fs.symlink_to(path, target, force=...)` where
 `TruenasPath.symlink_to(..., force=...)` was; import `hostctl.deploy` where
-`pytruenas.utils.bundle` was.
+`pytruenas.utils.bundle` was; run commands through
+`client.run(...)` or `WebShellExecutorProvider(client).executor(...)` where
+`WebShellSession.execute()` was; pass `ssh=SSHConfig(..., ssh_config=None)` for
+an SSH leg that must not read `~/.ssh/config`.
 
 ### Validation
 
-- Suite against the hostctl checkout at `893aaa9`, then `e401705`
-  (`0.4.0.dev0`; pathapi 0.1.1, pathapi-uri 0.1.0, sftppath 0.1.3, netimps
-  0.4.1, truststore 0.10.5 on 3.14): 883 passed / 6 skipped on Python 3.14 and
-  on the 3.9 floor (Windows ARM64). The skips are the five POSIX-shell `run()`
-  tests and the web shell's pty leg; the web shell tests, pty leg included,
-  pass under WSL (36). Its real-`sh` leg runs on Windows too (Git Bash).
+- Suite against the hostctl checkout at `1d3057a` (`0.4.0.dev0`; pathapi
+  0.1.1, pathapi-uri 0.1.0, sftppath 0.1.3, netimps 0.4.1, truststore 0.10.5
+  on 3.14): 891 passed / 6 skipped on Python 3.14 and on the 3.9 floor
+  (Windows ARM64). The skips are the five POSIX-shell `run()` tests and the web
+  shell's pty leg; under WSL (Fedora, aarch64) those run and pass, with the web
+  shell, `~/.ssh/config` and missing-extra tests (46). The web shell's
+  real-`sh` leg runs on Windows too (Git Bash). No test reads the developer's
+  own `~/.ssh`: the suite points `HOME`/`USERPROFILE` at an empty directory.
 - Exercised against a TrueNAS 26.0 host: `run()` and `path()` with a trusted
   key, an unknown host key, `verify=False` and a refused SSH port (falling back
   to the web shell and `tnasws`, one WARNING per skipped provider); one SSH
@@ -69,10 +81,24 @@ read `client.last_selection` entries as records (`step.provider`); call
   reconnecting, a hostile `input=` never run); `deploy` of a zipapp and of a
   tree into a scratch directory, each run with `--version`, re-deployed as
   "verified", and a foreign path refused.
-- The web shell's `input=` is slower than before: hostctl's protocol waits for
-  an acknowledgement every 2 KiB typed, one round trip (about 0.5 s on the web
-  shell) each, so 64 KiB took 20.6 s against 3.8 s and 1 MiB 396 s against
-  63 s. Output and small commands are unaffected.
+- The web shell's `input=` types with no acknowledgement round trip
+  (`PosixConsoleProfile(batch=None)`), in writes of at most 2 KiB with the
+  echo read between them. Measured on the TrueNAS host, sha256 of the input
+  matching: 64 KiB in 2.6-2.8 s and 1 MiB in 48 s, against 20.6 s and 396 s
+  with an acknowledgement per 2 KiB, and 3.8 s and 63 s with pytruenas's
+  earlier framing. 1 MiB of output: 1.2-4.7 s.
+- Also exercised there: the fallback WARNING for an untrusted host key
+  (`SSH host key of HOST is not trusted (...); add the key to known_hosts ...
+  or pass verify=False`), a refused port (`SSH connection to HOST:2 was
+  refused`) and a refused login (`SSH login to HOST was refused`), each
+  served by the web shell; a `~/.ssh/config` alias in a scratch home giving
+  `HostName`, `IdentityFile` and `UserKnownHostsFile` (login `root` with no
+  `User`; the file's `User` and `Port` applied, and a user or port in
+  `shell=` winning over them); the user's own `~/.ssh/config` parsed by
+  asyncssh without error; and the web shell under `ConsoleExecutor`: output,
+  stderr and status, binary and hostile input (never run), four lines one
+  second apart arriving one second apart, a 3 s timeout raising in 3.3 s with
+  the next command working.
 - hostctl 0.4.0 is not on PyPI yet, so these pins do not resolve from the
   index until it is released; the checkout (`0.4.0.dev0`) was installed with
   `--no-deps`, and `pip check` reports the pin until 0.4.0 ships.
