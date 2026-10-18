@@ -110,10 +110,28 @@ its own `known_hosts`, and `verify=False` reaches it on a copy. When the key can
 commands and file operations fall back to the websocket transports, and the
 client logs a warning the first time `run()` does so.
 
-Neither SSH leg reads `~/.ssh/config`: a host alias, `IdentityFile` or
-`ProxyCommand` there is ignored. Pass the host, key and known-hosts file to
-`shell=`/`SSHConfig(...)`, or name the file explicitly with
-`ssh=SSHConfig(host, username="root", ssh_config="~/.ssh/config")`.
+The SSH leg reads your `~/.ssh/config`, as `ssh` does: a host alias,
+`HostName`, `Port`, `User`, `IdentityFile`, `ProxyJump` or `ProxyCommand` there
+applies to commands and file operations alike. A user or port written in
+`shell=` wins over the file; with no user in either, pytruenas logs in as
+`root`, TrueNAS's administrative account, on port 22.
+
+```python
+TrueNASClient("nas", api_key, shell="nas")                 # ~/.ssh/config's User, else root
+TrueNASClient("nas", api_key, shell="ssh://admin@nas")     # admin, whatever the file says
+```
+
+For a connection that depends on no personal file, build the leg yourself with
+`ssh_config=None`, or name another file with a `pathlib.Path` (a plain string
+is configuration *text*, not a file name):
+
+```python
+from pathlib import Path
+from hostctl import SSHConfig
+
+TrueNASClient("nas", api_key, ssh=SSHConfig("nas", username="root", ssh_config=None))
+TrueNASClient("nas", api_key, ssh=SSHConfig("nas", ssh_config=Path("lab/ssh_config")))
+```
 
 !!! note
     The `shell=` argument was also readable as `client.shell` before the move

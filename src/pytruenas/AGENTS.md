@@ -66,14 +66,24 @@ version="current", executor=None, path=None, ssh=None, ...)`
   as a `str`. A missing bundle raises `FileNotFoundError` naming the path and
   its source at connect time.
 - **`shell`** — connection string for the SSH leg (`"ssh://root@nas"`,
-  `"root:pw@nas:22"`). Stored as a `hostctl.SSHConfig` on `.config.ssh`; pass
-  `ssh=SSHConfig(...)` to supply one directly.
+  `"root:pw@nas:22"`, `"nas"`). Stored as a `hostctl.SSHConfig` on
+  `.config.ssh`; pass `ssh=SSHConfig(...)` to supply one directly. The user's
+  `~/.ssh/config` applies, as it does for `ssh` (a `Host` alias, `HostName`,
+  `Port`, `User`, `IdentityFile`, `ProxyJump`), with this precedence: a user or
+  port in the string, then the file's `User`/`Port`, then `root` and 22. With
+  no user in the string, `.config.ssh.username` is `None` and
+  `.config.ssh.ssh_config` is configuration text that includes
+  `~/.ssh/config` and then sets `User root`; with one, it is hostctl's
+  `USER_SSH_CONFIG`. `.config.ssh.port` is `None` when the string names no
+  port. For a leg that reads no personal file, pass
+  `ssh=SSHConfig(host, username="root", ssh_config=None)`.
 - **`verify`/`sslverify` and plaintext** — a credential sent over plain
   `ws://` to a non-loopback host logs one warning per host. `ws://` is not
   refused: it is legitimate for a loopback target or an already-private link.
 - **`known_hosts`** (default `()`) — the trusted host keys for the SSH leg
   built from `shell=` or by `.install_sshcreds()`, with hostctl's values: `()`
-  is `~/.ssh/known_hosts` (skipped under `verify=False`), a path or list of
+  is `~/.ssh/config`'s `UserKnownHostsFile`, else `~/.ssh/known_hosts`
+  (skipped under `verify=False`), a path or list of
   paths names the file(s), checked either way. `known_hosts=None` raises
   `ValueError` naming `verify=False`. An explicit `ssh=SSHConfig(...)` keeps its
   own. Both the command and SFTP halves verify by default; an unverifiable key
@@ -226,7 +236,9 @@ version="current", executor=None, path=None, ssh=None, ...)`
 - **`.install_sshcreds(name=None, private_key=None)`** — generate/reuse an SSH
   keypair via `keychaincredential`, install the public half on `root`'s
   `authorized_keys`, and store the private half on `.config.ssh` as a real
-  `SSHConfig.client_keys`. Returns the private key. Needs **no** optional
+  `SSHConfig.client_keys` (user `root`, since that is where the key went; the
+  port, host alias and proxy come from `~/.ssh/config`, else 22). Returns the
+  private key. Needs **no** optional
   extra: provisioning runs over the middleware API and opens no SSH
   connection. Passing `private_key=` for a key the host does not already know
   is the exception — the public half is derived locally, which needs

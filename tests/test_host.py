@@ -166,16 +166,18 @@ def test_every_historical_client_setting_is_accepted():
 @pytest.mark.parametrize(
     "shell, expected",
     [
-        ("ssh://root@nas", ("nas", 22, "root")),
+        ("ssh://root@nas", ("nas", None, "root")),
         ("ssh://admin@nas:2222", ("nas", 2222, "admin")),
-        ("nas", ("nas", 22, "root")),
+        ("nas", ("nas", None, None)),
     ],
 )
 def test_shell_string_builds_the_ssh_leg(shell, expected):
     """`shell=` takes the connection string the client always took.
 
     Requiring a prebuilt SSHConfig for the common case would be a step
-    backwards from `TrueNASClient(shell="ssh://root@nas")`.
+    backwards from `TrueNASClient(shell="ssh://root@nas")`. What the string
+    leaves out is the ssh_config's, then `root` and 22
+    (`tests/test_ssh_config_policy.py`).
     """
     config = TrueNASConfig.from_target("wss://nas", shell=shell)
     assert (config.ssh.host, config.ssh.port, config.ssh.username) == expected

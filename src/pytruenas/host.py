@@ -288,6 +288,14 @@ class _TrustAdapter(_req.adapters.HTTPAdapter):
         conn.ca_cert_dir = None
 
 
+#: The OpenSSH client configuration of an SSH leg whose ``shell=`` names no
+#: user: the user's own ``~/.ssh/config``, then ``root``, TrueNAS's
+#: administrative login, for a host that file gives no ``User``. OpenSSH (and
+#: asyncssh) keeps the first value it reads, so the file's ``User`` wins, and a
+#: missing file is skipped. It is configuration text, not a file name.
+_ROOT_UNLESS_CONFIGURED = "Include ~/.ssh/config\nHost *\n    User root\n"
+
+
 def _ssh_config_from(
     shell: "str | None", known_hosts: object = (), verify: bool = True
 ):
@@ -299,39 +307,48 @@ def _ssh_config_from(
     ``None`` or a local target yields ``None``: no SSH leg.
 
     ``known_hosts`` and ``verify`` are hostctl's own fields, passed through:
-    ``()`` checks the host key against ``~/.ssh/known_hosts`` unless
+    ``()`` checks the host key against the ssh_config's
+    ``UserKnownHostsFile``, else ``~/.ssh/known_hosts``, unless
     ``verify`` is false, and a path or list names the trusted keys, checked
     either way.
+
+    The user's ``~/.ssh/config`` applies, as it does for ``ssh``: a user or
+    port in ``shell`` wins over its ``User``/``Port``, and with no ``User``
+    from either the login is ``root`` (see :data:`_ROOT_UNLESS_CONFIGURED`).
     """
     if not shell:
         return None
 
     from hostctl import SSHConfig
 
-    target = _TGT.parse(shell, scheme="ssh")
+    target = _TGT.parse(shell, resolve_port=False, scheme="ssh")
     if target.scheme == "local" or not target.host:
         return None
 
-    username = target.username or "root"
+    username = target.username or None
     password = target.password or None
     client_keys = None
     # The pre-hostctl client packed the auth type into the username as
     # "client_keys|root"; accept it so an existing connection string keeps
     # working, but unpack it into SSHConfig's real fields.
-    if "|" in username:
+    if username and "|" in username:
         logintype, username = username.split("|", maxsplit=1)
         if logintype == "client_keys" and password:
             client_keys = [password.encode() if isinstance(password, str) else password]
             password = None
+    options: "dict[str, _ty.Any]" = {}
+    if not username:
+        options["ssh_config"] = _ROOT_UNLESS_CONFIGURED
     return SSHConfig(
         host=target.host,
-        port=target.port or 22,
-        username=username or "root",
+        port=target.port or None,
+        username=username or None,
         password=password,
         client_keys=client_keys,
         executable=target.path or None,
         verify=verify,
         known_hosts=_ty.cast(_ty.Any, known_hosts),
+        **options,
     )
 
 
@@ -507,8 +524,9 @@ class TrueNASConfig(
         #:
         #: ``known_hosts`` names the trusted host keys for an SSH leg built
         #: here -- from ``shell=`` or by :meth:`TrueNASHost.install_sshcreds`
-        #: -- with hostctl's values: ``()`` is ``~/.ssh/known_hosts``, a path
-        #: or list names the file(s). ``verify=False`` skips the ``()`` lookup;
+        #: -- with hostctl's values: ``()`` is the ssh_config's
+        #: ``UserKnownHostsFile``, else ``~/.ssh/known_hosts``; a path or list
+        #: names the file(s). ``verify=False`` skips the ``()`` lookup;
         #: named keys are checked either way. An explicit ``ssh=SSHConfig(...)``
         #: keeps its ``known_hosts`` and gets ``verify=False`` on a copy.
         if known_hosts is None:

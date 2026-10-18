@@ -5,11 +5,26 @@ module is not installed, naming it in the skip reason -- so running the suite
 without an extra reports skips instead of failures, and a test that needs no
 extra is never skipped along with its neighbours (a module-level
 ``importorskip`` in the middle of a file skips everything after it).
+
+No test reads the developer's own ``~/.ssh``: an SSH leg reads the user's
+``~/.ssh/config`` (and ``known_hosts``) by default, so every test runs with
+``HOME`` and ``USERPROFILE`` pointing at an empty directory. ``fake_home``
+returns that directory for a test that writes a config there.
 """
 
 import importlib.util
 
 import pytest
+
+
+@pytest.fixture(autouse=True)
+def fake_home(tmp_path_factory, monkeypatch):
+    """An empty home directory, with ``.ssh/``, where ``~`` resolves."""
+    home = tmp_path_factory.mktemp("home")
+    (home / ".ssh").mkdir()
+    monkeypatch.setenv("HOME", str(home))
+    monkeypatch.setenv("USERPROFILE", str(home))
+    return home
 
 
 def pytest_configure(config):

@@ -62,10 +62,18 @@ pytruenas now runs on hostctl 0.4, which moves from `pathlib_next` to
   entry (the working directory is never importable); each step on the target is an argv with
   `--` before its paths; a package name that is not a dotted identifier
   raises `ValueError`; and a missing extra raises `hostctl.MissingExtraError`.
-- **SSH settings follow hostctl 0.4.** Neither SSH leg reads `~/.ssh/config`
-  unless `SSHConfig(ssh_config=...)` names it, and an `SSHConfig` you build
-  yourself defaults to the local account name rather than `root` (`shell=` and
-  `install_sshcreds()` still use `root`).
+- **The SSH leg reads `~/.ssh/config`, as `ssh` does**, for commands and
+  file operations alike: a host alias, `HostName`, `Port`, `User`,
+  `IdentityFile` or `ProxyJump` there now applies. A user or port written in
+  `shell=` wins over the file; with no user in either the login is still
+  `root`, and with no port 22 (`install_sshcreds()` always logs in as `root`,
+  where it installed the key). So `.config.ssh.port` is `None` and, for a
+  `shell=` with no user, `.config.ssh.username` is `None`, where both read 22
+  and `"root"`. For a leg that reads no personal file, pass
+  `ssh=SSHConfig(host, username="root", ssh_config=None)`. An `SSHConfig` you
+  build yourself defaults to the local account name rather than `root`, as in
+  hostctl 0.4, and its `ssh_config=` takes a `pathlib.Path` for a file (a
+  string is configuration text).
 
 ### Added
 
