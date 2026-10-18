@@ -79,8 +79,8 @@ shell drives an interactive terminal. It behaves like any other executor for
   terminal and nothing the terminal draws (the echo, the prompt, the login
   banner) reaches your result. Captured `.stdout` is the program's own bytes.
 - **Uncaptured stdout is streamed as it arrives** to its target (default
-  `sys.stdout.buffer`), within about 0.1 s — a long-running command reports
-  progress live.
+  `sys.stdout.buffer`), as the web shell delivers it — a long-running command
+  reports progress live.
 - **stderr is captured separately** in any POSIX login shell. It is written to
   the remote side and delivered when the command finishes, so a stderr
   *target* receives it at the end rather than live. `stderr=subprocess.STDOUT`

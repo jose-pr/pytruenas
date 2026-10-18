@@ -39,19 +39,23 @@ pytruenas now runs on hostctl 0.4, which moves from `pathlib_next` to
   checked. For host keys checked with TLS off, pass `sslverify=False`.
 - **`client.last_selection` holds hostctl `SelectionStep` records**, not
   dicts: read `step.provider`/`step.chosen`, not `step["provider"]`.
-- **The web shell runs hostctl's framed console protocol.** Its executor is
-  `webshell.WebShellExecutor`, a hostctl `StreamingExecutor`, driving
-  `hostctl.console.PosixConsoleProfile` over the websocket.
-  `WebShellSession.command_lines()` is gone; `WebShellSession.execute()`
-  keeps its signature. What a caller can see: a connection lost after the
+- **The web shell runs hostctl's framed console protocol.** Its executor,
+  `webshell.WebShellExecutor`, is hostctl's `hostctl.console.ConsoleExecutor`
+  over the websocket, with no thread per command.
+  `WebShellSession.command_lines()` and `WebShellSession.execute()` are gone:
+  run a command with `client.run(...)` or
+  `WebShellExecutorProvider(client).executor(command, ...)`, hostctl's
+  `subprocess`-shaped call. What a caller can see: a connection lost after the
   command line was typed raises `ConnectionError` (it raised
   `OperationNotStartedError` until the command's first marker arrived, which
   let the host replay a command that may have run) and a command that exits
-  the shell raises `ConnectionError` instead of `SubprocessError`;
-  `stdin=subprocess.PIPE` without `input=` raises `ValueError` and a file
-  descriptor is read to EOF, where both raised `NotImplementedError`; an
-  unknown `run()` option raises `TypeError`. Large `input=` costs one round
-  trip per 2 KiB typed, so a terminal's input queue never overflows.
+  the shell raises `ConnectionError` instead of `SubprocessError`; a failure
+  before the command line was typed, including a failed write, is a decline,
+  so `run()` falls back to the next provider; `stdin=subprocess.PIPE` without
+  `input=` raises `ValueError` and a file descriptor is read to EOF, where both
+  raised `NotImplementedError`; an unknown `run()` option raises `TypeError`.
+  Uncaptured stdout is written per websocket frame, where it was batched up to
+  4 KiB or 0.1 s.
 - **`deploy` runs on `hostctl.deploy`**, which came from pytruenas's own
   bundler; `pytruenas.utils.bundle` is gone (import `hostctl.deploy`:
   `bundle()`, `deploy()`, `SourceTree`, `Deployment`), and `BundleError` is

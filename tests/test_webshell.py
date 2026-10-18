@@ -4,7 +4,7 @@ The framed protocol itself is hostctl's (``hostctl.console.PosixConsoleProfile``
 and is tested there. What is tested here is pytruenas's half:
 
 * the websocket as a console stream (``_WebSocketStream``);
-* the session and the ``StreamingExecutor`` call surface, against an emulator
+* the session and the ``ConsoleExecutor`` call surface, against an emulator
   of the TrueNAS zsh terminal (echo with redraw sequences, a banner, output cut
   into small fragments);
 * the same against a real ``sh`` behind a pipe (Git Bash's on Windows), whose
@@ -32,8 +32,8 @@ from unittest.mock import MagicMock
 import pytest
 
 from hostctl.exceptions import OperationNotStartedError
+from hostctl.provider import ExecutorProvider
 
-import pytruenas.webshell as ws_mod
 from pytruenas.webshell import (
     WEBSHELL_PATH,
     WebShellExecutor,
@@ -244,12 +244,12 @@ def _echo(cmd, data, merged):
     return (out + (b"err" if merged else b""), b"" if merged else b"err", 0)
 
 
-def test_the_executor_is_hostctl_s_streaming_base():
-    from hostctl.executor import StreamingExecutor
+def test_the_executor_is_hostctl_s_console_executor():
+    from hostctl.console import ConsoleExecutor
 
     provider = _provider(_Terminal())
     assert isinstance(provider.executor, WebShellExecutor)
-    assert isinstance(provider.executor, StreamingExecutor)
+    assert isinstance(provider.executor, ConsoleExecutor)
     assert "args" not in provider.capabilities
 
 
@@ -282,13 +282,16 @@ def test_input_reaches_the_command_byte_for_byte(value):
     assert result.stdout == b"out:cat|in:" + expected
 
 
-def test_long_input_and_command_cross_acknowledged_batches():
+def test_long_input_is_typed_without_waiting_for_acknowledgements():
+    """The middleware keeps reading the terminal, so no batch waits for the
+    shell: one round trip per 2 KiB made 1 MiB of input take minutes."""
     payload = os.urandom(20000)
     terminal = _Terminal(_echo)
     result = _run(terminal, "cat " + "x" * 3000, input=payload)
     assert result.stdout == b"out:cat " + b"x" * 3000 + b"|in:" + payload
-    assert len(terminal.sent) > 3
     typed = b"".join(terminal.sent).decode("ascii")
+    assert "__AK" not in typed
+    assert max(len(piece) for piece in terminal.sent) <= 2048
     assert all(32 <= ord(ch) < 127 for ch in typed.replace("\n", ""))
     assert "!" not in typed
 
@@ -331,28 +334,6 @@ def test_uncaptured_output_goes_to_its_targets():
     assert out.getvalue() == b"out:x" and err.getvalue() == b"err"
 
 
-def test_uncaptured_stdout_is_written_in_batches_not_per_fragment():
-    """Output arrives in 5-byte fragments; the sink sees a few writes, not 800."""
-    writes = []
-
-    class Sink(io.BytesIO):
-        def write(self, data):
-            writes.append(bytes(data))
-            return super().write(data)
-
-    sink = Sink()
-    payload = b"a" * 4000
-    _run(
-        _Terminal(lambda c, d, m: (payload, b"", 0)),
-        "x",
-        capture_output=False,
-        stdout=sink,
-        stderr=subprocess.DEVNULL,
-    )
-    assert sink.getvalue() == payload
-    assert len(writes) < 50
-
-
 def test_timeout_interrupts_closes_and_raises_the_hostctl_shape():
     terminal = _Terminal(silent=True)
     provider = _provider(terminal)
@@ -365,18 +346,9 @@ def test_timeout_interrupts_closes_and_raises_the_hostctl_shape():
     assert provider._session._ws is None
 
 
-def test_a_session_timeout_raises_the_same_shape():
-    terminal = _Terminal(silent=True)
-    session = _session(terminal)
-    with pytest.raises(subprocess.TimeoutExpired) as caught:
-        session.execute("sleep 100", timeout=0.3)
-    assert caught.value.orphaned is False and caught.value.output == b""
-    assert terminal.sent[-1] == b"\x03" and session._ws is None
-
-
 def test_timeout_none_waits_past_the_poll_interval():
-    out, err, rc = _session(_Terminal(_echo, delay=0.6)).execute("slow")
-    assert out == b"out:slow" and rc == 0
+    result = _run(_Terminal(_echo, delay=0.6), "slow")
+    assert result.stdout == b"out:slow" and result.returncode == 0
 
 
 def test_the_next_command_after_a_timeout_reconnects():
@@ -399,14 +371,18 @@ def test_a_command_that_ends_the_shell_raises_and_closes_the_session():
     assert provider._session._ws is None
 
 
-def test_a_session_whose_terminal_is_gone_before_typing_did_not_run_it():
+def test_a_terminal_gone_before_typing_declines_and_closes_the_session():
+    """A failed write before the command line: nothing ran, so the host may
+    try its next provider."""
     terminal = _Terminal()
     terminal.close()
+    provider = _provider(terminal)
     with pytest.raises(OperationNotStartedError):
-        _session(terminal).execute("true", timeout=5)
+        provider.execute("true", timeout=5)
+    assert provider._session._ws is None
 
 
-def test_a_web_shell_that_cannot_connect_declines():
+def test_a_web_shell_that_cannot_connect_declines_with_the_cause():
     """A refused connection lets the host try another provider."""
     provider = _provider(_Terminal())
     provider._session._ws = None
@@ -415,9 +391,35 @@ def test_a_web_shell_that_cannot_connect_declines():
         raise OSError("connection refused")
 
     provider.session.connect = refuse
-    with pytest.raises(OperationNotStartedError):
+    with pytest.raises(OperationNotStartedError) as caught:
         provider.execute("true")
-    assert provider.executor._lock.acquire(blocking=False)
+    assert caught.value.reason == "web shell unavailable: OSError: connection refused"
+
+    fresh = _Terminal(_echo)
+    provider.session.connect = lambda: provider.session.__dict__.update(
+        _ws=fresh, _stream=_WebSocketStream(fresh)
+    )
+    assert provider.execute("echo next").stdout == b"out:echo next"
+
+
+def test_a_failed_write_before_typing_falls_back_to_the_next_provider(caplog):
+    from pytruenas.host import TrueNASConfig, TrueNASHost
+
+    host = TrueNASHost(TrueNASConfig.from_target("wss://nas", autologin=False))
+    terminal = _Terminal()
+    terminal.close()
+    webshell = _provider(terminal)
+    other = ExecutorProvider(
+        "other",
+        lambda command, *a, **k: subprocess.CompletedProcess(command, 0, b"other", b""),
+    )
+    host.replace_providers(executor=(webshell, other))
+    with caplog.at_level("WARNING"):
+        assert host.run("true").stdout == b"other"
+    assert any(
+        "fell back from webshell to other" in record.getMessage()
+        for record in caplog.records
+    )
 
 
 def test_probe_declines_for_a_local_target_and_accepts_a_remote_one():
@@ -615,7 +617,3 @@ def test_real_pty_round_trip(real_shell, tmp_path):
 
     big = run("head -c 262144 /dev/zero | tr '\\0' a").stdout
     assert big == b"a" * 262144
-
-
-def test_module_constants_are_the_documented_batching():
-    assert (ws_mod._BATCH, ws_mod._FLUSH_INTERVAL) == (4096, 0.1)

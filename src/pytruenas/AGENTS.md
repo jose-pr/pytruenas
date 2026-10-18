@@ -805,24 +805,30 @@ can compose a host of its own.
 - **`providers.TnasWsPathProvider(client)`** — the `filesystem.*` path provider
   (`"tnasws"`), which works over the API websocket with no SSH.
 - **`webshell.WebShellExecutorProvider(client)`** — the `"webshell"`
-  executor provider; `.executor` is a `webshell.WebShellExecutor`, a
-  `hostctl.executor.StreamingExecutor`, so its call surface is hostctl's
+  executor provider. `.session` is its `WebShellSession` (created on first
+  use); `.connect()` opens it, raising `hostctl.OperationNotStartedError`
+  (`web shell unavailable: TYPE: message`, credentials redacted) when it
+  cannot, which is a decline: the host tries its next provider.
+- **`webshell.WebShellExecutor(provider)`** — `provider.executor`, a
+  `hostctl.console.ConsoleExecutor` over the provider's session with
+  `PosixConsoleProfile(batch=None)`, so its call surface is hostctl's
   (`capture_output`, `stdout=`/`stderr=` targets, `input=`/`stdin=` read to
   EOF, `stdin=PIPE` without `input=` raising `ValueError`, text rule, `check`,
   `TimeoutExpired`). No `args`, `cwd` or `env`: hostctl renders them into the
-  command line. Uncaptured stdout is written as it arrives, in batches of up to
-  4 KiB or 0.1 s.
+  command line. Uncaptured stdout is written as each websocket frame arrives;
+  stderr when the command ends. Input is typed in writes of at most 2 KiB with
+  no acknowledgement round trip. One command holds the terminal at a time. A
+  failure before the command line is typed (the connection, or a write of the
+  command's files) is a decline; a connection lost after it is a plain
+  `ConnectionError`, never retried elsewhere. A timeout types ^C, closes the
+  session (its hang-up ends the command) and raises
+  `subprocess.TimeoutExpired(orphaned=False)` carrying what arrived; any other
+  failure closes it too, and the next command reconnects.
 - **`webshell.WebShellSession(client, **options)`** — one `/websocket/shell`
-  session. `.execute(command, *, input=None, merge_stderr=False, timeout=None,
-  sink=None, errsink=None) -> (stdout, stderr, returncode)` runs one command
-  through `hostctl.console.PosixConsoleProfile` over the websocket: `sink`
-  gets stdout bytes as they arrive, `errsink` stderr when the command ends. A
-  `timeout` interrupts, closes the session and raises
-  `subprocess.TimeoutExpired(orphaned=False)` carrying what arrived; a failure
-  before the command line was typed raises `hostctl.OperationNotStartedError`
-  (a `ConnectionError`; nothing ran), a connection lost after it a plain
-  `ConnectionError`; the session is closed either way. `.stream` is the
-  websocket as a `hostctl.console.ConsoleStream` (connects first).
+  session: `.connect()` (idempotent; a rejected token raises
+  `hostctl.OperationNotStartedError`), `.stream` (the websocket as a
+  `hostctl.console.ConsoleStream`; connects first), `.close()`, `.shell_id`.
+  It runs no command itself: use `WebShellExecutor`, or `client.run(...)`.
 
 ## `patch` (`pytruenas.patch`)
 

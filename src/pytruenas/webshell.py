@@ -37,8 +37,9 @@ A command runs through that terminal with
 are typed base64-encoded inside fixed shell syntax, output is framed by markers
 the shell prints (never by the echo), stdin is a temporary file or
 ``/dev/null``, and stderr and the exit status come back in their own frames.
-:class:`WebShellExecutor` gives it hostctl's ``subprocess``-shaped call
-surface (:class:`hostctl.executor.StreamingExecutor`).
+:class:`WebShellExecutor` is hostctl's :class:`hostctl.console.ConsoleExecutor`
+over that websocket, which gives it hostctl's ``subprocess``-shaped call
+surface with stdout delivered as it arrives.
 
 A command that exits the shell (``exit 3``) ends the session; the next call
 reconnects. This provider ranks after SSH, whose separate channels need none of
@@ -48,23 +49,20 @@ the above.
 from __future__ import annotations
 
 import json as _json
-import queue as _queue
 import re as _re
-import subprocess as _subprocess
 import threading as _threading
-import time as _time
 import typing as _ty
 
-from hostctl.console import PosixConsoleProfile as _PosixConsoleProfile
-from hostctl.exceptions import OperationNotStartedError as _OperationNotStartedError
-from hostctl.executor import (
-    ExecutorRequest as _ExecutorRequest,
-    StreamingExecutor as _StreamingExecutor,
-    expired as _expired,
+from hostctl.console import (
+    ConsoleExecutor as _ConsoleExecutor,
+    PosixConsoleProfile as _PosixConsoleProfile,
 )
+from hostctl.exceptions import OperationNotStartedError as _OperationNotStartedError
+from hostctl.executor import ExecutorRequest as _ExecutorRequest
 from hostctl.provider import (
     ExecutorProvider as _ExecutorProvider,
     ProviderProbe as _ProviderProbe,
+    ProviderSelector as _ProviderSelector,
 )
 
 if _ty.TYPE_CHECKING:  # pragma: no cover - typing only
@@ -87,12 +85,6 @@ _SETTLE = 1.0
 #: Opening the websocket and authenticating must not hang forever.
 CONNECT_TIMEOUT = 30.0
 
-#: Bytes of stdout to accumulate before writing to a streaming sink.
-_BATCH = 4096
-
-#: Longest a partial batch may wait before being written anyway.
-_FLUSH_INTERVAL = 0.1
-
 #: The **externally reachable** web-shell path. ``middlewared`` registers the
 #: handler at ``/_shell`` on its internal port; nginx exposes it as
 #: ``/websocket/shell``. Connecting to ``/_shell`` on 443 does not fail cleanly
@@ -102,9 +94,9 @@ _FLUSH_INTERVAL = 0.1
 WEBSHELL_PATH = "/websocket/shell"
 
 #: The framed protocol. zsh, TrueNAS root's login shell, reads it as sh does.
-_PROFILE = _PosixConsoleProfile()
-
-_Sink = _ty.Optional[_ty.Callable[[bytes], None]]
+#: No acknowledged batches: the middleware keeps reading the terminal, and a
+#: websocket send blocks rather than overflowing the terminal's input queue.
+_PROFILE = _PosixConsoleProfile(batch=None)
 
 
 def clean_output(data: bytes) -> str:
@@ -112,7 +104,7 @@ def clean_output(data: bytes) -> str:
 
     A display helper for bytes read OUTSIDE a command's frame (a banner, an
     interactive session). Command output is never passed through it: what
-    :meth:`WebShellSession.execute` returns is the program's own bytes.
+    :class:`WebShellExecutor` returns is the program's own bytes.
     """
     data = _PROMPT.sub(b"", _ANSI.sub(b"", data)).replace(b"\r", b"")
     return data.decode("utf-8", "replace")
@@ -151,7 +143,14 @@ class _WebSocketStream:
 
     def write(self, data: bytes) -> None:
         # Binary frames only: see the module docstring.
-        self._ws.send_binary(bytes(data))
+        try:
+            self._ws.send_binary(bytes(data))
+        except OSError:
+            raise
+        except Exception as exc:
+            raise ConnectionError(
+                f"web shell connection lost: {type(exc).__name__}"
+            ) from exc
 
 
 class WebShellSession:
@@ -165,8 +164,6 @@ class WebShellSession:
         #: Guards opening and closing; never held while a command runs, so a
         #: timed-out command's session can be closed from another thread.
         self._lock = _threading.RLock()
-        #: One command at a time on the one terminal.
-        self._busy = _threading.Lock()
         self.shell_id: "str | None" = None
 
     # -- connection --------------------------------------------------------
@@ -249,173 +246,51 @@ class WebShellSession:
                 except Exception:
                     pass
 
-    # -- execution ---------------------------------------------------------
-
-    def execute(
-        self,
-        command: str,
-        *,
-        input: "bytes | None" = None,
-        merge_stderr: bool = False,
-        timeout: "float | None" = None,
-        sink: _Sink = None,
-        errsink: _Sink = None,
-    ) -> "tuple[bytes, bytes, int]":
-        """Run ``command``; return ``(stdout, stderr, returncode)`` as bytes.
-
-        ``sink`` receives stdout AS IT ARRIVES, ``errsink`` stderr when the
-        command finishes. ``input`` is the whole stdin (``/dev/null`` without
-        it); ``merge_stderr`` is ``2>&1``. ``timeout=None`` waits
-        indefinitely. On timeout the command is interrupted and the session
-        closed (its hang-up ends the shell's jobs), and a ``TimeoutExpired``
-        carrying the partial output is raised.
-
-        A failure before the command line was typed raises
-        ``OperationNotStartedError``: nothing ran. A connection lost after
-        that raises ``ConnectionError``; the session is closed either way.
-        """
-        with self._busy:
-            stream = self.stream
-            try:
-                return _PROFILE.execute(
-                    stream,
-                    command,
-                    input=input,
-                    merge_stderr=merge_stderr,
-                    timeout=timeout,
-                    on_stdout=sink,
-                    on_stderr=errsink,
-                )
-            except TimeoutError as exc:
-                self._drop(stream)
-                raise _expired(
-                    command,
-                    timeout,
-                    output=getattr(exc, "output", b""),
-                    stderr=getattr(exc, "stderr", b""),
-                    orphaned=False,
-                ) from exc
-            except BaseException:
-                self._drop(stream)
-                raise
-
-    def _drop(self, stream: _WebSocketStream) -> None:
+    def _drop(self, stream: "_WebSocketStream | None") -> None:
         """Close the session if ``stream`` is still its terminal.
 
-        A command abandoned from another thread may fail after a newer
-        session replaced its own; that one must stay open.
+        A newer session that replaced it stays open.
         """
         with self._lock:
-            if self._stream is stream:
+            if stream is not None and self._stream is stream:
                 self.close()
 
-    def _interrupt(self) -> None:
-        """Type ^C and drop the session, from any thread."""
-        stream = self._stream
-        if stream is not None:
-            try:
-                stream.write(b"\x03")
-            except Exception:
-                pass
-        self.close()
 
+class WebShellExecutor(_ConsoleExecutor):
+    """``run()`` over the web shell: :class:`hostctl.console.ConsoleExecutor`.
 
-#: Events a command's worker thread hands to `WebShellExecutor._receive`.
-_OUT, _ERR, _DONE, _FAILED = "out", "err", "done", "failed"
-
-
-class WebShellExecutor(_StreamingExecutor):
-    """``run()`` over the web shell, with hostctl's call surface.
-
-    :meth:`WebShellSession.execute` blocks until the command ends, and is the
-    only way to drive the framed protocol, so it runs on a worker thread per
-    command; stdout reaches the caller from there as it arrives, in batches of
-    up to 4 KiB or 0.1 s. No ``args``, ``cwd`` or ``env``: the terminal takes
-    one line of shell text, which hostctl renders.
+    Each command takes the provider's session, connecting it first; a
+    connection that fails is a decline, so the host tries its next provider.
+    No ``args``, ``cwd`` or ``env``: the terminal takes one line of shell
+    text, which hostctl renders. A timeout or a failure closes the session,
+    whose hang-up ends the command (``TimeoutExpired.orphaned`` is False);
+    the next command reconnects.
     """
 
     def __init__(self, provider: "WebShellExecutorProvider") -> None:
         self._provider = provider
-        #: One command at a time; the call state below belongs to it.
-        self._lock = _threading.Lock()
-        self._events: "_queue.Queue[tuple[str, object]] | None" = None
-        self._owned = False
+        #: The stream the running command typed into. The terminal is held
+        #: from the factory call until `_abandon` returns, so it is that
+        #: command's.
+        self._stream: "_WebSocketStream | None" = None
+        super().__init__(self._open, profile=_PROFILE)
 
-    def _send(self, request: _ExecutorRequest) -> None:
-        self._lock.acquire()
-        self._owned = True
-        session = self._provider.session
-        try:
-            # Connecting here, not on the worker, keeps a refused connection a
-            # decline: the host may then try another provider.
-            session.stream
-        except _OperationNotStartedError:
-            self._finish()
-            raise
-        except Exception as exc:
-            self._finish()
-            raise _OperationNotStartedError(
-                f"web shell unavailable: {type(exc).__name__}", cause=exc
-            ) from exc
-        events: "_queue.Queue[tuple[str, object]]" = _queue.Queue()
-        self._events = events
-
-        def work() -> None:
-            try:
-                _, _, status = session.execute(
-                    request.command,
-                    input=request.input,
-                    merge_stderr=request.merge_stderr,
-                    sink=lambda data: events.put((_OUT, data)),
-                    errsink=lambda data: events.put((_ERR, data)),
-                )
-            except BaseException as exc:
-                events.put((_FAILED, exc))
-            else:
-                events.put((_DONE, status))
-
-        _threading.Thread(target=work, name="pytruenas-webshell", daemon=True).start()
-
-    def _receive(
-        self, request: _ExecutorRequest, wait: "float | None"
-    ) -> "tuple[bytes, bytes, int | None]":
-        events = _ty.cast("_queue.Queue[tuple[str, object]]", self._events)
-        end = None if wait is None else _time.monotonic() + wait
-        out = bytearray()
-        err = bytearray()
-        flush_at = None
-        while True:
-            limits = [t for t in (end, flush_at) if t is not None]
-            timeout = None if not limits else max(0.0, min(limits) - _time.monotonic())
-            try:
-                kind, value = events.get(timeout=timeout)
-            except _queue.Empty:
-                return bytes(out), bytes(err), None
-            if kind == _DONE:
-                self._finish()
-                return bytes(out), bytes(err), _ty.cast(int, value)
-            if kind == _FAILED:
-                # The base calls `_abandon`, which closes the session.
-                raise _ty.cast(BaseException, value)
-            (out if kind == _OUT else err).extend(_ty.cast(bytes, value))
-            if len(out) >= _BATCH:
-                return bytes(out), bytes(err), None
-            if flush_at is None:
-                flush_at = _time.monotonic() + _FLUSH_INTERVAL
+    def _open(self) -> _WebSocketStream:
+        self._provider.connect()
+        self._stream = self._provider.session.stream
+        return self._stream
 
     def _abandon(self, request: _ExecutorRequest) -> bool:
+        try:
+            super()._abandon(request)
+        except OSError:
+            # The terminal is already gone; closing the session below is what
+            # ends the command either way.
+            pass
         session = self._provider._session
         if session is not None:
-            session._interrupt()
-        self._finish()
-        # The closed session hangs up the shell, which ends the command.
+            session._drop(self._stream)
         return False
-
-    def _finish(self) -> None:
-        self._events = None
-        if self._owned:
-            self._owned = False
-            self._lock.release()
 
 
 class WebShellExecutorProvider(_ExecutorProvider):
@@ -454,13 +329,16 @@ class WebShellExecutorProvider(_ExecutorProvider):
         return _ProviderProbe("available", capabilities=self.capabilities)
 
     def connect(self) -> None:
+        """Open the session; a failure is a decline naming its cause."""
         try:
             self.session.connect()
         except _OperationNotStartedError:
             raise
         except Exception as exc:
             raise _OperationNotStartedError(
-                f"web shell unavailable: {type(exc).__name__}", cause=exc
+                f"web shell unavailable: {type(exc).__name__}: "
+                f"{_ProviderSelector.redact(exc)}",
+                cause=exc,
             ) from exc
 
     def close(self) -> None:
