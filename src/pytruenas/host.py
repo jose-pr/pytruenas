@@ -555,6 +555,9 @@ class TrueNASConfig(
     #: hostctl checks this *before* construction, so a typo (``passwrd=``)
     #: raises instead of silently yielding a config with no password.
     uri_credentials = (
+        # hostctl applies `username=`/`password=` over the URI's own user and
+        # password before `_from_parsed_uri` runs (`password=""`: none).
+        "username",
         "password",
         "otp",
         "api_key",
@@ -729,7 +732,7 @@ _CONFIG_OPTIONS = frozenset(
     name
     for name, parameter in _inspect.signature(TrueNASConfig.__init__).parameters.items()
     if parameter.kind is _inspect.Parameter.KEYWORD_ONLY
-)
+) | frozenset(TrueNASConfig.uri_credentials)
 
 #: Keywords that belong to `SystemHost` rather than the config (`info=`,
 #: `initializer=`, ...). Derived from the signature too, so a hostctl release

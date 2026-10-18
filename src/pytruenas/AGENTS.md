@@ -41,6 +41,12 @@ version="current", executor=None, path=None, ssh=None, ...)`
   password, so neither this package nor hostctl guesses).
 - **`credentials`** (positional as `creds` historically) — passed to
   `Credentials(...)` (below); `None` means local-socket auth (no login call).
+- **`username=`, `password=`, `otp=`, `api_key=`, `token=`** — keyword
+  credentials, as hostctl's `HostConfig(uri, ...)` takes them: `username=` and
+  `password=` replace the URI's own user and password (`password=""` is no
+  password), so one target string serves several logins; `connection_uri` and
+  `repr()` never show a password. Combined with `credentials=` they still raise
+  `ValueError`.
 - **`autologin`** (default `True`) — the first `.conn` access calls
   `.login()` automatically when there's no live connection.
 - **`verify`** (default `True`) — one switch for every check the client

@@ -67,6 +67,17 @@ pytruenas now runs on hostctl 0.4, which moves from `pathlib_next` to
   yourself defaults to the local account name rather than `root` (`shell=` and
   `install_sshcreds()` still use `root`).
 
+### Added
+
+- **`username=` and `password=` override the target's own credentials**, in
+  `TrueNASClient(...)`/`TrueNASHost(...)` and `TrueNASConfig.from_target()`:
+  hostctl applies them over the URI's user and password (`password=""` is no
+  password), so `TrueNASClient("wss://admin@nas", password=pw)` and
+  `TrueNASClient("wss://nas", username="admin", password=pw)` work. The
+  constructor now takes `password=`, `otp=`, `api_key=` and `token=` as
+  `from_target()` did; a password given both in the URI and as `password=`
+  takes the keyword instead of raising.
+
 ### Changed
 
 - **`hostctl[deploy]>=0.4.0,<0.5` replaces `hostctl` and `packaging`** in the

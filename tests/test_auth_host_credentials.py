@@ -133,3 +133,42 @@ def test_hostctl_extras_are_lowercased_keys():
     cred = Credentials.from_host_credentials(password="pw", **extras)
     assert isinstance(cred, BasicAuth)
     assert cred.otp_token == "9999"
+
+
+# -- keyword credentials override the URI's (hostctl's dispatcher) -----------
+
+
+def test_password_and_username_keywords_override_the_uri():
+    from pytruenas.host import TrueNASConfig
+
+    config = TrueNASConfig.from_target("wss://admin:pw@nas", password="other")
+    assert (config.credentials.username, config.credentials.password) == (
+        "admin",
+        "other",
+    )
+    config = TrueNASConfig.from_target("wss://admin:pw@nas", username="bob")
+    assert (config.credentials.username, config.credentials.password) == (
+        "bob",
+        "pw",
+    )
+    assert "pw" not in repr(config) and "other" not in config.connection_uri
+
+
+def test_an_empty_password_keyword_means_no_password():
+    from pytruenas.host import TrueNASConfig
+
+    config = TrueNASConfig.from_target("wss://admin:pw@nas", password="")
+    assert isinstance(config.credentials, LocalAuth)
+
+
+def test_the_host_constructor_takes_the_same_credential_keywords():
+    from pytruenas import TrueNASClient
+
+    client = TrueNASClient("wss://nas", username="u", password="p", autologin=False)
+    assert isinstance(client.config.credentials, BasicAuth)
+    assert (client.config.credentials.username, client.config.credentials.password) == (
+        "u",
+        "p",
+    )
+    with pytest.raises(ValueError, match="unknown credential argument"):
+        TrueNASClient("wss://nas", passwrd="p", autologin=False)
