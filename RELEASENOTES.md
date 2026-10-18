@@ -8,6 +8,8 @@ user-facing; this file is the durable record.
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-10-19
+
 Next performance target: still a CI benchmark baseline, so the following release
 has a previous->current table. The ejson codec is the hot path worth watching
 (`ejson.loads.plain` is the largest per-call cost); the `benchmark` job in
