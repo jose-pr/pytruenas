@@ -275,27 +275,19 @@ class WebShellExecutor(_ConsoleExecutor):
 
     def __init__(self, provider: "WebShellExecutorProvider") -> None:
         self._provider = provider
-        #: The stream the running command typed into. The terminal is held
-        #: from the factory call until `_abandon` returns, so it is that
-        #: command's.
-        self._stream: "_WebSocketStream | None" = None
         super().__init__(self._open, profile=_PROFILE)
 
     def _open(self) -> _WebSocketStream:
         self._provider.connect()
-        self._stream = self._provider.session.stream
-        return self._stream
+        return self._provider.session.stream
 
-    def _abandon(self, request: _ExecutorRequest) -> bool:
-        try:
-            super()._abandon(request)
-        except OSError:
-            # The terminal is already gone; closing the session below is what
-            # ends the command either way.
-            pass
+    def _abandon(self, request: _ExecutorRequest, *, stream: object = None) -> bool:
+        # The base types ^C best effort; closing the session is what ends the
+        # command either way.
+        super()._abandon(request, stream=stream)
         session = self._provider._session
         if session is not None:
-            session._drop(self._stream)
+            session._drop(stream)
         return False
 
 
