@@ -586,7 +586,10 @@ A command is a plain module exposing:
   target. The CLI closes a client it built when the command finishes; one an
   `init` hook returned is left alone. Return an exit code — never raise
   `SystemExit` from a command body: it runs in a fan-out worker, where raising
-  it aborts the whole run and discards the other targets' codes.
+  it aborts the whole run and discards the other targets' codes. A
+  `hostctl.MissingExtraError` out of `run` (an optional extra not installed)
+  ends that target with one ERROR line and status 125, as hostctl's own
+  command line does; any other exception keeps its traceback.
   Write results through `utils.cmd.emit_json(value, args)` (or `emit(text)`):
   one locked write, so concurrent targets cannot interleave mid-line, and with
   more than one target each line is `{"target": ..., "result": ...}` with the

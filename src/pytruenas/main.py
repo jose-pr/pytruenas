@@ -27,6 +27,7 @@ from duho import logging as _logging
 from duho.discovery import CmdBuilder, ModuleCommand, discover_commands
 from duho.fanout import run_targets
 from duho.runpath import RunPathCmd, is_runpath_dir
+from hostctl.exceptions import MissingExtraError as _MissingExtraError
 
 from .host import TrueNASConfig
 from .host import TrueNASHost as TrueNASClient
@@ -403,6 +404,11 @@ class _Target:
         return repr(self.label)
 
 
+#: Exit status of a target whose command needs an optional extra that is not
+#: installed (`hostctl.MissingExtraError`): the status hostctl's own CLI uses.
+_MISSING_EXTRA_STATUS = 125
+
+
 def _run_module_on_target(
     command: "ModuleCommand",
     args: "PyTrueNAS",
@@ -464,6 +470,11 @@ def _run_module_on_target(
         # "deploy succeeded" notification fired for a failed deploy.
         if result == 0 and callable(success):
             success(client, args, logger)
+    except _MissingExtraError as exc:
+        # A usage condition with a remedy in its message, not a crash: one
+        # line, and hostctl's status for it.
+        logger.error("%s", exc)
+        result = _MISSING_EXTRA_STATUS
     finally:
         if callable(finally_):
             try:

@@ -77,6 +77,10 @@ pytruenas now runs on hostctl 0.4, which moves from `pathlib_next` to
   constructor now takes `password=`, `otp=`, `api_key=` and `token=` as
   `from_target()` did; a password given both in the URI and as `password=`
   takes the keyword instead of raising.
+- **A command that needs a missing optional extra fails its target in one
+  line, with status 125**: the CLI reports `hostctl.MissingExtraError` (`FEATURE
+  needs the 'EXTRA' extra: pip install "hostctl[EXTRA]"`) as hostctl's own
+  command line does, instead of a traceback.
 
 ### Changed
 
