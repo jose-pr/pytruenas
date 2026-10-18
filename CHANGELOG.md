@@ -16,8 +16,16 @@ pytruenas now runs on hostctl 0.4, which moves from `pathlib_next` to
   subclasses (distribution `pathapi-uri`); `client.path()` returns hostctl's
   `CompositePosixPath` on `pathapi`. Code importing `pathlib_next`, or testing
   `isinstance(..., pathlib_next.Path)` against these, must use `pathapi.Path`.
-- **`TruenasPath.resolve()` resolves symlinks over the SFTP leg.** It returned
-  the path unchanged on every host; it still does on a host with no SFTP leg.
+- **`TruenasPath` is gone, and `pytruenas.fs.path(client, ...)` of a remote
+  client is `client.path(...)`**: hostctl's composite path over the host's
+  providers, whose SFTP leg is the host's own. `TruenasPath` kept a second SFTP
+  leg (its own connection and login) only so a path built without a host could
+  fall back to the websocket. `fs.path(..., backend="ws")` still builds a
+  `TnasWsPath`, which is what the `tnasws` provider returns now; an unknown
+  `backend=` raises `ValueError`. `symlink_to(force=, onremove=)` is the
+  function `pytruenas.fs.symlink_to(path, target, ..., force=, onremove=)`,
+  which works on any path, `client.path()` included (the method form never
+  reached a composite path's SFTP leg).
 - **hostctl 0.4 names.** `hostctl.host.SshConfig` is `hostctl.SSHConfig`
   (keyword arguments after the host); the "not started" error a web shell
   connection raises is `hostctl.OperationNotStartedError`, a `ConnectionError`
@@ -54,11 +62,13 @@ pytruenas now runs on hostctl 0.4, which moves from `pathlib_next` to
 - **Dependencies: `hostctl>=0.4.0,<0.5`, `netimps>=0.4.0,<0.5`,
   `pathapi>=0.1.0,<0.2` and `pathapi-uri>=0.1.0,<0.2`**, replacing
   `hostctl<0.4`, `netimps<0.4` and `pathlib_next[uri]`. The `ssh` extra is
-  `hostctl[ssh]>=0.4.0,<0.5` plus `sftppath[asyncssh]>=0.1.0,<0.2`. A deploy
+  `hostctl[ssh]>=0.4.0,<0.5` alone: pytruenas no longer imports `sftppath`. A deploy
   payload carries `pathapi` and `pathapi-uri` where it carried `pathlib-next`
   and `uritools`.
-- `TruenasPath`'s SFTP leg is an `sftppath.SFTPPath` on one connection per
-  client, given the decoded path rather than an `sftp://` URI.
+- **One SSH connection and one login per host.** Commands and SFTP paths
+  share the connection hostctl opens (it was three with `TruenasPath`'s own
+  SFTP leg), so `ssh_config`, `connect_options` and the connect timeout apply
+  once.
 - A `TnasWsPath` write stream whose `with` block raises uploads nothing; it
   uploaded what had been written.
 - A relative path on a remote target, and `client.path()` with no segments,

@@ -4,7 +4,7 @@ from types import SimpleNamespace
 
 from pathapi import LocalPath
 
-from pytruenas.fs import TruenasPath, path
+from pytruenas.fs import TnasWsPath, path
 
 
 def _local_client():
@@ -22,9 +22,17 @@ def test_local_client_yields_localpath():
     assert isinstance(p, LocalPath)
 
 
-def test_remote_client_yields_truenaspath():
-    p = path(_remote_client(), "/mnt/tank/x")
-    assert isinstance(p, TruenasPath)
+def test_remote_client_yields_the_host_path():
+    seen = []
+    client = _remote_client()
+    client.path = lambda *segments: seen.append(segments) or "host path"
+    assert path(client, "mnt/tank/x") == "host path"
+    assert seen == [("/mnt/tank/x",)]
+
+
+def test_remote_client_ws_backend_yields_a_tnaswspath():
+    p = path(_remote_client(), "/mnt/tank/x", backend="ws")
+    assert isinstance(p, TnasWsPath)
     assert p.path == "/mnt/tank/x"
 
 

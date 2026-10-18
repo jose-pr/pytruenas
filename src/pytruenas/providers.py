@@ -17,11 +17,9 @@ plain local path -- there is nothing about TrueNAS to add.
 Local comes first because reaching this machine through SSH, a PTY, or the
 filesystem API would be slower and strictly less capable; it is only built when
 the target is local, and everything after it is a way of reaching a machine
-somewhere else. Among the remote options SSH wins on capability, which also
-reproduces :class:`~pytruenas.fs.truenas.TruenasPath`'s hand-rolled "try SFTP,
-fall back to the websocket" behaviour -- now through hostctl's selector, which
-additionally records a redacted trace of what was tried and why
-(``host.last_selection``).
+somewhere else. Among the remote options SSH wins on capability; hostctl's
+selector falls back to the websocket when SFTP cannot serve, and records a
+redacted trace of what was tried and why (``host.last_selection``).
 
 **On honesty.** ``probe()`` reports what a transport can *actually* do rather
 than what would be convenient. The JSON-RPC endpoint is not a general command
@@ -52,7 +50,7 @@ if _ty.TYPE_CHECKING:  # pragma: no cover - typing only
 #: Path operations the middleware ``filesystem.*`` API can actually serve.
 #: Deliberately narrower than ``PathProvider.DEFAULT_CAPABILITIES``: the
 #: websocket API has no symlink creation, no rename, and no realpath, which is
-#: precisely why ``TruenasPath`` prefers SFTP for those. Declaring them here
+#: why the host's composite path routes those to SFTP. Declaring them here
 #: would make the selector choose this provider for operations it cannot do.
 WS_PATH_CAPABILITIES = frozenset(
     (
@@ -106,16 +104,9 @@ class TnasWsPathProvider(_PathProvider):
     def _make_path(self, *segments: object) -> "Path":
         from .fs import path as _make
 
-        # `truenas`, not `ws`: both ride the same TnasWsBackend, so this is not
-        # a transport change -- it is which path CLASS the caller receives.
-        # TruenasPath adds what TnasWsPath lacks: the documented
-        # `symlink_to(force=, onremove=)` extension, and the SFTP->websocket
-        # fallback for the operations SFTP alone can do. Handing back the
-        # narrower type was silently dropping a documented API.
-        #
-        # A *local* target is served by hostctl's own local path provider,
-        # which the host orders ahead of this one -- no local case to handle.
-        return _make(self._client, *segments, backend="truenas")
+        # The plain websocket path: the host's composite path routes what this
+        # provider cannot do (rename, symlinks, resolve) to `sftp` itself.
+        return _make(self._client, *segments, backend="ws")
 
     def probe(self) -> _ProviderProbe:
         return _ProviderProbe("available", capabilities=self.capabilities)

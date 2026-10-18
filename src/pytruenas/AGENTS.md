@@ -498,8 +498,11 @@ imports on Python 3.9.
 
 ## `fs` (`pytruenas.fs`)
 
-`client.path(*segments, backend=None)` is the intended entry point; the
-module-level `path(client, *segments, backend=None)` is what it delegates to.
+`client.path(*segments, backend=None)` is the intended entry point: a
+hostctl `CompositePosixPath` over the host's path providers (`sftp`, then
+`tnasws`, for a remote host; `local` for the unix socket), with a relative
+path rooted at `/`. The module-level `path(client, *segments, backend=None)`
+builds the individual path types (below).
 
 - **`LocalPath`** — re-exported `pathapi.LocalPath`, used for a local
   client with no client-specific behavior.
@@ -528,40 +531,31 @@ module-level `path(client, *segments, backend=None)` is what it delegates to.
   Two paths are the same filesystem (for pathapi's same-file and overlap
   guards) when their backends talk to the same client or to clients with the
   same `connection_uri` — not merely when they share a backend object.
-- **`TruenasPath`** (`pytruenas.fs.truenas`) — subclasses `TnasWsPath`; six
-  operations — `unlink`/`rmdir`/`rename`/`symlink_to`/`readlink`/`resolve` —
-  try an SFTP leg first (an `sftppath.SFTPPath` on one `AsyncSSHBackend` per
-  client, built from `client.config.ssh.connect_opts()`; requires the `ssh`
-  extra) and fall back to `TnasWsPath`'s websocket behavior (or raise
-  `NotImplementedError` for ops SFTP alone can do — rename, symlink_to,
-  readlink). `resolve()` replaces every symlink over SFTP and returns `self`
-  unchanged on a host with no SFTP leg (the middleware has no `realpath`).
-  The SFTP leg takes the decoded `.path`, not a URI. `rename(target)` accepts a
-  `str` or a path on the SAME host and returns the new `TruenasPath`; a target
-  on another host (or of another type) raises `NotImplementedError`, so
-  `move()` copies and deletes instead of renaming on the source host.
-  `symlink_to(..., force=False, onremove=None)` adds a
-  pytruenas-specific convenience: `force` (bool, a file-type string, or a set
-  of `"file"/"link"/"directory"`) removes a conflicting existing target first;
-  `onremove(path, kind)` gates each removal. The SFTP leg is resolved *before*
-  `force` removes anything, so a host that cannot create the link raises
-  `NotImplementedError` with the existing target still in place.
-- **`TnasWsBackend(client)`** — the backend object `TnasWsPath`/`TruenasPath`
-  carry; just holds `.client`.
+- **`symlink_to(path, target, target_is_directory=False, *, force=False,
+  onremove=None)`** (`pytruenas.fs`) — make `path` (any `pathapi` path:
+  `client.path(...)`, a `LocalPath`) a symlink to `target` (a `str` or a path).
+  `force` (bool, a file-type string, or a set of `"file"/"link"/"directory"`)
+  removes a conflicting existing entry first (a directory recursively; another
+  kind raises `FileExistsError`); `onremove(path, kind)` gates each removal.
+  Raises `NotImplementedError` *before* removing anything when no leg of `path`
+  can create a symlink (`pathapi.protocols.supports(path, Symlink)` is false:
+  a host without SFTP). Returns what `path.symlink_to` returns.
+- **`TnasWsBackend(client)`** — the backend object `TnasWsPath` carries; just
+  holds `.client`.
 
-`backend=` values: `"local"` -> `LocalPath`, `"ws"`/`"api"` -> `TnasWsPath`,
-`"truenas"`/`"auto"` -> `TruenasPath`/`LocalPath` (`"auto"` picks `LocalPath`
-for a local client).
+`path(client, *segments, backend=None)` values: `"local"` -> `LocalPath`,
+`"ws"`/`"api"` -> `TnasWsPath`, `"truenas"` -> `client.path(...)` (the host's
+composite path, rooted at `/`), `"auto"`/`None` -> `LocalPath` for a local
+client, else `client.path(...)`. Another value raises `ValueError`. A remote
+client must be a `TrueNASHost` (it calls `client.path`).
 
-**Segments are filesystem paths, not URIs** (since 0.4.5). Both remote types are
-`URIPath`s, so `path()` percent-encodes each segment into the `truenas://` /
+**Segments are filesystem paths, not URIs.** `TnasWsPath` is a `URIPath`, so
+`path(..., backend="ws")` percent-encodes each segment into the
 `truenas+ws://` URI it builds: a name containing `?`, `#`, `%`, a space or
-non-ASCII survives `p.path` unchanged, and the SFTP leg is given that decoded
-name. Before 0.4.5 the segments were interpolated raw and
-`client.path("/mnt/tank/cache?v=2")` addressed `/mnt/tank/cache` silently, on
-**both** legs. Constructing a path type *directly* from a URI string
-(`TruenasPath("truenas://nas/...")`) is unchanged and still URI syntax — `?`
-there really is a query; encode the path yourself if you go around `path()`.
+non-ASCII survives `p.path` unchanged, and the host's SFTP leg is given the
+same decoded name. Constructing a `TnasWsPath` *directly* from a URI string is
+URI syntax — `?` there really is a query; encode the path yourself if you go
+around `path()`.
 
 ## `main` (`pytruenas.main`) — CLI entry point
 
@@ -1073,9 +1067,8 @@ a directory the user does not control.
 
 ## Optional extras and their gating imports
 
-- **`ssh`** (`hostctl[ssh]>=0.4.0,<0.5` and `sftppath[asyncssh]>=0.1.0,<0.2`,
-  i.e. asyncssh + sftppath) — required for
-  `.ssh`, `.run()` over SSH, and the SFTP leg of `TruenasPath`. Missing it
+- **`ssh`** (`hostctl[ssh]>=0.4.0,<0.5`, i.e. asyncssh + sftppath) —
+  required for `.ssh`, `.run()` over SSH, and the `sftp` path leg. Missing it
   raises a clear `ImportError` naming the extra at first use, not at import
   time. **Not** required by `.install_sshcreds`, which provisions over the
   middleware API; only deriving a public key from a caller-supplied

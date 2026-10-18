@@ -799,10 +799,9 @@ class TrueNASHost(_PosixHost, _ty.Generic[ApiVersion]):
       this same machine over SSH, a PTY, or the filesystem API would be slower
       and strictly less capable.
     * **remote** -- ``ssh`` then ``webshell`` for commands, ``sftp`` then
-      ``tnasws`` for paths. SSH leads on capability; the websocket legs follow.
-      This reproduces :class:`~pytruenas.fs.truenas.TruenasPath`'s hand-rolled
-      fallback through hostctl's selector, which additionally records a redacted
-      trace of what was tried (``host.last_selection``).
+      ``tnasws`` for paths. SSH leads on capability; the websocket legs follow
+      through hostctl's selector, which records a redacted trace of what was
+      tried (``host.last_selection``).
     """
 
     config_type = TrueNASConfig
@@ -881,8 +880,6 @@ class TrueNASHost(_PosixHost, _ty.Generic[ApiVersion]):
         self._conn_finalizer: "_weakref.finalize | None" = None
         #: One warning per host about credentials over plaintext ws://.
         self._plaintext_warned = False
-        #: Cached SFTP backend, keyed on the SSH settings (see fs.truenas).
-        self._sftp_backend_cache: "tuple[str, object] | None" = None
         #: HTTP(S) session for the side channels; see `_http`.
         self._http_session: "_req.Session | None" = None
         # `client=` is accepted and ignored: the host *is* the client now.
@@ -1441,15 +1438,6 @@ class TrueNASHost(_PosixHost, _ty.Generic[ApiVersion]):
         # connection among them) once.
         executors, paths = self.resolve_providers()
         self.replace_providers(executor=executors, path=paths)
-        with self._conn_lock:
-            # The SFTP backend is cached per client and keyed on the SSH
-            # settings, which just changed; drop it so the next path call does
-            # not authenticate with the previous credentials.
-            cached, self._sftp_backend_cache = self._sftp_backend_cache, None
-        if cached is not None:
-            from .fs.truenas import _close_backend
-
-            _close_backend(cached[1])
         return private_key
 
     def _warn_if_plaintext(self, creds: object) -> None:

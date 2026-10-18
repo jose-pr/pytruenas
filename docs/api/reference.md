@@ -9,6 +9,6 @@ Generated from docstrings, organized by module:
 - **[Connection](connection.md)** — the lean middleware client, extended-JSON
   (`dumps`/`loads`), and `ClientException`/`ValidationErrors`.
 - **[Auth](auth.md)** — `Credentials` and the credential types.
-- **[Filesystem](fs.md)** — `LocalPath` / `TruenasPath`.
+- **[Filesystem](fs.md)** — `fs.path`, `fs.symlink_to`, `LocalPath` / `TnasWsPath`.
 - **[Host](host.md)** — `TrueNASHost` / `TrueNASConfig`, the transport
   providers, and the web-shell executor.

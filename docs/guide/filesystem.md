@@ -15,7 +15,8 @@ p.with_name("report.bak").write_bytes(data)
 - For a **local** target, `client.path(...)` is an ordinary local `Path`.
 - For a **remote** target it prefers **SFTP** (the `ssh` extra: asyncssh and
   `sftppath`) and falls back to the middleware `filesystem.*` websocket API
-  when SFTP is not configured or cannot connect.
+  when SFTP is not configured or cannot connect. SFTP runs over the same SSH
+  connection as `run()`: one connection and one login per host.
 - A relative path, and `client.path()` with no segments, is rooted at `/` on
   a remote target, whichever leg serves it.
 - `client.path(p, backend="tnasws")` (or `"sftp"`, `"local"`) pins the path to
@@ -87,22 +88,23 @@ need the `ssh` extra and a reachable SSH leg. Without one they raise
 `resolve()` replaces every symlink in the path over SFTP. The middleware has no
 `realpath`, so on a host with no SFTP leg it returns the path unchanged.
 
-`symlink_to` takes a pytruenas-specific `force=` that removes a conflicting
-target first — a bool, a file-type string, or a set of
-`"file"`/`"link"`/`"directory"`:
+`pytruenas.fs.symlink_to()` replaces a conflicting entry first — `force=` is a
+bool, a file-type string, or a set of `"file"`/`"link"`/`"directory"`:
 
 ```python
+from pytruenas import fs
+
 link = client.path("/mnt/tank/current")
-link.symlink_to("/mnt/tank/releases/v2", force="link")   # replace only a symlink
+fs.symlink_to(link, "/mnt/tank/releases/v2", force="link")   # replace only a symlink
 ```
 
-The SFTP leg is resolved *before* `force=` removes anything, so a host that
-cannot create the link raises `NotImplementedError` with the existing target
-still in place — rather than deleting it and then failing.
+It checks that the path can create a symlink *before* `force=` removes
+anything, so a host with no SFTP leg raises `NotImplementedError` with the
+existing entry still in place — rather than deleting it and then failing.
 
 !!! note
-    SFTP concurrency and transport details come from `sftppath`; pytruenas
-    just selects and wires the backend. The SFTP leg verifies the server's host
+    SFTP concurrency and transport details come from hostctl and `sftppath`;
+    pytruenas only orders the providers. The SFTP leg verifies the server's host
     key (see [Host keys](connecting.md#host-keys)); when it cannot connect,
     `client.path()` operations are served by the websocket leg instead.
     `p / "name"` joins a literal file name, so `p / "cache?v=2"` names the file

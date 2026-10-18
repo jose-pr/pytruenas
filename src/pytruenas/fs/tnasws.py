@@ -230,8 +230,7 @@ class TnasWsPath(_URIPath):
     def unlink(self, missing_ok=False):
         # The middleware has no filesystem.unlink; deletion is not part of the
         # filesystem.* API. Shell out on the host (the client runs commands
-        # there). In a TruenasPath the SFTP leg handles this first when
-        # available; this is the API-backend fallback.
+        # there). A host path routes this to SFTP first when it has a leg.
         if missing_ok and not self.exists():
             return
         self.backend.client.run(("rm", "-f", self.path))

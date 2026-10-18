@@ -82,33 +82,18 @@ def test_reconnecting_tracks_the_new_connection():
     assert _Conn.closed == 2
 
 
-# -- the SFTP backend -----------------------------------------------------
+# -- the SSH connection ----------------------------------------------------
 
 
-def test_the_sftp_backend_is_built_once_per_client():
-    """A backend owns its SSH connection, so a fresh backend per call opens a
-    session per operation (five readlink() calls, five sessions)."""
+def test_paths_and_commands_share_the_host_s_one_ssh_transport():
+    """One SSH transport per host: no SFTP connection of pytruenas's own."""
     pytest.importorskip("asyncssh")
-    from pytruenas.fs.truenas import _sftp_backend
-
     host = TrueNASClient("wss://nas", shell="ssh://root@nas", autologin=False)
-    ssh = host.config.ssh
-    first = _sftp_backend(host, ssh)
-    assert first is not None
-    assert _sftp_backend(host, ssh) is first
-    # A different client gets its own.
-    other = TrueNASClient("wss://nas2", shell="ssh://root@nas2", autologin=False)
-    assert _sftp_backend(other, other.config.ssh) is not first
-
-
-def test_changing_the_ssh_settings_invalidates_the_backend():
-    pytest.importorskip("asyncssh")
-    from pytruenas.fs.truenas import _sftp_backend
-
-    host = TrueNASClient("wss://nas", shell="ssh://root@nas", autologin=False)
-    first = _sftp_backend(host, host.config.ssh)
-    host.config.ssh.client_keys = [b"a new key"]
-    assert _sftp_backend(host, host.config.ssh) is not first
+    executor = host.executor_providers[0]
+    sftp = host.path_providers[0]
+    assert (executor.name, sftp.name) == ("ssh", "sftp")
+    assert executor.transport is sftp.transport
+    assert not hasattr(host, "_sftp_backend_cache")
 
 
 # -- plaintext ------------------------------------------------------------

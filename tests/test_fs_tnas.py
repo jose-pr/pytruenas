@@ -1,7 +1,7 @@
-"""TnasWsPath (middleware filesystem.* backend) + TruenasPath (sftp->ws fallback).
+"""TnasWsPath (the middleware filesystem.* backend), fs.path() and fs.symlink_to().
 
-All mocked -- no server. Asserts the right ``filesystem.*`` calls are made and
-that TruenasPath falls back to the websocket leg when no SFTP is configured.
+All mocked -- no server. Asserts the right ``filesystem.*`` calls are made, and
+that a host path names the decoded file on every leg.
 """
 
 import stat
@@ -10,20 +10,17 @@ from unittest.mock import MagicMock
 
 import pytest
 
+from pytruenas import TrueNASClient
 from pytruenas.fs import path as fs_path
+from pytruenas.fs import symlink_to as fs_symlink_to
 from pytruenas.fs.tnasws import TnasWsBackend, TnasWsPath, _stat_from_info
-from pytruenas.fs.truenas import TruenasPath
 
 
 def _client(ssh=None, **fs):
-    """A fake host: websocket-only by default, or carrying an SSH leg.
+    """A fake host for a `TnasWsPath`: websocket-only by default.
 
-    The shape matters -- `TruenasPath._sftp()` reads the SSH target off
-    `client.config.ssh` (a real `hostctl.SSHConfig`), exactly as a live
-    `TrueNASHost` carries it. A bare `MagicMock` would auto-vivify *any*
-    attribute name and make the leg look configured no matter what it read,
-    which is how the dead `client.ssh_config` lookup stayed green for a
-    release.
+    `config.ssh` is a real attribute (or a real `hostctl.SSHConfig`): a bare
+    `MagicMock` would auto-vivify any attribute name.
     """
     client = MagicMock()
     client.config = SimpleNamespace(ssh=ssh)
@@ -294,28 +291,42 @@ def test_stat_from_listdir_entry_without_mode():
     assert stat.S_ISDIR(st.st_mode)
 
 
-# -- TruenasPath fallback -----------------------------------------------------
+# -- fs.path() for a remote host is the host's own composite path -------------
 
 
-# The SSH target is `client.config.ssh`, an `hostctl.SSHConfig`. It was
-# `client.ssh_config` before `TrueNASClient` merged into `TrueNASHost`, and
-# that name no longer exists anywhere -- see
-# `test_truenaspath_ignores_the_pre_merge_ssh_config_attribute`.
+def _ws_only_host(**fs):
+    host = TrueNASClient("wss://nas", autologin=False)
+    host.__dict__["api"] = MagicMock()
+    for name, value in fs.items():
+        getattr(host.api.filesystem, name).return_value = value
+    return host
 
 
-def test_truenaspath_falls_back_to_ws_without_sftp():
-    client = _client(stat={"mode": 0o100644}, get=b"x")  # no ssh -> no sftp leg
-    p = TruenasPath("truenas://nas/f.txt", backend=TnasWsBackend(client))
-    assert p.read_text() == "x"  # ws leg
-    p.unlink()  # ws shell fallback
-    assert client.run.call_args[0][0] == ("rm", "-f", "/f.txt")
+def test_fs_path_of_a_remote_host_is_the_host_path_rooted_at_slash():
+    host = TrueNASClient("wss://nas", autologin=False)
+    p = fs_path(host, "mnt", "tank", "f.txt")
+    assert type(p) is type(host.path("/x"))
+    assert str(p) == "/mnt/tank/f.txt"
+    assert p.provider.name == "tnasws"
+    assert str(fs_path(host, "x", backend="truenas")) == "/x"
 
 
-def test_truenaspath_rename_without_sftp_raises():
-    client = _client()
-    p = TruenasPath("truenas://nas/f", backend=TnasWsBackend(client))
+def test_fs_path_refuses_an_unknown_backend():
+    with pytest.raises(ValueError, match="unknown path backend"):
+        fs_path(TrueNASClient("wss://nas", autologin=False), "/x", backend="sftp")
+
+
+def test_the_tnasws_provider_builds_a_plain_websocket_path():
+    host = TrueNASClient("wss://nas", autologin=False)
+    p = host.path("/mnt/tank/f.txt", backend="tnasws")
+    assert type(p._backend_path) is TnasWsPath
+    assert p._backend_path.path == "/mnt/tank/f.txt"
+
+
+def test_a_websocket_only_host_cannot_rename():
+    host = TrueNASClient("wss://nas", autologin=False)
     with pytest.raises(NotImplementedError):
-        p.rename("/g")
+        host.path("/f").rename("/g")
 
 
 # -- mkdir: the mode actually applied, and parents ------------------------------
@@ -405,20 +416,6 @@ def _host_client(name, **fs):
     return client
 
 
-class _RecordingSftp:
-    """An SFTP leg that records renames/unlinks instead of doing them."""
-
-    def __init__(self):
-        self.renamed, self.unlinked = [], []
-
-    def rename(self, target):
-        self.renamed.append(target)
-        return SimpleNamespace(path=target)
-
-    def unlink(self, missing_ok=False):
-        self.unlinked.append(True)
-
-
 def test_paths_built_separately_on_one_host_are_one_filesystem():
     """`fs.path()` gives each path its own backend; the host is what counts.
 
@@ -427,8 +424,8 @@ def test_paths_built_separately_on_one_host_are_one_filesystem():
     `fs.path()` of the same file deletes it.
     """
     client = _host_client("nasA", stat={"mode": 0o100644}, get=b"data")
-    a = fs_path(client, "/mnt/tank/a.txt")
-    b = fs_path(client, "/mnt/tank/a.txt")
+    a = fs_path(client, "/mnt/tank/a.txt", backend="ws")
+    b = fs_path(client, "/mnt/tank/a.txt", backend="ws")
     assert a._backend is not b._backend
     assert a._same_filesystem(b)
     with pytest.raises(OSError, match="same file"):
@@ -437,171 +434,59 @@ def test_paths_built_separately_on_one_host_are_one_filesystem():
 
 
 def test_paths_on_two_hosts_are_two_filesystems():
-    a = fs_path(_host_client("nasA"), "/mnt/tank/a.txt")
-    b = fs_path(_host_client("nasB"), "/mnt/tank/a.txt")
+    a = fs_path(_host_client("nasA"), "/mnt/tank/a.txt", backend="ws")
+    b = fs_path(_host_client("nasB"), "/mnt/tank/a.txt", backend="ws")
     assert not a._same_filesystem(b)
-    assert not a._rename_compatible(b)
 
 
-def test_rename_refuses_another_host_and_move_copies_instead(monkeypatch):
-    """`rename()` sends the SFTP leg only the destination's PATH.
-
-    Across hosts that renamed the file on the SOURCE host: it left nasA, never
-    reached nasB, and no error was raised. `rename()` now refuses, so
-    `move()` takes its copy + delete path.
-    """
-    sftp = _RecordingSftp()
-    monkeypatch.setattr(TruenasPath, "_sftp", lambda self: sftp)
-    src_client = _host_client("nasA", stat={"mode": 0o100644}, get=b"payload")
-    dst_client = _host_client("nasB")
-    dst_client.api.filesystem.stat.side_effect = FileNotFoundError(2, "absent")
-    src = fs_path(src_client, "/mnt/tank/export.csv")
-    dst = fs_path(dst_client, "/mnt/tank/export.csv")
-
-    with pytest.raises(NotImplementedError, match="across hosts"):
-        src.rename(dst)
-    src.move(dst)
-
-    assert sftp.renamed == []
-    assert dst_client.api.filesystem.put.called  # the bytes reached nasB
-    assert sftp.unlinked  # and the source was removed afterwards
-
-
-def test_rename_on_one_host_returns_the_new_truenaspath(monkeypatch):
-    sftp = _RecordingSftp()
-    monkeypatch.setattr(TruenasPath, "_sftp", lambda self: sftp)
-    client = _host_client("nasA")
-    moved = fs_path(client, "/mnt/tank/a.txt").rename("/mnt/tank/b.txt")
-    assert sftp.renamed == ["/mnt/tank/b.txt"]
-    assert isinstance(moved, TruenasPath)
-    assert moved.path == "/mnt/tank/b.txt"
-    assert moved._host_client() is client
-
-
-def test_truenaspath_resolve_uses_the_sftp_leg(monkeypatch):
-    """`resolve()` answers from the SFTP leg and keeps the TruenasPath type."""
-    client = _client(ssh=_ssh_config())
-    p = TruenasPath("truenas://nas/a/link", backend=TnasWsBackend(client))
-    leg = MagicMock()
-    leg.resolve.return_value = SimpleNamespace(as_posix=lambda: "/a/target")
-    monkeypatch.setattr(TruenasPath, "_sftp", lambda self: leg)
-
-    resolved = p.resolve(strict=True)
-
-    leg.resolve.assert_called_once_with(strict=True)
-    assert isinstance(resolved, TruenasPath)
-    assert resolved.path == "/a/target"
-    assert resolved._host_client() is client
-
-
-def test_truenaspath_resolve_without_an_sftp_leg_returns_self():
-    """The middleware has no realpath: with no SSH leg the path is unchanged."""
-    client = _client()
-    p = TruenasPath("truenas://nas/a/b", backend=TnasWsBackend(client))
-    assert p.resolve().path == "/a/b"
-
-
-@pytest.mark.requires("asyncssh")
-def test_truenaspath_builds_the_sftp_leg_from_config_ssh():
-    from sftppath import SFTPPath
-
-    client = _client(ssh=_ssh_config(host="nas", port=2222, username="admin"))
-    p = TruenasPath("truenas://nas/a/b", backend=TnasWsBackend(client))
-    sftp = p._sftp()
-    assert isinstance(sftp, SFTPPath)
-    assert str(sftp) == "/a/b"
-    assert sftp.backend.endpoint == ("nas", 2222, "admin")
-
-
-@pytest.mark.requires("asyncssh")
-def test_sftp_backend_is_shared_per_client_and_replaced_when_ssh_changes():
-    """One backend (one connection) per client, rebuilt for new credentials."""
-    client = _client(ssh=_ssh_config(password="one"))
-    p = TruenasPath("truenas://nas/a/b", backend=TnasWsBackend(client))
-    first = p._sftp().backend
-    assert (p / "c")._sftp().backend is first
-
-    client.config.ssh = _ssh_config(password="two")
-    second = p._sftp().backend
-    assert second is not first
-    assert second.connect_opts["password"] == "two"
+def test_host_paths_built_separately_are_one_filesystem():
+    """The host's composite paths share its providers, so the guard fires."""
+    host = TrueNASClient("wss://nas", autologin=False)
+    assert fs_path(host, "/a")._same_filesystem(host.path("/a"))
+    other = TrueNASClient("wss://nas", autologin=False)
+    assert not host.path("/a")._same_filesystem(other.path("/a"))
 
 
 # -- a filename with URI syntax reaches the SFTP leg unchanged ----------------
 
 
-# RFC 3986 `pchar` plus `/`, spelled out here rather than imported from the
-# module under test: the input side of these cases is a fixture, and the
-# assertion is a *round-trip*, so borrowing the implementation's own constant
-# for both halves would make the pin tautological.
-_PCHAR = "/:@-._~!$&'()*+,;="
-
-
-def _truenas_path(client, remote):
-    """A `TruenasPath` whose `.path` really is `remote`.
-
-    `TruenasPath` is a `uripath.URIPath`, so a raw `truenas://` URI is read as
-    URI syntax -- the fixture has to encode, or the precondition below fails
-    before the leg is ever reached.
-    """
-    from urllib.parse import quote
-
-    return TruenasPath(
-        "truenas://nas" + quote(remote, safe=_PCHAR), backend=TnasWsBackend(client)
-    )
+_SPECIAL_NAMES = [
+    "/mnt/tank/cache?v=2",  # truncated at the `?` -- read as a query
+    "/mnt/tank/a#b",  # truncated at the `#` -- read as a fragment
+    "/mnt/tank/sp ace",
+    "/mnt/tank/100%",  # a lone `%` -- must not be re-encoded twice
+    "/mnt/tank/report%20final.txt",  # a literal `%20`, NOT a space
+    "/mnt/tank/café.txt",
+    "/C:/Temp",  # `:` is legal in a segment
+]
 
 
 @pytest.mark.requires("asyncssh")
-@pytest.mark.parametrize(
-    "remote",
-    [
-        "/mnt/tank/cache?v=2",  # truncated at the `?` -- read as a query
-        "/mnt/tank/a#b",  # truncated at the `#` -- read as a fragment
-        "/mnt/tank/sp ace",
-        "/mnt/tank/100%",  # a lone `%` -- must not be re-encoded twice
-        "/mnt/tank/report%20final.txt",  # a literal `%20`, NOT a space
-        "/mnt/tank/café.txt",
-    ],
-)
-def test_sftp_leg_survives_uri_syntax_in_a_filename(remote):
-    """The SFTP leg addresses the decoded name, byte for byte.
+@pytest.mark.parametrize("remote", _SPECIAL_NAMES)
+def test_every_leg_of_a_host_path_names_the_decoded_file(remote):
+    """The SFTP leg and the websocket leg address the same name, byte for byte.
 
     A `?` or `#` read as URI syntax would truncate the name into a query or
     fragment, and a genuine `%xx` decoded once more would name another file --
     either way the operation runs against a different file with no error.
+    Building an absolute path connects nothing.
     """
-    client = _client(ssh=_ssh_config(host="nas", port=2222))
-    p = _truenas_path(client, remote)
-    assert p.path == remote  # precondition: the path really carries the name
-
-    sftp = p._sftp()
-    assert sftp is not None
-    assert str(sftp) == remote
-
-
-@pytest.mark.requires("asyncssh")
-def test_sftp_leg_encoding_leaves_uri_legal_characters_readable():
-    """`:` is legal in a path segment, so it stays.
-
-    A naive `quote(path, safe="/")` would render a Windows-flavoured remote
-    path as `/C%3A/Temp`, which is a different (and wrong) name.
-    """
-    client = _client(ssh=_ssh_config(host="nas", port=2222))
-    p = _truenas_path(client, "/C:/Temp")
-    assert str(p) == "truenas://nas/C:/Temp"
-    assert str(p._sftp()) == "/C:/Temp"
+    host = TrueNASClient("wss://nas", autologin=False, ssh=_ssh_config(port=2222))
+    sftp = host.path(remote, backend="sftp")
+    ws = host.path(remote, backend="tnasws")
+    assert str(sftp._backend_path) == remote
+    assert ws._backend_path.path == remote
+    assert fs_path(host, remote, backend="ws").path == remote
 
 
 # -- the truenas:// URI is built the same way, one layer up --------------------
 
 
 def _path_client(ssh=None):
-    """A remote fake host shaped for `pytruenas.fs.path()`.
+    """A remote fake host shaped for `pytruenas.fs.path(..., backend="ws")`.
 
     `path()` reads `is_local`/`host` off the settings object (`_api` here, the
-    pre-hostctl spelling it still accepts), while `TruenasPath._sftp()` reads
-    the SSH target off `client.config.ssh` -- two different attributes, so both
-    have to be real for a path built through `path()` to reach its SFTP leg.
+    pre-hostctl spelling it still accepts).
     """
     return SimpleNamespace(
         _api=SimpleNamespace(is_local=False, host="nas", port=0),
@@ -624,7 +509,7 @@ _URI_SYNTAX_NAMES = [
 @pytest.mark.parametrize("remote", _URI_SYNTAX_NAMES)
 @pytest.mark.parametrize(
     "backend,expected",
-    [("ws", TnasWsPath), ("api", TnasWsPath), ("auto", TruenasPath)],
+    [("ws", TnasWsPath), ("api", TnasWsPath)],
 )
 def test_path_construction_survives_uri_syntax_in_a_filename(remote, backend, expected):
     """Regression: `_ws_uri`/`_truenas_uri` interpolated the path unencoded.
@@ -655,173 +540,88 @@ def test_path_construction_joins_segments_before_encoding():
     assert p.name == "c#d"
 
 
-@pytest.mark.requires("asyncssh")
-@pytest.mark.parametrize("remote", _URI_SYNTAX_NAMES)
-def test_sftp_leg_is_not_encoded_twice(remote):
-    """Construction encodes once and the SFTP leg takes the decoded name.
-
-    `URIPath.path` *decodes* the `truenas://` spelling, and `SFTPPath` takes a
-    plain path. Encoding an encoded value anywhere would send `100%` as
-    `100%25` and `report%20final.txt` as `report%2520final.txt` -- a different
-    file, silently.
-    """
-    client = _path_client(ssh=_ssh_config(host="nas", port=2222))
-    p = fs_path(client, remote, backend="auto")
-    assert p.path == remote
-
-    sftp = p._sftp()
-    assert sftp is not None
-    assert str(sftp) == remote
-
-
-def test_truenaspath_ignores_the_pre_merge_ssh_config_attribute():
-    """`client.ssh_config` is gone; reading it built the leg off a Mock.
-
-    Fails on the pre-fix lookup, which read `ssh_config` first and would have
-    happily built an SFTP path out of this stray attribute.
-    """
-    client = _client()  # config.ssh is None -> websocket-only
-    client.ssh_config = SimpleNamespace(
-        host="nas", port=22, username="root", password=None
-    )
-    p = TruenasPath("truenas://nas/f", backend=TnasWsBackend(client))
-    assert p._sftp() is None
-
-
 # -- symlink_to(force=) must not remove before it can create ------------------
 
 
-class _FakeSftp:
-    """Just enough SFTP leg to record a `symlink_to`."""
+class _LinkPath:
+    """Just enough path to record what `fs.symlink_to` does to it."""
 
-    def __init__(self):
+    def __init__(self, kind=None):
+        self.kind = kind  # None: absent; "file", "directory" or "link"
         self.calls = []
 
+    def exists(self):
+        return self.kind is not None
+
+    def is_symlink(self):
+        return self.kind == "link"
+
+    def is_dir(self):
+        return self.kind == "directory"
+
+    def is_file(self):
+        return self.kind == "file"
+
+    def unlink(self):
+        self.calls.append("unlink")
+
+    def rm(self, recursive=False, missing_ok=False):
+        self.calls.append(("rm", recursive))
+
+    def _symlink_to(self, target, target_is_directory=False):
+        raise AssertionError("fs.symlink_to calls the public method")
+
     def symlink_to(self, target, target_is_directory=False):
-        self.calls.append((target, target_is_directory))
+        self.calls.append(("symlink", target, target_is_directory))
 
 
-def test_symlink_to_force_does_not_remove_when_nothing_can_create(monkeypatch):
-    """Regression: the removal used to run, and *then* the call failed.
+def test_symlink_to_force_does_not_remove_when_nothing_can_create():
+    """A websocket-only host cannot make a symlink, so `force=` must not delete.
 
-    A websocket-only host has no way to make a symlink, so `force=True` was
-    pure loss -- the existing target was deleted and `NotImplementedError`
-    raised straight after.
+    Removing first and then failing would be pure loss.
     """
-    client = _client(stat={"mode": 0o100644})  # target exists, is a file
-    p = TruenasPath("truenas://nas/link", backend=TnasWsBackend(client))
-    assert p._sftp() is None  # websocket-only
-
+    host = _ws_only_host(stat={"mode": 0o100644})
     with pytest.raises(NotImplementedError):
-        p.symlink_to("/target", force=True)
-
-    assert not client.run.called  # nothing was removed
-    assert not client.api.filesystem.unlink.called
-
-
-def test_symlink_to_force_still_removes_when_a_leg_can_create(monkeypatch):
-    """The gate must not disable `force=` on a host that *does* have SFTP."""
-    client = _client(stat={"mode": 0o100644}, ssh=_ssh_config())
-    fake = _FakeSftp()
-    monkeypatch.setattr(TruenasPath, "_sftp", lambda self: fake)
-
-    p = TruenasPath("truenas://nas/link", backend=TnasWsBackend(client))
-    p.symlink_to("/target", force=True)
-
-    assert client.run.called  # the conflicting file was removed
-    assert fake.calls == [("/target", False)]
+        fs_symlink_to(host.path("/link"), "/target", force=True)
+    assert not host.api.filesystem.stat.called
+    assert not host.api.filesystem.put.called
 
 
-def test_symlink_to_force_honours_onremove_veto(monkeypatch):
-    client = _client(stat={"mode": 0o100644}, ssh=_ssh_config())
-    fake = _FakeSftp()
-    monkeypatch.setattr(TruenasPath, "_sftp", lambda self: fake)
-
-    p = TruenasPath("truenas://nas/link", backend=TnasWsBackend(client))
-    p.symlink_to("/target", force=True, onremove=lambda _p, _kind: False)
-
-    assert not client.run.called  # veto -> no removal
-    assert fake.calls == [("/target", False)]
+def test_symlink_to_force_removes_then_creates():
+    p = _LinkPath("file")
+    fs_symlink_to(p, "/target", force=True)
+    assert p.calls == ["unlink", ("symlink", "/target", False)]
+    d = _LinkPath("directory")
+    fs_symlink_to(d, TnasWsPath("truenas+ws://nas/t", backend=None), True, force=True)
+    assert d.calls == [("rm", True), ("symlink", "/t", True)]
 
 
-def test_symlink_to_force_rejects_a_kind_it_was_not_allowed(monkeypatch):
-    client = _client(stat={"mode": 0o100644}, ssh=_ssh_config())
-    fake = _FakeSftp()
-    monkeypatch.setattr(TruenasPath, "_sftp", lambda self: fake)
+def test_symlink_to_without_force_leaves_a_conflict_to_the_leg():
+    p = _LinkPath("file")
+    fs_symlink_to(p, "/target")
+    assert p.calls == [("symlink", "/target", False)]
 
-    p = TruenasPath("truenas://nas/link", backend=TnasWsBackend(client))
+
+def test_symlink_to_force_honours_onremove_veto():
+    p = _LinkPath("link")
+    fs_symlink_to(p, "/target", force=True, onremove=lambda _p, _kind: False)
+    assert p.calls == [("symlink", "/target", False)]
+
+
+def test_symlink_to_force_rejects_a_kind_it_was_not_allowed():
+    p = _LinkPath("file")
     with pytest.raises(FileExistsError):
-        p.symlink_to("/target", force="link")  # existing target is a file
-
-    assert not client.run.called
-    assert fake.calls == []
-
-
-@pytest.mark.requires("asyncssh")
-def test_truenaspath_sftp_leg_reachable_on_a_real_host():
-    """Construction only -- no network. Pins the real class's attribute shape."""
-    from hostctl import SSHConfig
-
-    from pytruenas import TrueNASClient
-
-    host = TrueNASClient(
-        "wss://nas",
-        autologin=False,
-        ssh=SSHConfig(host="nas", port=22, username="root", password="pw"),
-    )
-    p = TruenasPath("truenas://nas/etc/hosts", backend=TnasWsBackend(host))
-    assert p._sftp() is not None
-
-
-def test_connect_opts_delegate_to_sshconfig_connect_opts():
-    """The mapping is hostctl's, not a hand-rolled copy of its field list.
-
-    A local copy is how `known_hosts` went missing (see the test below), so
-    pin the delegation itself: whatever `SSHConfig.connect_opts()` produces is
-    what the SFTP leg connects with.
-    """
-    from pytruenas.fs.truenas import _connect_opts_from_ssh
-
-    ssh = _ssh_config(username="admin", password="pw")
-    assert _connect_opts_from_ssh(ssh) == ssh.connect_opts()
-    opts = _connect_opts_from_ssh(ssh)
-    assert (opts["username"], opts["password"]) == ("admin", "pw")
-
-    keyed = _ssh_config(client_keys=["PRIVATE"])
-    assert _connect_opts_from_ssh(keyed) == keyed.connect_opts()
-
-
-def test_connect_opts_carry_known_hosts():
-    """Regression: the SFTP leg dropped the caller's host-key policy.
-
-    `_connect_opts_from_ssh` hand-mapped username/client_keys/password only, so
-    `known_hosts` never reached `asyncssh.connect()`. The SSH executor (which
-    uses `SSHConfig.connect_opts()`) enforced the configured policy while this
-    leg ignored it -- proven live: a `known_hosts` file with no entry for the
-    host made hostctl's ssh executor refuse to connect, and the SFTP leg
-    connected anyway.
-    """
-    from pytruenas.fs.truenas import _connect_opts_from_ssh
-
-    opts = _connect_opts_from_ssh(_ssh_config(known_hosts="/etc/ssh/known_hosts"))
-    assert opts["known_hosts"] == "/etc/ssh/known_hosts"
-
-    # `verify=False` means "do not verify" and is a real, deliberate choice.
-    disabled = _connect_opts_from_ssh(_ssh_config(verify=False))
-    assert "known_hosts" in disabled and disabled["known_hosts"] is None
-
-    # The `()` default is passed through: asyncssh reads it as "use
-    # ~/.ssh/known_hosts". Omitting it would let an SFTP connect seed
-    # `known_hosts=None` -- no verification at all.
-    assert _connect_opts_from_ssh(_ssh_config())["known_hosts"] == ()
+        fs_symlink_to(p, "/target", force="link")
+    assert p.calls == []
+    q = _LinkPath("link")
+    fs_symlink_to(q, "/target", force=["link", "file"])
+    assert q.calls[0] == "unlink"
 
 
 @pytest.mark.requires("asyncssh")
-def test_sftp_backend_is_built_with_the_configured_known_hosts():
-    """The same regression, end to end through the leg the client really builds."""
-    client = _client(ssh=_ssh_config(known_hosts="/etc/ssh/known_hosts"))
-    p = TruenasPath("truenas://nas/etc/hosts", backend=TnasWsBackend(client))
+def test_a_host_path_with_an_sftp_leg_can_create_a_symlink():
+    """Construction only: the composite path claims the operation for SFTP."""
+    from pathapi.protocols import Symlink, supports
 
-    sftp = p._sftp()
-    assert sftp is not None
-    assert sftp.backend.connect_opts["known_hosts"] == "/etc/ssh/known_hosts"
+    host = TrueNASClient("wss://nas", autologin=False, ssh=_ssh_config())
+    assert supports(host.path("/link"), Symlink)

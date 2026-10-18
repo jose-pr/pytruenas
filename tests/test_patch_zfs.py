@@ -258,17 +258,17 @@ def test_host_path_unwraps_a_uripath_and_never_leaks_credentials():
 
 
 def test_host_path_handles_pytruenas_own_path_types():
-    """`TruenasPath`/`TnasWsPath` name a file ON the NAS, so fspath applies.
+    """A `TnasWsPath` names a file ON the NAS, so fspath applies.
 
-    They opt in via `_host_filesystem_path`; without it, fspath raises for
-    these schemes and nothing can name the file in a remote command line.
+    It opts in via `_host_filesystem_path`; without it, fspath raises for the
+    scheme and nothing can name the file in a remote command line.
     """
-    from pytruenas.fs.truenas import TruenasPath
+    from pytruenas.fs.tnasws import TnasWsPath
 
-    path = TruenasPath("truenas://root:hunter2@nas/usr/lib/x.conf")
+    path = TnasWsPath("truenas+ws://root:hunter2@nas/usr/lib/x.conf")
     assert zfs.host_path(path) == "/usr/lib/x.conf"
     assert "hunter2" not in zfs.host_path(path)
-    assert "truenas://" not in zfs.host_path(path)
+    assert "truenas" not in zfs.host_path(path)
 
 
 def test_host_path_refuses_to_invent_a_path_for_a_non_host_scheme():

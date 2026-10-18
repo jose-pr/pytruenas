@@ -123,7 +123,7 @@ def test_ws_path_provider_always_uses_the_websocket_backend(monkeypatch):
 
     for is_local in (True, False):
         TnasWsPathProvider(_client(is_local=is_local)).path("/etc/hostname")
-        assert seen["backend"] == "truenas"
+        assert seen["backend"] == "ws"
 
 
 def test_ws_path_provider_builds_a_ws_path(monkeypatch):
@@ -144,14 +144,9 @@ def test_ws_path_provider_builds_a_ws_path(monkeypatch):
     monkeypatch.setattr(fs, "path", fake_path)
     client = _client()
     assert TnasWsPathProvider(client).path("/etc/hosts") is sentinel
-    # It must pin the backend explicitly: falling through to "auto" would let
-    # this provider hand back an SFTP path, defeating the ordering.
-    #
-    # "truenas" rather than "ws": both ride the same TnasWsBackend, so the
-    # transport is identical -- but TruenasPath carries the documented
-    # `symlink_to(force=, onremove=)` extension and the SFTP->websocket
-    # fallback that TnasWsPath lacks. Pinning "ws" silently narrowed the API.
-    assert seen["backend"] == "truenas"
+    # It must pin the backend explicitly: "auto" would hand back the host's
+    # own composite path, which routes back through this provider.
+    assert seen["backend"] == "ws"
     assert seen["client"] is client
 
 
@@ -225,7 +220,7 @@ def test_executor_order_prefers_local_then_ssh():
 
 
 def test_path_selector_prefers_sftp_then_websocket():
-    """Ordering reproduces TruenasPath's SFTP-preferred behaviour."""
+    """SFTP is preferred and the websocket serves when it declines."""
     sftp = PathProvider("sftp", lambda *s: LocalPath("/sftp-path"))
     ws = TnasWsPathProvider(_client())
 

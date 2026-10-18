@@ -69,10 +69,9 @@ dependencies = [
 [project.optional-dependencies]
 # Config-file support for the CLI (YAML targets/config).
 config = ["pyyaml"]
-# Remote shell + SFTP filesystem leg: the SSH providers are hostctl's (its
-# `ssh` extra is asyncssh and sftppath), and TruenasPath's own SFTP leg builds
-# sftppath's `SFTPPath` and `AsyncSSHBackend` directly.
-ssh = ["hostctl[ssh]>=0.4.0,<0.5", "sftppath[asyncssh]>=0.1.0,<0.2"]
+# Remote shell + SFTP filesystem leg: both SSH providers are hostctl's (its
+# `ssh` extra is asyncssh and sftppath).
+ssh = ["hostctl[ssh]>=0.4.0,<0.5"]
 # Typings generator (`pytruenas generate-typings`).
 # Series base: `Environment`/`DictLoader`/`tojson` have been stable since 3.0,
 # and 4.x may break them. Validated against 3.1.x.
@@ -85,7 +84,7 @@ codegen = ["jinja2>=3.0,<4"]
 # so 3.11+ never installs a redundant package for what it already has built
 # in -- `pytruenas.utils.bundle` tries tomllib first regardless.
 repo = ["pathspec", "tomli; python_version<'3.11'"]
-dev =["black", "build", "hatchling", "pytest", "pytest-cov", "twine", "pyyaml", "hostctl[ssh]>=0.4.0,<0.5", "sftppath[asyncssh]>=0.1.0,<0.2", "duho>=0.7.5,<0.8", "jinja2", "pathspec", "tomli; python_version<'3.11'"]
+dev =["black", "build", "hatchling", "pytest", "pytest-cov", "twine", "pyyaml", "hostctl[ssh]>=0.4.0,<0.5", "duho>=0.7.5,<0.8", "jinja2", "pathspec", "tomli; python_version<'3.11'"]
 docs = ["mkdocs", "mkdocs-material", "mkdocstrings[python]"]
 
 [project.scripts]
