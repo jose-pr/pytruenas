@@ -17,8 +17,8 @@ site; [`CONTRIBUTING.md`](CONTRIBUTING.md) covers the human workflow.
   names); `connection.py` the JSON-RPC websocket transport; `namespace.py` the
   dynamic API dispatcher; `auth.py` credentials; `fs/` remote path objects;
   `cmd/` the CLI's command modules; `codegen/` the typings generator; `patch/`
-  host modification beyond the API; `utils/` shared helpers (`bundle.py` builds
-  deploy payloads and knows nothing about TrueNAS).
+  host modification beyond the API; `utils/` shared helpers. `deploy` runs on
+  `hostctl.deploy`; `cmd/deploy.py` holds only pytruenas's policy.
 - `tests/` — the suite, one module per area. `benchmarks/` — a runnable perf
   suite plus its tracked results. `examples/` — runnable scripts.
   `docs/` — the MkDocs site sources.

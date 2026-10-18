@@ -55,15 +55,10 @@ dependencies = [
     "requests>=2.0,<3",
     "websocket-client>=1.0,<2",
     # Series base. TrueNASHost is a hostctl PosixHost; every path a provider
-    # returns must be a pathapi path.
-    "hostctl>=0.4.0,<0.5",
-    # `deploy` reads PEP 508 requirement lines and environment markers to build
-    # its dependency closure; without it the closure silently lost duho,
-    # hostctl and netimps. Capped above the newest tested (26.x) rather than at
-    # the next major as the rule says: packaging bumps its major every release,
-    # so a major-scoped cap would pin one calendar year. Floor 21.3 is where
-    # `Requirement`/`markers` took their current shape.
-    "packaging>=21.3,<27",
+    # returns must be a pathapi path. `deploy` is a built-in command and runs
+    # on `hostctl.deploy`, whose extra brings packaging and pathspec (and tomli
+    # below Python 3.11).
+    "hostctl[deploy]>=0.4.0,<0.5",
 ]
 
 [project.optional-dependencies]
@@ -76,15 +71,10 @@ ssh = ["hostctl[ssh]>=0.4.0,<0.5"]
 # Series base: `Environment`/`DictLoader`/`tojson` have been stable since 3.0,
 # and 4.x may break them. Validated against 3.1.x.
 codegen = ["jinja2>=3.0,<4"]
-# Repo-tree bundling (`pytruenas deploy --source repo`): gitignore-style
-# filtering via pathspec's GitWildMatch (accurate on `**`/negation, which a
-# hand-rolled matcher gets wrong at the edges), and a parser for
-# pyproject.toml's [project] table on interpreters below 3.11, where stdlib
-# tomllib does not exist yet. tomli is version-gated rather than unconditional
-# so 3.11+ never installs a redundant package for what it already has built
-# in -- `pytruenas.utils.bundle` tries tomllib first regardless.
-repo = ["pathspec", "tomli; python_version<'3.11'"]
-dev =["black", "build", "hatchling", "pytest", "pytest-cov", "twine", "pyyaml", "hostctl[ssh]>=0.4.0,<0.5", "duho>=0.7.5,<0.8", "jinja2", "pathspec", "tomli; python_version<'3.11'"]
+# `pytruenas deploy --source repo`. The core dependency already carries it;
+# the extra stays so an existing `pytruenas[repo]` requirement resolves.
+repo = ["hostctl[deploy]>=0.4.0,<0.5"]
+dev =["black", "build", "hatchling", "pytest", "pytest-cov", "twine", "pyyaml", "hostctl[ssh]>=0.4.0,<0.5", "duho>=0.7.5,<0.8", "jinja2"]
 docs = ["mkdocs", "mkdocs-material", "mkdocstrings[python]"]
 
 [project.scripts]

@@ -52,6 +52,16 @@ pytruenas now runs on hostctl 0.4, which moves from `pathlib_next` to
   descriptor is read to EOF, where both raised `NotImplementedError`; an
   unknown `run()` option raises `TypeError`. Large `input=` costs one round
   trip per 2 KiB typed, so a terminal's input queue never overflows.
+- **`deploy` runs on `hostctl.deploy`**, which came from pytruenas's own
+  bundler; `pytruenas.utils.bundle` is gone (import `hostctl.deploy`:
+  `bundle()`, `deploy()`, `SourceTree`, `Deployment`), and `BundleError` is
+  `hostctl.BundleError`. The command line, the default path, the `.pyz` name,
+  `PYTRUENAS_PKG_ROOT`/`PYTRUENAS_PKG_NAME` and the digest markers are
+  unchanged, so a previous deploy is recognised (and replaced once: the
+  payload's digest differs). What differs: the `dir` launcher adds no empty `PYTHONPATH`
+  entry (the working directory is never importable); each step on the target is an argv with
+  `--` before its paths; a package name that is not a dotted identifier
+  raises `ValueError`; and a missing extra raises `hostctl.MissingExtraError`.
 - **SSH settings follow hostctl 0.4.** Neither SSH leg reads `~/.ssh/config`
   unless `SSHConfig(ssh_config=...)` names it, and an `SSHConfig` you build
   yourself defaults to the local account name rather than `root` (`shell=` and
@@ -59,6 +69,10 @@ pytruenas now runs on hostctl 0.4, which moves from `pathlib_next` to
 
 ### Changed
 
+- **`hostctl[deploy]>=0.4.0,<0.5` replaces `hostctl` and `packaging`** in the
+  core dependencies, so `deploy` (both sources) works out of the box; it adds
+  `pathspec`. The `repo` extra is that same requirement, and `dev` no longer
+  lists `pathspec`/`tomli`.
 - **Dependencies: `hostctl>=0.4.0,<0.5`, `netimps>=0.4.0,<0.5`,
   `pathapi>=0.1.0,<0.2` and `pathapi-uri>=0.1.0,<0.2`**, replacing
   `hostctl<0.4`, `netimps<0.4` and `pathlib_next[uri]`. The `ssh` extra is

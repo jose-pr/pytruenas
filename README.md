@@ -33,7 +33,7 @@ Optional extras:
 | `pytruenas[ssh]` | SSH commands + the SFTP filesystem leg (`asyncssh`) |
 | `pytruenas[config]` | YAML config/targets file for the CLI (`pyyaml`) |
 | `pytruenas[codegen]` | `generate-typings` command (`jinja2`) |
-| `pytruenas[repo]` | `deploy --source repo` (`pathspec`, `tomli` below 3.11) |
+| `pytruenas[repo]` | `deploy --source repo`; included in the core install (`hostctl[deploy]`) |
 
 ## Quickstart
 
@@ -127,7 +127,8 @@ may be comma-separated and supports `[A-Z]`/`[0-9]` range expansion (e.g.
 
 ## Running on the appliance
 
-TrueNAS has a read-only root and no `pip`, so `deploy` bootstraps instead: it
+TrueNAS has a read-only root and no `pip`, so `deploy` bootstraps instead,
+through [hostctl](https://pypi.org/project/hostctl/)'s `hostctl.deploy`: it
 asks the target which distributions it already has, bundles only the
 difference, and copies that over. In practice that is five pure-Python packages
 under a megabyte — the appliance already ships `requests`, `websocket-client`,
@@ -154,7 +155,7 @@ and your package ships with pytruenas bundled underneath it.
 `--source repo` ships a working tree as-is instead of an installed dependency
 closure — the files a clone would have, filtered by whichever of `.gitignore`,
 `.ignore` and `.bundleignore` are present, with nothing needing to be installed
-locally first (needs `pytruenas[repo]`). It requires `--mode dir`: a zipapp
+locally first. It requires `--mode dir`: a zipapp
 needs an importable package root, which a working tree does not have.
 
 ```sh

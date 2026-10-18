@@ -1,20 +1,19 @@
-"""``deploy``'s ``--source repo`` axis: CLI wiring, PYTHONPATH detection, and
-the pyz/repo combination that cannot work.
+"""``deploy``: CLI wiring and the policy around ``hostctl.deploy``.
 
-The failure mode this guards against is the same shape as ``test_bundle.py``'s:
-a deploy that builds and runs the `tar -xf`/launcher-write pipeline
-successfully and then does not IMPORT on the target, because the launcher's
-PYTHONPATH does not point at wherever the repo's package actually lives.
+The bundler and installer are hostctl's and tested there; these tests pin
+what pytruenas decides: what is deployed, where, under which name, and what
+runs afterwards.
 """
 
 import logging
+from types import SimpleNamespace
 from unittest.mock import patch
 
 import pytest
+from hostctl.exceptions import BundleError
 
 import pytruenas.cmd.deploy as deploy_cmd
 import pytruenas.main as main
-from pytruenas.utils.bundle import BundleError
 
 
 def _logger():
@@ -95,118 +94,186 @@ def test_mode_choices_are_unchanged():
         _parse(["deploy", "--mode", "repo", "nas1"])
 
 
-# -- _detect_pythonpath ---------------------------------------------------
+# -- the policy around hostctl.deploy --------------------------------------
+#
+# Bundling, probing, the digest marker, the atomic swap and the refusal of a
+# foreign path are hostctl's (`hostctl.deploy`, tested there). What pytruenas
+# decides is what to deploy, where, under which name, and what runs after.
 
 
-def test_detect_pythonpath_finds_src_layout(tmp_path):
-    (tmp_path / "src" / "pkg").mkdir(parents=True)
-    (tmp_path / "src" / "pkg" / "__init__.py").write_text("")
-    assert deploy_cmd._detect_pythonpath(tmp_path, "pkg") == ["src"]
+class _Recorder:
+    """Stands in for `hostctl.deploy.deploy` and records the call."""
+
+    def __init__(self, written=True):
+        self.calls = []
+        self.written = written
+
+    def __call__(self, host, source, path, **options):
+        from hostctl.deploy import Deployment
+
+        self.calls.append((host, source, path, options))
+        mode = options["mode"]
+        command = (
+            (options["python"], path)
+            if mode == "pyz"
+            else (f"{path}/bin/{options['package']}",)
+        )
+        return Deployment(path, "0" * 64, self.written, command)
 
 
-def test_detect_pythonpath_finds_flat_layout(tmp_path):
-    (tmp_path / "pkg").mkdir()
-    (tmp_path / "pkg" / "__init__.py").write_text("")
-    assert deploy_cmd._detect_pythonpath(tmp_path, "pkg") == [""]
+class _Client:
+    def __init__(self, returncode=0):
+        self.ran = []
+        self.returncode = returncode
+
+    def run(self, command, **options):
+        self.ran.append((command, options))
+        return SimpleNamespace(returncode=self.returncode)
 
 
-def test_detect_pythonpath_finds_a_single_module_file(tmp_path):
-    """A single-file module (pkg.py), not a package directory."""
-    (tmp_path / "lib").mkdir()
-    (tmp_path / "lib" / "pkg.py").write_text("")
-    assert deploy_cmd._detect_pythonpath(tmp_path, "pkg") == ["lib"]
+@pytest.fixture
+def recorder(monkeypatch):
+    import hostctl.deploy
 
-
-def test_detect_pythonpath_returns_every_match():
-    """A repo vendoring under lib/ while its own code lives in src/ needs
-    both on PYTHONPATH -- taking only the first hit would silently drop one."""
-    import tempfile
-    from pathlib import Path
-
-    with tempfile.TemporaryDirectory() as tmp:
-        root = Path(tmp)
-        for base in ("src", "lib"):
-            (root / base / "pkg").mkdir(parents=True)
-            (root / base / "pkg" / "__init__.py").write_text("")
-        assert deploy_cmd._detect_pythonpath(root, "pkg") == ["src", "lib"]
-
-
-def test_detect_pythonpath_finds_nothing(tmp_path):
-    assert deploy_cmd._detect_pythonpath(tmp_path, "pkg") == []
-
-
-# -- _repo_contents ---------------------------------------------------------
+    recorded = _Recorder()
+    monkeypatch.setattr(hostctl.deploy, "deploy", recorded)
+    monkeypatch.delenv("PYTRUENAS_PKG_ROOT", raising=False)
+    monkeypatch.delenv("PYTRUENAS_PKG_NAME", raising=False)
+    return recorded
 
 
 def _args(**overrides):
     args = deploy_cmd.Args()
-    for key, value in {
-        "repo_root": ".",
-        "ignore_files": [],
-        "ignore_pattern": [],
-        "extras": [],
-        "include": [],
-        "exclude": [],
-        "pythonpath": [],
-    }.items():
-        setattr(args, key, overrides.get(key, value))
+    for name, value in overrides.items():
+        setattr(args, name, value)
     return args
 
 
-@pytest.mark.requires("pathspec")
-def test_repo_contents_detects_pythonpath_automatically(tmp_path):
-    (tmp_path / "src" / "pkg").mkdir(parents=True)
-    (tmp_path / "src" / "pkg" / "__init__.py").write_text("X = 1\n")
+def test_the_call_binds_to_hostctl_s_deploy_signature():
+    import inspect
 
-    contents, pythonpath = deploy_cmd._repo_contents(
-        _args(repo_root=str(tmp_path)), "pkg", _logger()
+    from hostctl.deploy import deploy
+
+    inspect.signature(deploy).bind(
+        object(),
+        "pytruenas",
+        "/x.pyz",
+        mode="pyz",
+        package="pytruenas",
+        extras=(),
+        skip=(),
+        force=False,
+        python="python3",
     )
-    assert pythonpath == ["src"]
-    names = [a for a, _ in contents]
-    assert any(n.endswith("src/pkg/__init__.py") for n in names)
 
 
-@pytest.mark.requires("pathspec")
-def test_repo_contents_explicit_pythonpath_overrides_detection(tmp_path):
-    (tmp_path / "src" / "pkg").mkdir(parents=True)
-    (tmp_path / "src" / "pkg" / "__init__.py").write_text("")
-    (tmp_path / "custom").mkdir()
+def test_installed_pyz_deploys_pytruenas_to_the_persistent_dataset(recorder):
+    client = _Client()
+    assert deploy_cmd.run(client, _args(), _logger()) == 0
+    [(host, source, path, options)] = recorder.calls
+    assert host is client and source == "pytruenas"
+    assert path == "/var/db/system/pytruenas.pyz"
+    assert options == {
+        "mode": "pyz",
+        "package": "pytruenas",
+        "extras": (),
+        "skip": (),
+        "force": False,
+        "python": "python3",
+    }
+    assert client.ran == []  # nothing runs without `--`
 
-    _, pythonpath = deploy_cmd._repo_contents(
-        _args(repo_root=str(tmp_path), pythonpath=["custom"]), "pkg", _logger()
+
+@pytest.mark.parametrize(
+    "given, mode, expected",
+    [
+        ("/opt/tool", "pyz", "/opt/tool.pyz"),
+        ("/opt/tool.pyz", "pyz", "/opt/tool.pyz"),
+        ("/opt/tool/", "pyz", "/opt/tool.pyz"),
+        ("/opt/tool/", "dir", "/opt/tool"),
+        ("/opt/tool.pyz", "dir", "/opt/tool.pyz"),
+    ],
+)
+def test_a_zipapp_is_named_as_a_pyz_file(recorder, given, mode, expected):
+    deploy_cmd.run(_Client(), _args(path=given, mode=mode), _logger())
+    assert recorder.calls[0][2] == expected
+
+
+def test_the_root_and_package_come_from_the_arguments_then_the_environment(
+    recorder, monkeypatch
+):
+    monkeypatch.setenv("PYTRUENAS_PKG_ROOT", "tnas-config")
+    deploy_cmd.run(_Client(), _args(extras=["ssh"], skip=["jinja2"]), _logger())
+    _, source, _, options = recorder.calls[-1]
+    assert (source, options["package"]) == ("tnas-config", "tnas_config")
+    assert (options["extras"], options["skip"]) == (("ssh",), ("jinja2",))
+
+    monkeypatch.setenv("PYTRUENAS_PKG_NAME", "tnasconfig")
+    deploy_cmd.run(_Client(), _args(), _logger())
+    assert recorder.calls[-1][3]["package"] == "tnasconfig"
+
+    deploy_cmd.run(_Client(), _args(pkg_root="mine", pkg_name="mine_pkg"), _logger())
+    assert recorder.calls[-1][1] == "mine"
+    assert recorder.calls[-1][3]["package"] == "mine_pkg"
+
+
+def test_force_reaches_hostctl(recorder):
+    deploy_cmd.run(_Client(), _args(force=True), _logger())
+    assert recorder.calls[0][3]["force"] is True
+
+
+def test_arguments_after_the_separator_run_the_deployed_program(recorder):
+    from hostctl import Exec
+
+    client = _Client(returncode=3)
+    args = _args(mode="dir")
+    args._passthrough_ = ["call", "system.info"]
+    assert deploy_cmd.run(client, args, _logger()) == 3
+    [(command, options)] = client.ran
+    assert isinstance(command, Exec)
+    assert options == {"check": False}
+    assert (command.program, command.args) == (
+        "/var/db/system/pytruenas/bin/pytruenas",
+        ("call", "system.info"),
     )
-    assert pythonpath == ["custom"]
 
 
 @pytest.mark.requires("pathspec")
-def test_repo_contents_raises_when_package_cannot_be_found(tmp_path):
-    (tmp_path / "unrelated.txt").write_text("x")
-    with pytest.raises(BundleError, match="could not find"):
-        deploy_cmd._repo_contents(
-            _args(repo_root=str(tmp_path)), "nosuchpkg", _logger()
-        )
+def test_source_repo_ships_a_source_tree_with_its_filters(recorder, tmp_path, caplog):
+    from hostctl.deploy import SourceTree
 
-
-@pytest.mark.requires("pathspec")
-def test_repo_contents_survives_a_repo_with_no_declared_dependencies(tmp_path):
-    """Advisory logging must not turn into a hard failure for a repo with
-    neither pyproject.toml nor requirements.txt -- copying the tree is the
-    only thing this mode promises to do."""
-    (tmp_path / "pkg").mkdir()
-    (tmp_path / "pkg" / "__init__.py").write_text("")
-    contents, _ = deploy_cmd._repo_contents(
-        _args(repo_root=str(tmp_path)), "pkg", _logger()
+    (tmp_path / "pyproject.toml").write_text(
+        '[project]\nname = "pkg"\ndependencies = ["requests", "click"]\n'
     )
-    assert contents
-
-
-# -- --source repo + --mode pyz is rejected ---------------------------------
+    args = _args(
+        source="repo",
+        mode="dir",
+        repo_root=str(tmp_path),
+        pkg_root="pkg",
+        ignore_files=[".gitignore"],
+        ignore_pattern=["*.log"],
+        pythonpath=["src"],
+        exclude=["click"],
+    )
+    with caplog.at_level(logging.INFO, logger="test-deploy"):
+        deploy_cmd.run(_Client(), args, _logger())
+    _, source, path, options = recorder.calls[0]
+    assert isinstance(source, SourceTree)
+    assert source.root == type(source.root)(str(tmp_path))
+    assert source.ignore_files == (".gitignore",)
+    assert source.ignore_patterns == ("*.log",)
+    assert source.pythonpath == ("src",)
+    assert (path, options["mode"], options["package"]) == (
+        "/var/db/system/pytruenas",
+        "dir",
+        "pkg",
+    )
+    declared = [r.getMessage() for r in caplog.records if "declares" in r.getMessage()]
+    assert declared and "requests" in declared[0] and "click" not in declared[0]
 
 
 def test_source_repo_rejects_mode_pyz():
-    args = deploy_cmd.Args()
-    args.source = "repo"
-    args.mode = "pyz"
+    args = _args(source="repo", mode="pyz")
     with pytest.raises(BundleError, match="does not support --mode pyz"):
         deploy_cmd.run(None, args, _logger())
 
@@ -214,279 +281,19 @@ def test_source_repo_rejects_mode_pyz():
 def test_source_repo_mode_pyz_never_touches_the_client():
     """The rejection must happen before any client interaction -- a caller
     should not need a reachable target to find out the combination is invalid."""
-    args = deploy_cmd.Args()
-    args.source = "repo"
-    args.mode = "pyz"
+    args = _args(source="repo", mode="pyz")
     sentinel = object()  # anything -- if this is touched, it will AttributeError
     with pytest.raises(BundleError):
         deploy_cmd.run(sentinel, args, _logger())
 
 
-# -- end-to-end: --source repo --mode dir against a fake client -------------
-
-
-class _FakePath:
-    def __init__(self, path, store):
-        self.path = path
-        self.store = store
-
-    def exists(self):
-        return self.path in self.store
-
-    def mkdir(self, **_kwargs):
-        pass
-
-    def write_bytes(self, data):
-        self.store[self.path] = data
-
-
-class _FakeResult:
-    returncode = 0
-    stdout = ""  # `_probe` reads this for --source installed's PROBE_SOURCE call
-
-
-class _FakeClient:
-    def __init__(self):
-        self.store = {}
-        self.ran = []
-
-    def path(self, path):
-        return _FakePath(path, self.store)
-
-    def run(self, cmd, **_kwargs):
-        self.ran.append(cmd)
-        return _FakeResult()
-
-
 @pytest.mark.requires("pathspec")
-def test_source_repo_mode_dir_deploys_a_working_launcher(tmp_path):
+def test_a_real_bundle_of_a_source_tree_has_a_working_launcher(tmp_path):
+    """End to end through hostctl's bundler: the launcher reaches `src/`."""
+    from hostctl.deploy import SourceTree, bundle
+
     (tmp_path / "src" / "pkg").mkdir(parents=True)
     (tmp_path / "src" / "pkg" / "__init__.py").write_text("X = 1\n")
-
-    args = deploy_cmd.Args()
-    args.source = "repo"
-    args.mode = "dir"
-    args.repo_root = str(tmp_path)
-    args.pkg_root = "pkg"
-    args.pkg_name = "pkg"
-    args.force = True
-
-    client = _FakeClient()
-    rc = deploy_cmd.run(client, args, _logger())
-    assert rc == 0
-
-    import io
-    import tarfile
-
-    payload = client.store["/var/db/system/pytruenas.incoming.tar"]
-    tf = tarfile.open(fileobj=io.BytesIO(payload))
-    [launcher_name] = [n for n in tf.getnames() if n.endswith("bin/pkg")]
-    launcher = tf.extractfile(launcher_name).read().decode()
-    repo_name = tmp_path.name
-    assert f"lib/{repo_name}/src" in launcher
-    assert tf.getmember(launcher_name).mode & 0o111, "launcher is not executable"
-
-
-def test_source_installed_path_never_calls_repo_contents(monkeypatch):
-    """The default axis must behave exactly as before -- --source repo's
-    machinery (pythonpath detection, collect_repo) must not run at all.
-
-    Patches `_repo_contents` itself rather than driving `run()` all the way
-    through a real dependency-closure build: that closure depends on what
-    happens to be installed in the environment running this test (e.g.
-    `charset-normalizer`'s compiled extension, which `bundle.build` correctly
-    refuses -- exactly what `test_bundle.py`'s own `TRUENAS_HAS` fixture
-    exists to route around), which is irrelevant to what this test checks.
-    """
-
-    def _boom(*_a, **_k):
-        raise AssertionError("_repo_contents must not run for --source installed")
-
-    monkeypatch.setattr(deploy_cmd, "_repo_contents", _boom)
-
-    args = deploy_cmd.Args()  # source defaults to "installed"
-    assert args.source == "installed"
-    # Calling run() this far would need a real target; asserting the branch
-    # taken is enough -- see `test_source_repo_rejects_mode_pyz` above for
-    # the same "check the guard without needing a client" shape.
-    monkeypatch.setattr(
-        deploy_cmd,
-        "_probe",
-        lambda client, logger: (_ for _ in ()).throw(
-            AssertionError("stop: reached the installed path, as expected")
-        ),
-    )
-    with pytest.raises(AssertionError, match="reached the installed path"):
-        deploy_cmd.run(_FakeClient(), args, _logger())
-
-
-# -- the install step against a modelled remote filesystem -------------------
-#
-# `_RemoteFS` executes the argv lists deploy issues (rm -rf, mkdir -p, tar -xf,
-# mv, chmod) against an in-memory tree, so these tests assert what the TARGET
-# looks like afterwards -- not merely which commands were sent.
-
-
-class _RemoteFS:
-    def __init__(self, files=None):
-        self.files = dict(files or {})
-        self.dirs = set()
-        self.ran = []
-
-    def path(self, path):
-        fs = self
-
-        class _P:
-            def exists(self):
-                return fs._exists(path)
-
-            def mkdir(self, **_kw):
-                fs.dirs.add(path)
-
-            def write_bytes(self, data):
-                fs.files[path] = data
-
-            def read_text(self):
-                return fs.files[path].decode()
-
-        return _P()
-
-    def _exists(self, path):
-        prefix = path.rstrip("/") + "/"
-        return (
-            path in self.files
-            or path in self.dirs
-            or any(k.startswith(prefix) for k in [*self.files, *self.dirs])
-        )
-
-    def _under(self, path):
-        prefix = path + "/"
-        return [k for k in self.files if k == path or k.startswith(prefix)]
-
-    def run(self, cmd, **_kw):
-        import io
-        import tarfile
-
-        self.ran.append(list(cmd))
-        op = cmd[0]
-        if op == "rm":
-            for target in cmd[2:]:
-                for key in self._under(target):
-                    del self.files[key]
-                self.dirs = {
-                    d
-                    for d in self.dirs
-                    if d != target and not d.startswith(target + "/")
-                }
-        elif op == "mkdir":
-            self.dirs.add(cmd[-1])
-        elif op == "tar":
-            staging, dest = cmd[2], cmd[4]
-            with tarfile.open(fileobj=io.BytesIO(self.files[staging])) as tf:
-                for member in tf.getmembers():
-                    if member.isfile():
-                        rel = member.name.split("/", 1)[1]
-                        self.files[f"{dest}/{rel}"] = tf.extractfile(member).read()
-        elif op == "mv":
-            src, dst = cmd[-2], cmd[-1]
-            for key in self._under(src):
-                self.files[dst + key[len(src) :]] = self.files.pop(key)
-            self.dirs = {
-                dst + d[len(src) :] if d == src or d.startswith(src + "/") else d
-                for d in self.dirs
-            }
-        return _FakeResult()
-
-
-def _tar(**files):
-    import io
-    import tarfile
-
-    buf = io.BytesIO()
-    with tarfile.open(fileobj=buf, mode="w") as tf:
-        for name, data in files.items():
-            info = tarfile.TarInfo(f"top/{name}")
-            info.size = len(data)
-            tf.addfile(info, io.BytesIO(data))
-    return buf.getvalue()
-
-
-def _install_args(force=False):
-    from types import SimpleNamespace
-
-    return SimpleNamespace(force=force)
-
-
-T = "/mnt/tank/app"
-
-
-def test_dir_deploy_installs_a_fresh_tree_with_its_marker():
-    fs = _RemoteFS()
-    payload = _tar(**{"bin/app": b"#!"})
-    assert deploy_cmd._deploy_dir(fs, payload, "d1", T, _install_args(), _logger())
-    assert fs.files[f"{T}/bin/app"] == b"#!"
-    assert fs.files[f"{T}/.digest"] == b"d1\n"
-    leftovers = (f"{T}.new", f"{T}.old", f"{T}.incoming")
-    assert not [k for k in fs.files if k.startswith(leftovers)]
-
-
-def test_dir_deploy_replaces_a_previous_deploy():
-    fs = _RemoteFS(
-        {f"{T}/.digest": b"d0\n", f"{T}/bin/app": b"old", f"{T}/stale": b"x"}
-    )
-    deploy_cmd._deploy_dir(
-        fs, _tar(**{"bin/app": b"new"}), "d1", T, _install_args(), _logger()
-    )
-    assert fs.files[f"{T}/bin/app"] == b"new"
-    assert f"{T}/stale" not in fs.files
-    assert fs.files[f"{T}/.digest"] == b"d1\n"
-
-
-def test_dir_deploy_refuses_a_directory_it_did_not_create():
-    """`--path` pointed at somebody's directory must not delete it.
-
-    Before, the swap moved it aside and `rm -rf`'d it, then reported success.
-    """
-    fs = _RemoteFS({f"{T}/notes.txt": b"mine", f"{T}/sub/data.db": b"mine too"})
-    payload = _tar(**{"bin/app": b"#!"})
-    with pytest.raises(FileExistsError, match="not a previous deploy"):
-        deploy_cmd._deploy_dir(
-            fs, payload, "d1", T, _install_args(force=True), _logger()
-        )
-    assert fs.files[f"{T}/notes.txt"] == b"mine"
-    assert fs.files[f"{T}/sub/data.db"] == b"mine too"
-    assert not [cmd for cmd in fs.ran if cmd[0] in ("rm", "mv")]
-
-
-def test_dir_deploy_recovers_an_interrupted_swap_instead_of_deleting_it():
-    """Only `.old` left (killed between the renames): it is the good copy."""
-    fs = _RemoteFS({f"{T}.old/.digest": b"d0\n", f"{T}.old/bin/app": b"good"})
-    deploy_cmd._deploy_dir(
-        fs, _tar(**{"bin/app": b"new"}), "d0", T, _install_args(), _logger()
-    )
-    # Same digest: restored and verified, nothing re-uploaded.
-    assert fs.files[f"{T}/bin/app"] == b"good"
-    assert f"{T}.incoming.tar" not in fs.files
-
-
-def test_dir_deploy_with_an_unchanged_digest_uploads_nothing():
-    fs = _RemoteFS({f"{T}/.digest": b"d1\n", f"{T}/bin/app": b"current"})
-    payload = _tar(**{"bin/app": b"new"})
-    assert not deploy_cmd._deploy_dir(fs, payload, "d1", T, _install_args(), _logger())
-    assert fs.ran == []
-    assert f"{T}.incoming.tar" not in fs.files
-
-
-def test_pyz_deploy_renames_into_place_and_refuses_a_foreign_file():
-    target = "/mnt/tank/tool.pyz"
-    fs = _RemoteFS()
-    deploy_cmd._deploy_pyz(fs, b"PK", "d1", target, _install_args(), _logger())
-    assert fs.files[target] == b"PK" and fs.files[f"{target}.digest"] == b"d1\n"
-    assert ["mv", "-f", f"{target}.new", target] in fs.ran
-
-    other = _RemoteFS({target: b"somebody else's"})
-    with pytest.raises(FileExistsError):
-        deploy_cmd._deploy_pyz(
-            other, b"PK", "d1", target, _install_args(force=True), _logger()
-        )
-    assert other.files[target] == b"somebody else's"
+    out = bundle(SourceTree(tmp_path), tmp_path / "out", mode="dir", package="pkg")
+    launcher = (out / "bin" / "pkg").read_text()
+    assert f"lib/{tmp_path.name}/src" in launcher

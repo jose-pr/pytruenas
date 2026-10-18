@@ -1,15 +1,15 @@
 """Install pytruenas onto a target so it can run there, then optionally run it.
 
 TrueNAS has a read-only root and no ``pip``, so the usual "install it on the
-box" answer does not apply. This command bootstraps instead: it asks the target
-what it already has, bundles only the difference, and copies that over.
+box" answer does not apply. :func:`hostctl.deploy.deploy` bootstraps instead:
+it asks the target what it already has, bundles only the difference, and
+copies that over, atomically and only when the digest changed. TrueNAS 26.0
+already ships ``requests``, ``websocket-client``, ``pyyaml``, ``asyncssh``,
+``jinja2`` and ``packaging``, so the bundle is a few pure-Python packages.
 
-That probe is the interesting part. TrueNAS 26.0 already ships ``requests``,
-``websocket-client``, ``pyyaml``, ``asyncssh``, ``jinja2`` and the whole
-``requests`` transitive set, so a full vendored payload would be mostly
-redundant -- and *which* packages are present varies by release, which is why
-it is asked rather than assumed. In practice the bundle is five pure-Python
-packages, well under a megabyte.
+This module is the policy around it: what to deploy (pytruenas, or the
+package that depends on it), where (a persistent dataset), the ``.pyz`` name,
+and running the result.
 
 Two layouts, ``--mode``:
 
@@ -22,25 +22,15 @@ Two layouts, ``--mode``:
 Orthogonal to ``--mode`` is ``--source``, which decides where the bundled
 CONTENT comes from:
 
-* ``installed`` (default) -- the dependency-closure path above: what this
-  environment has installed, probed against what the target already has.
-* ``repo`` -- copy a repo working tree as-is (``--repo-root``, default the
-  current directory), filtered by whichever of ``.gitignore``/``.ignore``/
+* ``installed`` (default) -- the dependency closure this environment has
+  installed, minus what the target already has.
+* ``repo`` -- a repo working tree as-is (``--repo-root``, default the current
+  directory), filtered by whichever of ``.gitignore``/``.ignore``/
   ``.bundleignore`` exist (``--ignore-file`` narrows the selection,
-  ``--ignore-pattern`` adds more patterns on the command line). This does
-  **not** vendor the repo's own dependencies -- that needs them installed
-  here, which is exactly what repo mode exists to avoid requiring -- so it is
-  for shipping source to be read, edited, or run by an interpreter that
-  already has (or can reach) what the repo declares. ``--include``/
-  ``--exclude`` (a bare name or a bracketed ``[extra]``) only affect the
-  dependency names LOGGED as a heads-up, not which files are copied.
-
-  Only ``--mode dir`` supports ``--source repo``: a zipapp needs its package
-  importable at the archive root, which a ``src/``-layout repo copy does not
-  have. ``--mode dir``'s launcher instead puts every directory a package was
-  found under (``src/``, ``lib/``, ``vendor/``, or the repo root itself,
-  auto-detected -- or named explicitly with ``--pythonpath``) on
-  ``PYTHONPATH``.
+  ``--ignore-pattern`` adds more patterns). Its own dependencies are not
+  vendored; ``--include``/``--exclude`` only adjust the dependency names
+  LOGGED as a heads-up. Only ``--mode dir`` supports it: a zipapp needs its
+  package at the archive root, which a ``src/``-layout copy does not have.
 
 Everything after ``--`` is passed to the deployed copy and run there, so a
 single invocation can install and use it::
@@ -54,17 +44,14 @@ The default destination is under ``/var/db/system``. That is deliberate and was
 verified on a live appliance: ``/var/db/system`` is the mountpoint of the
 ``<pool>/.system`` dataset on a *data* pool, so it survives an update, whereas
 ``/var/db`` itself lives in the boot environment
-(``boot-pool/ROOT/<version>/var``) and is replaced by one. Writable, and
-persistent for the right reason rather than by luck.
+(``boot-pool/ROOT/<version>/var``) and is replaced by one.
 """
 
 from __future__ import annotations
 
-import hashlib
 import shlex
 import typing as _ty
 from logging import Logger
-from pathlib import Path, PurePosixPath
 
 from duho import Arg, Meta
 
@@ -75,10 +62,9 @@ from pytruenas.utils.cmd import PyTrueNASArgs
 #: and not ``/var/db``, ``/root`` or ``/data`` (all in the boot environment).
 DEFAULT_PREFIX = "/var/db/system/pytruenas"
 
-#: Where the digest of the deployed tree is recorded, relative to the target
-#: directory. Lets a redeploy answer "is what is already there current?"
-#: without hashing the remote tree file by file.
-DIGEST_NAME = ".digest"
+#: The interpreter on the target: the appliance's middleware runs on it, so it
+#: is always present, and pinning a version would break on the next release.
+REMOTE_PYTHON = "python3"
 
 
 class Args(PyTrueNASArgs):
@@ -164,437 +150,113 @@ def _resolve_root(
 ) -> "tuple[str, str]":
     """Decide what is being deployed: ``(distribution_name, package_name)``.
 
-    This is *policy* and lives here rather than in
-    :mod:`~pytruenas.utils.bundle`, which is deliberately agnostic about who is
-    using it.
-
-    pytruenas is normally a dependency, not the deliverable. The usual caller
-    has their own package -- ``tnasconfig`` -- that imports pytruenas, and what
-    they want on the appliance is *their* package with pytruenas bundled
-    underneath. So the closure root has to be nameable, and falls back to
-    pytruenas only when nothing else says otherwise.
-
-    Resolution order, highest first:
-
-    1. the explicit arguments (``--pkg-root`` / ``--pkg-name``);
-    2. ``PYTRUENAS_PKG_ROOT`` / ``PYTRUENAS_PKG_NAME``, so a project sets it
-       once in its own tooling instead of at every call;
-    3. ``pytruenas`` itself.
+    pytruenas is normally a dependency, not the deliverable: the usual caller
+    has their own package that imports pytruenas, and what they want on the
+    appliance is *their* package with pytruenas bundled underneath. So the
+    closure root is nameable, and falls back to pytruenas only when nothing
+    else says otherwise. Highest first: the arguments (``--pkg-root`` /
+    ``--pkg-name``), then ``PYTRUENAS_PKG_ROOT`` / ``PYTRUENAS_PKG_NAME``, then
+    ``pytruenas``; the package defaults to the root with ``-`` as ``_``.
     """
-    from pytruenas.utils.bundle import default_package
     from pytruenas.utils.cmd import ENV
 
     root = root or ENV.get("PKG_ROOT") or "pytruenas"
-    package = package or ENV.get("PKG_NAME") or default_package(root)
+    package = package or ENV.get("PKG_NAME") or root.replace("-", "_")
     return root, package
 
 
-def _remote_python(client: TrueNASClient) -> str:
-    """The interpreter to drive on the target.
-
-    ``python3`` by name: the appliance's own middleware runs on it, so it is
-    always present and on PATH, and pinning a version here would break on the
-    next release that moves.
-    """
-    return "python3"
+def _target(args: Args) -> str:
+    """The install path: ``--path``, named as a ``.pyz`` file for a zipapp."""
+    target = args.path.rstrip("/") or args.path
+    if args.mode == "pyz" and not target.endswith(".pyz"):
+        target = f"{target}.pyz"
+    return target
 
 
-def _probe(client: TrueNASClient, logger: Logger) -> "list[str]":
-    """Ask the target which distributions it already has."""
-    from pytruenas.utils.bundle import PROBE_SOURCE
+def _source(args: Args) -> object:
+    """``--source installed``'s distribution name, or ``--source repo``'s tree."""
+    from hostctl.deploy import SourceTree
 
-    logger.info("Probing installed packages")
-    result = client.run(
-        f"{_remote_python(client)} -",
-        input=PROBE_SOURCE,
-        capture_output="stdout",
-        encoding="utf-8",
-        check=True,
+    root, _ = _resolve_root(args.pkg_root or None, args.pkg_name or None)
+    if args.source != "repo":
+        return root
+    return SourceTree(
+        args.repo_root,
+        ignore_files=args.ignore_files or None,
+        ignore_patterns=tuple(args.ignore_pattern or ()),
+        pythonpath=args.pythonpath or None,
     )
-    installed = [line.strip() for line in result.stdout.splitlines() if line.strip()]
-    logger.debug("target reports %d installed distributions", len(installed))
-    return installed
 
 
-def _ensure_parent(client: TrueNASClient, target: str) -> None:
-    """Create ``target``'s parent directory if it is missing.
+def _log_declared(tree: _ty.Any, args: Args, logger: Logger) -> None:
+    """Name what a repo tree declares but does not ship, after the filters."""
+    from hostctl.exceptions import BundleError
 
-    Guarded by an ``exists()`` check rather than relying on
-    ``mkdir(exist_ok=True)``: the SFTP backend surfaces an existing directory as
-    a bare ``OSError: Failure`` from the server, which ``exist_ok`` never sees
-    and which says nothing useful about what went wrong.
-
-    ``PurePosixPath``, never ``Path``: the target is POSIX regardless of what
-    the machine running this is, and ``Path("/var/db/x").parent`` on Windows
-    yields ``\\var\\db`` -- a path that does not exist remotely, so the guard
-    would pass and the mkdir would then fail on a mangled name.
-    """
-    parent = client.path(str(PurePosixPath(target).parent))
-    if not parent.exists():
-        parent.mkdir(parents=True, exist_ok=True)
-
-
-def _current_digest(client: TrueNASClient, marker: str) -> "str | None":
-    """The digest recorded by a previous deploy, or ``None`` if absent."""
     try:
-        path = client.path(marker)
-        if not path.exists():
-            return None
-        return path.read_text().strip() or None
-    except Exception:
-        # A missing or unreadable marker means "no usable prior deploy"; it must
-        # never turn into a failure, since the fix is simply to deploy again.
-        return None
-
-
-def _refuse_foreign(client: TrueNASClient, target: str, marker: str) -> None:
-    """Refuse to replace ``target`` unless a previous deploy wrote ``marker``.
-
-    Replacing means deleting whatever is there, and ``--path`` is free text: a
-    typo, or a directory that merely has the right name, would otherwise be
-    removed wholesale -- and reported as "Deployed". ``--force`` does not
-    override this; it only skips the "already current" check.
-    """
-    if client.path(target).exists() and not client.path(marker).exists():
-        raise FileExistsError(
-            f"refusing to replace {target}: it exists but is not a previous "
-            f"deploy (no {PurePosixPath(marker).name}); remove it or choose "
-            "another --path"
+        declared = tree.requirements(
+            tuple(args.extras or ()),
+            include=tuple(args.include or ()),
+            exclude=tuple(args.exclude or ()),
         )
-
-
-def _deploy_pyz(
-    client: TrueNASClient,
-    payload: bytes,
-    digest: str,
-    target: str,
-    args: Args,
-    logger: Logger,
-) -> bool:
-    """Install a single zipapp. Returns whether anything was written."""
-    marker = f"{target}.digest"
-    if not args.force and _current_digest(client, marker) == digest:
-        logger.info("Already current (%s); nothing to do", digest[:12])
-        return False
-    _refuse_foreign(client, target, marker)
-
-    _ensure_parent(client, target)
-    logger.info("Writing %s (%d bytes)", target, len(payload))
-    # Written beside the target and renamed over it: a rename is atomic, so
-    # anything already running the zipapp never reads a half-written file.
-    incoming = f"{target}.new"
-    client.path(incoming).write_bytes(payload)
-    # argv as a list, not a shell string: no quoting to get wrong, and no shell
-    # involved to reinterpret a path that happens to contain a metacharacter.
-    client.run(["chmod", "755", incoming], check=True)
-    client.run(["mv", "-f", incoming, target], check=True)
-    # Bytes, so a Windows controller does not write "\r\n" into a file that
-    # lives on a POSIX host (see the launcher below).
-    client.path(marker).write_bytes(f"{digest}\n".encode())
-    return True
-
-
-def _deploy_dir(
-    client: TrueNASClient,
-    payload: bytes,
-    digest: str,
-    target: str,
-    args: Args,
-    logger: Logger,
-) -> bool:
-    """Install an unpacked tree from a tar payload. Returns whether it wrote."""
-    marker = f"{target}/{DIGEST_NAME}"
-    incoming, previous = f"{target}.new", f"{target}.old"
-
-    # A deploy interrupted between its two renames leaves the last good tree
-    # only at `.old`. Put it back before anything else: the steps below delete
-    # `.old`, and that would destroy the only copy.
-    if (
-        not client.path(target).exists()
-        and client.path(f"{previous}/{DIGEST_NAME}").exists()
-    ):
-        logger.warning("Restoring %s from an interrupted deploy", target)
-        client.run(["mv", previous, target], check=True)
-
-    if not args.force and _current_digest(client, marker) == digest:
-        logger.info("Already current (%s); nothing to do", digest[:12])
-        return False
-    _refuse_foreign(client, target, marker)
-
-    staging = f"{target}.incoming.tar"
-    _ensure_parent(client, target)
-    logger.info("Uploading %d bytes to %s", len(payload), target)
-    client.path(staging).write_bytes(payload)
-
-    # Unpack beside the target and swap, so an interrupted transfer never
-    # leaves a half-written tree at a path something may already be running
-    # from. Each step is its own argv list -- no shell, so nothing here depends
-    # on how a path would be quoted. The sequencing that a `&&` chain provided
-    # comes from check=True instead: the first failure raises.
-    client.run(["rm", "-rf", incoming], check=True)
-    client.run(["mkdir", "-p", incoming], check=True)
-    client.run(
-        ["tar", "-xf", staging, "-C", incoming, "--strip-components=1"], check=True
-    )
-    # The marker goes INTO the new tree before it is swapped in, so whatever
-    # sits at the target always carries it -- a later deploy can then tell its
-    # own output from someone else's directory. Bytes, so a Windows controller
-    # does not write "\r\n" into a file that lives on a POSIX host.
-    client.path(f"{incoming}/{DIGEST_NAME}").write_bytes(f"{digest}\n".encode())
-    if client.path(target).exists():
-        client.run(["rm", "-rf", previous], check=True)
-        client.run(["mv", target, previous], check=True)
-    client.run(["mv", incoming, target], check=True)
-    client.run(["rm", "-rf", previous, staging], check=True)
-    return True
+    except BundleError as exc:
+        logger.debug("Could not read declared dependencies: %s", exc)
+        return
+    if declared:
+        logger.info(
+            "Repo declares %d dependenc%s (not vendored -- ensure the target "
+            "can resolve them): %s",
+            len(declared),
+            "y" if len(declared) == 1 else "ies",
+            ", ".join(sorted(declared)),
+        )
 
 
 def _passthrough(args: Args) -> "list[str]":
     """Arguments after ``--``, to run on the target after installing.
 
-    duho captures them on the parsed instance as ``_passthrough_``; pytruenas
-    used to split ``argv`` itself and carry the result in a module global,
-    which was the same work done twice and could not see per-command parsing.
+    duho captures them on the parsed instance as ``_passthrough_``.
     """
     return list(getattr(args, "_passthrough_", ()) or ())
 
 
-#: Directories checked, in order, for an importable ``<package>`` when
-#: ``--pythonpath`` is not given explicitly. Covers the common Python project
-#: layouts: PEP 517 ``src/``, a vendored ``lib/`` or ``vendor/`` tree, and the
-#: package sitting directly at the repo root (the flat layout).
-_PYTHONPATH_CANDIDATES = ("src", "lib", "vendor", "")
-
-
-def _detect_pythonpath(repo_root: "Path", package: str) -> "list[str]":
-    """Which of :data:`_PYTHONPATH_CANDIDATES` actually contain ``package``.
-
-    Checked locally, against the repo tree being bundled -- not guessed at
-    launch time on the target, which cannot see this machine's layout anyway.
-    A directory counts if it holds ``<package>/__init__.py`` or
-    ``<package>.py``, the same two shapes :func:`~pytruenas.utils.bundle.
-    _top_level_paths` already recognises for an installed distribution.
-
-    Returns every match rather than the first: a repo that vendors under
-    ``lib/`` while its own code lives in ``src/`` needs both on PYTHONPATH,
-    and there is no way to tell that apart from "only take the first hit"
-    without ALSO breaking the (more common) single-layout case.
-    """
-    found: "list[str]" = []
-    for candidate in _PYTHONPATH_CANDIDATES:
-        base = repo_root / candidate if candidate else repo_root
-        if (base / package / "__init__.py").is_file() or (
-            base / f"{package}.py"
-        ).is_file():
-            found.append(candidate)
-    return found
-
-
-class _RepoContents(_ty.NamedTuple):
-    files: "list[tuple[str, Path]]"
-    #: Relative-to-repo-root directories to arrange onto PYTHONPATH; see
-    #: `_detect_pythonpath`/`--pythonpath`.
-    pythonpath: "list[str]"
-
-
-def _repo_contents(args: Args, package: str, logger: Logger) -> "_RepoContents":
-    """Build --source repo's file list, its PYTHONPATH entries, and log a
-    dependency heads-up.
-
-    Copies the repo tree as-is (:func:`~pytruenas.utils.bundle.collect_repo`).
-    Deliberately does NOT vendor the repo's own dependencies alongside it --
-    that needs a resolved transitive closure, which requires those
-    dependencies to be INSTALLED here (:func:`~pytruenas.utils.bundle.
-    requirements`), the exact thing repo mode exists to avoid needing. So a
-    caller wanting a fully self-contained pyz from a repo still uses
-    ``--source installed`` (the default); this mode is for the read-only-root
-    workflow of shipping source to be *read*, edited, or run by an interpreter
-    that already has (or can reach) what it declares.
-
-    ``--include``/``--exclude`` only affect the dependency NAMES this logs,
-    via :func:`~pytruenas.utils.bundle.repo_requirements` -- they do not
-    change which files are copied. `--ignore-pattern` is what affects that.
-    """
-    from pytruenas.utils import bundle as _bundle
-
-    root = Path(args.repo_root)
-    logger.info("Collecting repo tree from %s", root)
-    contents = _bundle.collect_repo(
-        root,
-        ignore_files=args.ignore_files or None,
-        extra_ignores=tuple(args.ignore_pattern or ()),
-    )
-    logger.info("Repo tree: %d files", len(contents))
-
-    pythonpath = list(args.pythonpath or ())
-    if not pythonpath:
-        pythonpath = _detect_pythonpath(root, package)
-        if not pythonpath:
-            raise _bundle.BundleError(
-                f"could not find an importable {package!r} under {root} "
-                f"(checked {', '.join(c or '.' for c in _PYTHONPATH_CANDIDATES)}"
-                f"); pass --pythonpath to say where it lives"
-            )
-        logger.debug("Detected PYTHONPATH entries: %s", ", ".join(pythonpath) or ".")
-
-    try:
-        declared = _bundle.repo_requirements(
-            root,
-            extras=tuple(args.extras or ()),
-            include=tuple(args.include or ()),
-            exclude=tuple(args.exclude or ()),
-        )
-    except _bundle.BundleError as exc:
-        # Advisory only -- a repo with neither pyproject.toml nor
-        # requirements.txt (or no TOML parser available) still ships fine;
-        # this is a heads-up, not a requirement of the copy succeeding.
-        logger.debug("Could not read declared dependencies: %s", exc)
-    else:
-        if declared:
-            logger.info(
-                "Repo declares %d dependenc%s (not vendored -- ensure the "
-                "target can resolve them): %s",
-                len(declared),
-                "y" if len(declared) == 1 else "ies",
-                ", ".join(sorted(declared)),
-            )
-    return _RepoContents(contents, pythonpath)
-
-
 def run(client: TrueNASClient, args: Args, logger: Logger):
-    from pytruenas.utils import bundle as _bundle
+    from hostctl import Exec
+    from hostctl.deploy import deploy
+    from hostctl.exceptions import BundleError
 
-    dist_root, package = _resolve_root(
-        getattr(args, "pkg_root", "") or None, getattr(args, "pkg_name", "") or None
-    )
-    if dist_root != "pytruenas":
-        logger.info("Deploying %s (running %s)", dist_root, package)
-
-    source = getattr(args, "source", "installed")
-    if source == "repo" and args.mode == "pyz":
-        # A zipapp needs the package importable at the ZIP ROOT (that is how
-        # zipimport works); collect_repo keeps a repo's own src/lib/vendor
-        # layout intact instead of flattening it there, which is what
-        # --mode dir's multi-entry PYTHONPATH is for. Reject rather than
-        # silently produce a zipapp that cannot import anything.
-        raise _bundle.BundleError(
+    if args.source == "repo" and args.mode == "pyz":
+        # Before anything reaches the target: the combination cannot work.
+        raise BundleError(
             "--source repo does not support --mode pyz: a zipapp needs the "
             "package at the archive root, which a src/-layout repo copy does "
             "not have. Use --mode dir, whose launcher can PYTHONPATH into "
             "src/lib/vendor directly."
         )
+    root, package = _resolve_root(args.pkg_root or None, args.pkg_name or None)
+    if root != "pytruenas":
+        logger.info("Deploying %s (running %s)", root, package)
+    source = _source(args)
+    if args.source == "repo":
+        _log_declared(source, args, logger)
 
-    contents: "list[tuple[str, Path]] | None" = None
-    pythonpath: "list[str]" = []
-    missing: "dict[str, object]" = {}
-    if source == "repo":
-        contents, pythonpath = _repo_contents(args, package, logger)
-    else:
-        installed = _probe(client, logger)
-        missing = _bundle.missing_on(
-            installed,
-            root=dist_root,
-            extras=tuple(args.extras or ()),
-            skip=tuple(args.skip or ()),
-        )
-        if not missing:
-            logger.info("Target already provides every dependency")
-        else:
-            logger.info("Bundling %s", ", ".join(sorted(missing)))
-
-    # A trailing slash would make `f"{target}.new"` a hidden entry INSIDE the
-    # target and turn the swap into a move of a directory into itself.
-    target = args.path.rstrip("/") or args.path
-    if args.mode == "pyz":
-        # A zipapp is one file; name it as one even if a directory was given.
-        if not target.endswith(".pyz"):
-            target = f"{target}.pyz"
-        import tempfile
-
-        with tempfile.TemporaryDirectory() as tmp:
-            if contents is not None:
-                local = _bundle.build(
-                    Path(tmp) / "bundle.pyz", contents=contents, package=package
-                )
-            else:
-                local = _bundle.build(
-                    Path(tmp) / "bundle.pyz", missing, package=package
-                )
-            payload = local.read_bytes()
-        digest = hashlib.sha256(payload).hexdigest()
-        wrote = _deploy_pyz(client, payload, digest, target, args, logger)
-        entry = [_remote_python(client), target]
-    else:
-        import tempfile
-
-        with tempfile.TemporaryDirectory() as tmp:
-            # PurePosixPath for the remote name (see _ensure_parent); Path for
-            # the local staging dir, which really is this machine's flavour.
-            root = Path(tmp) / PurePosixPath(target).name
-            (root / "lib").mkdir(parents=True)
-            if contents is not None:
-                _bundle.export(root / "lib", contents=contents)
-            else:
-                _bundle.export(root / "lib", missing)
-            (root / "bin").mkdir()
-            # write_bytes, not write_text: on Windows text mode rewrites "\n"
-            # as "\r\n", which turns the shebang into "#!/bin/sh\r" and makes
-            # the launcher fail on the target with "bad interpreter" -- naming
-            # a path that visibly exists.
-            if pythonpath:
-                # collect_repo arranges everything under one prefix (the
-                # repo's own directory name) inside lib/, so each PYTHONPATH
-                # entry needs that prefix -- lib/<repo-name>/src, not lib/src.
-                repo_prefix = Path(args.repo_root).resolve().name
-                entries = ":".join(
-                    (
-                        f"$here/lib/{repo_prefix}/{entry}"
-                        if entry
-                        else f"$here/lib/{repo_prefix}"
-                    )
-                    for entry in pythonpath
-                )
-                launcher = _REPO_LAUNCHER_TEMPLATE.format(
-                    package=package, pythonpath=entries
-                )
-            else:
-                launcher = _LAUNCHER_TEMPLATE.format(package=package)
-            (root / "bin" / package).write_bytes(launcher.encode())
-            # tar_tree normalizes ownership and marks bin/* executable, so the
-            # launcher arrives runnable without a follow-up chmod.
-            digest, payload = _bundle.tar_digest(root)
-        wrote = _deploy_dir(client, payload, digest, target, args, logger)
-        entry = [f"{target}/bin/{package}"]
-
-    logger.info("%s at %s", "Deployed" if wrote else "Verified", target)
+    deployment = deploy(
+        client,
+        _ty.cast(_ty.Any, source),
+        _target(args),
+        mode=args.mode,
+        package=package,
+        extras=tuple(args.extras or ()),
+        skip=tuple(args.skip or ()),
+        force=bool(args.force),
+        python=REMOTE_PYTHON,
+    )
+    logger.info(
+        "%s at %s", "Deployed" if deployment.written else "Verified", deployment.path
+    )
 
     extra = _passthrough(args)
     if not extra:
         return 0
-
-    command = [*entry, *extra]
+    command = [*deployment.command, *extra]
     logger.info("Running: %s", " ".join(shlex.quote(part) for part in command))
-    result = client.run(command, check=False)
-    return result.returncode
-
-
-#: ``bin/<package>`` for the unpacked layout: put the sibling ``lib`` on the
-#: path and hand off. A shell wrapper rather than a Python script so the
-#: interpreter is chosen at run time on the target, and ``-m`` so the deployed
-#: package's own entry point decides what running it means.
-_LAUNCHER_TEMPLATE = """\
-#!/bin/sh
-here=$(cd "$(dirname "$0")/.." && pwd)
-PYTHONPATH="$here/lib:$PYTHONPATH" exec python3 -m {package} "$@"
-"""
-
-#: The --source repo counterpart of `_LAUNCHER_TEMPLATE`. Puts EVERY detected
-#: PYTHONPATH entry on the path (see `_detect_pythonpath`) rather than one
-#: `lib` directory -- a repo copy is not flattened into one importable root
-#: the way `_collect` arranges an installed distribution, so `src/`, `lib/`,
-#: and `vendor/` may all need to be reachable at once.
-_REPO_LAUNCHER_TEMPLATE = """\
-#!/bin/sh
-here=$(cd "$(dirname "$0")/.." && pwd)
-PYTHONPATH="{pythonpath}:$PYTHONPATH" exec python3 -m {package} "$@"
-"""
+    return client.run(Exec(*command), check=False).returncode
