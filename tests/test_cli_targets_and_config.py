@@ -55,13 +55,15 @@ def test_a_config_file_is_read_as_utf8(tmp_path, monkeypatch):
     assert args._config_dict_()["credentials"] == "røøt:hünter2"
 
 
-def test_a_config_that_is_not_a_mapping_is_ignored(tmp_path, caplog):
+def test_a_config_that_is_not_a_table_is_a_usage_error(tmp_path):
+    """A list was logged and ignored, dropping every setting in the file."""
+    from duho import UsageError
+
     pytest.importorskip("yaml")
     cfg = tmp_path / "pytruenas.yaml"
     cfg.write_text("- just\n- a\n- list\n")
-    with caplog.at_level(logging.WARNING):
-        assert _args(config=cfg)._config_dict_() == {}
-    assert "expected a mapping" in caplog.text
+    with pytest.raises(UsageError, match="expected a table"):
+        _args(config=cfg)._config_dict_()
 
 
 def test_a_scalar_commandspath_is_one_source(tmp_path):
@@ -90,42 +92,54 @@ def test_an_unusable_command_source_is_skipped_not_fatal(caplog):
     assert "skipping command source" in caplog.text
 
 
-def test_an_implicit_config_cannot_inject_command_sources(
-    tmp_path, monkeypatch, caplog
-):
-    """./pytruenas.yaml is whatever directory the CLI runs in; naming command
-    sources from there means importing that directory's code."""
-    monkeypatch.delenv("PYTRUENAS_CONFIG", raising=False)
-    monkeypatch.delenv("PYTRUENAS_CFG", raising=False)
-    implicit = _args()
-    assert implicit._config_is_implicit_() is True
-    explicit = _args(config=tmp_path / "given.yaml")
-    assert explicit._config_is_implicit_() is False
-    # And naming it through the environment counts as asking for it.
-    monkeypatch.setenv("PYTRUENAS_CONFIG", str(tmp_path / "given.yaml"))
-    assert _args()._config_is_implicit_() is False
-
-
-def test_the_app_root_refuses_an_implicit_config_s_command_sources(
-    tmp_path, monkeypatch, caplog
-):
-    """The check read the default off the instance's own class, which is the
-    app root (a subclass) on a real run, so it never saw one and the implicit
-    file's commandspath was imported after all."""
-    pytest.importorskip("yaml")
-    monkeypatch.delenv("PYTRUENAS_CONFIG", raising=False)
-    monkeypatch.delenv("PYTRUENAS_CFG", raising=False)
-    monkeypatch.delenv("PYTRUENAS_PATH", raising=False)
+def _plant_commands(tmp_path):
     (tmp_path / "mycmds").mkdir()
     (tmp_path / "mycmds" / "planted.py").write_text(
         "def run(client, args, logger):\n    return 0\n"
     )
+
+
+@pytest.fixture
+def isolated_config(tmp_path, monkeypatch):
+    for name in ("PYTRUENAS_CONFIG", "PYTRUENAS_PATH"):
+        monkeypatch.delenv(name, raising=False)
+    monkeypatch.setenv("APPDATA", str(tmp_path / "appdata"))
+    monkeypatch.setenv("XDG_CONFIG_HOME", str(tmp_path / "xdg"))
+
+
+def test_the_working_directory_names_no_command_sources(
+    tmp_path, monkeypatch, isolated_config
+):
+    """./pytruenas.yaml was read from whatever directory the CLI ran in, and
+    its commandspath imported that directory's code."""
+    pytest.importorskip("yaml")
+    _plant_commands(tmp_path)
     (tmp_path / "pytruenas.yaml").write_text("commandspath: [mycmds]\n")
+    (tmp_path / "pytruenas.cfg").write_text('commandspath = ["mycmds"]\n')
     monkeypatch.chdir(tmp_path)
-    with caplog.at_level(logging.WARNING):
-        names = {main.command_name(c) for c in main._discover(["query", "user"])}
+    names = {main.command_name(c) for c in main._discover(["query", "user"])}
     assert "planted" not in names
-    assert "ignoring commandspath" in caplog.text
+
+
+@pytest.mark.parametrize("via", ["--config", "PYTRUENAS_CONFIG", "default"])
+def test_a_config_files_command_sources_load(
+    tmp_path, monkeypatch, isolated_config, via
+):
+    """Relative to the file, wherever the file came from."""
+    from pytruenas.utils.cmd import default_config_path
+
+    folder = default_config_path().parent if via == "default" else tmp_path / "conf"
+    folder.mkdir(parents=True)
+    _plant_commands(folder)
+    cfg = folder / "pytruenas.cfg"
+    cfg.write_text('commandspath = ["mycmds"]\n')
+    argv = ["query", "user"]
+    if via == "--config":
+        argv = ["--config", str(cfg)] + argv
+    elif via == "PYTRUENAS_CONFIG":
+        monkeypatch.setenv("PYTRUENAS_CONFIG", str(cfg))
+    names = {main.command_name(c) for c in main._discover(argv)}
+    assert "planted" in names
 
 
 def test_a_config_file_that_was_named_must_exist(tmp_path, monkeypatch, capsys):

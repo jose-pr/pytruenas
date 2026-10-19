@@ -233,18 +233,9 @@ def _discover(
     # so neither the presence check nor the manual split is needed here.
     sources += ENV.paths("PATH")
     sources += list(globals_.cmdspath or [])
-    if config.get("commandspath") and globals_._config_is_implicit_():
-        # An implicit ./pytruenas.yaml is whatever directory the CLI happens to
-        # run in; letting it name command sources means importing code from
-        # there. `--config`/$PYTRUENAS_CONFIG is a deliberate choice and still
-        # contributes. Every other key of an implicit file is read as before.
-        _pylogging.getLogger("pytruenas").warning(
-            "ignoring commandspath from %s: name it with --config to load "
-            "commands from a config file",
-            globals_.config,
-        )
-    else:
-        sources += _config_sources(config.get("commandspath"), globals_.config)
+    # The config file is the user's own (named, or in their config
+    # directory), never one found in the working directory.
+    sources += _config_sources(config.get("commandspath"), globals_._config_path_()[0])
 
     by_name: "dict[str, object]" = {}
     for source in sources:

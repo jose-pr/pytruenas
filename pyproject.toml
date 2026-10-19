@@ -65,12 +65,15 @@ dependencies = [
     # on `hostctl.deploy`, whose extra brings packaging and pathspec (and tomli
     # below Python 3.11).
     "hostctl[deploy]>=0.4.0,<0.5",
+    # The CLI's config file, TOML unless a `#!<format>` line or the file name
+    # says otherwise; TOML is read by tomllib, before Python 3.11 by tomli.
+    "anycfg>=0.14.0,<0.15",
+    "tomli>=2.0,<3; python_version < '3.11'",
 ]
 
 [project.optional-dependencies]
-# The CLI's YAML config file (credentials, TLS, command sources).
-# 6.0.1: 6.0 no longer builds from source (Cython 3), where no wheel exists.
-config = ["pyyaml>=6.0.1,<7"]
+# A CLI config file written in YAML (`#!yaml`, `.yaml`/`.yml`).
+yaml = ["anycfg[yaml]>=0.14.0,<0.15"]
 # Remote shell + SFTP filesystem leg: both SSH providers are hostctl's (its
 # `ssh` extra is asyncssh and sftppath).
 ssh = ["hostctl[ssh]>=0.4.0,<0.5"]
@@ -83,7 +86,7 @@ codegen = ["jinja2>=3.0,<4"]
 repo = ["hostctl[deploy]>=0.4.0,<0.5"]
 # Every extra that has tests, by reference so the ranges live in one place.
 dev = [
-    "pytruenas[config,ssh,codegen]",
+    "pytruenas[yaml,ssh,codegen]",
     "black",
     "build",
     "hatchling",

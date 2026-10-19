@@ -186,7 +186,9 @@ class PendingDownload:
         self._uri = uri
         self._buffered = buffered
 
-    def fetch(self, callback: "_ty.Optional[_ty.Callable[..., object]]" = None) -> bytes:
+    def fetch(
+        self, callback: "_ty.Optional[_ty.Callable[..., object]]" = None
+    ) -> bytes:
         """The downloaded bytes, once the job that produced them has finished.
 
         A failed job raises :class:`~pytruenas.connection.JobFailed`. A

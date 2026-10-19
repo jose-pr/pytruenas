@@ -6,6 +6,7 @@ source but the target string, so a remote target with none connected
 unauthenticated and every call failed on the far side.
 """
 
+import os
 import subprocess
 import sys
 
@@ -19,7 +20,10 @@ def args(monkeypatch, tmp_path):
     for name in ("SSLVERIFY", "INSECURE", "CA_BUNDLE"):
         monkeypatch.delenv("PYTRUENAS_" + name, raising=False)
     monkeypatch.delenv("TN_CREDS", raising=False)
-    monkeypatch.chdir(tmp_path)  # no stray ./pytruenas.yaml
+    # `_config` names a file through the variable; until then, no config.
+    monkeypatch.setenv("APPDATA", str(tmp_path / "appdata"))
+    monkeypatch.setenv("XDG_CONFIG_HOME", str(tmp_path / "xdg"))
+    monkeypatch.delenv("PYTRUENAS_CONFIG", raising=False)
 
     def build(**fields):
         parsed = PyTrueNASArgs()
@@ -38,8 +42,11 @@ def bundle(tmp_path):
 
 
 def _config(tmp_path, text):
+    """A YAML config file named by $PYTRUENAS_CONFIG (restored by `args`)."""
     pytest.importorskip("yaml")
-    (tmp_path / "pytruenas.yaml").write_text(text)
+    path = tmp_path / "pytruenas.cfg"
+    path.write_text("#!yaml\n" + text)
+    os.environ["PYTRUENAS_CONFIG"] = str(path)
 
 
 def test_tls_is_verified_by_default(args):
@@ -111,7 +118,7 @@ def test_credentials_come_from_the_environment_or_config(args, monkeypatch, tmp_
     from pytruenas.auth import ApiKeyAuth, BasicAuth
 
     assert args()._credentials_() is None
-    (tmp_path / "pytruenas.yaml").write_text("credentials: root:hunter2\n")
+    _config(tmp_path, "credentials: root:hunter2")
     assert isinstance(args()._credentials_(), BasicAuth)
     monkeypatch.setenv("TN_CREDS", "1-" + "k" * 64)
     assert isinstance(args()._credentials_(), ApiKeyAuth)  # env wins

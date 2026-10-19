@@ -23,6 +23,7 @@ from __future__ import annotations
 
 import logging as _pylogging
 import os as _os
+import sys as _sys
 import re as _re
 import threading as _threading
 import typing as _ty
@@ -139,34 +140,90 @@ if _ty.TYPE_CHECKING:
 ENV = _Env("pytruenas", autoload=False)
 
 
-def _load_config(path: "_Path") -> dict:
-    """Load a YAML config file, or return ``{}`` if it does not exist.
+#: The formats a config file may be written in; anycfg reads others too, but
+#: their documents are not a table of settings (INI is sections of strings).
+CONFIG_FORMATS = ("toml", "yaml", "json")
 
-    YAML support is optional (the ``config`` extra); a missing ``pyyaml`` with a
-    present config file is a clear, actionable error rather than a silent skip.
+
+def default_config_path() -> _Path:
+    """Where the CLI's config file is when nothing names one.
+
+    ``pytruenas/pytruenas.cfg`` in the platform's configuration directory:
+    ``%APPDATA%`` on Windows, ``$XDG_CONFIG_HOME`` or ``~/.config`` elsewhere.
     """
-    if not path.exists():
-        return {}
+    if _sys.platform == "win32" and _os.environ.get("APPDATA"):
+        base = _Path(_os.environ["APPDATA"])
+    else:
+        base = _Path(_os.environ.get("XDG_CONFIG_HOME") or _Path.home() / ".config")
+    return base / "pytruenas" / "pytruenas.cfg"
+
+
+def _format_for(path: _Path) -> "_ty.Optional[str]":
+    """The format a file name selects; ``.cfg`` and no suffix select none."""
+    if path.suffix.lower() in ("", ".cfg"):
+        return None
+    from anycfg import formats
+
+    found = formats.find_for_filename(path.name)
+    return found.name if found is not None else None
+
+
+def load_config(path: "_ty.Union[str, _os.PathLike[str]]") -> dict:
+    """The settings in the CLI's config file at ``path``, read by anycfg.
+
+    The format is the one a ``#!<format>`` first line names (``#!toml``,
+    ``#!yaml``, ``#!json``, also ``#!/usr/bin/env yaml``; the line is not part
+    of the document), else the one the file name's suffix selects (``.toml``,
+    ``.yaml``/``.yml``, ``.json``; ``.cfg`` and no suffix select none), else
+    TOML. YAML needs the ``yaml`` extra (:class:`hostctl.MissingExtraError`
+    naming it otherwise). A document that does not parse, is not a table, or
+    is in another format raises :class:`duho.UsageError` naming the file.
+    """
+    import anycfg
+    from anycfg import formats
+    from duho import UsageError
+
+    path = _Path(path)
+    raw = path.read_bytes()
     try:
-        import yaml
-    except ImportError as exc:
+        text = raw.decode("utf-8")
+    except UnicodeDecodeError as error:
+        raise UsageError(
+            f"config file {path}: not UTF-8 at byte {error.start}"
+        ) from None
+    if text.startswith("\ufeff"):
+        text = text[1:]
+    declared, _ = formats.declared(text)
+    try:
+        chosen = formats.get(declared or _format_for(path) or "toml").name
+    except anycfg.UnsupportedFormatError as error:
+        raise UsageError(f"config file {path}: {error}") from None
+    if chosen not in CONFIG_FORMATS:
+        raise UsageError(
+            f"config file {path}: a {chosen} document is not supported; "
+            f"write it as {', '.join(CONFIG_FORMATS)}"
+        )
+    try:
+        data = anycfg.loads(text) if declared else anycfg.loads(text, format=chosen)
+    except anycfg.MissingDependencyError as exc:
         from hostctl import MissingExtraError
 
         raise MissingExtraError(
-            "config", f"reading the config file {path}", distribution="pytruenas"
+            chosen, f"reading the config file {path}", distribution="pytruenas"
         ) from exc
-    # read_bytes(), not read_text(): PyYAML detects UTF-8/16 itself, while
-    # read_text() uses the locale encoding and raised UnicodeDecodeError on a
-    # UTF-8 config file under a cp1252 default.
-    loaded = yaml.safe_load(path.read_bytes()) or {}
-    if not isinstance(loaded, dict):
-        _pylogging.getLogger("pytruenas").warning(
-            "ignoring config %s: expected a mapping, got %s",
-            path,
-            type(loaded).__name__,
-        )
+    except anycfg.ParseError as error:
+        where = f" line {error.lineno}:" if error.lineno else ""
+        raise UsageError(f"config file {path}:{where} {error.msg}") from None
+    except anycfg.ConfigError as error:
+        raise UsageError(f"config file {path}: {error}") from None
+    if data is None:
         return {}
-    return loaded
+    if not isinstance(data, dict):
+        raise UsageError(
+            f"config file {path}: expected a table of settings, "
+            f"got {type(data).__name__}"
+        )
+    return data
 
 
 _TARGETS_HELP = (
@@ -243,17 +300,11 @@ class PyTrueNASArgs(LoggingArgs):
     make the runnable app root.
     """
 
-    # `CONFIG` first, `CFG` for compatibility: both spellings existed (`CFG`
-    # here, `CONFIG` in `ops.main`), which is exactly the drift a single
-    # accessor is meant to stop. `CONFIG` wins as the spelled-out name.
-    # A PATH field, not `dict`: duho hands a dict-typed option its KEY=VALUE
-    # UpdateAction, so every `--config file.yaml` died in argparse
-    # ("'WindowsPath' object is not iterable") before a command could run.
-    # `_config_dict_()` is what turns it into the mapping.
-    config: "Arg[_Path, Meta(metavar='FILE')]" = _Path(
-        ENV.get("CONFIG") or ENV.get("CFG") or "./pytruenas.yaml"
-    )
-    "Config file to use"
+    # A path, not a `dict` (duho gives a dict-typed option a KEY=VALUE action);
+    # `None` until resolved by `_config_path_()`, so `$PYTRUENAS_CONFIG` is
+    # read when the file is needed, not when this module is imported.
+    config: "Arg[_ty.Optional[_Path], Meta(metavar='FILE')]" = None
+    "Config file (default: $PYTRUENAS_CONFIG, else pytruenas/pytruenas.cfg in the user's config directory)"
     ("--config", "-c")  # type: ignore
 
     cmdspath: "Arg[list[str], Extend(':')]" = []
@@ -279,48 +330,37 @@ class PyTrueNASArgs(LoggingArgs):
     logto: str = "-"
     "Where to log: '-' for stderr, or a path template (supports {target}, {isodate})"
 
-    def _config_dict_(self) -> dict:
-        """Return the loaded config mapping.
+    def _config_path_(self) -> "tuple[_Path, bool]":
+        """The config file, and whether it must exist.
 
-        Empty when the implicit ``./pytruenas.yaml`` is absent. A file named
-        with ``--config`` or ``$PYTRUENAS_CONFIG`` must exist: a typo there
-        would otherwise drop its credentials and TLS setting without a word.
-        Raises :class:`duho.UsageError` (exit status 2) when it does not.
+        ``--config``, else ``$PYTRUENAS_CONFIG`` -- either must exist, since a
+        typo there would drop its credentials and TLS settings without a word
+        -- else :func:`default_config_path`, read only when present.
         """
-        config = self.config
-        if isinstance(config, _Path):
-            if not config.exists() and not self._config_is_implicit_():
+        if self.config is not None:
+            return _Path(self.config), True
+        named = ENV.get("CONFIG")
+        if named:
+            return _Path(named), True
+        return default_config_path(), False
+
+    def _config_dict_(self) -> dict:
+        """The settings in the config file (:func:`load_config`).
+
+        Empty when the default file is absent. Raises :class:`duho.UsageError`
+        (exit status 2) when a named file is missing or cannot be read as
+        settings.
+        """
+        if isinstance(self.config, dict):
+            return self.config
+        path, required = self._config_path_()
+        if not path.exists():
+            if required:
                 from duho import UsageError
 
-                raise UsageError(f"config file not found: {config}")
-            return _load_config(config)
-        return config or {}
-
-    def _config_is_implicit_(self) -> bool:
-        """Whether the config file was found rather than asked for.
-
-        ``./pytruenas.yaml`` in the process's working directory is a default,
-        and a CLI is routinely run from a directory its user does not control.
-        Which matters for two things: an implicit file may be absent, and its
-        ``commandspath`` (i.e. "import code from here") is refused while its
-        ``credentials`` and TLS settings are still read. Same reasoning as
-        ``ENV``'s ``autoload=False``.
-        """
-        if ENV.get("CONFIG") or ENV.get("CFG"):
-            return False
-        # Through the MRO: the parsed instance is the app root, a subclass that
-        # does not redeclare the field.
-        default = next(
-            (
-                k.__dict__["config"]
-                for k in type(self).__mro__
-                if "config" in k.__dict__
-            ),
-            None,
-        )
-        if default is None:  # pragma: no cover - the field always has a default
-            return False
-        return _Path(self.config) == _Path(default)
+                raise UsageError(f"config file not found: {path}")
+            return {}
+        return load_config(path)
 
     def _verify_(self) -> "bool | str":
         """``verify=`` for the clients this CLI builds.
@@ -337,9 +377,10 @@ class PyTrueNASArgs(LoggingArgs):
                 f"and ${ENV.prefix}CA_BUNDLE"
             )
         config = self._config_dict_()
+        where = self._config_path_()[0]
         if "sslverify" in config:
             raise ValueError(
-                f"sslverify in {self.config} was replaced by insecure and ca_bundle"
+                f"sslverify in {where} was replaced by insecure and ca_bundle"
             )
         layers = (
             (self.insecure, self.ca_bundle, "--ca-bundle"),
@@ -349,9 +390,9 @@ class PyTrueNASArgs(LoggingArgs):
                 f"${ENV.prefix}CA_BUNDLE",
             ),
             (
-                _config_bool(config, "insecure", self.config),
+                _config_bool(config, "insecure", where),
                 config.get("ca_bundle") or None,
-                f"ca_bundle in {self.config}",
+                f"ca_bundle in {where}",
             ),
         )
         for insecure, bundle, source in layers:

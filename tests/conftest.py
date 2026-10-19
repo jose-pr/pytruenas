@@ -19,11 +19,20 @@ import pytest
 
 @pytest.fixture(autouse=True)
 def fake_home(tmp_path_factory, monkeypatch):
-    """An empty home directory, with ``.ssh/``, where ``~`` resolves."""
+    """An empty home directory, with ``.ssh/``, where ``~`` resolves.
+
+    The CLI's config file lives under it too, and ``$PYTRUENAS_CONFIG`` is
+    unset (set-then-deleted, so a test that sets it is undone as well): the
+    developer's own configuration must not reach a test.
+    """
     home = tmp_path_factory.mktemp("home")
     (home / ".ssh").mkdir()
     monkeypatch.setenv("HOME", str(home))
     monkeypatch.setenv("USERPROFILE", str(home))
+    monkeypatch.setenv("APPDATA", str(home / "AppData"))
+    monkeypatch.setenv("XDG_CONFIG_HOME", str(home / ".config"))
+    monkeypatch.setenv("PYTRUENAS_CONFIG", "")
+    monkeypatch.delenv("PYTRUENAS_CONFIG")
     return home
 
 

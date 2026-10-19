@@ -59,7 +59,7 @@ def test_a_plain_import_error_is_not_mapped():
 # -- pytruenas's own extras --------------------------------------------------
 
 
-def test_a_config_file_without_pyyaml_names_pytruenas_config(tmp_path, monkeypatch):
+def test_a_yaml_config_file_without_pyyaml_names_pytruenas_yaml(tmp_path, monkeypatch):
     import sys
 
     from pytruenas.utils import cmd
@@ -68,9 +68,9 @@ def test_a_config_file_without_pyyaml_names_pytruenas_config(tmp_path, monkeypat
     cfg = tmp_path / "pytruenas.yaml"
     cfg.write_bytes(b"credentials: x\n")
     with pytest.raises(MissingExtraError) as caught:
-        cmd._load_config(cfg)
+        cmd.load_config(cfg)
     assert caught.value.distribution == "pytruenas"
-    assert 'pip install "pytruenas[config]"' in str(caught.value)
+    assert 'pip install "pytruenas[yaml]"' in str(caught.value)
     assert str(cfg) in str(caught.value)
 
 
@@ -88,8 +88,8 @@ def test_the_cli_reports_a_missing_config_extra_in_one_line(
     assert status == 125
     err = capsys.readouterr().err
     assert err.splitlines() == [
-        f"pytruenas: reading the config file {cfg} needs the 'config' extra: "
-        'pip install "pytruenas[config]"'
+        f"pytruenas: reading the config file {cfg} needs the 'yaml' extra: "
+        'pip install "pytruenas[yaml]"'
     ]
 
 
