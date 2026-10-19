@@ -21,7 +21,7 @@ Targets are trailing positionals, so a range pattern and the global options work
 as they do for any other command:
 
 ```sh
-pytruenas --cmdspath examples/runpath health --ca-bundle lab-ca.pem -v 'nas[1-3]'
+pytruenas --cmdspath examples/runpath health -v 'nas[1-3]'
 pytruenas --cmdspath examples/runpath health --parallel 4 nas1,nas2
 ```
 
