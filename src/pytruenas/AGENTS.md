@@ -1,54 +1,55 @@
 # `pytruenas` — public API header
 
 Header-file-style reference for the `pytruenas` package: every public export
-with its signature, arguments, contract, and gotchas, so this module can be
-consumed without reading its source. Kept current with the public API. For the
-project overview and CLI usage, see <https://github.com/jose-pr/pytruenas> and
+with its signature, arguments, contract and gotchas, so the package can be used
+without reading its source. It ships inside the package and is
+self-contained. Development documentation lives with the source at
+<https://github.com/jose-pr/pytruenas>; the user guide is at
 <https://jose-pr.github.io/pytruenas/>.
 
-## Package root (`pytruenas`)
-
+**Imports.** Everything a caller needs is importable from `pytruenas`:
 `__all__ = ["Namespace", "TrueNASClient", "TrueNASHost", "TrueNASConfig",
 "Credentials", "LocalAuth", "ApiKeyAuth", "TokenAuth", "BasicAuth", "Event",
 "Subscription", "TrueNASWSConnection", "__version__", "TrueNASError",
 "ClientException", "ValidationErrors", "CallTimeout", "ConnectionClosed",
-"JobFailed", "AuthenticationError"]`
+"JobFailed", "AuthenticationError"]`, each defined in the module named in its
+section below; `redact_call_args` (from `auth`) is importable from the root
+too, outside `__all__`. The modules documented below are public. A name with a
+leading underscore is private, as are `pytruenas.utils.io` and the `_`-prefixed
+modules — with two deliberate exceptions: `Namespace`'s helpers and call
+options (`_query`, `_get`, `_timeout`, ...), which carry the underscore so they
+cannot collide with a middleware name, and the `_name_()` hook methods of the
+CLI's args classes, which are duho's convention.
 
-Each name is defined in the module named in its section below and imported
-here; `redact_call_args` (from `auth`) is importable from the root too, outside
-`__all__`.
+**Install.** `pip install pytruenas` (Python 3.9+). The core install is the
+client, the websocket and HTTP transports, the web shell, the `tnasws` path
+provider, the CLI and `deploy`. Extras:
 
-- **`__version__: str`** — resolved from installed package metadata
-  (`importlib.metadata`); `"0.0.0.dev0"` when run from a bare checkout with the
-  package not installed.
+| extra | brings | needed for |
+| --- | --- | --- |
+| `ssh` | `hostctl[ssh]>=0.4.0,<0.5` (asyncssh, sftppath) | `.ssh`, `run()` over SSH, the `sftp` path leg |
+| `config` | `pyyaml` | reading a CLI `--config` YAML file |
+| `codegen` | `jinja2` | `pytruenas.codegen` and `generate-typings` |
+| `repo` | `hostctl[deploy]` | `deploy --source repo`; the core dependency already installs it, so the extra only lets a requirement that names it resolve |
 
-## Errors (`pytruenas.exceptions`)
+A missing extra raises `hostctl.MissingExtraError` (an `ImportError`) at first
+use, never at import time: `FEATURE needs the 'EXTRA' extra: pip install
+"pytruenas[EXTRA]"` for pytruenas's own (`.distribution == "pytruenas"`),
+`"hostctl[EXTRA]"` for hostctl's. Without `ssh` the host has no `ssh`/`sftp`
+provider and `run()`/`path()` use the websocket ones. Without `config`, a
+config file that is present raises naming `pytruenas[config]` and the file.
+Without `codegen`, the error comes before anything is written, and before
+`generate-typings` dumps the API from a host.
 
-- **`TrueNASError(Exception)`** — the base of every error pytruenas raises at
-  run time. `except pytruenas.TrueNASError` catches all of these:
+**Version.** `pytruenas.__version__: str` is resolved from installed package
+metadata (`importlib.metadata`); `"0.0.0.dev0"` when run from a bare checkout
+with the package not installed.
 
-  | class (module) | raised when |
-  | --- | --- |
-  | `ClientException` (`connection`) | the middleware failed a call (`.errno`, `.trace`, `.extra`) |
-  | `ValidationErrors` (`connection`) | the server rejected the arguments, per field |
-  | `CallTimeout` (`connection`) | no answer within the timeout |
-  | `ConnectionClosed` (`connection`) | the connection dropped before the answer |
-  | `JobFailed` (`connection`) | a middleware job ended `FAILED`/`ABORTED` |
-  | `AuthenticationError` (`auth`) | a login was refused |
+## Client (`pytruenas.host`)
 
-  The four `connection` subclasses are also `ClientException`s. A caller's
-  mistake (an unknown keyword, a malformed target) is a plain
-  `TypeError`/`ValueError`, not a `TrueNASError`. A failure before the
-  websocket is open (a refused port, a TLS or HTTP error during the handshake)
-  is raised by the socket or `websocket-client` as it is.
-
-## `TrueNASClient` (`pytruenas.host`)
-
-**`TrueNASClient` is `TrueNASHost`** — one class, two names. They were briefly
-two objects forwarding halves of their surface to each other (`client.run()`
-called `client.host.run()`; `host.api` called `host.client.api`); that is gone.
-`client` is the friendlier word at a call site, `TrueNASHost` is where the
-host half of the API is documented, and `.client` returns the object itself.
+**`TrueNASClient` is `TrueNASHost`** — one class, two names. `client` is the
+friendlier word at a call site; `TrueNASHost` is where the host half of the API
+is documented (next section).
 
 `TrueNASClient(config=None, credentials=None, *, verify=True, sslverify=None,
 shell=None, known_hosts=(), logger=None, autologin=True,
@@ -62,19 +63,20 @@ version="current", executor=None, path=None, ssh=None, ...)`
   scheme or path resolves to **TLS and the current API** — `"nas"` means
   `wss://nas/api/current`; `ws://`/`http://` selects plaintext. Nothing is
   probed and building a client performs no network I/O, so a bad host raises on
-  first use. A password in the
-  userinfo must percent-encode `/`, `?`, `#` and `@` (`%2F`, `%3F`, `%23`,
-  `%40`). A string that does not parse as a URI raises `ValueError` with the
-  credentials stripped from the message; one that *does* parse is used as the
-  URI it is (an `@` in a path is a path — indistinguishable from an unencoded
-  password, so neither this package nor hostctl guesses).
-- **`credentials`** (positional as `creds` historically) — passed to
-  `Credentials(...)` (below); `None` means local-socket auth (no login call).
+  first use. A password in the userinfo must percent-encode `/`, `?`, `#` and
+  `@` (`%2F`, `%3F`, `%23`, `%40`). A string that does not parse as a URI
+  raises `ValueError` with the credentials stripped from the message; one that
+  *does* parse is used as the URI it is (an `@` in a path is a path —
+  indistinguishable from an unencoded password, so neither this package nor
+  hostctl guesses).
+- **`credentials`** — the second positional argument or `credentials=`
+  (giving both raises `TypeError`); passed to `Credentials(...)` (below).
+  `None` means local-socket auth (no login call).
 - **`username=`, `password=`, `otp=`, `api_key=`, `token=`** — keyword
   credentials, as hostctl's `HostConfig(uri, ...)` takes them: `username=` and
   `password=` replace the URI's own user and password (`password=""` is no
   password), so one target string serves several logins; `connection_uri` and
-  `repr()` never show a password. Combined with `credentials=` they still raise
+  `repr()` never show a password. Combined with `credentials=` they raise
   `ValueError`.
 - **`autologin`** (default `True`) — the first `.conn` access calls
   `.login()` automatically when there's no live connection.
@@ -94,6 +96,9 @@ version="current", executor=None, path=None, ssh=None, ...)`
   directory) is the CA bundle, trusted instead of the OS store; it is stored
   as a `str`. A missing bundle raises `FileNotFoundError` naming the path and
   its source at connect time.
+- **Plaintext** — a credential sent over plain `ws://` to a non-loopback host
+  logs one warning per host. `ws://` is not refused: it is legitimate for a
+  loopback target or an already-private link.
 - **`shell`** — connection string for the SSH leg (`"ssh://root@nas"`,
   `"root:pw@nas:22"`, `"nas"`). Stored as a `hostctl.SSHConfig` on
   `.config.ssh`; pass `ssh=SSHConfig(...)` to supply one directly. The user's
@@ -106,30 +111,31 @@ version="current", executor=None, path=None, ssh=None, ...)`
   `USER_SSH_CONFIG`. `.config.ssh.port` is `None` when the string names no
   port. For a leg that reads no personal file, pass
   `ssh=SSHConfig(host, username="root", ssh_config=None)`.
-- **`verify`/`sslverify` and plaintext** — a credential sent over plain
-  `ws://` to a non-loopback host logs one warning per host. `ws://` is not
-  refused: it is legitimate for a loopback target or an already-private link.
 - **`known_hosts`** (default `()`) — the trusted host keys for the SSH leg
   built from `shell=` or by `.install_sshcreds()`, with hostctl's values: `()`
   is `~/.ssh/config`'s `UserKnownHostsFile`, else `~/.ssh/known_hosts`
-  (skipped under `verify=False`), a path or list of
-  paths names the file(s), checked either way. `known_hosts=None` raises
-  `ValueError` naming `verify=False`. An explicit `ssh=SSHConfig(...)` keeps its
-  own. Both the command and SFTP halves verify by default; an unverifiable key
-  (or an unreachable SSH port) makes `run()` and `path()` fall back to the
-  websocket providers, and the host logs one WARNING per skipped provider.
-- **`executor`/`path`** — name the providers to use, in preference order.
-  Replaces `fsbackend`, which could only pick a filesystem backend; see the
-  provider table below.
+  (skipped under `verify=False`); a path or list of paths names the file(s),
+  checked either way. `known_hosts=None` raises `ValueError` naming
+  `verify=False`. An explicit `ssh=SSHConfig(...)` keeps its own. Both the
+  command and SFTP halves verify by default; an unverifiable key (or an
+  unreachable SSH port) makes `run()` and `path()` fall back to the websocket
+  providers, and the host logs one WARNING per skipped provider.
+- **`executor`/`path`** — name the providers to use, in preference order; see
+  the provider table in the next section.
 - **`version`** — API path used when the target carries none (default
   `"current"`, i.e. `/api/current`).
+- **`logger`** — a name or a `Logger` to bind the host's logger to (see
+  `.logger`).
 - **Other keywords** — hostctl's `PosixHost` options (`info=`,
-  `initializer=`, `executor_providers=`, `path_providers=`). The port, scheme
-  and API path are spelled in the target string, not as keywords: any other
-  keyword raises `ValueError: unknown credential argument: 'NAME'` listing the
-  keywords above. Typing overloads list them for an editor.
+  `initializer=`, `executor_providers=`, `path_providers=`); `client=` is
+  accepted and ignored. The port, scheme and API path are spelled in the
+  target string, not as keywords: any other keyword raises `ValueError:
+  unknown credential argument: 'NAME'` listing the keywords above. Given a
+  `TrueNASConfig`, a configuration keyword raises `TypeError` (pass it to
+  `TrueNASConfig.from_target` instead). Typing overloads list them for an
+  editor.
 
-### Attributes / properties
+### Attributes and properties
 
 - **`.api`** (`cached_property`) — the root `Namespace` for this client
   (`client.api.<namespace>.<method>(...)`).
@@ -149,17 +155,16 @@ version="current", executor=None, path=None, ssh=None, ...)`
   `hostctl-asyncssh-loop`), not yours: run its coroutines with
   `asyncio.run_coroutine_threadsafe(coro, provider.loop).result()`, never await
   them on another loop, and never block that loop. `.close()` closes it; a read
-  after that opens a new connection the host no longer tracks. For the raw
+  after that opens a new connection the host does not track. For the raw
   connection only (port forwarding, an SFTP client of your own);
   `.run()`/`.path()` select a transport instead of assuming this one.
-- **`.config`** — the `TrueNASConfig` this was built from. `.config.ssh` is the
-  SSH leg; `.shell` means the *bound shell object* (`client.shell.run(...)`),
+- **`.config`** — the `TrueNASConfig` this host is built from. `.config.ssh` is
+  the SSH leg; `.shell` means the *bound shell object* (`client.shell.run(...)`),
   as it does throughout hostctl.
-- **`.client`** — returns the object itself, kept so code written against
-  the two-object model keeps working.
+- **`.client`** — the object itself (`client.client is client`).
 - **`.capabilities`** — `{"run", "path"}` as available, plus `"spawn"`/`"tty"`
   when an SSH leg is configured; a remote target with no SSH and no web shell
-  honestly reports no `run`.
+  reports no `run`.
 - **`.last_selection`** — the redacted provider trace for the most recent
   `run()`: hostctl `SelectionStep` records (`.provider`, `.chosen`,
   `.availability`, `.reason`, ...), not dicts.
@@ -182,8 +187,8 @@ version="current", executor=None, path=None, ssh=None, ...)`
 - **`.login(creds=None, *, login_ex=False, login_options=None,
   otp_provider=None)`** — close any existing connection, open a new one, and
   authenticate (`creds` or the client's configured credentials). Default uses
-  the legacy `auth.login`/`login_with_*` path. `login_ex=True` uses the modern
-  `auth.login_ex` mechanism, handling an `OTP_REQUIRED` 2FA challenge via
+  the server's legacy `auth.login`/`login_with_*` methods. `login_ex=True` uses
+  the `auth.login_ex` mechanism, handling an `OTP_REQUIRED` 2FA challenge via
   `auth.login_ex_continue` (OTP from the credential's `otp_token` or
   `otp_provider()`), raising `auth.AuthenticationError` on failure and returning
   the success response dict. `login_options` overrides the server defaults
@@ -197,10 +202,9 @@ version="current", executor=None, path=None, ssh=None, ...)`
   `AuthenticationError("OTP_REQUIRED")`.
 - **`.close()`** — closes the transports and then the websocket; also a
   context manager (`with TrueNASClient(...) as client:`). A client that is
-  garbage-collected without it closes its connection from a finalizer, so a
-  forgotten `close()` no longer leaks the socket and its reader thread — but
-  the finalizer runs whenever the collector gets to it, so `close()` is still
-  how you decide *when*.
+  garbage-collected without it closes its connection (socket and reader
+  thread) from a finalizer, which runs whenever the collector gets to it;
+  `close()` is how you decide *when*.
 - **`.me() -> dict`** (`auth.me`) / **`.logout() -> None`** (`auth.logout`) /
   **`.ping() -> str`** (`core.ping` -> `"pong"`) — convenience wrappers.
 - **`.path(*path, backend=None) -> pathapi.Path`** — build a path on the
@@ -208,15 +212,16 @@ version="current", executor=None, path=None, ssh=None, ...)`
   provider per operation (annotate with `pathapi.Path`). On a remote target a
   relative path, and `path()` with no segments, is rooted at `/` on every leg
   (hostctl's own SSH hosts read it against the login directory; pytruenas
-  does not, because the websocket leg cannot). `backend` names one **path
+  does not, because the websocket leg has none). `backend` names one **path
   provider**, from the names in the provider table below (`"tnasws"`,
   `"sftp"`, `"local"`), and pins the returned path to it for every operation
-  (hostctl's own `backend=`); it raises `ValueError: unknown path provider` for anything
-  else — including a provider this host has not got (`"sftp"` without an SSH
-  leg, `"local"` on a remote host) — and `OperationNotStartedError` when that
-  provider is unavailable. Not the `pytruenas.fs.path()` vocabulary
-  (`"ws"`/`"api"`/`"truenas"`), which is a different function documented under
-  `fs` below. Wraps `hostctl.host.Host.path`.
+  (hostctl's own `backend=`); it raises `ValueError: unknown path provider`
+  for anything else — including a provider this host has not got (`"sftp"`
+  without an SSH leg, `"local"` on a remote host) — and
+  `OperationNotStartedError` when that provider is unavailable. Not the
+  `pytruenas.fs.path()` vocabulary (`"ws"`/`"api"`/`"truenas"`), which is a
+  different function documented under `fs` below. Wraps
+  `hostctl.host.Host.path`.
 - **`.run(*cmds, **kwargs) -> subprocess.CompletedProcess`** — run commands on
   the target. Inherited from `hostctl.host.Host.run`; see that for the full
   signature (`stdin`/`stdout`/`stderr`, `cwd`, `env`, `capture_output`,
@@ -284,12 +289,13 @@ version="current", executor=None, path=None, ssh=None, ...)`
   extra: provisioning runs over the middleware API and opens no SSH
   connection. Passing `private_key=` for a key the host does not already know
   is the exception — the public half is derived locally, which needs
-  `cryptography` (preferred) or `asyncssh`.
+  `cryptography` (preferred; `asyncssh` depends on it) or `asyncssh`; with
+  neither, `MissingExtraError` names `pytruenas[ssh]`.
   The providers are rebuilt afterwards, so a host that had no SSH executor
   gains one. A *local* target provisions the key but wires no leg — there is
   nothing to SSH to.
 
-## `TrueNASHost` / `TrueNASConfig` (`pytruenas.host`)
+## Host, transports and configuration (`pytruenas.host`)
 
 `TrueNASHost` **is** `TrueNASClient` (same class). Constructible from a
 connection string, a `TrueNASConfig`, or nothing:
@@ -358,10 +364,10 @@ one transport; hostctl's `winrm` is hidden) beside hostctl's global `local`.
 An unknown one raises hostctl's `ValueError` listing the known names rather
 than silently composing a host with nothing. Requesting `ssh`/`sftp` without
 an `SSHConfig` also raises. `None` (the default) means "decide from the
-target": `host.default_providers()` returns the table above, and hostctl
-drops a default `ssh`/`sftp` when its `ssh` extra is missing (a name you give
-is kept and fails at use). `host.resolve_providers()` builds the providers
-for the current config, for `host.replace_providers()`.
+target": `TrueNASHost.default_providers()` returns the table above, and
+hostctl drops a default `ssh`/`sftp` when its `ssh` extra is missing (a name
+you give is kept and fails at use). `TrueNASHost.resolve_providers()` builds
+the providers for the current config, for `TrueNASHost.replace_providers()`.
 
 `TrueNASConfig` is the `hostctl.host.HostConfig`. It accepts every connection
 string `TrueNASClient` does and normalizes to a `truenas+*` scheme
@@ -369,27 +375,28 @@ string `TrueNASClient` does and normalizes to a `truenas+*` scheme
 works from hostctl's own registry. A socket is `truenas+unix:///var/run/x.sock`
 or `truenas+unix://var/run/x.sock` (the same path either way), or a bare
 `"/var/run/x.sock"`; `TrueNASConfig()` with no arguments is the local
-middleware socket. Constructing one performs **no network
-I/O** — the scheme and API path are resolved from the string alone, not in the
-constructor.
+middleware socket. Constructing one performs **no network I/O** — the scheme
+and API path are resolved from the string alone, not in the constructor.
+`TrueNASConfig.from_target(target, **options)` takes the same keywords as
+`TrueNASClient`.
 
 An OTP travels in the URI password field after a newline
-(`wss://root:pw%0Aotp:123456@nas`); a raw newline works too on recent hostctl.
-Unknown credential names are rejected rather than silently dropped. The
-keyword form dispatches on the names (`username`/`password`/`otp`/`api_key`/
-`token`), the same selection `Credentials.from_host_credentials` makes.
+(`wss://root:pw%0Aotp:123456@nas`); a raw newline works too. Unknown
+credential names are rejected rather than silently dropped. The keyword form
+dispatches on the names (`username`/`password`/`otp`/`api_key`/`token`), the
+same selection `Credentials.from_host_credentials` makes.
 
 Generic type parameter `ApiVersion` (bound to `Namespace`) lets a consumer
 annotate `client: TrueNASClient[Current]` (from generated typings) for
 IDE/type-checker completion on `client.api`; it has no runtime effect.
 
-## `Namespace` (`pytruenas.namespace`)
+## API namespace (`pytruenas.namespace`)
 
-Dynamic attribute-style dispatcher for one API namespace path (e.g.
-`client.api.user`, `client.api.pool.dataset`). Attribute/item access builds
-child namespaces lazily and caches them per-instance
-(`namespace.child` / `namespace["child"]`); leading-underscore names other
-than the dunder-safe helpers below raise `AttributeError` normally.
+`Namespace` is the dynamic attribute-style dispatcher for one API namespace
+path (e.g. `client.api.user`, `client.api.pool.dataset`). Attribute/item
+access builds child namespaces lazily and caches them per instance
+(`ns.child` / `ns["child"]`); leading-underscore names other than the helpers
+below raise `AttributeError` normally.
 
 - **`Namespace(client, *name)`** — not usually constructed directly; reached
   via `client.api` and attribute/`__getitem__` traversal.
@@ -408,9 +415,10 @@ than the dunder-safe helpers below raise `AttributeError` normally.
     `background`, `callback`, `register_call` and `raise_` are accepted and
     have no effect (the job id is returned).
   - **`_tries`** — reconnect retries after a dropped connection
-    (`ECONNABORTED`); default `1` means up to 2 attempts total. The call
-    **always** returns or raises — never silently returns `None` on a
-    connection error.
+    (`ECONNABORTED`); default `1` means up to 2 attempts total. Only a request
+    that never reached the socket (`ConnectionClosed.sent is False`) is
+    repeated. The call **always** returns or raises — never silently returns
+    `None` on a connection error.
   - **`_timeout`** — per-call seconds; the default sentinel uses the client's
     configured timeout, `None` waits indefinitely.
   - **`_ioerror`** — map a middleware `[ERRNO] message` error to the matching
@@ -418,12 +426,12 @@ than the dunder-safe helpers below raise `AttributeError` normally.
   - **`_filetransfer`** — `True` routes through `client.download`; bytes/a
     readable routes through `client.upload`.
 - **`.subscribe(callback=None, *, event=None, maxsize=1000) ->
-  connection.Subscription`** — subscribe to this namespace's collection event; the
-  event name defaults to the namespace's dotted path
+  connection.Subscription`** — subscribe to this namespace's collection event;
+  the event name defaults to the namespace's dotted path
   (`client.api.alert.list.subscribe()` -> `alert.list`), or pass `event=` to
   override (e.g. from `client.api`). A **real method**, so it shadows any
   middleware method literally named `subscribe`; reach such a method via
-  `ns(_method="subscribe", ...)`. See `connection.Subscription`/`Event` above.
+  `ns(_method="subscribe", ...)`. See `connection.Subscription`/`Event` below.
 - **`._query(*opts, **filter) -> list[dict]`** — calls `<namespace>.query`
   with filters built from `**filter` kwargs (equality by default; wrap a value
   in `EQ`/`NE`/`RE`/`GT`/`GE`/`LT`/`LE`/`IN`/`NIN` from `pytruenas.utils.query`
@@ -451,19 +459,27 @@ than the dunder-safe helpers below raise `AttributeError` normally.
   create (read it from `result`). Common opts: `idkey` (default `"id"`),
   `update_exclude`/`create_exclude` (field names to drop for that path),
   `wait` (wait on a returned job id; default `True`), `force`.
+- **`DbAction`** — `str` enum, `CREATE = "create"`, `UPDATE = "update"`; the
+  mutation an `_upsert`/`_update`/`_create` resolves to.
+- **`ioerror(error: ClientException) -> Exception`** — map a middleware
+  `[ENAME] message` or `[Errno N] message` error to an `OSError` with that
+  errno (so the builtin subclass, e.g. `FileNotFoundError`); any other error
+  is returned unchanged.
 
-## `connection` (`pytruenas.connection`)
+## Connection (`pytruenas.connection`)
 
 The synchronous JSON-RPC 2.0 websocket transport backing `TrueNASClient`
 (`client.conn`).
 
 - **`TrueNASWSConnection(uri=None, *, verify_ssl=True, call_timeout=CALL_TIMEOUT,
-  connect_timeout=CONNECT_TIMEOUT, py_exceptions=False, logger=None)`** — opens the
-  websocket immediately (blocking, bounded by `connect_timeout`: connect, TLS
-  and the HTTP upgrade) and starts a background reader thread. `uri` is `wss://`/`ws://` or
-  `ws+unix://...`; `verify_ssl` takes the same values as the host's
-  `sslverify` (bool or CA bundle path; see above); `None`/bare `ws+unix://` connects to
-  `DEFAULT_UNIX_SOCKET` (`/var/run/middleware/middlewared.sock`).
+  connect_timeout=CONNECT_TIMEOUT, py_exceptions=False, logger=None)`** — opens
+  the websocket immediately (blocking, bounded by `connect_timeout`: connect,
+  TLS and the HTTP upgrade) and starts a background reader thread. `uri` is
+  `wss://`/`ws://` or `ws+unix://...`; `verify_ssl` takes the same values as
+  the host's `sslverify` (bool or CA bundle path; see above); `None`/bare
+  `ws+unix://` connects to `DEFAULT_UNIX_SOCKET`
+  (`/var/run/middleware/middlewared.sock`). `logger` receives the
+  connection's records (a host passes its own name-bound logger).
   - **`.call(method, *params, timeout=UNSET, **_ignored) -> Any`** — send a
     request and block for the matching response. `timeout=None` waits
     **indefinitely**; the default sentinel uses `call_timeout`. Unknown
@@ -475,9 +491,8 @@ The synchronous JSON-RPC 2.0 websocket transport backing `TrueNASClient`
     `ConnectionClosed` (`errno=ECONNABORTED`) if the connection dropped,
     `ClientException` with `errno=EPROTO` when the response arrived but could
     not be decoded (the call fails at once rather than waiting out its
-    timeout),
-    `TypeError` for a parameter JSON cannot encode (nothing is sent), and
-    `RuntimeError` when called from the reader thread, i.e. from a
+    timeout), `TypeError` for a parameter JSON cannot encode (nothing is
+    sent), and `RuntimeError` when called from the reader thread, i.e. from a
     subscription callback (it would deadlock until the call timed out —
     consume `Subscription.events()` on another thread instead).
   - **`.subscribe(event, callback=None, *, maxsize=1000) -> Subscription`** —
@@ -499,39 +514,25 @@ The synchronous JSON-RPC 2.0 websocket transport backing `TrueNASClient`
   subscription id, **`.event`** the subscribed name.
 - **`Event(collection, msg, fields, id=None)`** — a `NamedTuple` for one
   `collection_update`: `msg` ∈ `added`/`changed`/`removed`, `fields` the payload
-  dict. Verified against TrueNAS 26.0.
+  dict (the shape TrueNAS 26.0 sends).
 - **`DEFAULT_EVENT_QUEUE_SIZE`** — default `maxsize` (1000) for a subscription's
   event queue.
-- **`CALL_TIMEOUT`** — default per-call timeout in seconds (int; overridable
-  via the `CALL_TIMEOUT` env var, read at import time).
+- **`CALL_TIMEOUT`** — default per-call timeout in seconds (int, 60;
+  overridable via the `CALL_TIMEOUT` environment variable, read at import
+  time).
 - **`CONNECT_TIMEOUT`** — default timeout in seconds (30) for opening a
   connection. It is not the reader's timeout: an idle connection stays open.
-- **`ClientException(error, errno=None, trace=None, extra=None)`**
-  (`TrueNASError` subclass) — base error for any call/connection failure;
-  `errno` carries a POSIX errno when the middleware's `[ERRNO] message` prefix
-  maps to one.
-- **`ValidationErrors(errors)`** (`ClientException` subclass) — per-field validation errors; `.errors` is
-  `list[(attribute, errmsg, errcode)]`.
-- **`JobFailed(job)`** (`ClientException` subclass) — raised by
-  `TrueNASHost.wait` for a `FAILED`/`ABORTED` job; `.job` is the
-  `core.get_jobs` record, `.errno` the middleware's errno when it reports one.
-- **`CallTimeout()`** (`ClientException` subclass) —
-  raised when a call exceeds its timeout.
-- **`ConnectionClosed(sent)`** (`ClientException` subclass, `errno` is
-  `ECONNABORTED`) — the connection closed before the
-  response arrived.
-  **`.sent`** is `False` when the request never reached the socket (safe to
-  repeat: `Namespace` retries exactly these) and `True` when the server may
-  have run it — a create, a delete, a job start — so only the caller can
-  decide. A plain `ClientException(errno=ECONNABORTED)` carries no `.sent` and
-  is treated as "may have run".
+- **`DEFAULT_UNIX_SOCKET`** — `"/var/run/middleware/middlewared.sock"`.
+- **`ClientException`**, **`ValidationErrors`**, **`JobFailed`**,
+  **`CallTimeout`**, **`ConnectionClosed`** — defined here; see
+  [Exceptions](#exceptions).
 - **`dumps(obj, **kwargs) -> str`** / **`loads(data, **kwargs)`** — JSON
   (de)serialization with the middleware's extended-type wrappers
   (`datetime`/`date`/`time`/`set`/`IPv4Interface`/`IPv6Interface`)
   round-tripped through `$date`/`$type`/`$time`/`$set`/`$ipv4_interface`/
   `$ipv6_interface` wrapper objects.
 
-## `auth` (`pytruenas.auth`)
+## Credentials (`pytruenas.auth`)
 
 - **`Credentials(...)`** — a factory (via metaclass `__call__`), not a normal
   constructor when called on the base class directly:
@@ -546,30 +547,35 @@ The synchronous JSON-RPC 2.0 websocket transport backing `TrueNASClient`
   - multiple positional args -> `BasicAuth(*args)`.
   - Instantiating a `Credentials` **subclass** directly (e.g. `BasicAuth(...)`)
     bypasses the factory and behaves like a normal constructor.
-- **`.login(client)`** — legacy path: `client.api.auth[self.METHOD]
+- **`.login(client)`** — the server's legacy login: `client.api.auth[self.METHOD]
   (*self._args())`, returning its result; raises
   `AuthenticationError("AUTH_ERR", {"method": METHOD})` when that is `False`.
-  A no-op returning `None` when `METHOD` is `None` (`LocalAuth`).
+  A no-op returning `None` when `METHOD` is `None` (`LocalAuth`). A credential
+  subclass logs in through this method, not by calling `api.auth.*` itself,
+  so a refusal raises.
 - **`.login_ex(client, *, login_options=None, otp_provider=None) -> dict|None`**
-  — modern path via `auth.login_ex` using this credential's `MECHANISM`
+  — `auth.login_ex` using this credential's `MECHANISM`
   (`PASSWORD_PLAIN`/`API_KEY_PLAIN`/`TOKEN_PLAIN`). Handles `OTP_REQUIRED`
   (continues with `auth.login_ex_continue`, OTP from `self.otp_token` or
   `otp_provider()`), returns the `SUCCESS` response dict, raises
-  `AuthenticationError` otherwise. Falls back to legacy `.login()` for a
-  credential with no login_ex form.
-- **`AuthenticationError(response_type, response, method="login_ex")`**
-  (`TrueNASError` subclass) —
-  raised by `login_ex` on a non-`SUCCESS` response and by legacy `login` on a
-  `False` answer; `.response_type` is the server discriminator, `.response`
-  the full dict; the message names `method`.
-- **`Credentials.from_env(env=None) -> Credentials`** — `Credentials(env.get("TN_CREDS"))`, defaulting `env` to `os.environ`.
+  `AuthenticationError` otherwise. Falls back to `.login()` for a credential
+  with no `login_ex` form.
+- **`Credentials.from_env(env=None) -> Credentials`** —
+  `Credentials(env.get("TN_CREDS"))`, defaulting `env` to `os.environ`.
+- **`Credentials.from_host_credentials(...)`** — the keyword selection
+  (`username`/`password`/`otp`/`api_key`/`token`) `TrueNASConfig` uses.
 - **`LocalAuth`** — no-op auth (local socket). **`ApiKeyAuth(api_key,
   username=None)`** — `login_with_api_key` (legacy) / `API_KEY_PLAIN` (login_ex,
   needs `username`). **`TokenAuth(token)`** — `login_with_token` / `TOKEN_PLAIN`.
   **`BasicAuth(username, password, otp_token=None)`** — `login` /
   `PASSWORD_PLAIN`.
+- **`redact_call_args(method: str, args: tuple) -> tuple`** — `args` of an RPC
+  call, safe to log: an `auth.*` method's arguments are reduced to type names;
+  elsewhere a dict value under a secret-looking key (`password`, `*_token`,
+  `private_key`, ...) is masked at any depth.
+- **`AuthenticationError`** — defined here; see [Exceptions](#exceptions).
 
-## `fs` (`pytruenas.fs`)
+## Remote paths (`pytruenas.fs`)
 
 `client.path(*segments, backend=None)` is the intended entry point: a
 hostctl `CompositePosixPath` over the host's path providers (`sftp`, then
@@ -581,33 +587,33 @@ builds the individual path types (below).
   client with no client-specific behavior.
 - **`TnasWsPath`** (`pytruenas.fs.tnasws`) — a `uripath.URIPath` (distribution
   `pathapi-uri`; scheme `truenas+ws`) backed entirely by the middleware
-  `filesystem.*` API
-  via a `TnasWsBackend(client)`. Implements stat/listdir/open/read/write/
-  mkdir/chmod/chown; `unlink`/`rmdir` shell out (`rm --` / `rmdir --`) because
-  `filesystem.*` has no delete op, and raise what pathlib would:
-  `FileNotFoundError` (unless `missing_ok`), `IsADirectoryError`,
-  `NotADirectoryError`, `OSError(ENOTEMPTY)`, else the errno `rm` printed
-  (`EACCES`, `EPERM`, `EROFS`, `EBUSY`) or `EIO`. `chmod`/`chown` are
-  middleware jobs: they return once the job has finished and raise `OSError`
-  when it failed (`EIO` when the middleware names no errno). `read_bytes` (a
-  `filesystem.get` download) raises `OSError` when the job behind the
-  download failed. `stat()` follows a symlink (`filesystem.stat` describes the
-  link and names its target in `realpath`); `stat(follow_symlinks=False)` and
-  `is_symlink()` describe the link. A stat carries `st_mode`, `st_size`,
-  `st_uid`, `st_gid` and the times. Built from a bare URI (no backend) raises
-  `RuntimeError` on first use — construct one with
-  `pytruenas.fs.path(client, ..., backend="ws")`. `client.path(...)` returns
-  hostctl's `CompositePosixPath`, whose websocket leg is a `TnasWsPath`.
+  `filesystem.*` API via a `TnasWsBackend(client)`. Implements
+  stat/listdir/open/read/write/mkdir/chmod/chown; `unlink`/`rmdir` shell out
+  (`rm --` / `rmdir --`) because `filesystem.*` has no delete op, and raise
+  what pathlib would: `FileNotFoundError` (unless `missing_ok`),
+  `IsADirectoryError`, `NotADirectoryError`, `OSError(ENOTEMPTY)`, else the
+  errno `rm` printed (`EACCES`, `EPERM`, `EROFS`, `EBUSY`) or `EIO`.
+  `chmod`/`chown` are middleware jobs: they return once the job has finished
+  and raise `OSError` when it failed (`EIO` when the middleware names no
+  errno). `read_bytes` (a `filesystem.get` download) raises `OSError` when the
+  job behind the download failed. `stat()` follows a symlink
+  (`filesystem.stat` describes the link and names its target in `realpath`);
+  `stat(follow_symlinks=False)` and `is_symlink()` describe the link. A stat
+  carries `st_mode`, `st_size`, `st_uid`, `st_gid` and the times. Built from a
+  bare URI (no backend) raises `RuntimeError` on first use — construct one
+  with `pytruenas.fs.path(client, ..., backend="ws")`. `client.path(...)`
+  returns hostctl's `CompositePosixPath`, whose websocket leg is a
+  `TnasWsPath`.
   Listing calls `filesystem.listdir` with an explicit `select` projection
   (`name` for `_listdir`; `name`/`type`/`size`/`mode`/`uid`/`gid` for
   `_scandir`, which seeds each child's stat in the same round trip). That is
-  load-bearing, not
-  an optimisation: an unrestricted `listdir` computes the ZFS-only `zfs_attrs`
-  column and fails with `EFAULT ... ZFS attributes are not supported.` on any
-  non-ZFS path (`/tmp`, `/dev`, `/proc`, ...), so widening the projection to
-  that column breaks `iterdir`/`glob`/`walk` off-pool. `listdir` reports no
-  `mtime` on any filesystem, so stats seeded from a listing carry `st_mtime`
-  0; `stat()` uses `filesystem.stat`, which does report it.
+  load-bearing, not an optimisation: an unrestricted `listdir` computes the
+  ZFS-only `zfs_attrs` column and fails with `EFAULT ... ZFS attributes are not
+  supported.` on any non-ZFS path (`/tmp`, `/dev`, `/proc`, ...), so widening
+  the projection to that column breaks `iterdir`/`glob`/`walk` off-pool.
+  `listdir` reports no `mtime` on any filesystem, so stats seeded from a
+  listing carry `st_mtime` 0; `stat()` uses `filesystem.stat`, which does
+  report it.
   A write stream (`open("w")`/`"a"`, `write_bytes`) is one `filesystem.put`
   when it closes; a `with` block that raises discards it, so a failed write
   uploads nothing (`pathapi.providers.CommitOnClose`).
@@ -617,23 +623,22 @@ builds the individual path types (below).
   Two paths are the same filesystem (for pathapi's same-file and overlap
   guards) when their backends talk to the same client or to clients with the
   same `connection_uri` — not merely when they share a backend object.
-- **`symlink_to(path, target, target_is_directory=False, *, force=False,
-  onremove=None)`** (`pytruenas.fs`) — make `path` (any `pathapi` path:
-  `client.path(...)`, a `LocalPath`) a symlink to `target` (a `str` or a path).
-  `force` (bool, a file-type string, or a set of `"file"/"link"/"directory"`)
-  removes a conflicting existing entry first (a directory recursively; another
-  kind raises `FileExistsError`); `onremove(path, kind)` gates each removal.
-  Raises `NotImplementedError` *before* removing anything when no leg of `path`
-  can create a symlink (`pathapi.protocols.supports(path, Symlink)` is false:
-  a host without SFTP). Returns what `path.symlink_to` returns.
 - **`TnasWsBackend(client)`** — the backend object `TnasWsPath` carries; just
   holds `.client`.
-
-`path(client, *segments, backend=None)` values: `"local"` -> `LocalPath`,
-`"ws"`/`"api"` -> `TnasWsPath`, `"truenas"` -> `client.path(...)` (the host's
-composite path, rooted at `/`), `"auto"`/`None` -> `LocalPath` for a local
-client, else `client.path(...)`. Another value raises `ValueError`. A remote
-client must be a `TrueNASHost` (it calls `client.path`).
+- **`path(client, *segments, backend=None)`** — `"local"` -> `LocalPath`,
+  `"ws"`/`"api"` -> `TnasWsPath`, `"truenas"` -> `client.path(...)` (the
+  host's composite path, rooted at `/`), `"auto"`/`None` -> `LocalPath` for a
+  local client, else `client.path(...)`. Another value raises `ValueError`. A
+  remote client must be a `TrueNASHost` (it calls `client.path`).
+- **`symlink_to(path, target, target_is_directory=False, *, force=False,
+  onremove=None)`** — make `path` (any `pathapi` path: `client.path(...)`, a
+  `LocalPath`) a symlink to `target` (a `str` or a path). `force` (bool, a
+  file-type string, or a set of `"file"/"link"/"directory"`) removes a
+  conflicting existing entry first (a directory recursively; another kind
+  raises `FileExistsError`); `onremove(path, kind)` gates each removal. Raises
+  `NotImplementedError` *before* removing anything when no leg of `path` can
+  create a symlink (`pathapi.protocols.supports(path, Symlink)` is false: a
+  host without SFTP). Returns what `path.symlink_to` returns.
 
 **Segments are filesystem paths, not URIs.** `TnasWsPath` is a `URIPath`, so
 `path(..., backend="ws")` percent-encodes each segment into the
@@ -643,265 +648,18 @@ same decoded name. Constructing a `TnasWsPath` *directly* from a URI string is
 URI syntax — `?` there really is a query; encode the path yourself if you go
 around `path()`.
 
-## `main` (`pytruenas.main`) — CLI entry point
-
-- **`main(name=None, argv=None, args=None, root=None) -> int`** — build the
-  `duho` app (`root`, default `PyTrueNAS`), discover commands (built-ins in
-  `pytruenas.cmd` plus any `PYTRUENAS_PATH` / `--cmdspath` / config
-  `commandspath` entries), parse `argv`, and dispatch the selected command
-  against every target concurrently. `args` is the shared args class every
-  command inherits (a `PyTrueNASArgs` subclass, default `root._ARGS_`; anything
-  else raises `TypeError`); a derived tool adds global options through it or by
-  subclassing `PyTrueNAS` with `_ARGS_` set. Raises `SystemExit` for `--help`,
-  `--version` and a usage error found while parsing; a `--config`/
-  `$PYTRUENAS_CONFIG` file that does not exist returns 2 with
-  `NAME: error: config file not found: PATH`. `pytruenas = "pytruenas.main:main"`
-  is the installed console script.
-- **`PyTrueNAS(PyTrueNASArgs, duho.Cli)`** — the app root; `--version` resolves
-  from installed package metadata.
-
-### Writing a command module (`pytruenas.cmd.*` or a `--cmdspath` entry)
-
-A command is a plain module exposing:
-
-- **`run(client, args, logger)`** — required; the command body, called once
-  per target with a connected `TrueNASClient`. A module without it is skipped
-  at discovery (with a warning) rather than offered and then failing.
-  `args` is a **per-target copy** carrying **`args.target`** (this target's
-  connection string), so state a command writes on it cannot reach another
-  target. The CLI closes a client it built when the command finishes; one an
-  `init` hook returned is left alone. Return an exit code — never raise
-  `SystemExit` from a command body: it runs in a fan-out worker, where raising
-  it aborts the whole run and discards the other targets' codes. A
-  `hostctl.MissingExtraError` out of `run` (an optional extra not installed,
-  hostctl's or pytruenas's) ends that target with one ERROR line and status
-  125, as hostctl's own command line does; any other exception keeps its
-  traceback. One raised before any target runs (a `--config` file without
-  the `config` extra) makes `main()` print `pytruenas: MESSAGE` to stderr and
-  return 125.
-  Write results through `utils.cmd.emit_json(value, args)` (or `emit(text)`):
-  one locked write, so concurrent targets cannot interleave mid-line, and with
-  more than one target each line is `{"target": ..., "result": ...}` with the
-  credentials removed. `utils.cmd.json_default` is the encoder fallback (sets
-  become sorted lists, dates ISO strings).
-- **`Args`** — optional; a `PyTrueNASArgs` subclass declaring the command's own
-  CLI fields (duho ≥0.4.1 adds them to the subparser before `register` runs).
-  Preferred over `register`: an annotated attr + docstring + bare flags-tuple
-  becomes a CLI field, e.g. `("method",)` for a positional or `("--param",
-  "-p")` for an option. A `list[str]` option is repeatable as declared (`-f a
-  -f b`, one value per occurrence), so it never swallows the trailing targets.
-- **`register(parser, args, logger)`** — optional; the imperative escape hatch,
-  for what declarations can't express (mutually-exclusive/titled groups). The
-  trailing `TARGET...` positionals are declared centrally as the command's last
-  field (`pytruenas.utils.cmd.with_targets`, applied by `main._with_targets`),
-  so a command never declares them itself — declared and `register`-added
-  positionals both land ahead of the targets, and the targets are part of the
-  command's MCP tool schema.
-- **`_allow_passthrough_ = True`** — optional, module level; the command reads
-  the arguments after `--` (`args._passthrough_`). Without it, a `--` tail is
-  reported as ignored. RunPath commands are taken to read it.
-- **`validate_args(args)`** — optional; called once with the parsed args
-  before any target runs or any client is built. Raise `duho.UsageError` for
-  an invocation the arguments alone show cannot work: it is reported once as
-  `pytruenas: error: MESSAGE` with exit status 2, instead of failing every
-  target.
-- **`init(args, logger) -> client`**, **`success(client, args, logger)`**,
-  **`finally_(client, args, logger)`** — optional lifecycle hooks
-  (`finally_` always runs).
-
-`pytruenas.utils.cmd.PyTrueNASArgs` (a `duho.LoggingArgs` mixin) carries the
-global fields every command sees: `config` (path, default
-`$PYTRUENAS_CONFIG`, else the older `$PYTRUENAS_CFG`, else `./pytruenas.yaml`),
-`cmdspath`, `sslverify`
-(`--sslverify`/`--no-sslverify`, unset by default), `insecure`
-(`--insecure`/`-k`), `parallel` (default `1`), `logto` (default `-` for
-stderr, or a `{target}`/`{isodate}` path template; each target's file gets only
-that target's records, `--parallel` included), plus `targets` (the
-trailing positionals, not a flag; each command declares the field last through
-`with_targets(args_cls)`, whose field type is `TargetsField`) and helper methods
-`._config_dict_()`/`._expanded_targets_()`. `._config_dict_()` is the YAML
-mapping (the `config` extra); the CLI reads three keys from it —
-`credentials`, `sslverify` and `commandspath` — and ignores any other. The
-implicit `./pytruenas.yaml` may be absent; a file named with `--config` or
-`$PYTRUENAS_CONFIG` must exist (`duho.UsageError`, exit status 2). Target
-expansion (commas and
-`[A-Z]`/`[0-9]` ranges) applies to the HOST part only -- a comma or a range
-inside credentials is part of them -- and credentials are carried onto every
-expanded host.
-
-Three more methods decide how a command connects, and are the only supported
-way to build a client from parsed args:
-
-- **`._config_is_implicit_() -> bool`** — whether the config file was found
-  (`./pytruenas.yaml`) rather than named by `--config`/`$PYTRUENAS_CONFIG`.
-  `main` refuses `commandspath` from an implicit file: that key names code to
-  import, and a CLI often runs in a directory its user does not control.
-- **`._sslverify_() -> bool|str`** — `-k`/`--insecure`, else
-  `--sslverify`/`--no-sslverify`, else `$PYTRUENAS_SSLVERIFY`, else the config
-  file's `sslverify`, else `True`. A string is a CA bundle path.
-- **`._credentials_() -> Credentials|None`** — `$TN_CREDS`, else the config
-  file's `credentials` (a connection string, or a mapping of keyword
-  arguments), else `None`.
-- **`._client_(target) -> TrueNASClient`** — the client for one target: the
-  above, with the credentials applied **only** when the target string carries
-  none (passing both raises). `main` and `runpath.default_init` both use it,
-  so a plain command and a RunPath step connect alike.
-
-### Built-in commands (`pytruenas.cmd`)
-
-- **`query <namespace> [-f/--filter KEY=VALUE ...] [targets...]`** — prints
-  `client.api[namespace]._query(**filters)` as JSON. Only works on queryable
-  namespaces (`<namespace>.query` must exist), e.g. `user`, `pool.dataset`.
-- **`call <method> [-p/--param JSON ...] [--no-schema] [--refresh-api]
-  [targets...] [-- --field=value ...]`** — prints
-  `client.api[method](*params)` as JSON; works for any dotted method name,
-  including non-queryable ones like `system.info`.
-  After a literal `--`, **fields** replace hand-written JSON:
-  `--field=value` and bare `field=value` are interchangeable, and each is
-  typed from the method's own schema (booleans from the strict true/false
-  sets, integers, `null` for a nullable field, arrays from a comma list *or* a
-  repeated flag, nested objects from dotted names). `--name:json=<json>` takes a
-  literal JSON value and `--name=@path` reads one from a file. Fields fill the
-  **last object-typed parameter**, so `call user.update -p 1 nas1 --
-  --full_name=x` still reads its id from `-p`. An unknown field name or a bad
-  enum value is an error naming the alternatives, raised **before** anything is
-  called — nothing partial reaches the appliance. The separator is required
-  because the valid names are only known after the method is parsed, so
-  top-level flags would collide with the globals. `--no-schema` types fields the
-  way `-p` does and validates nothing; `--refresh-api` re-fetches the
-  definition.
-- **`help NAME [--json] [--dump] [--api-version V] [--refresh-api]
-  [targets...]`** — CLI-style help. `NAME` is a method (`user.create`: usage,
-  every field with type/required/default/enum values, whether it is a job, and
-  the return type), a namespace (`user`: its methods with their first doc line),
-  or **`all`**/`.` for the index of namespaces. `NAME` is **required** and comes
-  first, like `query`'s namespace: made optional, argparse claims the lone token
-  of `help nas1` and leaves no target, so the index form could only run against
-  the local socket — hence the `all` sentinel.
-  The source is the **API itself**, per namespace (`core.get_services` +
-  `core.get_methods(<service>)`), which needs no roles and **no command access** —
-  it works for an API-key account with no shell. `--dump` uses the full
-  `middlewared --dump-api` instead (needs command access; required only for
-  `--api-version`, which the live API cannot report). Either way it reads the
-  definition, never generated stubs: a `.pyi` carries names and types only, while
-  descriptions, defaults, enum values and required-ness exist solely in the
-  definition the stubs are generated from.
-- **`dump-api [targets...]`** — prints `client.dump_api()` as JSON.
-- **`generate-typings [--api-version V] [--path DIR] [--api-cache FILE]
-  [targets...]`** — dumps (or reads a cached) API definition and writes
-  `.pyi` stubs via `pytruenas.codegen.Codegen().generate(version, path)`.
-  `--path` defaults to `truenasapi_typings/current`; only an absent or empty
-  directory, or one a previous run marked `.pytruenas-typings`, is replaced.
-  Without the `codegen` extra it fails before dumping the API.
-- **`deploy [--path PATH] [--mode pyz|dir] [--source installed|repo]
-  [--pkg-root DIST] [--pkg-name PKG] [--extra E] [--skip DIST] [--force]
-  [--repo-root PATH] [--ignore-file FILE] [--ignore-pattern PATTERN]
-  [--include NAME] [--exclude NAME] [--pythonpath DIR] [targets...]
-  [-- COMMAND ...]`** — installs pytruenas (or the caller's own distribution)
-  ON the target so it can run there, through `hostctl.deploy.deploy()` (the
-  probe, closure, reproducible payload, digest marker and atomic install are
-  hostctl's; this command is the policy around it). Defaults to
-  `/var/db/system/pytruenas.pyz` — a dataset on a *data* pool, which survives
-  an update, unlike `/var/db` itself (boot environment). Anything after `--`
-  runs on the target afterwards as `hostctl.Exec(*deployment.command,
-  *args)` and its status is the command's, read from duho's
-  `args._passthrough_` (the parsed instance carries everything after the
-  first bare `--`). A `pyz` path is named `<path>.pyz` unless it already ends
-  so; a `dir` path is used as given. Targets must
-  come **before** the separator; a stray tail, or a command that reads none,
-  is reported rather than dropped.
-  An existing `--path` is replaced only if a previous deploy wrote its digest
-  marker (`<path>/.digest` for `dir`, `<path>.digest` for `pyz`); anything else
-  raises `FileExistsError` and is left alone — `--force` only skips the
-  "already current" check. Both layouts are written beside the target and
-  renamed into place, and a `dir` deploy interrupted between its renames is
-  restored from `<path>.old` on the next run.
-
-  `--source` picks **what** gets bundled and `--mode` the output **layout**
-  (zipapp or unpacked tree), with one constraint: `--source repo` requires
-  `--mode dir` and is refused with the default `pyz`, because a zipapp needs an
-  importable package root and a working tree has none. That and a relative
-  `--path` are usage errors (exit status 2) reported once, before any target.
-  - `installed` (default) — the resolved dependency closure. Probes what the
-    host already has (and its PEP 508 marker environment) and bundles only the
-    difference. `--pkg-root`/`--pkg-name` name the distribution and its import
-    name (default `PYTRUENAS_PKG_ROOT`/`PYTRUENAS_PKG_NAME`, else pytruenas);
-    `--extra` adds an extra's dependencies, `--skip` never bundles a named
-    distribution.
-  - `repo` — a working tree copied as-is from `--repo-root` (default `.`),
-    filtered by whichever of `.gitignore`/`.ignore`/`.bundleignore` exist.
-    `--ignore-file` narrows that selection; `--ignore-pattern` adds a
-    gitignore-style pattern applied after them (a leading `!` un-ignores).
-    `--pythonpath` names directories, relative to the repo root, to put on the
-    launcher's `PYTHONPATH` (default: whichever of `src/`, `lib/`, `vendor/`
-    and the root itself hold an importable package, in that order). It is a
-    `hostctl.deploy.SourceTree`; `pathspec` (and `tomli` below 3.11) come with
-    the core dependency `hostctl[deploy]`.
-    Repo mode does **not** vendor the repo's own dependencies — that needs
-    them installed here, the thing repo mode exists to avoid. It *logs* what
-    the repo declares as a heads-up; `--include`/`--exclude` adjust only that
-    logged list (each takes a bare dependency name or a bracketed `[extra]`,
-    exclude wins). `--skip` is the `installed`-mode counterpart and has no
-    effect here.
-
-### RunPath step directories (`duho.runpath`)
-
-A **RunPath** is a directory of numbered `NN-name.py` *step* files run in
-order, with no `__init__.py` — placed among the command sources
-(`PYTRUENAS_PATH` / `--cmdspath` / config `commandspath`, or nested one level
-inside a source directory) it becomes a subcommand named after the directory.
-`pytruenas` adopts `duho.runpath` (declared floor `duho>=0.7.5,<0.8`; `runpath`
-itself arrived in 0.4.0, `register(step_adapter=...)` in 0.5.2) and fans the whole
-step directory out **once per target**, each target getting its own connected
-`TrueNASClient` — the same per-target fan-out the built-in commands get. Author
-one with:
-
-- **`__main__.py`** (optional lifecycle) — `init(cmd, logger) -> ctx` builds
-  the per-target client (its return is the `ctx` every 2-arg step receives);
-  `success(ctx, cmd, logger)` / `finally_(ctx, cmd, logger)` run once after the
-  steps. `cmd` is the parsed command instance for THIS target (carrying
-  `cmd.target`, and any per-target state a step needs — e.g. `cmd.context = …`
-  stashed in `init` and read by later steps, isolated per target). Re-export
-  `pytruenas.utils.runpath.default_init` as `init` to build
-  `cmd._client_(cmd.target)` with no boilerplate.
-- **`NN-name.py`** step files — each exposes a `main`/`run`/`call` entrypoint;
-  written `main(cmd, ctx)` it receives the `__main__.py` context, written
-  `main(cmd)` it does not (arity-detected). A step may set module-level
-  `PRIORITY`, `REQUIRED`, `BEFORE`, `AFTER` (ordering) — see `duho.runpath`.
-- **`-O`/`--rcopts PATTERN[,PATTERN…]`** selects steps (fnmatch on step name):
-  `!name` disables, `!*,build` = disable-all-then-enable-`build`, filename
-  `!`/`!strict`/`!enable` tokens set per-step defaults. The grammar and its
-  precedence are `duho.runpath`'s (see the `duho` docs / CHANGELOG for the
-  authoritative description — not restated here to avoid drift).
-
-**Fidelity to the private predecessor (grammar is `duho`'s, two original bugs
-FIXED not reproduced).** This RunPath support restores the predecessor's
-per-target `RunPathCmd` *capability*; the step signature is `duho`'s native
-`main(cmd, ctx)` rather than the predecessor's literal
-`run(client, args, logger)` (the logger travels on `cmd`, the client is `ctx`)
-— capability-parity, not signature-parity. The filename-modifier / `--rcopts`
-grammar follows the predecessor's `RcOptions.from_matchstring` *intent*, with
-two confirmed original bugs deliberately **fixed, not reproduced**: (1) the
-predecessor's disable token was misspelled `:!enable` and set a nonexistent
-`.enable` attribute instead of the real `.enabled` field, so filename-driven
-leading-`!` disable was silently broken — `duho` uses the consistent
-`enable`/`!enable` spelling throughout; (2) the predecessor's `Extend(",")`
-had a latent nested-list double-collection bug (dormant only because its own
-arg layer never built a `list[T]` splitter) — `duho`'s richer list-type
-dispatch would have made it live, and it is already fixed there (the same fix
-that flattens `--cmdspath a:b` to `['a', 'b']`). Do not read this support as
-exact behavioral parity where `duho` intentionally improved on the original.
-
 ## Transport providers (`pytruenas.providers`, `pytruenas.webshell`)
 
-The objects behind the table above. A caller never needs them to use a host --
-`executor=`/`path=` name them by string -- but they are public, so a consumer
-can compose a host of its own.
+The objects behind the provider table. A caller never needs them to use a
+host — `executor=`/`path=` name them by string — but they are public, so a
+consumer can compose a host of its own.
 
 - **`providers.local_providers()`** — `hostctl.local_providers()` unchanged: a
   fresh `(executor_provider, path_provider)` pair, both named `"local"`.
 - **`providers.TnasWsPathProvider(client)`** — the `filesystem.*` path provider
   (`"tnasws"`), which works over the API websocket with no SSH.
+- **`providers.WS_PATH_CAPABILITIES`** — the `frozenset` of path capabilities
+  `TnasWsPathProvider` declares to hostctl.
 - **`webshell.WebShellExecutorProvider(client)`** — the `"webshell"`
   executor provider. `.session` is its `WebShellSession` (created on first
   use); `.connect()` opens it, raising `hostctl.OperationNotStartedError`
@@ -927,17 +685,21 @@ can compose a host of its own.
   `hostctl.OperationNotStartedError`), `.stream` (the websocket as a
   `hostctl.console.ConsoleStream`; connects first), `.close()`, `.shell_id`.
   It runs no command itself: use `WebShellExecutor`, or `client.run(...)`.
+- **`webshell.clean_output(data: bytes) -> str`** — raw PTY bytes as text,
+  with escape sequences, prompts and CRs removed. For bytes read outside a
+  command's frame (a banner, an interactive session); command output never
+  passes through it.
 
-## `patch` (`pytruenas.patch`)
+## Host patching (`pytruenas.patch`)
 
 A toolkit for building your own patches to a host **beyond what the middleware
 API exposes**: templates rendered into files, systemd units, the middleware's
 own `etc_files` templates, and the ZFS `readonly` window that writing under
 `/usr` needs. The toolkit is supported and versioned like the rest of the
 package; the changes it makes are not supported by TrueNAS, and an update boots
-a new environment without them -- a patch is meant to be re-applied. Worked
-example, runnable offline against a stand-in client: the guide page "Patching a
-host" (`docs/guide/patch.md`).
+a new environment without them — a patch is meant to be re-applied. Worked
+example, runnable offline against a stand-in client: "Patching a host",
+<https://jose-pr.github.io/pytruenas/guide/patch/>.
 
 What a client must offer: `client.path(str)` (a path object with `exists`,
 `read_bytes`, `write_bytes`, `with_name`, `name`, `parent`, `mkdir`; `stat`,
@@ -975,7 +737,7 @@ check=, capture_output=, encoding=)` and `client.api.<ns>.<method>(...)`. A
     the suffix). The first *changing* write copies the original to
     `<name><suffix>` (complete or not at all: written to a random sibling and
     renamed where the path has `replace`), or creates `<name><suffix>.absent`
-    when there was no file -- `read()` then raises `FileNotFoundError` and
+    when there was no file — `read()` then raises `FileNotFoundError` and
     `revert()` leaves the file, returning `False`. Every changing write also
     records digests of what it writes and what it found in
     `<name><suffix>.applied`; a file matching neither was rewritten by
@@ -989,7 +751,7 @@ check=, capture_output=, encoding=)` and `client.api.<ns>.<method>(...)`. A
   - `SystemFile(path: str, client, etc=None, services=None, baseline=True,
     writable=False, mode=None)` — a `FileTarget` on `client.path(path)`.
     `etc`/`services` take one name, `"a,b"` or a sequence (`as_names`). After
-    a change -- a write or a revert -- each etc group is regenerated with its
+    a change — a write or a revert — each etc group is regenerated with its
     own `client.api.etc.generate(group)` and each service reloaded with
     `client.api.service.reload(name)`. If that fails, the previous content is
     put back (a file the write created is removed) and the error raised, so
@@ -1026,16 +788,16 @@ check=, capture_output=, encoding=)` and `client.api.<ns>.<method>(...)`. A
 - **`middleware`**
   - `middlewared_path(client)` — the `middlewared` package directory as a
     `client.path`, by running `python3 -c "import middlewared ..."` on the host
-    (no API method reports it, checked against 26.0); `RuntimeError` on an
-    empty answer.
+    (no API method reports it on 26.0); `RuntimeError` on an empty answer.
   - `MiddlewareFiles(client=None, module_path=None)` — `client=None` is a
-    local `TrueNASHost()`; `module_path` is located on first use (`repr()` never locates it). `find_template(template,
-    etc=None, services=None, baseline=True, writable=False) -> SystemFile`
-    searches `TEMPLATE_DIRS` (`etc_files`, then `etc_files/local`; the first
-    match wins) for `template` and `template.mako`; `FileNotFoundError` names
-    every path tried. `baseline` defaults to **True**: `read()` never writes, so
-    it works on the read-only `/usr` dataset, and the snapshot is taken by the
-    first changing write -- pass `writable=True` for that write.
+    local `TrueNASHost()`; `module_path` is located on first use (`repr()`
+    never locates it). `find_template(template, etc=None, services=None,
+    baseline=True, writable=False) -> SystemFile` searches `TEMPLATE_DIRS`
+    (`etc_files`, then `etc_files/local`; the first match wins) for `template`
+    and `template.mako`; `FileNotFoundError` names every path tried.
+    `baseline` defaults to **True**: `read()` never writes, so it works on the
+    read-only `/usr` dataset, and the snapshot is taken by the first changing
+    write — pass `writable=True` for that write.
     `find_file(path, *args, cls=None, **kwargs)` wraps a file under the package
     (`cls` default `SystemFile`); a file whose own baseline is all that is left
     still counts as present.
@@ -1068,171 +830,27 @@ check=, capture_output=, encoding=)` and `client.api.<ns>.<method>(...)`. A
     rather than putting a URI into a command line. `PathLike` is
     `str | path`.
 
-## `codegen` (`pytruenas.codegen`)
+## Typings generator (`pytruenas.codegen`)
 
 Backs the `generate-typings` command; not typically used directly.
 
 - **`Codegen().generate(api: Version, root: Path | str)`** — write one
-  `__init__.pyi` per API namespace under `root`, rendered from the
-  `namespace.pyi.j2` Jinja template. `api` is one entry from
-  `client.dump_api()["versions"]` (see `pytruenas.models.apidump`). Renders
-  into a temporary sibling and swaps it in only when complete: the previous
-  tree is renamed aside and deleted after the new one is in place, so a
-  failure (on Windows, a stub held open or a shell inside the tree) leaves the
-  previous output intact and no temporary directory behind; a previous tree
-  that cannot be deleted is logged at WARNING. `root` is replaced only if it
-  is absent, empty, or a previous output (marked `.pytruenas-typings`); otherwise
-  `FileExistsError` — hand-written stubs included. Missing `jinja2` raises
-  `hostctl.MissingExtraError` naming `pytruenas[codegen]` before anything is
-  touched.
+  `__init__.pyi` per API namespace under `root`, rendered from the bundled
+  Jinja template (`pytruenas/codegen/namespace.pyi.j2`). `api` is one entry
+  from `client.dump_api()["versions"]` (see `pytruenas.models.apidump`).
+  Renders into a temporary sibling and swaps it in only when complete: the
+  previous tree is renamed aside and deleted after the new one is in place, so
+  a failure (on Windows, a stub held open or a shell inside the tree) leaves
+  the previous output intact and no temporary directory behind; a previous
+  tree that cannot be deleted is logged at WARNING. `root` is replaced only if
+  it is absent, empty, or a previous output (marked `.pytruenas-typings`);
+  otherwise `FileExistsError` — hand-written stubs included. Missing `jinja2`
+  raises `hostctl.MissingExtraError` naming `pytruenas[codegen]` before
+  anything is touched.
+- **`codegen.BadApiName`** (`ValueError`) — a dump name that would write
+  outside the output directory.
 
-## `models` (`pytruenas.models`)
-
-TypedDict schemas; import the submodules directly. The `models.jsonschema`
-types also carry `get_type`/`python_declaration`, which the typings generator
-uses.
-
-- **`pytruenas.models.apidump`** — `Api` (`{"versions": [Version, ...]}`),
-  `Version` (`{"version", "methods", "events"}`), `Method`
-  (`{"name", "roles", "doc", "schemas"}`), `Event`.
-- **`pytruenas.models.jsonschema`** — the JSON-Schema-shaped `Schema`/`Object`/
-  `Array` TypedDicts used by `Method.schemas`.
-
-## `utils` (`pytruenas.utils`)
-
-- **`target.Target`** (`NamedTuple`: `scheme, username, password, host, port,
-  path, query, fragment`) — a parsed connection string.
-  `Target.parse(connectionstring, resolve_port=True, **defaults) -> Target`
-  (raises `ValueError` for a string that does not parse as a URI, naming the
-  characters to percent-encode and never quoting the credentials);
-  `.uri` reassembles it; `.is_local` checks for
-  `""`/`"localhost"`/`"127.0.0.1"`; `.qsl` / `.query_val(key, default=None,
-  *, islist=False)` read the query string.
-- **`query`** — `EQ`/`NE`/`RE`/`GT`/`GE`/`LT`/`LE`/`IN`/`NIN` filter-operator
-  wrappers for `Namespace._query`/`_get` kwargs (bare values default to
-  `EQ`); `EXCLUDE` sentinel to drop a kwarg from a filter/update entirely;
-  `Option(name, value)` + `Option.options(*opts)` merge dict/tuple/`Option`
-  opts passed to `_query`/`_upsert`/etc.; `diff(base, against) -> dict` (keys
-  in `against` whose value differs from `base`, comparing a property-shaped
-  `{"value"/"parsed"/"rawvalue"}` current against a scalar, and a partial dict
-  on its own keys only); `MISSING`, the "not reported at all" sentinel (an
-  instance, like `EXCLUDE`);
-  `filter_from_kwargs(**kwargs) -> list[QueryFilter]`, which builds the
-  middleware's filter list those kwargs stand for —
-  `[("username", "=", "root"), ("uid", ">", 0)]` — what `_query` uses
-  internally, and the way to build a filter without a client.
-- **`cmd`** — see "Writing a command module" above. Also holds
-  **`json_value(raw)`**, the decoding `call -p` and `query -f` share (a JSON
-  value, falling back to the raw string), and **`ENV`**, the
-  single `duho.env.Env("pytruenas")` accessor every `PYTRUENAS_*` setting is
-  read through (`autoload=False`; see "Environment variables").
-- **`runpath`** — helpers for authoring a RunPath step directory (see "RunPath
-  step directories" above): `default_init(cmd, logger) -> TrueNASClient` (the
-  per-target `__main__.py` client builder) and `PyTrueNASRunPathArgs` (the
-  shared root every RunPath command inherits — supplies the target fields /
-  fan-out methods and the trailing `TARGET` positional).
-- **`apicache`** — fetch and cache the API definition, two ways.
-  **Preferred, over the API alone:** `services(client, *, refresh=False,
-  version=None)` (`core.get_services` — the namespace index) and
-  `service_methods(client, service, *, refresh=False, version=None)`
-  (`core.get_methods(<service>)`). `version` keys the cache as it does for
-  `load`; omitted, each call reads it with a `system.info()` round trip, so a
-  caller making several reads it once and passes it. Both middleware
-  methods declare **no roles** and need **no command access**, so they work for
-  an API-key account with no shell, no SSH and no web shell; one namespace is a
-  small answer (`user`: 13 methods / 100 KB on 26.0). The filter is by
-  **service**, not method name — `core.get_methods("user.create")` returns `{}` —
-  and the unfiltered call is not usable at all, because the server closes the
-  websocket on that payload.
-  **The whole definition:** `load(client, *, refresh=False, version=None) -> Api`
-  and `fetch(client, *, keep_remote=False)`, via `middlewared --dump-api`. Needs
-  command access and weighs 24 MB, so it is the fallback — but it is the only
-  source for an *older* API version, and what `generate-typings` consumes.
-  Also `path_for(host, version)`, `store(api, path)` (atomic),
-  `ApiDumpError` (raised when a transfer does not reproduce the target's
-  sha256), `CHUNK_SIZE`/`CHUNK_ATTEMPTS`/`CHUNK_TIMEOUT`/`DUMP_TIMEOUT`/
-  `SERVICE_TIMEOUT`, and `REMOTE_DIR` (`/var/db/system` — on a data pool so it
-  survives an update, and not `noexec` the way `/tmp` is). Each fetch dumps
-  into a `mktemp` file of its own there, so concurrent fetches of one appliance
-  do not collide, and removes it afterwards. Every command carries
-  a timeout on purpose: the web shell waits forever by default, which turns a
-  stalled channel into an indefinite hang instead of a retry.
-- **`apihelp`** — render help from a dump slice; pure functions, no client.
-  `find(version, name)` (raises `UnknownMethod` with near-misses),
-  `methods(version)`, `namespaces(names)`, `parameters(method)`,
-  `returns(method)`, `payload_index(method)` (the **last** object-typed
-  parameter — the payload), `fields(method)` (the `--field=value` names),
-  `type_label(schema)`, `usage(name, method)`, `render(name, method)`,
-  `render_namespace(version, ns)`, `render_index(version)`. A parameter list is
-  `schemas.properties["Call parameters"].prefixItems`; the result is
-  `["Return value"]`.
-  `from_get_methods(name, entry)` and `methods_from_get_methods(found)`
-  normalize the **other** envelope — what `core.get_methods` returns, where the
-  parameters are `accepts`, the result is `returns` (a list), the doc is
-  `description`, and a `job` flag exists that the dump does not carry. Both
-  envelopes render through one path afterwards; `render` calls a job out **above**
-  the doc, because a job returns an id rather than a result and some docs run to
-  hundreds of words.
-- **`fields`** — coerce `--field=value` text per a property's schema.
-  `collect(tokens, fields) -> dict` builds a payload (dotted names nest, a
-  repeated name accumulates, `name:json=` takes literal JSON, `name=@file` reads
-  a file); `coerce(name, schema, raw)` casts one value; `split(token)` accepts
-  both spellings via `cmd.split_assignment`; `FieldError` carries the message,
-  and an unknown name or bad enum value names the alternatives. `TRUE`/`FALSE`
-  are the accepted boolean spellings — strict sets, because `bool("false")` is
-  `True` and would send the wrong value.
-- **`tls`** — the one TLS trust decision every leg uses.
-  **`context(sslverify) -> ssl.SSLContext | None`** (`None` when verification
-  is off) and **`ca_bundle(sslverify) -> (path, source) | None`**, which says
-  which bundle is trusted and where it came from (`"sslverify"` or the
-  environment variable's name). `CA_BUNDLE_ENV` is that variable list, in
-  precedence order.
-- **`io`** — internal helpers (byte-like checks); no stable external contract.
-
-## Environment variables
-
-Every `PYTRUENAS_*` setting is read through one accessor,
-`utils.cmd.ENV` (a `duho.env.Env("pytruenas")`), so the set is enumerable with
-`sorted(ENV)` rather than by grepping. Reading `os.environ` directly at each
-site is how this app once had three names for two settings. `autoload=False`
-on purpose: the companion-module feature would import a `pytruenas_env` module
-from anywhere on `sys.path` including the CWD, and a CLI is routinely run from
-a directory the user does not control.
-
-- **`PYTRUENAS_CONFIG`** — default path for the CLI's `--config` (YAML); the
-  file must exist. `PYTRUENAS_CFG` is still accepted as the older spelling.
-- **`PYTRUENAS_PATH`** — `os.pathsep`-separated extra command source(s) for CLI
-  discovery (read with `ENV.paths`, which splits on the platform separator, so
-  a Windows `C:\...` entry is not mis-split on its drive colon).
-- **`PYTRUENAS_PKG_ROOT` / `PYTRUENAS_PKG_NAME`** — the distribution `deploy`
-  bundles, and the package the deployed copy runs. For when pytruenas is a
-  *dependency* of the thing being deployed rather than the deliverable.
-- **`TN_CREDS`** — read by `Credentials.from_env()`, and by the CLI
-  (`PyTrueNASArgs._credentials_`) for a target that carries no credentials of
-  its own. Not prefixed, and not routed through `ENV`.
-- **`PYTRUENAS_CACHE`** — directory for the cached API definition (read by
-  `utils.apicache`), one gzipped file per host and API version. Default: the
-  platform user cache directory (`$XDG_CACHE_HOME/pytruenas`, or
-  `%LOCALAPPDATA%\pytruenas\cache`). A host label is sanitized to a single path
-  component, so a connection string cannot choose where the file lands.
-- **`PYTRUENAS_SSLVERIFY`** — the CLI's TLS default when no flag is given: a
-  boolean (`true`/`false`/`1`/`0`/`yes`/`no`/`on`/`off`, ...) or an existing CA
-  bundle path. Empty is unset (the config file, then verify); anything else is
-  a `ValueError` naming the variable. The config file's `sslverify` takes the
-  same values.
-- **`PYTRUENAS_MCP`** — not read by pytruenas itself, nor through `ENV`:
-  `duho`'s (≥0.6.0) own `<PREFIX>_MCP` launch trigger, keyed off this app's
-  `Env` prefix. Setting `PYTRUENAS_MCP=stdio` makes `main()` serve MCP over
-  stdio instead of the normal CLI dispatch, exposing every built-in command
-  (`call`, `query`, `deploy`, ...) and RunPath command as an MCP tool, whose
-  `targets` argument names the hosts (none: `localhost`). Checked in both `duho.main`
-  and `duho.app`, so it applies here regardless of entry point. No opt-out is
-  set — `_mcp_ = False` on `PyTrueNAS` (`main.py`) or `app(mcp=False)` in its
-  `app(...)` call would disable it — so this is accepted, documented behavior.
-- **`CALL_TIMEOUT`** — default per-call JSON-RPC timeout in seconds, read at
-  import time by `pytruenas.connection`. Also unprefixed.
-
-### Generated typings (`generate-typings` output)
+## Generated typings (`generate-typings` output)
 
 - The package root exports **`Current`**, an alias for the generated version
   class (`V2600` for v26.0.0), so the documented `TrueNASClient[Current]`
@@ -1274,32 +892,503 @@ a directory the user does not control.
   member. Call it as `ns(_method="subscribe", ...)`; generation logs each one
   it skipped at INFO.
 
-## Optional extras and their gating imports
+## Schemas (`pytruenas.models`)
 
-A missing extra raises `hostctl.MissingExtraError` (an `ImportError`) at first
-use, never at import time: `FEATURE needs the 'EXTRA' extra: pip install
-"pytruenas[EXTRA]"` for pytruenas's own (`.distribution == "pytruenas"`),
-`"hostctl[EXTRA]"` for hostctl's.
+TypedDict schemas; import the submodules directly. The `models.jsonschema`
+types also carry `get_type`/`python_declaration`, which the typings generator
+uses.
 
-- **`ssh`** (`hostctl[ssh]>=0.4.0,<0.5`, i.e. asyncssh + sftppath) —
-  required for `.ssh`, `.run()` over SSH, and the `sftp` path leg; without
-  it the host has no `ssh`/`sftp` provider and `run()`/`path()` use the
-  websocket ones. **Not** required by `.install_sshcreds`, which provisions
-  over the middleware API; only deriving a public key from a caller-supplied
-  `private_key=` needs a key library, and `cryptography` (which `asyncssh`
-  itself depends on) is preferred over `asyncssh` for that (with neither,
-  `MissingExtraError` names `pytruenas[ssh]`).
-- **`config`** (`pyyaml`) — required to read a CLI `--config` YAML file;
-  missing it with a config file present raises `MissingExtraError` naming
-  `pytruenas[config]` and the file.
-- **`codegen`** (`jinja2`) — required by `pytruenas.codegen`/`generate-typings`;
-  `MissingExtraError` names `pytruenas[codegen]` before anything is written,
-  and before `generate-typings` dumps the API from a host.
-- **`repo`** (`hostctl[deploy]`) — what `deploy --source repo` needs, which
-  the core dependency `hostctl[deploy]` already installs; kept so an existing
-  `pytruenas[repo]` requirement resolves. Without hostctl's `deploy` extra,
-  `deploy` raises `hostctl.MissingExtraError` naming it.
+- **`pytruenas.models.apidump`** — `Api` (`{"versions": [Version, ...]}`),
+  `Version` (`{"version", "methods", "events"}`), `Method`
+  (`{"name", "roles", "doc", "schemas"}`), `Event`.
+- **`pytruenas.models.jsonschema`** — the JSON-Schema-shaped `Schema`/`Object`/
+  `Array` TypedDicts used by `Method.schemas`.
 
-(There is no `host` extra. It existed for `pytruenas.ops.host`'s adapter
-discovery, which moved from `ifaddr` to `netimps` — a core dependency — and the
-module has since been removed outright.)
+## Utilities (`pytruenas.utils`)
+
+- **`target.Target`** (`NamedTuple`: `scheme, username, password, host, port,
+  path, query, fragment`) — a parsed connection string.
+  `Target.parse(connectionstring, resolve_port=True, **defaults) -> Target`
+  (raises `ValueError` for a string that does not parse as a URI, naming the
+  characters to percent-encode and never quoting the credentials);
+  `.uri` reassembles it; `.redacted` is that URI without the password;
+  `.is_local` checks for `""`/`"localhost"`/`"127.0.0.1"`; `.qsl` /
+  `.query_val(key, default=None, *, islist=False)` read the query string.
+- **`target.redact(connectionstring) -> str`** — the string with its password
+  **removed** (`wss://root:secret@nas` -> `wss://root@nas`), never masked, so
+  the result is still a usable target; delegates to `hostctl.host.redact_uri`,
+  so pytruenas and hostctl render a target identically. Never raises; a string
+  with no userinfo comes back unchanged.
+- **`query`** — `EQ`/`NE`/`RE`/`GT`/`GE`/`LT`/`LE`/`IN`/`NIN` filter-operator
+  wrappers for `Namespace._query`/`_get` kwargs (bare values default to
+  `EQ`); `EXCLUDE` sentinel to drop a kwarg from a filter/update entirely;
+  `Option(name, value)` + `Option.options(*opts)` merge dict/tuple/`Option`
+  opts passed to `_query`/`_upsert`/etc.; `diff(base, against) -> dict` (keys
+  in `against` whose value differs from `base`, comparing a property-shaped
+  `{"value"/"parsed"/"rawvalue"}` current against a scalar, and a partial dict
+  on its own keys only); `MISSING`, the "not reported at all" sentinel (an
+  instance, like `EXCLUDE`);
+  `filter_from_kwargs(**kwargs) -> list[QueryFilter]`, which builds the
+  middleware's filter list those kwargs stand for —
+  `[("username", "=", "root"), ("uid", ">", 0)]` — what `_query` uses
+  internally, and the way to build a filter without a client.
+- **`cmd`** — the CLI's args root and output helpers; see
+  [Command line](#command-line).
+- **`runpath`** — helpers for authoring a RunPath step directory; see
+  [Command line](#command-line).
+- **`apicache`** — fetch and cache the API definition, two ways.
+  **Preferred, over the API alone:** `services(client, *, refresh=False,
+  version=None)` (`core.get_services` — the namespace index) and
+  `service_methods(client, service, *, refresh=False, version=None)`
+  (`core.get_methods(<service>)`). `version` keys the cache as it does for
+  `load`; omitted, each call reads it with a `system.info()` round trip, so a
+  caller making several reads it once and passes it. Both middleware
+  methods declare **no roles** and need **no command access**, so they work for
+  an API-key account with no shell, no SSH and no web shell; one namespace is a
+  small answer (`user`: 13 methods / 100 KB on 26.0). The filter is by
+  **service**, not method name — `core.get_methods("user.create")` returns `{}` —
+  and the unfiltered call is not usable at all, because the server closes the
+  websocket on that payload.
+  **The whole definition:** `load(client, *, refresh=False, version=None) -> Api`
+  and `fetch(client, *, keep_remote=False)`, via `middlewared --dump-api`. Needs
+  command access and weighs 24 MB, so it is the fallback — but it is the only
+  source for an *older* API version, and what `generate-typings` consumes.
+  Also `cache_root()` (the cache directory: `$PYTRUENAS_CACHE`, else the
+  platform user cache directory), `path_for(host, version)`, `store(api,
+  path)` (atomic), `ApiDumpError` (`RuntimeError`, raised when a transfer does
+  not reproduce the target's sha256),
+  `CHUNK_SIZE`/`CHUNK_ATTEMPTS`/`CHUNK_TIMEOUT`/`DUMP_TIMEOUT`/
+  `SERVICE_TIMEOUT`, and `REMOTE_DIR` (`/var/db/system` — on a data pool so it
+  survives an update, and not `noexec` the way `/tmp` is). Each fetch dumps
+  into a `mktemp` file of its own there, so concurrent fetches of one appliance
+  do not collide, and removes it afterwards. Every command carries
+  a timeout on purpose: the web shell waits forever by default, which turns a
+  stalled channel into an indefinite hang instead of a retry.
+- **`apihelp`** — render help from a dump slice; pure functions, no client.
+  `find(version, name)` (raises `apihelp.UnknownMethod`, a `LookupError`, with
+  near-misses), `methods(version)`, `namespaces(names)`, `parameters(method)`,
+  `returns(method)`, `payload_index(method)` (the **last** object-typed
+  parameter — the payload), `fields(method)` (the `--field=value` names),
+  `type_label(schema)`, `usage(name, method)`, `render(name, method)`,
+  `render_namespace(version, ns)`, `render_index(version)`. A parameter list is
+  `schemas.properties["Call parameters"].prefixItems`; the result is
+  `["Return value"]`.
+  `from_get_methods(name, entry)` and `methods_from_get_methods(found)`
+  normalize the **other** envelope — what `core.get_methods` returns, where the
+  parameters are `accepts`, the result is `returns` (a list), the doc is
+  `description`, and a `job` flag exists that the dump does not carry. Both
+  envelopes render through one path afterwards; `render` calls a job out **above**
+  the doc, because a job returns an id rather than a result and some docs run to
+  hundreds of words.
+- **`fields`** — coerce `--field=value` text per a property's schema.
+  `collect(tokens, fields) -> dict` builds a payload (dotted names nest, a
+  repeated name accumulates, `name:json=` takes literal JSON, `name=@file` reads
+  a file); `coerce(name, schema, raw)` casts one value; `split(token)` accepts
+  both spellings via `cmd.split_assignment`; `fields.FieldError` (a
+  `ValueError`) carries the message, and an unknown name or bad enum value
+  names the alternatives. `TRUE`/`FALSE` are the accepted boolean spellings —
+  strict sets, because `bool("false")` is `True` and would send the wrong
+  value.
+- **`tls`** — the one TLS trust decision every leg uses.
+  **`context(sslverify) -> ssl.SSLContext | None`** (`None` when verification
+  is off) and **`ca_bundle(sslverify) -> (path, source) | None`**, which says
+  which bundle is trusted and where it came from (`"sslverify"` or the
+  environment variable's name). `CA_BUNDLE_ENV` is that variable list, in
+  precedence order.
+- **`io`** — internal helpers (byte-like checks); no stable external contract.
+
+## Exceptions
+
+**`TrueNASError(Exception)`** (`pytruenas.exceptions`) is the base of every
+error pytruenas raises at run time; `except pytruenas.TrueNASError` catches all
+of these, and every one is exported from `pytruenas`:
+
+| class (module) | raised when |
+| --- | --- |
+| `ClientException` (`connection`) | the middleware failed a call (`.errno`, `.trace`, `.extra`) |
+| `ValidationErrors` (`connection`) | the server rejected the arguments, per field |
+| `CallTimeout` (`connection`) | no answer within the timeout |
+| `ConnectionClosed` (`connection`) | the connection dropped before the answer |
+| `JobFailed` (`connection`) | a middleware job ended `FAILED`/`ABORTED` |
+| `AuthenticationError` (`auth`) | a login was refused |
+
+- **`ClientException(error, errno=None, trace=None, extra=None)`**
+  (`TrueNASError`) — base error for any call/connection failure; `errno`
+  carries a POSIX errno when the middleware's `[ERRNO] message` prefix maps to
+  one.
+- **`ValidationErrors(errors)`** (`ClientException`) — per-field validation
+  errors; `.errors` is `list[(attribute, errmsg, errcode)]`.
+- **`JobFailed(job)`** (`ClientException`) — raised by `TrueNASHost.wait` (and
+  `job=True`, `.download`) for a `FAILED`/`ABORTED` job; `.job` is the
+  `core.get_jobs` record, `.errno` the middleware's errno when it reports one.
+- **`CallTimeout()`** (`ClientException`) — a call exceeded its timeout, or
+  `.wait(timeout=)` ran out (the job keeps running).
+- **`ConnectionClosed(sent)`** (`ClientException`, `errno` is `ECONNABORTED`) —
+  the connection closed before the response arrived. **`.sent`** is `False`
+  when the request never reached the socket (safe to repeat: `Namespace`
+  retries exactly these) and `True` when the server may have run it — a
+  create, a delete, a job start — so only the caller can decide. A plain
+  `ClientException(errno=ECONNABORTED)` carries no `.sent` and is treated as
+  "may have run".
+- **`AuthenticationError(response_type, response, method="login_ex")`**
+  (`TrueNASError`) — raised by `login_ex` on a non-`SUCCESS` response and by
+  the legacy `login` on a `False` answer; `.response_type` is the server
+  discriminator, `.response` the full dict; the message names `method`.
+
+A caller's mistake (an unknown keyword, a malformed target) is a plain
+`TypeError`/`ValueError`, not a `TrueNASError`. A failure before the websocket
+is open (a refused port, a TLS or HTTP error during the handshake) is raised by
+the socket or `websocket-client` as it is. Other exceptions, documented where
+they arise: `hostctl.MissingExtraError` (a missing extra),
+`hostctl.OperationNotStartedError` (a provider declined: `path(backend=)`, the
+web shell), `utils.apicache.ApiDumpError`, `apihelp.UnknownMethod`,
+`fields.FieldError`, `codegen.BadApiName`, and `duho.UsageError` from the CLI.
+
+## Command line
+
+`pytruenas = "pytruenas.main:main"` is the installed console script; `python
+-m pytruenas` is the same. User guide: <https://jose-pr.github.io/pytruenas/guide/cli/>.
+
+### Entry point (`pytruenas.main`)
+
+- **`main(name=None, argv=None, args=None, root=None) -> int`** — build the
+  `duho` app (`root`, default `PyTrueNAS`), discover commands (built-ins in
+  `pytruenas.cmd` plus any `PYTRUENAS_PATH` / `--cmdspath` / config
+  `commandspath` entries), parse `argv`, and dispatch the selected command
+  against every target concurrently. `args` is the shared args class every
+  command inherits (a `PyTrueNASArgs` subclass, default `root._ARGS_`; anything
+  else raises `TypeError`); a derived tool adds global options through it or by
+  subclassing `PyTrueNAS` with `_ARGS_` set. Raises `SystemExit` for `--help`,
+  `--version` and a usage error found while parsing; a `--config`/
+  `$PYTRUENAS_CONFIG` file that does not exist returns 2 with
+  `NAME: error: config file not found: PATH`. A `hostctl.MissingExtraError`
+  raised before any target runs (a `--config` file without the `config` extra)
+  prints `NAME: MESSAGE` to stderr and returns 125.
+- **`PyTrueNAS(PyTrueNASArgs, duho.Cli)`** — the app root; `--version` resolves
+  from installed package metadata.
+
+### Global options (`pytruenas.utils.cmd.PyTrueNASArgs`)
+
+`PyTrueNASArgs` (a `duho.LoggingArgs` mixin) carries the global fields every
+command sees: `config` (`--config`/`-c`, a path, default `$PYTRUENAS_CONFIG`,
+else `$PYTRUENAS_CFG`, else `./pytruenas.yaml`), `cmdspath` (`--cmdspath`,
+split on `:`), `sslverify` (`--sslverify`/`--no-sslverify`, unset by default),
+`insecure` (`--insecure`/`-k`), `parallel` (default `1`), `logto` (default `-`
+for stderr, or a `{target}`/`{isodate}` path template; each target's file gets
+only that target's records, `--parallel` included), plus `targets` (the
+trailing positionals, not a flag; each command declares the field last through
+`with_targets(args_cls)`, whose field type is `TargetsField`) and helper
+methods `._config_dict_()`/`._expanded_targets_()`. `._config_dict_()` is the
+YAML mapping (the `config` extra); the CLI reads three keys from it —
+`credentials`, `sslverify` and `commandspath` — and ignores any other. The
+implicit `./pytruenas.yaml` may be absent; a file named with `--config` or
+`$PYTRUENAS_CONFIG` must exist (`duho.UsageError`, exit status 2). Target
+expansion (commas and `[A-Z]`/`[0-9]` ranges) applies to the HOST part only —
+a comma or a range inside credentials is part of them — and credentials are
+carried onto every expanded host.
+
+These methods decide how a command connects, and are the only supported way
+to build a client from parsed args:
+
+- **`._config_is_implicit_() -> bool`** — whether the config file was found
+  (`./pytruenas.yaml`) rather than named by `--config`/`$PYTRUENAS_CONFIG`.
+  `main` refuses `commandspath` from an implicit file: that key names code to
+  import, and a CLI often runs in a directory its user does not control.
+- **`._sslverify_() -> bool|str`** — `-k`/`--insecure`, else
+  `--sslverify`/`--no-sslverify`, else `$PYTRUENAS_SSLVERIFY`, else the config
+  file's `sslverify`, else `True`. A string is a CA bundle path.
+- **`._credentials_() -> Credentials|None`** — `$TN_CREDS`, else the config
+  file's `credentials` (a connection string, or a mapping of keyword
+  arguments), else `None`.
+- **`._client_(target) -> TrueNASClient`** — the client for one target: the
+  above, with the credentials applied **only** when the target string carries
+  none (passing both raises). `main` and `runpath.default_init` both use it,
+  so a plain command and a RunPath step connect alike.
+
+Also in `pytruenas.utils.cmd`: **`with_targets(args_cls=None) -> type`**
+(`args_cls`, default `PyTrueNASArgs`, with `targets` declared last),
+**`TargetsField`** (that field's annotated type), **`register_targets(parser)`**
+(adds the trailing `targets` positional to a parser you build yourself; a
+command does not need it), **`CommandModule`** (a `Protocol` naming the
+`run(client, args, logger)` a command module exposes), **`emit(text)`** /
+**`emit_json(value, args=None)`** and **`json_default`** (below),
+**`json_value(raw)`** (the decoding `call -p` and `query -f` share: a JSON
+value, falling back to the raw string), and **`ENV`**, the single
+`duho.env.Env("pytruenas", autoload=False)` accessor every `PYTRUENAS_*`
+setting is read through (see [Environment variables](#environment-variables)).
+
+### Built-in commands (`pytruenas.cmd`)
+
+- **`query <namespace> [-f/--filter KEY=VALUE ...] [targets...]`** — prints
+  `client.api[namespace]._query(**filters)` as JSON. Only works on queryable
+  namespaces (`<namespace>.query` must exist), e.g. `user`, `pool.dataset`.
+- **`call <method> [-p/--param JSON ...] [--no-schema] [--refresh-api]
+  [targets...] [-- --field=value ...]`** — prints
+  `client.api[method](*params)` as JSON; works for any dotted method name,
+  including non-queryable ones like `system.info`.
+  After a literal `--`, **fields** replace hand-written JSON:
+  `--field=value` and bare `field=value` are interchangeable, and each is
+  typed from the method's own schema (booleans from the strict true/false
+  sets, integers, `null` for a nullable field, arrays from a comma list *or* a
+  repeated flag, nested objects from dotted names). `--name:json=<json>` takes a
+  literal JSON value and `--name=@path` reads one from a file. Fields fill the
+  **last object-typed parameter**, so `call user.update -p 1 nas1 --
+  --full_name=x` still reads its id from `-p`. An unknown field name or a bad
+  enum value is an error naming the alternatives, raised **before** anything is
+  called — nothing partial reaches the appliance. The separator is required
+  because the valid names are only known after the method is parsed, so
+  top-level flags would collide with the globals. `--no-schema` types fields the
+  way `-p` does and validates nothing; `--refresh-api` re-fetches the
+  definition.
+- **`help NAME [--json] [--dump] [--api-version V] [--refresh-api]
+  [targets...]`** — CLI-style help. `NAME` is a method (`user.create`: usage,
+  every field with type/required/default/enum values, whether it is a job, and
+  the return type), a namespace (`user`: its methods with their first doc line),
+  or **`all`**/`.` for the index of namespaces. `NAME` is **required** and comes
+  first, like `query`'s namespace: made optional, argparse would claim the lone
+  token of `help nas1` and leave no target, so the index is spelled `all`.
+  The source is the **API itself**, per namespace (`core.get_services` +
+  `core.get_methods(<service>)`), which needs no roles and **no command access** —
+  it works for an API-key account with no shell. `--dump` uses the full
+  `middlewared --dump-api` instead (needs command access; required only for
+  `--api-version`, which the live API cannot report). Either way it reads the
+  definition, never generated stubs: a `.pyi` carries names and types only, while
+  descriptions, defaults, enum values and required-ness exist solely in the
+  definition the stubs are generated from.
+- **`dump-api [targets...]`** — prints `client.dump_api()` as JSON.
+- **`generate-typings [--api-version V] [--path DIR] [--api-cache FILE]
+  [targets...]`** — dumps (or reads a cached) API definition and writes
+  `.pyi` stubs via `pytruenas.codegen.Codegen().generate(version, path)`.
+  `--path` defaults to `truenasapi_typings/current`; only an absent or empty
+  directory, or one a previous run marked `.pytruenas-typings`, is replaced.
+  Without the `codegen` extra it fails before dumping the API.
+- **`deploy [--path PATH] [--mode pyz|dir] [--source installed|repo]
+  [--pkg-root DIST] [--pkg-name PKG] [--extra E] [--skip DIST] [--force]
+  [--repo-root PATH] [--ignore-file FILE] [--ignore-pattern PATTERN]
+  [--include NAME] [--exclude NAME] [--pythonpath DIR] [targets...]
+  [-- COMMAND ...]`** — installs pytruenas (or the caller's own distribution)
+  ON the target so it can run there, through `hostctl.deploy.deploy()` (the
+  probe, closure, reproducible payload, digest marker and atomic install are
+  hostctl's; this command is the policy around it). Defaults to
+  `/var/db/system/pytruenas.pyz` — a dataset on a *data* pool, which survives
+  an update, unlike `/var/db` itself (boot environment). Anything after `--`
+  runs on the target afterwards as `hostctl.Exec(*deployment.command,
+  *args)` and its status is the command's, read from duho's
+  `args._passthrough_` (the parsed instance carries everything after the
+  first bare `--`). A `pyz` path is named `<path>.pyz` unless it already ends
+  so; a `dir` path is used as given. Targets must come **before** the
+  separator; a stray tail, or a command that reads none, is reported rather
+  than dropped.
+  An existing `--path` is replaced only if a previous deploy wrote its digest
+  marker (`<path>/.digest` for `dir`, `<path>.digest` for `pyz`); anything else
+  raises `FileExistsError` and is left alone — `--force` only skips the
+  "already current" check. Both layouts are written beside the target and
+  renamed into place, and a `dir` deploy interrupted between its renames is
+  restored from `<path>.old` on the next run.
+
+  `--source` picks **what** gets bundled and `--mode` the output **layout**
+  (zipapp or unpacked tree), with one constraint: `--source repo` requires
+  `--mode dir` and is refused with the default `pyz`, because a zipapp needs an
+  importable package root and a working tree has none. That and a relative
+  `--path` are usage errors (exit status 2) reported once, before any target.
+  - `installed` (default) — the resolved dependency closure. Probes what the
+    host already has (and its PEP 508 marker environment) and bundles only the
+    difference. `--pkg-root`/`--pkg-name` name the distribution and its import
+    name (default `PYTRUENAS_PKG_ROOT`/`PYTRUENAS_PKG_NAME`, else pytruenas);
+    `--extra` adds an extra's dependencies, `--skip` never bundles a named
+    distribution.
+  - `repo` — a working tree copied as-is from `--repo-root` (default `.`),
+    filtered by whichever of `.gitignore`/`.ignore`/`.bundleignore` exist.
+    `--ignore-file` narrows that selection; `--ignore-pattern` adds a
+    gitignore-style pattern applied after them (a leading `!` un-ignores).
+    `--pythonpath` names directories, relative to the repo root, to put on the
+    launcher's `PYTHONPATH` (default: whichever of `src/`, `lib/`, `vendor/`
+    and the root itself hold an importable package, in that order). It is a
+    `hostctl.deploy.SourceTree`; `pathspec` (and `tomli` below 3.11) come with
+    the core dependency `hostctl[deploy]`.
+    Repo mode does **not** vendor the repo's own dependencies — that needs
+    them installed here, the thing repo mode exists to avoid. It *logs* what
+    the repo declares as a heads-up; `--include`/`--exclude` adjust only that
+    logged list (each takes a bare dependency name or a bracketed `[extra]`,
+    exclude wins). `--skip` is the `installed`-mode counterpart and has no
+    effect here.
+
+### Writing a command module (`pytruenas.cmd.*` or a `--cmdspath` entry)
+
+A command is a plain module exposing:
+
+- **`run(client, args, logger)`** — required; the command body, called once
+  per target with a connected `TrueNASClient`. A module without it is skipped
+  at discovery (with a warning) rather than offered and then failing.
+  `args` is a **per-target copy** carrying **`args.target`** (this target's
+  connection string), so state a command writes on it cannot reach another
+  target. The CLI closes a client it built when the command finishes; one an
+  `init` hook returned is left alone. Return an exit code — never raise
+  `SystemExit` from a command body: it runs in a fan-out worker, where raising
+  it aborts the whole run and discards the other targets' codes. A
+  `hostctl.MissingExtraError` out of `run` (an optional extra not installed,
+  hostctl's or pytruenas's) ends that target with one ERROR line and status
+  125, as hostctl's own command line does; any other exception keeps its
+  traceback.
+  Write results through `utils.cmd.emit_json(value, args)` (or `emit(text)`):
+  one locked write, so concurrent targets cannot interleave mid-line, and with
+  more than one target each line is `{"target": ..., "result": ...}` with the
+  credentials removed. `utils.cmd.json_default` is the encoder fallback (sets
+  become sorted lists, dates ISO strings, bytes text, anything else its
+  `str()`).
+- **`Args`** — optional; a `PyTrueNASArgs` subclass declaring the command's own
+  CLI fields (added to the subparser before `register` runs). Preferred over
+  `register`: an annotated attr + docstring + bare flags-tuple becomes a CLI
+  field, e.g. `("method",)` for a positional or `("--param", "-p")` for an
+  option. A `list[str]` option is repeatable as declared (`-f a -f b`, one
+  value per occurrence), so it never swallows the trailing targets.
+- **`register(parser, args, logger)`** — optional; the imperative escape hatch,
+  for what declarations can't express (mutually-exclusive/titled groups). The
+  trailing `TARGET...` positionals are declared centrally as the command's last
+  field (`pytruenas.utils.cmd.with_targets`, applied by `main()` to every
+  module command), so a command never declares them itself — declared and
+  `register`-added positionals both land ahead of the targets, and the targets
+  are part of the command's MCP tool schema.
+- **`_allow_passthrough_ = True`** — optional, module level; the command reads
+  the arguments after `--` (`args._passthrough_`). Without it, a `--` tail is
+  reported as ignored. RunPath commands are taken to read it.
+- **`validate_args(args)`** — optional; called once with the parsed args
+  before any target runs or any client is built. Raise `duho.UsageError` for
+  an invocation the arguments alone show cannot work: it is reported once as
+  `pytruenas: error: MESSAGE` with exit status 2, instead of failing every
+  target.
+- **`init(args, logger) -> client`**, **`success(client, args, logger)`**,
+  **`finally_(client, args, logger)`** — optional lifecycle hooks
+  (`finally_` always runs).
+
+### RunPath step directories (`pytruenas.utils.runpath`)
+
+A **RunPath** is a directory of numbered `NN-name.py` *step* files run in
+order, with no `__init__.py` — placed among the command sources
+(`PYTRUENAS_PATH` / `--cmdspath` / config `commandspath`, or nested one level
+inside a source directory) it becomes a subcommand named after the directory.
+The discovery, ordering, filename modifiers and `--rcopts` selection are
+`duho.runpath`'s (requires `duho>=0.7.5,<0.8`); pytruenas fans the whole step
+directory out **once per target**, each target getting its own connected
+`TrueNASClient` — the same per-target fan-out the built-in commands get.
+Author one with:
+
+- **`__main__.py`** (optional lifecycle) — `init(cmd, logger) -> ctx` builds
+  the per-target client (its return is the `ctx` every 2-arg step receives);
+  `success(ctx, cmd, logger)` / `finally_(ctx, cmd, logger)` run once after the
+  steps. `cmd` is the parsed command instance for THIS target, carrying its
+  target string and any per-target state a step needs (an attribute stashed
+  in `init` and read by later steps is isolated per target). Re-export
+  `default_init` as `init` to build the client from the target with no
+  boilerplate.
+- **`NN-name.py`** step files — each exposes a `main`/`run`/`call` entrypoint;
+  written `main(cmd, ctx)` it receives the `__main__.py` context, written
+  `main(cmd)` it does not (arity-detected). A step logs through
+  `cmd._logger_`, already `[target]`-prefixed. A step may set module-level
+  `PRIORITY`, `REQUIRED`, `BEFORE`, `AFTER` (ordering) — see `duho.runpath`.
+- **`-O`/`--rcopts PATTERN[,PATTERN…]`** selects steps (fnmatch on step name):
+  `!name` disables, `!*,build` = disable-all-then-enable-`build`, filename
+  `!`/`!strict`/`!enable` tokens set per-step defaults. The grammar and its
+  precedence are `duho.runpath`'s (see the `duho` docs for the authoritative
+  description).
+
+The module exports:
+
+- **`default_init(cmd, logger) -> TrueNASClient`** — the per-target
+  `__main__.py` client builder: the parsed instance's `_client_()` for its
+  target.
+- **`PyTrueNASRunPathArgs`** — the shared root every RunPath command inherits:
+  `PyTrueNASArgs` (the target fields and fan-out methods, and `_logger_` via
+  `LoggingArgs`) plus the trailing `TARGET` positional, which puts the hosts in
+  a RunPath command's MCP tool schema.
+- **`step(entrypoint)`** — decorator letting a step use the module command
+  signature `run(client, args, logger)`: `client` is the `ctx` from `init`,
+  `args` the per-target `cmd`, `logger` its `_logger_`. A step may declare
+  fewer parameters (`(client, args)` or `(client)`) and is handed only those.
+  Without it, a step written that way fails at run time (duho passes two
+  positionals, in the other order). Opt-in; a duho-native step needs nothing.
+
+## Environment variables
+
+Every `PYTRUENAS_*` setting is read through one accessor, `utils.cmd.ENV` (a
+`duho.env.Env("pytruenas")`), so the set is enumerable with `sorted(ENV)`.
+`autoload=False` on purpose: the companion-module feature would import a
+`pytruenas_env` module from anywhere on `sys.path` including the CWD, and a CLI
+is routinely run from a directory the user does not control.
+
+- **`PYTRUENAS_CONFIG`** — default path for the CLI's `--config` (YAML); the
+  file must exist. `PYTRUENAS_CFG` is read when it is unset.
+- **`PYTRUENAS_PATH`** — `os.pathsep`-separated extra command source(s) for CLI
+  discovery (read with `ENV.paths`, which splits on the platform separator, so
+  a Windows `C:\...` entry is not mis-split on its drive colon).
+- **`PYTRUENAS_PKG_ROOT` / `PYTRUENAS_PKG_NAME`** — the distribution `deploy`
+  bundles, and the package the deployed copy runs. For when pytruenas is a
+  *dependency* of the thing being deployed rather than the deliverable.
+- **`PYTRUENAS_CACHE`** — directory for the cached API definition (read by
+  `utils.apicache`), one gzipped file per host and API version. Default: the
+  platform user cache directory (`$XDG_CACHE_HOME/pytruenas`, `XDG_CACHE_HOME`
+  defaulting to `~/.cache`; or `%LOCALAPPDATA%\pytruenas\cache`). A host label
+  is sanitized to a single path component, so a connection string cannot
+  choose where the file lands.
+- **`PYTRUENAS_SSLVERIFY`** — the CLI's TLS default when no flag is given: a
+  boolean (`true`/`false`/`1`/`0`/`yes`/`no`/`on`/`off`, ...) or an existing CA
+  bundle path. Empty is unset (the config file, then verify); anything else is
+  a `ValueError` naming the variable. The config file's `sslverify` takes the
+  same values.
+- **`PYTRUENAS_MCP`** — not read by pytruenas itself, nor through `ENV`:
+  `duho`'s own `<PREFIX>_MCP` launch trigger, keyed off this app's `Env`
+  prefix. Setting `PYTRUENAS_MCP=stdio` makes `main()` serve MCP over stdio
+  instead of the normal CLI dispatch, exposing every built-in command
+  (`call`, `query`, `deploy`, ...) and RunPath command as an MCP tool, whose
+  `targets` argument names the hosts (none: `localhost`). Checked in both
+  `duho.main` and `duho.app`, so it applies here regardless of entry point.
+  It is enabled: no opt-out is set (`_mcp_ = False` on `PyTrueNAS`, or
+  `app(mcp=False)`, would disable it).
+- **`TN_CREDS`** — read by `Credentials.from_env()`, and by the CLI
+  (`PyTrueNASArgs._credentials_`) for a target that carries no credentials of
+  its own. Not prefixed, and not routed through `ENV`.
+- **`CALL_TIMEOUT`** — default per-call JSON-RPC timeout in seconds (60), read
+  at import time by `pytruenas.connection`. Not prefixed, and not routed
+  through `ENV`.
+- **`SSL_CERT_FILE`**, **`REQUESTS_CA_BUNDLE`**, **`CURL_CA_BUNDLE`**,
+  **`WEBSOCKET_CLIENT_CA_BUNDLE`** — the first one set is the CA bundle
+  `sslverify=True` trusts instead of the OS store (`utils.tls.CA_BUNDLE_ENV`).
+
+## Gotchas
+
+- **Middleware parameters are positional.** `client.api.user.query(filters)`,
+  not `filters=`: any keyword the method does not take raises `TypeError`.
+  The `_query`/`_get`/`_create`/`_update`/`_upsert` helpers take keywords.
+- **Nothing connects until first use.** Building a client or a
+  `TrueNASConfig` does no network I/O; a wrong host, port or credential
+  surfaces on the first call.
+- **A bare host means TLS.** `"nas"` is `wss://nas/api/current`; spell
+  `ws://` for plaintext, which logs a warning when credentials go to a
+  non-loopback host.
+- **Percent-encode a password** containing `/`, `?`, `#` or `@` in a target
+  string; an unencoded `@` after the host is read as part of the path.
+- **`ConnectionClosed.sent is True` means the call may have run.** Only an
+  unsent request is retried; decide yourself whether to repeat a create or a
+  delete.
+- **A subscription callback runs on the reader thread** and cannot make a call
+  (`RuntimeError`); consume `Subscription.events()` on another thread. A
+  subscription ends on a reconnect — re-subscribe when `events()` ends.
+- **A 2FA session needs `otp_provider`** to survive a reconnect; the one-time
+  code in the credential is spent by the first login.
+- **`core.job_wait` does not block** — it is itself a job. Use `job=True`,
+  `.wait()` or `.job_updates()`.
+- **`core.get_methods()` with no argument closes the websocket**; pass a
+  service name (`"user"`), not a method name (`"user.create"` returns `{}`).
+- **A middleware method named `subscribe`** is shadowed by
+  `Namespace.subscribe`; call it as `ns(_method="subscribe", ...)`.
+- **`.ssh` belongs to hostctl's event loop**: never await its coroutines on
+  your own loop.
+- **A relative remote path is rooted at `/`**, on every leg, not at a login
+  directory.
+- **Stats from a listing carry `st_mtime` 0** (`filesystem.listdir` reports no
+  mtime); call `stat()` when you need it.
+- **`--cmdspath` splits on `:`**, which breaks a Windows drive letter; use
+  `PYTRUENAS_PATH` (split on `os.pathsep`) there.
+- **Never raise `SystemExit` from a command body**: return an exit code.
+- **`TN_CREDS` and `CALL_TIMEOUT` are unprefixed**, and `CALL_TIMEOUT` is read
+  once, at import.
