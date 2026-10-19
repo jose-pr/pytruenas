@@ -865,24 +865,34 @@ class TrueNASWSConnection:
                 self._subs.clear()
             for sink in sinks:
                 sink._close()
-            if self._send_lock.locked():
-                # A blocked send holds the websocket's own lock, which its
-                # close() needs: shut the socket down first.
-                self._release()
-            try:
-                self._ws.close()
-            except Exception:
-                pass
+            if not self._send_lock.locked():
+                # The close frame, without waiting for the peer's answer as
+                # WebSocket.close() does: that wait reads the socket the
+                # reader thread is blocked on, so a peer that never answers
+                # held close() for good. A blocked send holds the frame lock.
+                try:
+                    self._ws.send_close()
+                except Exception:
+                    pass
         self._release()
 
     def _release(self) -> None:
-        """Shut the socket down, once. ``WebSocket.close()`` returns early once
-        websocket-client has marked the socket disconnected (as it does on a
-        server close), so this uses ``shutdown()``."""
+        """Shut the socket down, once.
+
+        ``shutdown(SHUT_RDWR)`` first: it is what wakes a read or a send
+        blocked on the socket in another thread on every platform, where
+        closing the descriptor alone does not on Linux.
+        """
         with self._release_lock:
             if self._released or self._ws is None:
                 return
             self._released = True
+        sock = getattr(self._ws, "sock", None)
+        if sock is not None:
+            try:
+                sock.shutdown(_socket.SHUT_RDWR)
+            except Exception:
+                pass
         try:
             self._ws.shutdown()
         except Exception:

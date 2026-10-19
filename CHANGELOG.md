@@ -192,6 +192,9 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   `error` raised `AttributeError`), and declines when no `connected` message
   arrives instead of returning a session with no shell behind it.
 - Turning TLS verification off logs one WARNING per host.
+- `TrueNASWSConnection.close()` sends the close frame without waiting for the
+  peer's answer: the wait read the socket the reader thread was blocked on, so
+  a peer that never answered held `close()` for good.
 - A call's timeout bounds its send: a peer that stopped reading held
   `call(..., timeout=)` -- and a `close()` behind it -- forever once the socket
   buffers filled. The send is aborted and the connection closed (part of the
