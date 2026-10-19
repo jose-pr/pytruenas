@@ -123,15 +123,9 @@ def emit_json(value: object, args: "PyTrueNASArgs | None" = None) -> None:
 if _ty.TYPE_CHECKING:
     from ..host import TrueNASHost as TrueNASClient
 
-#: Every ``PYTRUENAS_*`` setting, read through one accessor.
-#:
-#: Reading ``os.environ`` directly at each site is how this app ended up with
-#: three names for two settings (``PYTRUENAS_CFG`` here, ``PYTRUENAS_CONFIG``
-#: in ``ops``, ``PYTRUENAS_PATH`` in ``main``) -- a prefixed accessor makes the
-#: full set enumerable (``list(ENV)``) instead of something you find by
-#: grepping. ``.paths()`` also splits on ``os.pathsep`` rather than a hardcoded
-#: separator, so a Windows ``C:\...`` entry is not mis-split on its drive
-#: colon.
+#: Every ``PYTRUENAS_*`` setting, read through one accessor, so the full set is
+#: enumerable (``list(ENV)``). ``.paths()`` splits on ``os.pathsep``, so a
+#: Windows ``C:\...`` entry keeps its drive colon.
 #:
 #: ``autoload=False``: the companion-module feature would import a
 #: ``pytruenas_env`` module from anywhere on ``sys.path``, including the CWD.

@@ -28,7 +28,7 @@ provider, the CLI and `deploy`. Extras:
 | extra | brings | needed for |
 | --- | --- | --- |
 | `ssh` | `hostctl[ssh]>=0.4.0,<0.5` (asyncssh, sftppath) | `.ssh`, `run()` over SSH, the `sftp` path leg |
-| `config` | `pyyaml` | reading a CLI `--config` YAML file |
+| `yaml` | `anycfg[yaml]` (PyYAML) | a CLI config file written in YAML (`#!yaml`, `.yaml`) |
 | `codegen` | `jinja2` | `pytruenas.codegen` and `generate-typings` |
 | `repo` | `hostctl[deploy]` | `deploy --source repo`; the core dependency already installs it, so the extra only lets a requirement that names it resolve |
 
@@ -36,8 +36,8 @@ A missing extra raises `hostctl.MissingExtraError` (an `ImportError`) at first
 use, never at import time: `FEATURE needs the 'EXTRA' extra: pip install
 "pytruenas[EXTRA]"` for pytruenas's own (`.distribution == "pytruenas"`),
 `"hostctl[EXTRA]"` for hostctl's. Without `ssh` the host has no `ssh`/`sftp`
-provider and `run()`/`path()` use the websocket ones. Without `config`, a
-config file that is present raises naming `pytruenas[config]` and the file.
+provider and `run()`/`path()` use the websocket ones. Without `yaml`, a
+YAML config file raises naming `pytruenas[yaml]` and the file.
 Without `codegen`, the error comes before anything is written, and before
 `generate-typings` dumps the API from a host.
 
@@ -1085,7 +1085,7 @@ web shell), `utils.apicache.ApiDumpError`, `apihelp.UnknownMethod`,
   `--version` and a usage error found while parsing; a `--config`/
   `$PYTRUENAS_CONFIG` file that does not exist returns 2 with
   `NAME: error: config file not found: PATH`. A `hostctl.MissingExtraError`
-  raised before any target runs (a `--config` file without the `config` extra)
+  raised before any target runs (a YAML config file without the `yaml` extra)
   prints `NAME: MESSAGE` to stderr and returns 125.
 - **`PyTrueNAS(PyTrueNASArgs, duho.Cli)`** — the app root; `--version` resolves
   from installed package metadata.
@@ -1093,20 +1093,30 @@ web shell), `utils.apicache.ApiDumpError`, `apihelp.UnknownMethod`,
 ### Global options (`pytruenas.utils.cmd.PyTrueNASArgs`)
 
 `PyTrueNASArgs` (a `duho.LoggingArgs` mixin) carries the global fields every
-command sees: `config` (`--config`/`-c`, a path, default `$PYTRUENAS_CONFIG`,
-else `$PYTRUENAS_CFG`, else `./pytruenas.yaml`), `cmdspath` (`--cmdspath`,
+command sees: `config` (`--config`/`-c`, a path; `None` when not given),
+`cmdspath` (`--cmdspath`,
 split on `:`), `insecure` (`--insecure`/`-k`), `ca_bundle` (`--ca-bundle
 FILE`), `parallel` (default `1`), `logto` (default `-`
 for stderr, or a `{target}`/`{isodate}` path template; each target's file gets
 only that target's records, `--parallel` included), plus `targets` (the
 trailing positionals, not a flag; each command declares the field last through
 `with_targets(args_cls)`, whose field type is `TargetsField`) and helper
-methods `._config_dict_()`/`._expanded_targets_()`. `._config_dict_()` is the
-YAML mapping (the `config` extra); the CLI reads four keys from it —
-`credentials`, `insecure`, `ca_bundle` and `commandspath` — and ignores any
-other. The
-implicit `./pytruenas.yaml` may be absent; a file named with `--config` or
-`$PYTRUENAS_CONFIG` must exist (`duho.UsageError`, exit status 2). Target
+methods `._config_path_()`/`._config_dict_()`/`._expanded_targets_()`.
+
+The config file is `--config`, else `$PYTRUENAS_CONFIG` (either must exist:
+`duho.UsageError`, exit status 2), else
+`pytruenas.utils.cmd.default_config_path()` — `pytruenas/pytruenas.cfg` in
+the platform's configuration directory (`%APPDATA%` on Windows,
+`$XDG_CONFIG_HOME` or `~/.config` elsewhere), read only when present. The
+working directory is never searched. Its format is the one a `#!<format>` first line names (`#!toml`, `#!yaml`,
+`#!json`, also `#!/usr/bin/env yaml`; the line is not part of the
+document), else the one the file name's suffix selects (`.toml`,
+`.yaml`/`.yml`, `.json`; `.cfg` and no suffix select none), else TOML. YAML needs the `yaml` extra. `load_config(path) -> dict` reads one
+(`pytruenas.utils.cmd`); a file that does not parse, is not a table, or is in
+another format (INI) is a `duho.UsageError` naming it. The CLI reads four keys
+— `credentials`, `insecure`, `ca_bundle` and `commandspath` (relative entries
+resolve against the file's directory) — and ignores any other, which a derived
+tool may read through `._config_dict_()`. Target
 expansion (commas and `[A-Z]`/`[0-9]` ranges) applies to the HOST part only —
 a comma or a range inside credentials is part of them — and credentials are
 carried onto every expanded host.
@@ -1114,10 +1124,8 @@ carried onto every expanded host.
 These methods decide how a command connects, and are the only supported way
 to build a client from parsed args:
 
-- **`._config_is_implicit_() -> bool`** — whether the config file was found
-  (`./pytruenas.yaml`) rather than named by `--config`/`$PYTRUENAS_CONFIG`.
-  `main` refuses `commandspath` from an implicit file: that key names code to
-  import, and a CLI often runs in a directory its user does not control.
+- **`._config_path_() -> (Path, bool)`** — the config file and whether it
+  must exist (see above).
 - **`._verify_() -> bool|str`** — the `verify=` for the clients the CLI
   builds. Each layer in turn — the flags (`-k`, `--ca-bundle`), then
   `$PYTRUENAS_INSECURE`/`$PYTRUENAS_CA_BUNDLE`, then the config file's
@@ -1346,8 +1354,10 @@ Every `PYTRUENAS_*` setting is read through one accessor, `utils.cmd.ENV` (a
 `pytruenas_env` module from anywhere on `sys.path` including the CWD, and a CLI
 is routinely run from a directory the user does not control.
 
-- **`PYTRUENAS_CONFIG`** — default path for the CLI's `--config` (YAML); the
-  file must exist. `PYTRUENAS_CFG` is read when it is unset.
+- **`PYTRUENAS_CONFIG`** — the CLI's config file when `--config` is not given;
+  the file must exist. Read when the file is needed.
+- **`APPDATA`** (Windows), **`XDG_CONFIG_HOME`** — where the default config file
+  `pytruenas/pytruenas.cfg` is looked for (`~/.config` without the latter).
 - **`PYTRUENAS_PATH`** — `os.pathsep`-separated extra command source(s) for CLI
   discovery (read with `ENV.paths`, which splits on the platform separator, so
   a Windows `C:\...` entry is not mis-split on its drive colon).

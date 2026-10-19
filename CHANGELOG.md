@@ -35,6 +35,19 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - **`download(..., wait=False)` returns a `PendingDownload`** (`.job_id`,
   `.fetch()`), not the job id: the link was discarded, so the bytes could
   never be fetched.
+- **The CLI's config file is read by anycfg, and is TOML by default.** It is
+  `--config`, else `$PYTRUENAS_CONFIG`, else `pytruenas/pytruenas.cfg` in the
+  user's configuration directory (`%APPDATA%`, `$XDG_CONFIG_HOME` or
+  `~/.config`); `./pytruenas.yaml` in the working directory is no longer read,
+  and `$PYTRUENAS_CFG` is gone. The format is the one a `#!<format>` first line
+  names (`#!toml`, `#!yaml`, `#!json`), else the file name's suffix (`.cfg`
+  selects none), else TOML. A YAML file keeps working as `pytruenas.yaml`, or
+  as a `.cfg` starting with `#!yaml`, with the new `yaml` extra, which replaces
+  `config`. A file that does not parse, or is not a table, is now an error
+  naming it (exit status 2) instead of being ignored. `commandspath` is read
+  from any config file. `PyTrueNASArgs._config_is_implicit_()` is gone;
+  `._config_path_()` and `utils.cmd.load_config()`/`default_config_path()`
+  are new.
 - **`pytruenas.utils.tls` is gone** (`context`, `ca_bundle`, `CA_BUNDLE_ENV`,
   `SslVerify`); the decision is private now. Pass `verify=` instead.
 

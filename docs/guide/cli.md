@@ -161,27 +161,38 @@ See [Generating typings](typings.md).
 
 ## Config file
 
-With the `config` extra, a YAML file supplies these settings, and only these;
-any other key is ignored (targets and options always come from the command
-line):
+A config file supplies these settings, and only these; any other key is
+ignored (targets and options always come from the command line). It is TOML
+unless it says otherwise:
+
+```toml
+credentials = "1-<64-char-api-key>"   # or a table: {username = "root", password = "..."}
+ca_bundle = "/etc/pki/lab-ca.pem"     # or: insecure = true
+commandspath = ["mycommands"]         # extra command sources, relative to this file
+```
+
+Its format is the one a `#!<format>` first line names (`#!toml`, `#!yaml`,
+`#!json`, also `#!/usr/bin/env yaml`; the line is not part of the
+document), else the one the file name's suffix selects (`.toml`,
+`.yaml`/`.yml`, `.json`; `.cfg` and no suffix select none), else TOML. So a `pytruenas.cfg` can be YAML (with the `yaml`
+extra) by starting it with a `#!yaml` line:
 
 ```yaml
-credentials: 1-<64-char-api-key>   # or a mapping: {username: root, password: ...}
-ca_bundle: /etc/pki/lab-ca.pem     # or: insecure: true
-commandspath: [mycommands]         # extra command sources, relative to this file
+#!yaml
+credentials: 1-<64-char-api-key>
+ca_bundle: /etc/pki/lab-ca.pem
 ```
 
 - `credentials` — used for a target that carries none, after `$TN_CREDS`.
 - `insecure` / `ca_bundle` — the TLS default, below `-k`/`--ca-bundle` and
   `$PYTRUENAS_INSECURE`/`$PYTRUENAS_CA_BUNDLE`.
-- `commandspath` — directories or packages to load commands from. Read only
-  from a file named with `--config` or `$PYTRUENAS_CONFIG`: the implicit
-  `./pytruenas.yaml` is whatever directory the CLI runs in, so its
-  `commandspath` is refused with a warning.
+- `commandspath` — directories or packages to load commands from.
 
 The file is `--config FILE` (`-c`), else `$PYTRUENAS_CONFIG`, else
-`./pytruenas.yaml` in the current directory. The implicit file may be absent; a
-file you named must exist, or the run stops with exit status 2 before any
+`pytruenas/pytruenas.cfg` in your configuration directory (`%APPDATA%` on
+Windows, `$XDG_CONFIG_HOME` or `~/.config` elsewhere); the current directory
+is never searched. The default file may be absent; a file you named must exist,
+and a file that does not parse stops the run with exit status 2 before any
 target.
 
 ## MCP
