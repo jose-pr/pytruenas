@@ -930,53 +930,143 @@ can compose a host of its own.
 
 ## `patch` (`pytruenas.patch`)
 
-Modifying a host **beyond what the middleware API exposes** — unsupported by
-definition, since TrueNAS owns its own configuration and a boot-environment
-swap on update discards anything outside the persistent datasets. Was
-`pytruenas.ops`, a name that said neither what it does nor what it costs.
+A toolkit for building your own patches to a host **beyond what the middleware
+API exposes**: templates rendered into files, systemd units, the middleware's
+own `etc_files` templates, and the ZFS `readonly` window that writing under
+`/usr` needs. The toolkit is supported and versioned like the rest of the
+package; the changes it makes are not supported by TrueNAS, and an update boots
+a new environment without them -- a patch is meant to be re-applied. Worked
+example, runnable offline against a stand-in client: the guide page "Patching a
+host" (`docs/guide/patch.md`).
 
-Everything is built to be repeatable and undoable:
+What a client must offer: `client.path(str)` (a path object with `exists`,
+`read_bytes`, `write_bytes`, `with_name`, `name`, `parent`, `mkdir`; `stat`,
+`chmod`, `unlink`, `lstat`, `replace` are used when present), `client.run(argv,
+check=, capture_output=, encoding=)` and `client.api.<ns>.<method>(...)`. A
+`TrueNASHost` offers all three; so can a test double.
 
-- **`templates`** — `base` renders (`BaseTemplate`/`TextTemplate`/
-  `BasicTemplate`, `%{NAME}` substitution); `targets` writes (`TemplateTarget`,
-  `FileTarget`). `write()` compares content first and returns whether anything
-  changed; every caller keys expensive follow-up work off that boolean.
-  `FileTarget(path, baseline=True)` snapshots the original on first write and
-  `read()`s *that* thereafter, so a patch layers onto the stock file rather
-  than onto its own previous output. The snapshot keeps the original's mode
-  (it is created empty, chmod'ed, then filled, so a copy of `/etc/shadow` is
-  never readable at a wider mode). When the file did not exist at the first
-  write, a `<name><suffix>.absent` marker records that instead, and `read()`
-  raises `FileNotFoundError` from then on (the original was "no file"), so
-  re-applying a layering template to a file it created is idempotent. Also
-  `revert(remove_baseline=True)` (restore content and mode + clear the
-  snapshot; for a file the target created it removes only the marker and
-  leaves the file, which returns `False`), `is_patched()` (also `True` for a
-  snapshotted file that was deleted), `would_change(content)` (dry run), and
-  `mode=` for a created file — applied before the content is written — while
-  an *existing* file keeps its own mode across a rewrite, so patching
-  `/etc/shadow` cannot silently widen it from `0640`.
-- **`systemd`** — `unitfile` (pure text: unit syntax is case-sensitive,
-  `=`-only, and `%` belongs to systemd, so all three `ConfigParser` defaults
-  are wrong); `files.SystemFile` (a file plus the `etc` groups and services to
-  notify); `units.Unit`/`ServiceUnit`/`MountUnit`/`AutomountUnit`. Unit
-  `enable`/`start` are three-valued — `None` means "not mine to manage", which
-  a bool could not express.
-- **`middleware.MiddlewareFiles`** — locate files in the host's `middlewared`
-  package, chiefly to take a stock `etc_files` template as a baseline.
-  `module_path` is resolved lazily by running `import middlewared` on the host
-  (no API method reports it, checked against 26.0). `find_template` defaults to
-  `baseline=False`: that package is on a **read-only mount**, so snapshotting
-  beside it cannot work.
-- **`zfs.writable(client, path)`** — a context manager that clears `readonly`
-  on the backing dataset and **restores it however the block exits**. Required
-  for anything under `/usr`. `dataset_for` walks up to an existing ancestor,
-  because `findmnt --target` fails on a path that does not exist yet — the
-  ordinary "create this file" case. `host_path(path) -> str` unwraps a path
-  for argv through `os.fspath()`: a `client.path(...)` composite gives its
-  logical path, and a URI path gives the host path when its scheme names a
-  host filesystem (`truenas`, `truenas+ws`, `sftp`); a `str` passes through.
-  Any other scheme raises rather than putting a URI into a command line.
+- **`templates`** — rendering and targets.
+  - `BaseTemplate.render(context) -> str` (abstract: raises
+    `NotImplementedError`); `.apply(target, context=None) -> bool` renders and
+    writes, returning whether the target changed. `TextTemplate(text: str |
+    bytes)` renders `text`; `BasicTemplate(text)` substitutes `%{name}` from a
+    dict or an object's attributes via `render_basic_template(template,
+    context) -> str`: one pass, a name matches as given or upper-cased (exact
+    wins), a substituted value is not substituted again, an unknown placeholder
+    stays, a `None` context returns the template.
+  - `TemplateTarget.apply_template(template, context=None, **kwargs) -> bool`:
+    `template` is an instance (used as is), a `BaseTemplate` *class* (built
+    with `kwargs` and the target's `read()` content, `b""` when absent), a
+    `str` (literal text) or a local path (read as UTF-8). `kwargs` with any
+    form but a class raise `TypeError`.
+  - `FileTarget(path, baseline: bool | str = False, mode: int | None = None)`
+    (`TypeError` if `path` lacks the four required methods).
+    `write(content: str | bytes) -> bool` writes only when the content
+    differs (`None` raises `TypeError`); an existing file keeps its mode, a new
+    one gets `mode` before any content lands, missing parents are created
+    `0o755`. `read() -> bytes` is the content to template *from*, never writes,
+    and raises `FileNotFoundError` when there is no original.
+    `would_change(content) -> bool` is the dry run. `is_patched() -> bool`
+    (also `True` for a snapshotted file since deleted).
+    `revert(remove_baseline=True) -> bool` restores the snapshot's content and
+    mode and returns whether the file changed. `baseline()` takes the snapshot
+    now; `baseline_path` is where it lives (`None` without one).
+  - **Baseline files** (`baseline=True` means suffix `.baseline`; a `str` is
+    the suffix). The first *changing* write copies the original to
+    `<name><suffix>` (complete or not at all: written to a random sibling and
+    renamed where the path has `replace`), or creates `<name><suffix>.absent`
+    when there was no file -- `read()` then raises `FileNotFoundError` and
+    `revert()` leaves the file, returning `False`. Every changing write also
+    records digests of what it writes and what it found in
+    `<name><suffix>.applied`; a file matching neither was rewritten by
+    something else and is the new original: `read()` returns it, the next
+    write snapshots it, `is_patched()` is `False`, `revert()` leaves it. A
+    baseline without that record keeps its first snapshot. Where the path has
+    `lstat()`, a baseline, marker or record must be a regular file with one
+    link, owned by root or by the target's owner (its directory's while it is
+    absent); anything else raises `PermissionError`.
+- **`systemd`**
+  - `SystemFile(path: str, client, etc=None, services=None, baseline=True,
+    writable=False, mode=None)` — a `FileTarget` on `client.path(path)`.
+    `etc`/`services` take one name, `"a,b"` or a sequence (`as_names`). After
+    a change -- a write or a revert -- each etc group is regenerated with its
+    own `client.api.etc.generate(group)` and each service reloaded with
+    `client.api.service.reload(name)`. If that fails, the previous content is
+    put back (a file the write created is removed) and the error raised, so
+    the next apply retries. `writable=True` wraps the change in
+    `zfs.writable`, and an unchanged write opens no window. `revert()` keeps
+    the snapshot until notifying succeeded.
+  - `Unit(client, name, description="", enable=True, start=True, *,
+    after="network.target auditd.service", wantedby="multi-user.target",
+    conf=None, restart_on_change=False)` — `/etc/systemd/system/<name>`
+    (`UNIT_DIR`), `baseline=False`. `name` gets the class `SUFFIX` unless it
+    ends in a systemd unit type (`.service`, `.socket`, `.device`, `.mount`,
+    `.automount`, `.swap`, `.target`, `.path`, `.timer`, `.slice`, `.scope`).
+    `conf` (`{section: {key: value}}`) is deep-copied, then `Description`,
+    `After`, `WantedBy` defaulted. `apply() -> bool` writes if changed; a
+    change runs `daemon-reload` (and `systemctl try-restart` with
+    `restart_on_change`, unless `start` is `False`), then `enable`/`start` are
+    reconciled: `True` make it so, `False` make sure it is not, `None` leave
+    alone. `uninstall() -> bool` (disable `--now`, remove, reload; `False` if
+    absent), `is_active()`, `is_enabled()`, `restart()`, `daemon_reload()`,
+    `configure()`, `render() -> str`, `escape(text) -> str`
+    (`systemd-escape -- text` on the host).
+  - `ServiceUnit(client, name, cmd=None, **kwargs)` (`ExecStart` = `cmd` or
+    `name`, `Restart=always`, `RestartSec=10`, unless `conf` sets them);
+    `MountUnit(client, where, what, options="", type="", **kwargs)` and
+    `AutomountUnit(client, where, timeout="60", **kwargs)`, named by
+    `escape_path(client, where)` (`systemd-escape --path`; `/` is `-.mount`).
+  - `render_unit(conf) -> str` — `Key = value` lines; a list value is one line
+    per item; a value with a line break raises `ValueError`, `None` raises
+    `TypeError`. `parse_unit(text) -> dict` per systemd.syntax(7): a repeated
+    key becomes a list, repeated sections merge, backslash continuations join,
+    `#`/`;` comments; `ValueError` on a malformed line. `UnitConfigParser` is a
+    `ConfigParser` set up for unit syntax (case-sensitive keys, `=` only, no
+    interpolation).
+- **`middleware`**
+  - `middlewared_path(client)` — the `middlewared` package directory as a
+    `client.path`, by running `python3 -c "import middlewared ..."` on the host
+    (no API method reports it, checked against 26.0); `RuntimeError` on an
+    empty answer.
+  - `MiddlewareFiles(client=None, module_path=None)` — `client=None` is a
+    local `TrueNASHost()`; `module_path` is located on first use (`repr()` never locates it). `find_template(template,
+    etc=None, services=None, baseline=True, writable=False) -> SystemFile`
+    searches `TEMPLATE_DIRS` (`etc_files`, then `etc_files/local`; the first
+    match wins) for `template` and `template.mako`; `FileNotFoundError` names
+    every path tried. `baseline` defaults to **True**: `read()` never writes, so
+    it works on the read-only `/usr` dataset, and the snapshot is taken by the
+    first changing write -- pass `writable=True` for that write.
+    `find_file(path, *args, cls=None, **kwargs)` wraps a file under the package
+    (`cls` default `SystemFile`); a file whose own baseline is all that is left
+    still counts as present.
+- **`zfs`**
+  - `writable(client, path)` — context manager: clears `readonly` on the
+    dataset holding `path` and restores it however the block exits, as it was
+    found (an inherited `on` is inherited again). Yields the dataset. A
+    writable dataset, or a path not on ZFS (then the yield is the mount's
+    source), is left alone. While open, the dataset carries the user property
+    `pytruenas:restore-readonly`; a later window finding it on a writable
+    dataset restores on exit. Body raises and restore fails: the body's
+    exception is raised, the restore failure logged; clean body, failed
+    restore: raises. Two concurrent windows on one dataset are not
+    coordinated.
+  - `dataset_for(client, path) -> str` — via `findmnt --raw --nofsroot -o
+    FSTYPE,SOURCE`, walking up to the nearest existing ancestor (findmnt fails
+    on a missing path); `ValueError` naming the filesystem type when not ZFS,
+    `RuntimeError` when nothing answers.
+  - `get_property(client, dataset, name, *, default=None)` (`default` when ZFS
+    prints `-`: unset or not applicable), `get_properties(client, dataset,
+    names) -> dict` (one `zfs get`; unset omitted), `set_property(client,
+    dataset, name, value)` / `set_properties(client, dataset, mapping)` (`bool`
+    as `on`/`off`), `inherit_property(client, dataset, name, *,
+    received=False)`, `is_readonly`, `set_readonly`. User properties (a name
+    with a colon) work throughout.
+  - `host_path(path) -> str` unwraps a path for argv through `os.fspath()`: a
+    `client.path(...)` composite gives its logical path, and a URI path gives
+    the host path when its scheme names a host filesystem (`truenas`,
+    `truenas+ws`, `sftp`); a `str` passes through. Any other scheme raises
+    rather than putting a URI into a command line. `PathLike` is
+    `str | path`.
 
 ## `codegen` (`pytruenas.codegen`)
 

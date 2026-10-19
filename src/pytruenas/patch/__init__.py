@@ -1,20 +1,20 @@
-"""Modify a TrueNAS host beyond what the middleware API exposes.
+"""Build your own patches to a TrueNAS host, beyond what the middleware API exposes.
 
-**This is unsupported territory, by definition.** TrueNAS is an appliance: its
-configuration is owned by the middleware, ``/`` is read-only, and a boot
-environment swap on update discards anything written outside the persistent
-datasets. Everything here writes files and drives services the appliance
-believes it owns. Sometimes that is the only way to get a thing done -- a
-systemd unit for a daemon TrueNAS has no concept of, an ``/etc`` file carrying
-a setting the UI does not expose -- and that is what this package is for. It is
-still not a supported configuration, and an update can undo any of it.
+A toolkit for the changes the API has no method for: a systemd unit for a
+daemon TrueNAS has no concept of, an ``/etc`` file carrying a setting the UI
+does not expose, a line layered onto one of the middleware's own templates.
+The toolkit is a supported part of pytruenas. The changes it makes are not
+supported by TrueNAS, which owns its configuration, keeps ``/usr`` on a
+read-only dataset, and boots a new environment without them on every update.
 
-Given that, the design goal is to be *undoable and repeatable*:
+So everything here is built to be *re-applied and undone*:
 
 * **Baselines.** A :class:`~pytruenas.patch.templates.FileTarget` snapshots the
   original before its first change and templates from that snapshot ever after.
   So a patch layers onto what TrueNAS generates rather than onto its own
-  previous output, and the original is still on disk to restore.
+  previous output, and the original is still on disk to restore. A file
+  rewritten by something else since the patch wrote it is taken as the new
+  original.
 * **Undo.** ``revert()`` puts the original back and clears the snapshot;
   ``Unit.uninstall()`` does the same for a unit (disable, remove, reload). A
   file this code *created* is deliberately left alone -- there is no baseline
@@ -24,7 +24,8 @@ Given that, the design goal is to be *undoable and repeatable*:
   ``etc.generate``, a service reload) runs only when it did. Applying the same
   patch twice does the work once. ``would_change()`` answers the same question
   without writing, and ``is_patched()`` reports whether a file currently
-  differs from its baseline.
+  differs from its baseline. A follow-up that fails puts the previous content
+  back, so the next apply retries it.
 * **Permissions survive.** A rewrite preserves the file's existing mode --
   silently widening ``/etc/shadow`` from ``0640`` to whatever the umask gives
   is a security regression, not a cosmetic one. ``mode=`` sets the mode for a
@@ -41,6 +42,10 @@ Contents:
 * :mod:`.zfs` -- :func:`~.zfs.writable`, which clears ``readonly`` on the
   dataset holding a path and restores it afterwards. Needed for anything under
   ``/usr``, and the reason a patch there is possible at all.
+
+A complete patch (template, systemd unit, reload), runnable offline against a
+stand-in client, is in the guide page "Patching a host"
+(``docs/guide/patch.md``).
 """
 
 from .middleware import MiddlewareFiles, middlewared_path

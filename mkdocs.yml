@@ -35,6 +35,7 @@ nav:
       - Running commands: guide/commands.md
       - Recipes: guide/recipes.md
       - Provisioning: guide/provisioning.md
+      - Patching a host: guide/patch.md
       - CLI: guide/cli.md
       - Generating typings: guide/typings.md
   - API Reference:
