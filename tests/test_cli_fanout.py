@@ -173,6 +173,31 @@ def test_two_targets_write_to_their_own_files(tmp_path):
     assert "hello from nas1" not in (tmp_path / "nas2.log").read_text(encoding="utf-8")
 
 
+def test_concurrent_targets_write_only_their_own_records(tmp_path):
+    """Under --parallel every target's file handler is attached at once, to the
+    same loggers, so each file received both targets' records. Both targets are
+    held inside run() while they log."""
+    from duho.discovery import ModuleCommand
+
+    args = _Args(targets=("nas1", "nas2"), logto=str(tmp_path / "{target}.log"))
+    both_running = threading.Barrier(2)
+
+    def run(client, args, logger):
+        both_running.wait(5)
+        logger.info("command record from %s", args.target)
+        logging.getLogger("pytruenas").warning("library record from %s", args.target)
+        both_running.wait(5)
+        return 0
+
+    module = SimpleNamespace(__doc__="fake", run=run)
+    assert main._dispatch(ModuleCommand(module, name="fake", entrypoint=run), args) == 0
+    for mine, other in (("nas1", "nas2"), ("nas2", "nas1")):
+        written = (tmp_path / f"{mine}.log").read_text(encoding="utf-8")
+        assert f"command record from {mine}" in written
+        assert f"library record from {mine}" in written
+        assert other not in written
+
+
 # -- output ---------------------------------------------------------------
 
 

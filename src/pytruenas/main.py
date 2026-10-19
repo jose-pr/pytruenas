@@ -26,7 +26,7 @@ import duho.runpath as _runpath
 from duho import AUTO, Cli, command_name, parse_globals, run
 from duho import logging as _logging
 from duho.discovery import ModuleCommand, discover_commands
-from duho.fanout import run_targets
+from duho.fanout import current_target, run_targets
 from duho.runpath import RunPathCmd
 from duho.runtime import accepts_positional
 from hostctl.exceptions import MissingExtraError as _MissingExtraError
@@ -299,20 +299,40 @@ def _logto_path(template: str, shown: str) -> str:
     return template.format(target=_safe(shown), isodate=_safe(now))
 
 
+class _ThisTarget(_pylogging.Filter):
+    """Pass the records logged while ``target`` runs, and no other target's.
+
+    Every target's file handler sits on the same loggers, so under
+    ``--parallel`` each would otherwise receive every running target's records.
+    A record logged outside any target (a thread the fan-out did not start)
+    cannot be attributed and is kept.
+    """
+
+    def __init__(self, target: object) -> None:
+        super().__init__()
+        self._target = target
+
+    def filter(self, record: "_pylogging.LogRecord") -> bool:
+        current = current_target.get()
+        return current is None or current is self._target
+
+
 def _attach_logto(
-    logto: str, shown: str, logger: "_pylogging.Logger"
+    logto: str, target: object, shown: str, logger: "_pylogging.Logger"
 ) -> "_pylogging.Handler | None":
     """Attach a per-target ``--logto`` file handler, or return ``None``.
 
     On the ``pytruenas`` library logger as well as the command's own: the
     library's records (a transport fallback WARNING, a connection error) are
     exactly what a per-target file is wanted for, and they never pass through
-    the command's logger.
+    the command's logger. ``target`` is the object the fan-out runs, which
+    selects the records the file receives; ``shown`` names the file.
     """
     if not logto or logto == "-":
         return None
     handler = _pylogging.FileHandler(_logto_path(logto, shown))
     handler.setFormatter(_logging.DefaultFormatter())
+    handler.addFilter(_ThisTarget(target))
     logger.addHandler(handler)
     library = _pylogging.getLogger("pytruenas")
     if library is not logger:
@@ -383,7 +403,7 @@ def _run_module_on_target(
     args.target = target
     # The `--logto` {target} is the credential-free label the fan-out prefixes
     # records with; _logto_path makes it a legal filename.
-    file_handler = _attach_logto(args.logto, _target_label(target), logger)
+    file_handler = _attach_logto(args.logto, target, _target_label(target), logger)
 
     # The target is already on every record as the ``[name]`` prefix, so naming
     # it again here would just read "[nas1] Started: nas1".
@@ -456,7 +476,7 @@ def _run_runpath_on_target(
     """
     per_target = _copy.copy(instance)
     per_target.target = target
-    file_handler = _attach_logto(instance.logto, _target_label(target), logger)
+    file_handler = _attach_logto(instance.logto, target, _target_label(target), logger)
 
     # Already on every record as the ``[name]`` prefix -- see
     # _run_module_on_target.
