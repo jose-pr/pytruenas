@@ -1,56 +1,43 @@
-"""client.path() type selection + local round-trip (no server needed)."""
-
-from types import SimpleNamespace
+"""`client.path()` on the local socket target: plain local paths (no server)."""
 
 from pathapi import LocalPath
 
-from pytruenas.fs import TnasWsPath, path
+from pytruenas import TrueNASClient
+from pytruenas.fs import TnasWsPath
 
 
-def _local_client():
-    api = SimpleNamespace(is_local=True, host="localhost", port=0)
-    return SimpleNamespace(_config=api, fsbackend="auto")
+def _local_path(*segments):
+    return TrueNASClient(autologin=False).path(*segments)
 
 
-def _remote_client():
-    api = SimpleNamespace(is_local=False, host="nas.example.com", port=0)
-    return SimpleNamespace(_config=api, fsbackend="auto", api=SimpleNamespace())
+def test_a_local_client_serves_paths_from_the_local_provider():
+    p = _local_path("/etc/hosts")
+    assert p.provider.name == "local"
+    assert isinstance(p._backend_path, LocalPath)
 
 
-def test_local_client_yields_localpath():
-    p = path(_local_client(), "/etc/hosts")
-    assert isinstance(p, LocalPath)
-
-
-def test_remote_client_yields_the_host_path():
-    seen = []
-    client = _remote_client()
-    client.path = lambda *segments: seen.append(segments) or "host path"
-    assert path(client, "mnt/tank/x") == "host path"
-    assert seen == [("/mnt/tank/x",)]
-
-
-def test_remote_client_ws_backend_yields_a_tnaswspath():
-    p = path(_remote_client(), "/mnt/tank/x", backend="ws")
-    assert isinstance(p, TnasWsPath)
-    assert p.path == "/mnt/tank/x"
+def test_a_remote_client_pins_the_websocket_leg_on_request():
+    p = TrueNASClient("wss://nas.example.com", autologin=False).path(
+        "/mnt/tank/x", backend="tnasws"
+    )
+    assert isinstance(p._backend_path, TnasWsPath)
+    assert p._backend_path.path == "/mnt/tank/x"
 
 
 def test_local_roundtrip(tmp_path):
-    p = path(_local_client(), str(tmp_path), "hello.txt")
-    assert isinstance(p, LocalPath)
+    p = _local_path(str(tmp_path), "hello.txt")
     p.write_text("hi there")
     assert p.read_text() == "hi there"
     assert p.exists() and p.is_file()
 
 
 def test_local_read_returns_bytes(tmp_path):
-    p = path(_local_client(), str(tmp_path), "b.bin")
+    p = _local_path(str(tmp_path), "b.bin")
     p.write_bytes(b"\x00\x01\x02")
     assert p.read_bytes() == b"\x00\x01\x02"
 
 
 def test_local_mkdir_nested(tmp_path):
-    d = path(_local_client(), str(tmp_path), "a", "b", "c")
+    d = _local_path(str(tmp_path), "a", "b", "c")
     d.mkdir(parents=True, exist_ok=True)
     assert d.exists() and d.is_dir()

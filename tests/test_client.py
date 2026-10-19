@@ -12,7 +12,7 @@ import pytest
 
 from pytruenas import TrueNASClient
 from pytruenas.auth import ApiKeyAuth, BasicAuth, LocalAuth
-from pytruenas.fs import LocalPath
+from pathapi import LocalPath
 
 
 def _posix_shell():

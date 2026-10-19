@@ -83,23 +83,23 @@ def test_ws_path_provider_always_uses_the_websocket_backend(monkeypatch):
     the local provider existed, because `filesystem.get` routes reads through
     the HTTP side channel, which a unix-socket client cannot reach at all.)
     """
-    import pytruenas.fs as fs
+    import pytruenas.fs.tnasws as tnasws
 
-    seen = {}
+    seen = []
 
-    def fake_path(client, *segments, backend=None):
-        seen["backend"] = backend
+    def fake_path(client, *segments):
+        seen.append(segments)
         return LocalPath("/etc/hostname")
 
-    monkeypatch.setattr(fs, "path", fake_path)
+    monkeypatch.setattr(tnasws, "_for_host", fake_path)
 
     for is_local in (True, False):
         TnasWsPathProvider(_client(is_local=is_local)).path("/etc/hostname")
-        assert seen["backend"] == "ws"
+    assert seen == [("/etc/hostname",), ("/etc/hostname",)]
 
 
 def test_ws_path_provider_builds_a_ws_path(monkeypatch):
-    import pytruenas.fs as fs
+    import pytruenas.fs.tnasws as tnasws
     from pathapi import LocalPath
 
     seen = {}
@@ -107,19 +107,15 @@ def test_ws_path_provider_builds_a_ws_path(monkeypatch):
     # so the stand-in has to be one (LocalPath is the cheapest such value).
     sentinel = LocalPath("/etc/hosts")
 
-    def fake_path(client, *segments, backend=None):
+    def fake_path(client, *segments):
         seen["client"] = client
         seen["segments"] = segments
-        seen["backend"] = backend
         return sentinel
 
-    monkeypatch.setattr(fs, "path", fake_path)
+    monkeypatch.setattr(tnasws, "_for_host", fake_path)
     client = _client()
     assert TnasWsPathProvider(client).path("/etc/hosts") is sentinel
-    # It must pin the backend explicitly: "auto" would hand back the host's
-    # own composite path, which routes back through this provider.
-    assert seen["backend"] == "ws"
-    assert seen["client"] is client
+    assert seen == {"client": client, "segments": ("/etc/hosts",)}
 
 
 # -- local_providers -------------------------------------------------------

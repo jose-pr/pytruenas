@@ -113,7 +113,7 @@ def test_a_streamed_download_whose_job_failed_raises(monkeypatch):
 
 def test_read_bytes_of_a_failed_download_is_an_oserror(monkeypatch):
     """Through the real `Namespace`: `filesystem.get` is a download."""
-    from pytruenas.fs import path as fs_path
+    from pytruenas.fs.tnasws import _for_host
 
     class Middleware:
         _closed = type("Open", (), {"is_set": lambda self: False})()
@@ -141,7 +141,7 @@ def test_read_bytes_of_a_failed_download_is_an_oserror(monkeypatch):
     c = TrueNASClient("wss://nas", autologin=False)
     c._conn = Middleware()
     with pytest.raises(OSError) as error:
-        fs_path(c, "/mnt/f", backend="ws").read_bytes()
+        _for_host(c, "/mnt/f").read_bytes()
     assert error.value.errno == errno.EIO
 
 

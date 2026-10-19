@@ -8,9 +8,9 @@ only through the middleware connection, so ``TnasWsPath`` is a
 ``chown``/...); no path library has an equivalent, which is why this backend
 stays custom while local and SFTP paths are ``pathapi``'s and ``sftppath``'s.
 
-Construct one through :meth:`~pytruenas.TrueNASClient.path` (which threads the
-client in via the backend); a ``TnasWsPath`` built from a bare URI with no client
-backend raises a clear error on the first I/O call.
+``client.path(..., backend="tnasws")`` serves paths through one (the provider
+threads the client in via the backend); a ``TnasWsPath`` built from a bare URI
+with no client backend raises a clear error on the first I/O call.
 """
 
 from __future__ import annotations
@@ -18,9 +18,11 @@ from __future__ import annotations
 import errno as _errno
 import io as _io
 import os as _os
+import posixpath as _posixpath
 import stat as _stat
 import typing as _ty
 
+from hostctl import uri_host as _uri_host
 from pathapi import FileStat as _FileStat
 from pathapi.providers import CommitOnClose as _CommitOnClose
 from uripath import URIPath as _URIPath
@@ -100,8 +102,8 @@ class TnasWsPath(_URIPath):
         # A TnasWsPath is only useful with a client-carrying backend; one built
         # from a bare URI has none, so fail clearly rather than at a random attr.
         raise RuntimeError(
-            "TnasWsPath has no TrueNAS client backend; build it via "
-            "client.path(...) rather than from a bare URI"
+            "TnasWsPath has no TrueNAS client backend; use "
+            'client.path(..., backend="tnasws") rather than a bare URI'
         )
 
     @property
@@ -116,12 +118,12 @@ class TnasWsPath(_URIPath):
     def _same_filesystem(self, other) -> bool:
         """Whether ``other`` names files on the same TrueNAS host.
 
-        uripath's default compares supplied backend objects, and
-        ``fs.path()`` gives every path its own backend -- so two spellings of
-        one file on one host read as two trees, and its same-file guard never
-        fired: ``move(overwrite=True)`` onto a second ``fs.path()`` for the same
-        file deleted it. The host is what the backend talks to: the same client,
-        or clients for the same (credential-free) connection URI.
+        uripath's default compares supplied backend objects, and each path
+        built for a host gets its own backend -- so two spellings of one file
+        on one host would read as two trees, and ``move(overwrite=True)`` onto
+        the second would delete the file. The host is what the backend talks
+        to: the same client, or clients for the same (credential-free)
+        connection URI.
         """
         mine, theirs = self._host_client(), other._host_client()
         if mine is None or theirs is None:
@@ -290,6 +292,22 @@ class TnasWsPath(_URIPath):
         if error.errno == _errno.EIO and any(self._listdir()):
             raise _error(_errno.ENOTEMPTY, self.path)
         raise error
+
+
+def _for_host(client: "TrueNASClient", *segments: object) -> TnasWsPath:
+    """The websocket-leg path of ``segments`` on ``client``, rooted at ``/``.
+
+    Joined as the host's composite path joins them (an absolute segment
+    restarts the path), so every leg names the same file. ``with_path``
+    percent-encodes the name into the URI and ``.path`` decodes it back, so a
+    ``?``, ``#`` or ``%`` in a filename stays part of the name.
+    """
+    posix = _posixpath.join(*(str(s) for s in segments)) if segments else "/"
+    if not posix.startswith("/"):
+        posix = "/" + posix
+    host = client._config.host or "localhost"
+    root = TnasWsPath(f"{_SCHEME}://{_uri_host(host)}/", backend=TnasWsBackend(client))
+    return root.with_path(posix)
 
 
 #: What ``rm``/``rmdir`` print for the errors a caller branches on. Only a

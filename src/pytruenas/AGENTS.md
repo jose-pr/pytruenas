@@ -230,10 +230,11 @@ ssh=None, ...)`
   (hostctl's own `backend=`); it raises `ValueError: unknown path provider`
   for anything else — including a provider this host has not got (`"sftp"`
   without an SSH leg, `"local"` on a remote host) — and
-  `OperationNotStartedError` when that provider is unavailable. Not the
-  `pytruenas.fs.path()` vocabulary (`"ws"`/`"api"`/`"truenas"`), which is a
-  different function documented under `fs` below. Wraps
-  `hostctl.host.Host.path`.
+  `OperationNotStartedError` when that provider is unavailable. It is the one
+  path constructor; `backend="tnasws"` is the websocket leg alone. Wraps
+  `hostctl.host.Host.path`. `p.symlink_to(target, force=True)` is pathapi's:
+  it replaces a file or symlink in the way, never a directory, and on a host
+  with no SFTP leg raises `NotImplementedError` before removing anything.
 - **`.run(*cmds, **kwargs) -> subprocess.CompletedProcess`** — run commands on
   the target. Inherited from `hostctl.host.Host.run`; see that for the full
   signature (`stdin`/`stdout`/`stderr`, `cwd`, `env`, `capture_output`,
@@ -598,14 +599,11 @@ The synchronous JSON-RPC 2.0 websocket transport backing `TrueNASClient`
 
 ## Remote paths (`pytruenas.fs`)
 
-`client.path(*segments, backend=None)` is the intended entry point: a
-hostctl `CompositePosixPath` over the host's path providers (`sftp`, then
-`tnasws`, for a remote host; `local` for the unix socket), with a relative
-path rooted at `/`. The module-level `path(client, *segments, backend=None)`
-builds the individual path types (below).
-
-- **`LocalPath`** — re-exported `pathapi.LocalPath`, used for a local
-  client with no client-specific behavior.
+`client.path(*segments, backend=None)` is the one entry point: a hostctl
+`CompositePosixPath` over the host's path providers (`sftp`, then `tnasws`, for
+a remote host; `local`, a `pathapi.LocalPath`, for the unix socket), with a
+relative path rooted at `/`. This package holds the websocket leg's path type.
+`__all__ = ["TnasWsPath", "TnasWsBackend"]`.
 - **`TnasWsPath`** (`pytruenas.fs.tnasws`) — a `uripath.URIPath` (distribution
   `pathapi-uri`; scheme `truenas+ws`) backed entirely by the middleware
   `filesystem.*` API via a `TnasWsBackend(client)`. Implements
@@ -621,10 +619,9 @@ builds the individual path types (below).
   (`filesystem.stat` describes the link and names its target in `realpath`);
   `stat(follow_symlinks=False)` and `is_symlink()` describe the link. A stat
   carries `st_mode`, `st_size`, `st_uid`, `st_gid` and the times. Built from a
-  bare URI (no backend) raises `RuntimeError` on first use — construct one
-  with `pytruenas.fs.path(client, ..., backend="ws")`. `client.path(...)`
-  returns hostctl's `CompositePosixPath`, whose websocket leg is a
-  `TnasWsPath`.
+  bare URI (no backend) raises `RuntimeError` on first use — reach one with
+  `client.path(..., backend="tnasws")`, a `CompositePosixPath` whose websocket
+  leg is a `TnasWsPath`.
   Listing calls `filesystem.listdir` with an explicit `select` projection
   (`name` for `_listdir`; `name`/`type`/`size`/`mode`/`uid`/`gid` for
   `_scandir`, which seeds each child's stat in the same round trip). That is
@@ -646,28 +643,14 @@ builds the individual path types (below).
   same `connection_uri` — not merely when they share a backend object.
 - **`TnasWsBackend(client)`** — the backend object `TnasWsPath` carries; just
   holds `.client`.
-- **`path(client, *segments, backend=None)`** — `"local"` -> `LocalPath`,
-  `"ws"`/`"api"` -> `TnasWsPath`, `"truenas"` -> `client.path(...)` (the
-  host's composite path, rooted at `/`), `"auto"`/`None` -> `LocalPath` for a
-  local client, else `client.path(...)`. Another value raises `ValueError`. A
-  remote client must be a `TrueNASClient` (it calls `client.path`).
-- **`symlink_to(path, target, target_is_directory=False, *, force=False,
-  onremove=None)`** — make `path` (any `pathapi` path: `client.path(...)`, a
-  `LocalPath`) a symlink to `target` (a `str` or a path). `force` (bool, a
-  file-type string, or a set of `"file"/"link"/"directory"`) removes a
-  conflicting existing entry first (a directory recursively; another kind
-  raises `FileExistsError`); `onremove(path, kind)` gates each removal. Raises
-  `NotImplementedError` *before* removing anything when no leg of `path` can
-  create a symlink (`pathapi.protocols.supports(path, Symlink)` is false: a
-  host without SFTP). Returns what `path.symlink_to` returns.
 
 **Segments are filesystem paths, not URIs.** `TnasWsPath` is a `URIPath`, so
-`path(..., backend="ws")` percent-encodes each segment into the
-`truenas+ws://` URI it builds: a name containing `?`, `#`, `%`, a space or
-non-ASCII survives `p.path` unchanged, and the host's SFTP leg is given the
-same decoded name. Constructing a `TnasWsPath` *directly* from a URI string is
-URI syntax — `?` there really is a query; encode the path yourself if you go
-around `path()`.
+the `tnasws` provider percent-encodes each segment into the `truenas+ws://` URI
+it builds: a name containing `?`, `#`, `%`, a space or non-ASCII survives
+`p.path` unchanged, and the host's SFTP leg is given the same decoded name.
+Constructing a `TnasWsPath` *directly* from a URI string is URI syntax — `?`
+there really is a query; encode the path yourself if you go around
+`client.path()`.
 
 ## Transport providers (`pytruenas.providers`, `pytruenas.webshell`)
 

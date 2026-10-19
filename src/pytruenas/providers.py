@@ -86,11 +86,11 @@ class TnasWsPathProvider(_PathProvider):
         )
 
     def _make_path(self, *segments: object) -> "Path":
-        from .fs import path as _make
+        from .fs.tnasws import _for_host
 
         # The plain websocket path: the host's composite path routes what this
         # provider cannot do (rename, symlinks, resolve) to `sftp` itself.
-        return _make(self.client, *segments, backend="ws")
+        return _for_host(self.client, *segments)
 
     def probe(self) -> _ProviderProbe:
         return _ProviderProbe("available", capabilities=self.capabilities)

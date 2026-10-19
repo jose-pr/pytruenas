@@ -67,6 +67,15 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   - `client.subscribe("alert.list")` → `client.api.alert.list.subscribe()`, or
     `client.conn.subscribe("alert.list")` for an event name that is not a
     namespace path.
+- **`client.path()` is the one path constructor.** `pytruenas.fs.path`,
+  `pytruenas.fs.LocalPath` and `pytruenas.fs.symlink_to` are gone:
+  - `fs.path(client, *segments)` → `client.path(*segments)`;
+    `fs.path(client, ..., backend="ws")` → `client.path(..., backend="tnasws")`.
+  - `fs.LocalPath` → `pathapi.LocalPath`.
+  - `fs.symlink_to(p, target, force=True)` → `p.symlink_to(target, force=True)`
+    (pathapi's), which replaces a file or a symlink but never removes a
+    directory: remove a directory in the way yourself (`p.rm(recursive=True)`)
+    where that is what you mean. `onremove=` has no replacement.
 
 ### Added
 

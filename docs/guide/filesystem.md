@@ -94,19 +94,18 @@ On the `tnasws` leg the operations keep pathlib's contract: `chmod()` and
 `IsADirectoryError`, `NotADirectoryError` or `OSError(ENOTEMPTY)` as a local
 path would; `stat()` follows a symlink and `is_symlink()` sees the link itself.
 
-`pytruenas.fs.symlink_to()` replaces a conflicting entry first — `force=` is a
-bool, a file-type string, or a set of `"file"`/`"link"`/`"directory"`:
+`symlink_to(target, force=True)` (pathapi's) replaces a conflicting file or
+symlink first; a directory in the way is never removed, and raises
+`FileExistsError`:
 
 ```python
-from pytruenas import fs
-
 link = client.path("/mnt/tank/current")
-fs.symlink_to(link, "/mnt/tank/releases/v2", force="link")   # replace only a symlink
+link.symlink_to("/mnt/tank/releases/v2", force=True)
 ```
 
-It checks that the path can create a symlink *before* `force=` removes
-anything, so a host with no SFTP leg raises `NotImplementedError` with the
-existing entry still in place — rather than deleting it and then failing.
+On a host with no SFTP leg, no leg can create a symlink, so it raises
+`NotImplementedError` with the existing entry still in place — rather than
+deleting it and then failing.
 
 !!! note
     SFTP concurrency and transport details come from hostctl and `sftppath`;

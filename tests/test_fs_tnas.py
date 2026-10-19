@@ -1,4 +1,4 @@
-"""TnasWsPath (the middleware filesystem.* backend), fs.path() and fs.symlink_to().
+"""TnasWsPath (the middleware filesystem.* backend) and the paths built on it.
 
 All mocked -- no server. Asserts the right ``filesystem.*`` calls are made, and
 that a host path names the decoded file on every leg.
@@ -11,9 +11,7 @@ from unittest.mock import MagicMock
 import pytest
 
 from pytruenas import TrueNASClient
-from pytruenas.fs import path as fs_path
-from pytruenas.fs import symlink_to as fs_symlink_to
-from pytruenas.fs.tnasws import TnasWsBackend, TnasWsPath, _stat_from_info
+from pytruenas.fs.tnasws import TnasWsBackend, TnasWsPath, _for_host, _stat_from_info
 
 
 def _client(ssh=None, **fs):
@@ -104,7 +102,7 @@ def _job_path(middleware):
 
     host = TrueNASClient("wss://nas.example", autologin=False)
     host._conn = middleware
-    return fs_path(host, "/mnt/tank/f", backend="ws")
+    return _for_host(host, "/mnt/tank/f")
 
 
 @pytest.mark.parametrize(
@@ -475,7 +473,7 @@ def test_a_symlink_entry_without_mode_is_a_link():
     assert stat.S_ISLNK(_stat_from_info({"type": "SYMLINK"}).st_mode)
 
 
-# -- fs.path() for a remote host is the host's own composite path -------------
+# -- the websocket leg of a host path -----------------------------------------
 
 
 def _ws_only_host(**fs):
@@ -484,20 +482,6 @@ def _ws_only_host(**fs):
     for name, value in fs.items():
         getattr(host.api.filesystem, name).return_value = value
     return host
-
-
-def test_fs_path_of_a_remote_host_is_the_host_path_rooted_at_slash():
-    host = TrueNASClient("wss://nas", autologin=False)
-    p = fs_path(host, "mnt", "tank", "f.txt")
-    assert type(p) is type(host.path("/x"))
-    assert str(p) == "/mnt/tank/f.txt"
-    assert p.provider.name == "tnasws"
-    assert str(fs_path(host, "x", backend="truenas")) == "/x"
-
-
-def test_fs_path_refuses_an_unknown_backend():
-    with pytest.raises(ValueError, match="unknown path backend"):
-        fs_path(TrueNASClient("wss://nas", autologin=False), "/x", backend="sftp")
 
 
 def test_the_tnasws_provider_builds_a_plain_websocket_path():
@@ -601,15 +585,15 @@ def _host_client(name, **fs):
 
 
 def test_paths_built_separately_on_one_host_are_one_filesystem():
-    """`fs.path()` gives each path its own backend; the host is what counts.
+    """Each path built for a host gets its own backend; the host is what counts.
 
     With the URI layer's default (compare supplied backend objects) the
     same-file guard never fires, so `move(overwrite=True)` onto a second
-    `fs.path()` of the same file deletes it.
+    path of the same file deletes it.
     """
     client = _host_client("nasA", stat={"mode": 0o100644}, get=b"data")
-    a = fs_path(client, "/mnt/tank/a.txt", backend="ws")
-    b = fs_path(client, "/mnt/tank/a.txt", backend="ws")
+    a = _for_host(client, "/mnt/tank/a.txt")
+    b = _for_host(client, "/mnt/tank/a.txt")
     assert a._backend is not b._backend
     assert a._same_filesystem(b)
     with pytest.raises(OSError, match="same file"):
@@ -618,15 +602,15 @@ def test_paths_built_separately_on_one_host_are_one_filesystem():
 
 
 def test_paths_on_two_hosts_are_two_filesystems():
-    a = fs_path(_host_client("nasA"), "/mnt/tank/a.txt", backend="ws")
-    b = fs_path(_host_client("nasB"), "/mnt/tank/a.txt", backend="ws")
+    a = _for_host(_host_client("nasA"), "/mnt/tank/a.txt")
+    b = _for_host(_host_client("nasB"), "/mnt/tank/a.txt")
     assert not a._same_filesystem(b)
 
 
 def test_host_paths_built_separately_are_one_filesystem():
     """The host's composite paths share its providers, so the guard fires."""
     host = TrueNASClient("wss://nas", autologin=False)
-    assert fs_path(host, "/a")._same_filesystem(host.path("/a"))
+    assert host.path("/a")._same_filesystem(host.path("/a"))
     other = TrueNASClient("wss://nas", autologin=False)
     assert not host.path("/a")._same_filesystem(other.path("/a"))
 
@@ -660,16 +644,16 @@ def test_every_leg_of_a_host_path_names_the_decoded_file(remote):
     ws = host.path(remote, backend="tnasws")
     assert str(sftp._backend_path) == remote
     assert ws._backend_path.path == remote
-    assert fs_path(host, remote, backend="ws").path == remote
+    assert _for_host(host, remote).path == remote
 
 
 # -- the truenas:// URI is built the same way, one layer up --------------------
 
 
 def _path_client(ssh=None):
-    """A remote fake host shaped for `pytruenas.fs.path(..., backend="ws")`.
+    """A remote fake host shaped for the websocket leg's path builder.
 
-    `path()` reads `is_local`/`host` off the host's `_config`.
+    It reads `host` off the host's `_config`.
     """
     return SimpleNamespace(
         _config=SimpleNamespace(is_local=False, host="nas", port=0),
@@ -690,24 +674,20 @@ _URI_SYNTAX_NAMES = [
 
 
 @pytest.mark.parametrize("remote", _URI_SYNTAX_NAMES)
-@pytest.mark.parametrize(
-    "backend,expected",
-    [("ws", TnasWsPath), ("api", TnasWsPath)],
-)
-def test_path_construction_survives_uri_syntax_in_a_filename(remote, backend, expected):
+def test_path_construction_survives_uri_syntax_in_a_filename(remote):
     """A name holding URI syntax survives construction unchanged.
 
     A truncated name at construction would send every `filesystem.*` call to
     another file. What is pinned is the round-trip, not the encoded spelling.
     """
-    p = fs_path(_path_client(), remote, backend=backend)
-    assert isinstance(p, expected)
+    p = _for_host(_path_client(), remote)
+    assert isinstance(p, TnasWsPath)
     assert p.path == remote
 
 
 def test_path_construction_leaves_uri_legal_characters_readable():
     """Encoding is minimal, as on the SFTP leg: `:` is legal in a segment."""
-    p = fs_path(_path_client(), "/C:/Temp", backend="ws")
+    p = _for_host(_path_client(), "/C:/Temp")
     assert str(p) == "truenas+ws://nas/C:/Temp"
     assert p.path == "/C:/Temp"
 
@@ -717,14 +697,14 @@ def test_path_construction_brackets_an_ipv6_host():
     port."""
     client = _path_client()
     client._config.host = "fd00::1"
-    p = fs_path(client, "/mnt/x", backend="ws")
+    p = _for_host(client, "/mnt/x")
     assert str(p) == "truenas+ws://[fd00::1]/mnt/x"
     assert p.path == "/mnt/x"
 
 
 def test_path_construction_joins_segments_before_encoding():
     """A `/` between segments is a separator, not part of a name."""
-    p = fs_path(_path_client(), "/mnt/tank", "a?b", "c#d", backend="ws")
+    p = _for_host(_path_client(), "/mnt/tank", "a?b", "c#d")
     assert p.path == "/mnt/tank/a?b/c#d"
     assert p.name == "c#d"
 
@@ -732,7 +712,7 @@ def test_path_construction_joins_segments_before_encoding():
 def test_an_absolute_later_segment_restarts_the_path_on_every_leg():
     """`client.path("/mnt", "/etc")` named `/etc`, while its websocket leg
     operated on `/mnt//etc` -- `unlink()` removed a different file."""
-    assert fs_path(_path_client(), "/mnt", "/etc", backend="ws").path == "/etc"
+    assert _for_host(_path_client(), "/mnt", "/etc").path == "/etc"
     from pytruenas.providers import TnasWsPathProvider
 
     host = TrueNASClient("wss://nas.example", autologin=False)
@@ -742,38 +722,6 @@ def test_an_absolute_later_segment_restarts_the_path_on_every_leg():
 # -- symlink_to(force=) must not remove before it can create ------------------
 
 
-class _LinkPath:
-    """Just enough path to record what `fs.symlink_to` does to it."""
-
-    def __init__(self, kind=None):
-        self.kind = kind  # None: absent; "file", "directory" or "link"
-        self.calls = []
-
-    def exists(self):
-        return self.kind is not None
-
-    def is_symlink(self):
-        return self.kind == "link"
-
-    def is_dir(self):
-        return self.kind == "directory"
-
-    def is_file(self):
-        return self.kind == "file"
-
-    def unlink(self):
-        self.calls.append("unlink")
-
-    def rm(self, recursive=False, missing_ok=False):
-        self.calls.append(("rm", recursive))
-
-    def _symlink_to(self, target, target_is_directory=False):
-        raise AssertionError("fs.symlink_to calls the public method")
-
-    def symlink_to(self, target, target_is_directory=False):
-        self.calls.append(("symlink", target, target_is_directory))
-
-
 def test_symlink_to_force_does_not_remove_when_nothing_can_create():
     """A websocket-only host cannot make a symlink, so `force=` must not delete.
 
@@ -781,40 +729,18 @@ def test_symlink_to_force_does_not_remove_when_nothing_can_create():
     """
     host = _ws_only_host(stat={"mode": 0o100644})
     with pytest.raises(NotImplementedError):
-        fs_symlink_to(host.path("/link"), "/target", force=True)
+        host.path("/link").symlink_to("/target", force=True)
     assert not host.api.filesystem.stat.called
     assert not host.api.filesystem.put.called
 
 
-def test_symlink_to_force_removes_then_creates():
-    p = _LinkPath("file")
-    fs_symlink_to(p, "/target", force=True)
-    assert p.calls == ["unlink", ("symlink", "/target", False)]
-    d = _LinkPath("directory")
-    fs_symlink_to(d, TnasWsPath("truenas+ws://nas/t", backend=None), True, force=True)
-    assert d.calls == [("rm", True), ("symlink", "/t", True)]
+def test_the_fs_package_has_no_second_constructor():
+    """`client.path()` builds paths, and pathapi's `symlink_to(force=)` replaces."""
+    import pytruenas.fs as fs
 
-
-def test_symlink_to_without_force_leaves_a_conflict_to_the_leg():
-    p = _LinkPath("file")
-    fs_symlink_to(p, "/target")
-    assert p.calls == [("symlink", "/target", False)]
-
-
-def test_symlink_to_force_honours_onremove_veto():
-    p = _LinkPath("link")
-    fs_symlink_to(p, "/target", force=True, onremove=lambda _p, _kind: False)
-    assert p.calls == [("symlink", "/target", False)]
-
-
-def test_symlink_to_force_rejects_a_kind_it_was_not_allowed():
-    p = _LinkPath("file")
-    with pytest.raises(FileExistsError):
-        fs_symlink_to(p, "/target", force="link")
-    assert p.calls == []
-    q = _LinkPath("link")
-    fs_symlink_to(q, "/target", force=["link", "file"])
-    assert q.calls[0] == "unlink"
+    for name in ("path", "symlink_to", "LocalPath"):
+        assert not hasattr(fs, name), name
+    assert fs.__all__ == ["TnasWsPath", "TnasWsBackend"]
 
 
 @pytest.mark.requires("asyncssh")
