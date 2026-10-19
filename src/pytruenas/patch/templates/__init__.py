@@ -11,9 +11,6 @@ That boolean is the point. Everything in :mod:`pytruenas.patch` keys its
 expensive follow-up work (``systemctl daemon-reload``, an ``etc.generate``, a
 service reload) off it, so applying the same configuration twice does the work
 once.
-
-Was a single ``ops/template.py``; split when the file-target logic grew a
-baseline mechanism worth reading on its own.
 """
 
 from .base import (

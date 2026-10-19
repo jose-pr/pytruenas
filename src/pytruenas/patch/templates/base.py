@@ -41,10 +41,8 @@ class BaseTemplate:
     def render(self, context: object) -> str:
         """Return the rendered text.
 
-        Abstract on purpose: the base used to be ``def render(...): ...``,
-        which silently returned ``None`` for a subclass that forgot to override
-        it -- and ``None`` then flowed into ``write()`` as the file's new
-        content. Raising names the mistake at the point it is made.
+        Abstract: a subclass that does not override it raises here, rather
+        than handing ``None`` to ``write()`` as the file's new content.
         """
         raise NotImplementedError(f"{type(self).__name__} must implement render()")
 

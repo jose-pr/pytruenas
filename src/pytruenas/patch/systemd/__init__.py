@@ -13,9 +13,6 @@ Typical use::
     unit.apply()          # write if changed, reload, enable + start
     ...
     unit.uninstall()      # disable, remove, reload
-
-Was ``ops/midclt.py`` -- a misnomer, since ``midclt`` is TrueNAS's own CLI
-binary and nothing here invokes it.
 """
 
 from .files import SystemFile, as_names

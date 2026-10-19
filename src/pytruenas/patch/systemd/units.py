@@ -136,11 +136,9 @@ class Unit(SystemFile):
     def _systemctl(self, command: str, *args: str, unit_action: bool = True):
         """Run one ``systemctl`` invocation as a single argv.
 
-        A list, not a shell string: ``run()`` takes ``*cmds`` where each
-        positional is a *separate command*, so passing the words individually
-        ran four commands instead of one. Unit names also contain characters a
-        shell would reinterpret -- a mount unit's name is full of ``\\x2d``
-        escapes -- which hand-quoting got wrong.
+        One list: ``run()`` takes ``*cmds``, each positional a *separate
+        command*. An argv also needs no shell quoting for a mount unit's
+        ``\\x2d`` escapes.
 
         ``is-*`` queries answer through their exit code, so they must not raise
         on non-zero; that is the normal "no" case.

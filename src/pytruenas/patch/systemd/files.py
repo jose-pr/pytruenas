@@ -24,8 +24,8 @@ LOGGER = _logging.getLogger(__name__)
 def as_names(value: "str | _ty.Sequence[str] | None") -> "tuple[str, ...]":
     """Normalize ``None`` / one name / ``"a,b"`` / a sequence to a tuple.
 
-    A bare string is one name, not an iterable of characters -- the mistake
-    that turned ``services="nfs"`` into three bogus per-character reloads.
+    A bare string is one name (or a comma-separated list), never an iterable
+    of characters: ``services="nfs"`` is one service.
     """
     if not value:
         return ()

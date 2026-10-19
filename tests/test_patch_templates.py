@@ -91,11 +91,7 @@ def test_apply_template_baseline_read_missing_ok():
 
 
 def test_base_render_raises_instead_of_returning_none():
-    """A subclass that forgets render() must not silently write None.
-
-    The base used to be `def render(...): ...`, so the None flowed straight
-    into write() as the file's new content.
-    """
+    """A subclass that forgets render() must not hand None to write()."""
     import pytest
 
     from pytruenas.patch.templates import BaseTemplate
@@ -166,11 +162,8 @@ def _fake_path_factory():
 
 
 def test_baseline_on_a_file_that_does_not_exist_yet():
-    """ "Create this config if absent" must work, not raise.
-
-    baseline() used to read_bytes() the missing original, so a first write to a
-    new path raised FileNotFoundError from inside write().
-    """
+    """ "Create this config if absent" must work: there is no original to
+    read, and write() must not raise for it."""
     from pytruenas.patch.templates import FileTarget
 
     P = _fake_path_factory()
@@ -203,10 +196,8 @@ def test_baseline_snapshots_an_existing_file_once():
 def test_read_never_creates_the_baseline():
     """Reading must not mutate the target -- the snapshot is write's job.
 
-    This is not a style point: taking the snapshot in read() makes reading a
-    WRITE, which fails outright on a read-only mount (the middlewared package
-    ships on one). That is what forced MiddlewareFiles.find_template to default
-    baseline=False, trading away the undo path.
+    A snapshot taken in read() would make reading a WRITE, which fails on a
+    read-only mount (the middlewared package ships on one).
     """
     from pytruenas.patch.templates import FileTarget
 
@@ -292,11 +283,7 @@ def test_write_refuses_none():
 
 
 def test_directory_mode_is_octal():
-    """The old code passed a bare 755, which Python reads as DECIMAL.
-
-    0o1363 -- setuid plus the wrong permission bits -- on any directory it had
-    to create.
-    """
+    """A bare 755 is DECIMAL: 0o1363, setuid plus the wrong permission bits."""
     from pytruenas.patch.templates.targets import DIRECTORY_MODE
 
     assert DIRECTORY_MODE == 0o755
@@ -566,10 +553,10 @@ def _layer(target, line):
 
 
 def test_reapplying_to_a_file_this_target_created_is_idempotent():
-    """The second write used to snapshot this target's OWN output as the original.
+    """This target's own output is never snapshotted as the original.
 
-    Layering onto a file that did not exist then produced `line`, `line line`,
-    ... and revert() "restored" patched content.
+    Otherwise layering onto a file that did not exist produces `line`,
+    `line line`, ... and revert() "restores" patched content.
     """
     from pytruenas.patch.templates import FileTarget
 
@@ -597,11 +584,8 @@ def test_revert_of_a_created_file_leaves_it_and_drops_the_marker():
 
 
 def test_the_baseline_snapshot_keeps_the_originals_mode_throughout():
-    """A copy of /etc/shadow must never exist at the default 0644.
-
-    The snapshot used to be written with the backend's default mode and kept
-    it, leaving the original hashes world-readable beside the file.
-    """
+    """A copy of /etc/shadow must never exist at the default 0644, not even
+    while it is being written."""
     from pytruenas.patch.templates import FileTarget
 
     store = {"/etc/shadow": b"root:$6$hash\n"}

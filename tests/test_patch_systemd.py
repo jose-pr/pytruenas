@@ -167,11 +167,8 @@ def test_explicit_conf_survives_the_defaults():
 
 
 def test_systemctl_is_invoked_as_one_argv_not_several_commands():
-    """`run()` takes *cmds -- each positional is a SEPARATE command.
-
-    The old code called run("systemctl", "disable", "--now", name), which ran
-    four commands rather than one, and hand-quoted the unit name on top.
-    """
+    """`run()` takes *cmds -- each positional is a SEPARATE command, so
+    run("systemctl", "disable", ...) would run several commands."""
     client = _FakeClient()
     Unit(client, "agent")._systemctl("disable", "--now")
     assert client.calls == [["systemctl", "disable", "agent.service", "--now"]]
@@ -220,7 +217,7 @@ def test_configure_disables_and_stops_when_declared_false():
 
 
 def test_none_means_leave_alone_which_is_not_false():
-    """A distinction the old bool-only API could not express."""
+    """`None` leaves the state alone, which `False` (disable/stop) does not."""
     client = _FakeClient(enabled=True, active=False)
     ServiceUnit(client, "agent", cmd="/bin/true", enable=None, start=None).configure()
     assert client.systemctl_calls() == []

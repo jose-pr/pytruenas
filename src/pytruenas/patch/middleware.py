@@ -3,9 +3,6 @@
 Mostly for the stock ``etc_files`` templates: taking one as a baseline lets a
 patch layer onto what TrueNAS itself generates instead of replacing it with a
 hand-written file that then drifts from every future release.
-
-Was in ``ops/midclt.py`` alongside the systemd code, which it has nothing to do
-with.
 """
 
 from __future__ import annotations

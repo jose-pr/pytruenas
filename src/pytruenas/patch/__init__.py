@@ -41,9 +41,6 @@ Contents:
 * :mod:`.zfs` -- :func:`~.zfs.writable`, which clears ``readonly`` on the
   dataset holding a path and restores it afterwards. Needed for anything under
   ``/usr``, and the reason a patch there is possible at all.
-
-Renamed from ``pytruenas.ops``, which said nothing about what the code does or
-what it costs you.
 """
 
 from .middleware import MiddlewareFiles, middlewared_path
