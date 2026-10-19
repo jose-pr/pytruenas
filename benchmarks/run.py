@@ -6,14 +6,16 @@ Measures the pure-CPU hot paths hit on every middleware call — extended-JSON
 construction — with no network or server involved. Produces a comparable JSON
 result plus a human summary.
 
-    python benchmarks/run.py            # print summary only
-    python benchmarks/run.py --save     # also write benchmarks/results/<name>.json
-    python benchmarks/run.py --name foo # custom result name
+    python benchmarks/run.py                   # print summary only
+    python benchmarks/run.py --save            # also write benchmarks/results/<name>.json
+    python benchmarks/run.py --name foo        # custom result name
+    python benchmarks/run.py --compare B.json  # each median as a ratio to result B
 
 Each metric is sampled `REPEAT` times (each sample is `inner` iterations) and
 reported as min/median/max ms-per-call, so run-to-run noise is visible rather
 than averaged away. Counts are fixed so numbers stay comparable across commits.
-Requires pytruenas importable (PYTHONPATH=src, or installed).
+Requires pytruenas importable (PYTHONPATH=src, or installed); the result
+describes whichever pytruenas that import finds.
 """
 
 import argparse
@@ -21,16 +23,13 @@ import json
 import platform
 import statistics
 import sys
+import sysconfig
 import timeit
 from datetime import datetime, timezone, date, time
 from ipaddress import IPv4Interface
 from pathlib import Path
 
 import pytruenas
-
-# The ejson codec lives in pytruenas.connection; `pytruenas.jsonrpc` was
-# removed in 0.2.0, which left this runner unimportable (and its CI job
-# failing) until it was ported.
 from pytruenas import connection as ejson
 from pytruenas.namespace import Namespace
 from pytruenas.utils import query as q
@@ -86,7 +85,8 @@ def sample(fn, inner, repeat=REPEAT):
 
 def _build_method_name():
     # client.api.pool.dataset.snapshot -> "pool.dataset.snapshot": build a fresh
-    # chain each call to measure the attribute walk + join (not the @cache hit).
+    # chain each call to measure the attribute walk + join, not a hit in the
+    # namespace's child cache.
     return str(Namespace(_client_stub, "pool").dataset.snapshot)
 
 
@@ -106,24 +106,59 @@ def measure():
     }
 
 
+def default_name():
+    """`pytruenas-<version>-py<XY>-<platform tag>`: one file per release,
+    interpreter and kind of machine, so no result overwrites another's."""
+    pyver = f"py{sys.version_info.major}{sys.version_info.minor}"
+    tag = sysconfig.get_platform().replace(".", "_")
+    return f"pytruenas-{pytruenas.__version__}-{pyver}-{tag}"
+
+
+def compare(baseline, metrics):
+    """Print each metric's median as a ratio to `baseline`, a saved result;
+    above 1.0 is slower than the baseline."""
+    print(f"against {baseline['name']} ({baseline['pytruenas_version']}):")
+    for key, m in metrics.items():
+        base = baseline["metrics"].get(key)
+        if base:
+            print(f"{key:24s} {m['median_ms'] / base['median_ms']:10.3f}x")
+        else:
+            print(f"{key:24s} (not in the baseline)")
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description="Run pytruenas benchmarks")
     ap.add_argument(
-        "--save", action="store_true", help="write result to benchmarks/results/"
+        "--save", action="store_true", help="write the result to --results-dir"
     )
     ap.add_argument(
-        "--name", default=None, help="result name (default pytruenas-<ver>-py<ver>)"
+        "--name",
+        default=None,
+        help="result name (default pytruenas-<ver>-py<XY>-<platform tag>)",
+    )
+    ap.add_argument(
+        "--results-dir",
+        type=Path,
+        default=Path(__file__).resolve().parent / "results",
+        help="where --save writes (default benchmarks/results/)",
+    )
+    ap.add_argument(
+        "--compare",
+        type=Path,
+        default=None,
+        metavar="RESULT",
+        help="a saved result to report each median against, as a ratio",
     )
     args = ap.parse_args(argv)
 
-    pyver = f"py{sys.version_info.major}{sys.version_info.minor}"
-    name = args.name or f"pytruenas-{pytruenas.__version__}-{pyver}"
+    name = args.name or default_name()
     metrics = measure()
     result = {
         "name": name,
         "pytruenas_version": pytruenas.__version__,
         "python": platform.python_version(),
         "platform": platform.platform(),
+        "platform_tag": sysconfig.get_platform(),
         "processor": platform.processor() or platform.machine(),
         "timestamp": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "iterations": {
@@ -143,11 +178,16 @@ def main(argv=None):
             f"{key:24s} {m['median_ms']:11.6f} {m['min_ms']:11.6f} {m['max_ms']:11.6f}"
         )
 
+    if args.compare:
+        compare(json.loads(args.compare.read_bytes()), metrics)
+
     if args.save:
-        dest = Path(__file__).resolve().parent / "results"
-        dest.mkdir(parents=True, exist_ok=True)
-        out = dest / f"{name}.json"
-        out.write_text(json.dumps(result, indent=2, sort_keys=True) + "\n")
+        args.results_dir.mkdir(parents=True, exist_ok=True)
+        out = args.results_dir / f"{name}.json"
+        # Bytes: results are committed, and write_text would make them CRLF
+        # on Windows.
+        text = json.dumps(result, indent=2, sort_keys=True) + "\n"
+        out.write_bytes(text.encode("utf-8"))
         print(f"saved: {out}")
     return 0
 
