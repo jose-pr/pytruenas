@@ -23,7 +23,7 @@ import typing as _ty
 from pathlib import Path
 
 import duho.runpath as _runpath
-from duho import AUTO, Cli, command_name, parse_globals, run
+from duho import AUTO, Cli, UsageError, command_name, parse_globals, run
 from duho import logging as _logging
 from duho.discovery import ModuleCommand, discover_commands
 from duho.fanout import current_target, run_targets
@@ -699,3 +699,9 @@ def main(
         # and the status a target's missing extra gets.
         print(f"{name}: {exc}", file=_sys.stderr)
         return _MISSING_EXTRA_STATUS
+    except UsageError as exc:
+        # Raised by discovery, before duho's own error reporting is in place
+        # (a --config file that does not exist): reported the way duho reports
+        # one raised by a command.
+        print(f"{name}: error: {exc}", file=_sys.stderr)
+        return exc.code

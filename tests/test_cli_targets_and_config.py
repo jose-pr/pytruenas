@@ -126,3 +126,24 @@ def test_the_app_root_refuses_an_implicit_config_s_command_sources(
         names = {main.command_name(c) for c in main._discover(["query", "user"])}
     assert "planted" not in names
     assert "ignoring commandspath" in caplog.text
+
+
+def test_a_config_file_that_was_named_must_exist(tmp_path, monkeypatch, capsys):
+    """A typo in --config or $PYTRUENAS_CONFIG ran with no credentials or TLS
+    setting from the file, and exit 0."""
+    monkeypatch.delenv("PYTRUENAS_CONFIG", raising=False)
+    monkeypatch.delenv("PYTRUENAS_CFG", raising=False)
+    missing = tmp_path / "nosuch.yaml"
+    assert main.main("pytruenas", ["--config", str(missing), "query", "user"]) == 2
+    assert f"config file not found: {missing}" in capsys.readouterr().err
+
+    monkeypatch.setenv("PYTRUENAS_CONFIG", str(missing))
+    assert main.main("pytruenas", ["query", "user"]) == 2
+    assert "config file not found" in capsys.readouterr().err
+
+
+def test_the_implicit_config_file_may_be_absent(tmp_path, monkeypatch):
+    monkeypatch.delenv("PYTRUENAS_CONFIG", raising=False)
+    monkeypatch.delenv("PYTRUENAS_CFG", raising=False)
+    monkeypatch.chdir(tmp_path)
+    assert _args()._config_dict_() == {}

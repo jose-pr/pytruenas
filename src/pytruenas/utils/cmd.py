@@ -285,9 +285,19 @@ class PyTrueNASArgs(LoggingArgs):
     "Where to log: '-' for stderr, or a path template (supports {target}, {isodate})"
 
     def _config_dict_(self) -> dict:
-        """Return the loaded config mapping (empty when the file is absent)."""
+        """Return the loaded config mapping.
+
+        Empty when the implicit ``./pytruenas.yaml`` is absent. A file named
+        with ``--config`` or ``$PYTRUENAS_CONFIG`` must exist: a typo there
+        would otherwise drop its credentials and TLS setting without a word.
+        Raises :class:`duho.UsageError` (exit status 2) when it does not.
+        """
         config = self.config
         if isinstance(config, _Path):
+            if not config.exists() and not self._config_is_implicit_():
+                from duho import UsageError
+
+                raise UsageError(f"config file not found: {config}")
             return _load_config(config)
         return config or {}
 
@@ -296,9 +306,9 @@ class PyTrueNASArgs(LoggingArgs):
 
         ``./pytruenas.yaml`` in the process's working directory is a default,
         and a CLI is routinely run from a directory its user does not control.
-        Which matters for one key only -- ``commandspath``, i.e. "import code
-        from here" -- so the caller can refuse *that* from an implicit file
-        while still reading targets and options from it. Same reasoning as
+        Which matters for two things: an implicit file may be absent, and its
+        ``commandspath`` (i.e. "import code from here") is refused while its
+        ``credentials`` and ``sslverify`` are still read. Same reasoning as
         ``ENV``'s ``autoload=False``.
         """
         if ENV.get("CONFIG") or ENV.get("CFG"):
