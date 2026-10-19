@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import typing as _ty
+from .exceptions import TrueNASError
 from .utils import io as _ioutils
 
 if _ty.TYPE_CHECKING:
@@ -181,7 +182,7 @@ class _CredentialsMeta(type):
         raise ValueError("Credentials not supported", _mask_kwargs(kwargs))
 
 
-class AuthenticationError(Exception):
+class AuthenticationError(TrueNASError):
     """A login was refused.
 
     ``response_type`` is the server's discriminator (``AUTH_ERR``/``DENIED``/

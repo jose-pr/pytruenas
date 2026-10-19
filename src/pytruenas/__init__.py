@@ -1,7 +1,17 @@
 from duho import logging as _logging  # noqa: F401  (registers the TRACE level)
 from .namespace import Namespace
 from .auth import *
-from .connection import Event, Subscription, TrueNASWSConnection
+from .connection import (
+    CallTimeout,
+    ClientException,
+    ConnectionClosed,
+    Event,
+    JobFailed,
+    Subscription,
+    TrueNASWSConnection,
+    ValidationErrors,
+)
+from .exceptions import TrueNASError
 from .host import TrueNASConfig, TrueNASHost
 from .host import TrueNASHost as TrueNASClient
 
@@ -25,4 +35,12 @@ __all__ = [
     "Subscription",
     "TrueNASWSConnection",
     "__version__",
+    # Errors: `TrueNASError` is the base of every one of them.
+    "TrueNASError",
+    "ClientException",
+    "ValidationErrors",
+    "CallTimeout",
+    "ConnectionClosed",
+    "JobFailed",
+    "AuthenticationError",
 ]

@@ -47,6 +47,7 @@ from ipaddress import IPv6Interface as _IPv6Interface
 
 import websocket as _websocket
 
+from .exceptions import TrueNASError
 from .utils import tls as _tls
 from .utils.io import json_scalar as _json_scalar
 
@@ -178,7 +179,7 @@ def loads(data: "str | bytes | bytearray", **kwargs):
 # --------------------------------------------------------------------------
 
 
-class ClientException(Exception):
+class ClientException(TrueNASError):
     """Any error surfaced by a :class:`TrueNASWSConnection` call or connection.
 
     ``errno`` carries the middleware's error number when it maps to a POSIX
