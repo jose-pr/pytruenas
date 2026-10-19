@@ -905,9 +905,12 @@ Backs the `generate-typings` command; not typically used directly.
   `__init__.pyi` per API namespace under `root`, rendered from the
   `namespace.pyi.j2` Jinja template. `api` is one entry from
   `client.dump_api()["versions"]` (see `pytruenas.models.apidump`). Renders
-  into a temporary sibling and swaps it in only when complete, so a failure
-  leaves the previous output intact. `root` is replaced only if it is absent,
-  empty, or a previous output (marked `.pytruenas-typings`); otherwise
+  into a temporary sibling and swaps it in only when complete: the previous
+  tree is renamed aside and deleted after the new one is in place, so a
+  failure (on Windows, a stub held open or a shell inside the tree) leaves the
+  previous output intact and no temporary directory behind; a previous tree
+  that cannot be deleted is logged at WARNING. `root` is replaced only if it
+  is absent, empty, or a previous output (marked `.pytruenas-typings`); otherwise
   `FileExistsError` — hand-written stubs included. Missing `jinja2` raises
   `hostctl.MissingExtraError` naming `pytruenas[codegen]` before anything is
   touched.

@@ -10,6 +10,7 @@ create/update/get_instance (which grow synthetic ``_create``/``_update``/
 import ast
 import json
 import re
+import sys
 from pathlib import Path
 
 import pytest
@@ -247,3 +248,79 @@ def test_the_helpers_fields_are_the_payload_not_a_call_option(tmp_path):
     fields = re.findall(r"\*\*fields:_Unpack\[(\w+)\]", stub)
     assert "bool" not in fields
     assert {"CreateUserCreate", "UpdateUserUpdate", "UpsertUserUpdate"} <= set(fields)
+
+
+def _tree(root: Path) -> "dict[str, str]":
+    return {
+        p.relative_to(root).as_posix(): p.read_text(encoding="utf-8")
+        for p in root.rglob("*")
+        if p.is_file()
+    }
+
+
+@pytest.mark.requires("jinja2")
+def test_a_failed_swap_keeps_the_previous_output_whole(tmp_path, monkeypatch):
+    """Moving the new tree into place fails (a stub held open on Windows):
+    the previous output stays whole and no temporary sibling is left."""
+    target = tmp_path / "typings"
+    Codegen().generate(_api_version(), target)
+    (target / "user" / "extra.pyi").write_text("# from the previous run")
+    before = _tree(target)
+
+    real = Path.rename
+    blocked = []
+
+    def locked(self, other):
+        # Moving the first tree into place always fails (retries included);
+        # putting another one back works.
+        if Path(other) == target and (not blocked or self in blocked):
+            blocked.append(self)
+            raise PermissionError(13, "in use", str(self))
+        return real(self, other)
+
+    monkeypatch.setattr(Path, "rename", locked)
+    with pytest.raises(PermissionError):
+        Codegen().generate(_api_version(), target)
+    assert _tree(target) == before
+    assert [p.name for p in tmp_path.iterdir()] == ["typings"]
+
+
+@pytest.mark.requires("jinja2")
+def test_an_undeletable_previous_output_does_not_fail_the_run(
+    tmp_path, monkeypatch, caplog
+):
+    """Deleting the previous tree fails part-way: the new tree is in place in
+    full, and the run says where the leftover is."""
+    import logging
+    import shutil
+
+    reference = tmp_path / "reference"
+    Codegen().generate(_api_version(), reference)
+    target = tmp_path / "typings"
+    Codegen().generate(_api_version(), target)
+    (target / "stale.pyi").write_text("# from an older API")
+
+    def partly(path, ignore_errors=False, **kwargs):
+        next(p for p in Path(path).rglob("*.pyi")).unlink()
+        if not ignore_errors:
+            raise PermissionError(13, "in use", str(path))
+
+    monkeypatch.setattr(shutil, "rmtree", partly)
+    with caplog.at_level(logging.WARNING, logger="pytruenas.codegen"):
+        Codegen().generate(_api_version(), target)
+    assert _tree(target) == _tree(reference)
+    assert "could not delete the previous output" in caplog.text
+
+
+@pytest.mark.requires("jinja2")
+@pytest.mark.skipif(sys.platform != "win32", reason="Windows file locking")
+def test_a_stub_held_open_leaves_the_previous_output_whole(tmp_path):
+    target = tmp_path / "typings"
+    Codegen().generate(_api_version(), target)
+    (target / "user" / "extra.pyi").write_text("# from the previous run")
+    before = _tree(target)
+    with open(target / "system" / "__init__.pyi", encoding="utf-8"):
+        with pytest.raises(PermissionError):
+            Codegen().generate(_api_version(), target)
+    assert _tree(target) == before
+    assert [p.name for p in tmp_path.iterdir()] == ["typings"]
