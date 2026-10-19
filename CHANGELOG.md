@@ -208,6 +208,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Behind an HTTPS proxy (`HTTPS_PROXY`), uploads and downloads verify with the
   same trust as the websockets; they ignored a CA bundle and failed (or trusted
   certifi) while the API connected.
+- `generate-typings` writes LF stubs on every platform; on Windows they were
+  CRLF, so one dump gave different bytes there than on Linux.
 
 
 ## [0.6.1] - 2026-10-20

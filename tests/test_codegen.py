@@ -40,6 +40,14 @@ def test_all_stubs_parse(generated):
         compile(src, str(path), "exec")
 
 
+def test_stubs_are_lf_on_every_platform(generated):
+    """One dump gives the same bytes on Windows as on Linux."""
+    files = [p for p in generated.rglob("*") if p.is_file()]
+    assert any(p.suffix == ".pyi" for p in files)
+    for path in files:
+        assert b"\r" not in path.read_bytes(), path
+
+
 def test_no_undefined_uppercase_return_types(generated):
     for path in generated.rglob("*.pyi"):
         src = path.read_text(encoding="utf-8")
