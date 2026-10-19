@@ -50,7 +50,6 @@ from . import auth as _auth
 from . import connection as _connection
 from .connection import DEFAULT_UNIX_SOCKET
 from .namespace import Namespace as _Namespace
-from .fs._uri import quote_uri_path as _quote_uri_path
 from .utils import tls as _tls
 from .utils.target import Target as _TGT
 from .utils.target import redact as _redact_target
@@ -946,15 +945,10 @@ class TrueNASHost(_PosixHost, _ty.Generic[ApiVersion]):
         """
         config = self._config
         if config.is_local:
-            # Encoded, not interpolated raw: `Target.parse` unquotes what it
-            # reads, so a socket path holding a "?" or "#" was truncated there
-            # (`/run/a?b/x.sock` became `/run/a`). Nothing reads this branch's
-            # path today -- `_openwss` uses `config.socket_path` directly -- but
-            # a property that renders a wrong path is a trap for whoever does.
+            # Built field by field: `Target.parse` would unquote the path, and a
+            # `?` or `#` in the socket path would end it.
             socket_path = config.socket_path or DEFAULT_SOCKET_PATH
-            return _TGT.parse(
-                f"ws+unix://{_quote_uri_path(socket_path)}", scheme="ws+unix"
-            )
+            return _TGT("ws+unix", "", "", "", 0, socket_path, "", "")
         scheme = "ws" if config.secure is False else "wss"
         authority = config.host
         if ":" in authority and not authority.startswith("["):

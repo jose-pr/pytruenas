@@ -25,9 +25,10 @@ from __future__ import annotations
 import posixpath as _posixpath
 import typing as _ty
 
+from hostctl import uri_host as _uri_host
 from pathapi import LocalPath as LocalPath
 
-from ._uri import quote_uri_path as _quote_uri_path
+from .tnasws import _SCHEME
 from .tnasws import TnasWsBackend as TnasWsBackend
 from .tnasws import TnasWsPath as TnasWsPath
 
@@ -58,7 +59,12 @@ def path(client: "TrueNASClient", *segments, backend: "str | None" = None):
     if backend == "local" or (backend == "auto" and _settings(client).is_local):
         return LocalPath(*segments) if segments else LocalPath("/")
     if backend in ("ws", "api"):
-        return TnasWsPath(_ws_uri(client, posix), backend=TnasWsBackend(client))
+        # `with_path` percent-encodes the name into the URI and `.path` decodes
+        # it back, so a `?`, `#` or `%` in a filename stays part of the name.
+        root = TnasWsPath(
+            f"{_SCHEME}://{_uri_host(_host(client))}/", backend=TnasWsBackend(client)
+        )
+        return root.with_path(_abspath(posix))
     if backend in ("truenas", "auto"):
         # The host's own path rather than `CompositePosixPath.over(...)`: a
         # selector built per call forgets the host's declines, so a refused
@@ -145,21 +151,6 @@ def _settings(client: "TrueNASClient"):
 
 def _host(client: "TrueNASClient") -> str:
     return getattr(_settings(client), "host", None) or "localhost"
-
-
-def _ws_uri(client: "TrueNASClient", posix: str) -> str:
-    return f"truenas+ws://{_host(client)}{_uri_path(posix)}"
-
-
-def _uri_path(posix: str) -> str:
-    """``posix`` as the absolute, percent-encoded path component of a URI.
-
-    ``TnasWsPath`` is a ``uripath.URIPath``: it parses the string built here
-    and percent-decodes it. Interpolated raw, a ``?`` or ``#`` in a filename
-    would begin a query or fragment and truncate the path at construction, so
-    every ``filesystem.*`` call would address another file, with no error.
-    """
-    return _quote_uri_path(_abspath(posix))
 
 
 def _abspath(posix: str) -> str:

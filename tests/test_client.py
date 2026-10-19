@@ -33,6 +33,12 @@ def test_local_construction_no_network():
     assert isinstance(c._config.credentials, LocalAuth)
 
 
+def test_local_target_keeps_uri_syntax_in_the_socket_path():
+    c = TrueNASClient("ws+unix:///run/a%3Fb/x.sock", autologin=False)
+    assert c._target.path == "/run/a?b/x.sock"
+    assert c._target.uri == "ws+unix:///run/a%3Fb/x.sock"
+
+
 def test_creds_wired_from_target():
     c = TrueNASClient(None, ("root", "secret"), autologin=False)
     assert isinstance(c._config.credentials, BasicAuth)

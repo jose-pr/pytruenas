@@ -512,14 +512,10 @@ _URI_SYNTAX_NAMES = [
     [("ws", TnasWsPath), ("api", TnasWsPath)],
 )
 def test_path_construction_survives_uri_syntax_in_a_filename(remote, backend, expected):
-    """Regression: `_ws_uri`/`_truenas_uri` interpolated the path unencoded.
+    """A name holding URI syntax survives construction unchanged.
 
-    It corrupts `self.path` at *construction* -- before any leg is chosen --
-    so the websocket leg
-    (`read_bytes`, `stat`, every `filesystem.*` call) addressed the truncated
-    name too, not just the five SFTP-first operations.
-
-    What is pinned is the round-trip, not the encoded spelling.
+    A truncated name at construction would send every `filesystem.*` call to
+    another file. What is pinned is the round-trip, not the encoded spelling.
     """
     p = fs_path(_path_client(), remote, backend=backend)
     assert isinstance(p, expected)
@@ -531,6 +527,16 @@ def test_path_construction_leaves_uri_legal_characters_readable():
     p = fs_path(_path_client(), "/C:/Temp", backend="ws")
     assert str(p) == "truenas+ws://nas/C:/Temp"
     assert p.path == "/C:/Temp"
+
+
+def test_path_construction_brackets_an_ipv6_host():
+    """An IPv6 literal is bracketed in the authority, or its colons read as a
+    port."""
+    client = _path_client()
+    client._api.host = "fd00::1"
+    p = fs_path(client, "/mnt/x", backend="ws")
+    assert str(p) == "truenas+ws://[fd00::1]/mnt/x"
+    assert p.path == "/mnt/x"
 
 
 def test_path_construction_joins_segments_before_encoding():
