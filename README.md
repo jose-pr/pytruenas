@@ -166,7 +166,9 @@ pytruenas deploy --source repo --mode dir --repo-root . nas.example.com
 
 `generate-typings` turns a host's API definition into a package of `.pyi` stubs
 so editors and type checkers understand `client.api.<namespace>.<method>(...)`.
-It is validated against the full real API (every version in a live dump).
+The test suite compiles the stubs it generates from a fixture dump and a set of
+unusual schema shapes and type-checks them with pyright and mypy; it does not
+run against a full live dump.
 
 ```sh
 pytruenas generate-typings --path truenasapi_typings/current nas.example.com
