@@ -8,6 +8,74 @@ user-facing; this file is the durable record.
 
 ## [Unreleased]
 
+## [0.6.1] - 2026-10-20
+
+### What changed
+
+The fixes from a whole-repository review of 0.6.0, every one that leaves the
+documented API as it is. The full list is in `CHANGELOG.md`; the ones that
+matter most:
+
+- **MCP:** every tool takes `targets`. A tool call could not name a host, so it
+  always ran against `localhost`.
+- **`generate-typings`** no longer replaces a directory of hand-written stubs
+  (its default `--path` was `typings/`, where pyright reads them), and types
+  the helpers' `**fields` with the method's payload again (`Unpack[bool]` since
+  0.5.1). Unusual dump shapes generate stubs that compile, and the stubs are
+  type-checked with pyright and mypy in the suite.
+- **TLS:** an empty `PYTRUENAS_SSLVERIFY` no longer turns verification off.
+- **Paths on the websocket leg** (hosts without SFTP): `path("/mnt", "/etc")`
+  names `/etc` (it acted on `/mnt//etc`), `chmod`/`chown` wait for their job,
+  `unlink`/`rmdir` raise the `OSError` pathlib would, `stat` follows symlinks.
+- **Calls:** a caller's `LoggerAdapter` works; `job=True` waits for the job; a
+  reconnect asks `otp_provider` for a new one-time code; a lost connection says
+  why.
+- **CLI:** comma lists of full URIs split correctly; per-target `--logto` files
+  hold only their own records; an implicit `./pytruenas.yaml` cannot name
+  command sources; a named config file must exist; deploy's log line shows no
+  password.
+- **`pytruenas.patch`** is a supported toolkit (a guide page with a complete
+  patch), with its open defects fixed, including two units built from one
+  `conf` sharing an `ExecStart`.
+- **Errors:** `pytruenas.TrueNASError`, one base for every run-time error.
+- **Repository:** floors that install, a suite that passes without extras,
+  release gates (floors, wheel smoke, tag = version, the docs build), the
+  README and API header in the standard shape, the 0.0.0-0.4.6 changelog moved
+  to `CHANGELOG-0.x.md`.
+
+### Behaviour you may notice
+
+All of these are fixes of a defect, which is why this is a patch release:
+
+- `generate-typings` writes to `truenasapi_typings/current` by default, and
+  refuses any non-empty directory a previous run did not mark.
+- `job=True` on a middleware call waits for the job (it was accepted and
+  ignored).
+- `TnasWsPath.unlink()` of a missing file raises `FileNotFoundError` (it ran
+  `rm -f`).
+- `--config FILE` or `$PYTRUENAS_CONFIG` naming a missing file stops with exit
+  status 2 (it was ignored).
+- An unbuffered `download()` checks the job that produced it, so a failed job
+  raises instead of returning a partial body.
+
+### Validation
+
+- Suite: 1256 passed / 14 skipped on Python 3.14 with warnings as errors, 1254
+  passed / 16 skipped on the 3.9 floor; the skips are the POSIX-shell tests and
+  the version-gated type-checker cases.
+- Every declared floor installed together on 3.9: the suite passes. A bare
+  install (no extras) passes the suite. `black --check`, `mkdocs build
+  --strict`, `dotagents leak-check` (now clean) and the EOL check pass.
+- Not verified live against an appliance in this release: the middleware facts
+  behind the websocket-leg path fixes (which methods are jobs, whether
+  `filesystem.stat` follows links) come from middlewared's source.
+
+### Publication state
+
+Released as 0.6.1 on the owner's instruction (patch: fixes only).
+
+---
+
 ## [0.6.0] - 2026-10-19
 
 Next performance target: still a CI benchmark baseline, so the following release
