@@ -17,30 +17,69 @@ class _Result:
 
 
 class _FakeClient:
-    """Answers findmnt/zfs-get from state; records zfs-set calls."""
+    """One mount and its dataset's properties, answering findmnt and zfs.
 
-    def __init__(self, dataset="boot-pool/ROOT/26.0/usr", readonly=True):
+    Prints what the real commands print for the argv `patch.zfs` sends:
+    ``findmnt --raw -o FSTYPE,SOURCE`` and ``zfs get -H`` with tab-separated
+    fields, ``-`` for an unset property.
+    """
+
+    PARENT = "boot-pool/ROOT"
+
+    def __init__(
+        self,
+        dataset="boot-pool/ROOT/26.0/usr",
+        readonly=True,
+        source="local",
+        fstype="zfs",
+    ):
         self.dataset = dataset
-        self.readonly = readonly
+        self.fstype = fstype
+        self.props = {"readonly": ("on" if readonly else "off", source)}
         self.calls = []
         self.fail_on_restore = False
+
+    @property
+    def readonly(self):
+        return self.props["readonly"][0] == "on"
 
     def run(self, argv, check=True, capture_output=None, encoding=None, **kwargs):
         self.calls.append(list(argv))
         if argv[0] == "findmnt":
-            return _Result(self.dataset + "\n")
+            if not self.dataset:
+                return _Result("", 1)
+            return _Result(f"{self.fstype} {self.dataset}\n")
         if argv[:2] == ["zfs", "get"]:
-            return _Result(("on" if self.readonly else "off") + "\n")
+            fields = argv[argv.index("-o") + 1].split(",")
+            lines = []
+            for name in argv[-2].split(","):
+                value, source = self.props.get(name, ("-", "-"))
+                row = {"property": name, "value": value, "source": source}
+                lines.append("\t".join(row[field] for field in fields))
+            return _Result("\n".join(lines) + "\n")
         if argv[:2] == ["zfs", "set"]:
-            value = argv[2].split("=", 1)[1]
-            if value == "on" and self.fail_on_restore:
-                raise RuntimeError("zfs set failed")
-            self.readonly = value == "on"
+            for pair in argv[2:-1]:
+                name, _, value = pair.partition("=")
+                if (name, value) == ("readonly", "on") and self.fail_on_restore:
+                    raise RuntimeError("zfs set failed")
+                self.props[name] = (value, "local")
+            return _Result()
+        if argv[:2] == ["zfs", "inherit"]:
+            name = argv[-2]
+            if name == "readonly":
+                if self.fail_on_restore:
+                    raise RuntimeError("zfs inherit failed")
+                self.props[name] = ("on", f"inherited from {self.PARENT}")
+            else:
+                self.props.pop(name, None)
             return _Result()
         return _Result()
 
     def sets(self):
         return [c[2] for c in self.calls if c[:2] == ["zfs", "set"]]
+
+    def zfs_calls(self):
+        return [c[1:] for c in self.calls if c[0] == "zfs" and c[1] != "get"]
 
 
 def test_dataset_for_asks_the_host():
@@ -298,7 +337,7 @@ def test_dataset_for_walks_up_to_an_existing_ancestor():
                 target = argv[-1]
                 self.targets.append(target)
                 if target == self.answers_for:
-                    return _Result("boot-pool/ROOT/26.0/usr\n", 0)
+                    return _Result("zfs boot-pool/ROOT/26.0/usr\n", 0)
                 return _Result("", 1)
             return super().run(argv, check=check, **kwargs)
 
@@ -325,3 +364,93 @@ def test_dataset_for_gives_up_at_the_root():
 
     with pytest.raises(RuntimeError, match="could not determine the dataset"):
         zfs.dataset_for(_NeverAnswers(), "/a/b/c")
+
+
+# -- writable: what it leaves behind, and what it raises --------------------
+
+
+def test_a_failed_restore_does_not_hide_the_bodys_exception(caplog):
+    """The caller sees why the patch failed; the restore failure is logged."""
+    import logging
+
+    client = _FakeClient(readonly=True)
+    client.fail_on_restore = True
+    with caplog.at_level(logging.ERROR, logger="pytruenas.patch.zfs"):
+        with pytest.raises(ValueError, match="the body failed"):
+            with zfs.writable(client, "/usr"):
+                raise ValueError("the body failed")
+    assert any("still WRITABLE" in record.getMessage() for record in caplog.records)
+
+
+def test_an_inherited_readonly_is_inherited_again():
+    """Setting it back locally would turn an inherited `on` into a local one."""
+    client = _FakeClient(readonly=True, source="inherited from boot-pool/ROOT")
+    with zfs.writable(client, "/usr"):
+        assert client.readonly is False
+    assert client.props["readonly"] == ("on", "inherited from boot-pool/ROOT")
+    assert ["inherit", "readonly", client.dataset] in client.zfs_calls()
+    assert "readonly=on" not in client.sets()
+
+
+def test_the_window_is_marked_on_the_dataset_while_it_is_open():
+    client = _FakeClient(readonly=True)
+    with zfs.writable(client, "/usr"):
+        assert client.props["pytruenas:restore-readonly"][0] == "on"
+        # Cleared together, in one `zfs set`, so no moment is unmarked.
+        assert client.zfs_calls()[0] == [
+            "set",
+            "readonly=off",
+            "pytruenas:restore-readonly=on",
+            client.dataset,
+        ]
+    assert "pytruenas:restore-readonly" not in client.props
+    assert client.readonly is True
+
+
+def test_a_window_left_open_is_closed_by_the_next_one(caplog):
+    """A crash inside the window left readonly off with the mark still set."""
+    import logging
+
+    client = _FakeClient(readonly=False)
+    client.props["pytruenas:restore-readonly"] = ("on", "local")
+    with caplog.at_level(logging.WARNING, logger="pytruenas.patch.zfs"):
+        with zfs.writable(client, "/usr"):
+            assert client.readonly is False
+    assert client.readonly is True
+    assert "pytruenas:restore-readonly" not in client.props
+    assert any("left open" in record.getMessage() for record in caplog.records)
+
+
+def test_a_path_not_on_zfs_is_left_alone():
+    client = _FakeClient(dataset="tmpfs", fstype="tmpfs", readonly=False)
+    with zfs.writable(client, "/tmp/x") as source:
+        assert source == "tmpfs"
+    assert client.zfs_calls() == []
+    assert not [c for c in client.calls if c[:2] == ["zfs", "get"]]
+
+
+def test_dataset_for_names_a_filesystem_that_is_not_zfs():
+    client = _FakeClient(dataset="/dev/sdc", fstype="ext4")
+    with pytest.raises(ValueError, match="ext4"):
+        zfs.dataset_for(client, "/home/x")
+
+
+def test_dataset_for_reads_findmnt_raw_escapes():
+    """`findmnt --raw` writes a space inside a value as \x20."""
+    client = _FakeClient(dataset="tank/my\x20data")
+    assert zfs.dataset_for(client, "/mnt/tank/my data") == "tank/my data"
+
+
+def test_dataset_for_asks_for_the_type_and_a_source_without_a_bind_suffix():
+    client = _FakeClient()
+    zfs.dataset_for(client, "/usr")
+    argv = client.calls[0]
+    assert "--nofsroot" in argv and "--raw" in argv
+    assert argv[argv.index("--output") + 1] == "FSTYPE,SOURCE"
+
+
+def test_get_property_keeps_a_values_own_spaces():
+    client = _PropClient(**{"com.example:note": " two words "})
+    assert zfs.get_property(client, "pool/ds", "com.example:note") == " two words "
+    values = zfs.get_properties(client, "pool/ds", ["com.example:note"])
+    assert values == {"com.example:note": " two words "}

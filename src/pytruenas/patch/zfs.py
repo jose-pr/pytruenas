@@ -12,8 +12,9 @@ narrow:
 * :func:`writable` is a context manager that flips ``readonly`` off and
   restores it on the way out -- **including when the body raises**, which is
   the entire reason it is a context manager and not two functions.
-* It is a no-op when the dataset is already writable, so wrapping something
-  that turns out not to need it costs one query and changes nothing.
+* It is a no-op when the dataset is already writable, or when the path is not
+  on ZFS at all, so wrapping something that turns out not to need it costs a
+  query or two and changes nothing.
 
 Underneath those sits a general dataset property API -- :func:`get_property` /
 :func:`set_property` (plus the batched :func:`get_properties` /
@@ -33,6 +34,7 @@ from __future__ import annotations
 import contextlib as _contextlib
 import logging as _logging
 import os as _os
+import re as _re
 import typing as _ty
 from pathlib import PurePosixPath as _PurePosixPath
 
@@ -96,7 +98,21 @@ def dataset_for(client: "TrueNASClient", path: "PathLike") -> str:
     ordinary "create a new file here" case -- so this walks up to the nearest
     existing ancestor and asks about that. A file and the directory it will be
     created in are on the same dataset by definition.
+
+    Raises ``ValueError`` naming the filesystem type when ``path`` is not on
+    ZFS, and ``RuntimeError`` when the host answers for no ancestor.
     """
+    fstype, source = _mount_for(client, path)
+    if fstype != "zfs":
+        raise ValueError(
+            f"{path!r} is on a {fstype} filesystem ({source}), not a ZFS dataset"
+        )
+    return source
+
+
+def _mount_for(client: "TrueNASClient", path: "PathLike") -> "tuple[str, str]":
+    """``(FSTYPE, SOURCE)`` of the mount holding ``path`` or its nearest
+    existing ancestor, as ``findmnt`` reports them."""
     # Walk with the path's own `.parent` when it has one (it keeps the type,
     # and so keeps `.path` meaningful); wrap a bare string in a POSIX pure path
     # so a Windows controller does not hand `\usr\lib` to the host.
@@ -105,15 +121,28 @@ def dataset_for(client: "TrueNASClient", path: "PathLike") -> str:
     while True:
         target = host_path(candidate)
         tried.append(target)
+        # --raw: columns split by one space, a space inside a value escaped.
+        # --nofsroot: a bind mount's SOURCE without the "[/subdir]" suffix,
+        # which no `zfs` command accepts.
         result = client.run(
-            ["findmnt", "--noheadings", "--output", "SOURCE", "--target", target],
+            [
+                "findmnt",
+                "--noheadings",
+                "--raw",
+                "--nofsroot",
+                "--output",
+                "FSTYPE,SOURCE",
+                "--target",
+                target,
+            ],
             capture_output="stdout",
             encoding="utf-8",
             check=False,
         )
-        dataset = result.stdout.strip()
-        if result.returncode == 0 and dataset:
-            return dataset
+        lines = result.stdout.strip().splitlines()
+        fstype, _, source = lines[0].partition(" ") if lines else ("", "", "")
+        if result.returncode == 0 and source:
+            return _unescape(fstype), _unescape(source)
         parent = candidate.parent
         if host_path(parent) == target:  # reached "/" without an answer
             break
@@ -123,6 +152,11 @@ def dataset_for(client: "TrueNASClient", path: "PathLike") -> str:
         f"could not determine the dataset backing {path!r} "
         f"(tried: {', '.join(tried)})"
     )
+
+
+def _unescape(value: str) -> str:
+    """Undo the ``\\xNN`` escapes of ``findmnt --raw``."""
+    return _re.sub(r"\\x([0-9a-fA-F]{2})", lambda m: chr(int(m.group(1), 16)), value)
 
 
 #: What ``zfs get`` prints for a property that has no value set. ZFS uses this
@@ -146,13 +180,14 @@ def get_property(
     worth setting on a dataset to carry your own metadata -- ZFS stores them
     verbatim, and they survive send/receive.
 
-    Returns ``default`` when the property is unset. ZFS prints ``-`` for an
-    unset user property (and exits 0), so "absent" is a value here rather than
-    an error; a *native* property is never absent, so this only bites for user
-    properties. ``zfs get`` still fails loudly for a bad dataset name.
+    Returns ``default`` when ZFS prints ``-``, which means "unset or not
+    applicable": an unset user property, or a native one that does not apply
+    to this dataset (``origin`` on a dataset that is not a clone, ``volsize``
+    on a filesystem). ``zfs get`` exits 0 for both, and still fails loudly for
+    a bad dataset name.
 
-    ``-H -o value`` asks for exactly one unheadered field, so the result needs
-    no parsing beyond a strip.
+    ``-H -o value`` asks for exactly one unheadered field; only the line end
+    is removed, so a user property keeps its own surrounding spaces.
     """
     result = client.run(
         ["zfs", "get", "-H", "-o", "value", name, dataset],
@@ -160,7 +195,7 @@ def get_property(
         encoding="utf-8",
         check=True,
     )
-    value = result.stdout.strip()
+    value = result.stdout.rstrip("\r\n")
     return default if value == _UNSET else value
 
 
@@ -194,10 +229,10 @@ def get_properties(
             continue
         # -H separates fields with a single tab; a value may itself contain
         # spaces, so split on tab and only once.
-        prop, _, value = line.partition("\t")
-        if value.strip() == _UNSET:
+        prop, _, value = line.rstrip("\r").partition("\t")
+        if value == _UNSET:
             continue
-        values[prop.strip()] = value.strip()
+        values[prop.strip()] = value
     return values
 
 
@@ -284,40 +319,121 @@ def set_readonly(client: "TrueNASClient", dataset: str, readonly: bool) -> None:
     set_property(client, dataset, "readonly", readonly)
 
 
+#: User property set together with ``readonly=off`` while :func:`writable`
+#: holds a dataset open. Its value says how to put ``readonly`` back (``on``:
+#: set it locally; ``inherit``: ``zfs inherit`` it), so a window that never
+#: closed -- a crash, a dropped connection -- is closed by the next one.
+_RESTORE_MARK = "pytruenas:restore-readonly"
+
+
 @_contextlib.contextmanager
 def writable(client: "TrueNASClient", path: "PathLike") -> "_ty.Iterator[str]":
     """Make the dataset holding ``path`` writable for the duration.
 
-    Yields the dataset name. Restores the original ``readonly`` value on exit
-    however the block ends -- leaving ``/usr`` writable because a patch raised
-    halfway is exactly the failure this exists to prevent.
+    Yields the dataset name. Restores ``readonly`` on exit however the block
+    ends -- leaving ``/usr`` writable because a patch raised halfway is exactly
+    the failure this exists to prevent. The restore keeps the property's
+    source: a ``readonly=on`` inherited from a parent is inherited again
+    rather than set locally.
 
     A dataset that is already writable is left alone, and nothing is restored
     on exit: the flag is only ever put *back* to what it was found as, never
-    set from scratch.
+    set from scratch. A path that is not on ZFS is left alone too, and the
+    yield is then the mount's source as ``findmnt`` names it.
+
+    While the window is open the dataset carries the user property
+    ``pytruenas:restore-readonly``. A later ``writable()`` that finds it on a
+    writable dataset takes the window as left open, and restores on exit. Two
+    windows over one dataset at the same time (two processes) are not
+    coordinated: the first to close makes the dataset read-only for both.
+
+    If the body raises and the restore fails too, the body's exception is the
+    one raised and the restore failure is logged; after a body that
+    completed, a failed restore raises.
 
         with writable(nas, "/usr/lib/python3/dist-packages/middlewared"):
             target.write(patched)
     """
-    dataset = dataset_for(client, path)
-    was_readonly = is_readonly(client, dataset)
-    if not was_readonly:
+    fstype, dataset = _mount_for(client, path)
+    if fstype != "zfs":
+        LOGGER.debug("%s is on %s (%s), not ZFS; nothing to do", path, fstype, dataset)
+        yield dataset
+        return
+
+    readonly, source, pending = _readonly_state(client, dataset)
+    if readonly == "on":
+        restore = "inherit" if source in ("default", "inherited") else "on"
+        set_properties(client, dataset, {"readonly": False, _RESTORE_MARK: restore})
+    elif pending in ("on", "inherit"):
+        LOGGER.warning(
+            "%s is writable and carries %s=%s: an earlier window was left open, "
+            "and readonly is restored when this one closes",
+            dataset,
+            _RESTORE_MARK,
+            pending,
+        )
+        restore = pending
+    else:
         LOGGER.debug("%s is already writable; nothing to do", dataset)
         yield dataset
         return
 
-    set_readonly(client, dataset, False)
+    body_failed = True
     try:
         yield dataset
+        body_failed = False
     finally:
-        # Best-effort restore: if putting it back fails we must still surface
-        # the original exception, but a silently-writable root is worth a loud
-        # log line of its own.
         try:
-            set_readonly(client, dataset, True)
-        except Exception:  # pragma: no cover - needs a host that fails here
+            _restore_readonly(client, dataset, restore)
+        except Exception:
+            # A silently writable root is worth a loud line of its own; the
+            # body's exception, when there is one, is still the one raised.
             LOGGER.exception(
                 "FAILED to restore readonly=on for %s -- it is still WRITABLE",
                 dataset,
             )
-            raise
+            if not body_failed:
+                raise
+
+
+def _readonly_state(client: "TrueNASClient", dataset: str) -> "tuple[str, str, str]":
+    """``(value, source, restore mark)`` of ``readonly`` on ``dataset``.
+
+    ``source`` is its first word: ``local``, ``default``, ``inherited``
+    (ZFS prints ``inherited from <parent>``), ``temporary`` or ``received``.
+    """
+    result = client.run(
+        [
+            "zfs",
+            "get",
+            "-H",
+            "-o",
+            "property,value,source",
+            f"readonly,{_RESTORE_MARK}",
+            dataset,
+        ],
+        capture_output="stdout",
+        encoding="utf-8",
+        check=True,
+    )
+    fields: "dict[str, tuple[str, str]]" = {}
+    for line in result.stdout.splitlines():
+        prop, _, rest = line.rstrip("\r").partition("\t")
+        value, _, source = rest.partition("\t")
+        fields[prop.strip()] = (value, source)
+    value, source = fields.get("readonly", ("", ""))
+    mark, _ = fields.get(_RESTORE_MARK, (_UNSET, ""))
+    return value, source.split(" ", 1)[0], mark
+
+
+def _restore_readonly(client: "TrueNASClient", dataset: str, restore: str) -> None:
+    if restore == "inherit":
+        inherit_property(client, dataset, "readonly")
+    else:
+        set_readonly(client, dataset, True)
+    try:
+        inherit_property(client, dataset, _RESTORE_MARK)
+    except Exception:
+        # readonly is back on; a mark left on a read-only dataset is ignored,
+        # and the next window replaces it.
+        LOGGER.warning("could not clear %s on %s", _RESTORE_MARK, dataset)
