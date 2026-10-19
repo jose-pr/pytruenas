@@ -25,7 +25,8 @@ class Method(_ty.TypedDict):
 
 
 class MethodSchema(_schema.Object):
-    properties: "MethodProperties"  # type: ignore
+    # Narrows the inherited `properties` key to a method's two schemas.
+    properties: "MethodProperties"  # type: ignore[misc]
 
 
 MethodProperties = _ty.TypedDict(

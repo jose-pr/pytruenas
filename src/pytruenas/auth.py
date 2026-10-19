@@ -10,8 +10,7 @@ if _ty.TYPE_CHECKING:
 
 #: Keyword names passed to ``Credentials(...)`` whose value may be shown. Every
 #: other value is credential material: an allowlist, because a list of secret
-#: names is only as good as its author's imagination (``otp_token`` and
-#: ``private_key`` were both missing from the old one).
+#: names misses whichever one its author did not think of.
 _SHOWN_KEYS = {"username", "user"}
 
 
@@ -108,7 +107,8 @@ def _split_extras(raw: str) -> "tuple[str, _ty.Optional[str]]":
 
 
 class _CredentialsMeta(type):
-    def __call__(cls: "type[Credentials]", *args, **kwargs):  # type: ignore
+    # The metaclass's `cls` is narrowed to the class it builds.
+    def __call__(cls: "type[Credentials]", *args, **kwargs):  # type: ignore[misc]
         if cls is not Credentials:
             inst = cls.__new__(cls, *args, **kwargs)
             inst.__init__(*args, **kwargs)

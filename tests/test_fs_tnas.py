@@ -669,11 +669,10 @@ def test_every_leg_of_a_host_path_names_the_decoded_file(remote):
 def _path_client(ssh=None):
     """A remote fake host shaped for `pytruenas.fs.path(..., backend="ws")`.
 
-    `path()` reads `is_local`/`host` off the settings object (`_api` here, the
-    pre-hostctl spelling it still accepts).
+    `path()` reads `is_local`/`host` off the host's `_config`.
     """
     return SimpleNamespace(
-        _api=SimpleNamespace(is_local=False, host="nas", port=0),
+        _config=SimpleNamespace(is_local=False, host="nas", port=0),
         config=SimpleNamespace(ssh=ssh),
         api=SimpleNamespace(),
         fsbackend="auto",
@@ -717,7 +716,7 @@ def test_path_construction_brackets_an_ipv6_host():
     """An IPv6 literal is bracketed in the authority, or its colons read as a
     port."""
     client = _path_client()
-    client._api.host = "fd00::1"
+    client._config.host = "fd00::1"
     p = fs_path(client, "/mnt/x", backend="ws")
     assert str(p) == "truenas+ws://[fd00::1]/mnt/x"
     assert p.path == "/mnt/x"

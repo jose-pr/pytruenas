@@ -474,8 +474,8 @@ class TrueNASWSConnection:
         self._subs: "dict[str, list[Subscription]]" = {}
         self._subs_lock = _threading.Lock()
         # Whether the socket has been shut down; separate from `_closed`, which
-        # the reader sets on its own and which used to make close() a no-op
-        # that left the socket open.
+        # the reader sets on its own, so close() still releases the socket
+        # after the server ended the connection.
         self._released = False
 
         self._ws = self._connect()
@@ -762,7 +762,7 @@ class TrueNASWSConnection:
         """Close the websocket connection. Idempotent.
 
         Also releases the socket when the reader already ended the connection
-        (the server closed it); that used to return early and leave it open.
+        (the server closed it).
         """
         with self._pending_lock:
             was_closed = self._closed.is_set()

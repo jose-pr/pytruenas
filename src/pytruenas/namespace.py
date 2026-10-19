@@ -222,15 +222,9 @@ class Namespace:
         # embedding client. A plain dict is dropped with the instance.
         self._children: "dict[str, Namespace]" = {}
 
-    def __repr__(self) -> str:  # type: ignore
-        # `_client._api` was a pre-hostctl leftover: the attribute exists
-        # nowhere anymore, so this raised AttributeError for every namespace --
-        # and `repr` is what a traceback frame renders, so the failure landed
-        # while something else was already going wrong.
-        #
-        # `name` rather than the connection URI: it is the short label, and it
-        # is credential-free by construction. A repr that leaks a password is
-        # worse than an unhelpful one.
+    def __repr__(self) -> str:
+        # `name` rather than the connection URI: the short label, and
+        # credential-free by construction. A traceback renders this repr.
         host = getattr(self._client, "name", None) or self._client
         return f"{self.__class__.__name__}({host}/{self._namespace.replace('.','/')})"
 
@@ -335,14 +329,16 @@ class Namespace:
                 raise (ioerror(e) if _ioerror else e) from None
         else:
             # Unreachable: the last attempt raises rather than continuing.
-            raise ioerror(last_exc) if _ioerror else last_exc  # type: ignore[misc]
+            assert last_exc is not None
+            raise ioerror(last_exc) if _ioerror else last_exc
 
         # `type(...) is int`: a job id. bool is an int subclass, and a method
         # answering True is not job 1.
         if job and job != "RETURN" and type(result) is int:
             try:
                 result = self._client.wait(
-                    result, timeout=None if _timeout is _UNSET else _timeout
+                    result,
+                    timeout=None if isinstance(_timeout, _Unset) else _timeout,
                 )
             except _connection.ClientException as e:
                 raise (ioerror(e) if _ioerror else e) from None

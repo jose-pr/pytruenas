@@ -1,25 +1,21 @@
 from __future__ import annotations
 
 import re as _re
-import sys as _sys
+import sys
 import typing as _ty
 
 from duho import qualname as _qn
 
-if _sys.version_info >= (3, 11):
+if sys.version_info >= (3, 11):
     from typing import NotRequired as _NotRequired
 else:  # pragma: no cover - exercised on the 3.9 floor
-    try:
-        from typing_extensions import NotRequired as _NotRequired
-    except ImportError:
 
-        class _NotRequired:
-            """``NotRequired[X]`` resolves to ``X`` where neither ``typing``
-            nor ``typing_extensions`` has it; the key's optionality is the
-            class's ``total=False``."""
+    class _NotRequired:
+        """``NotRequired[X]`` before 3.11: resolves to ``X``, so the hints
+        resolve; a key's optionality there is the class's ``total``."""
 
-            def __class_getitem__(cls, item):
-                return item
+        def __class_getitem__(cls, item):
+            return item
 
 
 JsonNumber = _ty.Union[float, int]
@@ -58,12 +54,14 @@ def _typeddict_name(namespace: "_qn.PythonName", title: str) -> str:
     return name
 
 
+# These TypedDicts also carry the methods codegen calls; a type checker
+# reports each method and default as `[misc]` (a TypedDict body holds keys).
 class Schema(_ty.TypedDict, total=False):
     title: _NotRequired[str]
     description: _NotRequired[str]
     default: _NotRequired[_ty.Optional[object]]
 
-    def get_type(schema) -> "type[_ty.Union[AnyOf, BaseType, OneOf]]":  # type: ignore
+    def get_type(schema) -> "type[_ty.Union[AnyOf, BaseType, OneOf]]":  # type: ignore[misc]
         if "anyOf" in schema:
             return AnyOf
         elif "oneOf" in schema:
@@ -71,13 +69,13 @@ class Schema(_ty.TypedDict, total=False):
         else:
             return BaseType
 
-    def python_declaration(
+    def python_declaration(  # type: ignore[misc]
         self, typeddicts: dict[str, object], namespace: _qn.PythonName
     ):
         if isinstance(self, str):
             self = _ty.cast(Schema, {"type": self})
         return Schema.get_type(self).python_declaration(
-            self,  # type: ignore
+            self,
             typeddicts,
             namespace,
         )
@@ -118,7 +116,7 @@ def _literal_declaration(schema: "_ty.Mapping[str, object]") -> "_ty.Optional[st
 class BaseType(Schema):
     type: _NotRequired[str]
 
-    def python_declaration(
+    def python_declaration(  # type: ignore[misc]
         self, typeddicts: dict[str, object], namespace: _qn.PythonName
     ):
         # `enum`/`const` say more than `type` does, and the appliance's dump
@@ -153,7 +151,7 @@ class BaseType(Schema):
                     members.append(rendered)
             return "|".join(members) if members else "_jsonschema.JsonValue"
         for ty in TYPES:
-            if ty.type == type:  # type: ignore
+            if ty.type == type:
                 return ty.python_declaration(self, typeddicts, namespace)
         # An unknown type name is imprecise, not fatal: the stub says "some
         # JSON value" rather than failing to generate at all.
@@ -171,9 +169,9 @@ TypeDeclaration = _ty.Union[BaseType, str]
 class AnyOf(Schema):
     anyOf: list[TypeDeclaration]
 
-    def python_declaration(
+    def python_declaration(  # type: ignore[misc]
         self, typeddicts: dict[str, object], namespace: _qn.PythonName
-    ):  # type: ignore
+    ):
         return "|".join(
             [
                 Schema.python_declaration(_ty.cast(Schema, t), typeddicts, namespace)
@@ -185,9 +183,9 @@ class AnyOf(Schema):
 class OneOf(Schema):
     oneOf: list[TypeDeclaration]
 
-    def python_declaration(
+    def python_declaration(  # type: ignore[misc]
         self, typeddicts: dict[str, object], namespace: _qn.PythonName
-    ):  # type: ignore
+    ):
         return "|".join(
             [
                 Schema.python_declaration(_ty.cast(Schema, t), typeddicts, namespace)
@@ -197,61 +195,61 @@ class OneOf(Schema):
 
 
 class Float(BaseType):
-    type: _ty.Literal["float"] = "float"  # type: ignore
+    type: _ty.Literal["float"] = "float"  # type: ignore[misc]
 
-    def python_declaration(
+    def python_declaration(  # type: ignore[misc]
         self, typeddicts: dict[str, object], namespace: _qn.PythonName
-    ):  # type: ignore
+    ):
         return "float"
 
 
 class Null(BaseType):
-    type: _ty.Literal["null"] = "null"  # type: ignore
+    type: _ty.Literal["null"] = "null"  # type: ignore[misc]
 
-    def python_declaration(
+    def python_declaration(  # type: ignore[misc]
         self, typeddicts: dict[str, object], namespace: _qn.PythonName
-    ):  # type: ignore
+    ):
         return "None"
 
 
 class Boolean(BaseType):
-    type: _ty.Literal["boolean"] = "boolean"  # type: ignore
+    type: _ty.Literal["boolean"] = "boolean"  # type: ignore[misc]
 
-    def python_declaration(
+    def python_declaration(  # type: ignore[misc]
         self, typeddicts: dict[str, object], namespace: _qn.PythonName
-    ):  # type: ignore
+    ):
         return "bool"
 
 
 class Integer(BaseType):
-    type: _ty.Literal["integer"] = "integer"  # type: ignore
+    type: _ty.Literal["integer"] = "integer"  # type: ignore[misc]
 
-    def python_declaration(
+    def python_declaration(  # type: ignore[misc]
         self, typeddicts: dict[str, object], namespace: _qn.PythonName
-    ):  # type: ignore
+    ):
         return "int"
 
 
 class Number(BaseType):
-    type: _ty.Literal["number"] = "number"  # type: ignore
+    type: _ty.Literal["number"] = "number"  # type: ignore[misc]
 
-    def python_declaration(
+    def python_declaration(  # type: ignore[misc]
         self, typeddicts: dict[str, object], namespace: _qn.PythonName
-    ):  # type: ignore
+    ):
         return "_jsonschema.JsonNumber"
 
 
 class String(BaseType):
-    type: _ty.Literal["string"] = "string"  # type: ignore
+    type: _ty.Literal["string"] = "string"  # type: ignore[misc]
 
-    def python_declaration(
+    def python_declaration(  # type: ignore[misc]
         self, typeddicts: dict[str, object], namespace: _qn.PythonName
-    ):  # type: ignore
+    ):
         return "str"
 
 
 class Object(BaseType):
-    type: _ty.Literal["object"] = "object"  # type: ignore
+    type: _ty.Literal["object"] = "object"  # type: ignore[misc]
     properties: _NotRequired[dict[str, Schema]]
     #: The dump's own spelling. A bool ("anything"/"nothing else allowed") or a
     #: schema the extra VALUES must match, which is how the middleware writes a
@@ -260,9 +258,9 @@ class Object(BaseType):
     additionalProperties: _NotRequired["_ty.Union[bool, Schema]"]
     required: _NotRequired[list[str]]
 
-    def python_declaration(
+    def python_declaration(  # type: ignore[misc]
         self, typeddicts: dict[str, object], namespace: _qn.PythonName
-    ):  # type: ignore
+    ):
         properties = self.get("properties")
         if not properties:
             extra = self.get("additional_properties", self.get("additionalProperties"))
@@ -308,25 +306,25 @@ class Object(BaseType):
 
 
 class Any(BaseType):
-    type: _ty.Literal["any"] = "any"  # type: ignore
+    type: _ty.Literal["any"] = "any"  # type: ignore[misc]
 
-    def python_declaration(
+    def python_declaration(  # type: ignore[misc]
         self, typeddicts: dict[str, object], namespace: _qn.PythonName
-    ):  # type: ignore
+    ):
         return "_jsonschema.JsonValue"
 
 
 class Array(BaseType):
-    type: _ty.Literal["array"] = "array"  # type: ignore
+    type: _ty.Literal["array"] = "array"  # type: ignore[misc]
     #: A schema every item matches, or a bool (`True`/`{}` any item,
     #: `False` none). Absent for an array with no item constraint at all.
     items: _NotRequired["_ty.Union[Schema, bool]"]
     #: Positional item schemas (the middleware's call-parameter lists).
     prefixItems: _NotRequired[list[Schema]]
 
-    def python_declaration(
+    def python_declaration(  # type: ignore[misc]
         self, typeddicts: dict[str, object], namespace: _qn.PythonName
-    ):  # type: ignore
+    ):
         items = self.get("items")
         if items is True or items == {}:
             # "any item is allowed" -- a list of anything.
@@ -349,7 +347,7 @@ TYPES: list[type[BaseType]] = [
     Array,
     Any,
     Number,
-]  # type: ignore
+]
 # name: str
 # title: str #type: ignore
 # required: bool

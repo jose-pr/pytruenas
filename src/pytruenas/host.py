@@ -65,9 +65,7 @@ if _ty.TYPE_CHECKING:  # pragma: no cover - typing only
 
     #: Mirrors `TrueNASClient`'s parameter so `TrueNASHost[Current]` gives the
     #: same completion on `.api` that `TrueNASClient[Current]` does.
-    ApiVersion = _ty.TypeVar(
-        "ApiVersion", bound=_Namespace, default=Current  # type: ignore
-    )
+    ApiVersion = _ty.TypeVar("ApiVersion", bound=_Namespace, default=Current)
 else:
     ApiVersion = _ty.TypeVar("ApiVersion", bound=_Namespace)
 
@@ -212,9 +210,7 @@ def _public_key(private_key: str) -> str:
     passed ``private_key=`` to :meth:`TrueNASHost.install_sshcreds` and nothing
     else. Every other path gets both halves from the middleware, which is what
     keeps ``install_sshcreds`` usable without the optional ``ssh`` extra: it
-    provisions a keypair through the API and never opens an SSH connection, so
-    requiring ``asyncssh`` for the common case was a dependency on a library
-    that was not being used to do anything.
+    provisions a keypair through the API and never opens an SSH connection.
 
     This is pure key math, so it prefers ``cryptography`` over ``asyncssh``:
     it is what asyncssh itself depends on for the primitives (so the ``ssh``
@@ -269,9 +265,8 @@ def _shared_options(credentials: "_ty.Mapping[str, object]") -> "dict[str, objec
     """Config options common to every branch of ``_from_parsed_uri``.
 
     Shared deliberately: that method returns from two places (the unix-socket
-    form and the host/port form), and an option forwarded in only one is
-    silently ignored for the other. That is not hypothetical -- it is exactly
-    how ``webshell=False`` was once accepted and dropped.
+    form and the host/port form), and an option forwarded in only one would be
+    accepted and silently ignored for the other.
     """
     return {
         "verify": _ty.cast(bool, credentials.get("verify", True)),
@@ -290,8 +285,8 @@ def _shared_options(credentials: "_ty.Mapping[str, object]") -> "dict[str, objec
 class _TrustAdapter(_req.adapters.HTTPAdapter):
     """HTTPS verified against exactly the context the websocket legs use.
 
-    ``requests`` otherwise verifies against its own certifi bundle, which is how
-    the side channels once disagreed with the API websocket -- see
+    ``requests`` otherwise verifies against its own certifi bundle, so the side
+    channels could trust what the API websocket does not -- see
     :mod:`pytruenas.utils.tls`, which makes the one trust decision.
     """
 
@@ -343,9 +338,8 @@ def _ssh_config_from(
     username = target.username or None
     password = target.password or None
     client_keys = None
-    # The pre-hostctl client packed the auth type into the username as
-    # "client_keys|root"; accept it so an existing connection string keeps
-    # working, but unpack it into SSHConfig's real fields.
+    # "client_keys|root" in the username names the auth type, with the key as
+    # the password; it is unpacked into SSHConfig's own fields.
     if username and "|" in username:
         logintype, username = username.split("|", maxsplit=1)
         if logintype == "client_keys" and password:
@@ -1084,7 +1078,7 @@ class TrueNASHost(_PosixHost, _ty.Generic[ApiVersion]):
 
         Only if it is still the current connection -- another thread may have
         replaced it already -- and closed, not just forgotten: a dropped
-        reference used to leak its socket and reader thread.
+        reference would leak its socket and reader thread.
         """
         with self._conn_lock:
             if conn is not None and self._conn is conn:
@@ -1164,7 +1158,7 @@ class TrueNASHost(_PosixHost, _ty.Generic[ApiVersion]):
         """The root API namespace (``host.api.<namespace>.<method>(...)``).
 
         Parameterise the host to type it: ``TrueNASHost[Current]("nas").api``
-        completes exactly as the old ``TrueNASClient[Current]`` did.
+        (or ``TrueNASClient[Current]``) completes the generated API stubs.
         """
         return _ty.cast("ApiVersion", _Namespace(_ty.cast(_ty.Any, self)))
 
@@ -1245,10 +1239,10 @@ class TrueNASHost(_PosixHost, _ty.Generic[ApiVersion]):
         A fragment is dropped deliberately: it is a client-side construct and
         is never sent to the server, so carrying it would only mislead.
 
-        The target's port is kept (a ``wss://nas:8443`` API means
-        ``https://nas:8443`` side channels; it used to be dropped, sending
-        uploads, downloads, file reads, the web shell -- and their auth tokens
-        -- to 443). On the NAS itself (the unix-socket target) the side channels
+        The target's port is kept: a ``wss://nas:8443`` API means
+        ``https://nas:8443`` side channels, and the uploads, downloads, file
+        reads and web shell -- with their auth tokens -- must not go to 443.
+        On the NAS itself (the unix-socket target) the side channels
         go to middlewared's own HTTP listener, ``http://127.0.0.1:6000``: there
         is no hostname to use, and nginx on 80 only redirects to 443.
         """
@@ -1418,10 +1412,9 @@ class TrueNASHost(_PosixHost, _ty.Generic[ApiVersion]):
 
         The dump is built and **compressed on the target**, then fetched over
         SFTP when this host has an SSH leg and in verified chunks otherwise.
-        It used to capture the raw output through ``run()``, which cannot work:
-        the dump is 24,103,000 bytes on 26.0, and pushing that through the web
-        shell's PTY lost the connection every time -- so a host with no SSH, the
-        exact case the web shell exists for, could not dump its API at all.
+        Its raw output cannot come back through ``run()``: the dump is
+        24,103,000 bytes on 26.0, and the web shell's PTY loses the connection
+        on that much output, on the very hosts (no SSH) that need it.
 
         ``cache=True`` (the default) reads and writes the per-host, per-version
         cache under ``$PYTRUENAS_CACHE``; building the dump costs about 75
@@ -1442,9 +1435,8 @@ class TrueNASHost(_PosixHost, _ty.Generic[ApiVersion]):
         Generates (or reuses) a ``SSH_KEY_PAIR`` keychain credential, installs
         the public half on root's ``authorized_keys``, and stores the private
         half on :attr:`TrueNASConfig.ssh` as a real
-        :class:`hostctl.SSHConfig` -- with ``client_keys`` as an actual
-        field rather than the ``"client_keys|root"`` string that the pre-hostctl
-        client packed into a username.
+        :class:`hostctl.SSHConfig`, as its ``client_keys``; an ``ssh=`` the
+        caller passed is copied, not changed.
 
         Adding an SSH transport changes what this host can do, so the providers
         are rebuilt: a host that had no executor at all (remote, no SSH) gains
@@ -1636,7 +1628,7 @@ class TrueNASHost(_PosixHost, _ty.Generic[ApiVersion]):
 
 # `auth` and `namespace` name the client in their annotations, but this module
 # imports them, so they cannot import it: bind it for `typing.get_type_hints`.
-_auth.TrueNASClient = TrueNASHost  # type: ignore[attr-defined]
-_namespace.TrueNASClient = TrueNASHost  # type: ignore[attr-defined]
+setattr(_auth, "TrueNASClient", TrueNASHost)
+setattr(_namespace, "TrueNASClient", TrueNASHost)
 
 __all__ = ["AUTO_SCHEME", "DEFAULT_SOCKET_PATH", "TrueNASConfig", "TrueNASHost"]

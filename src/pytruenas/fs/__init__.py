@@ -132,18 +132,9 @@ def _as_posix(value: object) -> str:
 
 
 def _settings(client: "TrueNASClient"):
-    """The object carrying ``host``/``is_local`` for ``client``.
-
-    A ``TrueNASHost`` keeps them on ``_config``; the pre-hostctl client kept
-    them on ``_api``. Both spellings are accepted because this module is
-    reached from both directions -- the path providers pass a host, while
-    ``client.path()`` callers may hold either.
-    """
-    for name in ("_config", "_api"):
-        settings = getattr(client, name, None)
-        if settings is not None:
-            return settings
-    return client
+    """The object carrying ``host``/``is_local`` for ``client``: its config."""
+    settings = getattr(client, "_config", None)
+    return client if settings is None else settings
 
 
 def _host(client: "TrueNASClient") -> str:

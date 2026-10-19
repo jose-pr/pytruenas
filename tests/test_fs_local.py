@@ -9,12 +9,12 @@ from pytruenas.fs import TnasWsPath, path
 
 def _local_client():
     api = SimpleNamespace(is_local=True, host="localhost", port=0)
-    return SimpleNamespace(_api=api, fsbackend="auto")
+    return SimpleNamespace(_config=api, fsbackend="auto")
 
 
 def _remote_client():
     api = SimpleNamespace(is_local=False, host="nas.example.com", port=0)
-    return SimpleNamespace(_api=api, fsbackend="auto", api=SimpleNamespace())
+    return SimpleNamespace(_config=api, fsbackend="auto", api=SimpleNamespace())
 
 
 def test_local_client_yields_localpath():
