@@ -93,20 +93,19 @@ def _schema_fields(client: TrueNASClient, args: Args, logger: Logger):
         return {}, None
     try:
         found = apicache.service_methods(client, service, refresh=args.refresh_api)
-        method = apihelp.from_get_methods(args.method, found[args.method])
-    except KeyError:
-        import difflib
-
-        close = difflib.get_close_matches(args.method, list(found), n=5)
-        hint = f"; did you mean: {', '.join(close)}" if close else ""
-        raise apihelp.UnknownMethod(f"no method named {args.method!r}{hint}") from None
-    except apihelp.UnknownMethod:
-        raise
+        entry = found.get(args.method)
+        method = None if entry is None else apihelp.from_get_methods(args.method, entry)
     except Exception as exc:  # noqa: BLE001
         logger.warning(
             "Could not read %s's schema (%s); typing fields as plain JSON", service, exc
         )
         return {}, None
+    if method is None:
+        import difflib
+
+        close = difflib.get_close_matches(args.method, list(found), n=5)
+        hint = f"; did you mean: {', '.join(close)}" if close else ""
+        raise apihelp.UnknownMethod(f"no method named {args.method!r}{hint}")
     return apihelp.fields(method), apihelp.payload_index(method)
 
 

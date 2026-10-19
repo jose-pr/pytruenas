@@ -161,3 +161,18 @@ def test_help_reads_the_version_once(name):
         FakeClient.calls.clear()
         assert _main("help", name, "nas1") == 0
         assert FakeClient.calls["system.info"] == 1
+
+
+# -- call ------------------------------------------------------------------
+
+
+@pytest.mark.parametrize("error", [RuntimeError("closed"), KeyError("version")])
+def test_call_without_a_schema_sends_the_fields_untyped(error, caplog):
+    """A schema that cannot be read is a warning: the untyped call still goes
+    out, with the payload last. A KeyError raised while reading it was taken
+    for "no such method" and failed on an unbound name."""
+    FakeClient.get_methods_error = error
+    with caplog.at_level(logging.WARNING):
+        assert _main("call", "user.create", "nas1", "--", "--smb=false") == 0
+    assert "typing fields as plain JSON" in caplog.text
+    assert FakeClient.sent == [("user.create", ({"smb": False},))]
