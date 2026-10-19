@@ -238,6 +238,20 @@ def test_arguments_after_the_separator_run_the_deployed_program(recorder):
     )
 
 
+def test_the_logged_command_carries_no_password(recorder, caplog):
+    client = _Client()
+    args = _args(mode="dir")
+    args._passthrough_ = ["query", "user", "wss://root:hunter2@other", "root:pw2@nas"]
+    with caplog.at_level(logging.INFO, logger="test-deploy"):
+        deploy_cmd.run(client, args, _logger())
+    assert "Running:" in caplog.text
+    assert "hunter2" not in caplog.text and "pw2" not in caplog.text
+    assert "wss://root@other" in caplog.text
+    # What runs is still the command as given.
+    [(command, _)] = client.ran
+    assert command.args[-2:] == ("wss://root:hunter2@other", "root:pw2@nas")
+
+
 @pytest.mark.requires("pathspec")
 def test_source_repo_ships_a_source_tree_with_its_filters(recorder, tmp_path, caplog):
     from hostctl.deploy import SourceTree

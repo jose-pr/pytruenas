@@ -57,6 +57,7 @@ from duho import Arg, Meta
 
 from pytruenas import TrueNASClient
 from pytruenas.utils.cmd import PyTrueNASArgs
+from pytruenas.utils.target import redact
 
 #: The command to run on the target once installed comes after `--`.
 _allow_passthrough_ = True
@@ -278,5 +279,8 @@ def run(client: TrueNASClient, args: Args, logger: Logger):
     if not extra:
         return 0
     command = [*deployment.command, *extra]
-    logger.info("Running: %s", " ".join(shlex.quote(part) for part in command))
+    # The deployed command may name another host with its password; the log
+    # line shows it without, and the command itself is run as given.
+    shown = " ".join(shlex.quote(redact(part)) for part in command)
+    logger.info("Running: %s", shown)
     return client.run(Exec(*command), check=False).returncode
