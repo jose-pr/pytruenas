@@ -309,19 +309,19 @@ class _ThisTarget(_pylogging.Filter):
 
 
 def _attach_logto(
-    logto: str, target: object, shown: str, logger: "_pylogging.Logger"
+    logto: str, target: str, logger: "_pylogging.Logger"
 ) -> "_pylogging.Handler | None":
     """Attach a per-target ``--logto`` file handler, or return ``None``.
 
     On the ``pytruenas`` library logger as well as the command's own: the
     library's records (a transport fallback WARNING, a connection error) are
     exactly what a per-target file is wanted for, and they never pass through
-    the command's logger. ``target`` is the object the fan-out runs, which
-    selects the records the file receives; ``shown`` names the file.
+    the command's logger. ``target`` is the string the fan-out runs, which
+    selects the records the file receives; its label names the file.
     """
     if not logto or logto == "-":
         return None
-    handler = _pylogging.FileHandler(_logto_path(logto, shown))
+    handler = _pylogging.FileHandler(_logto_path(logto, _target_label(target)))
     handler.setFormatter(_logging.DefaultFormatter())
     handler.addFilter(_ThisTarget(target))
     logger.addHandler(handler)
@@ -359,39 +359,6 @@ def _target_label(target: str) -> str:
         return _redact(target)
 
 
-class _Target:
-    """The object the fan-out runs: renders as the label, carries the target.
-
-    ``duho.fanout`` renders the object it is handed with ``str()`` in each
-    record's ``[...]`` prefix and with ``repr()`` in its own "target failed"
-    line, so both give the label; ``run_targets(label=)`` covers only the
-    prefix and would put the connection string, password included, in that
-    line. The worker reads the real string from :attr:`target`.
-
-    Not a ``str`` subclass: one whose ``__str__`` is the label renders as the
-    label wherever user code interpolates it.
-    """
-
-    __slots__ = ("target", "label")
-
-    def __init__(self, target: str) -> None:
-        self.target = target
-        self.label = _target_label(target)
-
-    def __str__(self) -> str:
-        return self.label
-
-    def __repr__(self) -> str:
-        return repr(self.label)
-
-
-def _unwrap(target: "_Target | str") -> "tuple[str, str]":
-    """``(connection string, label)`` of what the fan-out handed a worker."""
-    if isinstance(target, _Target):
-        return target.target, target.label
-    return target, _target_label(target)
-
-
 #: Exit status of a target whose command needs an optional extra that is not
 #: installed (`hostctl.MissingExtraError`): the status hostctl's own CLI uses.
 _MISSING_EXTRA_STATUS = 125
@@ -400,7 +367,7 @@ _MISSING_EXTRA_STATUS = 125
 def _run_module_on_target(
     command: "ModuleCommand",
     args: "PyTrueNAS",
-    target: "_Target | str",
+    target: str,
     logger: "_pylogging.Logger",
 ) -> int:
     """Run one module command against one target; return an exit code.
@@ -424,12 +391,8 @@ def _run_module_on_target(
     # was building a client for.
     args = _copy.copy(args)
 
-    # `fanned` is what the fan-out runs (and what --logto's filter selects
-    # records by); the command sees the connection string.
-    fanned = target
-    target, label = _unwrap(target)
     args.target = target
-    file_handler = _attach_logto(args.logto, fanned, label, logger)
+    file_handler = _attach_logto(args.logto, target, logger)
 
     # The target is already on every record as the ``[name]`` prefix, so naming
     # it again here would just read "[nas1] Started: nas1".
@@ -478,7 +441,7 @@ def _run_module_on_target(
 
 def _run_runpath_on_target(
     instance: "RunPathCmd",
-    target: "_Target | str",
+    target: str,
     logger: "_pylogging.Logger",
 ) -> int:
     """Run one RunPath command (a whole step directory) against one target.
@@ -501,10 +464,8 @@ def _run_runpath_on_target(
     route files).
     """
     per_target = _copy.copy(instance)
-    fanned = target
-    target, label = _unwrap(target)
     per_target.target = target
-    file_handler = _attach_logto(instance.logto, fanned, label, logger)
+    file_handler = _attach_logto(instance.logto, target, logger)
 
     # Already on every record as the ``[name]`` prefix -- see
     # _run_module_on_target.
@@ -547,13 +508,14 @@ def _dispatch(command: object, instance: "PyTrueNAS") -> int:
         isinstance(command, type) and issubclass(command, RunPathCmd)
     ):
         runpath = _ty.cast("RunPathCmd", instance)
-        targets = [_Target(target) for target in runpath._expanded_targets_()]
+        targets = runpath._expanded_targets_()
         logger.info("Running '%s' on %d target(s)", runpath._parsername_, len(targets))
         return run_targets(
             lambda target: _run_runpath_on_target(runpath, target, logger),
             targets,
             max_workers=max(1, instance.parallel),
             logger=logger,
+            label=_target_label,
         )
 
     if not isinstance(command, ModuleCommand):
@@ -567,13 +529,14 @@ def _dispatch(command: object, instance: "PyTrueNAS") -> int:
     if callable(validate):
         validate(instance)
 
-    targets = [_Target(target) for target in instance._expanded_targets_()]
+    targets = instance._expanded_targets_()
     logger.info("Running '%s' on %d target(s)", command._parsername_, len(targets))
     return run_targets(
         lambda target: _run_module_on_target(command, instance, target, logger),
         targets,
         max_workers=max(1, instance.parallel),
         logger=logger,
+        label=_target_label,
     )
 
 

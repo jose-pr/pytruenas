@@ -162,17 +162,32 @@ def test_prefix_is_not_applied_twice():
     assert adapter.process("[nas1] already tagged", {})[0] == "[nas1] already tagged"
 
 
-def test_trace_is_forwarded_when_available_and_silent_when_not():
-    """namespace.py calls .trace on every API call; plain Loggers lack it."""
-    plain = logging.getLogger("pytruenas.test.notrace")
-    adapter = _HostLogger(plain, {"name": "nas1"})
-    adapter.trace("must not raise")  # no TRACE level installed -> no-op
+def test_host_logger_trace_is_prefixed(caplog):
+    """duho installs `.trace` on LoggerAdapter, so the host's adapter has it."""
+    from duho.logging import add_logging_level
 
-    seen = []
-    withtrace = logging.getLogger("pytruenas.test.trace")
-    withtrace.trace = lambda msg, *a, **kw: seen.append(msg)  # type: ignore[attr-defined]
-    _HostLogger(withtrace, {"name": "nas1"}).trace("hello")
-    assert seen == ["[nas1] hello"]
+    add_logging_level("TRACE", 5)
+    adapter = _HostLogger(logging.getLogger("pytruenas.test.trace"), {"name": "nas1"})
+    with caplog.at_level(5, logger="pytruenas.test.trace"):
+        adapter.trace("hello")
+    assert [r.getMessage() for r in caplog.records] == ["[nas1] hello"]
+
+
+def test_the_cli_fanout_label_is_not_repeated_by_the_host_logger():
+    """The CLI fans out over connection strings and labels them by host name."""
+    from duho.fanout import current_target
+
+    adapter = _HostLogger(logging.getLogger("pytruenas.test"), {"name": "nas1:8443"})
+    token = current_target.set("wss://root:hunter2@nas1:8443")
+    try:
+        assert adapter.process("plain", {})[0] == "plain"
+    finally:
+        current_target.reset(token)
+    token = current_target.set("wss://nas2")
+    try:
+        assert adapter.process("plain", {})[0] == "[nas1:8443] plain"
+    finally:
+        current_target.reset(token)
 
 
 def test_call_trace_never_carries_a_password():

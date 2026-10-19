@@ -44,7 +44,7 @@ dependencies = [
     # suite on both interpreters, none apply. 0.6.0 also adds opt-in
     # MCP-over-stdio launch (`PYTRUENAS_MCP=stdio`); not opted out, see
     # "Environment variables" in src/pytruenas/AGENTS.md.
-    "duho>=0.7.5,<0.8",
+    "duho>=0.7.7,<0.8",
     # Series base; only `get_default_port` (utils/target.py) is used.
     "netimps>=0.4.0,<0.5",
     # hostctl 0.4.0 requires 0.1.2; `LocalPath`, `FileStat`, `CommitOnClose`.

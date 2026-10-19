@@ -175,6 +175,13 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   `Union[str, Any]` (the `zfs` functions take `str | os.PathLike[str]`), and
   `systemd.parse_unit()`; `render_unit()` and `UnitConfigParser` stay.
 
+### Changed
+
+- **Dependency floor raised to `duho>=0.7.7,<0.8`.** The command line names a
+  failed target by its host name through duho's own `run_targets(label=)`, and
+  `client.logger.trace()` is duho's `LoggerAdapter.trace`; neither changes
+  what is printed.
+
 ### Added
 
 - `TrueNASClient(..., timeout=)` / `TrueNASConfig(timeout=)` take hostctl's

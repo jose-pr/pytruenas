@@ -30,6 +30,7 @@ from __future__ import annotations
 
 import copy as _copy
 import dataclasses as _dataclasses
+import functools as _functools
 import inspect as _inspect
 import json as _js
 import logging as _logging
@@ -132,17 +133,13 @@ class _HostLogger(_logging.LoggerAdapter):
     -- ``duho.fanout`` tags at the handler, this tags at the call site, and a
     record that somehow passed through both would read ``[nas1] [nas1] ...``,
     which :meth:`process` suppresses.
-
-    ``.trace`` is forwarded if the underlying logger has it (``duho.logging``
-    installs a TRACE level), for code that calls it on ``host.logger``;
-    pytruenas itself logs TRACE through ``log()``, which any logger accepts.
     """
 
     def process(self, msg, kwargs):
         name = self.extra["name"] if self.extra else ""
         # Inside a duho fan-out over this host, the fan-out's handler filter
         # tags the record with the same name.
-        if name and str(_fanout.current_target.get()) == name:
+        if name and _fanout_label(_fanout.current_target.get()) == name:
             return msg, kwargs
         prefix = f"[{name}] " if name else ""
         text = str(msg)
@@ -150,13 +147,26 @@ class _HostLogger(_logging.LoggerAdapter):
             return text, kwargs
         return f"{prefix}{text}", kwargs
 
-    def trace(self, msg, *args, **kwargs):
-        # LoggerAdapter forwards only the standard levels; TRACE is duho's.
-        inner = getattr(self.logger, "trace", None)
-        if inner is None:  # pragma: no cover - only without duho's logging setup
-            return
-        msg, kwargs = self.process(msg, kwargs)
-        inner(msg, *args, **kwargs)
+
+@_functools.lru_cache(maxsize=32)
+def _target_name(target: str) -> "str | None":
+    try:
+        return TrueNASConfig.from_target(target).name
+    except Exception:
+        return None
+
+
+def _fanout_label(target: object) -> "str | None":
+    """The ``[...]`` prefix a duho fan-out puts on ``target``'s records.
+
+    The CLI fans out over connection strings labelled with the host's name;
+    a fan-out with no label prefixes ``str(target)``.
+    """
+    if target is None:
+        return None
+    if isinstance(target, str):
+        return _target_name(target) or target
+    return str(target)
 
 
 def _without_otp(creds: "_auth.Credentials") -> "_auth.Credentials":

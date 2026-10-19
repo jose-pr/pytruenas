@@ -11,8 +11,8 @@ from . import auth as _auth
 from . import connection as _connection
 from .utils import query as _q, io as _ioutils
 
-#: duho's TRACE level, by number: `log()` works on any Logger or LoggerAdapter,
-#: where a caller's adapter has no `.trace()`.
+#: duho's TRACE level, by number: `log()` works on any logger a caller assigns,
+#: including one whose class has no `.trace()`.
 _TRACE = 5
 
 if _ty.TYPE_CHECKING:
