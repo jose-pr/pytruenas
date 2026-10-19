@@ -51,7 +51,7 @@ import re as _re
 import shlex as _shlex
 import typing as _ty
 
-from ..exceptions import APIDumpError
+from ..exceptions import APIDumpError, UnknownMethod
 
 if _ty.TYPE_CHECKING:  # pragma: no cover - typing only
     from ..host import TrueNASClient
@@ -403,7 +403,7 @@ def service_methods(
     client.logger.info("Fetching the methods of %s (core.get_methods)", service)
     found = client.api.core.get_methods(service, _timeout=SERVICE_TIMEOUT)
     if not found:
-        raise LookupError(
+        raise UnknownMethod(
             f"no service named {service!r} (core.get_methods filters by SERVICE, "
             "not by method name)"
         )

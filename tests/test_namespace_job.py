@@ -77,3 +77,83 @@ def test_job_return_keeps_the_job_id():
     middleware = _Middleware()
     assert _host(middleware).api.pool.dataset.delete("x", job="RETURN") == 42
     assert len(middleware.wire) == 1
+
+
+# -- job-ness of a `_create`/`_update` answer comes from the schema ---------------
+
+
+class _Schemas:
+    """A faked `conn` with `core.get_methods` flags and a `group.create` that
+    answers with an int (a record id or a job id)."""
+
+    def __init__(self, flags, answer=5, jobs=None):
+        self.wire = []
+        self.flags = flags
+        self.answer = answer
+        self.jobs = jobs or {}
+        self._closed = type("Open", (), {"is_set": lambda self: False})()
+
+    def call(self, method, *params, **kwds):
+        self.wire.append(method)
+        if method == "system.info":
+            return {"version": "26.0"}
+        if method == "core.get_methods":
+            assert params == ("group",)
+            return {name: {"job": job} for name, job in self.flags.items()}
+        if method == "group.query":
+            return []
+        if method == "core.get_jobs":
+            job_id = params[0][0][2]
+            return [self.jobs[job_id]] if job_id in self.jobs else []
+        return self.answer
+
+
+@pytest.fixture
+def _cache(tmp_path, monkeypatch):
+    monkeypatch.setenv("PYTRUENAS_CACHE", str(tmp_path))
+
+
+def test_a_record_id_is_not_waited_on(_cache):
+    """`group.create` answers with the new id, and job 5 belongs to another."""
+    conn = _Schemas(
+        {"group.create": False},
+        jobs={5: {"id": 5, "state": "SUCCESS", "result": "unrelated", "progress": {}}},
+    )
+    host = _host(conn)
+    assert host.api.group._create(name="svc") == 5
+    assert "core.get_jobs" not in conn.wire
+
+
+def test_a_job_id_is_waited_on(_cache):
+    conn = _Schemas(
+        {"group.create": True},
+        jobs={5: {"id": 5, "state": "SUCCESS", "result": {"id": 9}, "progress": {}}},
+    )
+    assert _host(conn).api.group._create(name="svc") == {"id": 9}
+
+
+def test_the_flags_are_read_once_per_service(_cache):
+    conn = _Schemas({"group.create": False})
+    host = _host(conn)
+    host.api.group._create(name="a")
+    host.api.group._create(name="b")
+    assert conn.wire.count("core.get_methods") == 1
+
+
+def test_unreadable_flags_wait_on_nothing_and_say_so(_cache, caplog):
+    """Asked after the create ran: a refused `core.get_methods` must not turn
+    that success into an error."""
+    from pytruenas import ClientException
+
+    class Refusing(_Schemas):
+        def call(self, method, *params, **kwds):
+            if method == "core.get_methods":
+                self.wire.append(method)
+                raise ClientException("[EPERM] not allowed", errno.EPERM)
+            return super().call(method, *params, **kwds)
+
+    conn = Refusing({})
+    with caplog.at_level("WARNING", logger="pytruenas"):
+        assert _host(conn).api.group._create(name="svc") == 5
+    assert "core.get_jobs" not in conn.wire
+    assert "job=True" in caplog.text

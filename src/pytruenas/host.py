@@ -980,6 +980,8 @@ class TrueNASClient(_PosixHost, _ty.Generic[ApiVersion]):
         self._unverified_warned = False
         #: HTTP(S) session for the side channels; see `_http`.
         self._http_session: "_ty.Optional[_req.Session]" = None
+        #: `{service: {method: is a job}}`, read once per service; see `_is_job`.
+        self._job_flags: "dict[str, dict[str, bool]]" = {}
 
         super().__init__(config, **_ty.cast(_ty.Any, options))
 
@@ -1302,6 +1304,37 @@ class TrueNASClient(_PosixHost, _ty.Generic[ApiVersion]):
         if wait:
             self.wait(jobid, callback=wait if callable(wait) else None)
         return jobid
+
+    def _is_job(self, method: str) -> bool:
+        """Whether middleware ``method`` runs as a job, per its schema's flag.
+
+        Read for the whole service with ``core.get_methods`` (cached on disk by
+        :func:`pytruenas.utils.apicache.service_methods`, and here for the life
+        of this client). A service that cannot be read counts as having no
+        jobs, with one WARNING: the caller can still pass ``job=True``.
+        """
+        service = method.rpartition(".")[0]
+        flags = self._job_flags.get(service)
+        if flags is None:
+            from .utils import apicache as _apicache
+
+            try:
+                found = _apicache.service_methods(self, service)
+            # Asked after a create or an update already ran: failing to read
+            # the flag must not turn that success into an error.
+            except Exception as exc:
+                self.logger.warning(
+                    "cannot read which %s methods are jobs (%s); none is waited "
+                    "on unless job=True is passed",
+                    service,
+                    exc,
+                )
+                found = {}
+            flags = self._job_flags[service] = {
+                name: bool(entry.get("job")) if isinstance(entry, dict) else False
+                for name, entry in found.items()
+            }
+        return flags.get(method, False)
 
     #: Job states after which a job never changes again.
     JOB_DONE = ("SUCCESS", "FAILED", "ABORTED")

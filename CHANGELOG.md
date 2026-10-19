@@ -121,6 +121,14 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   otp_token=)` raises `ValueError` (`otp=` is the keyword, as on
   `TrueNASClient`), and any keyword outside `username`/`password`/`otp`/
   `api_key`/`token` does too.
+- **`_create`/`_update`/`_upsert` wait only on a job.** Whether the
+  `create`/`update` method is a job comes from its schema (`core.get_methods`,
+  read once per namespace and cached), not from the answer being an integer:
+  a method answering with a record id returns that id instead of waiting on an
+  unrelated job of the same number. Pass `{"job": True}` for a method whose
+  schema cannot be read (the lookup logs a WARNING and waits on nothing).
+  `utils.apicache.service_methods` raises `UnknownMethod` (still a
+  `LookupError`) for an unknown service.
 
 ### Added
 

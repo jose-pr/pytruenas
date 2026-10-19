@@ -81,6 +81,24 @@ class DBAction(str, _enum.Enum):
         opts = _q.Option.options(*__opts)
         idkey = opts.get("idkey") or "id"
         callback = opts.get("callback") or None
+        wait = opts.get("wait", True)
+        job = opts.get("job")
+
+        def run(leaf: str, *params):
+            # A job answers with its id; whether this method is one comes from
+            # the caller (`job`) or the method's schema, never from the answer.
+            answer = getattr(__namespace, leaf)(*params)
+            if type(answer) is not int or not (wait is None or wait):
+                return answer
+            is_job = job
+            if is_job is None:
+                is_job = __namespace._client._is_job(f"{__namespace._namespace}.{leaf}")
+            if not is_job:
+                return answer
+            return __namespace._client.wait(
+                answer, callback=wait if callable(wait) else None
+            )
+
         fields = {name: val for name, val in __fields.items() if val is not _q.EXCLUDE}
 
         if isinstance(__selector, str) or not isinstance(__selector, _ty.Iterable):
@@ -123,7 +141,7 @@ class DBAction(str, _enum.Enum):
             else:
                 result = None
             if fields:
-                result = __namespace.update(fields)
+                result = run("update", fields)
                 action = DBAction.UPDATE
         elif _id not in (None, _q.EXCLUDE):
             if __action not in (DBAction.UPDATE, DBAction.UPSERT):
@@ -156,7 +174,7 @@ class DBAction(str, _enum.Enum):
                 fields = _q.diff(current, fields)
 
             if fields:
-                result = __namespace.update(_id, fields)
+                result = run("update", _id, fields)
                 action = DBAction.UPDATE
             else:
                 result = None
@@ -171,23 +189,13 @@ class DBAction(str, _enum.Enum):
             exclude = (idkey, *(opts.get("create_exclude") or []))
             fields = {name: val for name, val in fields.items() if name not in exclude}
             try:
-                result = __namespace.create(fields)
+                result = run("create", fields)
             except _connection.ValidationErrors as e:
                 if "already exists" in e.error:
                     raise FileExistsError(e.error)
                 else:
                     raise e
             action = DBAction.CREATE
-
-        wait = opts.get("wait", True)
-        # `type(...) is int`, not isinstance: bool is a subclass of int, so a
-        # method answering True had its answer treated as job id 1.
-        if type(result) is int and (wait is None or wait):
-            # A job id: block until the job finishes and return its result
-            # (`core.job_wait` is itself a job and returns immediately).
-            result = __namespace._client.wait(
-                result, callback=wait if callable(wait) else None
-            )
 
         result = _ty.cast(_T, result)
 

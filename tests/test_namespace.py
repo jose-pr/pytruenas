@@ -179,13 +179,46 @@ def test_callback_receives_action_and_result():
     assert seen["result"] == {"id": 99}
 
 
-def test_int_result_triggers_job_wait():
-    # An int create result is treated as a job id and waited on.
+def test_an_int_answer_is_waited_on_only_when_the_method_is_a_job():
+    """An int answer is a record id as often as a job id: the schema decides.
+
+    Waiting on a record id returned an unrelated job's result, or raised
+    "no such job" after the record was created.
+    """
     ns, client = _namespace_with(existing=None, create_ret=7)
+    client._is_job.return_value = False
+    assert DBAction.CREATE.execute(ns, ("username",), username="svc") == 7
+    client._is_job.assert_called_once_with("user.create")
+    client.wait.assert_not_called()
+
+    client._is_job.return_value = True
     client.wait.return_value = {"id": 7, "done": True}
-    out = DBAction.CREATE.execute(ns, ("username",), {"wait": True}, username="svc")
+    out = DBAction.CREATE.execute(ns, ("username",), username="svc")
     client.wait.assert_called_once_with(7, callback=None)
     assert out == {"id": 7, "done": True}
+
+
+@pytest.mark.parametrize("job, waits", [(True, True), (False, False)])
+def test_the_job_option_overrides_the_schema(job, waits):
+    ns, client = _namespace_with(existing=None, create_ret=7)
+    client.wait.return_value = "done"
+    out = DBAction.CREATE.execute(ns, ("username",), {"job": job}, username="svc")
+    client._is_job.assert_not_called()
+    assert out == ("done" if waits else 7)
+
+
+def test_wait_false_returns_the_job_id_without_asking():
+    ns, client = _namespace_with(existing=None, create_ret=7)
+    out = DBAction.CREATE.execute(ns, ("username",), {"wait": False}, username="svc")
+    assert out == 7
+    client._is_job.assert_not_called()
+    client.wait.assert_not_called()
+
+
+def test_a_non_int_answer_needs_no_lookup():
+    ns, client = _namespace_with(existing=None, create_ret={"id": 7})
+    DBAction.CREATE.execute(ns, ("username",), username="svc")
+    client._is_job.assert_not_called()
 
 
 # -- DBAction over a real Namespace ------------------------------------------

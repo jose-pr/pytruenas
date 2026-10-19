@@ -43,9 +43,12 @@ created. A bare string or int selector is a **record id**, not a field name
 (`_upsert("username", ...)` looks up the record whose id is `"username"`). A
 `!`-prefixed name (`("username", "!uid")`) is left out of the match and is not
 changed on update; a selector made only of those is rejected, since it would
-match the first record in the collection. A middleware job returned by a
-mutating call is waited on by default (`wait=True`; pass a callable instead to
-receive progress updates).
+match the first record in the collection. When the `create`/`update` method
+is a middleware job — its schema says so (`core.get_methods`, read once per
+namespace) — the job is waited on by default (`wait=True`; pass a callable
+instead to receive progress updates) and its result returned. An integer
+answer from a method that is not a job is a record id, returned as it is.
+`{"job": True}` (or `False`) states it yourself and skips the lookup.
 
 ## Waiting for jobs
 

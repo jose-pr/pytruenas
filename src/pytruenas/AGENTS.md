@@ -474,7 +474,13 @@ below raise `AttributeError` normally.
   `DBAction.UPDATE`, or `None` when nothing changed, and `id` is `None` after a
   create (read it from `result`). Common opts: `idkey` (default `"id"`),
   `update_exclude`/`create_exclude` (field names to drop for that path),
-  `wait` (wait on a returned job id; default `True`), `force`.
+  `wait` (wait for a job; default `True`; a callable gets its progress),
+  `job` (`True`/`False`: whether the `create`/`update` method is a job;
+  default: its schema's `job` flag, from `core.get_methods` once per namespace
+  for the life of the client and in the `$PYTRUENAS_CACHE` cache — an
+  unreadable schema logs one WARNING and counts as no job), `force`. Only a
+  job's id is waited on: an integer answer from a method that is not a job is
+  a record id and comes back as it is.
 - **`DBAction`** — `str` enum, `CREATE = "create"`, `UPDATE = "update"`; the
   mutation an `_upsert`/`_update`/`_create` resolves to.
 - **`ioerror(error: ClientException) -> Exception`** — map a middleware
