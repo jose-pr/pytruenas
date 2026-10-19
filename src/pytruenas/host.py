@@ -42,6 +42,7 @@ import weakref as _weakref
 from functools import cached_property as _cached_property
 from urllib.parse import quote as _quote
 from urllib.parse import unquote as _unquote
+from urllib.parse import urlencode as _urlencode
 from urllib.parse import urlsplit as _urlsplit
 
 import requests as _req
@@ -52,6 +53,7 @@ from hostctl import Timeout
 from hostctl import uri_host as _uri_host
 from hostctl import uri_hostname as _uri_hostname
 from hostctl.host import HostConfig as _HostConfig
+from hostctl.uri import strict_uri_query as _strict_uri_query
 
 from . import auth as _auth
 from . import connection as _connection
@@ -307,6 +309,93 @@ def _public_key(private_key: str) -> str:
     )
 
 
+#: The ``?key=value`` settings a ``truenas+*`` URI carries: the options that are
+#: not secrets, spelled as hostctl's configs spell theirs. ``executor`` and
+#: ``path`` repeat, in preference order; one empty value is "none".
+_QUERY_KEYS = (
+    "verify",
+    "version",
+    "executor",
+    "path",
+    "autologin",
+    "timeout",
+    "timeout_connect",
+    "timeout_read",
+    "timeout_write",
+)
+
+#: The `Timeout` field behind each ``timeout*`` key, as hostctl names them.
+_TIMEOUT_KEYS = {
+    "total": "timeout",
+    "connect": "timeout_connect",
+    "read": "timeout_read",
+    "write": "timeout_write",
+}
+
+_TRUE_WORDS = frozenset(("1", "true", "yes", "on"))
+_FALSE_WORDS = frozenset(("0", "false", "no", "off"))
+
+
+def _query_bool(name: str, text: str) -> bool:
+    word = text.casefold()
+    if word in _TRUE_WORDS:
+        return True
+    if word in _FALSE_WORDS:
+        return False
+    raise ValueError(f"{name} must be one of 1/true/yes/on or 0/false/no/off")
+
+
+def _query_options(parsed) -> "dict[str, object]":
+    """The options a URI's query spells, as `TrueNASConfig` keywords.
+
+    Strict: an unknown or repeated key is a ``ValueError`` (hostctl's
+    :func:`~hostctl.uri.strict_uri_query`), so a misspelt ``?verfiy=0`` is
+    refused instead of verifying anyway. ``verify`` is a boolean word or a CA
+    bundle path; a ``timeout*`` value is seconds, empty for no limit.
+    """
+    query = _strict_uri_query(parsed, _QUERY_KEYS, repeatable=("executor", "path"))
+    options: "dict[str, object]" = {}
+    if "verify" in query:
+        text = _ty.cast(str, query["verify"])
+        word = text.casefold()
+        if not text:
+            raise ValueError("verify must be a boolean word or a CA bundle path")
+        options["verify"] = (
+            word in _TRUE_WORDS if word in _TRUE_WORDS | _FALSE_WORDS else text
+        )
+    if "version" in query:
+        options["version"] = query["version"]
+    for name in ("executor", "path"):
+        if name in query:
+            names = _ty.cast("tuple[str, ...]", query[name])
+            options[name] = () if names == ("",) else names
+    if "autologin" in query:
+        options["autologin"] = _query_bool(
+            "autologin", _ty.cast(str, query["autologin"])
+        )
+    fields: "dict[str, object]" = {}
+    for field, key in _TIMEOUT_KEYS.items():
+        if key not in query:
+            continue
+        text = _ty.cast(str, query[key])
+        try:
+            fields[field] = None if text == "" else float(text)
+        except ValueError:
+            raise ValueError(f"{key} must be a number of seconds") from None
+    if fields:
+        total = fields.pop("total", _DEFAULT)
+        options["timeout"] = Timeout(
+            _ty.cast(_ty.Any, total), **_ty.cast(_ty.Any, fields)
+        )
+    return options
+
+
+def _seconds_text(value: object) -> str:
+    """``20`` for 20.0, so a URI keeps a whole-second spelling."""
+    number = float(_ty.cast(float, value))
+    return str(int(number)) if number.is_integer() else repr(number)
+
+
 def _shared_options(credentials: "_ty.Mapping[str, object]") -> "dict[str, object]":
     """Config options common to every branch of ``_from_parsed_uri``.
 
@@ -511,7 +600,8 @@ def _normalize_target(target: "_ty.Optional[str]") -> str:
 
     if is_local and not parsed.port:
         # Local with no port -> the middleware unix socket, as today.
-        return f"{_SCHEME_PREFIX}unix://{DEFAULT_SOCKET_PATH}"
+        query = f"?{parsed.query}" if parsed.query else ""
+        return f"{_SCHEME_PREFIX}unix://{DEFAULT_SOCKET_PATH}{query}"
 
     if is_local and scheme == "":
         # Local *with* an explicit port is a real websocket, and there is
@@ -676,6 +766,14 @@ class TrueNASConfig(
         explicit = credentials.get("credentials")
         password = _ty.cast("str | None", credentials.get("password"))
         username = _unquote(parsed.username or "") or None
+        given = _query_options(parsed)
+        both = sorted(name for name in given if name in credentials)
+        if both:
+            raise ValueError(
+                f"{both[0]} given both in the connection URI's query and as an "
+                "argument"
+            )
+        credentials = {**credentials, **given}
 
         if explicit is not None and (
             password or credentials.get("api_key") or credentials.get("token")
@@ -815,9 +913,19 @@ class TrueNASConfig(
 
     @property
     def connection_uri(self) -> str:
-        """The canonical, credential-free URI for this configuration."""
+        """The canonical, credential-free URI for this configuration.
+
+        Every option that is not a secret and not at its default is in the
+        query (``verify``, ``version``, ``executor``, ``path``, ``autologin``,
+        ``timeout*``), so ``TrueNASConfig.from_target(config.connection_uri)``
+        is an equal config. Credentials, the SSH leg and an
+        ``ssl.SSLContext`` given as ``verify`` are not rendered.
+        """
+        query = _urlencode(self._query_pairs())
+        query = f"?{query}" if query else ""
         if self.is_local:
-            return f"{_SCHEME_PREFIX}unix://{self.socket_path}"
+            socket_path = _quote(self.socket_path or "", safe=_SOCKET_PATH_SAFE)
+            return f"{_SCHEME_PREFIX}unix://{socket_path}{query}"
         if self.secure is None:
             scheme = AUTO_SCHEME
         else:
@@ -825,7 +933,36 @@ class TrueNASConfig(
         authority = _uri_host(self.host)
         if self.port:
             authority = f"{authority}:{self.port}"
-        return f"{scheme}://{authority}{self.api_path or ''}"
+        return f"{scheme}://{authority}{self.api_path or ''}{query}"
+
+    def _query_pairs(self) -> "list[tuple[str, str]]":
+        """The non-default options as URI query pairs, in a fixed order."""
+        pairs: "list[tuple[str, str]]" = []
+        if self.verify is False:
+            pairs.append(("verify", "false"))
+        elif isinstance(self.verify, str):
+            pairs.append(("verify", self.verify))
+        if self.version != "current":
+            pairs.append(("version", self.version))
+        for key, names in (("executor", self.executors), ("path", self.paths)):
+            if names is not None:
+                pairs += [(key, name) for name in names] if names else [(key, "")]
+        if not self.autologin:
+            pairs.append(("autologin", "false"))
+        for field, key in _TIMEOUT_KEYS.items():
+            value = getattr(self.timeout, field)
+            if value is not _DEFAULT:
+                pairs.append((key, "" if value is None else _seconds_text(value)))
+        return pairs
+
+    def __eq__(self, other: object) -> bool:
+        """Equal when :attr:`connection_uri` is: credentials are not compared."""
+        if not isinstance(other, TrueNASConfig):
+            return NotImplemented
+        return self.connection_uri == other.connection_uri
+
+    def __hash__(self) -> int:
+        return hash(self.connection_uri)
 
     def __repr__(self) -> str:
         # Never render credentials: a config is logged, and connection_uri is

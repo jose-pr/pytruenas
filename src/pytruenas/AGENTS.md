@@ -408,6 +408,25 @@ and API path are resolved from the string alone, not in the constructor.
 `TrueNASConfig.from_target(target, **options)` takes the same keywords as
 `TrueNASClient`.
 
+**The URI query** carries the options that are not secrets, as hostctl's
+configs carry theirs: `verify` (`true`/`false`/`1`/`0`/`yes`/`no`/`on`/`off`,
+or a CA bundle path), `version`, `executor` and `path` (repeated, in
+preference order; one empty value is "none"), `autologin`, and `timeout`,
+`timeout_connect`, `timeout_read` (seconds; empty is no limit;
+`timeout_write` is refused as the keyword is). An unknown or repeated key
+raises `ValueError` (`unknown connection parameter: ...`), and so does an
+option given both in the query and as a keyword.
+`wss://nas?verify=false&timeout_read=10` is
+`TrueNASClient("wss://nas", verify=False, timeout=Timeout(read=10))`.
+
+**`connection_uri`** (and `str(config)`) renders every option that is not at
+its default into that query, so `TrueNASConfig.from_target(str(config))` (or
+hostctl's `HostConfig(str(config))`) is an equal config. Credentials, the SSH
+leg (`ssh=`/`shell=`/`known_hosts=`) and an `ssl.SSLContext` given as
+`verify` are never rendered. **Equality and hashing** are by
+`connection_uri`: two configs for the same target and options are equal
+whatever their credentials or `name`.
+
 An OTP travels in the URI password field after a newline
 (`wss://root:pw%0Aotp:123456@nas`); a raw newline works too. Unknown
 credential names are rejected rather than silently dropped. The keyword form

@@ -415,3 +415,108 @@ def test_an_unparsable_target_names_every_character_to_encode():
         assert "pa[ss" not in str(error)
     else:
         pytest.skip("this interpreter's urlsplit accepts a bracket in userinfo")
+
+
+# -- the URI query: strict on the way in, rendered on the way out ---------------
+
+
+@pytest.mark.parametrize(
+    "options",
+    [
+        {"verify": False},
+        {"verify": "/etc/pki/lab-ca.pem"},
+        {"version": "v25.04.0"},
+        {"executor": "ssh"},
+        {"executor": ["ssh", "webshell"]},
+        {"executor": []},
+        {"path": "tnasws"},
+        {"autologin": False},
+        {"timeout": 20},
+        {"timeout": None},
+        {"timeout": "every field"},
+    ],
+    ids=lambda options: ",".join(f"{k}={v!r}" for k, v in options.items()),
+)
+def test_a_config_round_trips_through_its_uri(options):
+    """`connection_uri` dropped every option, so `HostConfig(str(config))` was
+    another config: `version="v25.04.0"` came back as `current`, `verify=False`
+    as `True`."""
+    from hostctl import Timeout
+
+    if options.get("timeout") == "every field":
+        options = {"timeout": Timeout(20, connect=2.5, read=None)}
+    config = TrueNASConfig.from_target("wss://nas.example", **options)
+    back = HostConfig(str(config))
+    assert back == config
+    assert hash(back) == hash(config)
+    for name in ("verify", "version", "executors", "paths", "autologin", "timeout"):
+        assert getattr(back, name) == getattr(config, name), name
+
+
+def test_a_default_config_renders_no_query():
+    assert (
+        str(TrueNASConfig.from_target("wss://nas.example"))
+        == "truenas+wss://nas.example"
+    )
+
+
+def test_the_query_is_honoured():
+    from hostctl import Timeout
+
+    config = TrueNASConfig.from_target(
+        "wss://nas.example/api/current?verify=false&executor=ssh&executor=webshell"
+        "&autologin=0&timeout_read=5"
+    )
+    assert config.verify is False
+    assert config.executors == ("ssh", "webshell")
+    assert config.autologin is False
+    assert config.timeout == Timeout(read=5)
+    assert config.api_path == "/api/current"
+
+
+@pytest.mark.parametrize(
+    "target, message",
+    [
+        ("wss://nas.example/api/current?verfiy=0", "unknown connection parameter"),
+        (
+            "wss://nas.example?verify=false&verify=true",
+            "duplicate connection parameter",
+        ),
+        ("wss://nas.example?autologin=maybe", "autologin must be"),
+        ("wss://nas.example?timeout=soon", "timeout must be a number"),
+        ("wss://nas.example?timeout_write=5", "timeout.write is not supported"),
+        ("wss://nas.example?verify=", "verify must be"),
+    ],
+)
+def test_the_query_is_strict(target, message):
+    """`?verfiy=0` and `?timeout=5` were accepted and dropped: the misspelt
+    switch verified anyway."""
+    with pytest.raises(ValueError, match=message):
+        TrueNASConfig.from_target(target)
+
+
+def test_an_option_in_the_query_and_as_a_keyword_is_refused():
+    with pytest.raises(ValueError, match="verify given both"):
+        TrueNASConfig.from_target("wss://nas.example?verify=false", verify=True)
+
+
+@pytest.mark.parametrize(
+    "target",
+    [
+        "localhost?verify=false",
+        "/var/run/x.sock",
+        "truenas+unix:///x%3Fy.sock?version=v1",
+    ],
+)
+def test_a_socket_config_round_trips_too(target):
+    config = TrueNASConfig.from_target(target)
+    assert HostConfig(str(config)) == config
+
+
+def test_equality_ignores_credentials_and_the_label():
+    a = TrueNASConfig.from_target("wss://nas.example", api_key="1-" + "a" * 64)
+    b = TrueNASConfig.from_target("wss://nas.example", password="pw")
+    b.name = "other"
+    assert a == b and hash(a) == hash(b)
+    assert a != TrueNASConfig.from_target("wss://nas.example", verify=False)
+    assert "pw" not in str(b)

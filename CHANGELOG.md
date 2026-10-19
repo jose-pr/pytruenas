@@ -144,6 +144,15 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   `TrueNASWSConnection(call_timeout=)` left out is
   `connection.default_call_timeout()`. `PYTRUENAS_CREDENTIALS` is documented
   as a secret.
+- **A connection URI's query is read, strictly, and `connection_uri` renders
+  the options.** `?verify=false`, `?version=`, `?executor=`, `?path=`,
+  `?autologin=` and `?timeout`/`timeout_connect`/`timeout_read` set the
+  options; any other key (a misspelt `?verfiy=0`) raises `ValueError`, where it
+  was dropped. `connection_uri`/`str(config)` now carries every non-default
+  option (`truenas+wss://nas?verify=false`), so it round-trips; code that
+  compared it to a bare `truenas+wss://host` string, or parsed it, sees the
+  query. `TrueNASConfig` compares and hashes by `connection_uri` (it compared
+  by identity): credentials and `name` are not part of equality.
 
 ### Added
 
