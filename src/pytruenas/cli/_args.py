@@ -1,4 +1,4 @@
-"""CLI argument classes and the command-module contract.
+"""The CLI's global options, its config file, and the result writers.
 
 ``pytruenas`` commands are plain modules that expose:
 
@@ -11,28 +11,23 @@
 * ``init(args, logger) -> client`` / ``success(client, args, logger)`` /
   ``finally_(client, args, logger)`` -- optional lifecycle hooks.
 
-The app (see :mod:`pytruenas.main`) parses global options into
-:class:`PyTrueNASArgs`, then for each target fans out and invokes the selected
-command's ``run`` with a per-target client and logger. Argument parsing and
-command discovery are provided by :mod:`duho`; the per-target fan-out and the
-client/logger threading are ``pytruenas``-specific and live here + in
-:mod:`pytruenas.main`.
+The app parses global options into :class:`PyTrueNASArgs`, then for each
+target fans out and invokes the selected command's ``run`` with a per-target
+client and logger.
 """
 
 from __future__ import annotations
 
-import logging as _pylogging
 import os as _os
 import sys as _sys
 import re as _re
 import threading as _threading
 import typing as _ty
-from logging import Logger as _Logger
 from pathlib import Path as _Path
 
 
-from duho import Arg, Extend, LoggingArgs, Meta
-from duho.env import Env as _Env
+from duho import Arg, LoggingArgs, Meta
+from .._utils.env import ENV
 
 
 def json_value(raw: str):
@@ -114,7 +109,7 @@ def emit_json(value: object, args: "PyTrueNASArgs | None" = None) -> None:
 
     target = getattr(args, "target", None)
     if target is not None and args is not None and len(args._expanded_targets_()) > 1:
-        from .target import redact
+        from ..target import redact
 
         value = {"target": redact(str(target)), "result": value}
     emit(json.dumps(value, default=json_default))
@@ -122,17 +117,6 @@ def emit_json(value: object, args: "PyTrueNASArgs | None" = None) -> None:
 
 if _ty.TYPE_CHECKING:
     from ..host import TrueNASClient
-
-#: Every ``PYTRUENAS_*`` setting, read through one accessor, so the full set is
-#: enumerable (``list(ENV)``). ``.paths()`` splits on ``os.pathsep``, so a
-#: Windows ``C:\...`` entry keeps its drive colon.
-#:
-#: ``autoload=False``: the companion-module feature would import a
-#: ``pytruenas_env`` module from anywhere on ``sys.path``, including the CWD.
-#: This app ships no such defaults, so the import is pure attack surface --
-#: and a CLI is routinely run from a directory the user does not control.
-ENV = _Env("pytruenas", autoload=False)
-
 
 #: The formats a config file may be written in; anycfg reads others too, but
 #: their documents are not a table of settings (INI is sections of strings).
@@ -238,7 +222,7 @@ def with_targets(args_cls: "type | None" = None) -> type:
     stay the trailing positionals (``pytruenas query <namespace> <host>...``),
     and a declared field is also what duho publishes in a command's MCP tool
     schema -- a positional added in a ``register`` hook is not.
-    :func:`pytruenas.main._with_targets` applies this to every module command.
+    The app applies this to every module command.
     """
     base = args_cls if args_cls is not None else PyTrueNASArgs
     namespace = {
@@ -257,9 +241,9 @@ def with_targets(args_cls: "type | None" = None) -> type:
 def register_targets(parser) -> None:
     """Add the trailing ``targets`` positional to a parser imperatively.
 
-    Commands no longer need it: :func:`with_targets` declares the positional,
-    which also puts it in the MCP tool schema. Kept for code that builds its
-    own parser.
+    For code that builds its own parser. A command does not need it:
+    :func:`with_targets` declares the positional, which also puts it in the MCP
+    tool schema.
     """
     parser.add_argument("targets", nargs="*", metavar="TARGET", help=_TARGETS_HELP)
 
@@ -290,7 +274,7 @@ class PyTrueNASArgs(LoggingArgs):
     """Global options shared by every ``pytruenas`` command.
 
     A data mixin (``LoggingArgs``): it carries the global fields and config
-    loading; :class:`pytruenas.main.PyTrueNAS` combines it with ``duho.Cli`` to
+    loading; :class:`pytruenas.cli.PyTrueNAS` combines it with ``duho.Cli`` to
     make the runnable app root.
     """
 
@@ -301,8 +285,10 @@ class PyTrueNASArgs(LoggingArgs):
     "Config file (default: $PYTRUENAS_CONFIG, else pytruenas/pytruenas.cfg in the user's config directory)"
     ("--config", "-c")  # type: ignore
 
-    cmdspath: "Arg[list[str], Extend(':')]" = []
-    "Extra directories/packages to search for commands"
+    # Repeated, never split: a separator character would cut a Windows
+    # drive letter (`C:\...`) out of its path.
+    cmdspath: "Arg[list[str], Meta(metavar='SOURCE')]" = []
+    "A directory or package to search for commands (repeatable; also $PYTRUENAS_PATH)"
     ("--cmdspath",)  # type: ignore
 
     insecure: bool = False
@@ -426,7 +412,7 @@ class PyTrueNASArgs(LoggingArgs):
         raises).
         """
         from ..host import TrueNASClient
-        from .target import Target
+        from ..target import Target
 
         credentials = None
         if not Target.parse(target, resolve_port=False).password:
@@ -515,20 +501,13 @@ def _expand_one(item: str, expand) -> "list[str]":
     return hosts + [scheme + userinfo + host for part in parts for host in expand(part)]
 
 
-class CommandModule(_ty.Protocol):
-    """The attributes the app expects from a command module."""
-
-    def run(
-        self, client: "TrueNASClient", args: PyTrueNASArgs, logger: _Logger
-    ) -> object: ...
-
-
 __all__ = [
     "PyTrueNASArgs",
     "TargetsField",
     "with_targets",
     "register_targets",
-    "CommandModule",
+    "load_config",
+    "default_config_path",
     "json_value",
     "json_default",
     "emit",

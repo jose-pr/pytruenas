@@ -9,7 +9,8 @@ import enum as _enum
 
 from . import auth as _auth
 from . import connection as _connection
-from .utils import query as _q, io as _ioutils
+from . import query as _q
+from ._utils import io as _ioutils
 
 #: duho's TRACE level, by number: `log()` works on any logger a caller assigns,
 #: including one whose class has no `.trace()`.

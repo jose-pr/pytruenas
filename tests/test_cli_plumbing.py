@@ -10,9 +10,9 @@ from unittest.mock import patch
 
 import pytest
 
-import pytruenas.main as main
-from pytruenas.utils._introspect import positional_arity
-from pytruenas.utils.runpath import _positional_count, step
+import pytruenas.cli._app as main
+from pytruenas._utils.introspect import positional_arity
+from pytruenas.cli.runpath import _positional_count, step
 
 
 def _parse(argv):
@@ -25,7 +25,7 @@ def _parse(argv):
         return 0
 
     with patch.object(main, "_dispatch", fake_dispatch):
-        main.main("pytruenas", argv)
+        main.main(argv)
     return captured
 
 
@@ -39,7 +39,7 @@ def test_the_tail_after_a_separator_reaches_the_command():
 
 
 def test_deploy_reads_the_tail_off_the_parsed_instance():
-    from pytruenas.cmd import deploy
+    from pytruenas.cli.commands import deploy
 
     assert deploy._passthrough(SimpleNamespace(_passthrough_=["a", "b"])) == ["a", "b"]
     assert deploy._passthrough(SimpleNamespace()) == []
@@ -90,7 +90,7 @@ def test_the_builtin_commands_that_read_the_tail_say_so(name):
     none while sending them."""
     import importlib
 
-    module = importlib.import_module(f"pytruenas.cmd.{name}")
+    module = importlib.import_module(f"pytruenas.cli.commands.{name}")
     assert main._reads_passthrough(SimpleNamespace(module=module))
 
 
@@ -114,8 +114,8 @@ def test_the_runpath_base_for_the_shared_root_is_the_shared_base():
     """Combining them the other way round is an impossible MRO, which is why
     registration used to be skipped for the default args entirely -- leaving a
     derived tool's base registered for everyone after it."""
-    from pytruenas.utils.cmd import PyTrueNASArgs
-    from pytruenas.utils.runpath import PyTrueNASRunPathArgs
+    from pytruenas.cli._args import PyTrueNASArgs
+    from pytruenas.cli.runpath import PyTrueNASRunPathArgs
 
     assert main._runpath_base(PyTrueNASArgs) is PyTrueNASRunPathArgs
     assert main._runpath_base(PyTrueNASRunPathArgs) is PyTrueNASRunPathArgs

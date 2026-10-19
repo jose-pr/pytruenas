@@ -58,7 +58,7 @@ from .exceptions import (
     JobFailed,
     ValidationErrors,
 )
-from .utils.io import json_scalar as _json_scalar
+from ._utils.io import json_scalar as _json_scalar
 
 _LOGGER = _logging.getLogger("pytruenas.connection")
 
@@ -100,7 +100,7 @@ def default_call_timeout() -> float:
     never at import. A value that is not a positive number raises
     ``ValueError`` naming the variable.
     """
-    from .utils.cmd import ENV
+    from ._utils.env import ENV
 
     raw = (ENV.get("CALL_TIMEOUT") or "").strip()
     if not raw:

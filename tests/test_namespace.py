@@ -10,7 +10,7 @@ from unittest.mock import MagicMock
 import pytest
 
 from pytruenas.namespace import DBAction, Namespace
-from pytruenas.utils import query as q
+from pytruenas import query as q
 
 
 def _client():

@@ -19,7 +19,7 @@ per target, one target's plan cannot leak into another's.
 
 from __future__ import annotations
 
-from pytruenas.utils.runpath import default_init
+from pytruenas.cli.runpath import default_init
 
 
 class Plan:

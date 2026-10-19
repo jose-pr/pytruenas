@@ -31,7 +31,13 @@ _PUBLIC_MODULES = [
     "pytruenas.models.jsonschema",
     "pytruenas.namespace",
     "pytruenas.providers",
-    "pytruenas.utils.io",
+    "pytruenas.query",
+    "pytruenas.target",
+    "pytruenas.apicache",
+    "pytruenas.cli",
+    "pytruenas.cli.runpath",
+    "pytruenas.codegen",
+    "pytruenas.patch",
     "pytruenas.webshell",
 ]
 
@@ -95,3 +101,12 @@ def test_capwords_names_spell_acronyms_in_capitals(module, old, new):
     assert hasattr(mod, new)
     assert not hasattr(mod, old)
     assert new in mod.__all__
+
+
+@pytest.mark.parametrize("gone", ["pytruenas.utils", "pytruenas.main", "pytruenas.cmd"])
+def test_the_old_module_paths_are_gone(gone):
+    """The CLI is `pytruenas.cli`; `query`, `target` and `apicache` moved up."""
+    import importlib
+
+    with pytest.raises(ImportError):
+        importlib.import_module(gone)

@@ -17,7 +17,7 @@ from pathlib import Path
 import pytest
 
 from pytruenas import connection
-from pytruenas.main import main
+from pytruenas.cli._app import main
 
 ROOT = Path(__file__).resolve().parent.parent
 README = ROOT / "README.md"

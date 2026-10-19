@@ -17,7 +17,7 @@ import subprocess
 
 import pytest
 
-from pytruenas.utils import apicache
+from pytruenas import apicache
 
 API = {"versions": [{"version": "26.0.0-BETA.1", "methods": [], "events": []}]}
 BLOB = gzip.compress(json.dumps(API).encode("utf-8"))

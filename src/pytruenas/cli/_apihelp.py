@@ -4,7 +4,7 @@ The API definition is the only place that records what a method accepts, and
 the parts a caller needs most -- a field's description, its default, the values
 an enum allows, whether it is required at all -- exist *only* there. Generated
 ``.pyi`` stubs cannot carry them, which is why help reads the dump (cached by
-:mod:`pytruenas.utils.apicache`) rather than the stubs generated from it.
+:mod:`pytruenas.apicache`) rather than the stubs generated from it.
 
 Everything here is a pure function over a dump slice: text in, text out, no
 client and no network, so the shapes an appliance actually emits can be pinned
@@ -22,7 +22,7 @@ from __future__ import annotations
 import textwrap as _textwrap
 import typing as _ty
 
-from . import _schema
+from .._utils import schema as _schema
 from ..exceptions import UnknownMethod
 
 #: Width the descriptions wrap to.

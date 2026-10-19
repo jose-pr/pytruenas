@@ -2,7 +2,7 @@
 
 A RunPath is a directory of numbered ``NN-name.py`` steps (duho.runpath, adopted
 in pytruenas via ``duho.runpath.register(base=PyTrueNASRunPathArgs)`` in
-``pytruenas.main``). ``pytruenas`` fans the whole directory out per target, so a
+``pytruenas.cli._app``). ``pytruenas`` fans the whole directory out per target, so a
 RunPath command's steps run once per target with a per-target client -- restoring
 the private predecessor's ``RunPathCmd`` behavior the current duho-based
 ``pytruenas`` never had.
@@ -13,8 +13,7 @@ and read by a later step (no cross-target bleed); the whole directory running
 once per target; and ``--rcopts`` step selection. The source is injected via a
 ``tmp_path`` directory + ``PYTRUENAS_PATH`` (never ``-c``), matching this repo's
 own testing convention; ``PYTRUENAS_PATH`` splits on ``os.pathsep`` (``;`` on
-Windows), so a ``tmp_path`` with a drive letter is safe (unlike ``--cmdspath``'s
-``:`` split).
+Windows), so a ``tmp_path`` with a drive letter is safe.
 
 Each step appends a line to a recorder FILE (path passed via an env var) rather
 than a shared in-process object: a RunPath step is imported under a synthesized
@@ -28,7 +27,7 @@ import os
 import pytest
 
 import pytruenas.host
-import pytruenas.utils.runpath as _runpath_utils  # noqa: F401
+import pytruenas.cli.runpath as _runpath_utils  # noqa: F401
 
 _RECORD_ENV = "PYTRUENAS_TEST_RECORD"
 
@@ -53,7 +52,7 @@ def _write_runpath(directory):
     flow = directory / "myflow"
     flow.mkdir()
     (flow / "__main__.py").write_text(
-        "from pytruenas.utils.runpath import default_init\n"
+        "from pytruenas.cli.runpath import default_init\n"
         "def init(cmd, logger):\n"
         "    client = default_init(cmd, logger)\n"
         "    cmd.context = 'ctx-%s' % cmd.target\n"
@@ -108,9 +107,9 @@ def _run(tmp_path, monkeypatch, argv):
     """Point PYTRUENAS_PATH at a fresh RunPath dir and run main() with argv."""
     _write_runpath(tmp_path)
     monkeypatch.setenv("PYTRUENAS_PATH", str(tmp_path))
-    import pytruenas.main as main
+    import pytruenas.cli._app as main
 
-    return main.main("pytruenas", argv)
+    return main.main(argv)
 
 
 def test_runpath_runs_once_per_target(tmp_path, monkeypatch, record_path):
@@ -157,7 +156,7 @@ def _write_module_signature_runpath(directory):
     flow = directory / "myflow"
     flow.mkdir()
     (flow / "__main__.py").write_text(
-        "from pytruenas.utils.runpath import default_init as init\n"
+        "from pytruenas.cli.runpath import default_init as init\n"
     )
     _recorder = (
         "import json, os\n"
@@ -167,7 +166,7 @@ def _write_module_signature_runpath(directory):
     )
     # Full module signature: client FIRST, args second, a real logger third.
     (flow / "01-first.py").write_text(
-        _recorder + "from pytruenas.utils.runpath import step\n"
+        _recorder + "from pytruenas.cli.runpath import step\n"
         "@step\n"
         "def main(client, args, logger):\n"
         "    _record(['first', args.target, client.target,\n"
@@ -175,7 +174,7 @@ def _write_module_signature_runpath(directory):
     )
     # Shorter arity: a step that does not care about the logger.
     (flow / "02-second.py").write_text(
-        _recorder + "from pytruenas.utils.runpath import step\n"
+        _recorder + "from pytruenas.cli.runpath import step\n"
         "@step\n"
         "def main(client, args):\n"
         "    _record(['second', args.target, client.target, None])\n"
@@ -191,9 +190,9 @@ def test_step_decorator_gives_steps_the_module_signature(
     # the per-target client, `args` the cmd, and `logger` a usable logger.
     _write_module_signature_runpath(tmp_path)
     monkeypatch.setenv("PYTRUENAS_PATH", str(tmp_path))
-    import pytruenas.main as main
+    import pytruenas.cli._app as main
 
-    rc = main.main("pytruenas", ["myflow", "nas1"])
+    rc = main.main(["myflow", "nas1"])
     assert rc == 0
     records = _records(record_path)
     # client.target is the per-target client -- proving it did NOT bind to cmd.
@@ -207,7 +206,7 @@ def _write_undecorated_runpath(directory):
     flow = directory / "myflow"
     flow.mkdir()
     (flow / "__main__.py").write_text(
-        "from pytruenas.utils.runpath import default_init as init\n"
+        "from pytruenas.cli.runpath import default_init as init\n"
     )
     _recorder = (
         "import json, os\n"
@@ -229,14 +228,14 @@ def _write_undecorated_runpath(directory):
 
 
 def test_a_three_arg_step_needs_no_decorator(tmp_path, monkeypatch, record_path):
-    # The step_adapter registered in pytruenas.main adapts an unambiguous
+    # The step_adapter registered in pytruenas.cli._app adapts an unambiguous
     # 3-arg step automatically: duho never calls a step with three positionals,
     # so it can only have meant the module signature.
     _write_undecorated_runpath(tmp_path)
     monkeypatch.setenv("PYTRUENAS_PATH", str(tmp_path))
-    import pytruenas.main as main
+    import pytruenas.cli._app as main
 
-    rc = main.main("pytruenas", ["myflow", "nas1"])
+    rc = main.main(["myflow", "nas1"])
     assert rc == 0
     records = _records(record_path)
     # client bound FIRST (not to cmd), and a real logger arrived third.
@@ -249,7 +248,7 @@ def test_step_adapter_leaves_ambiguous_arities_alone():
     # A 2-arg step could be duho's (cmd, ctx) or this app's (client, args), and
     # nothing in the signature says which. Guessing would silently swap them,
     # so shorter signatures still need an explicit @step.
-    from pytruenas.utils.runpath import step, step_adapter
+    from pytruenas.cli.runpath import step, step_adapter
 
     def native(cmd, ctx):
         return cmd
@@ -278,7 +277,7 @@ def test_step_decorator_preserves_arity_detection():
     # ctx=None -- a silently None client rather than an error.
     from duho.runpath import step_wants_context
 
-    from pytruenas.utils.runpath import step
+    from pytruenas.cli.runpath import step
 
     @step
     def one(client):
@@ -305,9 +304,9 @@ def test_runpath_discovered_as_subcommand(tmp_path, monkeypatch, record_path):
     import contextlib
     import io
 
-    import pytruenas.main as main
+    import pytruenas.cli._app as main
 
     out = io.StringIO()
     with contextlib.redirect_stdout(out), pytest.raises(SystemExit):
-        main.main("pytruenas", ["--help"])
+        main.main(["--help"])
     assert "myflow" in out.getvalue()

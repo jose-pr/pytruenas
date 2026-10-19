@@ -12,7 +12,7 @@ from types import SimpleNamespace
 import pytest
 from hostctl.exceptions import MissingExtraError
 
-import pytruenas.main as main
+import pytruenas.cli._app as main
 
 
 class _Client:
@@ -62,7 +62,7 @@ def test_a_plain_import_error_is_not_mapped():
 def test_a_yaml_config_file_without_pyyaml_names_pytruenas_yaml(tmp_path, monkeypatch):
     import sys
 
-    from pytruenas.utils import cmd
+    from pytruenas.cli import _args as cmd
 
     monkeypatch.setitem(sys.modules, "yaml", None)
     cfg = tmp_path / "pytruenas.yaml"

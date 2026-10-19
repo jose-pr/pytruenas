@@ -1,18 +1,23 @@
 """Generate typed API stubs (.pyi) for a TrueNAS API version.
 
-Dumps the middleware API definition (or reads a cached dump) and writes a
-package of ``.pyi`` stubs describing every namespace and method, so editors and
+Reads the middleware API definition from the target (``client.dump_api()``,
+cached per host and version) or from a dump file, and writes a package of
+``.pyi`` stubs describing every namespace and method, so editors and
 type checkers understand ``client.api.<namespace>.<method>(...)`` calls.
 """
 
 from __future__ import annotations
 
+import gzip
 import json
+import typing as _ty
 from logging import Logger
 from pathlib import Path
 
+from duho import Arg, Meta
+
 from pytruenas import TrueNASClient, codegen
-from pytruenas.utils.cmd import PyTrueNASArgs
+from pytruenas.cli import PyTrueNASArgs
 
 
 class Args(PyTrueNASArgs):
@@ -24,21 +29,29 @@ class Args(PyTrueNASArgs):
     path: Path = Path("truenasapi_typings/current")
     "Output directory for the generated stubs (default: ./truenasapi_typings/current)"
 
-    api_cache: Path = None
-    "Path to cache the API dump JSON (read if present, written if not)"
+    dump: "Arg[_ty.Optional[Path], Meta(metavar='FILE')]" = None
+    "Read the API definition from this dump file (JSON, or gzipped) instead of the target"
+    ("--from",)  # type: ignore
+
+
+_GZIP_MAGIC = bytes((0x1F, 0x8B))
+
+
+def _read_dump(path: Path) -> dict:
+    """A ``dump-api`` output or a ``$PYTRUENAS_CACHE`` file: JSON, maybe gzipped."""
+    raw = path.read_bytes()
+    if raw[:2] == _GZIP_MAGIC:
+        raw = gzip.decompress(raw)
+    return json.loads(raw.decode("utf-8"))
 
 
 def run(client: TrueNASClient, args: Args, logger: Logger):
-    cache = args.api_cache
-    if cache is not None and cache.exists():
-        logger.info("Reading cached API dump from %s", cache)
-        apidump = json.loads(cache.read_text(encoding="utf-8"))
+    if args.dump is not None:
+        logger.info("Reading the API definition from %s", args.dump)
+        apidump = _read_dump(Path(args.dump))
     else:
         logger.info("Dumping API definition from server")
         apidump = client.dump_api()
-        if cache is not None:
-            cache.write_text(json.dumps(apidump), encoding="utf-8")
-            logger.info("Cached API dump at %s", cache)
 
     versions = apidump["versions"]
     available = [v["version"] for v in versions]

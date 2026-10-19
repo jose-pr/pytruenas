@@ -60,7 +60,7 @@ def main(client, args, logger):
     else:
         # `_update` diffs against the current record, so passing the whole
         # desired state is safe and idempotent -- it sends only what differs.
-        from pytruenas.utils.query import diff
+        from pytruenas.query import diff
 
         pending = diff(existing, desired)
         if pending:

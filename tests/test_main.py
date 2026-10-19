@@ -7,9 +7,9 @@ from types import SimpleNamespace
 from unittest.mock import MagicMock
 
 import pytruenas.host
-import pytruenas.main as main
+import pytruenas.cli._app as main
 from duho.discovery import ModuleCommand
-from pytruenas.utils.cmd import PyTrueNASArgs
+from pytruenas.cli._args import PyTrueNASArgs
 
 
 def _fake_clients(monkeypatch):
@@ -53,7 +53,7 @@ def test_main_version_in_process(monkeypatch, capsys):
 
     monkeypatch.setattr(sys, "argv", ["pytruenas", "--version"])
     with pytest.raises(SystemExit) as ei:
-        main.main("pytruenas")
+        main.main()
     import importlib.metadata as _md
 
     assert ei.value.code in (0, None)
@@ -65,7 +65,7 @@ def test_main_help_in_process(monkeypatch, capsys):
 
     monkeypatch.setattr(sys, "argv", ["pytruenas", "--help"])
     with pytest.raises(SystemExit) as ei:
-        main.main("pytruenas")
+        main.main()
     assert ei.value.code in (0, None)
     assert "usage:" in capsys.readouterr().out
 
@@ -148,10 +148,7 @@ def test_a_logger_named_by_loglevel_keeps_its_level(monkeypatch):
         return MagicMock()
 
     monkeypatch.setattr(pytruenas.host, "TrueNASClient", client)
-    main.main(
-        "pytruenas",
-        ["--loglevel", "websocket:DEBUG,requests:INFO", "dump-api", "nas1"],
-    )
+    main.main(["--loglevel", "websocket:DEBUG,requests:INFO", "dump-api", "nas1"])
     assert seen == {
         "websocket": logging.DEBUG,
         "requests": logging.INFO,

@@ -7,7 +7,7 @@ from logging import Logger
 from duho import Arg, Meta
 
 from pytruenas import TrueNASClient
-from pytruenas.utils.cmd import PyTrueNASArgs, emit_json, json_value, split_assignment
+from pytruenas.cli._args import PyTrueNASArgs, emit_json, json_value, split_assignment
 
 
 class Args(PyTrueNASArgs):

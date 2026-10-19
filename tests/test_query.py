@@ -1,6 +1,6 @@
 """Query filter / option / diff helpers (utils.query)."""
 
-from pytruenas.utils import query as q
+from pytruenas import query as q
 
 
 def test_eq_filter_from_kwargs():

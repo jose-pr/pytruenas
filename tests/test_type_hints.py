@@ -23,7 +23,7 @@ _MODULES = [
     "pytruenas.models.jsonschema",
     "pytruenas.namespace",
     "pytruenas.providers",
-    "pytruenas.utils.io",
+    "pytruenas._utils.io",
     "pytruenas.webshell",
 ]
 

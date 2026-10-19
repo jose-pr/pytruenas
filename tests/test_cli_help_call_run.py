@@ -14,7 +14,7 @@ import logging
 import pytest
 
 import pytruenas.host
-import pytruenas.main as main
+import pytruenas.cli._app as main
 
 USER_METHODS = {
     "user.create": {
@@ -116,7 +116,7 @@ def _fake(monkeypatch, tmp_path):
 
 
 def _main(*argv):
-    return main.main("pytruenas", list(argv))
+    return main.main(list(argv))
 
 
 # -- help ------------------------------------------------------------------
@@ -246,7 +246,7 @@ def _cached_dump():
     """A whole definition in the cache, so `--dump` reads it with no shell."""
     from test_cli_help import USER_CREATE, USER_UPDATE
 
-    from pytruenas.utils import apicache
+    from pytruenas import apicache
 
     older = {"version": "v25.10.0", "methods": [USER_CREATE], "events": []}
     newest = {"version": "v26.0.0", "methods": [USER_CREATE, USER_UPDATE]}

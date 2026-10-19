@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import typing as _ty
 from .exceptions import AuthenticationError
-from .utils import io as _ioutils
+from ._utils import io as _ioutils
 
 if _ty.TYPE_CHECKING:
     from . import TrueNASClient
@@ -268,7 +268,7 @@ class Credentials(metaclass=_CredentialsMeta):
         place of the process environment.
         """
         if env is None:
-            from .utils.cmd import ENV
+            from ._utils.env import ENV
 
             raw = ENV.get("CREDENTIALS")
         else:

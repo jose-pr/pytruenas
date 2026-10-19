@@ -125,7 +125,7 @@ def test_hand_written_stubs_are_not_a_typings_tree(tmp_path):
 
 
 def test_the_default_path_is_not_pyrights_stub_directory():
-    from pytruenas.cmd.generate_typings import Args
+    from pytruenas.cli.commands.generate_typings import Args
 
     assert Args.path.as_posix() == "truenasapi_typings/current"
 
@@ -334,7 +334,7 @@ def test_generate_typings_from_a_dump_file_needs_no_extra(tmp_path):
             "-c",
             _NO_JINJA,
             "generate-typings",
-            "--api-cache",
+            "--from",
             str(FIXTURE),
             "--path",
             str(out),
@@ -347,3 +347,19 @@ def test_generate_typings_from_a_dump_file_needs_no_extra(tmp_path):
     )
     assert run.returncode == 0, run.stdout + run.stderr
     assert (out / "user" / "__init__.pyi").exists()
+
+
+def test_generate_typings_reads_a_gzipped_dump(tmp_path):
+    """`--from` takes `$PYTRUENAS_CACHE`'s own gzipped files as well as JSON."""
+    import gzip
+    import logging
+    from types import SimpleNamespace
+
+    from pytruenas.cli.commands import generate_typings
+
+    dump = tmp_path / "v26.json.gz"
+    dump.write_bytes(gzip.compress(FIXTURE.read_bytes()))
+    args = SimpleNamespace(dump=dump, api_version=None, path=tmp_path / "out")
+    logger = logging.getLogger("pytruenas.test.typings")
+    assert generate_typings.run(object(), args, logger) is None
+    assert (tmp_path / "out" / "user" / "__init__.pyi").exists()

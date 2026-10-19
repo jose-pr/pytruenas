@@ -15,8 +15,9 @@ from logging import Logger
 from duho import Arg
 
 from pytruenas import TrueNASClient
-from pytruenas.utils import apicache, apihelp
-from pytruenas.utils.cmd import PyTrueNASArgs, emit, emit_json
+from pytruenas import apicache
+from pytruenas.cli import _apihelp as apihelp
+from pytruenas.cli._args import PyTrueNASArgs, emit, emit_json
 
 # The source is the API definition, never generated `.pyi` stubs: descriptions,
 # defaults, enum values and required-ness exist only in the definition.

@@ -12,7 +12,7 @@ import sys
 
 import pytest
 
-from pytruenas.utils.cmd import PyTrueNASArgs
+from pytruenas.cli._args import PyTrueNASArgs
 
 
 @pytest.fixture

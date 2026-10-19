@@ -23,8 +23,8 @@ from ipaddress import IPv4Address, IPv4Interface, IPv6Interface
 import pytest
 
 from pytruenas.connection import dumps, loads
-from pytruenas.utils.io import json_scalar
-from pytruenas.utils.query import diff
+from pytruenas._utils.io import json_scalar
+from pytruenas.query import diff
 
 
 class Mac:

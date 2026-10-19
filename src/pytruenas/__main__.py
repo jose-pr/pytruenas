@@ -2,7 +2,7 @@
 
 from duho.logging import init_stderr_logging
 
-from .main import main
+from .cli import main
 
 if __name__ == "__main__":
     # Logging is set up here, not at import: importing `pytruenas.__main__`
@@ -11,4 +11,4 @@ if __name__ == "__main__":
     # `raise SystemExit(...)`, not a bare call: main()'s exit code was
     # discarded, so `python -m pytruenas call nope host` exited 0 and every
     # shell and CI step read a failed run as a success.
-    raise SystemExit(main("pytruenas"))
+    raise SystemExit(main())

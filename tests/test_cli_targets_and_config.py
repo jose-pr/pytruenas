@@ -9,8 +9,8 @@ import logging
 
 import pytest
 
-import pytruenas.main as main
-from pytruenas.utils.cmd import PyTrueNASArgs
+import pytruenas.cli._app as main
+from pytruenas.cli._args import PyTrueNASArgs
 
 
 def _args(targets=(), **fields):
@@ -66,7 +66,7 @@ def test_a_config_that_is_not_a_table_is_a_usage_error(tmp_path):
         _args(config=cfg)._config_dict_()
 
 
-def test_a_scalar_commandspath_is_one_source(tmp_path):
+def test_a_scalar_cmdspath_is_one_source(tmp_path):
     """`list("mycmds")` made it six single-letter sources."""
     (tmp_path / "mycmds").mkdir()
     cfg = tmp_path / "pytruenas.yaml"
@@ -78,7 +78,7 @@ def test_a_scalar_commandspath_is_one_source(tmp_path):
     assert main._config_sources(None, cfg) == []
 
 
-def test_a_commandspath_of_the_wrong_type_is_ignored(tmp_path, caplog):
+def test_a_cmdspath_of_the_wrong_type_is_ignored(tmp_path, caplog):
     with caplog.at_level(logging.WARNING):
         assert main._config_sources({"not": "a list"}, tmp_path / "c.yaml") == []
     assert "expected a string or a list" in caplog.text
@@ -111,11 +111,11 @@ def test_the_working_directory_names_no_command_sources(
     tmp_path, monkeypatch, isolated_config
 ):
     """./pytruenas.yaml was read from whatever directory the CLI ran in, and
-    its commandspath imported that directory's code."""
+    its cmdspath imported that directory's code."""
     pytest.importorskip("yaml")
     _plant_commands(tmp_path)
-    (tmp_path / "pytruenas.yaml").write_text("commandspath: [mycmds]\n")
-    (tmp_path / "pytruenas.cfg").write_text('commandspath = ["mycmds"]\n')
+    (tmp_path / "pytruenas.yaml").write_text("cmdspath: [mycmds]\n")
+    (tmp_path / "pytruenas.cfg").write_text('cmdspath = ["mycmds"]\n')
     monkeypatch.chdir(tmp_path)
     names = {main.command_name(c) for c in main._discover(["query", "user"])}
     assert "planted" not in names
@@ -126,13 +126,13 @@ def test_a_config_files_command_sources_load(
     tmp_path, monkeypatch, isolated_config, via
 ):
     """Relative to the file, wherever the file came from."""
-    from pytruenas.utils.cmd import default_config_path
+    from pytruenas.cli._args import default_config_path
 
     folder = default_config_path().parent if via == "default" else tmp_path / "conf"
     folder.mkdir(parents=True)
     _plant_commands(folder)
     cfg = folder / "pytruenas.cfg"
-    cfg.write_text('commandspath = ["mycmds"]\n')
+    cfg.write_text('cmdspath = ["mycmds"]\n')
     argv = ["query", "user"]
     if via == "--config":
         argv = ["--config", str(cfg)] + argv
@@ -148,11 +148,11 @@ def test_a_config_file_that_was_named_must_exist(tmp_path, monkeypatch, capsys):
     monkeypatch.delenv("PYTRUENAS_CONFIG", raising=False)
     monkeypatch.delenv("PYTRUENAS_CFG", raising=False)
     missing = tmp_path / "nosuch.yaml"
-    assert main.main("pytruenas", ["--config", str(missing), "query", "user"]) == 2
+    assert main.main(["--config", str(missing), "query", "user"]) == 2
     assert f"config file not found: {missing}" in capsys.readouterr().err
 
     monkeypatch.setenv("PYTRUENAS_CONFIG", str(missing))
-    assert main.main("pytruenas", ["query", "user"]) == 2
+    assert main.main(["query", "user"]) == 2
     assert "config file not found" in capsys.readouterr().err
 
 
@@ -161,3 +161,48 @@ def test_the_implicit_config_file_may_be_absent(tmp_path, monkeypatch):
     monkeypatch.delenv("PYTRUENAS_CFG", raising=False)
     monkeypatch.chdir(tmp_path)
     assert _args()._config_dict_() == {}
+
+
+def test_the_old_config_key_names_its_replacement(tmp_path, isolated_config):
+    from duho import UsageError
+
+    cfg = tmp_path / "pytruenas.cfg"
+    cfg.write_text('commandspath = ["mycmds"]\n')
+    with pytest.raises(UsageError, match="renamed cmdspath"):
+        main._discover(["--config", str(cfg), "query", "user"])
+
+
+def test_cmdspath_is_repeated_not_split(tmp_path, isolated_config):
+    """A Windows path in `--cmdspath` was split on its drive letter's colon."""
+    _plant_commands(tmp_path)
+    (tmp_path / "more").mkdir()
+    (tmp_path / "more" / "other.py").write_text(
+        "def run(client, args, logger):\n    return 0\n"
+    )
+    argv = [
+        "--cmdspath",
+        str(tmp_path / "mycmds"),
+        "--cmdspath",
+        str(tmp_path / "more"),
+        "query",
+        "user",
+    ]
+    names = {main.command_name(c) for c in main._discover(argv)}
+    assert {"planted", "other"} <= names
+    from pytruenas.cli import PyTrueNASArgs
+
+    parsed = main.parse_globals(main.PyTrueNAS, argv)
+    assert parsed.cmdspath == [str(tmp_path / "mycmds"), str(tmp_path / "more")]
+    assert issubclass(main.PyTrueNAS, PyTrueNASArgs)
+
+
+def test_pytruenas_path_adds_to_cmdspath(tmp_path, monkeypatch, isolated_config):
+    _plant_commands(tmp_path)
+    (tmp_path / "more").mkdir()
+    (tmp_path / "more" / "other.py").write_text(
+        "def run(client, args, logger):\n    return 0\n"
+    )
+    monkeypatch.setenv("PYTRUENAS_PATH", str(tmp_path / "more"))
+    argv = ["--cmdspath", str(tmp_path / "mycmds"), "query", "user"]
+    names = {main.command_name(c) for c in main._discover(argv)}
+    assert {"planted", "other"} <= names

@@ -1,22 +1,20 @@
 """Turn ``--field=value`` text into the JSON values a middleware method wants.
 
-The CLI's only way to write anything used to be ``-p '{"username": "svc", ...}'``
--- hand-written JSON, quoted twice through a shell. This module is the other
-half of that problem: given a property's schema from the API definition, it
-casts one command-line string to the right JSON type, and says so clearly when
-it cannot.
+The alternative to ``-p '{"username": "svc", ...}'`` -- hand-written JSON,
+quoted twice through a shell: given a property's schema from the API
+definition, this casts one command-line string to the right JSON type, and
+says so clearly when it cannot.
 
 Two rules are deliberate, both because silence is the expensive failure:
 
-* **An unknown field is an error**, listing near-misses. A dropped field is the
-  same class of bug as the keyword argument ``Namespace.__call__`` used to
-  swallow, where ``query(filters=...)`` sent no filters and returned every row.
+* **An unknown field is an error**, listing near-misses. A dropped field would
+  change the call's meaning without a word: a dropped filter queries every row.
 * **A bad enum value names the valid ones.** The appliance's own error for a
   bad enum is a validation failure with a schema path, which is much harder to
   act on than a list of the five strings it accepts.
 
-Spelling (settled with the owner): fields come after a literal ``--``, and
-``--name=value`` and bare ``name=value`` are interchangeable there.
+Fields come after a literal ``--``, and ``--name=value`` and bare
+``name=value`` are interchangeable there.
 """
 
 from __future__ import annotations
@@ -25,7 +23,7 @@ import json as _json
 import pathlib as _pathlib
 import typing as _ty
 
-from . import _schema
+from .._utils import schema as _schema
 from ..exceptions import FieldError
 
 #: Accepted spellings for a boolean, matching duho's own strict sets rather
@@ -41,11 +39,11 @@ JSON_SUFFIX = ":json"
 def split(token: str) -> "tuple[str, str]":
     """``--name=value`` or ``name=value`` -> ``(name, value)``.
 
-    Delegates to :func:`pytruenas.utils.cmd.split_assignment`, the one spelling
+    Delegates to ``split_assignment``, the one spelling
     ``query -f`` uses too, so the three places that take a ``NAME=VALUE`` agree
     on what one is.
     """
-    from .cmd import split_assignment
+    from ._args import split_assignment
 
     try:
         return split_assignment(token)
@@ -85,7 +83,7 @@ def _coerce_scalar(name: str, schema: "_ty.Mapping[str, _ty.Any]", raw: str) -> 
     if types in ([None], []):
         # No declared type: fall back to the CLI's existing untyped rule, the
         # one `query -f` and `call -p` already use (JSON value, else string).
-        from .cmd import json_value
+        from ._args import json_value
 
         return json_value(raw)
     expected = "|".join(str(t) for t in types if t)

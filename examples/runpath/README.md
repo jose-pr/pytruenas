@@ -57,7 +57,7 @@ A **shorter** app-shaped signature is ambiguous: `(client, args)` and duho's own
 an explicit decorator:
 
 ```python
-from pytruenas.utils.runpath import step
+from pytruenas.cli.runpath import step
 
 @step
 def main(client, args):
@@ -80,7 +80,7 @@ before any step and whose return value becomes each step's `client`. Re-exportin
 `default_init` is enough for the common case:
 
 ```python
-from pytruenas.utils.runpath import default_init as init
+from pytruenas.cli.runpath import default_init as init
 ```
 
 This example wraps it to also stash `cmd.findings`, which later steps read back.

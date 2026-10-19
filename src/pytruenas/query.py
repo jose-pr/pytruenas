@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import typing as _ty
 
-from .io import json_scalar as _json_scalar
+from ._utils.io import json_scalar as _json_scalar
 
 
 class _Exclude: ...
@@ -166,3 +166,22 @@ def _same(current, wanted) -> bool:
         # "different". Reporting a spurious change is recoverable; silently
         # skipping a real one is not.
         return False
+
+
+__all__ = [
+    "QueryFilter",
+    "EQ",
+    "NE",
+    "RE",
+    "GT",
+    "GE",
+    "LT",
+    "LE",
+    "IN",
+    "NIN",
+    "EXCLUDE",
+    "MISSING",
+    "Option",
+    "filter_from_kwargs",
+    "diff",
+]

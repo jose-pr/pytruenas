@@ -8,8 +8,8 @@ from unittest.mock import patch
 
 import pytest
 
-import pytruenas.main as main
-from pytruenas.utils.cmd import PyTrueNASArgs
+import pytruenas.cli._app as main
+from pytruenas.cli._args import PyTrueNASArgs
 
 
 def _parse(argv):
@@ -23,7 +23,7 @@ def _parse(argv):
         return 0
 
     with patch.object(main, "_dispatch", fake_dispatch):
-        rc = main.main("pytruenas", argv)
+        rc = main.main(argv)
     captured["rc"] = rc
     return captured
 

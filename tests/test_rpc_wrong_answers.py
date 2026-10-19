@@ -15,7 +15,7 @@ import pytest
 from pytruenas import connection as jsonrpc
 from pytruenas.connection import ClientException
 from pytruenas.namespace import Namespace
-from pytruenas.utils import query as q
+from pytruenas import query as q
 from test_jsonrpc_client import _FakeWS, _client_with
 
 

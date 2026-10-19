@@ -11,7 +11,8 @@ from __future__ import annotations
 
 import pytest
 
-from pytruenas.utils import apihelp, fields
+from pytruenas.cli import _apihelp as apihelp
+from pytruenas.cli import _fields as fields
 
 USER_CREATE = {
     "name": "user.create",

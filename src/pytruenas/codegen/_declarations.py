@@ -12,7 +12,7 @@ from duho import qualname as _qn
 from duho import text as _text
 
 from ..models import apidump as _api, jsonschema as _schema
-from ..utils import _schema as _read
+from .._utils import schema as _read
 from . import _types
 
 

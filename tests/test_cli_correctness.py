@@ -7,8 +7,8 @@ from pathlib import Path
 
 import pytest
 
-import pytruenas.main as main
-from pytruenas.utils.cmd import PyTrueNASArgs, json_value
+import pytruenas.cli._app as main
+from pytruenas.cli._args import PyTrueNASArgs, json_value
 
 
 def _cli(*args):
@@ -21,7 +21,7 @@ def test_the_config_option_parses(tmp_path):
     """`--config` was typed `dict`, so duho gave it its KEY=VALUE action and
     argparse died on every use ("'WindowsPath' object is not iterable")."""
     cfg = tmp_path / "pytruenas.yaml"
-    cfg.write_text("commandspath: []\n")
+    cfg.write_text("cmdspath: []\n")
     r = _cli("-c", str(cfg), "call", "core.ping", "127.0.0.1")
     assert "not iterable" not in r.stderr
     # It got as far as connecting (there is no middleware here to answer).
@@ -61,7 +61,7 @@ def test_filter_values_are_typed(raw, expected):
 
 
 def test_query_builds_typed_filters(capsys):
-    from pytruenas.cmd import query as query_cmd
+    from pytruenas.cli.commands import query as query_cmd
 
     class _Api(dict):
         def __getitem__(self, name):
@@ -81,7 +81,7 @@ def test_query_builds_typed_filters(capsys):
 
 
 def test_a_malformed_filter_is_an_error(capsys):
-    from pytruenas.cmd import query as query_cmd
+    from pytruenas.cli.commands import query as query_cmd
 
     args = query_cmd.Args()
     args.namespace = "user"

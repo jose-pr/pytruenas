@@ -12,8 +12,8 @@ from unittest.mock import patch
 import pytest
 from hostctl.exceptions import BundleError
 
-import pytruenas.cmd.deploy as deploy_cmd
-import pytruenas.main as main
+import pytruenas.cli.commands.deploy as deploy_cmd
+import pytruenas.cli._app as main
 
 
 def _logger():
@@ -31,7 +31,7 @@ def _parse(argv):
         return 0
 
     with patch.object(main, "_dispatch", fake_dispatch):
-        main.main("pytruenas", argv)
+        main.main(argv)
     return captured
 
 
@@ -331,7 +331,7 @@ def test_arguments_that_cannot_work_are_refused_once_before_any_target(
     monkeypatch.setattr(
         pytruenas.host, "TrueNASClient", lambda *a, **k: built.append(a) or object()
     )
-    rc = main.main("pytruenas", ["deploy", *argv, "nas1", "nas2"])
+    rc = main.main(["deploy", *argv, "nas1", "nas2"])
     assert rc == 2
     assert built == []
     err = capsys.readouterr().err

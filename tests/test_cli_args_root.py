@@ -14,9 +14,9 @@ session, and the failure surfaces somewhere unrelated.
 import pytest
 from duho.runpath import preserve_registration, registration
 
-from pytruenas.main import PyTrueNAS, main
-from pytruenas.utils.cmd import PyTrueNASArgs
-from pytruenas.utils.runpath import PyTrueNASRunPathArgs
+from pytruenas.cli._app import PyTrueNAS, main
+from pytruenas.cli._args import PyTrueNASArgs
+from pytruenas.cli.runpath import PyTrueNASRunPathArgs
 
 
 class MyArgs(PyTrueNASArgs):
@@ -51,7 +51,7 @@ def test_no_args_leaves_the_registered_base_alone(_runpath_base):
     """The import-time registration already set this; don't churn it."""
     before = _runpath_base()
     with pytest.raises(SystemExit):
-        main("pytruenas", ["--help"])
+        main(["--help"])
     assert _runpath_base() is before
 
 
@@ -60,7 +60,7 @@ def test_no_args_leaves_the_registered_base_alone(_runpath_base):
 
 def test_args_subclass_reaches_the_runpath_base(_runpath_base):
     with pytest.raises(SystemExit):
-        main("mytool", ["--help"], args=MyArgs)
+        main(["--help"], name="mytool", args=MyArgs)
     assert issubclass(_runpath_base(), MyArgs)
 
 
@@ -71,19 +71,19 @@ def test_runpath_base_keeps_the_trailing_targets_override(_runpath_base):
     PyTrueNASRunPathArgs._initparser_ adds the positional back.
     """
     with pytest.raises(SystemExit):
-        main("mytool", ["--help"], args=MyArgs)
+        main(["--help"], name="mytool", args=MyArgs)
     assert issubclass(_runpath_base(), PyTrueNASRunPathArgs)
 
 
 def test_args_subclass_adds_its_flag_to_the_parser(capsys):
     with pytest.raises(SystemExit):
-        main("mytool", ["--help"], args=MyArgs)
+        main(["--help"], name="mytool", args=MyArgs)
     assert "--region" in capsys.readouterr().out
 
 
 def test_default_parser_has_no_derived_flag(capsys):
     with pytest.raises(SystemExit):
-        main("pytruenas", ["--help"])
+        main(["--help"])
     assert "--region" not in capsys.readouterr().out
 
 
@@ -99,7 +99,7 @@ def test_root_subclass_supplies_args_via_dunder(_runpath_base, capsys):
         _ARGS_ = MyArgs
 
     with pytest.raises(SystemExit):
-        main("mytool", ["--help"], root=MyApp)
+        main(["--help"], name="mytool", root=MyApp)
     assert "--region" in capsys.readouterr().out
     assert issubclass(_runpath_base(), MyArgs)
 
@@ -114,7 +114,7 @@ def test_explicit_args_overrides_the_roots_dunder(capsys):
         _ARGS_ = MyArgs
 
     with pytest.raises(SystemExit):
-        main("mytool", ["--help"], root=MyApp, args=Other)
+        main(["--help"], name="mytool", root=MyApp, args=Other)
     out = capsys.readouterr().out
     assert "--flavour" in out and "--region" not in out
 
@@ -129,4 +129,4 @@ def test_rejects_a_non_pytruenasargs_class():
         pass
 
     with pytest.raises(TypeError, match="PyTrueNASArgs"):
-        main("mytool", ["--help"], args=Bare)  # type: ignore[arg-type]
+        main(["--help"], name="mytool", args=Bare)  # type: ignore[arg-type]

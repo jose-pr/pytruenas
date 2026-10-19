@@ -33,11 +33,15 @@ from logging import Logger
 from duho import Arg, Meta
 
 from pytruenas import TrueNASClient
-from pytruenas.utils.cmd import PyTrueNASArgs
-from pytruenas.utils.target import redact
+from pytruenas.cli._args import PyTrueNASArgs
+from pytruenas.target import redact
 
 #: The command to run on the target once installed comes after `--`.
 _allow_passthrough_ = True
+
+#: Not an MCP tool: installing software on an appliance is for a person to
+#: choose, not for an agent to call.
+_mcp_ = False
 
 #: Under the persistent system dataset -- see the module docstring for why this
 #: and not ``/var/db``, ``/root`` or ``/data`` (all in the boot environment).
@@ -139,7 +143,7 @@ def _resolve_root(
     ``--pkg-name``), then ``PYTRUENAS_PKG_ROOT`` / ``PYTRUENAS_PKG_NAME``, then
     ``pytruenas``; the package defaults to the root with ``-`` as ``_``.
     """
-    from pytruenas.utils.cmd import ENV
+    from pytruenas.cli._args import ENV
 
     root = root or ENV.get("PKG_ROOT") or "pytruenas"
     package = package or ENV.get("PKG_NAME") or root.replace("-", "_")

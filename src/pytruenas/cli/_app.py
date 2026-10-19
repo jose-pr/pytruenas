@@ -31,11 +31,12 @@ from duho.runpath import RunPathCmd
 from duho.runtime import accepts_positional
 from hostctl.exceptions import MissingExtraError as _MissingExtraError
 
-from .host import TrueNASConfig
-from .host import TrueNASClient
-from .utils.cmd import ENV, PyTrueNASArgs, with_targets
-from .utils.runpath import PyTrueNASRunPathArgs, step_adapter as _step_adapter
-from .utils.target import redact as _redact
+from ..host import TrueNASConfig
+from ..host import TrueNASClient
+from .._utils.env import ENV
+from ._args import PyTrueNASArgs, with_targets
+from .runpath import PyTrueNASRunPathArgs, step_adapter as _step_adapter
+from ..target import redact as _redact
 
 # ``import duho.runpath`` auto-registers the RunPath command provider with its
 # default base (``duho.LoggingArgs``). Re-register with pytruenas's own shared
@@ -51,9 +52,9 @@ from .utils.target import redact as _redact
 # base for commands built from then on).
 #
 # ``step_adapter`` additionally lets a step be written with the MODULE command
-# signature -- ``(client, args, logger)``, the same shape ``cmd/`` modules use --
+# signature -- ``(client, args, logger)``, the same shape command modules use --
 # with no decorator in the step file. Only unambiguous 3-arg steps are adapted
-# automatically; see ``utils.runpath.step_adapter``.
+# automatically; see ``runpath.step_adapter``.
 _runpath.register(base=PyTrueNASRunPathArgs, step_adapter=_step_adapter)
 
 #: Third-party loggers to quiet by default (chatty at INFO/DEBUG).
@@ -65,7 +66,7 @@ DEFAULT_LOGLEVELS = {
 }
 
 #: Package import path to the built-in command modules.
-_BUILTIN_COMMANDS = "pytruenas.cmd"
+_BUILTIN_COMMANDS = "pytruenas.cli.commands"
 
 
 class PyTrueNAS(PyTrueNASArgs, Cli):
@@ -98,7 +99,7 @@ class PyTrueNAS(PyTrueNASArgs, Cli):
 
 
 def _config_sources(value: object, config_path: object) -> "list[str]":
-    """The config file's ``commandspath``, normalized.
+    """The config file's ``cmdspath``, normalized.
 
     A string is ONE source: `list("mycmds")` made it six single-letter ones.
     A relative entry resolves against the config file's own directory, since
@@ -112,7 +113,7 @@ def _config_sources(value: object, config_path: object) -> "list[str]":
         entries = [str(entry) for entry in value]
     else:
         _pylogging.getLogger("pytruenas").warning(
-            "ignoring config commandspath: expected a string or a list, got %s",
+            "ignoring config cmdspath: expected a string or a list, got %s",
             type(value).__name__,
         )
         return []
@@ -156,8 +157,8 @@ def _with_targets(command: object) -> object:
 
     Every pytruenas command takes the same trailing ``TARGET...`` positionals, so
     no command should have to opt in. The command's ``Args`` (or
-    :class:`PyTrueNASArgs`) is replaced by :func:`~pytruenas.utils.cmd.
-    with_targets` of it, which declares ``targets`` after the command's own
+    :class:`PyTrueNASArgs`) is replaced by :func:`~pytruenas.cli.with_targets`
+    of it, which declares ``targets`` after the command's own
     fields: argparse binds positionals in that order (``query <namespace>
     <host>...``), and duho publishes a declared field in the command's MCP tool
     schema, where a positional added by a ``register`` hook is missing.
@@ -166,7 +167,7 @@ def _with_targets(command: object) -> object:
     hook that adds positionals is wrapped and :func:`_targets_last` moves the
     hosts behind them; a hook that adds its own ``targets`` keeps it. Class
     commands (RunPath) declare the field on
-    :class:`pytruenas.utils.runpath.PyTrueNASRunPathArgs` and are returned
+    :class:`pytruenas.cli.runpath.PyTrueNASRunPathArgs` and are returned
     untouched.
     """
     if not isinstance(command, ModuleCommand):
@@ -235,7 +236,10 @@ def _discover(
     sources += list(globals_.cmdspath or [])
     # The config file is the user's own (named, or in their config
     # directory), never one found in the working directory.
-    sources += _config_sources(config.get("commandspath"), globals_._config_path_()[0])
+    where = globals_._config_path_()[0]
+    if "commandspath" in config:
+        raise UsageError(f"commandspath in {where} was renamed cmdspath")
+    sources += _config_sources(config.get("cmdspath"), where)
 
     by_name: "dict[str, object]" = {}
     for source in sources:
@@ -455,7 +459,7 @@ def _run_runpath_on_target(
     thread pool would race. A RunPath directory's own ``__main__.py`` ``init(cmd,
     logger)`` then reads ``cmd.target`` to build a per-target client, threaded by
     duho's ``RunPathCmd.__call__`` into every 2-arg step (``main(cmd, ctx)``) as
-    ``ctx`` (see :mod:`pytruenas.utils.runpath`), so each target gets its own
+    ``ctx`` (see :mod:`pytruenas.cli.runpath`), so each target gets its own
     isolated client/context -- the same per-target isolation guarantee
     :func:`_run_module_on_target` gives module commands.
 
@@ -485,12 +489,9 @@ def _dispatch(command: object, instance: "PyTrueNAS") -> int:
     numbered step files, adopted from :mod:`duho.runpath`), run it once per target
     positional via :func:`duho.fanout.run_targets` (thread pool sized by
     ``--parallel``, per-target ``[target]`` log prefixing, worst exit code wins).
-    This restores the private predecessor's behavior, where a RunPath directory
-    ran once per target with a per-target client -- current duho-based dispatch
-    would otherwise fall a class command (which is exactly what a ``RunPathCmd``
-    is) through to duho's plain SINGLE dispatch, un-fanned, never touching a
-    target. Any OTHER class command still falls back to duho's own single
-    dispatch.
+    duho's own dispatch would run a class command (which a ``RunPathCmd`` is)
+    once, un-fanned, never touching a target. Any OTHER class command still
+    falls back to duho's own single dispatch.
     """
     logger = instance._logger_
     # duho has already applied --loglevel; a logger named there keeps its level.
@@ -613,7 +614,7 @@ def _app_root(
 def _runpath_base(args: "type[PyTrueNASArgs]") -> type:
     """The ``duho.runpath`` base for ``args``.
 
-    A RunPath command needs :class:`~pytruenas.utils.runpath.
+    A RunPath command needs :class:`~pytruenas.cli.runpath.
     PyTrueNASRunPathArgs`'s trailing-``targets`` ``_initparser_`` override on
     top of the shared root -- without it a derived tool's RunPath commands
     silently lose their ``TARGET`` positional (it is ``SUPPRESS``-ed on a plain
@@ -631,8 +632,9 @@ def _runpath_base(args: "type[PyTrueNASArgs]") -> type:
 
 
 def main(
-    name: "str | None" = None,
     argv: "_ty.Sequence[str] | None" = None,
+    *,
+    name: "str | None" = None,
     args: "type[PyTrueNASArgs] | None" = None,
     root: "type[PyTrueNAS] | None" = None,
 ) -> int:

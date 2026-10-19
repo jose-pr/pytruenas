@@ -62,8 +62,8 @@ from .connection import DEFAULT_UNIX_SOCKET
 from . import namespace as _namespace
 from .namespace import Namespace as _Namespace
 from . import _tls
-from .utils.target import Target as _TGT
-from .utils.target import redact as _redact_target
+from .target import Target as _TGT
+from .target import redact as _redact_target
 
 if _ty.TYPE_CHECKING:  # pragma: no cover - typing only
     from hostctl import SSHConfig
@@ -1225,7 +1225,7 @@ class TrueNASClient(_PosixHost, _ty.Generic[ApiVersion]):
 
     @property
     def _target(self):
-        """The resolved websocket target as a :class:`~pytruenas.utils.target.Target`.
+        """The resolved websocket target as a :class:`~pytruenas.target.Target`.
 
         Built from the config rather than stored, so a change that resolves the
         scheme or API path later is picked up without re-syncing two copies.
@@ -1519,14 +1519,14 @@ class TrueNASClient(_PosixHost, _ty.Generic[ApiVersion]):
         """Whether middleware ``method`` runs as a job, per its schema's flag.
 
         Read for the whole service with ``core.get_methods`` (cached on disk by
-        :func:`pytruenas.utils.apicache.service_methods`, and here for the life
+        :func:`pytruenas.apicache.service_methods`, and here for the life
         of this client). A service that cannot be read counts as having no
         jobs, with one WARNING: the caller can still pass ``job=True``.
         """
         service = method.rpartition(".")[0]
         flags = self._job_flags.get(service)
         if flags is None:
-            from .utils import apicache as _apicache
+            from . import apicache as _apicache
 
             try:
                 found = _apicache.service_methods(self, service)
@@ -1684,9 +1684,9 @@ class TrueNASClient(_PosixHost, _ty.Generic[ApiVersion]):
         ``cache=True`` (the default) reads and writes the per-host, per-version
         cache under ``$PYTRUENAS_CACHE``; building the dump costs about 75
         seconds, which is not a price to pay twice. ``refresh=True`` re-fetches
-        and overwrites it. See :mod:`pytruenas.utils.apicache`.
+        and overwrites it. See :mod:`pytruenas.apicache`.
         """
-        from .utils import apicache as _apicache
+        from . import apicache as _apicache
 
         if not cache:
             return _apicache.fetch(self)

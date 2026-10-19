@@ -51,11 +51,11 @@ import re as _re
 import shlex as _shlex
 import typing as _ty
 
-from ..exceptions import APIDumpError, UnknownMethod
+from .exceptions import APIDumpError, UnknownMethod
 
 if _ty.TYPE_CHECKING:  # pragma: no cover - typing only
-    from ..host import TrueNASClient
-    from ..models.apidump import API
+    from .host import TrueNASClient
+    from .models.apidump import API
 
 #: Where the dump is built on the target. ``/var/db/system`` is a dataset on a
 #: data pool, so it survives an update -- and unlike ``/tmp`` it is not mounted
@@ -94,10 +94,10 @@ def cache_root() -> _pathlib.Path:
     """The directory cached dumps live in.
 
     ``$PYTRUENAS_CACHE`` wins; otherwise the platform's user cache directory.
-    Read through :data:`pytruenas.utils.cmd.ENV` like every other setting, so
+    Read through :data:`pytruenas.cli.ENV` like every other setting, so
     the set of variables stays enumerable rather than grepped for.
     """
-    from .cmd import ENV
+    from ._utils.env import ENV
 
     configured = ENV.get("CACHE")
     if configured:
@@ -381,7 +381,7 @@ def service_methods(
     all. This path needs none of them.
 
     The envelope differs from the dump's (``accepts``/``returns``/``description``
-    rather than ``schemas``); :func:`pytruenas.utils.apihelp.from_get_methods`
+    rather than ``schemas``); :func:`pytruenas.cli._apihelp.from_get_methods`
     normalizes it.
 
     Asking for the whole set at once (``core.get_methods()`` with no service) is
@@ -419,3 +419,21 @@ def store(api: "API", cache: "_pathlib.Path") -> None:
     tmp = cache.with_name(cache.name + ".part")
     tmp.write_bytes(_gzip.compress(_json.dumps(api).encode("utf-8"), 6))
     tmp.replace(cache)
+
+
+__all__ = [
+    "services",
+    "service_methods",
+    "load",
+    "fetch",
+    "store",
+    "cache_root",
+    "path_for",
+    "REMOTE_DIR",
+    "CHUNK_SIZE",
+    "CHUNK_ATTEMPTS",
+    "CHUNK_TIMEOUT",
+    "CLEANUP_TIMEOUT",
+    "DUMP_TIMEOUT",
+    "SERVICE_TIMEOUT",
+]

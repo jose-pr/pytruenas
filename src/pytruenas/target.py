@@ -205,3 +205,6 @@ class Target(_ty.NamedTuple):
             return val[-1]
         else:
             return val
+
+
+__all__ = ["Target", "redact"]

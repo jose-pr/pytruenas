@@ -10,7 +10,7 @@ import sys
 from pathlib import Path
 from unittest.mock import patch
 
-import pytruenas.main as main
+import pytruenas.cli._app as main
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -52,6 +52,9 @@ def test_every_tool_schema_has_targets():
     )
     tools = {tool["name"]: tool for tool in replies[2]["result"]["tools"]}
     assert "pytruenas.health" in tools  # a RunPath command
+    # Installing software on a NAS is for a person to choose.
+    assert "pytruenas.deploy" not in tools
+    assert "pytruenas.call" in tools
     for name, tool in tools.items():
         assert "targets" in tool["inputSchema"]["properties"], name
 
@@ -87,5 +90,5 @@ def test_hook_added_positionals_come_before_the_targets(tmp_path, monkeypatch):
         return 0
 
     with patch.object(main, "_dispatch", dispatch):
-        assert main.main("pytruenas", ["thing", "x", "nas1", "nas2"]) == 0
+        assert main.main(["thing", "x", "nas1", "nas2"]) == 0
     assert seen == {"item": "x", "targets": ["nas1", "nas2"]}

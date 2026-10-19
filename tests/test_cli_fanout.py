@@ -15,8 +15,8 @@ from types import SimpleNamespace
 import pytest
 
 import pytruenas.host
-import pytruenas.main as main
-from pytruenas.utils.cmd import PyTrueNASArgs, emit, emit_json, json_default
+import pytruenas.cli._app as main
+from pytruenas.cli._args import PyTrueNASArgs, emit, emit_json, json_default
 
 
 class _Args(PyTrueNASArgs):
@@ -245,14 +245,14 @@ def test_sets_and_datetimes_serialize_as_json():
 def test_an_unknown_typings_version_fails_one_target_not_the_run(tmp_path):
     """It raised SystemExit inside a fan-out worker, which aborted the whole run
     and discarded the other targets' exit codes."""
-    from pytruenas.cmd import generate_typings
+    from pytruenas.cli.commands import generate_typings
 
     args = SimpleNamespace(
-        api_cache=tmp_path / "dump.json",
+        dump=tmp_path / "dump.json",
         api_version="v99.0.0",
         path=tmp_path / "out",
     )
-    args.api_cache.write_text(
+    args.dump.write_text(
         json.dumps({"versions": [{"version": "v26.0.0", "methods": []}]}),
         encoding="utf-8",
     )

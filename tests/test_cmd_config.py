@@ -3,8 +3,8 @@
 import pytest
 from duho import UsageError
 
-from pytruenas.utils import cmd as _cmd
-from pytruenas.utils.cmd import PyTrueNASArgs
+from pytruenas.cli import _args as _cmd
+from pytruenas.cli._args import PyTrueNASArgs
 
 
 @pytest.fixture(autouse=True)
@@ -18,13 +18,13 @@ def _no_config_env(monkeypatch, tmp_path):
 @pytest.mark.parametrize(
     "name, text",
     [
-        ("pytruenas.cfg", 'credentials = "root:pw"\ncommandspath = ["cmds"]\n'),
-        ("settings", 'credentials = "root:pw"\ncommandspath = ["cmds"]\n'),
-        ("pytruenas.toml", 'credentials = "root:pw"\ncommandspath = ["cmds"]\n'),
-        ("pytruenas.json", '{"credentials": "root:pw", "commandspath": ["cmds"]}'),
+        ("pytruenas.cfg", 'credentials = "root:pw"\ncmdspath = ["cmds"]\n'),
+        ("settings", 'credentials = "root:pw"\ncmdspath = ["cmds"]\n'),
+        ("pytruenas.toml", 'credentials = "root:pw"\ncmdspath = ["cmds"]\n'),
+        ("pytruenas.json", '{"credentials": "root:pw", "cmdspath": ["cmds"]}'),
         (
             "pytruenas.cfg",
-            '#!json\n{"credentials": "root:pw", "commandspath": ["cmds"]}',
+            '#!json\n{"credentials": "root:pw", "cmdspath": ["cmds"]}',
         ),
     ],
 )
@@ -35,7 +35,7 @@ def test_a_cfg_is_toml_unless_its_first_line_or_suffix_says_otherwise(
     path.write_text(text, encoding="utf-8")
     assert _cmd.load_config(path) == {
         "credentials": "root:pw",
-        "commandspath": ["cmds"],
+        "cmdspath": ["cmds"],
     }
 
 
@@ -104,7 +104,7 @@ def test_the_working_directory_is_never_searched(monkeypatch, tmp_path):
 
 
 def test_the_variable_is_read_when_the_file_is_needed(monkeypatch, tmp_path):
-    """It was read when `pytruenas.utils.cmd` was imported."""
+    """It was read when `pytruenas.cli._args` was imported."""
     path = tmp_path / "named.cfg"
     path.write_text('credentials = "named"\n', encoding="utf-8")
     monkeypatch.setenv("PYTRUENAS_CONFIG", str(path))

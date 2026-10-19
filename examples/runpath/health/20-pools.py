@@ -7,7 +7,7 @@ is fixed: ``client``, then ``args``, then ``logger``.
 
 from __future__ import annotations
 
-from pytruenas.utils.runpath import step
+from pytruenas.cli.runpath import step
 
 
 @step

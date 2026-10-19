@@ -3,9 +3,9 @@
 import json
 from unittest.mock import MagicMock, patch
 
-import pytruenas.main as main
-from pytruenas.cmd import call as call_cmd
-from pytruenas.utils.cmd import json_value
+import pytruenas.cli._app as main
+from pytruenas.cli.commands import call as call_cmd
+from pytruenas.cli._args import json_value
 
 
 def _parse(argv):
@@ -19,7 +19,7 @@ def _parse(argv):
         return 0
 
     with patch.object(main, "_dispatch", fake_dispatch):
-        main.main("pytruenas", argv)
+        main.main(argv)
     return captured
 
 

@@ -2,7 +2,7 @@
 
 import pytest
 
-from pytruenas.utils.target import Target, redact
+from pytruenas.target import Target, redact
 
 
 def test_bare_host_defaults_to_http_scheme():

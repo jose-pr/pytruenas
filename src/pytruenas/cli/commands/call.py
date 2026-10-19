@@ -15,8 +15,9 @@ from logging import Logger
 from duho import Arg, Meta
 
 from pytruenas import TrueNASClient
-from pytruenas.utils import apihelp, fields as _fields
-from pytruenas.utils.cmd import PyTrueNASArgs, emit_json, json_value
+from pytruenas.cli import _apihelp as apihelp
+from pytruenas.cli import _fields as _fields
+from pytruenas.cli._args import PyTrueNASArgs, emit_json, json_value
 
 # Fields come after a literal `--` because their names are only known once the
 # method is parsed: as top-level options they would collide with the global
@@ -60,7 +61,7 @@ def _schema_fields(client: TrueNASClient, args: Args, logger: Logger):
     be worse than calling. A field name that does not exist is still caught --
     by the appliance's own validation rather than locally.
     """
-    from pytruenas.utils import apicache
+    from pytruenas import apicache
 
     service = args.method.rpartition(".")[0]
     if not service:
