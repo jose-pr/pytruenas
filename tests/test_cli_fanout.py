@@ -270,3 +270,20 @@ def test_a_command_without_run_is_not_offered(caplog):
     assert main._is_runnable(ok, "fine") is True
     # A class/RunPath command has no `module` and is never filtered.
     assert main._is_runnable(SimpleNamespace(), "runpath-dir") is True
+
+
+def test_a_failing_target_is_reported_without_its_password(caplog):
+    """duho reports a target that raised as `target %r failed`, so whatever
+    object the fan-out runs must render as the host's name there too."""
+    from duho.discovery import ModuleCommand
+
+    def run(client, args, logger):
+        raise RuntimeError("boom")
+
+    module = SimpleNamespace(__doc__="fake", run=run)
+    args = _Args(targets=("wss://root:hunter2@nas1:8443",))
+    with caplog.at_level(logging.INFO):
+        assert main._dispatch(ModuleCommand(module, name="fake", entrypoint=run), args)
+    assert "failed: boom" in caplog.text
+    assert "hunter2" not in caplog.text
+    assert "[nas1:8443]" in caplog.text

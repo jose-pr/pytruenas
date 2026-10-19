@@ -354,9 +354,9 @@ def _detach_logto(
 def _target_label(target: str) -> str:
     """The short name to tag this target's log records with.
 
-    ``run_targets(label=...)`` prefixes every record for a target with it, and
-    ``--logto`` names the target's file after it, so it is the host's short
-    name and never the connection string (which may carry a password).
+    The fan-out prefixes every record for a target with it, and ``--logto``
+    names the target's file after it, so it is the host's short name and never
+    the connection string (which may carry a password).
 
     Falls back to the password-free rendering of the target if it does not
     parse: an unparseable target must still run (and fail) on its own terms,
@@ -368,6 +368,39 @@ def _target_label(target: str) -> str:
         return _redact(target)
 
 
+class _Target:
+    """The object the fan-out runs: renders as the label, carries the target.
+
+    ``duho.fanout`` renders the object it is handed with ``str()`` in each
+    record's ``[...]`` prefix and with ``repr()`` in its own "target failed"
+    line, so both give the label; ``run_targets(label=)`` covers only the
+    prefix and would put the connection string, password included, in that
+    line. The worker reads the real string from :attr:`target`.
+
+    Not a ``str`` subclass: one whose ``__str__`` is the label renders as the
+    label wherever user code interpolates it.
+    """
+
+    __slots__ = ("target", "label")
+
+    def __init__(self, target: str) -> None:
+        self.target = target
+        self.label = _target_label(target)
+
+    def __str__(self) -> str:
+        return self.label
+
+    def __repr__(self) -> str:
+        return repr(self.label)
+
+
+def _unwrap(target: "_Target | str") -> "tuple[str, str]":
+    """``(connection string, label)`` of what the fan-out handed a worker."""
+    if isinstance(target, _Target):
+        return target.target, target.label
+    return target, _target_label(target)
+
+
 #: Exit status of a target whose command needs an optional extra that is not
 #: installed (`hostctl.MissingExtraError`): the status hostctl's own CLI uses.
 _MISSING_EXTRA_STATUS = 125
@@ -376,7 +409,7 @@ _MISSING_EXTRA_STATUS = 125
 def _run_module_on_target(
     command: "ModuleCommand",
     args: "PyTrueNAS",
-    target: str,
+    target: "_Target | str",
     logger: "_pylogging.Logger",
 ) -> int:
     """Run one module command against one target; return an exit code.
@@ -400,10 +433,12 @@ def _run_module_on_target(
     # was building a client for.
     args = _copy.copy(args)
 
+    # `fanned` is what the fan-out runs (and what --logto's filter selects
+    # records by); the command sees the connection string.
+    fanned = target
+    target, label = _unwrap(target)
     args.target = target
-    # The `--logto` {target} is the credential-free label the fan-out prefixes
-    # records with; _logto_path makes it a legal filename.
-    file_handler = _attach_logto(args.logto, target, _target_label(target), logger)
+    file_handler = _attach_logto(args.logto, fanned, label, logger)
 
     # The target is already on every record as the ``[name]`` prefix, so naming
     # it again here would just read "[nas1] Started: nas1".
@@ -452,7 +487,7 @@ def _run_module_on_target(
 
 def _run_runpath_on_target(
     instance: "RunPathCmd",
-    target: str,
+    target: "_Target | str",
     logger: "_pylogging.Logger",
 ) -> int:
     """Run one RunPath command (a whole step directory) against one target.
@@ -475,8 +510,10 @@ def _run_runpath_on_target(
     route files).
     """
     per_target = _copy.copy(instance)
+    fanned = target
+    target, label = _unwrap(target)
     per_target.target = target
-    file_handler = _attach_logto(instance.logto, target, _target_label(target), logger)
+    file_handler = _attach_logto(instance.logto, fanned, label, logger)
 
     # Already on every record as the ``[name]`` prefix -- see
     # _run_module_on_target.
@@ -519,14 +556,13 @@ def _dispatch(command: object, instance: "PyTrueNAS") -> int:
         isinstance(command, type) and issubclass(command, RunPathCmd)
     ):
         runpath = _ty.cast("RunPathCmd", instance)
-        targets = runpath._expanded_targets_()
+        targets = [_Target(target) for target in runpath._expanded_targets_()]
         logger.info("Running '%s' on %d target(s)", runpath._parsername_, len(targets))
         return run_targets(
             lambda target: _run_runpath_on_target(runpath, target, logger),
             targets,
             max_workers=max(1, instance.parallel),
             logger=logger,
-            label=_target_label,
         )
 
     if not isinstance(command, ModuleCommand):
@@ -540,14 +576,13 @@ def _dispatch(command: object, instance: "PyTrueNAS") -> int:
     if callable(validate):
         validate(instance)
 
-    targets = instance._expanded_targets_()
+    targets = [_Target(target) for target in instance._expanded_targets_()]
     logger.info("Running '%s' on %d target(s)", command._parsername_, len(targets))
     return run_targets(
         lambda target: _run_module_on_target(command, instance, target, logger),
         targets,
         max_workers=max(1, instance.parallel),
         logger=logger,
-        label=_target_label,
     )
 
 
