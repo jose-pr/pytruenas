@@ -1,39 +1,11 @@
-"""Call an arbitrary TrueNAS middleware method and print its JSON result.
+"""Call any middleware method by its dotted name and print the JSON result.
 
-Unlike ``query`` (which only covers queryable ``<namespace>.query`` methods),
-``call`` invokes any method by its dotted name, e.g. ``system.info``,
-``core.ping``, ``pool.dataset.details``. Parameters are passed with ``-p`` as
-JSON values (repeatable), so the trailing positionals stay the target host(s).
-
-**Fields after a literal ``--``.** Hand-writing ``-p '{"username": "svc", ...}'``
-is the reason this command was unpleasant for anything that writes, so the
-method's own schema is used instead::
-
-    pytruenas call user.create nas1 -- --username=svc --full_name='Svc' --group_create=true
-
-``--name=value`` and bare ``name=value`` are interchangeable there. The
-separator is what makes this unambiguous: the valid field names are only known
-after the method name is parsed, so arbitrary top-level ``--flags`` would
-collide with the global options (a middleware field named ``config`` or
-``parallel`` would be unreachable). Targets come before the separator, as they
-do for ``deploy``.
-
-Fields fill the **last object-typed parameter** -- the payload -- so a method
-taking ``(id, payload)`` still reads its id from ``-p``::
-
-    pytruenas call user.update -p 1 nas1 -- --full_name='New name'
-
-Field names, types, defaults and enum values come from the cached API
-definition; ``pytruenas help <method>`` prints them.
-
-Any ordering of ``-p`` relative to ``method``/the trailing targets now parses,
-including between them (``pytruenas call method -p '{"a": 1}' nas1``) -- as of
-duho >=0.5.1, whose flag-between-positionals reorder fix extends to a module
-command's subparser (this one); 0.5.0 alone only covered duho's own
-declarative ``_subcommands_`` tree. Earlier duho versions required ``-p``
-before ``method`` or after the targets; see the duho finding
-``2026-07-24_module_command_subparsers_bypass_positional_reorder.md`` for the
-history if this regresses.
+Parameters are JSON values given with -p (repeatable); a value that is not
+JSON is sent as a string. For a method that takes an object, give its fields
+after a literal --, as --name=value or name=value: each is typed from the
+method's schema (`pytruenas help METHOD` lists them) and fills the last object
+parameter, so `call user.update -p 1 nas1 -- --full_name=x` still takes its id
+from -p. Targets go before the --.
 """
 
 from __future__ import annotations
@@ -46,7 +18,9 @@ from pytruenas import TrueNASClient
 from pytruenas.utils import apihelp, fields as _fields
 from pytruenas.utils.cmd import PyTrueNASArgs, emit_json, json_value
 
-#: The method's fields come after `--` (see the module docstring).
+# Fields come after a literal `--` because their names are only known once the
+# method is parsed: as top-level options they would collide with the global
+# ones (a field named `config` or `parallel` would be unreachable).
 _allow_passthrough_ = True
 
 

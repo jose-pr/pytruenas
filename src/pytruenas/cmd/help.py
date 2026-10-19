@@ -1,33 +1,11 @@
-"""CLI-style help for a middleware method, read from the API definition.
+"""Describe a middleware method, a namespace, or every namespace (`all`).
 
-``pytruenas help user.create nas1`` prints what the method takes: every field
-with its type, whether it is required, its default, and the values an enum
-allows -- in the same spelling ``call`` accepts them::
-
-    pytruenas help user.create nas1          # one method
-    pytruenas help user nas1                 # the methods of a namespace
-    pytruenas help all nas1                  # every namespace, with counts
-
-The source is the **API itself**, per namespace: ``core.get_services`` and
-``core.get_methods(<service>)`` declare no roles and need no command access, so
-this works for an API-key account with no shell, no SSH and no web shell -- and
-one namespace is a small answer (13 methods / 100 KB for ``user`` on 26.0)
-rather than the 24 MB the whole definition weighs. Answers are cached per host,
-version and service.
-
-``--dump`` reads the full ``middlewared --dump-api`` definition instead. That
-needs command access on the target and is only necessary to describe an *older*
-API version (``--api-version``), which the live API cannot report.
-
-Either way the source is the definition, not generated ``.pyi`` stubs:
-descriptions, defaults, enum values and required-ness exist only in the
-definition, and stubs cannot carry them.
-
-``NAME`` is required and comes first, before the targets -- ``query``'s
-namespace works the same way. It has to be required: made optional, argparse
-gives the lone token of ``pytruenas help nas1`` to ``NAME`` and leaves no
-target, so the index form could only ever run against the local socket. ``all``
-(or ``.``) is therefore the spelling for "list what there is".
+`pytruenas help user.create nas1` prints each field with its type, whether it
+is required, its default and the values an enum allows, spelled the way `call`
+accepts them. The definition is read from the appliance one namespace at a
+time, which needs no shell access and no special role, and is cached per host
+and version. --dump reads the whole `middlewared --dump-api` definition
+instead, which needs command access and is only required for --api-version.
 """
 
 from __future__ import annotations
@@ -39,6 +17,13 @@ from duho import Arg
 from pytruenas import TrueNASClient
 from pytruenas.utils import apicache, apihelp
 from pytruenas.utils.cmd import PyTrueNASArgs, emit, emit_json
+
+# The source is the API definition, never generated `.pyi` stubs: descriptions,
+# defaults, enum values and required-ness exist only in the definition.
+# `core.get_services` and `core.get_methods(<service>)` declare no roles, so the
+# default path works for an API-key account with no shell; one namespace is a
+# small answer (13 methods / 100 KB for `user` on 26.0) against 24 MB for the
+# whole dump.
 
 
 class Args(PyTrueNASArgs):

@@ -1,51 +1,28 @@
-"""Install pytruenas onto a target so it can run there, then optionally run it.
+"""Install pytruenas (or the package built on it) on a target, then run it there.
 
-TrueNAS has a read-only root and no ``pip``, so the usual "install it on the
-box" answer does not apply. :func:`hostctl.deploy.deploy` bootstraps instead:
-it asks the target what it already has, bundles only the difference, and
-copies that over, atomically and only when the digest changed. TrueNAS 26.0
-already ships ``requests``, ``websocket-client``, ``pyyaml``, ``asyncssh``,
-``jinja2`` and ``packaging``, so the bundle is a few pure-Python packages.
-
-This module is the policy around it: what to deploy (pytruenas, or the
-package that depends on it), where (a persistent dataset), the ``.pyz`` name,
-and running the result.
-
-Two layouts, ``--mode``:
-
-* ``pyz`` (default) -- one executable zipapp. A single file to copy, verify and
-  replace, which makes it the better default for "just make the command work".
-* ``dir`` -- an unpacked tree, for when the deployment needs to be *readable*
-  on the target: editable in place, greppable, and able to carry extra data or
-  templates alongside the code.
-
-Orthogonal to ``--mode`` is ``--source``, which decides where the bundled
-CONTENT comes from:
-
-* ``installed`` (default) -- the dependency closure this environment has
-  installed, minus what the target already has.
-* ``repo`` -- a repo working tree as-is (``--repo-root``, default the current
-  directory), filtered by whichever of ``.gitignore``/``.ignore``/
-  ``.bundleignore`` exist (``--ignore-file`` narrows the selection,
-  ``--ignore-pattern`` adds more patterns). Its own dependencies are not
-  vendored; ``--include``/``--exclude`` only adjust the dependency names
-  LOGGED as a heads-up. Only ``--mode dir`` supports it: a zipapp needs its
-  package at the archive root, which a ``src/``-layout copy does not have.
-
-Everything after ``--`` is passed to the deployed copy and run there, so a
-single invocation can install and use it::
-
-    pytruenas deploy nas1                      # install only
-    pytruenas deploy nas1 -- query user        # install, then run remotely
-    pytruenas deploy --mode dir nas1 -- call system.info
-    pytruenas deploy --source repo --mode dir nas1 -- call system.info
-
-The default destination is under ``/var/db/system``. That is deliberate and was
-verified on a live appliance: ``/var/db/system`` is the mountpoint of the
-``<pool>/.system`` dataset on a *data* pool, so it survives an update, whereas
-``/var/db`` itself lives in the boot environment
-(``boot-pool/ROOT/<version>/var``) and is replaced by one.
+TrueNAS has a read-only root and no pip, so only what the target lacks is
+bundled, and it is installed under /var/db/system, which survives an update.
+--mode pyz (default) installs one zipapp; --mode dir an unpacked tree.
+--source repo (with --mode dir) copies a working tree instead of the installed
+packages. Anything after -- runs on the target once installed, e.g.
+`pytruenas deploy nas1 -- query user`.
 """
+
+# hostctl.deploy.deploy does the bundling: it asks the target what it already
+# has and copies the difference, atomically and only when the digest changed.
+# TrueNAS 26.0 already ships requests, websocket-client, pyyaml, asyncssh,
+# jinja2 and packaging, so the bundle is a few pure-Python packages. This module
+# is the policy around it: what to deploy, where, the .pyz name, and running it.
+#
+# --mode pyz is one file to copy, verify and replace; --mode dir is readable on
+# the target (editable in place, greppable, can carry data alongside). --source
+# repo needs --mode dir: a zipapp needs its package at the archive root, which a
+# src/-layout copy does not have. Its own dependencies are not vendored;
+# --include/--exclude only adjust the names it logs as a heads-up.
+#
+# /var/db/system is the mountpoint of the <pool>/.system dataset on a data pool,
+# so it survives an update; /var/db itself lives in the boot environment
+# (boot-pool/ROOT/<version>/var) and is replaced by one.
 
 from __future__ import annotations
 
