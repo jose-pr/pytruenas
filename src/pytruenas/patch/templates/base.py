@@ -8,6 +8,7 @@ same template be applied to a remote file, a systemd unit, or a test double.
 from __future__ import annotations
 
 import logging as _logging
+import re as _re
 import typing as _ty
 
 __all__ = [
@@ -77,9 +78,12 @@ class BasicTemplate(TextTemplate):
 def render_basic_template(template: str, context: "object | dict | None") -> str:
     """Substitute ``%{name}`` / ``%{NAME}`` placeholders from ``context``.
 
-    ``context`` may be a mapping or any object with a ``__dict__``. Both the
-    given spelling and its upper-cased form are replaced, so a template can use
-    ``%{PORT}`` against a ``port`` attribute without the caller restating it.
+    ``context`` may be a mapping or any object with a ``__dict__``. A
+    placeholder matches a name as given or its upper-cased form, so a template
+    can use ``%{PORT}`` against a ``port`` attribute without the caller
+    restating it; an exact match wins. Substitution is one pass: a value that
+    itself contains ``%{...}`` is inserted as is, and a placeholder naming
+    nothing in ``context`` is left untouched.
 
     A ``None`` context, or an object without attributes, leaves the template
     untouched rather than raising -- rendering a template with nothing to
@@ -92,10 +96,20 @@ def render_basic_template(template: str, context: "object | dict | None") -> str
             context = vars(context)
         except TypeError:
             return template
+    values: "dict[str, str]" = {}
     for name, value in context.items():
-        template = template.replace(f"%{{{name.upper()}}}", str(value))
-        template = template.replace(f"%{{{name}}}", str(value))
-    return template
+        values.setdefault(str(name).upper(), str(value))
+    for name, value in context.items():
+        values[str(name)] = str(value)
+
+    def lookup(match: "_re.Match[str]") -> str:
+        return values.get(match.group(1), match.group(0))
+
+    return _PLACEHOLDER.sub(lookup, template)
+
+
+#: ``%{name}``: any run of characters other than braces.
+_PLACEHOLDER = _re.compile(r"%\{([^{}]+)\}")
 
 
 if _ty.TYPE_CHECKING:  # pragma: no cover - typing only

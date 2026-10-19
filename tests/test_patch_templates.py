@@ -986,3 +986,18 @@ def test_a_baseline_without_a_record_keeps_its_old_meaning():
     assert target.read() == b"stock\n"
     assert target.revert() is True
     assert store == {"/etc/c.conf": b"stock\n"}
+
+
+def test_a_substituted_value_is_not_substituted_again():
+    """One pass: the result does not depend on the order of the context."""
+    assert render_basic_template("%{A}", {"a": "%{B}", "b": "x"}) == "%{B}"
+    assert render_basic_template("%{A}", {"b": "x", "a": "%{B}"}) == "%{B}"
+
+
+def test_an_exact_name_wins_over_an_upper_cased_one():
+    assert render_basic_template("%{PORT}", {"port": "1", "PORT": "2"}) == "2"
+    assert render_basic_template("%{PORT}", {"PORT": "2", "port": "1"}) == "2"
+
+
+def test_an_unknown_placeholder_is_left_as_it_is():
+    assert render_basic_template("%{X} %{y}", {"y": 1}) == "%{X} 1"
