@@ -104,3 +104,25 @@ def test_an_implicit_config_cannot_inject_command_sources(
     # And naming it through the environment counts as asking for it.
     monkeypatch.setenv("PYTRUENAS_CONFIG", str(tmp_path / "given.yaml"))
     assert _args()._config_is_implicit_() is False
+
+
+def test_the_app_root_refuses_an_implicit_config_s_command_sources(
+    tmp_path, monkeypatch, caplog
+):
+    """The check read the default off the instance's own class, which is the
+    app root (a subclass) on a real run, so it never saw one and the implicit
+    file's commandspath was imported after all."""
+    pytest.importorskip("yaml")
+    monkeypatch.delenv("PYTRUENAS_CONFIG", raising=False)
+    monkeypatch.delenv("PYTRUENAS_CFG", raising=False)
+    monkeypatch.delenv("PYTRUENAS_PATH", raising=False)
+    (tmp_path / "mycmds").mkdir()
+    (tmp_path / "mycmds" / "planted.py").write_text(
+        "def run(client, args, logger):\n    return 0\n"
+    )
+    (tmp_path / "pytruenas.yaml").write_text("commandspath: [mycmds]\n")
+    monkeypatch.chdir(tmp_path)
+    with caplog.at_level(logging.WARNING):
+        names = {main.command_name(c) for c in main._discover(["query", "user"])}
+    assert "planted" not in names
+    assert "ignoring commandspath" in caplog.text

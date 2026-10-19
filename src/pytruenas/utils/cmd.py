@@ -303,7 +303,16 @@ class PyTrueNASArgs(LoggingArgs):
         """
         if ENV.get("CONFIG") or ENV.get("CFG"):
             return False
-        default = type(self).__dict__.get("config", None)
+        # Through the MRO: the parsed instance is the app root, a subclass that
+        # does not redeclare the field.
+        default = next(
+            (
+                k.__dict__["config"]
+                for k in type(self).__mro__
+                if "config" in k.__dict__
+            ),
+            None,
+        )
         if default is None:  # pragma: no cover - the field always has a default
             return False
         return _Path(self.config) == _Path(default)
