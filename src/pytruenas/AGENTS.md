@@ -9,11 +9,41 @@ project overview and CLI usage, see <https://github.com/jose-pr/pytruenas> and
 ## Package root (`pytruenas`)
 
 `__all__ = ["Namespace", "TrueNASClient", "TrueNASHost", "TrueNASConfig",
-"Credentials", "Event", "Subscription", "TrueNASWSConnection", "__version__"]`
+"Credentials", "LocalAuth", "ApiKeyAuth", "TokenAuth", "BasicAuth", "Event",
+"Subscription", "TrueNASWSConnection", "__version__", "TrueNASError",
+"ClientException", "ValidationErrors", "CallTimeout", "ConnectionClosed",
+"JobFailed", "AuthenticationError"]`
+
+Each name is defined in the module named in its section below and imported
+here; `redact_call_args` (from `auth`) is importable from the root too, outside
+`__all__`.
 
 - **`__version__: str`** — resolved from installed package metadata
   (`importlib.metadata`); `"0.0.0.dev0"` when run from a bare checkout with the
   package not installed.
+
+## Errors (`pytruenas.exceptions`)
+
+- **`TrueNASError(Exception)`** — the base of every error pytruenas raises at
+  run time. `except pytruenas.TrueNASError` catches all of these:
+
+  | class (module) | also a | raised when |
+  | --- | --- | --- |
+  | `ClientException` (`connection`) | — | the middleware failed a call (`.errno`, `.trace`, `.extra`) |
+  | `ValidationErrors` (`connection`) | `ValueError` | the server rejected the arguments, per field |
+  | `CallTimeout` (`connection`) | `TimeoutError` | no answer within the timeout |
+  | `ConnectionClosed` (`connection`) | `ConnectionError` | the connection dropped before the answer |
+  | `JobFailed` (`connection`) | — | a middleware job ended `FAILED`/`ABORTED` |
+  | `AuthenticationError` (`auth`) | — | a login was refused |
+
+  The four `connection` subclasses are also `ClientException`s. A caller's
+  mistake (an unknown keyword, a malformed target) is a plain
+  `TypeError`/`ValueError`, not a `TrueNASError`. A failure before the
+  websocket is open (a refused port, a TLS or HTTP error during the handshake)
+  is raised by the socket or `websocket-client` as it is.
+- **Gotcha:** `CallTimeout` and `ConnectionClosed` are `OSError`s, so
+  `except OSError` catches them, and pathlib-style `exists()`/`is_dir()`/
+  `is_file()` read them as "not there", as they read any `OSError`.
 
 ## `TrueNASClient` (`pytruenas.host`)
 
@@ -28,7 +58,8 @@ shell=None, known_hosts=(), logger=None, autologin=True,
 version="current", executor=None, path=None, ssh=None, ...)`
 
 - **`config`** (positional) — the target: a host, `"host:port"`, or full
-  `scheme://...` URI, or a `TrueNASConfig`. There is no `target=` keyword. `None` /
+  `scheme://...` URI, a socket path (`"/var/run/x.sock"`), or a
+  `TrueNASConfig`. There is no `target=` keyword. `None` /
   omitted / local-only resolves to the local middleware unix socket
   (`ws+unix:///var/run/middleware/middlewared.sock`). A remote target with no
   scheme or path resolves to **TLS and the current API** — `"nas"` means
@@ -95,6 +126,11 @@ version="current", executor=None, path=None, ssh=None, ...)`
   provider table below.
 - **`version`** — API path used when the target carries none (default
   `"current"`, i.e. `/api/current`).
+- **Other keywords** — hostctl's `PosixHost` options (`info=`,
+  `initializer=`, `executor_providers=`, `path_providers=`). The port, scheme
+  and API path are spelled in the target string, not as keywords: any other
+  keyword raises `ValueError: unknown credential argument: 'NAME'` listing the
+  keywords above. Typing overloads list them for an editor.
 
 ### Attributes / properties
 
@@ -213,7 +249,11 @@ version="current", executor=None, path=None, ssh=None, ...)`
   none is given.
 - **`.download(method, *args, filename=None, buffered=False, wait=True,
   **kwargs)`** — call `method` to get a download link/job, fetch it over
-  HTTP(S), and return the bytes (when `wait=True`) or the job id.
+  HTTP(S), and return the bytes (when `wait=True`) or the job id. With
+  `wait=True` the bytes come back only once the job finished: `buffered=True`
+  waits before fetching, otherwise the job streams into the response and is
+  checked after it; a failed job raises `connection.JobFailed` instead of
+  returning a partial body.
   For both, `wait=` may also be a callable: it waits, and is passed to
   `.wait(callback=...)` for progress.
 - **`.subscribe(event, callback=None, *, maxsize=1000) -> connection.Subscription`**
@@ -240,8 +280,10 @@ version="current", executor=None, path=None, ssh=None, ...)`
   keypair via `keychaincredential`, install the public half on `root`'s
   `authorized_keys`, and store the private half on `.config.ssh` as a real
   `SSHConfig.client_keys` (user `root`, since that is where the key went; the
-  port, host alias and proxy come from `~/.ssh/config`, else 22). Returns the
-  private key. Needs **no** optional
+  port, host alias and proxy come from `~/.ssh/config`, else 22). An `ssh=`
+  config you passed with no password or key gets the key on a **copy**
+  (`.config.ssh` is then not your object; yours is unchanged); one with its own
+  credentials is left as it is. Returns the private key. Needs **no** optional
   extra: provisioning runs over the middleware API and opens no SSH
   connection. Passing `private_key=` for a key the host does not already know
   is the exception — the public half is derived locally, which needs
@@ -327,7 +369,10 @@ for the current config, for `host.replace_providers()`.
 `TrueNASConfig` is the `hostctl.host.HostConfig`. It accepts every connection
 string `TrueNASClient` does and normalizes to a `truenas+*` scheme
 (`truenas+auto`, `+ws`, `+wss`, `+unix`); `HostConfig("truenas+wss://nas")`
-works from hostctl's own registry. Constructing one performs **no network
+works from hostctl's own registry. A socket is `truenas+unix:///var/run/x.sock`
+or `truenas+unix://var/run/x.sock` (the same path either way), or a bare
+`"/var/run/x.sock"`; `TrueNASConfig()` with no arguments is the local
+middleware socket. Constructing one performs **no network
 I/O** — the scheme and API path are resolved from the string alone, not in the
 constructor.
 
@@ -355,10 +400,16 @@ than the dunder-safe helpers below raise `AttributeError` normally.
   _filetransfer=False, _timeout=UNSET, **kwds)`** — invoke this namespace's
   middleware method (`self._namespace`, optionally suffixed with `_method`).
   Middleware methods take **positional** parameters: any other keyword raises
-  `TypeError` naming it. (It used to be swallowed, so
-  `client.api.user.query(filters=[...])` sent no filters and returned every
-  row.) `timeout` and the upstream-compatibility names are still accepted, and
-  the `_query`/`_get`/`_update` helpers below take keywords by design.
+  `TypeError` naming it (a dropped `filters=` would query every row).
+  `timeout` and the upstream-compatibility names are accepted, and the
+  `_query`/`_get`/`_update` helpers below take keywords by design.
+  - **`job=True`** — as in the upstream client: wait for the job the method
+    starts (`TrueNASHost.wait`) and return the job's **result**; a failed job
+    raises `connection.JobFailed` (the matching `OSError` with `_ioerror=True`).
+    The wait has no deadline unless `_timeout` is given. A method that does not
+    answer with a job id returns its answer unchanged. `job="RETURN"`,
+    `background`, `callback`, `register_call` and `raise_` are accepted and
+    have no effect (the job id is returned).
   - **`_tries`** — reconnect retries after a dropped connection
     (`ECONNABORTED`); default `1` means up to 2 attempts total. The call
     **always** returns or raises — never silently returns `None` on a
@@ -407,8 +458,7 @@ than the dunder-safe helpers below raise `AttributeError` normally.
 ## `connection` (`pytruenas.connection`)
 
 The synchronous JSON-RPC 2.0 websocket transport backing `TrueNASClient`
-(`client.conn`). All annotations are quoted so the module imports on Python
-3.9.
+(`client.conn`).
 
 - **`TrueNASWSConnection(uri=None, *, verify_ssl=True, call_timeout=CALL_TIMEOUT,
   connect_timeout=CONNECT_TIMEOUT, py_exceptions=False, logger=None)`** — opens the
@@ -421,7 +471,8 @@ The synchronous JSON-RPC 2.0 websocket transport backing `TrueNASClient`
     request and block for the matching response. `timeout=None` waits
     **indefinitely**; the default sentinel uses `call_timeout`. Unknown
     kwargs in `{"job", "background", "callback", "register_call", "raise_"}`
-    are silently accepted (upstream-client compatibility); any other unknown
+    are silently accepted here (upstream-client compatibility; a job id is
+    returned — `Namespace` is what honours `job=True`); any other unknown
     kwarg is logged at debug level. Raises `ValidationErrors`/
     `ClientException` on a server error, `CallTimeout` on timeout,
     `ConnectionClosed` (`errno=ECONNABORTED`) if the connection dropped,
@@ -458,18 +509,21 @@ The synchronous JSON-RPC 2.0 websocket transport backing `TrueNASClient`
   via the `CALL_TIMEOUT` env var, read at import time).
 - **`CONNECT_TIMEOUT`** — default timeout in seconds (30) for opening a
   connection. It is not the reader's timeout: an idle connection stays open.
-- **`ClientException(error, errno=None, trace=None, extra=None)`** — base
-  error for any call/connection failure; `errno` carries a POSIX errno when
-  the middleware's `[ERRNO] message` prefix maps to one.
-- **`ValidationErrors(errors)`** (`ClientException` subclass) — per-field
-  validation errors; `.errors` is `list[(attribute, errmsg, errcode)]`.
+- **`ClientException(error, errno=None, trace=None, extra=None)`**
+  (`TrueNASError` subclass) — base error for any call/connection failure;
+  `errno` carries a POSIX errno when the middleware's `[ERRNO] message` prefix
+  maps to one.
+- **`ValidationErrors(errors)`** (`ClientException` and `ValueError`
+  subclass) — per-field validation errors; `.errors` is
+  `list[(attribute, errmsg, errcode)]`.
 - **`JobFailed(job)`** (`ClientException` subclass) — raised by
   `TrueNASHost.wait` for a `FAILED`/`ABORTED` job; `.job` is the
   `core.get_jobs` record, `.errno` the middleware's errno when it reports one.
-- **`CallTimeout()`** (`ClientException` subclass) — raised when a call
-  exceeds its timeout.
-- **`ConnectionClosed(sent)`** (`ClientException` subclass, `errno` is
-  `ECONNABORTED`) — the connection closed before the response arrived.
+- **`CallTimeout()`** (`ClientException` and `TimeoutError` subclass) —
+  raised when a call exceeds its timeout.
+- **`ConnectionClosed(sent)`** (`ClientException` and `ConnectionError`
+  subclass, `errno` is `ECONNABORTED`) — the connection closed before the
+  response arrived.
   **`.sent`** is `False` when the request never reached the socket (safe to
   repeat: `Namespace` retries exactly these) and `True` when the server may
   have run it — a create, a delete, a job start — so only the caller can
@@ -507,7 +561,8 @@ The synchronous JSON-RPC 2.0 websocket transport backing `TrueNASClient`
   `otp_provider()`), returns the `SUCCESS` response dict, raises
   `AuthenticationError` otherwise. Falls back to legacy `.login()` for a
   credential with no login_ex form.
-- **`AuthenticationError(response_type, response, method="login_ex")`** —
+- **`AuthenticationError(response_type, response, method="login_ex")`**
+  (`TrueNASError` subclass) —
   raised by `login_ex` on a non-`SUCCESS` response and by legacy `login` on a
   `False` answer; `.response_type` is the server discriminator, `.response`
   the full dict; the message names `method`.
@@ -532,14 +587,25 @@ builds the individual path types (below).
   `pathapi-uri`; scheme `truenas+ws`) backed entirely by the middleware
   `filesystem.*` API
   via a `TnasWsBackend(client)`. Implements stat/listdir/open/read/write/
-  mkdir/chmod/chown; `unlink`/`rmdir` shell out (`rm -f` / `rmdir`) because
-  `filesystem.*` has no delete op. Built from a bare URI (no backend) raises
+  mkdir/chmod/chown; `unlink`/`rmdir` shell out (`rm --` / `rmdir --`) because
+  `filesystem.*` has no delete op, and raise what pathlib would:
+  `FileNotFoundError` (unless `missing_ok`), `IsADirectoryError`,
+  `NotADirectoryError`, `OSError(ENOTEMPTY)`, else the errno `rm` printed
+  (`EACCES`, `EPERM`, `EROFS`, `EBUSY`) or `EIO`. `chmod`/`chown` are
+  middleware jobs: they return once the job has finished and raise `OSError`
+  when it failed (`EIO` when the middleware names no errno). `read_bytes` (a
+  `filesystem.get` download) raises `OSError` when the job behind the
+  download failed. `stat()` follows a symlink (`filesystem.stat` describes the
+  link and names its target in `realpath`); `stat(follow_symlinks=False)` and
+  `is_symlink()` describe the link. A stat carries `st_mode`, `st_size`,
+  `st_uid`, `st_gid` and the times. Built from a bare URI (no backend) raises
   `RuntimeError` on first use — construct one with
   `pytruenas.fs.path(client, ..., backend="ws")`. `client.path(...)` returns
   hostctl's `CompositePosixPath`, whose websocket leg is a `TnasWsPath`.
   Listing calls `filesystem.listdir` with an explicit `select` projection
-  (`name` for `_listdir`; `name`/`type`/`size`/`mode` for `_scandir`, which
-  seeds each child's stat in the same round trip). That is load-bearing, not
+  (`name` for `_listdir`; `name`/`type`/`size`/`mode`/`uid`/`gid` for
+  `_scandir`, which seeds each child's stat in the same round trip). That is
+  load-bearing, not
   an optimisation: an unrestricted `listdir` computes the ZFS-only `zfs_attrs`
   column and fails with `EFAULT ... ZFS attributes are not supported.` on any
   non-ZFS path (`/tmp`, `/dev`, `/proc`, ...), so widening the projection to

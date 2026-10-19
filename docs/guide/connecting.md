@@ -8,6 +8,7 @@ middleware. The transport is chosen from `target`:
 | `"nas.example.com"` | `wss://nas.example.com/api/current` (TLS) |
 | `"wss://nas/api/current"` | explicit TLS websocket |
 | `"ws+unix:///var/run/middleware/middlewared.sock"` | local unix socket |
+| `"/var/run/middleware/middlewared.sock"` | the same socket, as a path |
 | `None` / omitted | the local unix socket |
 
 ```python

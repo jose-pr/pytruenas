@@ -164,3 +164,19 @@ ignored, which turns a silent misconfiguration into an immediate error:
 TrueNASClient("wss://nas", passwrd="s3cret")   # ValueError: unknown credential argument
 TrueNASClient("wss://nas", executor=["shh"])   # ValueError: unknown executor provider
 ```
+
+## Wait for a job, and catch what failed
+
+`job=True` waits for the job a call starts, and `TrueNASError` is the base of
+every run-time error, so a script can tell "TrueNAS said no" from a bug:
+
+```python
+from pytruenas import JobFailed, TrueNASError
+
+try:
+    nas.api.pool.dataset.delete("tank/scratch", job=True)
+except JobFailed as error:
+    print("delete failed:", error.job["error"])
+except TrueNASError as error:
+    print("call failed:", error)
+```

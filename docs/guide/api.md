@@ -66,6 +66,46 @@ for job in client.job_updates(job_id):      # same updates, as a loop
 `upload()`, `download()` and the `_create`/`_update`/`_upsert` helpers accept
 the same callable as `wait=`.
 
+`job=True` on any call does the same, as it does in the upstream TrueNAS
+client: the call waits for the job it starts and returns the job's result.
+
+```python
+client.api.pool.dataset.delete("tank/old", job=True)   # returns once deleted
+```
+
+Without it the call returns the job id at once. The wait has no deadline unless
+`_timeout=` is given.
+
+## Errors
+
+Every error pytruenas raises at run time is a `pytruenas.TrueNASError`, and the
+common ones also carry the builtin you would catch anyway:
+
+| Error | Also a | Raised when |
+| --- | --- | --- |
+| `ClientException` | — | the middleware failed the call (`.errno`, `.extra`) |
+| `ValidationErrors` | `ValueError` | the server rejected the arguments, per field |
+| `CallTimeout` | `TimeoutError` | no answer within the timeout |
+| `ConnectionClosed` | `ConnectionError` | the connection dropped before the answer |
+| `JobFailed` | — | a job ended `FAILED` or `ABORTED` |
+| `AuthenticationError` | — | a login was refused |
+
+```python
+from pytruenas import TrueNASError, ValidationErrors
+
+try:
+    client.api.user._create(username="svc")
+except ValidationErrors as error:
+    print(error.errors)            # [(attribute, message, errno), ...]
+except TrueNASError as error:
+    print("TrueNAS refused:", error)
+```
+
+A mistake in the call itself — an unknown keyword, a malformed target — is a
+plain `TypeError` or `ValueError`. Because `CallTimeout` and `ConnectionClosed`
+are `OSError`s, a path's `exists()` reads them as "not there", as it does any
+`OSError`.
+
 ## Query filters
 
 `pytruenas.utils.query` provides operator wrappers so kwargs map to middleware

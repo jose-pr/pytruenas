@@ -88,6 +88,12 @@ need the `ssh` extra and a reachable SSH leg. Without one they raise
 `resolve()` replaces every symlink in the path over SFTP. The middleware has no
 `realpath`, so on a host with no SFTP leg it returns the path unchanged.
 
+On the `tnasws` leg the operations keep pathlib's contract: `chmod()` and
+`chown()` return once the middleware job behind them has finished and raise
+`OSError` when it failed; `unlink()` and `rmdir()` raise `FileNotFoundError`,
+`IsADirectoryError`, `NotADirectoryError` or `OSError(ENOTEMPTY)` as a local
+path would; `stat()` follows a symlink and `is_symlink()` sees the link itself.
+
 `pytruenas.fs.symlink_to()` replaces a conflicting entry first — `force=` is a
 bool, a file-type string, or a set of `"file"`/`"link"`/`"directory"`:
 
