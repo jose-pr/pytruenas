@@ -77,6 +77,67 @@ def test_mkdir_and_chmod():
     assert (sent["path"], sent["mode"]) == ("/d", "644")
 
 
+class _JobMiddleware:
+    """A faked `conn` where `filesystem.setperm`/`chown` start job 77."""
+
+    def __init__(self, state="SUCCESS", error="[EPERM] setperm failed", errno=None):
+        self.wire = []
+        self.job = {
+            "id": 77,
+            "state": state,
+            "result": None,
+            "error": error,
+            "exc_info": {"errno": errno},
+            "progress": {},
+        }
+        self._closed = type("Open", (), {"is_set": lambda self: False})()
+
+    def call(self, method, *params, **kwds):
+        self.wire.append(method)
+        if method == "core.get_jobs":
+            return [self.job]
+        return 77
+
+
+def _job_path(middleware):
+    from pytruenas import TrueNASHost
+
+    host = TrueNASHost("wss://nas.example", autologin=False)
+    host._conn = middleware
+    return fs_path(host, "/mnt/tank/f", backend="ws")
+
+
+@pytest.mark.parametrize(
+    "change",
+    [lambda p: p.chmod(0o600), lambda p: p.chown(0, 0)],
+    ids=["chmod", "chown"],
+)
+def test_a_permission_change_returns_once_its_job_is_done(change):
+    middleware = _JobMiddleware()
+    change(_job_path(middleware))
+    assert middleware.wire[-1] == "core.get_jobs"
+
+
+@pytest.mark.parametrize(
+    "change",
+    [lambda p: p.chmod(0o600), lambda p: p.chown(0, 0)],
+    ids=["chmod", "chown"],
+)
+def test_a_failed_permission_job_raises_the_matching_oserror(change):
+    with pytest.raises(PermissionError):
+        change(_job_path(_JobMiddleware(state="FAILED")))
+
+
+def test_a_failed_job_without_an_errno_name_is_still_an_oserror():
+    import errno
+
+    middleware = _JobMiddleware(state="FAILED", error="ACL is in the way", errno=None)
+    with pytest.raises(OSError) as error:
+        _job_path(middleware).chmod(0o600)
+    assert error.value.errno == errno.EIO
+    assert error.value.filename == "/mnt/tank/f"
+
+
 def test_iterdir_uses_listdir():
     client = _client(
         listdir=[

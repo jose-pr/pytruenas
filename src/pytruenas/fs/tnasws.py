@@ -15,6 +15,7 @@ backend raises a clear error on the first I/O call.
 
 from __future__ import annotations
 
+import errno as _errno
 import io as _io
 import stat as _stat
 import typing as _ty
@@ -22,6 +23,8 @@ import typing as _ty
 from pathapi import FileStat as _FileStat
 from pathapi.providers import CommitOnClose as _CommitOnClose
 from uripath import URIPath as _URIPath
+
+from ..connection import ClientException as _ClientException
 
 if _ty.TYPE_CHECKING:
     from .. import TrueNASClient
@@ -197,9 +200,9 @@ class TnasWsPath(_URIPath):
 
     def chmod(self, mode, *, follow_symlinks=True):
         # filesystem.setperm takes an octal-ish mode string.
-        self._fs.setperm(
+        self._job(
+            self._fs.setperm,
             {"path": self.path, "mode": oct(mode)[2:], "options": {"recursive": False}},
-            _ioerror=True,
         )
 
     def chown(
@@ -217,15 +220,26 @@ class TnasWsPath(_URIPath):
             gid = None
         if not follow_symlinks:
             raise NotImplementedError("chown(follow_symlinks=False)")
-        self._fs.chown(
+        self._job(
+            self._fs.chown,
             {
                 "path": self.path,
                 "uid": uid,
                 "gid": gid,
                 "options": {"recursive": recursive, "traverse": traverse},
             },
-            _ioerror=True,
         )
+
+    def _job(self, method, *params):
+        """Run a ``filesystem.*`` method that is a middleware job, to its end.
+
+        Returns once the change is made; a failed job raises ``OSError`` (the
+        matching subclass when the middleware names an errno).
+        """
+        try:
+            return method(*params, job=True, _ioerror=True)
+        except _ClientException as error:
+            raise _oserror(error, self.path) from error
 
     def unlink(self, missing_ok=False):
         # The middleware has no filesystem.unlink; deletion is not part of the
@@ -237,6 +251,13 @@ class TnasWsPath(_URIPath):
 
     def rmdir(self):
         self.backend.client.run(("rmdir", self.path))
+
+
+def _oserror(error: "_ClientException", path: str) -> OSError:
+    """``error`` as an ``OSError`` about ``path``; one already is, unchanged."""
+    if isinstance(error, OSError):
+        return error
+    return OSError(error.errno or _errno.EIO, str(error), path)
 
 
 def _stat_from_info(info: "dict") -> "_FileStat":
