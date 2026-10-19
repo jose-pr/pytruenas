@@ -25,30 +25,41 @@ site; [`CONTRIBUTING.md`](CONTRIBUTING.md) covers the human workflow.
 
 ## Environments
 
-The package targets **Python 3.9+** and is tested on 3.9, 3.13 and 3.14 across
-Linux, Windows and macOS. Dependencies are installed from PyPI per
-`pyproject.toml`; nothing is vendored.
+The package targets **Python 3.9+**. CI tests every version from 3.9 to 3.14
+on Linux, and 3.9 and 3.14 on Windows and macOS. Dependencies are installed
+from PyPI per `pyproject.toml`; nothing is vendored.
 
-```bash
-python -m venv .venv
-pip install -e ".[dev,config,ssh,codegen,docs,repo]"
+One venv per interpreter, named `.venv/<python>-<os>-<arch>` after the
+interpreter it holds. On Windows ARM64:
+
+```sh
+py -V:3.14-arm64 -m venv .venv/3.14-nt-arm64
+.venv/3.14-nt-arm64/Scripts/python -m pip install --only-binary=cryptography -e ".[dev,docs]"
+.venv/3.14-nt-arm64/Scripts/python -m pytest -q -rs
 ```
+
+The floor venv is the same with `3.9`. Elsewhere, create the venv with that
+interpreter (`python3.14 -m venv .venv/3.14-posix-x86_64`) and use `bin/`
+where Windows has `Scripts/`. This is the recipe the README's Development
+section and `CONTRIBUTING.md` give.
 
 Two things about the extras are easy to get wrong:
 
-- A test whose extra is missing **skips**. A partial install still prints
-  green, so install everything before judging a change.
-- On Windows ARM64, `cryptography` has no source build that works; install with
-  `--only-binary=cryptography`.
+- `dev` carries every extra that has tests (`config`, `ssh`, `codegen`). A
+  test whose extra is missing **skips**, so a partial install still prints
+  green; `-rs` lists the skips.
+- On Windows ARM64, recent `cryptography` releases have no wheel and the
+  source build fails; `--only-binary=cryptography` picks the newest release
+  that has one. It changes nothing where a wheel exists.
 
 ## Test, format, docs
 
 ```bash
-python -m pytest -q                      # the suite; -rs to see skip reasons
+python -m pytest -q -rs                  # the suite; -rs lists skip reasons
 python -m pytest -q --cov=pytruenas      # with coverage
-python -m black src tests benchmarks examples
+python -m black src tests benchmarks examples   # CI runs it with --check
 python -m mkdocs build --strict          # from the project venv, not a global one
-python benchmarks/run.py                 # --save writes benchmarks/results/
+python benchmarks/run.py                 # --save writes benchmarks/results/<name>.json
 ```
 
 `mkdocs` must run from the project's own environment: `mkdocstrings` imports

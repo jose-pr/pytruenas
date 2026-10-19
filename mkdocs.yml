@@ -1,5 +1,5 @@
 site_name: pytruenas
-site_description: A lean TrueNAS middleware (JSON-RPC over websocket) client and a pathlib interface for remote TrueNAS filesystems.
+site_description: A typed, Pythonic client and CLI for the TrueNAS middleware API.
 site_url: https://jose-pr.github.io/pytruenas/
 repo_url: https://github.com/jose-pr/pytruenas
 repo_name: jose-pr/pytruenas

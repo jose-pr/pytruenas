@@ -30,8 +30,9 @@ attribute-style namespace.
   [hostctl](https://github.com/jose-pr/hostctl).
 - **Typings on demand.** `generate-typings` produces `.pyi` stubs for the whole
   API so editors and type checkers understand every call.
-- **Python 3.9+**, tested on 3.9 and 3.13 across Linux, macOS and Windows, and
-  validated live against a real TrueNAS 26.0 host.
+- **Python 3.9+**, tested on every version from 3.9 to 3.14 on Linux and on 3.9
+  and 3.14 on macOS and Windows, and validated live against a real TrueNAS
+  26.0 host.
 
 ## Install
 

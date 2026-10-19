@@ -1,32 +1,42 @@
 # pytruenas
 
-[![PyPI version](https://img.shields.io/pypi/v/pytruenas.svg)](https://pypi.org/project/pytruenas/)
+[![Version](https://img.shields.io/pypi/v/pytruenas.svg)](https://pypi.org/project/pytruenas/)
 [![Python versions](https://img.shields.io/pypi/pyversions/pytruenas.svg)](https://pypi.org/project/pytruenas/)
-[![Documentation](https://img.shields.io/badge/docs-jose--pr.github.io%2Fpytruenas-blue.svg)](https://jose-pr.github.io/pytruenas/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/jose-pr/pytruenas/blob/main/LICENSE)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/jose-pr/pytruenas/blob/main/LICENSE)
+[![Docs](https://img.shields.io/badge/docs-latest-blue.svg)](https://jose-pr.github.io/pytruenas/)
+[![CI](https://img.shields.io/github/actions/workflow/status/jose-pr/pytruenas/test.yml)](https://github.com/jose-pr/pytruenas/actions/workflows/test.yml)
 
 A typed, Pythonic client and CLI for the [TrueNAS](https://www.truenas.com/)
-middleware API.
+middleware API. **Every middleware method, attribute-style, over the
+middleware's own JSON-RPC 2.0 websocket — from a remote host or on the NAS
+itself — with commands and files over whichever transport the target
+actually offers.** Documentation: <https://jose-pr.github.io/pytruenas/>.
 
-`pytruenas` speaks the middleware's JSON-RPC 2.0 websocket protocol directly —
-over `wss://`/`ws://` to a remote host, or over the local unix socket
-(`ws+unix://`) when running on the NAS itself. It exposes the whole API surface
-through an attribute-style namespace, adds convenience helpers for the common
-create/update/upsert patterns, a remote-filesystem abstraction, an optional
-typings generator, and a small CLI for scripting host configuration.
+## Features
 
-Running commands and reading files is delegated to
-[hostctl](https://github.com/jose-pr/hostctl): a client is a `hostctl` host, so
-`run()` and `path()` pick whichever transport a target actually offers rather
-than assuming one.
+- **The whole API, attribute-style.** `client.api.pool.dataset.query(...)` is
+  the middleware method `pool.dataset.query`; no per-endpoint wrappers.
+- **Create-or-update helpers.** `_get`/`_query`/`_create`/`_update`/`_upsert`
+  diff against the current record and send only what differs.
+- **Local and remote.** `wss://`/`ws://` to a remote host with an API key,
+  password or token, or the root-owned unix socket (`ws+unix://`) with no
+  auth on the NAS itself.
+- **Extended JSON.** `datetime`/`date`/`time`/`set`/IP-interface values
+  round-trip through the middleware's wire format.
+- **Commands and files.** `run()` and `path()` come from
+  [hostctl](https://github.com/jose-pr/hostctl): plain `subprocess` on the NAS,
+  SSH, or the web UI's own shell for a host reachable only on the API port;
+  SFTP or the middleware `filesystem.*` API for files.
+- **A CLI for many hosts.** `query`, `call`, `dump-api`, `deploy` and your own
+  command modules, fanned out over host ranges such as `'nas[1-3]'`.
+- **Typings on demand.** `generate-typings` writes `.pyi` stubs for a host's
+  whole API, so editors and type checkers understand every call.
 
-## Install
+## Installation
 
 ```sh
 pip install pytruenas
 ```
-
-Optional extras:
 
 | Extra | Enables |
 | ----- | ------- |
@@ -35,7 +45,7 @@ Optional extras:
 | `pytruenas[codegen]` | `generate-typings` command (`jinja2`) |
 | `pytruenas[repo]` | `deploy --source repo`; included in the core install (`hostctl[deploy]`) |
 
-## Quickstart
+## Quick start
 
 ```python
 from pytruenas import TrueNASClient
@@ -107,7 +117,7 @@ A password containing `/`, `?` or `#` must be percent-encoded (`%2F`, `%3F`,
 `%23`); a raw one is refused, because the URL parser would otherwise read the
 rest of it as a host, port and path.
 
-## CLI
+## Command line
 
 ```sh
 pytruenas --help
@@ -125,14 +135,37 @@ may be comma-separated and supports `[A-Z]`/`[0-9]` range expansion (e.g.
 `--parallel N` runs several targets concurrently. Filter `query` with
 `-f/--filter KEY=VALUE` (repeatable).
 
+## API overview
+
+| Module | Purpose |
+| --- | --- |
+| `pytruenas` | `TrueNASClient` (the same class as `TrueNASHost`), `TrueNASConfig`, `Credentials`, `Namespace`, `Event`, `Subscription`, `__version__` |
+| `pytruenas.host` | The client: connection and login, `client.api`, events, and hostctl's `run()` / `path()` |
+| `pytruenas.namespace` | `Namespace`: middleware calls by attribute, and the `_get`/`_query`/`_create`/`_update`/`_upsert` helpers |
+| `pytruenas.connection` | The JSON-RPC 2.0 websocket transport, the extended-JSON codec and the call exceptions |
+| `pytruenas.auth` | Credentials: API key, user and password (with OTP), token, local socket |
+| `pytruenas.fs` | Remote paths over the middleware `filesystem.*` API |
+| `pytruenas.providers`, `pytruenas.webshell` | The transports behind `run()` and `path()`, the web shell among them |
+| `pytruenas.main`, `pytruenas.cmd` | The CLI and its built-in commands |
+| `pytruenas.utils.runpath` | `step` and `default_init` for RunPath flows (numbered step directories) |
+| `pytruenas.patch` | Changing a host beyond what the API exposes: templates, systemd units, the middleware itself |
+| `pytruenas.codegen`, `pytruenas.models` | The typings generator and the API-dump schemas it reads |
+
+Every export, with its signature and contract, is in the API header that ships
+inside the package,
+[`pytruenas/AGENTS.md`](https://github.com/jose-pr/pytruenas/blob/main/src/pytruenas/AGENTS.md),
+and in the [API reference](https://jose-pr.github.io/pytruenas/api/reference/).
+
 ## Running on the appliance
 
 TrueNAS has a read-only root and no `pip`, so `deploy` bootstraps instead,
 through [hostctl](https://pypi.org/project/hostctl/)'s `hostctl.deploy`: it
 asks the target which distributions it already has, bundles only the
-difference, and copies that over. In practice that is five pure-Python packages
-under a megabyte — the appliance already ships `requests`, `websocket-client`,
-`pyyaml`, `asyncssh` and `jinja2`.
+difference, and copies that over. The appliance already ships `requests`,
+`websocket-client`, `pyyaml`, `asyncssh`, `jinja2` and `packaging`, so the
+bundle is pytruenas and its pure-Python dependencies `duho`, `hostctl`,
+`netimps`, `pathapi` and `pathapi-uri`, plus `pathspec` where the target lacks
+it.
 
 ```sh
 pytruenas deploy nas.example.com                 # a single executable .pyz
@@ -177,14 +210,42 @@ pytruenas generate-typings --path truenasapi_typings/current nas.example.com
 ## Development
 
 ```sh
-py -3.14 -m venv .venv/3.14-nt-amd64
-.venv/3.14-nt-amd64/Scripts/python -m pip install -e ".[dev,ssh,config,codegen]"
-.venv/3.14-nt-amd64/Scripts/python -m pytest
+git clone https://github.com/jose-pr/pytruenas.git
+cd pytruenas
+py -V:3.14-arm64 -m venv .venv/3.14-nt-arm64
+.venv/3.14-nt-arm64/Scripts/python -m pip install --only-binary=cryptography -e ".[dev,docs]"
+.venv/3.14-nt-arm64/Scripts/python -m pytest -q -rs
 ```
 
-Supports Python 3.9+. The `run()` tests need a POSIX shell and skip on Windows,
-so verify anything touching command or path dispatch on a real target.
+That is the recipe on Windows ARM64. A venv is named
+`.venv/<python>-<os>-<arch>` after the interpreter it holds: on Linux, for
+example, `python3.14 -m venv .venv/3.14-posix-x86_64`, with `bin/` where
+Windows has `Scripts/`. `--only-binary=cryptography` stops pip from building
+`cryptography` from source, which fails on Windows ARM64, where recent
+releases ship no wheel; on a platform with a wheel it changes nothing.
+
+`dev` carries every extra that has tests. A test whose extra is missing skips,
+so a partial install still prints green: `-rs` lists what skipped. Some
+`run()` tests need a POSIX shell and skip on Windows, so verify anything
+touching command or path dispatch on a real target. Supports Python 3.9+; run
+the suite on 3.9 as well before a release. Formatting, docs and benchmarks:
+[CONTRIBUTING.md](https://github.com/jose-pr/pytruenas/blob/main/CONTRIBUTING.md).
+
+### Releasing
+
+1. Add the `## [x.y.z] - <date>` section to `CHANGELOG.md` and set `version`
+   in `pyproject.toml` (PEP 440: `1.0.0rc1` for the tag `v1.0.0-rc.1`) in the
+   same commit. The release notes are scraped from that section.
+2. Run the suite on 3.9 and 3.14 and `mkdocs build --strict`; pushing a
+   throwaway `ci-*` tag runs the whole test workflow.
+3. Push the `vX.Y.Z` tag. The release workflow tests, tests at the dependency
+   floors, builds, smoke-tests the wheel and gates on the docs build before it
+   creates the GitHub release, uploads to PyPI and deploys the docs. A tag with
+   a `-` (a pre-release) stops at the GitHub release.
+
+Before 1.0, the minor version changes only when the documented API breaks;
+additions and fixes are patch releases.
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+MIT — see [LICENSE](https://github.com/jose-pr/pytruenas/blob/main/LICENSE).
