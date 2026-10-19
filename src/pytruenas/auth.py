@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import typing as _ty
-from .exceptions import TrueNASError
+from .exceptions import TrueNASError as _TrueNASError
 from .utils import io as _ioutils
 
 if _ty.TYPE_CHECKING:
@@ -182,7 +182,7 @@ class _CredentialsMeta(type):
         raise ValueError("Credentials not supported", _mask_kwargs(kwargs))
 
 
-class AuthenticationError(TrueNASError):
+class AuthenticationError(_TrueNASError):
     """A login was refused.
 
     ``response_type`` is the server's discriminator (``AUTH_ERR``/``DENIED``/
@@ -426,3 +426,14 @@ class BasicAuth(Credentials):
             "username": self.username,
             "password": self.password,
         }
+
+
+__all__ = [
+    "Credentials",
+    "LocalAuth",
+    "ApiKeyAuth",
+    "TokenAuth",
+    "BasicAuth",
+    "AuthenticationError",
+    "redact_call_args",
+]

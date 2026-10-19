@@ -463,3 +463,6 @@ class Namespace:
         **__fields,
     ):
         return DbAction.CREATE.execute(self, _q.EXCLUDE, *__opts, **__fields)
+
+
+__all__ = ["Namespace", "DbAction", "ioerror"]

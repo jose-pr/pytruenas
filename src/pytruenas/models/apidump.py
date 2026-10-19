@@ -37,3 +37,13 @@ class Event(_ty.TypedDict):
     roles: list[str]
     doc: str
     schemas: _schema.Schema
+
+
+__all__ = [
+    "Api",
+    "Version",
+    "Method",
+    "MethodSchema",
+    "MethodProperties",
+    "Event",
+]

@@ -1,6 +1,21 @@
+"""A client for the TrueNAS middleware API, and a hostctl host for TrueNAS.
+
+Everything a caller needs is importable from here; see ``__all__``.
+"""
+
+from __future__ import annotations
+
 from duho import logging as _logging  # noqa: F401  (registers the TRACE level)
-from .namespace import Namespace
-from .auth import *
+
+from .auth import (
+    ApiKeyAuth,
+    AuthenticationError,
+    BasicAuth,
+    Credentials,
+    LocalAuth,
+    TokenAuth,
+)
+from .auth import redact_call_args  # noqa: F401  (importable here; not in __all__)
 from .connection import (
     CallTimeout,
     ClientException,
@@ -14,6 +29,7 @@ from .connection import (
 from .exceptions import TrueNASError
 from .host import TrueNASConfig, TrueNASHost
 from .host import TrueNASHost as TrueNASClient
+from .namespace import Namespace
 
 try:
     from importlib.metadata import version as _version, PackageNotFoundError
@@ -31,6 +47,10 @@ __all__ = [
     "TrueNASHost",
     "TrueNASConfig",
     "Credentials",
+    "LocalAuth",
+    "ApiKeyAuth",
+    "TokenAuth",
+    "BasicAuth",
     "Event",
     "Subscription",
     "TrueNASWSConnection",

@@ -339,3 +339,26 @@ TYPES: list[type[BaseType]] = [
 # description: str
 # items: 'list[Parameter]'
 # properties: 'dict[str,Parameter]'
+
+
+__all__ = [
+    "JsonNumber",
+    "JsonValue",
+    "JsonObject",
+    "JsonArray",
+    "Schema",
+    "BaseType",
+    "TypeDeclaration",
+    "AnyOf",
+    "OneOf",
+    "Float",
+    "Null",
+    "Boolean",
+    "Integer",
+    "Number",
+    "String",
+    "Object",
+    "Any",
+    "Array",
+    "TYPES",
+]

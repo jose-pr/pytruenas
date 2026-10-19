@@ -358,3 +358,6 @@ def _stat_from_info(info: "dict") -> "_FileStat":
     result.st_atime = info.get("atime") or 0
     result.st_ctime = info.get("ctime") or 0
     return result
+
+
+__all__ = ["TnasWsPath", "TnasWsBackend"]
