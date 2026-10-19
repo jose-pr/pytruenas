@@ -37,9 +37,11 @@ client: TrueNASClient[Current] = TrueNASClient("nas.example.com", api_key)
 client.api.user.query()   # completed and checked from the stubs
 ```
 
-Optional keys use `NotRequired`, which `typing` only has from Python 3.11, so
-the stubs import it from `typing_extensions` below that. Install it in the
-environment you type-check in if your target is older than 3.11.
+Optional keys use `NotRequired` (and an array that admits no items is
+`list[Never]`), which `typing` only has from Python 3.11, so the stubs import
+them from `typing_extensions` below that. Install it in the environment you
+type-check in if your target is older than 3.11. The output is the same
+whichever Python version runs the generator.
 
 !!! note
     Generated stubs are **not** shipped in the package — they are produced on

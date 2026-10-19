@@ -518,6 +518,23 @@ def _shadows_runtime(declaration: "Method") -> bool:
     return name in _runtime_namespace_attributes()
 
 
+def _empty_arrays(node: object) -> None:
+    """Rewrite ``items: false`` in place, so that the stub names the template's
+    ``_Never`` (``typing`` has ``Never`` only from 3.11) whatever interpreter
+    generates it. With ``prefixItems`` it closes a tuple: any JSON array."""
+    if isinstance(node, dict):
+        if node.get("items") is False:
+            if "prefixItems" in node:
+                del node["items"]
+            else:
+                node["items"] = {"type": "!_Never"}
+        for value in node.values():
+            _empty_arrays(value)
+    elif isinstance(node, list):
+        for value in node:
+            _empty_arrays(value)
+
+
 def _check_inside(root: _P, path: _P) -> None:
     """Refuse a generated path that escapes ``root``.
 
@@ -548,6 +565,7 @@ class Codegen:
         # titles, so a caller generating twice from one dump got different
         # output the second time.
         api = _copy.deepcopy(api)
+        _empty_arrays(api)
         declarations: list[PyDeclaration] = []
         # The version string (e.g. ``v26.0.0``) is ONE opaque root segment, not a
         # dotted qualname -- collapse its dots so it does not split into three

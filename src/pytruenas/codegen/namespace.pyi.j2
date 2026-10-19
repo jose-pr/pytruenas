@@ -5,13 +5,17 @@ from pytruenas.models import jsonschema as _jsonschema
 import sys
 import typing as _ty
 
-# NotRequired and Unpack are typing members only from 3.11; this project's
-# floor -- and so a consumer's checking target -- is 3.9. `sys` is not
+# Never, NotRequired and Unpack are typing members only from 3.11; this
+# project's floor -- and so a consumer's checking target -- is 3.9. `sys` is not
 # aliased: mypy reads a version check only on the module's own name.
 if sys.version_info >= (3, 11):
-    from typing import NotRequired as _NotRequired, Unpack as _Unpack
+    from typing import Never as _Never, NotRequired as _NotRequired, Unpack as _Unpack
 else:
-    from typing_extensions import NotRequired as _NotRequired, Unpack as _Unpack
+    from typing_extensions import (
+        Never as _Never,
+        NotRequired as _NotRequired,
+        Unpack as _Unpack,
+    )
 
 {%- set typeddicts = {} -%}
 

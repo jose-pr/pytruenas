@@ -450,3 +450,33 @@ def test_no_create_helper_without_a_payload(tmp_path, caplog):
     assert "def _create(" not in src
     assert "_Unpack[int]" not in src
     assert "no _create stub emitted" in caplog.text
+
+
+@pytest.mark.parametrize("has_never", [True, False])
+def test_an_empty_array_names_never_whatever_interpreter_generates(
+    tmp_path, monkeypatch, has_never
+):
+    """`typing.Never` exists from 3.11 and the stubs target 3.9: the output
+    names the template's `_Never` alias on every generating interpreter."""
+    monkeypatch.setattr(js, "_HAS_NEVER", has_never)
+    codegen.Codegen().generate(edge_dump("empty_array"), tmp_path / "out")
+    src = (tmp_path / "out" / "system" / "__init__.pyi").read_text(encoding="utf-8")
+    assert "nothing:list[_Never]" in src.replace(" ", "")
+    assert "_ty.Never" not in src
+    assert "from typing_extensions import (" in src and "Never as _Never" in src
+
+
+def test_a_closed_tuple_is_any_json_array(tmp_path):
+    api = _api()
+    _add_params(
+        "system.info",
+        {
+            "title": "pair",
+            "type": "array",
+            "prefixItems": [{"type": "string"}, {"type": "integer"}],
+            "items": False,
+        },
+    )(api)
+    codegen.Codegen().generate(api, tmp_path / "out")
+    src = (tmp_path / "out" / "system" / "__init__.pyi").read_text(encoding="utf-8")
+    assert "pair:_jsonschema.JsonArray" in src.replace(" ", "")
