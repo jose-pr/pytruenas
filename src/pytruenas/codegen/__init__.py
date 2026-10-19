@@ -520,6 +520,19 @@ def _shadows_runtime(declaration: "Method") -> bool:
     return name in _runtime_namespace_attributes()
 
 
+def _require_jinja():
+    """The template renderer, or ``MissingExtraError`` naming ``codegen``."""
+    try:
+        from . import jinja
+    except ImportError as exc:
+        from hostctl import MissingExtraError
+
+        raise MissingExtraError(
+            "codegen", "generating typings", distribution="pytruenas"
+        ) from exc
+    return jinja
+
+
 def _swap(new: _P, final: _P) -> None:
     """Put the tree ``new`` at ``final``.
 
@@ -647,14 +660,7 @@ class Codegen:
 
         final = _P(root)
         _check_replaceable(final)
-        try:
-            from . import jinja
-        except ImportError as exc:
-            from hostctl import MissingExtraError
-
-            raise MissingExtraError(
-                "codegen", "generating typings", distribution="pytruenas"
-            ) from exc
+        jinja = _require_jinja()
         # Render into a sibling first and swap it in only once every stub is
         # written: a failure part-way leaves the previous output untouched.
         final.parent.mkdir(parents=True, exist_ok=True)

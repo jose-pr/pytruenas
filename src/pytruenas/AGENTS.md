@@ -713,6 +713,7 @@ way to build a client from parsed args:
   `.pyi` stubs via `pytruenas.codegen.Codegen().generate(version, path)`.
   `--path` defaults to `truenasapi_typings/current`; only an absent or empty
   directory, or one a previous run marked `.pytruenas-typings`, is replaced.
+  Without the `codegen` extra it fails before dumping the API.
 - **`deploy [--path PATH] [--mode pyz|dir] [--source installed|repo]
   [--pkg-root DIST] [--pkg-name PKG] [--extra E] [--skip DIST] [--force]
   [--repo-root PATH] [--ignore-file FILE] [--ignore-pattern PATTERN]
@@ -1104,7 +1105,8 @@ use, never at import time: `FEATURE needs the 'EXTRA' extra: pip install
   missing it with a config file present raises `MissingExtraError` naming
   `pytruenas[config]` and the file.
 - **`codegen`** (`jinja2`) — required by `pytruenas.codegen`/`generate-typings`;
-  `MissingExtraError` names `pytruenas[codegen]` before anything is written.
+  `MissingExtraError` names `pytruenas[codegen]` before anything is written,
+  and before `generate-typings` dumps the API from a host.
 - **`repo`** (`hostctl[deploy]`) — what `deploy --source repo` needs, which
   the core dependency `hostctl[deploy]` already installs; kept so an existing
   `pytruenas[repo]` requirement resolves. Without hostctl's `deploy` extra,

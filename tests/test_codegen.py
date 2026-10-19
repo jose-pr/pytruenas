@@ -324,3 +324,28 @@ def test_a_stub_held_open_leaves_the_previous_output_whole(tmp_path):
             Codegen().generate(_api_version(), target)
     assert _tree(target) == before
     assert [p.name for p in tmp_path.iterdir()] == ["typings"]
+
+
+def test_a_missing_extra_fails_before_the_api_dump(tmp_path, monkeypatch):
+    import logging
+    from types import SimpleNamespace
+
+    import pytruenas.codegen as codegen_pkg
+    from hostctl import MissingExtraError
+    from pytruenas.cmd import generate_typings
+
+    monkeypatch.setitem(sys.modules, "pytruenas.codegen.jinja", None)
+    monkeypatch.delattr(codegen_pkg, "jinja", raising=False)
+
+    class Client:
+        dumped = False
+
+        def dump_api(self):
+            Client.dumped = True
+            return {"versions": [_api_version()]}
+
+    args = SimpleNamespace(api_cache=None, api_version=None, path=tmp_path / "out")
+    with pytest.raises(MissingExtraError, match=r'"pytruenas\[codegen\]"'):
+        generate_typings.run(Client(), args, logging.getLogger("test.typings"))
+    assert not Client.dumped
+    assert not args.path.exists()

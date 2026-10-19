@@ -34,6 +34,8 @@ def run(client: TrueNASClient, args: Args, logger: Logger):
         logger.info("Reading cached API dump from %s", cache)
         apidump = json.loads(cache.read_text(encoding="utf-8"))
     else:
+        # The dump is the expensive part; a missing extra fails before it.
+        codegen._require_jinja()
         logger.info("Dumping API definition from server")
         apidump = client.dump_api()
         if cache is not None:
