@@ -7,12 +7,6 @@ def isbytelike(obj):
     return isinstance(obj, (memoryview, bytes, bytearray))
 
 
-def bytes_(txt: "_ty.Union[bytes, str]") -> bytes:
-    if isinstance(txt, str):
-        return txt.encode()
-    return txt
-
-
 def str_(txt: "_ty.Union[bytes, str]") -> str:
     if isinstance(txt, str):
         return txt
