@@ -504,8 +504,11 @@ def _dispatch(command: object, instance: "PyTrueNAS") -> int:
     dispatch.
     """
     logger = instance._logger_
+    # duho has already applied --loglevel; a logger named there keeps its level.
+    named = getattr(instance, "loglevels", None) or {}
     for name, level in DEFAULT_LOGLEVELS.items():
-        _pylogging.getLogger(name).setLevel(level)
+        if name not in named:
+            _pylogging.getLogger(name).setLevel(level)
     _warn_stray_passthrough(command, instance, logger)
 
     # A RunPath command reaches dispatch as (class, parsed-instance): ``app``

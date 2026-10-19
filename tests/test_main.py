@@ -133,3 +133,27 @@ def test_dispatch_isolates_target_failure(monkeypatch):
     # both targets attempted despite the exception; nonzero aggregate.
     assert len(ran) == 2
     assert rc != 0
+
+
+def test_a_logger_named_by_loglevel_keeps_its_level(monkeypatch):
+    """The third-party defaults were applied after --loglevel, so
+    `--loglevel websocket:DEBUG` could never raise the websocket logger."""
+    names = ("websocket", "requests", "urllib3")
+    for name in names:
+        monkeypatch.setattr(logging.getLogger(name), "level", logging.NOTSET)
+    seen = {}
+
+    def client(*a, **k):
+        seen.update({n: logging.getLogger(n).level for n in names})
+        return MagicMock()
+
+    monkeypatch.setattr(pytruenas.host, "TrueNASHost", client)
+    main.main(
+        "pytruenas",
+        ["--loglevel", "websocket:DEBUG,requests:INFO", "dump-api", "nas1"],
+    )
+    assert seen == {
+        "websocket": logging.DEBUG,
+        "requests": logging.INFO,
+        "urllib3": logging.WARNING,  # not named: still quieted
+    }
