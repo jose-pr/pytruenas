@@ -236,3 +236,52 @@ def test_a_tail_the_command_does_not_read_is_reported(caplog):
     with caplog.at_level(logging.WARNING):
         assert _main("help", "user", "nas1", "--", "--username=x") == 0
     assert "ignoring the 1 argument(s) after '--': help reads none" in caplog.text
+
+
+# -- help --dump -------------------------------------------------------------
+
+
+@pytest.fixture
+def _cached_dump():
+    """A whole definition in the cache, so `--dump` reads it with no shell."""
+    from test_cli_help import USER_CREATE, USER_UPDATE
+
+    from pytruenas.utils import apicache
+
+    older = {"version": "v25.10.0", "methods": [USER_CREATE], "events": []}
+    newest = {"version": "v26.0.0", "methods": [USER_CREATE, USER_UPDATE]}
+    api = {"versions": [{**newest, "events": []}, older]}
+    apicache.store(api, apicache.path_for("nas1", "26.0.0"))
+
+
+@pytest.mark.parametrize(
+    "argv, expected",
+    [
+        (["all"], "user"),
+        (["user.update"], "full_name"),
+        (["user"], "update"),
+        (["--api-version", "v25.10.0", "user"], "create"),
+    ],
+)
+def test_help_dump_reads_the_cached_definition(argv, expected, _cached_dump, capsys):
+    assert _main("help", "--dump", *argv, "nas1") == 0
+    assert expected in capsys.readouterr().out
+    assert FakeClient.calls["core.get_methods"] == 0
+
+
+def test_help_dump_json(_cached_dump, capsys):
+    assert _main("help", "--dump", "--json", "user", "nas1") == 0
+    assert sorted(json.loads(capsys.readouterr().out)) == ["user.create", "user.update"]
+
+
+@pytest.mark.parametrize(
+    "argv, message",
+    [
+        (["--api-version", "v1.0", "user"], "version 'v1.0' not found"),
+        (["user.creat"], "user.create"),
+    ],
+)
+def test_help_dump_unknown_names_exit_2(argv, message, _cached_dump, caplog):
+    with caplog.at_level(logging.ERROR):
+        assert _main("help", "--dump", *argv, "nas1") == 2
+    assert message in caplog.text
