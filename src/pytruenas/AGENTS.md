@@ -1005,7 +1005,7 @@ directly. Generated stubs import `pytruenas.models.jsonschema` for
   **service**, not method name — `core.get_methods("user.create")` returns `{}` —
   and the unfiltered call is not usable at all, because the server closes the
   websocket on that payload.
-  **The whole definition:** `load(client, *, refresh=False, version=None) -> Api`
+  **The whole definition:** `load(client, *, refresh=False, version=None) -> API`
   and `fetch(client, *, keep_remote=False)`, via `middlewared --dump-api`. Needs
   command access and weighs 24 MB, so it is the fallback — but it is the only
   source for an *older* API version, and what `generate-typings` consumes.
