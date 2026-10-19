@@ -114,7 +114,7 @@ pytruenas --help
 pytruenas query user -f username=root nas.example.com
 pytruenas call system.info nas.example.com          # any method by dotted name
 pytruenas dump-api nas.example.com > api.json
-pytruenas generate-typings --path typings --api-version v26.0.0 nas.example.com
+pytruenas generate-typings --api-version v26.0.0 nas.example.com
 pytruenas deploy nas.example.com                    # install pytruenas ON the host
 ```
 

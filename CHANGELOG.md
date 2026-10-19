@@ -28,6 +28,18 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   an existing CA bundle path (here or as the config file's `sslverify`) is an
   error naming where it came from, instead of a bundle path that verified
   nothing.
+- `generate-typings` no longer deletes a directory of hand-written stubs. A
+  directory holding only `.pyi` files was taken for an old output and replaced,
+  and the default `--path` was `typings/`, where pyright looks for a project's
+  own stubs. Only an absent or empty directory, or one marked
+  `.pytruenas-typings` by a previous run, is replaced, and the default `--path`
+  is `truenasapi_typings/current`.
+- Generated `_create`/`_update`/`_upsert` stubs type `**fields` with the
+  method's payload again (`Unpack[UpdateUserUpdate]`), not `Unpack[bool]`
+  (wrong since 0.5.1); the payload is found as `call` finds it.
+- Generated stubs import `sys` unaliased, so mypy reads the
+  `sys.version_info >= (3, 11)` guard and stops treating every optional key as
+  required on a target below 3.11.
 - `examples/simple_client_from_yaml.py` moved to `examples/scripts/`, so
   `--cmdspath examples` no longer warns that it is not a command.
 

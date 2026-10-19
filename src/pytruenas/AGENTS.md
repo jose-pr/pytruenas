@@ -705,6 +705,8 @@ way to build a client from parsed args:
 - **`generate-typings [--api-version V] [--path DIR] [--api-cache FILE]
   [targets...]`** — dumps (or reads a cached) API definition and writes
   `.pyi` stubs via `pytruenas.codegen.Codegen().generate(version, path)`.
+  `--path` defaults to `truenasapi_typings/current`; only an absent or empty
+  directory, or one a previous run marked `.pytruenas-typings`, is replaced.
 - **`deploy [--path PATH] [--mode pyz|dir] [--source installed|repo]
   [--pkg-root DIST] [--pkg-name PKG] [--extra E] [--skip DIST] [--force]
   [--repo-root PATH] [--ignore-file FILE] [--ignore-pattern PATTERN]
@@ -899,8 +901,8 @@ Backs the `generate-typings` command; not typically used directly.
   `client.dump_api()["versions"]` (see `pytruenas.models.apidump`). Renders
   into a temporary sibling and swaps it in only when complete, so a failure
   leaves the previous output intact. `root` is replaced only if it is absent,
-  empty, a previous output (marked `.pytruenas-typings`), or holds nothing but
-  `.pyi` files; otherwise `FileExistsError`. Missing `jinja2` raises
+  empty, or a previous output (marked `.pytruenas-typings`); otherwise
+  `FileExistsError` — hand-written stubs included. Missing `jinja2` raises
   `hostctl.MissingExtraError` naming `pytruenas[codegen]` before anything is
   touched.
 

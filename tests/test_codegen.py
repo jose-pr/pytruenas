@@ -100,10 +100,27 @@ def test_generate_refuses_a_directory_it_did_not_create(tmp_path):
     (target / ".git").mkdir(parents=True)
     (target / ".git" / "HEAD").write_text("ref: refs/heads/main\n")
     (target / "notes.txt").write_text("keep me")
-    with pytest.raises(FileExistsError, match="not a typings tree"):
+    with pytest.raises(FileExistsError, match="not a tree generate-typings wrote"):
         Codegen().generate(_api_version(), target)
     assert (target / ".git" / "HEAD").read_text() == "ref: refs/heads/main\n"
     assert (target / "notes.txt").read_text() == "keep me"
+
+
+def test_hand_written_stubs_are_not_a_typings_tree(tmp_path):
+    """A directory of nothing but `.pyi` files was replaced -- and `typings/`,
+    the old default `--path`, is where pyright looks for a project's own stubs."""
+    target = tmp_path / "typings"
+    (target / "somelib").mkdir(parents=True)
+    (target / "somelib" / "__init__.pyi").write_text("def f() -> int: ...\n")
+    with pytest.raises(FileExistsError, match="not a tree generate-typings wrote"):
+        Codegen().generate(_api_version(), target)
+    assert (target / "somelib" / "__init__.pyi").exists()
+
+
+def test_the_default_path_is_not_pyrights_stub_directory():
+    from pytruenas.cmd.generate_typings import Args
+
+    assert Args.path.as_posix() == "truenasapi_typings/current"
 
 
 @pytest.mark.requires("jinja2")
@@ -145,6 +162,7 @@ def test_missing_jinja2_names_the_extra_and_touches_nothing(tmp_path, monkeypatc
     monkeypatch.delattr(codegen_pkg, "jinja", raising=False)
     target = tmp_path / "typings"
     target.mkdir()
+    (target / ".pytruenas-typings").write_text("")
     (target / "old.pyi").write_text("# previous")
     from hostctl import MissingExtraError
 
@@ -202,7 +220,8 @@ def test_optionality_markers_resolve_on_the_39_floor(generated):
         assert "_ty.NotRequired" not in src and "_ty.Unpack" not in src
         if "_NotRequired[" in src or "_Unpack[" in src:
             assert "from typing_extensions import" in src
-            assert "_sys.version_info >= (3, 11)" in src
+            assert "sys.version_info >= (3, 11)" in src
+            assert "import sys as" not in src
 
 
 @pytest.mark.requires("jinja2")
@@ -217,3 +236,14 @@ def test_the_root_module_exports_current(generated):
     assert "Current = " not in (generated / "user" / "__init__.pyi").read_text(
         encoding="utf-8"
     )
+
+
+@pytest.mark.requires("jinja2")
+def test_the_helpers_fields_are_the_payload_not_a_call_option(tmp_path):
+    """`**fields` was `_Unpack[bool]`: a fixed index from the end picked the
+    `_ioerror` option once the call options grew from three to five."""
+    Codegen().generate(_api_version(), tmp_path / "out")
+    stub = (tmp_path / "out" / "user" / "__init__.pyi").read_text(encoding="utf-8")
+    fields = re.findall(r"\*\*fields:_Unpack\[(\w+)\]", stub)
+    assert "bool" not in fields
+    assert {"CreateUserCreate", "UpdateUserUpdate", "UpsertUserUpdate"} <= set(fields)

@@ -21,8 +21,8 @@ class Args(PyTrueNASArgs):
     api_version: str = None
     "API version to generate (default: the newest in the dump)"
 
-    path: Path = Path("typings")
-    "Output directory for the generated stubs (default: ./typings)"
+    path: Path = Path("truenasapi_typings/current")
+    "Output directory for the generated stubs (default: ./truenasapi_typings/current)"
 
     api_cache: Path = None
     "Path to cache the API dump JSON (read if present, written if not)"

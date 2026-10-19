@@ -9,6 +9,7 @@ import tempfile
 import typing as _ty
 import functools as _ftools
 from ..models import apidump as _api, jsonschema as _schema
+from ..utils import apihelp as _apihelp
 from duho import qualname as _qn
 from duho import text as _text
 
@@ -336,7 +337,7 @@ class Namespace(PyDeclaration):
     def init(self):
         for method in self.methods():
             if method.qualname.name == "update":
-                fields = method.parameters[-4]
+                fields = _payload(method)
                 update_return = method.definition["schemas"]["properties"][
                     "Return value"
                 ]
@@ -416,7 +417,7 @@ class Namespace(PyDeclaration):
                     self.childs.append(upsert)
 
             elif method.qualname.name == "create":
-                fields = method.parameters[-4]
+                fields = _payload(method)
                 create_return = method.definition["schemas"]["properties"][
                     "Return value"
                 ]
@@ -507,27 +508,36 @@ _INIT = "__init__.pyi"
 _MARKER = ".pytruenas-typings"
 
 
+def _payload(method: "Method") -> "Parameter":
+    """The parameter a synthetic helper's ``**fields`` stands for.
+
+    The payload as the ``call`` command finds it (the last object-typed
+    parameter), else the last real one. Never a call option: a fixed index from
+    the end picked ``_ioerror`` once the options grew.
+    """
+    index = _apihelp.payload_index(method.definition)
+    if index is None:
+        index = len(_apihelp.parameters(method.definition)) - 1
+    return method.parameters[index]
+
+
 def _check_replaceable(root: _P) -> None:
     """Refuse to replace a directory that is not a typings tree.
 
-    Replaceable: absent, empty, carrying the marker, or holding nothing but
-    ``.pyi`` stubs (a tree generated before the marker existed). Anything else
-    -- a checkout's ``.git``, source files, notes -- is someone's data.
+    Replaceable: absent, empty, or carrying the marker every generated tree
+    has. Anything else is someone's data -- a checkout's ``.git``, notes, or
+    hand-written stubs (``typings/`` is where pyright looks for them).
     """
     if not root.exists():
         return
     if not root.is_dir():
         raise FileExistsError(f"{root} exists and is not a directory")
-    if (root / _MARKER).exists():
+    if (root / _MARKER).exists() or next(root.iterdir(), None) is None:
         return
-    foreign = next(
-        (p for p in root.rglob("*") if p.is_file() and p.suffix != ".pyi"), None
+    raise FileExistsError(
+        f"refusing to replace {root}: it is not a tree generate-typings wrote "
+        f"(no {_MARKER}); choose another path"
     )
-    if foreign is not None:
-        raise FileExistsError(
-            f"refusing to replace {root}: it is not a typings tree "
-            f"({foreign.relative_to(root)} is not a stub); choose another path"
-        )
 
 
 def _runtime_namespace_attributes() -> "frozenset[str]":

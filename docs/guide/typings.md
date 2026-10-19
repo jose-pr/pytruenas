@@ -12,9 +12,10 @@ pytruenas generate-typings --path truenasapi_typings/current nas.example.com
 
 Options:
 
-- `--path PATH` — output directory for the stub package. A previous output is
-  replaced; a directory holding anything other than stubs is refused rather
-  than emptied.
+- `--path PATH` — output directory for the stub package (default
+  `truenasapi_typings/current`). A previous output (it carries a
+  `.pytruenas-typings` marker) is replaced; any other directory that is not
+  empty is refused rather than emptied — hand-written stubs included.
 - `--api-version VERSION` — target a specific API version (e.g. `v26.0.0`);
   defaults to the host's current version.
 - `--api-cache FILE` — read/write a cached API dump instead of hitting the host.
