@@ -119,39 +119,27 @@ def test_config_options_alongside_a_config_are_rejected():
         TrueNASClient(config, executor=["ssh"])
 
 
-def test_client_keyword_is_accepted_and_ignored():
-    """`client=` predates the host/client merge; old callers must not break."""
-    host = TrueNASClient("wss://nas", client=object())
-    assert host.client is host
+@pytest.mark.parametrize("option", ["client", "logger"], ids=["client=", "logger="])
+def test_a_removed_keyword_is_an_unknown_argument(option):
+    """`client=` was accepted and discarded; `logger=` is the `.logger` setter."""
+    with pytest.raises(ValueError, match=f"unknown credential argument: '{option}'"):
+        TrueNASClient("wss://nas", **{option: "x"})
 
 
-def test_truenasclient_is_the_same_class():
-    """The two were merged; `TrueNASClient` is kept as the friendlier name.
-
-    They used to be separate objects forwarding halves of their surface to each
-    other -- `client.run()` called `client.host.run()` while `host.api` called
-    `host.client.api`, each holding a reference to the other.
-    """
-    from pytruenas import TrueNASClient
-
-    assert TrueNASClient is TrueNASClient
+def test_credentials_are_keyword_only():
+    with pytest.raises(TypeError, match="positional"):
+        TrueNASClient("wss://nas", "1-" + "a" * 64)  # type: ignore[misc]
 
 
-def test_every_historical_client_setting_is_accepted():
-    """Every setting the old two-argument constructor took still works.
-
-    `target` and `creds` were positional; `fsbackend` is superseded by the
-    finer-grained `path=`. The rest are keywords on the config.
-    """
+def test_every_client_setting_is_a_keyword():
     host = TrueNASClient(
         "wss://nas",
-        "1-" + "a" * 64,  # creds, positionally, as the old client took them
+        credentials="1-" + "a" * 64,
         verify=False,
         version="v2.0",
         shell="ssh://root@nas",
         autologin=False,
-        logger="mylog",
-        path=["tnasws"],  # what fsbackend used to express
+        path=["tnasws"],
     )
     config = host._config
     assert config.verify is False
@@ -159,7 +147,6 @@ def test_every_historical_client_setting_is_accepted():
     assert config.ssh.host == "nas"
     assert config.autologin is False
     assert config.paths == ("tnasws",)
-    assert host.logger.name == "mylog"
     assert type(config.credentials).__name__ == "ApiKeyAuth"
 
 
@@ -422,17 +409,19 @@ def test_autologin_and_logger_are_honoured(monkeypatch):
     monkeypatch.setattr(
         requests, "get", lambda *a, **k: pytest.fail("constructed over the network")
     )
-    host = TrueNASClient("wss://nas", autologin=False, logger="mylog")
+    host = TrueNASClient("wss://nas", autologin=False)
+    host.logger = "mylog"
     assert host._config.autologin is False
     assert host.logger.name == "mylog"
+    assert host.logger.extra == {"name": "nas"}
 
-    # autologin=False means `.websocket` opens a connection without logging in.
+    # autologin=False means `.conn` opens a connection without logging in.
     opened = MagicMock()
     monkeypatch.setattr(type(host), "_openwss", lambda self: opened)
     monkeypatch.setattr(
         type(host), "login", lambda self, *a, **k: pytest.fail("logged in")
     )
-    assert host.websocket is opened
+    assert host.conn is opened
 
 
 def test_ssh_property_raises_clearly_without_a_transport():
@@ -684,33 +673,10 @@ def test_convenience_wrappers_call_the_right_api_method(
     getattr(getattr(api, namespace), call).assert_called_once_with()
 
 
-def test_subscribe_goes_through_the_connection(monkeypatch):
-    host = _built()
-    conn = MagicMock()
-    monkeypatch.setattr(type(host), "conn", conn)
-
-    host.subscribe("alert.list")
-
-    conn.subscribe.assert_called_once()
-    assert conn.subscribe.call_args[0][0] == "alert.list"
-
-
-def test_websocket_is_an_alias_for_conn(monkeypatch):
-    """`.websocket` must *read* `.conn`, not be a second copy of it.
-
-    `websocket = conn` at class scope would create two independent attributes,
-    so overriding one would silently leave the other on the original.
-    """
-    host = _built()
-    conn = MagicMock()
-    monkeypatch.setattr(type(host), "conn", conn)
-    assert host.websocket is conn
-
-
-def test_client_is_an_alias_for_self():
-    """The two objects were merged; `.client` stays so old code keeps working."""
-    host = _built()
-    assert host.client is host
+@pytest.mark.parametrize("name", ["client", "websocket", "subscribe"])
+def test_a_second_spelling_is_gone(name):
+    """`.conn` is the connection, `api.<ns>.subscribe()`/`conn.subscribe()` subscribe."""
+    assert not hasattr(_built(), name)
 
 
 def test_api_is_a_namespace_bound_to_this_host():

@@ -35,7 +35,7 @@ from truenasapi_typings.current import Current
 
 from pytruenas import TrueNASClient
 
-client: TrueNASClient[Current] = TrueNASClient("nas.example.com", api_key)
+client: TrueNASClient[Current] = TrueNASClient("nas.example.com", credentials=api_key)
 client.api.user.query()   # completed and checked from the stubs
 ```
 

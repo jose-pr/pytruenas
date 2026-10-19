@@ -192,18 +192,15 @@ def test_call_trace_never_carries_a_password():
     assert "auth.login" in rendered[0] and "<str>" in rendered[0]
 
 
-@pytest.mark.parametrize("assign", [False, True])
-def test_a_callers_logger_adapter_works(assign):
+def test_a_callers_logger_adapter_works():
     """The header says an adapter is used as-is, and every API call raised
     `AttributeError: 'LoggerAdapter' object has no attribute 'trace'`."""
     from unittest.mock import MagicMock
 
     adapter = logging.LoggerAdapter(logging.getLogger("pytruenas.test.mine"), {})
-    if assign:
-        host = TrueNASClient("wss://nas1", autologin=False)
-        host.logger = adapter
-    else:
-        host = TrueNASClient("wss://nas1", autologin=False, logger=adapter)
+    host = TrueNASClient("wss://nas1", autologin=False)
+    host.logger = adapter
+    assert host.logger is adapter
     host._conn = MagicMock(_closed=MagicMock(is_set=lambda: False))
     host._conn.call.return_value = "pong"
     assert host.api.core.ping() == "pong"
@@ -228,7 +225,8 @@ def test_a_record_inside_a_cli_fan_out_names_its_host_once():
     logger.addHandler(handler)
     logger.setLevel(logging.INFO)
     try:
-        host = TrueNASClient("wss://nas1", autologin=False, logger=logger.name)
+        host = TrueNASClient("wss://nas1", autologin=False)
+        host.logger = logger
         run_targets(lambda target: host.logger.info("hello"), ["nas1"], logger=logger)
     finally:
         logger.removeHandler(handler)

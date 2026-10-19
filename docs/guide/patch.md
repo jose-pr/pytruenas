@@ -245,7 +245,7 @@ when one is configured, otherwise over the middleware's web shell -- see
 # needs a NAS
 from pytruenas import TrueNASClient
 
-nas = TrueNASClient("nas.example.com", "1-<64-char-api-key>")
+nas = TrueNASClient("nas.example.com", credentials="1-<64-char-api-key>")
 install(nas)
 ```
 

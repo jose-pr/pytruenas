@@ -51,9 +51,9 @@ with the package not installed.
 half (transports, configuration) is documented in the next section. There is
 no second name for it.
 
-`TrueNASClient(config=None, credentials=None, *, verify=True, shell=None,
-known_hosts=(), logger=None, autologin=True, version="current",
-executor=None, path=None, ssh=None, ...)`
+`TrueNASClient(config=None, *, credentials=None, verify=True, shell=None,
+known_hosts=(), autologin=True, version="current", executor=None, path=None,
+ssh=None, ...)`
 
 - **`config`** (positional) — the target: a host, `"host:port"`, or full
   `scheme://...` URI, a socket path (`"/var/run/x.sock"`), or a
@@ -69,9 +69,9 @@ executor=None, path=None, ssh=None, ...)`
   *does* parse is used as the URI it is (an `@` in a path is a path —
   indistinguishable from an unencoded password, so neither this package nor
   hostctl guesses).
-- **`credentials`** — the second positional argument or `credentials=`
-  (giving both raises `TypeError`); passed to `Credentials(...)` (below).
-  `None` means local-socket auth (no login call).
+- **`credentials`** (keyword only: a second positional argument raises
+  `TypeError`) — passed to `Credentials(...)` (below). `None` means
+  local-socket auth (no login call).
 - **`username=`, `password=`, `otp=`, `api_key=`, `token=`** — keyword
   credentials, as hostctl's `HostConfig(uri, ...)` takes them: `username=` and
   `password=` replace the URI's own user and password (`password=""` is no
@@ -138,11 +138,8 @@ executor=None, path=None, ssh=None, ...)`
   the provider table in the next section.
 - **`version`** — API path used when the target carries none (default
   `"current"`, i.e. `/api/current`).
-- **`logger`** — a name or a `Logger` to bind the host's logger to (see
-  `.logger`).
 - **Other keywords** — hostctl's `PosixHost` options (`info=`,
-  `initializer=`, `executor_providers=`, `path_providers=`); `client=` is
-  accepted and ignored. The port, scheme and API path are spelled in the
+  `initializer=`, `executor_providers=`, `path_providers=`). The port, scheme and API path are spelled in the
   target string, not as keywords: any other keyword raises `ValueError:
   unknown credential argument: 'NAME'` listing the keywords above. Given a
   `TrueNASConfig`, a configuration keyword raises `TypeError` (pass it to
@@ -153,7 +150,7 @@ executor=None, path=None, ssh=None, ...)`
 
 - **`.api`** (`cached_property`) — the root `Namespace` for this client
   (`client.api.<namespace>.<method>(...)`).
-- **`.conn`** (alias `.websocket`) — the live
+- **`.conn`** — the live
   `connection.TrueNASWSConnection`; connects (and logs in, if
   `autologin`) on first access, reconnects if the prior connection closed.
   After a successful `.login(...)`, a reconnect repeats that login (same
@@ -175,7 +172,6 @@ executor=None, path=None, ssh=None, ...)`
 - **`.config`** — the `TrueNASConfig` this host is built from. `.config.ssh` is
   the SSH leg; `.shell` means the *bound shell object* (`client.shell.run(...)`),
   as it does throughout hostctl.
-- **`.client`** — the object itself (`client.client is client`).
 - **`.capabilities`** — `{"run", "path"}` as available, plus `"spawn"`/`"tty"`
   when an SSH leg is configured; a remote target with no SSH and no web shell
   reports no `run`.
@@ -192,9 +188,11 @@ executor=None, path=None, ssh=None, ...)`
   connection, which shares it, and hostctl's fallback WARNING (`run() fell
   back from ssh to webshell: ssh: <reason>`, `path() fell back from sftp to
   tnasws: ...`, once per skipped provider). Defaults to
-  `logging.getLogger("pytruenas")` underneath; pass `logger=` (a name or a
-  `Logger`) to redirect it, or assign `.logger` (hostctl's settable
-  attribute). A `LoggerAdapter` you pass in yourself is used as-is, unwrapped.
+  `logging.getLogger("pytruenas")` underneath. Assign `.logger` (hostctl's
+  settable attribute) a logger name or a `Logger` to redirect it, bound to
+  `.name` the same way; a `LoggerAdapter` you assign is used as-is, unwrapped.
+  The JSON-RPC connection takes the logger set when it opens. There is no
+  `logger=` keyword.
 
 ### Methods
 
@@ -278,13 +276,6 @@ executor=None, path=None, ssh=None, ...)`
   timeouts (`CONNECT_TIMEOUT` to connect, `CALL_TIMEOUT` per read), raise
   `requests`' own exceptions for an HTTP or transport error, and never name
   a token in the message (`auth_token=<redacted>`).
-- **`.subscribe(event, callback=None, *, maxsize=1000) -> connection.Subscription`**
-  — subscribe to a middleware collection event over the live websocket.
-  `client.subscribe("alert.list")` is shorthand for
-  `client.api.alert.list.subscribe()`. Consume via the returned subscription's
-  `.events(timeout=None)` iterator and/or the inline `callback`. Bound to the
-  current connection; does **not** survive a reconnect (the `events()` iterator
-  ends on disconnect — that's the re-subscribe signal). See `connection` below.
 - **`.dump_api(*, cache=True, refresh=False) -> dict`** — the middleware API
   definition (see `pytruenas.models.apidump.Api`). The dump is built **and
   gzipped on the target**, then fetched over SFTP when the host has an SSH leg
@@ -328,8 +319,8 @@ TrueNASClient()                       # the local middleware socket
 
 It is a `hostctl.PosixHost`, so `run`, `path`, `spawn`, `info`, `connect`,
 `close`, `shell`, `capabilities`, and `last_selection` are all inherited; the
-middleware surface (`api`, `websocket`, `login`, `logout`, `me`, `ping`,
-`subscribe`, `upload`, `download`, `dump_api`, `install_sshcreds`) is what this
+middleware surface (`api`, `conn`, `login`, `logout`, `me`, `ping`, `upload`,
+`download`, `dump_api`, `install_sshcreds`) is what this
 class adds. Generic in `ApiVersion`: `TrueNASClient[Current]("nas").api`
 completes the generated stubs.
 
@@ -452,6 +443,8 @@ below raise `AttributeError` normally.
   override (e.g. from `client.api`). A **real method**, so it shadows any
   middleware method literally named `subscribe`; reach such a method via
   `ns(_method="subscribe", ...)`. See `connection.Subscription`/`Event` below.
+  This and `client.conn.subscribe(event)` are the two ways to subscribe; the
+  client has no `subscribe()` of its own.
 - **`._query(*opts, **filter) -> list[dict]`** — calls `<namespace>.query`
   with filters built from `**filter` kwargs (equality by default; wrap a value
   in `EQ`/`NE`/`RE`/`GT`/`GE`/`LT`/`LE`/`IN`/`NIN` from `pytruenas.utils.query`

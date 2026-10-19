@@ -60,7 +60,7 @@ def client_from_config(config: dict) -> TrueNASClient:
     target = None if not host or host == "localhost" else host
 
     LOGGER.info("Connecting to %s", target or "the local middleware socket")
-    return TrueNASClient(target, credentials, verify=verify)
+    return TrueNASClient(target, credentials=credentials, verify=verify)
 
 
 def main(argv: "list[str] | None" = None) -> int:

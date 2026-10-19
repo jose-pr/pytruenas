@@ -40,12 +40,12 @@ def test_local_target_keeps_uri_syntax_in_the_socket_path():
 
 
 def test_creds_wired_from_target():
-    c = TrueNASClient(None, ("root", "secret"), autologin=False)
+    c = TrueNASClient(None, credentials=("root", "secret"), autologin=False)
     assert isinstance(c._config.credentials, BasicAuth)
 
 
 def test_api_key_creds():
-    c = TrueNASClient(None, "1-" + "a" * 64, autologin=False)
+    c = TrueNASClient(None, credentials="1-" + "a" * 64, autologin=False)
     assert isinstance(c._config.credentials, ApiKeyAuth)
 
 
@@ -60,7 +60,7 @@ def test_path_selection_local_vs_remote():
     assert [p.name for p in local.path_providers] == ["local"]
     assert local.path("/etc/hosts").as_posix() == "/etc/hosts"
 
-    remote = TrueNASClient("wss://nas", "1-" + "a" * 64, autologin=False)
+    remote = TrueNASClient("wss://nas", credentials="1-" + "a" * 64, autologin=False)
     assert [p.name for p in remote.path_providers] == ["tnasws"]
 
 

@@ -55,6 +55,18 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   `pytruenas.host.TrueNASHost` raise `ImportError`/`AttributeError`. Replace
   the name with `TrueNASClient` (`TrueNASClient[Current]` for typed `.api`);
   nothing else about the class changed with it.
+- **The client's compatibility shims are gone.** Callers change:
+  - `TrueNASClient(target, creds)` → `TrueNASClient(target, credentials=creds)`:
+    `credentials` is keyword-only, and a second positional argument raises
+    `TypeError`.
+  - `client.websocket` → `client.conn`; `client.client` → `client`.
+  - `client=` (accepted and ignored) and `logger=` raise `ValueError: unknown
+    credential argument`. For `logger=`, assign `client.logger = <name or
+    Logger>` instead, which binds it to the host's name as `logger=` did;
+    `TrueNASConfig(logger=)` and `config.logger` are gone too.
+  - `client.subscribe("alert.list")` → `client.api.alert.list.subscribe()`, or
+    `client.conn.subscribe("alert.list")` for an event name that is not a
+    namespace path.
 
 ### Added
 

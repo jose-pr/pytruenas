@@ -85,24 +85,12 @@ class TnasWsPathProvider(_PathProvider):
             capabilities=WS_PATH_CAPABILITIES,
         )
 
-    @property
-    def _client(self):
-        """The client whose websocket serves these paths.
-
-        A ``TrueNASClient`` passes *itself* here (the two are built together, and
-        the client is created lazily from the host's config), so unwrap it:
-        ``pytruenas.fs.path`` needs the client, not the host.
-        """
-        client = self.client
-        host_client = getattr(client, "client", None)
-        return host_client if host_client is not None else client
-
     def _make_path(self, *segments: object) -> "Path":
         from .fs import path as _make
 
         # The plain websocket path: the host's composite path routes what this
         # provider cannot do (rename, symlinks, resolve) to `sftp` itself.
-        return _make(self._client, *segments, backend="ws")
+        return _make(self.client, *segments, backend="ws")
 
     def probe(self) -> _ProviderProbe:
         return _ProviderProbe("available", capabilities=self.capabilities)

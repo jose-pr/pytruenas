@@ -12,7 +12,7 @@ opened:
 ```python
 from pytruenas import TrueNASClient
 
-with TrueNASClient("nas.example.com", "1-<api-key>") as nas:
+with TrueNASClient("nas.example.com", credentials="1-<api-key>") as nas:
     print(nas.ping())                    # "pong"
     print(nas.me()["pw_name"])           # the authenticated session's user
     print(nas.api.system.info()["version"])
@@ -68,7 +68,7 @@ Subscriptions are bounded queues fed by the live connection. Consume with the
 iterator, a callback, or both:
 
 ```python
-sub = nas.subscribe("alert.list")
+sub = nas.api.alert.list.subscribe()   # or nas.conn.subscribe("alert.list")
 for event in sub.events(timeout=30):
     print(event.msg, event.fields.get("klass"))
     if event.msg == "removed":
@@ -128,7 +128,7 @@ from concurrent.futures import ThreadPoolExecutor
 HOSTS = ["nas1.example.com", "nas2.example.com", "nas3.example.com"]
 
 def version(host):
-    with TrueNASClient(host, api_key) as nas:
+    with TrueNASClient(host, credentials=api_key) as nas:
         return host, nas.api.system.info()["version"]
 
 with ThreadPoolExecutor() as pool:
@@ -147,7 +147,7 @@ half into this client's SSH leg — so a client that had only the web shell gain
 real SSH:
 
 ```python
-nas = TrueNASClient("nas.example.com", api_key)
+nas = TrueNASClient("nas.example.com", credentials=api_key)
 nas.capabilities            # {"path", "run"} -- run via the web shell
 
 nas.install_sshcreds()

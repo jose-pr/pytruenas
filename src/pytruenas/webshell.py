@@ -315,13 +315,8 @@ class WebShellExecutorProvider(_ExecutorProvider):
     @property
     def session(self) -> WebShellSession:
         if self._session is None:
-            self._session = WebShellSession(self._client)
+            self._session = WebShellSession(self.client)
         return self._session
-
-    @property
-    def _client(self):
-        client = getattr(self.client, "client", None)
-        return client if client is not None else self.client
 
     def probe(self) -> _ProviderProbe:
         """Report availability without dispatching a command.

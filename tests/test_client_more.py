@@ -358,7 +358,9 @@ def test_local_client_uses_the_socket_and_no_ssh_leg():
 
 
 def test_remote_client_carries_the_target():
-    c = TrueNASClient("wss://nas", "1-" + "a" * 64, autologin=False, verify=False)
+    c = TrueNASClient(
+        "wss://nas", credentials="1-" + "a" * 64, autologin=False, verify=False
+    )
     assert c._config.host == "nas"
     assert not c._config.is_local
     assert c._config.verify is False
@@ -367,9 +369,11 @@ def test_remote_client_carries_the_target():
 def test_verify_is_one_value_for_every_transport():
     # Every leg -- the web shell, the JSON-RPC and REST legs -- reads
     # `client.config.verify`, the one value the caller set.
-    c = TrueNASClient("wss://nas", "1-" + "a" * 64, autologin=False, verify=False)
+    c = TrueNASClient(
+        "wss://nas", credentials="1-" + "a" * 64, autologin=False, verify=False
+    )
     assert c.config.verify is False
-    d = TrueNASClient("wss://nas", "1-" + "a" * 64, autologin=False)
+    d = TrueNASClient("wss://nas", credentials="1-" + "a" * 64, autologin=False)
     assert d.config.verify is True
 
 

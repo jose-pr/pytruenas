@@ -51,7 +51,7 @@ pip install pytruenas
 from pytruenas import TrueNASClient
 
 # Remote host (api key, or "user:password", or a token)
-client = TrueNASClient("nas.example.com", "1-<64-char-api-key>", verify=False)
+client = TrueNASClient("nas.example.com", credentials="1-<64-char-api-key>", verify=False)
 
 # Attribute-style access to any API namespace/method:
 for user in client.api.user.query():
@@ -71,7 +71,7 @@ print(local.api.system.info())
 rather than assuming one:
 
 ```python
-client = TrueNASClient("nas.example.com", api_key, shell="ssh://root@nas.example.com")
+client = TrueNASClient("nas.example.com", credentials=api_key, shell="ssh://root@nas.example.com")
 
 client.run("zpool status", capture_output="stdout", encoding="utf-8").stdout
 client.path("/mnt/tank/notes.txt").read_text()
@@ -99,7 +99,7 @@ through a temporary file, never typed into the terminal.
 
 ### Credentials
 
-`TrueNASClient(target, credentials)` accepts, for the second argument:
+`TrueNASClient(target, credentials=...)` accepts, as `credentials=` (a keyword):
 
 - an **API key** string `"<id>-<64 chars>"`,
 - `"user:password"` (optionally `"user:password\n<otp>"`),

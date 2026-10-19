@@ -74,34 +74,6 @@ def test_ws_path_capabilities_exclude_what_the_api_cannot_do():
         assert present in WS_PATH_CAPABILITIES
 
 
-def test_ws_path_provider_unwraps_a_host(monkeypatch):
-    """A TrueNASClient passes *itself*; the fs layer needs the client.
-
-    Regression: the host builds its providers with `self` (the client is
-    created lazily from the host's own config), so a provider that assumed it
-    held a client raised `AttributeError: no attribute '_api'` on the first
-    `host.path(...)`. Caught only on a live target.
-    """
-    import pytruenas.fs as fs
-    from pathapi import LocalPath
-
-    seen = {}
-
-    def fake_path(client, *segments, backend=None):
-        seen["client"] = client
-        return LocalPath("/etc/hostname")
-
-    monkeypatch.setattr(fs, "path", fake_path)
-
-    inner = _client()
-    host_like = MagicMock()
-    host_like.client = inner
-    host_like.config = _FakeConfig(False)
-
-    TnasWsPathProvider(host_like).path("/etc/hostname")
-    assert seen["client"] is inner
-
-
 def test_ws_path_provider_always_uses_the_websocket_backend(monkeypatch):
     """This provider is unconditionally the websocket leg.
 

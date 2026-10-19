@@ -69,11 +69,8 @@ def test_subscribe_is_a_real_method_not_a_child_namespace():
     assert str(ns.foo) == "alert.list.foo"
 
 
-def test_client_level_subscribe_delegates_to_websocket():
+def test_the_client_has_no_subscribe_of_its_own():
+    """`api.<ns>.subscribe()` and `conn.subscribe(event)` are the two scopes."""
     from pytruenas import TrueNASClient
 
-    client = MagicMock(spec=TrueNASClient)
-    # call the real method against a mock self
-    TrueNASClient.subscribe(client, "alert.list", None)
-    client.conn.subscribe.assert_called_once()
-    assert client.conn.subscribe.call_args[0][0] == "alert.list"
+    assert not hasattr(TrueNASClient, "subscribe")

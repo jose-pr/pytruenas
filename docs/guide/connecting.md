@@ -14,7 +14,7 @@ middleware. The transport is chosen from `target`:
 ```python
 from pytruenas import TrueNASClient
 
-client = TrueNASClient("nas.example.com", "1-<64-char-api-key>", verify=False)
+client = TrueNASClient("nas.example.com", credentials="1-<64-char-api-key>", verify=False)
 ```
 
 ## Credentials
@@ -62,7 +62,7 @@ connection, configured by the `shell=` argument and stored as
 `client.config.ssh`:
 
 ```python
-client = TrueNASClient("nas", api_key, shell="ssh://root@nas")
+client = TrueNASClient("nas", credentials=api_key, shell="ssh://root@nas")
 ```
 
 Omit it and the client falls back to the web shell for a remote target — see
@@ -77,7 +77,7 @@ The SSH leg — both commands and SFTP — verifies the server's host key agains
 `known_hosts=`:
 
 ```python
-TrueNASClient("nas", api_key, shell="ssh://root@nas", known_hosts="/srv/known_hosts")
+TrueNASClient("nas", credentials=api_key, shell="ssh://root@nas", known_hosts="/srv/known_hosts")
 ```
 
 For a lab box with a self-signed certificate and an unrecorded host key,
@@ -88,10 +88,10 @@ host-key check; `known_hosts=None` raises `ValueError`.
 ```python
 from hostctl import SSHConfig
 
-TrueNASClient("nas", api_key, shell="ssh://root@nas", verify=False)  # check nothing
-TrueNASClient("nas", api_key, verify=False,                          # host keys only
+TrueNASClient("nas", credentials=api_key, shell="ssh://root@nas", verify=False)  # check nothing
+TrueNASClient("nas", credentials=api_key, verify=False,                          # host keys only
               shell="ssh://root@nas", known_hosts="/srv/known_hosts")
-TrueNASClient("nas", api_key,                                        # TLS only
+TrueNASClient("nas", credentials=api_key,                                        # TLS only
               ssh=SSHConfig("nas", username="root", verify=False))
 ```
 
@@ -108,7 +108,7 @@ set `SSL_CERT_FILE` (also honored: `REQUESTS_CA_BUNDLE`, `CURL_CA_BUNDLE`,
 trust rather than adding to it.
 
 ```python
-TrueNASClient("nas", api_key, verify="/etc/pki/lab-ca.pem")
+TrueNASClient("nas", credentials=api_key, verify="/etc/pki/lab-ca.pem")
 ```
 
 `verify=` also takes a ready `ssl.SSLContext`, used as it is on every TLS
@@ -123,11 +123,11 @@ import sslcontext
 
 ctx = ssl.create_default_context(cafile="/etc/pki/lab-ca.pem")
 ctx.load_cert_chain("client.pem", "client.key")
-TrueNASClient("nas", api_key, verify=ctx)
+TrueNASClient("nas", credentials=api_key, verify=ctx)
 
 # A certificate from the Windows store, the macOS Keychain or a smart card,
 # chosen as the browser would:
-TrueNASClient("nas", api_key, verify=sslcontext.system_context())
+TrueNASClient("nas", credentials=api_key, verify=sslcontext.system_context())
 ```
 
 `known_hosts=` applies to the SSH leg built from `shell=` and to the one
@@ -143,8 +143,8 @@ applies to commands and file operations alike. A user or port written in
 `root`, TrueNAS's administrative account, on port 22.
 
 ```python
-TrueNASClient("nas", api_key, shell="nas")                 # ~/.ssh/config's User, else root
-TrueNASClient("nas", api_key, shell="ssh://admin@nas")     # admin, whatever the file says
+TrueNASClient("nas", credentials=api_key, shell="nas")                 # ~/.ssh/config's User, else root
+TrueNASClient("nas", credentials=api_key, shell="ssh://admin@nas")     # admin, whatever the file says
 ```
 
 For a connection that depends on no personal file, build the leg yourself with
@@ -155,8 +155,8 @@ is configuration *text*, not a file name):
 from pathlib import Path
 from hostctl import SSHConfig
 
-TrueNASClient("nas", api_key, ssh=SSHConfig("nas", username="root", ssh_config=None))
-TrueNASClient("nas", api_key, ssh=SSHConfig("nas", ssh_config=Path("lab/ssh_config")))
+TrueNASClient("nas", credentials=api_key, ssh=SSHConfig("nas", username="root", ssh_config=None))
+TrueNASClient("nas", credentials=api_key, ssh=SSHConfig("nas", ssh_config=Path("lab/ssh_config")))
 ```
 
 !!! note

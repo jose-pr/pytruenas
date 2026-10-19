@@ -321,7 +321,6 @@ def _shared_options(credentials: "_ty.Mapping[str, object]") -> "dict[str, objec
         "executor": _ty.cast(_ty.Any, credentials.get("executor")),
         "path": _ty.cast(_ty.Any, credentials.get("path")),
         "autologin": _ty.cast(bool, credentials.get("autologin", True)),
-        "logger": credentials.get("logger"),
     }
 
 
@@ -535,15 +534,12 @@ class TrueNASConfig(
         executor: "_ty.Optional[_ty.Union[_ty.Iterable[str], str]]" = None,
         path: "_ty.Optional[_ty.Union[_ty.Iterable[str], str]]" = None,
         autologin: bool = True,
-        logger: object = None,
     ) -> None:
         super().__init__()
         #: A label assigned to `name`, replacing the derived one.
         self._name: "_ty.Optional[str]" = None
         #: Whether the first websocket access logs in automatically.
         self.autologin = autologin
-        #: Logger for the client built from this config; a name or a Logger.
-        self.logger = logger
         #: Explicit provider selection, overriding the defaults. Each is a name
         #: or a sequence of names, in preference order; ``None`` means "decide
         #: from the target". See :meth:`TrueNASClient.default_providers`.
@@ -645,7 +641,6 @@ class TrueNASConfig(
         "executor",
         "path",
         "autologin",
-        "logger",
     )
 
     @classmethod
@@ -804,7 +799,7 @@ _HOST_OPTIONS = frozenset(
     name
     for name, parameter in _inspect.signature(_PosixHost.__init__).parameters.items()
     if parameter.kind is _inspect.Parameter.KEYWORD_ONLY
-) | {"client"}
+)
 
 
 def _ssh_pair(host: "TrueNASClient"):
@@ -888,8 +883,8 @@ class TrueNASClient(_PosixHost, _ty.Generic[ApiVersion]):
     def __init__(
         self,
         config: "_ty.Optional[str]" = None,
-        credentials: object = None,
         *,
+        credentials: object = ...,
         username: "_ty.Optional[str]" = ...,
         password: "_ty.Optional[str]" = ...,
         otp: "_ty.Optional[str]" = ...,
@@ -903,12 +898,10 @@ class TrueNASClient(_PosixHost, _ty.Generic[ApiVersion]):
         executor: "_ty.Optional[_ty.Union[_ty.Iterable[str], str]]" = ...,
         path: "_ty.Optional[_ty.Union[_ty.Iterable[str], str]]" = ...,
         autologin: bool = ...,
-        logger: "_ty.Union[str, _logging.Logger, _logging.LoggerAdapter, None]" = ...,
         executor_providers: "_ty.Optional[_ty.Iterable[ExecutorProvider]]" = ...,
         path_providers: "_ty.Optional[_ty.Iterable[PathProvider]]" = ...,
         info: "_ty.Optional[HostInfo]" = ...,
         initializer: object = ...,
-        client: object = ...,
     ) -> None: ...
 
     @_ty.overload
@@ -921,15 +914,11 @@ class TrueNASClient(_PosixHost, _ty.Generic[ApiVersion]):
         shell: object = ...,
         info: "_ty.Optional[HostInfo]" = ...,
         initializer: object = ...,
-        client: object = ...,
     ) -> None: ...
 
     def __init__(
         self,
         config: "_ty.Optional[_ty.Union[TrueNASConfig, str]]" = None,
-        credentials: object = None,
-        *,
-        client: object = None,
         **options: object,
     ) -> None:
         if "sslverify" in options:
@@ -937,12 +926,6 @@ class TrueNASClient(_PosixHost, _ty.Generic[ApiVersion]):
                 "sslverify= is now verify= (True, False, a CA bundle path or an "
                 "ssl.SSLContext), which also governs the SSH host-key check"
             )
-        # `TrueNASClient(target, creds)` passed credentials positionally, and
-        # that is the single most common call in the wild -- accept it.
-        if credentials is not None:
-            if "credentials" in options:
-                raise TypeError("credentials given both positionally and by keyword")
-            options["credentials"] = credentials
         # A connection string is the common case, so accept it directly rather
         # than making every caller reach for TrueNASConfig.from_target first.
         # hostctl's own `Host("uri")` shortcut cannot help here: its metaclass
@@ -982,7 +965,7 @@ class TrueNASClient(_PosixHost, _ty.Generic[ApiVersion]):
         #: The live JSON-RPC connection, opened on first `.conn` access.
         self._conn: "_ty.Optional[_connection.TrueNASWSConnection]" = None
         # hostctl logs a provider fallback here too, once per skipped provider.
-        self.logger = _resolve_logger(config.logger, config.name)
+        _PosixHost.logger.fset(self, _resolve_logger(None, config.name))
         #: Guards opening, replacing and dropping `_conn`. Reentrant: logging
         #: in calls `auth.*` through `api`, which reads `conn` again.
         self._conn_lock = _threading.RLock()
@@ -997,10 +980,6 @@ class TrueNASClient(_PosixHost, _ty.Generic[ApiVersion]):
         self._unverified_warned = False
         #: HTTP(S) session for the side channels; see `_http`.
         self._http_session: "_ty.Optional[_req.Session]" = None
-        # `client=` is accepted and ignored: the host *is* the client now.
-        # Kept so existing callers (and tests that injected a stand-in) do not
-        # break on an unexpected keyword.
-        del client
 
         super().__init__(config, **_ty.cast(_ty.Any, options))
 
@@ -1024,6 +1003,24 @@ class TrueNASClient(_PosixHost, _ty.Generic[ApiVersion]):
         if config.ssh is not None:
             return ("ssh", "webshell"), ("sftp", "tnasws")
         return ("webshell",), ("tnasws",)
+
+    @property
+    def logger(self) -> "_ty.Union[_logging.Logger, _logging.LoggerAdapter]":
+        """The host's logger: every record it emits starts with ``[name]``.
+
+        Assign a logger name or a ``Logger`` to send the records elsewhere;
+        it is bound to :attr:`name` the same way. A ``LoggerAdapter`` is used
+        as it is. The JSON-RPC connection takes the logger set when it opens.
+        """
+        return _PosixHost.logger.fget(self)  # type: ignore[attr-defined]
+
+    @logger.setter
+    def logger(
+        self, value: "_ty.Union[str, _logging.Logger, _logging.LoggerAdapter, None]"
+    ) -> None:
+        _PosixHost.logger.fset(  # type: ignore[attr-defined]
+            self, _resolve_logger(value, self.name)
+        )
 
     # -- the TrueNAS surface ----------------------------------------------
 
@@ -1049,16 +1046,6 @@ class TrueNASClient(_PosixHost, _ty.Generic[ApiVersion]):
             authority = f"{authority}:{config.port}"
         api_path = config.api_path or f"/api/{config.version}"
         return _TGT.parse(f"{scheme}://{authority}{api_path}", scheme=scheme)
-
-    @property
-    def client(self):
-        """Deprecated alias for ``self``.
-
-        The host *is* the client -- they were two objects forwarding halves of
-        their surface to each other, which is now one class. Kept so
-        ``host.client.api`` and similar keep working.
-        """
-        return self
 
     # -- middleware connection ---------------------------------------------
 
@@ -1138,17 +1125,6 @@ class TrueNASClient(_PosixHost, _ty.Generic[ApiVersion]):
                 conn.close()
             except Exception:
                 pass
-
-    @property
-    def websocket(self) -> "_connection.TrueNASWSConnection":
-        """Former name of :attr:`conn`, kept because it is public API.
-
-        Defined as a property that *reads* ``self.conn`` rather than as
-        ``websocket = conn``: the latter makes two independent class
-        attributes, so patching or overriding one would silently leave the
-        other pointing at the original.
-        """
-        return self.conn
 
     def login(
         self,
@@ -1253,22 +1229,6 @@ class TrueNASClient(_PosixHost, _ty.Generic[ApiVersion]):
     def ping(self) -> str:
         """Round-trip the middleware (``core.ping`` -> ``"pong"``)."""
         return _ty.cast(str, self.api.core.ping())
-
-    def subscribe(
-        self,
-        event: str,
-        callback: "_ty.Optional[_ty.Callable[..., object]]" = None,
-        *,
-        maxsize: int = _connection.DEFAULT_EVENT_QUEUE_SIZE,
-    ):
-        """Subscribe to a middleware event; return a ``Subscription``.
-
-        ``host.subscribe("alert.list")`` is shorthand for
-        ``host.api.alert.list.subscribe()``. A subscription is bound to the
-        current websocket and does **not** survive a reconnect -- the
-        ``events()`` iterator ending is that signal.
-        """
-        return self.conn.subscribe(event, callback, maxsize=maxsize)
 
     # -- HTTP side channels ------------------------------------------------
 
