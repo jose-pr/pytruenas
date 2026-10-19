@@ -15,6 +15,7 @@ from pytruenas import connection as jsonrpc
 from pytruenas.connection import (
     CallTimeout,
     ClientException,
+    ConnectionClosed,
     TrueNASWSConnection as Client,
     ValidationErrors,
 )
@@ -400,3 +401,34 @@ def test_unsubscribe_stops_delivery_and_sends_unsubscribe():
         assert list(sub.events(timeout=0.2)) == []
     finally:
         c.close()
+
+
+def test_a_lost_connection_says_why(caplog):
+    """The reader treated any recv() failure as a clean close and logged
+    nothing, so a dropped socket looked like a slow server."""
+    import logging
+
+    fake = _FakeWS()
+    c = _client_with(fake, call_timeout=5)
+    results = []
+
+    def call():
+        try:
+            c.call("core.ping")
+        except Exception as exc:
+            results.append(exc)
+
+    with caplog.at_level(logging.WARNING):
+        caller = threading.Thread(target=call)
+        caller.start()
+        while not fake.sent:
+            time.sleep(0.01)
+        with fake._cond:
+            fake._closed = True  # the peer resets: recv() raises
+            fake._cond.notify_all()
+        caller.join(5)
+    assert "connection lost: closed" in caplog.text
+    (error,) = results
+    assert isinstance(error, ConnectionClosed) and error.sent is True
+    assert isinstance(error.__cause__, OSError)
+    c.close()

@@ -477,6 +477,8 @@ class TrueNASWSConnection:
         # the reader sets on its own, so close() still releases the socket
         # after the server ended the connection.
         self._released = False
+        #: Why the reader stopped, when it stopped on an error.
+        self._end_cause: "_ty.Optional[BaseException]" = None
 
         self._ws = self._connect()
         self._reader = _threading.Thread(target=self._read_loop, daemon=True)
@@ -521,9 +523,20 @@ class TrueNASWSConnection:
             while not self._closed.is_set():
                 try:
                     raw = self._ws.recv()
-                except Exception:
+                except Exception as exc:
+                    # The cause reaches the log and every waiting call: a
+                    # dropped socket otherwise looked like a slow server.
+                    self._end_cause = exc
+                    if self._closed.is_set():
+                        self.logger.debug("connection closed: %s", exc)
+                    else:
+                        self.logger.warning(
+                            "connection lost: %s", exc or type(exc).__name__
+                        )
                     break
                 if not raw:
+                    if not self._closed.is_set():
+                        self.logger.warning("connection closed by the server")
                     break
                 try:
                     self._dispatch(raw)
@@ -585,7 +598,9 @@ class TrueNASWSConnection:
             pending_calls = list(self._pending.values())
             self._pending.clear()
         for pending in pending_calls:
-            pending.fail(ConnectionClosed(sent=True))
+            error = ConnectionClosed(sent=True)
+            error.__cause__ = self._end_cause
+            pending.fail(error)
         with self._subs_lock:
             sinks = [s for sinks in self._subs.values() for s in sinks]
             self._subs.clear()

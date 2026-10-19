@@ -93,6 +93,11 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
+- A lost connection says why: the reader logs `connection lost: <cause>` (or
+  `connection closed by the server`) as a WARNING, and the `ConnectionClosed`
+  each waiting call raises carries the cause as `__cause__`. Any `recv()`
+  failure used to end the connection silently, so a dropped socket looked like
+  a slow server.
 - Every MCP tool takes `targets`. The hosts were added to each command's parser
   by hand, so they were missing from the tool schema: naming one was refused as
   an unknown argument, and every tool call ran against `localhost`.
