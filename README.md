@@ -41,7 +41,7 @@ pip install pytruenas
 | Extra | Enables |
 | ----- | ------- |
 | `pytruenas[ssh]` | SSH commands + the SFTP filesystem leg (`asyncssh`) |
-| `pytruenas[config]` | YAML config/targets file for the CLI (`pyyaml`) |
+| `pytruenas[config]` | The CLI's YAML config file: credentials, TLS and command sources (`pyyaml`) |
 | `pytruenas[codegen]` | `generate-typings` command (`jinja2`) |
 | `pytruenas[repo]` | `deploy --source repo`; included in the core install (`hostctl[deploy]`) |
 

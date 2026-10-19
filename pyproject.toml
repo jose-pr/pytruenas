@@ -65,7 +65,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-# Config-file support for the CLI (YAML targets/config).
+# The CLI's YAML config file (credentials, TLS, command sources).
 # 6.0.1: 6.0 no longer builds from source (Cython 3), where no wheel exists.
 config = ["pyyaml>=6.0.1,<7"]
 # Remote shell + SFTP filesystem leg: both SSH providers are hostctl's (its
