@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import json
 from logging import Logger
 
 from duho import Arg, Meta
@@ -45,5 +44,4 @@ def run(client: TrueNASClient, args: Args, logger: Logger):
 
     logger.info("Querying %s with %s", args.namespace, filter or "no filter")
     result = client.api[args.namespace]._query(**filter)
-    # default=str so ejson-decoded datetimes/sets serialize instead of raising.
     emit_json(result, args)

@@ -34,8 +34,6 @@ from argparse import BooleanOptionalAction as _BooleanOptional
 from duho import Arg, Extend, LoggingArgs, Meta
 from duho.env import Env as _Env
 
-from . import io as _ioutils  # noqa: F401
-
 
 def json_value(raw: str):
     """A CLI value as its JSON type, falling back to the raw string.
@@ -81,8 +79,9 @@ _WRITE_LOCK = _threading.Lock()
 def json_default(obj):
     """JSON fallback for what the middleware sends back.
 
-    `default=str` turned a set into its Python repr (`"{1, 2}"`) and a datetime
-    into whatever `str()` gives, neither of which round-trips as JSON.
+    A set becomes a sorted list, a date or time its ISO string, bytes text;
+    anything else its ``str()``. Each is a value JSON can read back, which a
+    Python repr (``"{1, 2}"``) is not.
     """
     import datetime
 

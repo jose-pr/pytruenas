@@ -155,5 +155,4 @@ def run(client: TrueNASClient, args: Args, logger: Logger):
         f" and {len(payload)} field(s)" if payload else "",
     )
     result = client.api[args.method](*params)
-    # default=str so ejson-decoded datetimes/sets serialize instead of raising.
     emit_json(result, args)
