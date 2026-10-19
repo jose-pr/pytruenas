@@ -118,7 +118,7 @@ def test_upload_reports_a_refused_upload(monkeypatch):
     resp = MagicMock(status_code=413, text="<html>Payload Too Large</html>")
     resp.raise_for_status.side_effect = requests.HTTPError("413 Client Error")
     monkeypatch.setattr("requests.Session.request", lambda self, *a, **k: resp)
-    with pytest.raises(requests.HTTPError):
+    with pytest.raises(ClientException, match="413 Client Error"):
         c.upload(b"data", "config.upload", token="tok", wait=False)
 
     ok = MagicMock(status_code=200, text="not json")

@@ -152,10 +152,11 @@ def test_every_leg_honours_verify(pki, leg, cert, client_ca, kind, accepted):
         if accepted:
             leg(server.port, _verify(pki, kind))
         else:
-            with pytest.raises(Exception) as raised:
+            with pytest.raises(OSError) as raised:
                 leg(server.port, _verify(pki, kind))
-            assert isinstance(raised.value, (ssl.SSLError, OSError)) or (
-                "SSL" in type(raised.value).__name__ or "ssl" in str(raised.value)
-            ), repr(raised.value)
+            # Both legs raise the TLS layer's own error, never requests' type.
+            assert type(raised.value).__module__ in ("ssl", "builtins")
+            if client_ca is None:
+                assert isinstance(raised.value, ssl.SSLCertVerificationError)
     finally:
         server.close()

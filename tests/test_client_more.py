@@ -180,10 +180,71 @@ def test_a_failed_download_does_not_name_its_token(monkeypatch):
         raise requests.ConnectionError(f"Max retries exceeded with url: {url}")
 
     monkeypatch.setattr("requests.Session.request", fake_request)
-    with pytest.raises(requests.ConnectionError) as raised:
+    with pytest.raises(ConnectionError) as raised:
         c.download("config.save")
+    assert not isinstance(raised.value, requests.RequestException)
     assert "SECRET-TOKEN" not in str(raised.value)
     assert "auth_token=<redacted>" in str(raised.value)
+    assert raised.value.__cause__ is None and raised.value.__suppress_context__
+
+
+@pytest.mark.parametrize(
+    "raised, expected",
+    [
+        ("ReadTimeout", "CallTimeout"),
+        ("ConnectTimeout", "TimeoutError"),
+        ("ChunkedEncodingError", "ClientException"),
+    ],
+)
+def test_a_side_channel_raises_no_requests_exception(monkeypatch, raised, expected):
+    import builtins
+
+    import requests
+
+    import pytruenas
+
+    c = TrueNASClient(None, autologin=False)
+    c.api = MagicMock()
+    c.api.core.download.return_value = (5, "/_download/5?auth_token=SECRET-TOKEN")
+
+    def fake_request(self, method, url, **kwargs):
+        raise getattr(requests.exceptions, raised)(f"failed: {url}")
+
+    monkeypatch.setattr("requests.Session.request", fake_request)
+    cls = getattr(pytruenas, expected, None) or getattr(builtins, expected)
+    with pytest.raises(cls) as caught:
+        c.download("config.save")
+    assert not isinstance(caught.value, requests.RequestException)
+    assert "SECRET-TOKEN" not in str(caught.value)
+
+
+def test_a_wrapped_socket_error_is_raised_as_it_is(monkeypatch):
+    """requests wraps urllib3's error, which wraps the socket's."""
+    import requests
+    import urllib3
+
+    refused = ConnectionRefusedError(111, "Connection refused")
+    try:
+        try:
+            raise refused
+        except OSError as exc:
+            raise urllib3.exceptions.NewConnectionError(None, "no connection") from exc
+    except urllib3.exceptions.NewConnectionError as exc:
+        wrapped = requests.ConnectionError(
+            urllib3.exceptions.MaxRetryError(None, "/_download/5", reason=exc)
+        )
+
+    c = TrueNASClient(None, autologin=False)
+    c.api = MagicMock()
+    c.api.core.download.return_value = (5, "/_download/5?auth_token=T")
+
+    def fake_request(self, method, url, **kwargs):
+        raise wrapped
+
+    monkeypatch.setattr("requests.Session.request", fake_request)
+    with pytest.raises(ConnectionRefusedError) as caught:
+        c.download("config.save")
+    assert caught.value is refused
 
 
 def test_upload_generates_token_when_absent(monkeypatch):

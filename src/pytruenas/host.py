@@ -186,6 +186,54 @@ def _without_otp(creds: "_auth.Credentials") -> "_auth.Credentials":
 _TOKEN_IN_QUERY = _re.compile(r"((?:auth_)?token=)[^&#\s'\")]+")
 
 
+def _transport_cause(exc: BaseException) -> "_ty.Optional[OSError]":
+    """The ``OSError`` underneath a ``requests`` connection error, if any.
+
+    ``requests`` wraps urllib3's error, which wraps the socket's or the TLS
+    layer's (in ``reason``, ``args[0]`` or the exception chain).
+    """
+    seen: "set[int]" = set()
+    pending: "list[object]" = [exc]
+    while pending:
+        current = pending.pop(0)
+        if not isinstance(current, BaseException) or id(current) in seen:
+            continue
+        seen.add(id(current))
+        module = type(current).__module__.split(".")[0]
+        if isinstance(current, OSError) and module not in ("requests", "urllib3"):
+            return current
+        pending += [
+            getattr(current, "reason", None),
+            *current.args[:1],
+            current.__cause__,
+            current.__context__,
+        ]
+    return None
+
+
+def _side_channel_error(exc: "_req.RequestException") -> BaseException:
+    """What a failed side-channel request raises in place of ``requests``' error.
+
+    The same failure raises the same type as on the API websocket: a TLS or
+    socket error is that ``OSError`` (``ssl.SSLError``,
+    ``ConnectionRefusedError``, ...), a read that timed out is
+    :class:`~pytruenas.exceptions.CallTimeout`, and an HTTP error status a
+    :class:`~pytruenas.exceptions.ClientException`. A message never carries
+    the token a download link has in its query.
+    """
+    message = _TOKEN_IN_QUERY.sub(r"\1<redacted>", str(exc))
+    if isinstance(exc, _req.ReadTimeout):
+        return _connection.CallTimeout()
+    if isinstance(exc, _req.ConnectionError):
+        cause = _transport_cause(exc)
+        if cause is not None:
+            return cause
+        if isinstance(exc, _req.ConnectTimeout):
+            return TimeoutError(message)
+        return ConnectionError(message)
+    return _connection.ClientException(message)
+
+
 class PendingDownload:
     """A download the middleware prepared: its ``job_id``, and the bytes on ``fetch()``.
 
@@ -1652,9 +1700,8 @@ class TrueNASClient(_PosixHost, _ty.Generic[ApiVersion]):
     def _side_request(self, method: str, uri: str, **kwargs) -> "_req.Response":
         """One HTTP(S) side-channel request, checked, bounded and token-free.
 
-        ``requests`` names the URL in its errors, and a download link carries
-        its ``auth_token`` in the query, so the message is re-raised without
-        it. The connect and read timeouts are the websocket's own
+        A failure raises what :func:`_side_channel_error` makes of it. The
+        connect and read timeouts are the websocket's own
         (``config.timeouts``).
         """
         timeouts = self._config.timeouts
@@ -1668,8 +1715,8 @@ class TrueNASClient(_PosixHost, _ty.Generic[ApiVersion]):
             )
             resp.raise_for_status()
         except _req.RequestException as exc:
-            message = _TOKEN_IN_QUERY.sub(r"\1<redacted>", str(exc))
-            raise type(exc)(message, response=exc.response) from None
+            # `from None`: requests' own error names the URL, token included.
+            raise _side_channel_error(exc) from None
         return resp
 
     def dump_api(self, *, cache: bool = True, refresh: bool = False):
