@@ -195,6 +195,10 @@ class PyDeclaration:
 
 
 class Method(PyDeclaration):
+    #: Describes a runtime `Namespace` helper with a narrower, schema-typed
+    #: signature: an incompatible override, deliberately.
+    overrides_runtime = False
+
     def __init__(self, method: _api.Method):
         self.definition = method
 
@@ -437,7 +441,7 @@ def _id_type(method: "Method", *extra: str) -> "dict | None":
 
 def _helper(method: "Method", name: str, params: list, ret: object) -> "Method":
     """A synthetic method entry describing a runtime `Namespace` helper."""
-    return Method(
+    helper = Method(
         {
             "name": name,
             "roles": method.definition.get("roles") or [],
@@ -455,6 +459,8 @@ def _helper(method: "Method", name: str, params: list, ret: object) -> "Method":
             },
         }
     )
+    helper.overrides_runtime = True
+    return helper
 
 
 class Renderer:

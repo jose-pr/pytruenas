@@ -27,6 +27,7 @@ from .{{ qn.pyname.relative_to(ns.pyname) }} import {{ qn.classname }}
 class {{ ns.classname }}(_NS):
     {% for qn in ns.methods() %}
     def {{ qn.pyname.name }}(self,
+        {%- if qn.overrides_runtime %}  # type: ignore[override]{% endif %}
         {%- for decl in qn.declared_parameters(typeddicts) %}
         {{ decl }},
         {%- endfor %}
