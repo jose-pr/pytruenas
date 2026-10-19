@@ -68,7 +68,7 @@ def _client_with(fake, call_timeout=2):
     orig = Client._connect
     Client._connect = lambda self: fake
     try:
-        return Client("ws://x/api/current", call_timeout=call_timeout)
+        return Client("ws://x/api/current", call_timeout=call_timeout).connect()
     finally:
         Client._connect = orig
 

@@ -100,7 +100,7 @@ def test_unix_socket_default_uri():
     orig = jsonrpc.TrueNASWSConnection._connect
     jsonrpc.TrueNASWSConnection._connect = fake_connect
     try:
-        c = jsonrpc.TrueNASWSConnection()
+        c = jsonrpc.TrueNASWSConnection().connect()
         assert created["uri"].startswith("ws+unix://")
         c.close()
     finally:

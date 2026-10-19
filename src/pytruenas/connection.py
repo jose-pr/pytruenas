@@ -44,6 +44,7 @@ from datetime import timedelta as _timedelta
 from datetime import timezone as _timezone
 from ipaddress import IPv4Interface as _IPv4Interface
 from ipaddress import IPv6Interface as _IPv6Interface
+from time import monotonic as _monotonic
 
 import websocket as _websocket
 
@@ -476,14 +477,39 @@ class TrueNASWSConnection:
         self._subs_lock = _threading.Lock()
         # Whether the socket has been shut down; separate from `_closed`, which
         # the reader sets on its own, so close() still releases the socket
-        # after the server ended the connection.
+        # after the server ended the connection. Its own lock: a send blocked
+        # on a peer that stopped reading holds `_send_lock`, and the shutdown is
+        # what unblocks it.
         self._released = False
         #: Why the reader stopped, when it stopped on an error.
         self._end_cause: "_ty.Optional[BaseException]" = None
+        self._release_lock = _threading.Lock()
+        # A send is bounded by its call's timeout: `_watch_sends` shuts the
+        # socket down when one is still blocked past `_sending_until`.
+        self._watch = _threading.Condition()
+        self._sending_until: "_ty.Optional[float]" = None
+        self._send_timed_out = False
+        self._watchdog: "_ty.Optional[_threading.Thread]" = None
 
-        self._ws = self._connect()
-        self._reader = _threading.Thread(target=self._read_loop, daemon=True)
-        self._reader.start()
+        self._open_lock = _threading.Lock()
+        self._ws: "_ty.Optional[_websocket.WebSocket]" = None
+        self._reader: "_ty.Optional[_threading.Thread]" = None
+
+    def connect(self) -> "TrueNASWSConnection":
+        """Open the websocket and start the reader thread; idempotent.
+
+        Blocks for at most ``connect_timeout`` (connect, TLS and the HTTP
+        upgrade). A call opens the connection itself if this was not called;
+        a closed connection is not reopened (:class:`ConnectionClosed`).
+        """
+        with self._open_lock:
+            if self._ws is None:
+                if self._closed.is_set():
+                    raise ConnectionClosed(sent=False)
+                self._ws = self._connect()
+                self._reader = _threading.Thread(target=self._read_loop, daemon=True)
+                self._reader.start()
+        return self
 
     # -- connection ---------------------------------------------------------
 
@@ -668,6 +694,8 @@ class TrueNASWSConnection:
                 "callback; consume Subscription.events() on another thread"
             )
 
+        if self._ws is None:
+            self.connect()
         call_id = str(_uuid.uuid4())
         # Encoded before anything is registered or sent: a parameter JSON
         # cannot encode is the caller's error, and it was reported as a
@@ -695,15 +723,19 @@ class TrueNASWSConnection:
                 raise ConnectionClosed(sent=False)
             self._pending[call_id] = pending
 
+        wait_timeout = self.call_timeout if isinstance(timeout, _Unset) else timeout
         try:
-            with self._send_lock:
-                self._ws.send(request)
+            self._send(request, wait_timeout)
         except Exception as exc:
             with self._pending_lock:
                 self._pending.pop(call_id, None)
+            if self._send_timed_out:
+                # Part of the request may be on the wire: the connection is
+                # unusable, and the call may have reached the server.
+                self.close()
+                raise CallTimeout() from None
             raise ConnectionClosed(sent=False) from exc
 
-        wait_timeout = self.call_timeout if isinstance(timeout, _Unset) else timeout
         message = pending.wait(wait_timeout)
         if message is None:
             # Only reachable with a finite timeout; timeout=None waits forever.
@@ -714,6 +746,48 @@ class TrueNASWSConnection:
         if "error" in message and message["error"] is not None:
             raise _parse_error(message["error"])
         return message.get("result")
+
+    def _send(self, request: str, timeout: "_ty.Optional[float]") -> None:
+        """Send one frame; a send still blocked after ``timeout`` is aborted."""
+        assert self._ws is not None
+        with self._send_lock:
+            if timeout is not None:
+                with self._watch:
+                    self._sending_until = _monotonic() + timeout
+                    if self._watchdog is None:
+                        self._watchdog = _threading.Thread(
+                            target=self._watch_sends, daemon=True
+                        )
+                        self._watchdog.start()
+                    self._watch.notify()
+            try:
+                self._ws.send(request)
+            finally:
+                with self._watch:
+                    self._sending_until = None
+
+    def _watch_sends(self) -> None:
+        """Shut the socket down under a send blocked past its deadline.
+
+        A peer that stops reading fills the socket buffers, and a blocking
+        send then waits forever: the call's timeout covered only the wait for
+        the response, and ``close()`` queued behind the send.
+        """
+        with self._watch:
+            while True:
+                if self._closed.is_set():
+                    return
+                until = self._sending_until
+                if until is None:
+                    self._watch.wait()
+                    continue
+                left = until - _monotonic()
+                if left > 0:
+                    self._watch.wait(left)
+                    continue
+                self._send_timed_out = True
+                break
+        self._release()
 
     # -- subscriptions ------------------------------------------------------
 
@@ -779,6 +853,10 @@ class TrueNASWSConnection:
         with self._pending_lock:
             was_closed = self._closed.is_set()
             self._closed.set()
+        with self._watch:
+            self._watch.notify_all()
+        if self._ws is None:
+            return
         if not was_closed:
             # Wake any events() consumers; the server drops server-side
             # subscriptions when the socket closes.
@@ -787,6 +865,10 @@ class TrueNASWSConnection:
                 self._subs.clear()
             for sink in sinks:
                 sink._close()
+            if self._send_lock.locked():
+                # A blocked send holds the websocket's own lock, which its
+                # close() needs: shut the socket down first.
+                self._release()
             try:
                 self._ws.close()
             except Exception:
@@ -797,8 +879,8 @@ class TrueNASWSConnection:
         """Shut the socket down, once. ``WebSocket.close()`` returns early once
         websocket-client has marked the socket disconnected (as it does on a
         server close), so this uses ``shutdown()``."""
-        with self._send_lock:
-            if self._released:
+        with self._release_lock:
+            if self._released or self._ws is None:
                 return
             self._released = True
         try:
@@ -807,7 +889,7 @@ class TrueNASWSConnection:
             pass
 
     def __enter__(self) -> "TrueNASWSConnection":
-        return self
+        return self.connect()
 
     def __exit__(self, *exc) -> None:
         self.close()

@@ -29,6 +29,9 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   and `insecure`/`ca_bundle`, and raise an error naming them if still set.
   `-k` also skips the SSH host-key check, as `verify=False` does.
   `PyTrueNASArgs._sslverify_()` is `._verify_()`.
+- **`TrueNASWSConnection(...)` does no I/O.** It opened the websocket and
+  started its reader in the constructor; `.connect()` (returning the
+  connection), `with` or the first `.call()` does that now.
 - **`pytruenas.utils.tls` is gone** (`context`, `ca_bundle`, `CA_BUNDLE_ENV`,
   `SslVerify`); the decision is private now. Pass `verify=` instead.
 
@@ -177,6 +180,10 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   URL rather than a file an installed copy does not have.
 - The suite passes with no extras installed: one SSH test lacked its
   `asyncssh` guard.
+- A call's timeout bounds its send: a peer that stopped reading held
+  `call(..., timeout=)` -- and a `close()` behind it -- forever once the socket
+  buffers filled. The send is aborted and the connection closed (part of the
+  request may be on the wire), and the call raises `CallTimeout`.
 - Behind an HTTPS proxy (`HTTPS_PROXY`), uploads and downloads verify with the
   same trust as the websockets; they ignored a CA bundle and failed (or trusted
   certifi) while the API connected.

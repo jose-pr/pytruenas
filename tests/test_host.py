@@ -986,6 +986,9 @@ def test_a_custom_socket_path_reaches_the_connection(monkeypatch):
         def __init__(self, uri, **kwargs):
             seen["uri"] = uri
 
+        def connect(self):
+            return self
+
     monkeypatch.setattr(connection, "TrueNASWSConnection", _Conn)
     TrueNASHost("unix:///run/custom/middleware.sock", autologin=False)._openwss()
     assert seen["uri"] == "ws+unix:///run/custom/middleware.sock"

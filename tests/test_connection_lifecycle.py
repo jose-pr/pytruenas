@@ -183,5 +183,5 @@ def test_opening_a_connection_has_a_timeout(monkeypatch):
             pass
 
     monkeypatch.setattr(jsonrpc._websocket, "WebSocket", _WS)
-    Client("wss://nas/api/current", connect_timeout=7)
+    Client("wss://nas/api/current", connect_timeout=7).connect()
     assert seen == {"timeout": 7, "settimeout": None}

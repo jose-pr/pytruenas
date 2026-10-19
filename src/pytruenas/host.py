@@ -1042,7 +1042,7 @@ class TrueNASHost(_PosixHost, _ty.Generic[ApiVersion]):
             # clients open at once, an unattributed "connection was closed" is
             # not actionable.
             logger=self.logger,
-        )
+        ).connect()
 
     @property
     def conn(self) -> "_connection.TrueNASWSConnection":
