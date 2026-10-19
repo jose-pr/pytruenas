@@ -1334,17 +1334,28 @@ class TrueNASHost(_PosixHost, _ty.Generic[ApiVersion]):
         wait=True,
         **kwargs,
     ):
-        """Call ``method`` for a download link and fetch it over HTTP(S)."""
+        """Call ``method`` for a download link and fetch it over HTTP(S).
+
+        With ``wait`` (the default) returns the content, once the job that
+        produced it has finished: a failed job raises
+        :class:`~pytruenas.connection.JobFailed` rather than returning what
+        was sent before it failed. ``buffered=True`` waits before fetching;
+        otherwise the job streams into the response and is checked after it.
+        ``wait=False`` returns the job id without fetching anything.
+        """
         jobid, link = self.api.core.download(
             method, args, filename or "download", buffered, **kwargs
         )
         target = self._http_target(link)
 
         if wait:
+            callback = wait if callable(wait) else None
             if buffered:
-                self.wait(jobid, callback=wait if callable(wait) else None)
+                self.wait(jobid, callback=callback)
             resp = self._http.get(target.uri, verify=self._http_verify)
             resp.raise_for_status()
+            if not buffered:
+                self.wait(jobid, callback=callback)
             return resp.content
         return jobid
 

@@ -26,6 +26,7 @@ from pathapi.providers import CommitOnClose as _CommitOnClose
 from uripath import URIPath as _URIPath
 
 from ..connection import ClientException as _ClientException
+from ..namespace import ioerror as _ioerror
 
 if _ty.TYPE_CHECKING:
     from .. import TrueNASClient
@@ -168,7 +169,10 @@ class TnasWsPath(_URIPath):
         raise NotImplementedError(mode)
 
     def _read_bytes(self) -> bytes:
-        data = self._fs.get(self.path, _filetransfer=True, _ioerror=True)
+        try:
+            data = self._fs.get(self.path, _filetransfer=True)
+        except _ClientException as error:
+            raise _oserror(_ioerror(error), self.path) from error
         return _ty.cast(bytes, data)
 
     def _write_bytes(
@@ -308,11 +312,11 @@ def _command_error(done, path: str) -> OSError:
     return OSError(_errno.EIO, message, path)
 
 
-def _oserror(error: "_ClientException", path: str) -> OSError:
+def _oserror(error: Exception, path: str) -> OSError:
     """``error`` as an ``OSError`` about ``path``; one already is, unchanged."""
     if isinstance(error, OSError):
         return error
-    return OSError(error.errno or _errno.EIO, str(error), path)
+    return OSError(getattr(error, "errno", None) or _errno.EIO, str(error), path)
 
 
 def _stat_from_info(info: "dict") -> "_FileStat":

@@ -6,6 +6,7 @@ mocked so no server or shell round-trips are needed (except the two tests gated
 on a real POSIX shell, matching test_client.py).
 """
 
+import errno
 import os
 import subprocess
 from unittest.mock import MagicMock, patch
@@ -60,6 +61,86 @@ def test_download_buffered_builds_target_and_waits(monkeypatch):
     assert "/_download/11" in captured["url"]
     # buffered=True blocks on THE job it started (11) before fetching
     assert polled == [[["id", "=", 11]]] * 2
+
+
+def _streamed_download(monkeypatch, state):
+    """A client whose unbuffered download job ends in `state`; returns the
+    client and the order of events (`GET`, then each job poll)."""
+    c = TrueNASClient(None, autologin=False)
+    c.api = MagicMock()
+    c.api.core.download.return_value = (33, "/_download/33?auth=x")
+    events = []
+
+    def fake_get(self, url, verify=None):
+        events.append("GET")
+        return MagicMock(content=b"partial", raise_for_status=lambda: None)
+
+    def get_jobs(filters):
+        events.append("poll")
+        return [
+            {
+                "id": 33,
+                "state": state,
+                "progress": {},
+                "result": None,
+                "error": "[EIO] read failed",
+                "exc_info": {},
+            }
+        ]
+
+    monkeypatch.setattr("requests.Session.get", fake_get)
+    c.api.core.get_jobs.side_effect = get_jobs
+    return c, events
+
+
+def test_a_streamed_download_checks_its_job_after_the_fetch(monkeypatch):
+    """The job streams into the response, so it is checked after the GET; a
+    wait before it would never see the job finish."""
+    c, events = _streamed_download(monkeypatch, "SUCCESS")
+    assert c.download("filesystem.get", "/mnt/f") == b"partial"
+    assert events == ["GET", "poll"]
+
+
+def test_a_streamed_download_whose_job_failed_raises(monkeypatch):
+    from pytruenas.connection import JobFailed
+
+    c, _events = _streamed_download(monkeypatch, "FAILED")
+    with pytest.raises(JobFailed):
+        c.download("filesystem.get", "/mnt/f")
+
+
+def test_read_bytes_of_a_failed_download_is_an_oserror(monkeypatch):
+    """Through the real `Namespace`: `filesystem.get` is a download."""
+    from pytruenas.fs import path as fs_path
+
+    class Middleware:
+        _closed = type("Open", (), {"is_set": lambda self: False})()
+
+        def call(self, method, *params, **kwds):
+            if method == "core.download":
+                return [33, "/_download/33?auth=x"]
+            assert method == "core.get_jobs", method
+            return [
+                {
+                    "id": 33,
+                    "state": "FAILED",
+                    "progress": {},
+                    "error": "[EIO] read failed",
+                    "exc_info": {},
+                }
+            ]
+
+    monkeypatch.setattr(
+        "requests.Session.get",
+        lambda self, url, verify=None: MagicMock(
+            content=b"partial", raise_for_status=lambda: None
+        ),
+    )
+    c = TrueNASClient("wss://nas", autologin=False)
+    c._conn = Middleware()
+    with pytest.raises(OSError) as error:
+        fs_path(c, "/mnt/f", backend="ws").read_bytes()
+    assert error.value.errno == errno.EIO
 
 
 def test_download_no_wait_returns_jobid(monkeypatch):
