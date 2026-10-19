@@ -87,6 +87,9 @@ dev = [
     "pytest",
     "pytest-cov",
     "twine",
+    # tests/test_codegen_typecheck.py checks the generated stubs with both.
+    "pyright",
+    "mypy; python_version >= '3.10'",
 ]
 docs = ["mkdocs", "mkdocs-material", "mkdocstrings[python]"]
 
