@@ -213,3 +213,24 @@ def test_connection_shares_the_hosts_logger():
     """So a record from the transport layer names the host that owns it."""
     host = TrueNASClient("wss://nas1:8443", autologin=False)
     assert host.logger.extra == {"name": "nas1:8443"}
+
+
+def test_a_record_inside_a_cli_fan_out_names_its_host_once():
+    """The fan-out tags each record with its target at the handler, after the
+    host's own prefix: a record from `client.logger` read `[nas1] [nas1] ...`."""
+    import io
+
+    from duho.fanout import run_targets
+
+    stream = io.StringIO()
+    handler = logging.StreamHandler(stream)
+    logger = logging.getLogger("pytruenas.test.fanout")
+    logger.addHandler(handler)
+    logger.setLevel(logging.INFO)
+    try:
+        host = TrueNASClient("wss://nas1", autologin=False, logger=logger.name)
+        run_targets(lambda target: host.logger.info("hello"), ["nas1"], logger=logger)
+    finally:
+        logger.removeHandler(handler)
+    assert "[nas1] hello" in stream.getvalue()
+    assert "[nas1] [nas1]" not in stream.getvalue()

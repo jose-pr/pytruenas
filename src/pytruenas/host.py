@@ -43,6 +43,7 @@ from urllib.parse import unquote as _unquote
 from urllib.parse import urlsplit as _urlsplit
 
 import requests as _req
+from duho import fanout as _fanout
 from hostctl import PosixHost as _PosixHost
 from hostctl import uri_host as _uri_host
 from hostctl import uri_hostname as _uri_hostname
@@ -133,7 +134,12 @@ class _HostLogger(_logging.LoggerAdapter):
     """
 
     def process(self, msg, kwargs):
-        prefix = f"[{self.extra['name']}] " if self.extra else ""
+        name = self.extra["name"] if self.extra else ""
+        # Inside a duho fan-out over this host, the fan-out's handler filter
+        # tags the record with the same name.
+        if name and str(_fanout.current_target.get()) == name:
+            return msg, kwargs
+        prefix = f"[{name}] " if name else ""
         text = str(msg)
         if prefix and text.startswith(prefix):
             return text, kwargs
