@@ -63,7 +63,9 @@ def test_an_empty_file_has_no_settings(tmp_path):
 @pytest.mark.parametrize(
     "text, message",
     [
-        ("credentials = [\n", "line"),  # TOML that does not parse
+        # TOML that does not parse, mid-document: at the end of a document
+        # some tomllib versions name no line.
+        ("a = 1\ncredentials = = 2\n", "line 2"),
         ("#!json\n[1, 2]\n", "expected a table"),
         ("#!ini\n[pytruenas]\nx = 1\n", "not supported"),
         ("#!nosuchformat\nx = 1\n", "nosuchformat"),
