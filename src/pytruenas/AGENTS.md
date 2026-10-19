@@ -51,9 +51,9 @@ with the package not installed.
 friendlier word at a call site; `TrueNASHost` is where the host half of the API
 is documented (next section).
 
-`TrueNASClient(config=None, credentials=None, *, verify=True, sslverify=None,
-shell=None, known_hosts=(), logger=None, autologin=True,
-version="current", executor=None, path=None, ssh=None, ...)`
+`TrueNASClient(config=None, credentials=None, *, verify=True, shell=None,
+known_hosts=(), logger=None, autologin=True, version="current",
+executor=None, path=None, ssh=None, ...)`
 
 - **`config`** (positional) — the target: a host, `"host:port"`, or full
   `scheme://...` URI, a socket path (`"/var/run/x.sock"`), or a
@@ -80,22 +80,36 @@ version="current", executor=None, path=None, ssh=None, ...)`
   `ValueError`.
 - **`autologin`** (default `True`) — the first `.conn` access calls
   `.login()` automatically when there's no live connection.
-- **`verify`** (default `True`) — one switch for every check the client
-  makes. `verify=False` turns off TLS certificate verification (the API
-  websocket, the HTTP(S) side channels, the web shell) **and** SSH host-key
-  verification (commands and SFTP): `sslverify` becomes `False` and the SSH
-  leg is `SSHConfig(verify=False)`, including an explicit `ssh=SSHConfig(...)`
-  (a copy is changed, not yours). `sslverify=` overrides it for TLS; keys
-  named with `known_hosts=` are checked even under `verify=False`.
-- **`sslverify`** (default: follows `verify`) — TLS certificate verification
-  for `wss://`, the HTTP(S) side channels and the web shell, all through one
-  context (`pytruenas.utils.tls.context`). `True` trusts the OS store only
-  (never certifi), unless `$SSL_CERT_FILE`, `$REQUESTS_CA_BUNDLE`,
-  `$CURL_CA_BUNDLE` or `$WEBSOCKET_CLIENT_CA_BUNDLE` is set — the first one
-  set is trusted *instead*. A path (`str` / `PathLike`, a PEM file or hashed
-  directory) is the CA bundle, trusted instead of the OS store; it is stored
-  as a `str`. A missing bundle raises `FileNotFoundError` naming the path and
-  its source at connect time.
+- **`verify`** (default `True`): `bool | str | os.PathLike | ssl.SSLContext`
+  — one switch for every check the client makes: TLS certificates on the API
+  websocket, the HTTP(S) side channels and the web shell (all through one
+  context), and SSH host keys on commands and SFTP. Stored on
+  `.config.verify`.
+  - `True` trusts the operating system, through the platform's verifier
+    (`truststore`: Windows CryptoAPI, the macOS Security framework, OpenSSL
+    with the system CA paths elsewhere) on Python 3.10+ and OpenSSL's default
+    store on 3.9 — what hostctl's `verify=True` means. If `$SSL_CERT_FILE`,
+    `$REQUESTS_CA_BUNDLE`, `$CURL_CA_BUNDLE` or `$WEBSOCKET_CLIENT_CA_BUNDLE`
+    is set, the first one set is trusted *instead*. certifi is never used.
+  - A path (a PEM file or a hashed directory) is the CA bundle, trusted
+    instead of the OS; it is stored as a `str`. A missing bundle raises
+    `FileNotFoundError` naming the path and its source at connect time; an
+    empty string or a boolean word (`"false"`, `"0"`, ...) raises
+    `ValueError`, and any other type `TypeError`.
+  - An `ssl.SSLContext` is used as it is on every TLS leg: a client
+    certificate (mTLS, e.g. `sslcontext.create_context(certificate=, key=)`
+    or `sslcontext.system_context()` for OS keystores and smart cards), a
+    pinned CA. One context is shared, not copied.
+  - `False` turns every check off, the SSH leg included
+    (`SSHConfig(verify=False)`, also on a copy of an explicit
+    `ssh=SSHConfig(...)`, never yours). With a remote `wss://` target the host
+    logs one WARNING, the first time the API websocket or a side channel
+    opens, that certificate verification is off.
+  - For SSH, a path or a context means "verify". Keys named with
+    `known_hosts=` are checked even under `verify=False`, which is "TLS off,
+    SSH strict": `verify=False, known_hosts=...`. For "TLS on, SSH off", pass
+    `ssh=SSHConfig(host, username="root", verify=False)`.
+  - There is no `sslverify=`: it raises `TypeError` naming `verify=`.
 - **Plaintext** — a credential sent over plain `ws://` to a non-loopback host
   logs one warning per host. `ws://` is not refused: it is legitimate for a
   loopback target or an already-private link.
@@ -247,17 +261,23 @@ version="current", executor=None, path=None, ssh=None, ...)`
 - **`.upload(file, method, *params, token=None, wait=True, **kwargs)`** —
   upload `file` (`str`/`bytes`) via the middleware's `/_upload` HTTP side
   channel, then call `method(*params, **kwargs)` server-side with it; waits on
-  the resulting job by default. Auto-generates a short-lived auth token when
-  none is given.
+  the resulting job by default and returns the job id. Auto-generates a
+  short-lived auth token when none is given.
 - **`.download(method, *args, filename=None, buffered=False, wait=True,
   **kwargs)`** — call `method` to get a download link/job, fetch it over
-  HTTP(S), and return the bytes (when `wait=True`) or the job id. With
-  `wait=True` the bytes come back only once the job finished: `buffered=True`
-  waits before fetching, otherwise the job streams into the response and is
-  checked after it; a failed job raises `connection.JobFailed` instead of
-  returning a partial body.
+  HTTP(S), and return the bytes. The bytes come back only once the job
+  finished: `buffered=True` waits before fetching, otherwise the job streams
+  into the response and is checked after it; a failed job raises
+  `connection.JobFailed` instead of returning a partial body. With
+  `wait=False` it returns a **`PendingDownload`** (`pytruenas.host`) instead:
+  `.job_id`, and `.fetch(callback=None) -> bytes`, which does the same
+  (waits for a buffered job first, checks an unbuffered one after the GET).
+  Its `repr` shows only the job id; the link carries a single-use token.
   For both, `wait=` may also be a callable: it waits, and is passed to
-  `.wait(callback=...)` for progress.
+  `.wait(callback=...)` for progress. Both side channels use the websocket's
+  timeouts (`CONNECT_TIMEOUT` to connect, `CALL_TIMEOUT` per read), raise
+  `requests`' own exceptions for an HTTP or transport error, and never name
+  a token in the message (`auth_token=<redacted>`).
 - **`.subscribe(event, callback=None, *, maxsize=1000) -> connection.Subscription`**
   — subscribe to a middleware collection event over the live websocket.
   `client.subscribe("alert.list")` is shorthand for
@@ -471,22 +491,28 @@ below raise `AttributeError` normally.
 The synchronous JSON-RPC 2.0 websocket transport backing `TrueNASClient`
 (`client.conn`).
 
-- **`TrueNASWSConnection(uri=None, *, verify_ssl=True, call_timeout=CALL_TIMEOUT,
-  connect_timeout=CONNECT_TIMEOUT, py_exceptions=False, logger=None)`** — opens
-  the websocket immediately (blocking, bounded by `connect_timeout`: connect,
-  TLS and the HTTP upgrade) and starts a background reader thread. `uri` is
-  `wss://`/`ws://` or `ws+unix://...`; `verify_ssl` takes the same values as
-  the host's `sslverify` (bool or CA bundle path; see above); `None`/bare
-  `ws+unix://` connects to `DEFAULT_UNIX_SOCKET`
-  (`/var/run/middleware/middlewared.sock`). `logger` receives the
-  connection's records (a host passes its own name-bound logger).
+- **`TrueNASWSConnection(uri=None, *, verify=True, call_timeout=CALL_TIMEOUT,
+  connect_timeout=CONNECT_TIMEOUT, py_exceptions=False, logger=None)`** —
+  builds the connection and does no I/O. `uri` is `wss://`/`ws://` or
+  `ws+unix://...`; `None`/bare `ws+unix://` connects to `DEFAULT_UNIX_SOCKET`
+  (`/var/run/middleware/middlewared.sock`). `verify` takes the same values as
+  the client's `verify` (see above). `logger` receives the connection's
+  records (a host passes its own name-bound logger).
+  - **`.connect() -> TrueNASWSConnection`** — opens the websocket (blocking,
+    bounded by `connect_timeout`: connect, TLS and the HTTP upgrade), starts
+    the background reader thread and returns the connection. Idempotent;
+    `with` and the first `.call()` do it too. A closed connection is not
+    reopened: `.connect()` and `.call()` raise `ConnectionClosed`.
   - **`.call(method, *params, timeout=UNSET, **_ignored) -> Any`** — send a
     request and block for the matching response. `timeout=None` waits
     **indefinitely**; the default sentinel uses `call_timeout`. Unknown
     kwargs in `{"job", "background", "callback", "register_call", "raise_"}`
     are silently accepted here (upstream-client compatibility; a job id is
     returned — `Namespace` is what honours `job=True`); any other unknown
-    kwarg is logged at debug level. Raises `ValidationErrors`/
+    kwarg is logged at debug level. The timeout bounds the send as well as
+    the wait for the answer: a send still blocked when it expires (a peer
+    that stopped reading) closes the connection, since part of the request
+    may be on the wire, and raises `CallTimeout`. Raises `ValidationErrors`/
     `ClientException` on a server error, `CallTimeout` on timeout,
     `ConnectionClosed` (`errno=ECONNABORTED`) if the connection dropped,
     `ClientException` with `errno=EPROTO` when the response arrived but could
@@ -500,9 +526,11 @@ The synchronous JSON-RPC 2.0 websocket transport backing `TrueNASClient`
     notifications to a `Subscription`. The registry is keyed by event name
     (the notification's `params.collection`, the routing key — NOT the returned
     sub id); two subscribers to the same event both receive it.
-  - **`.close()`** — idempotent; also usable as a context manager. Wakes every
-    subscription's `events()` iterator (as does a dropped connection), and
-    releases the socket even when the server closed the connection first.
+  - **`.close()`** — idempotent; also usable as a context manager. Sends the
+    close frame without waiting for the peer's answer, and does not wait
+    behind a blocked send. Wakes every subscription's `events()` iterator (as
+    does a dropped connection), and releases the socket even when the server
+    closed the connection first.
     A connection whose reader ended is `._closed`, so the owning host opens a
     new one on next use; one bad message does not end it (it is logged and
     dropped).
@@ -681,8 +709,9 @@ consumer can compose a host of its own.
   `subprocess.TimeoutExpired(orphaned=False)` carrying what arrived; any other
   failure closes it too, and the next command reconnects.
 - **`webshell.WebShellSession(client, **options)`** — one `/websocket/shell`
-  session: `.connect()` (idempotent; a rejected token raises
-  `hostctl.OperationNotStartedError`), `.stream` (the websocket as a
+  session: `.connect()` (idempotent; a rejected token, or no `connected`
+  message after it, raises `hostctl.OperationNotStartedError`, and a failure
+  of any shape closes the websocket it opened), `.stream` (the websocket as a
   `hostctl.console.ConsoleStream`; connects first), `.close()`, `.shell_id`.
   It runs no command itself: use `WebShellExecutor`, or `client.run(...)`.
 - **`webshell.clean_output(data: bytes) -> str`** — raw PTY bytes as text,
@@ -989,12 +1018,6 @@ uses.
   names the alternatives. `TRUE`/`FALSE` are the accepted boolean spellings —
   strict sets, because `bool("false")` is `True` and would send the wrong
   value.
-- **`tls`** — the one TLS trust decision every leg uses.
-  **`context(sslverify) -> ssl.SSLContext | None`** (`None` when verification
-  is off) and **`ca_bundle(sslverify) -> (path, source) | None`**, which says
-  which bundle is trusted and where it came from (`"sslverify"` or the
-  environment variable's name). `CA_BUNDLE_ENV` is that variable list, in
-  precedence order.
 - **`io`** — internal helpers (byte-like checks); no stable external contract.
 
 ## Exceptions
@@ -1072,15 +1095,16 @@ web shell), `utils.apicache.ApiDumpError`, `apihelp.UnknownMethod`,
 `PyTrueNASArgs` (a `duho.LoggingArgs` mixin) carries the global fields every
 command sees: `config` (`--config`/`-c`, a path, default `$PYTRUENAS_CONFIG`,
 else `$PYTRUENAS_CFG`, else `./pytruenas.yaml`), `cmdspath` (`--cmdspath`,
-split on `:`), `sslverify` (`--sslverify`/`--no-sslverify`, unset by default),
-`insecure` (`--insecure`/`-k`), `parallel` (default `1`), `logto` (default `-`
+split on `:`), `insecure` (`--insecure`/`-k`), `ca_bundle` (`--ca-bundle
+FILE`), `parallel` (default `1`), `logto` (default `-`
 for stderr, or a `{target}`/`{isodate}` path template; each target's file gets
 only that target's records, `--parallel` included), plus `targets` (the
 trailing positionals, not a flag; each command declares the field last through
 `with_targets(args_cls)`, whose field type is `TargetsField`) and helper
 methods `._config_dict_()`/`._expanded_targets_()`. `._config_dict_()` is the
-YAML mapping (the `config` extra); the CLI reads three keys from it —
-`credentials`, `sslverify` and `commandspath` — and ignores any other. The
+YAML mapping (the `config` extra); the CLI reads four keys from it —
+`credentials`, `insecure`, `ca_bundle` and `commandspath` — and ignores any
+other. The
 implicit `./pytruenas.yaml` may be absent; a file named with `--config` or
 `$PYTRUENAS_CONFIG` must exist (`duho.UsageError`, exit status 2). Target
 expansion (commas and `[A-Z]`/`[0-9]` ranges) applies to the HOST part only —
@@ -1094,9 +1118,15 @@ to build a client from parsed args:
   (`./pytruenas.yaml`) rather than named by `--config`/`$PYTRUENAS_CONFIG`.
   `main` refuses `commandspath` from an implicit file: that key names code to
   import, and a CLI often runs in a directory its user does not control.
-- **`._sslverify_() -> bool|str`** — `-k`/`--insecure`, else
-  `--sslverify`/`--no-sslverify`, else `$PYTRUENAS_SSLVERIFY`, else the config
-  file's `sslverify`, else `True`. A string is a CA bundle path.
+- **`._verify_() -> bool|str`** — the `verify=` for the clients the CLI
+  builds. Each layer in turn — the flags (`-k`, `--ca-bundle`), then
+  `$PYTRUENAS_INSECURE`/`$PYTRUENAS_CA_BUNDLE`, then the config file's
+  `insecure`/`ca_bundle` — can turn verification off (`False`) or name a CA
+  bundle (its path, which must exist, else `ValueError` naming the source);
+  the first that does wins, else `True`. An empty variable is unset; a
+  non-boolean `$PYTRUENAS_INSECURE` or config `insecure` is a `ValueError`.
+  The removed `$PYTRUENAS_SSLVERIFY` and config `sslverify` raise
+  `ValueError` naming their replacements.
 - **`._credentials_() -> Credentials|None`** — `$TN_CREDS`, else the config
   file's `credentials` (a connection string, or a mapping of keyword
   arguments), else `None`.
@@ -1330,11 +1360,11 @@ is routinely run from a directory the user does not control.
   defaulting to `~/.cache`; or `%LOCALAPPDATA%\pytruenas\cache`). A host label
   is sanitized to a single path component, so a connection string cannot
   choose where the file lands.
-- **`PYTRUENAS_SSLVERIFY`** — the CLI's TLS default when no flag is given: a
-  boolean (`true`/`false`/`1`/`0`/`yes`/`no`/`on`/`off`, ...) or an existing CA
-  bundle path. Empty is unset (the config file, then verify); anything else is
-  a `ValueError` naming the variable. The config file's `sslverify` takes the
-  same values.
+- **`PYTRUENAS_INSECURE`**, **`PYTRUENAS_CA_BUNDLE`** — the CLI's TLS
+  defaults when no flag is given (`._verify_()` above): a boolean
+  (`true`/`false`/`1`/`0`/`yes`/`no`/`on`/`off`, ...) that turns verification
+  off, and an existing CA bundle path. Empty is unset (the config file's
+  `insecure`/`ca_bundle`, then `True`).
 - **`PYTRUENAS_MCP`** — not read by pytruenas itself, nor through `ENV`:
   `duho`'s own `<PREFIX>_MCP` launch trigger, keyed off this app's `Env`
   prefix. Setting `PYTRUENAS_MCP=stdio` makes `main()` serve MCP over stdio
@@ -1351,17 +1381,18 @@ is routinely run from a directory the user does not control.
   at import time by `pytruenas.connection`. Not prefixed, and not routed
   through `ENV`.
 - **`SSL_CERT_FILE`**, **`REQUESTS_CA_BUNDLE`**, **`CURL_CA_BUNDLE`**,
-  **`WEBSOCKET_CLIENT_CA_BUNDLE`** — the first one set is the CA bundle
-  `sslverify=True` trusts instead of the OS store (`utils.tls.CA_BUNDLE_ENV`).
+  **`WEBSOCKET_CLIENT_CA_BUNDLE`**, in that order — the first one set
+  (non-empty) is the CA bundle `verify=True` trusts instead of the operating
+  system. A bundle passed as `verify=` takes precedence over them.
 
 ## Gotchas
 
 - **Middleware parameters are positional.** `client.api.user.query(filters)`,
   not `filters=`: any keyword the method does not take raises `TypeError`.
   The `_query`/`_get`/`_create`/`_update`/`_upsert` helpers take keywords.
-- **Nothing connects until first use.** Building a client or a
-  `TrueNASConfig` does no network I/O; a wrong host, port or credential
-  surfaces on the first call.
+- **Nothing connects until first use.** Building a client, a
+  `TrueNASConfig` or a `TrueNASWSConnection` does no network I/O; a wrong
+  host, port or credential surfaces on the first call.
 - **A bare host means TLS.** `"nas"` is `wss://nas/api/current`; spell
   `ws://` for plaintext, which logs a warning when credentials go to a
   non-loopback host.
