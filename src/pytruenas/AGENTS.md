@@ -3,7 +3,8 @@
 Header-file-style reference for the `pytruenas` package: every public export
 with its signature, arguments, contract, and gotchas, so this module can be
 consumed without reading its source. Kept current with the public API. For the
-project overview and CLI usage, see the project overview doc at the repo root.
+project overview and CLI usage, see <https://github.com/jose-pr/pytruenas> and
+<https://jose-pr.github.io/pytruenas/>.
 
 ## Package root (`pytruenas`)
 
@@ -20,14 +21,14 @@ project overview and CLI usage, see the project overview doc at the repo root.
 two objects forwarding halves of their surface to each other (`client.run()`
 called `client.host.run()`; `host.api` called `host.client.api`); that is gone.
 `client` is the friendlier word at a call site, `TrueNASHost` is where the
-host half of the API is documented, and `.client`/`.host` both return the
-object itself.
+host half of the API is documented, and `.client` returns the object itself.
 
-`TrueNASClient(target=None, credentials=None, *, verify=True, sslverify=None,
+`TrueNASClient(config=None, credentials=None, *, verify=True, sslverify=None,
 shell=None, known_hosts=(), logger=None, autologin=True,
 version="current", executor=None, path=None, ssh=None, ...)`
 
-- **`target`** — a host, `"host:port"`, or full `scheme://...` URI. `None` /
+- **`config`** (positional) — the target: a host, `"host:port"`, or full
+  `scheme://...` URI, or a `TrueNASConfig`. There is no `target=` keyword. `None` /
   omitted / local-only resolves to the local middleware unix socket
   (`ws+unix:///var/run/middleware/middlewared.sock`). A remote target with no
   scheme or path resolves to **TLS and the current API** — `"nas"` means
@@ -121,8 +122,8 @@ version="current", executor=None, path=None, ssh=None, ...)`
 - **`.config`** — the `TrueNASConfig` this was built from. `.config.ssh` is the
   SSH leg; `.shell` means the *bound shell object* (`client.shell.run(...)`),
   as it does throughout hostctl.
-- **`.client`** / **`.host`** — both return the object itself, kept so code
-  written against the two-object model keeps working.
+- **`.client`** — returns the object itself, kept so code written against
+  the two-object model keeps working.
 - **`.capabilities`** — `{"run", "path"}` as available, plus `"spawn"`/`"tty"`
   when an SSH leg is configured; a remote target with no SSH and no web shell
   honestly reports no `run`.
@@ -397,19 +398,20 @@ than the dunder-safe helpers below raise `AttributeError` normally.
   unchanged when either half matches, so it is not rewritten on every call.
 - **`._upsert(selector=None, callback=None, *opts, **fields)`** — `._update`
   if a matching record exists, else `._create`. `callback(action, id,
-  result)` (`action` is a `DbAction` — `CREATE`/`UPDATE`/`UPSERT`) fires after
-  the mutation when given. Common opts: `idkey` (default `"id"`),
+  result)` fires after the call when given: `action` is `DbAction.CREATE` or
+  `DbAction.UPDATE`, or `None` when nothing changed, and `id` is `None` after a
+  create (read it from `result`). Common opts: `idkey` (default `"id"`),
   `update_exclude`/`create_exclude` (field names to drop for that path),
   `wait` (wait on a returned job id; default `True`), `force`.
 
 ## `connection` (`pytruenas.connection`)
 
 The synchronous JSON-RPC 2.0 websocket transport backing `TrueNASClient`
-(re-exported as `pytruenas._conn`). All annotations are quoted so the module
-imports on Python 3.9.
+(`client.conn`). All annotations are quoted so the module imports on Python
+3.9.
 
-- **`Client(uri=None, *, verify_ssl=True, call_timeout=CALL_TIMEOUT,
-  connect_timeout=CONNECT_TIMEOUT, py_exceptions=False)`** — opens the
+- **`TrueNASWSConnection(uri=None, *, verify_ssl=True, call_timeout=CALL_TIMEOUT,
+  connect_timeout=CONNECT_TIMEOUT, py_exceptions=False, logger=None)`** — opens the
   websocket immediately (blocking, bounded by `connect_timeout`: connect, TLS
   and the HTTP upgrade) and starts a background reader thread. `uri` is `wss://`/`ws://` or
   `ws+unix://...`; `verify_ssl` takes the same values as the host's
@@ -532,7 +534,9 @@ builds the individual path types (below).
   via a `TnasWsBackend(client)`. Implements stat/listdir/open/read/write/
   mkdir/chmod/chown; `unlink`/`rmdir` shell out (`rm -f` / `rmdir`) because
   `filesystem.*` has no delete op. Built from a bare URI (no backend) raises
-  `RuntimeError` on first use — always construct via `client.path(...)`.
+  `RuntimeError` on first use — construct one with
+  `pytruenas.fs.path(client, ..., backend="ws")`. `client.path(...)` returns
+  hostctl's `CompositePosixPath`, whose websocket leg is a `TnasWsPath`.
   Listing calls `filesystem.listdir` with an explicit `select` projection
   (`name` for `_listdir`; `name`/`type`/`size`/`mode` for `_scandir`, which
   seeds each child's stat in the same round trip). That is load-bearing, not
@@ -910,7 +914,9 @@ Backs the `generate-typings` command; not typically used directly.
 
 ## `models` (`pytruenas.models`)
 
-TypedDict schemas only (no runtime behavior); import the submodules directly.
+TypedDict schemas; import the submodules directly. The `models.jsonschema`
+types also carry `get_type`/`python_declaration`, which the typings generator
+uses.
 
 - **`pytruenas.models.apidump`** — `Api` (`{"versions": [Version, ...]}`),
   `Version` (`{"version", "methods", "events"}`), `Method`

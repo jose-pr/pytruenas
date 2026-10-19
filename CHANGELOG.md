@@ -51,6 +51,14 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   code instead of sending the spent one again (which the server refused, so the
   session never came back); without a provider it raises
   `AuthenticationError("OTP_REQUIRED")`.
+- The shipped API header documented names that do not exist: a `target=`
+  keyword (the first parameter is positional `config`), `.host`,
+  `connection.Client` and `pytruenas._conn` (the class is `TrueNASWSConnection`,
+  which also takes `logger=`), `client.path()` returning a `TnasWsPath`, and an
+  `UPSERT` action passed to `_upsert`'s callback. It now points at the project
+  URL rather than a file an installed copy does not have.
+- The suite passes with no extras installed: one SSH test lacked its
+  `asyncssh` guard.
 - `examples/simple_client_from_yaml.py` moved to `examples/scripts/`, so
   `--cmdspath examples` no longer warns that it is not a command.
 
