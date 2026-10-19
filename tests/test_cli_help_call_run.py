@@ -166,6 +166,54 @@ def test_help_reads_the_version_once(name):
 # -- call ------------------------------------------------------------------
 
 
+def test_call_sends_its_params(capsys):
+    assert _main("call", "system.version", "-p", '{"a": 1}', "-p", "5", "nas1") == 0
+    assert FakeClient.sent == [("system.version", ({"a": 1}, 5))]
+    assert json.loads(capsys.readouterr().out) == {"ok": True}
+
+
+def test_call_fields_after_the_separator_are_typed_from_the_schema():
+    argv = ["call", "user.create", "nas1", "--"]
+    argv += ["--username=svc", "shell=/usr/bin/bash", "--smb=false"]
+    assert _main(*argv) == 0
+    payload = {"username": "svc", "shell": "/usr/bin/bash", "smb": False}
+    assert FakeClient.sent == [("user.create", (payload,))]
+
+
+def test_call_fields_fill_the_payload_after_the_id():
+    argv = ["call", "user.update", "-p", "7", "nas1", "--", "--full_name=New"]
+    assert _main(*argv) == 0
+    assert FakeClient.sent == [("user.update", (7, {"full_name": "New"}))]
+
+
+def test_call_pads_missing_params_before_the_payload_with_null():
+    """With no `-p`, the payload still goes where the method wants it, and
+    the id ahead of it is sent as null for the appliance to refuse."""
+    assert _main("call", "user.update", "nas1", "--", "--full_name=New") == 0
+    assert FakeClient.sent == [("user.update", (None, {"full_name": "New"}))]
+
+
+@pytest.mark.parametrize(
+    "tail, message",
+    [
+        (["--usernme=svc"], "usernme"),
+        (["--username=svc", "--shell=/bin/sh"], "/usr/bin/zsh"),
+    ],
+)
+def test_call_refuses_a_bad_field_before_calling_anything(tail, message, caplog):
+    with caplog.at_level(logging.ERROR):
+        assert _main("call", "user.create", "nas1", "--", *tail) == 2
+    assert message in caplog.text
+    assert FakeClient.sent == []
+
+
+def test_call_an_unknown_method_exits_2_with_suggestions(caplog):
+    with caplog.at_level(logging.ERROR):
+        assert _main("call", "user.creat", "nas1", "--", "--username=x") == 2
+    assert "did you mean: user.create" in caplog.text
+    assert FakeClient.sent == []
+
+
 @pytest.mark.parametrize("error", [RuntimeError("closed"), KeyError("version")])
 def test_call_without_a_schema_sends_the_fields_untyped(error, caplog):
     """A schema that cannot be read is a warning: the untyped call still goes
@@ -176,3 +224,15 @@ def test_call_without_a_schema_sends_the_fields_untyped(error, caplog):
         assert _main("call", "user.create", "nas1", "--", "--smb=false") == 0
     assert "typing fields as plain JSON" in caplog.text
     assert FakeClient.sent == [("user.create", ({"smb": False},))]
+
+
+def test_call_no_schema_never_reads_one():
+    assert _main("call", "--no-schema", "user.create", "nas1", "--", "uid=5") == 0
+    assert FakeClient.calls["core.get_methods"] == 0
+    assert FakeClient.sent == [("user.create", ({"uid": 5},))]
+
+
+def test_a_tail_the_command_does_not_read_is_reported(caplog):
+    with caplog.at_level(logging.WARNING):
+        assert _main("help", "user", "nas1", "--", "--username=x") == 0
+    assert "ignoring the 1 argument(s) after '--': help reads none" in caplog.text
