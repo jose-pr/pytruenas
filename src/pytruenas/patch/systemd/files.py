@@ -98,9 +98,11 @@ class SystemFile(FileTarget):
 
     def _notify(self) -> None:
         """Regenerate etc groups and reload services after a real change."""
-        if self.etc:
-            LOGGER.info("Regenerating etc group(s): %s", ", ".join(self.etc))
-            self.client.api.etc.generate(*self.etc)
+        # One call per group: `etc.generate(name, checkpoint=None)` reads a
+        # second positional as its checkpoint, not as another group.
+        for group in self.etc:
+            LOGGER.info("Regenerating etc group: %s", group)
+            self.client.api.etc.generate(group)
         for service in self.services:
             LOGGER.info("Reloading service: %s", service)
             self.client.api.service.reload(service)
