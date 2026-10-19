@@ -7,17 +7,17 @@ from . import jsonschema as _schema
 from .jsonschema import Schema  # noqa: F401
 
 
-class Api(_ty.TypedDict):
+class API(_ty.TypedDict):
     versions: "list[Version]"
 
 
 class Version(_ty.TypedDict):
     version: str
-    methods: "list[Method]"
-    events: "list[Event]"
+    methods: "list[APIMethod]"
+    events: "list[APIEvent]"
 
 
-class Method(_ty.TypedDict):
+class APIMethod(_ty.TypedDict):
     name: str
     roles: list[str]
     doc: str
@@ -38,7 +38,7 @@ MethodProperties = _ty.TypedDict(
 )
 
 
-class Event(_ty.TypedDict):
+class APIEvent(_ty.TypedDict):
     name: str
     roles: list[str]
     doc: str
@@ -46,10 +46,10 @@ class Event(_ty.TypedDict):
 
 
 __all__ = [
-    "Api",
+    "API",
     "Version",
-    "Method",
+    "APIMethod",
     "MethodSchema",
     "MethodProperties",
-    "Event",
+    "APIEvent",
 ]

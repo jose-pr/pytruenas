@@ -15,7 +15,8 @@ from pathlib import Path
 
 import pytest
 
-from pytruenas.codegen import Codegen, docstring
+from pytruenas.codegen import Codegen
+from pytruenas.codegen._declarations import docstring
 from pytruenas.codegen._types import class_name, typeddict_name
 from duho.qualname import PythonName
 
@@ -153,7 +154,7 @@ _INIT_NAME = "__init__.pyi"
 # -- unit tests on the helpers -------------------------------------------------
 
 
-def test_camelcase_handles_trailing_separator():
+def test_class_name_handles_trailing_separator():
     assert class_name("global_") == "Global"
     assert class_name("query-options") == "QueryOptions"
     assert class_name("a__b") == "AB"

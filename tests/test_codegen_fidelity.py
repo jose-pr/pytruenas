@@ -14,7 +14,7 @@ from pathlib import Path
 import pytest
 
 from pytruenas import codegen
-from pytruenas.codegen import _types
+from pytruenas.codegen import _declarations, _types
 from pytruenas.models import jsonschema as js
 
 FIXTURE = Path(__file__).parent / "fixtures" / "api_min.json"
@@ -54,7 +54,7 @@ def test_an_empty_array_schema_is_an_empty_list():
 )
 def test_any_docstring_still_compiles(doc):
     """A doc ending in `\"\"\"` produced a stub that would not parse."""
-    rendered = codegen.docstring(doc)
+    rendered = _declarations.docstring(doc)
     ast.parse(f'def f():\n    """{rendered}"""\n')
 
 
@@ -132,11 +132,11 @@ def test_two_shapes_with_one_name_do_not_overwrite_each_other():
 def test_a_string_default_stays_a_string(default, expected):
     """It was parsed with literal_eval and passed through when that worked, so a
     default of "0" became the integer 0 and the stub lied about the type."""
-    assert codegen._default_literal(default) == expected
+    assert _declarations._default_literal(default) == expected
 
 
 def test_the_packages_own_source_defaults_still_render_as_source():
-    assert codegen._default_literal(codegen.Source("None")) == "None"
+    assert _declarations._default_literal(_declarations.Source("None")) == "None"
 
 
 def test_the_schema_models_are_data_only():
@@ -186,9 +186,16 @@ def test_generate_does_not_touch_the_callers_dump(tmp_path):
 def test_a_name_cannot_escape_the_output_directory(tmp_path):
     """Every path component comes from the dump."""
     root = tmp_path / "typings"
-    with pytest.raises(codegen.BadApiName):
+    with pytest.raises(codegen.BadAPIName):
         codegen._check_inside(root, root.parent / "elsewhere" / "__init__.pyi")
     codegen._check_inside(root, root / "user" / "__init__.pyi")  # fine
+
+
+def test_a_bad_name_is_a_pytruenas_error_and_a_value_error():
+    from pytruenas import TrueNASError
+
+    assert issubclass(codegen.BadAPIName, TrueNASError)
+    assert issubclass(codegen.BadAPIName, ValueError)
 
 
 def test_get_instance_without_an_id_parameter_generates(tmp_path):

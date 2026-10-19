@@ -55,7 +55,7 @@ from ..exceptions import APIDumpError, UnknownMethod
 
 if _ty.TYPE_CHECKING:  # pragma: no cover - typing only
     from ..host import TrueNASClient
-    from ..models.apidump import Api
+    from ..models.apidump import API
 
 #: Where the dump is built on the target. ``/var/db/system`` is a dataset on a
 #: data pool, so it survives an update -- and unlike ``/tmp`` it is not mounted
@@ -252,7 +252,7 @@ def _fetch_chunked(client: "TrueNASClient", remote: str, size: int) -> bytes:
     return bytes(out)
 
 
-def fetch(client: "TrueNASClient", *, keep_remote: bool = False) -> "Api":
+def fetch(client: "TrueNASClient", *, keep_remote: bool = False) -> "API":
     """Build the API definition on the target and return the parsed dump.
 
     The dump is written to a file of its own under :data:`REMOTE_DIR`, removed
@@ -297,7 +297,7 @@ def load(
     *,
     refresh: bool = False,
     version: "str | None" = None,
-) -> "Api":
+) -> "API":
     """Return the API definition for ``client``, from cache when possible.
 
     ``version`` names the appliance's version for cache keying; omitted, it is
@@ -411,7 +411,7 @@ def service_methods(
     return found
 
 
-def store(api: "Api", cache: "_pathlib.Path") -> None:
+def store(api: "API", cache: "_pathlib.Path") -> None:
     """Write ``api`` to ``cache``, atomically and compressed."""
     cache.parent.mkdir(parents=True, exist_ok=True)
     # Written beside and renamed: an interrupted write must not leave a

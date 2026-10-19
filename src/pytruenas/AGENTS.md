@@ -291,7 +291,7 @@ executor=None, path=None, ssh=None, ...)`
   `requests`' own exceptions for an HTTP or transport error, and never name
   a token in the message (`auth_token=<redacted>`).
 - **`.dump_api(*, cache=True, refresh=False) -> dict`** — the middleware API
-  definition (see `pytruenas.models.apidump.Api`). The dump is built **and
+  definition (see `pytruenas.models.apidump.API`). The dump is built **and
   gzipped on the target**, then fetched over SFTP when the host has an SSH leg
   and in verified 256 KiB chunks through the command channel otherwise; the
   transfer is checked against the target's own sha256 and a mismatch raises
@@ -887,11 +887,14 @@ check=, capture_output=, encoding=)` and `client.api.<ns>.<method>(...)`. A
 ## Typings generator (`pytruenas.codegen`)
 
 Backs the `generate-typings` command; not typically used directly.
+`__all__ = ["Codegen", "BadAPIName"]`; the declarations and rendering behind
+them are private (`codegen._declarations`, `_render`, `_types`).
 
-- **`Codegen().generate(api: Version, root: Path | str)`** — write one
+- **`Codegen().generate(api: Version, root: Path | str) -> None`** — write one
   `__init__.pyi` per API namespace under `root`, built in Python (no template
-  engine, no extra). `api` is one entry
-  from `client.dump_api()["versions"]` (see `pytruenas.models.apidump`).
+  engine, no extra). `api` is one entry from
+  `client.dump_api()["versions"]` (a `pytruenas.models.apidump.Version`); it
+  is not modified.
   Renders into a temporary sibling and swaps it in only when complete: the
   previous tree is renamed aside and deleted after the new one is in place, so
   a failure (on Windows, a stub held open or a shell inside the tree) leaves
@@ -899,8 +902,8 @@ Backs the `generate-typings` command; not typically used directly.
   tree that cannot be deleted is logged at WARNING. `root` is replaced only if
   it is absent, empty, or a previous output (marked `.pytruenas-typings`);
   otherwise `FileExistsError` — hand-written stubs included.
-- **`codegen.BadApiName`** (`ValueError`) — a dump name that would write
-  outside the output directory.
+- **`codegen.BadAPIName`** (`pytruenas.TrueNASError`, `ValueError`) — a
+  dump name that would write outside the output directory.
 
 ## Generated typings (`generate-typings` output)
 
@@ -922,7 +925,7 @@ Backs the `generate-typings` command; not typically used directly.
 - A schema form this generator cannot express degrades to `JsonValue` instead
   of failing the run; `JsonValue`/`JsonObject`/`JsonArray` are real aliases.
 - Generation never mutates the dump it is given, and never writes outside the
-  output directory (`codegen.BadApiName` if a dump name would escape it).
+  output directory (`codegen.BadAPIName` if a dump name would escape it).
 - The synthetic helpers `_create`/`_update`/`_upsert`/`_get` type a
   namespace's payload, so they narrow the runtime `Namespace` signatures; each
   carries `# type: ignore[override]`. One is omitted (logged at INFO) when the
@@ -950,11 +953,15 @@ TypedDicts and type aliases only (no runtime behavior); import the submodules
 directly. Generated stubs import `pytruenas.models.jsonschema` for
 `JsonValue`/`JsonObject`/`JsonArray`/`JsonNumber`, so those names stay.
 
-- **`pytruenas.models.apidump`** — `Api` (`{"versions": [Version, ...]}`),
-  `Version` (`{"version", "methods", "events"}`), `Method`
-  (`{"name", "roles", "doc", "schemas"}`), `Event`.
-- **`pytruenas.models.jsonschema`** — the JSON-Schema-shaped `Schema`/`Object`/
-  `Array` TypedDicts used by `Method.schemas`.
+- **`pytruenas.models.apidump`** — `API` (`{"versions": [Version, ...]}`),
+  `Version` (`{"version", "methods", "events"}`), `APIMethod`
+  (`{"name", "roles", "doc", "schemas"}`), `MethodSchema`,
+  `MethodProperties`, `APIEvent` (`{"name", "roles", "doc", "schemas"}`).
+- **`pytruenas.models.jsonschema`** — the JSON-Schema-shaped TypedDicts
+  (`Schema`, `BaseType`, `AnyOf`, `OneOf`, `Object`, `Array`, and one per
+  scalar type: `Float`, `Null`, `Boolean`, `Integer`, `Number`, `String`,
+  `Any`), `TypeDeclaration`, and the aliases `JsonValue`, `JsonObject`,
+  `JsonArray`, `JsonNumber`.
 
 ## Utilities (`pytruenas.utils`)
 
@@ -1102,7 +1109,7 @@ connecting — is raised as it is. The side channels (`upload`, `download`)
 raise `requests`' own exceptions for an HTTP or transport error. Other
 exceptions, documented where they arise: `hostctl.MissingExtraError` (a missing
 extra), `hostctl.OperationNotStartedError` (a provider declined:
-`path(backend=)`, the web shell), `codegen.BadApiName`, and `duho.UsageError`
+`path(backend=)`, the web shell), `codegen.BadAPIName`, and `duho.UsageError`
 from the CLI.
 
 ## Command line
