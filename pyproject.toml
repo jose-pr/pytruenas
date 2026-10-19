@@ -1,5 +1,5 @@
 [build-system]
-requires = ["hatchling"]
+requires = ["hatchling>=1.27"]  # PEP 639 license fields need 1.27
 build-backend = "hatchling.build"
 
 [project]
@@ -86,6 +86,7 @@ pytruenas = "pytruenas.main:main"
 
 [project.urls]
 Homepage = "https://github.com/jose-pr/pytruenas/"
+Documentation = "https://jose-pr.github.io/pytruenas/"
 Issues = "https://github.com/jose-pr/pytruenas/issues"
 Repository = "https://github.com/jose-pr/pytruenas"
 
@@ -100,17 +101,20 @@ Repository = "https://github.com/jose-pr/pytruenas"
 
 [tool.hatch.build.targets.sdist]
 # `/.*` covers every dot-entry at the root (.github, .venv, .pytest_cache,
-# .coverage, private tool directories). .gitignore still ships: hatchling
-# includes it for sdists by design, so the archive reproduces the source tree.
+# .coverage, private tool directories). The repo-root AGENTS.md orients a
+# contributor in a checkout and benchmarks/ is a development tool; neither is
+# part of the source a consumer builds from. .gitignore still ships: hatchling
+# includes it in an sdist by design.
 #
-# `*.local.*` is separate on purpose and matches at any depth: a dotfile
-# pattern does NOT match `AGENTS.local.md`, whose name does not start with a
-# dot -- and it sits in the same directory as the `AGENTS.md` that is meant to
-# ship. Same directory, nearly the same name, opposite destinations.
-exclude = ["/.*", "*.local.*"]
+# `*.local.*` (personal overrides) and `CLAUDE*` (agent config) match at any
+# depth, so they stay out even of a tree copied without its .gitignore. A
+# dotfile pattern does NOT match `AGENTS.local.md`, which sits beside the
+# `AGENTS.md` that is meant to ship.
+exclude = ["/.*", "/AGENTS.md", "/benchmarks", "*.local.*", "CLAUDE*"]
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/pytruenas"]
+exclude = ["*.local.*", "CLAUDE*"]
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]

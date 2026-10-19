@@ -8,7 +8,14 @@ Importing it here is what makes that visible.
 import ast
 from pathlib import Path
 
+import pytest
+
 RUNNER = Path(__file__).resolve().parent.parent / "benchmarks" / "run.py"
+
+# The sdist ships tests/ but not benchmarks/.
+pytestmark = pytest.mark.skipif(
+    not RUNNER.is_file(), reason="benchmarks/ is not in this tree (an sdist)"
+)
 
 
 def _module():
