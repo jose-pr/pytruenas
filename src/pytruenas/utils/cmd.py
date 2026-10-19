@@ -20,6 +20,7 @@ from __future__ import annotations
 
 import logging as _pylogging
 import os as _os
+import re as _re
 import threading as _threading
 import typing as _ty
 from logging import Logger as _Logger
@@ -392,6 +393,10 @@ def _split_userinfo(target: str) -> "tuple[str, str]":
     return prefix + userinfo + "@", hostpart + rest[end:]
 
 
+#: A comma followed by a scheme starts another target: `wss://a,ws://b`.
+_NEXT_TARGET = _re.compile(r",(?=[A-Za-z][A-Za-z0-9+.-]*://)")
+
+
 def _expand_target(item: str, expand) -> "list[str]":
     """One positional into its targets, expanding only the HOST part.
 
@@ -399,10 +404,31 @@ def _expand_target(item: str, expand) -> "list[str]":
     outside the credentials. Running either over the whole string turned
     ``wss://root:pw,with,commas@nas`` into three bogus targets and made
     ``root:secret@nas1,nas2`` a second target with no credentials at all.
+    A part with its own scheme (``wss://nas1,ws://nas2``) or its own user
+    (``nas1,root:pw@nas2``) is a target of its own; the hosts that follow a
+    part's credentials share them.
     """
+    return [
+        target
+        for chunk in _NEXT_TARGET.split(item)
+        for target in _expand_one(chunk, expand)
+    ]
+
+
+def _expand_one(item: str, expand) -> "list[str]":
     prefix, hostpart = _split_userinfo(item)
+    scheme, sep, userinfo = prefix.partition("://")
+    scheme, userinfo = (scheme + sep, userinfo) if sep else ("", prefix)
+    # A comma in the user name (before the password's ":") ends earlier hosts:
+    # a user name holds no comma, a password may.
+    leading, comma, _ = userinfo.partition(":")[0].rpartition(",")
+    if comma:
+        userinfo = userinfo[len(leading) + 1 :]
+    hosts = [
+        scheme + host for part in leading.split(",") if part for host in expand(part)
+    ]
     parts = [part for part in hostpart.split(",") if part]
-    return [prefix + host for part in parts for host in expand(part)]
+    return hosts + [scheme + userinfo + host for part in parts for host in expand(part)]
 
 
 class CommandModule(_ty.Protocol):

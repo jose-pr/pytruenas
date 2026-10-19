@@ -6,7 +6,10 @@ positionals come first, targets fill the rest; empty defaults to localhost.
 
 from unittest.mock import patch
 
+import pytest
+
 import pytruenas.main as main
+from pytruenas.utils.cmd import PyTrueNASArgs
 
 
 def _parse(argv):
@@ -62,3 +65,22 @@ def test_no_dash_t_flag():
             pass
     # argparse rejects the unknown -t optional
     assert "-t" in err.getvalue() or "unrecognized" in err.getvalue().lower()
+
+
+@pytest.mark.parametrize(
+    "positional, targets",
+    [
+        ("wss://nas1,wss://nas2", ["wss://nas1", "wss://nas2"]),
+        ("wss://nas1,ws://nas2:8080", ["wss://nas1", "ws://nas2:8080"]),
+        ("nas1,root:pw@nas2", ["nas1", "root:pw@nas2"]),
+        ("wss://nas1,root:pw@nas2", ["wss://nas1", "wss://root:pw@nas2"]),
+        ("nas1,nas2,root@nas3,nas4", ["nas1", "nas2", "root@nas3", "root@nas4"]),
+        # Unchanged: a comma in a password, and hosts sharing credentials.
+        ("wss://root:pw,with,commas@nas", ["wss://root:pw,with,commas@nas"]),
+        ("root:secret@nas1,nas2", ["root:secret@nas1", "root:secret@nas2"]),
+    ],
+)
+def test_a_part_with_its_own_scheme_or_user_is_its_own_target(positional, targets):
+    """`wss://nas1,wss://nas2` became `wss://wss://nas2`, and in
+    `nas1,root:pw@nas2` the second host logged in as `nas1,root`."""
+    assert PyTrueNASArgs(targets=[positional])._expanded_targets_() == targets

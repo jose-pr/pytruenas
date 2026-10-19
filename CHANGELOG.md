@@ -20,6 +20,9 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   log "ignoring the argument(s) after '--'" while using them. A command module
   now says it reads the tail with a module-level `_allow_passthrough_ = True`
   (as `call` and `deploy` do); RunPath commands are never warned about.
+- A comma list of targets where a later part has its own scheme or user is
+  split there: `wss://nas1,wss://nas2` was `wss://wss://nas2`, and in
+  `nas1,root:pw@nas2` the second host logged in as user `nas1,root`.
 - `examples/simple_client_from_yaml.py` moved to `examples/scripts/`, so
   `--cmdspath examples` no longer warns that it is not a command.
 
