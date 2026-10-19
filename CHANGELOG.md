@@ -15,10 +15,81 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   `sslverify`), a new `urllib3>=2.0.2,<3` (1.26 fails on an IP-address target),
   and `pytruenas[config]` now `pyyaml>=6.0.1,<7`.
 
+- The package root imports its names explicitly instead of
+  `from .auth import *`, and lists `Credentials`, `LocalAuth`, `ApiKeyAuth`,
+  `TokenAuth` and `BasicAuth` in `__all__`, so a type checker accepts
+  `from pytruenas import ApiKeyAuth`. Every name importable from the root
+  before still is. `auth`, `namespace`, `fs.tnasws`, `models.apidump`,
+  `models.jsonschema` and `utils.io` declare `__all__`.
+- `pytruenas call --help`, `help --help` and `deploy --help` (and their MCP
+  tool descriptions) are one paragraph on what the command does, instead of
+  1.7-2.5 KB of design notes.
+- `help`, `call --field` and `generate-typings` read a method's parameters,
+  return value, payload and enum values through one private module
+  (`pytruenas.utils._schema`). `apihelp` and `fields` keep every public
+  function and its signature; the generated stubs for the test fixture are
+  byte-identical apart from the entries below.
+- The sdist no longer ships the repository-root `AGENTS.md` or `benchmarks/`,
+  and neither the sdist nor the wheel ships a `CLAUDE*` or `*.local.*` file at
+  any depth, even from a tree copied without its `.gitignore`. The build
+  requires `hatchling>=1.27`, and the project URLs name the documentation site.
+- The `dev` extra requires `pytruenas[config,ssh,codegen]` instead of copying
+  their requirements; an install of `.[dev]` resolves to the same packages.
+- The test run treats a warning as an error and an `xfail` that passes as a
+  failure (`filterwarnings = ["error"]`, `xfail_strict = true`).
+- Releases: a `v*` tag now builds only after the suite passes at every declared
+  dependency floor on Python 3.9; the tag must equal the built version; the
+  wheel is installed with no extras into a clean environment on 3.9 and 3.14,
+  imported, checked for `py.typed`, `AGENTS.md` and `README.md`, its console
+  script run and the suite run against it; and a broken strict docs build
+  blocks the release. A pre-release tag (`v1.0.0-rc.1`) makes a GitHub
+  pre-release only: no PyPI upload, no docs deploy.
+- `benchmarks/run.py` names a saved result
+  `pytruenas-<version>-py<XY>-<platform tag>` and records `platform_tag`, so
+  results from different machines for one release no longer share a file;
+  results are written with LF line endings on every platform. New
+  `--results-dir` and `--compare RESULT` (each median as a ratio to a saved
+  result). The CI benchmark job measures the latest PyPI release and the
+  checkout in the same job.
+- The `dev` extra installs `pyright` and `mypy` (from Python 3.10), which
+  the generated-stub type check needs; without them that test skips.
+
 ### Added
 
 - `pytruenas.utils.cmd.with_targets(args_cls)` and `TargetsField`: an `Args`
   class with the trailing `targets` positional declared as its last field.
+
+- `pytruenas.TrueNASError`, the base of every error pytruenas raises at run
+  time: `ClientException` (and with it `ValidationErrors`, `CallTimeout`,
+  `ConnectionClosed`, `JobFailed`) and `AuthenticationError` now derive from
+  it. The package root exports all of them; each keeps its module and its
+  existing bases.
+- `TrueNASHost(...)` / `TrueNASClient(...)` has typing overloads that list the
+  keywords it accepts (`verify=`, `api_key=`, `executor=`, ...), so an editor
+  shows them; construction is unchanged.
+- A command module may define `validate_args(args)`, called once with the
+  parsed arguments before any target runs; a `duho.UsageError` raised there is
+  reported once as `pytruenas: error: MESSAGE` with exit status 2.
+- `apicache.services()` and `apicache.service_methods()` take an optional
+  `version=`, as `load()` does, so a caller making several lookups reads the
+  appliance's version once.
+- `tests/test_codegen_typecheck.py` runs pyright (3.9 and 3.14 targets) and
+  mypy (3.10 and 3.14) over the stubs generated from the fixture and from a
+  set of unusual schema shapes, plus a consumer whose valid calls must pass and
+  invalid ones must be reported. It skips, saying which checker is missing,
+  when pyright or mypy is not installed.
+- `Unit(..., restart_on_change=True)` runs `systemctl try-restart` after a
+  changed unit is reloaded, so a running service picks up its new definition.
+  Off by default: a restart interrupts the service.
+- `MiddlewareFiles.find_template(..., writable=False)`: every template it finds
+  is on the read-only `/usr` dataset, and there was no way to ask for the
+  `zfs.writable` window the write needs.
+- A guide page, "Patching a host", presenting `pytruenas.patch` as a toolkit
+  for building your own host patches, with a complete patch (a config file
+  from a template, a systemd unit, a change layered onto a middleware
+  template with its etc regeneration and service reload) and a stand-in client
+  that runs it offline. The API header's `patch` section now lists every
+  export with its signature and contract.
 
 ### Fixed
 
@@ -70,6 +141,168 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   `asyncssh` guard.
 - `examples/simple_client_from_yaml.py` moved to `examples/scripts/`, so
   `--cmdspath examples` no longer warns that it is not a command.
+
+- `client.api.<method>(..., job=True)` waits for the job and returns its
+  result, as the upstream client does. It was accepted and dropped, so the call
+  returned the job id while a delete or replication was still running and its
+  failure was never seen. A failed job raises `JobFailed` (the matching
+  `OSError` with `_ioerror=True`).
+- On a host without SFTP, `path.chmod()` and `path.chown()` wait for the
+  middleware job behind them and raise `OSError` when it fails; they returned
+  before the change was made and reported success for a job that then failed.
+- On a host without SFTP, `path.unlink()` of a missing file raises
+  `FileNotFoundError` (it ran `rm -f`, which succeeds), and `unlink()`/`rmdir()`
+  raise `IsADirectoryError`, `NotADirectoryError`, `OSError(ENOTEMPTY)` or the
+  errno `rm` reports instead of `subprocess.CalledProcessError`, so pathapi's
+  `rm()` and `move()` handle them.
+- On a host without SFTP, `path.stat()` follows a symlink, so `is_dir()` of a
+  link to a directory is true; `stat(follow_symlinks=False)` and
+  `is_symlink()` describe the link. Its result carries the owner and the access
+  and change times (every file read as owned by root).
+- `download()` (and so `read_bytes()` on a host without SFTP) checks the job
+  that streamed the content and raises when it failed, instead of returning
+  what arrived before the failure; `read_bytes()` raises it as an `OSError`.
+- `TrueNASHost("/var/run/x.sock")`, a bare socket path the docs list, connects
+  to that socket; it was read as a remote host with an empty name.
+  `HostConfig("truenas+unix://var/run/x.sock")` keeps the `var` segment, and
+  `TrueNASConfig()` is the local middleware socket rather than a remote target
+  with no host.
+- The error for an unknown keyword to `TrueNASHost(...)` lists only keywords
+  it accepts; it offered `port`, `secure`, `socket_path` and `api_path`, which
+  are spelled in the connection string.
+- `install_sshcreds()` puts the key on a copy of an `ssh=` config you passed,
+  rather than on your object, which another host may share.
+- A websocket-leg path on an IPv6 host renders its authority bracketed
+  (`truenas+ws://[fd00::1]/...`), not `truenas+ws://fd00%3A:1/...`.
+- `typing.get_type_hints()` resolves the public annotations of the client,
+  connection, auth, path and model modules on Python 3.9 and on every version;
+  quoted `X | None` unions, `typing.NotRequired` before 3.11, and names
+  imported only for type checkers made it raise.
+- `--logto {target}.log` gives each target only its own records under
+  `--parallel`. Every target's file handler sat on the same loggers, so each
+  file received the records of every target running at the same time.
+- `--loglevel websocket:DEBUG` (or `requests`, `urllib3`, `asyncssh`) takes
+  effect: those loggers were set to WARNING after `--loglevel` was applied.
+- A `./pytruenas.yaml` found in the current directory can no longer name
+  command sources (`commandspath`), as documented. The check never recognised
+  the implicit file on a real run, so its `commandspath` was imported.
+- A config file named with `--config` or `$PYTRUENAS_CONFIG` that does not
+  exist stops the run with exit status 2 (`config file not found: PATH`)
+  instead of running without its credentials and TLS setting. The implicit
+  `./pytruenas.yaml` may still be absent.
+- `deploy --source repo --mode pyz` and a relative `deploy --path` are refused
+  once, with exit status 2, before any client is built, instead of failing
+  every target with status 1.
+- `help` makes one `system.info` round trip per invocation instead of three,
+  cached or not.
+- `call METHOD nas -- --field=value` sends the fields untyped, with a warning,
+  when reading the method's schema raises `KeyError`; it failed the target
+  with an `UnboundLocalError`.
+- `deploy nas -- COMMAND` no longer logs a password contained in `COMMAND`
+  (`Running: ...` is redacted; the command runs as given).
+- Two fetches of one appliance's API dump (two processes, or one host named
+  twice) no longer overwrite and delete each other's file on the target: each
+  fetch dumps into a `mktemp` file of its own and removes only that one.
+- A target that does not parse as a URI is refused with a message naming every
+  character to percent-encode in the credentials, `[` and `]` included
+  (`%5B`, `%5D`), and no longer quotes part of the password: urlsplit's own
+  error ("Port could not be cast to integer value as '...'") was what the CLI
+  logged.
+- The CLI guide describes the config file as it is: it supplies
+  `credentials`, `sslverify` and `commandspath`, nothing else. The API header
+  gives `main()`'s full signature and the `$PYTRUENAS_CONFIG` default, and the
+  RunPath example's "TLS verification is on" line logs when it is.
+- `generate-typings` no longer aborts with `KeyError: 'properties'` when a
+  `get_instance` returns an optional object (`anyOf[object, null]`), a bare
+  object or an array. `_get` reads its filters through the union and returns
+  that union; with no properties to filter on it is not emitted (logged at
+  INFO), and the runtime helper's own signature applies. `_create`/`_update`/
+  `_upsert` are likewise skipped when the method has no object payload,
+  instead of unpacking a call option.
+- Generated signatures no longer repeat a parameter name: two titles that
+  sanitize to one (`a-b` and `a_b`, or the same title twice) and a parameter
+  titled `self` produced a stub that does not compile. A repeat gets a trailing
+  `_`, and an untitled parameter is `argN`, as `help` shows it.
+- An array that admits no items (`items: false`) is `list[Never]` whatever
+  Python runs the generator. It was `list[typing.Never]` from 3.11 and a bare
+  `list` on 3.9, so stubs generated on 3.14 did not resolve for a 3.9 or 3.10
+  target. `Never` comes from `typing_extensions` below 3.11, beside
+  `NotRequired` and `Unpack`.
+- Regenerating typings over a tree that is in use keeps the previous output
+  whole. On Windows a stub held open by an editor, or a shell inside the
+  directory, made the swap delete the old tree part-way (or entirely) and left
+  the new one in a `.typings.*` sibling; the old tree is now renamed aside and
+  deleted only once the new one is in place, and a failure removes the
+  temporary directory.
+- `generate-typings` without the `codegen` extra fails before dumping the API
+  from the host, not after (about 24 MB on 26.0).
+- A project that type-checks its generated `truenasapi_typings/` no longer
+  gets an incompatible-override error for every `_create`/`_update`/
+  `_upsert`/`_get` stub: they narrow the runtime helpers on purpose and say so
+  with `# type: ignore[override]`.
+- The typings guide and API header name the generated root class `V2600` for
+  v26.0.0 (not `V26000`), say `--api-version` defaults to the newest version in
+  the dump, and no longer describe a `src/truenasapi_typings/` package that
+  does not exist. The README no longer claims the generator is validated
+  against a full live dump; it says what the tests check.
+- `SystemFile(etc="a,b")` regenerated only `a`: both groups went to one
+  `etc.generate` call, whose second parameter is a checkpoint. Each group now
+  gets its own call.
+- Two units built from one `conf` dict no longer share settings. The second
+  kept the first one's `ExecStart` and `Description`, so it ran the other
+  program; the dict passed in is no longer modified.
+- A patch whose follow-up fails (`daemon-reload`, `etc.generate`, a service
+  reload) is retried by the next apply. The file was already written, so the
+  next apply found nothing to change and the follow-up never ran; the previous
+  content is now put back before the error is raised.
+- A file rewritten by something else since a patch wrote it -- TrueNAS
+  regenerating an `/etc` file after a settings change -- is taken as the new
+  original. Re-applying layered the patch onto the stale snapshot and
+  `revert()` put the stale content back, undoing that change. Each changing
+  write now records digests beside the snapshot (`<name>.baseline.applied`).
+- A `.baseline` or `.absent` file found beside a target is no longer trusted
+  blindly: a symlink there was read from, written through and restored into
+  the target. Where the path backend has `lstat()`, it must be a regular file
+  with one link, owned by root or by the target's owner, or `PermissionError`
+  is raised. The snapshot is written to a temporary sibling and renamed into
+  place, so an interrupted copy is never taken for the original.
+- An unchanged write no longer takes a snapshot, and with
+  `SystemFile(writable=True)` no longer clears and restores `readonly` on the
+  dataset. A rewrite also makes fewer remote calls.
+- `zfs.writable()`: when the block raised and the restore failed, the caller
+  got the restore's error instead of the block's; it now gets the block's, and
+  the restore failure is logged. An inherited `readonly=on` is restored by
+  inheriting it again rather than set locally. A path that is not on ZFS is
+  left alone (it failed in `zfs get`), and `dataset_for()` raises `ValueError`
+  naming the filesystem type instead of returning its mount source. A window
+  that never closed is marked on the dataset (`pytruenas:restore-readonly`)
+  and closed by the next one.
+- Unit names and files systemd reads as intended: a dotted name (`my.agent`)
+  gets its `.service` suffix, the root mount unit is `-.mount` (was `.mount`),
+  a list value in `conf` renders as repeated keys (was a Python repr), and a
+  value with a line break raises `ValueError`. `parse_unit()` reads repeated
+  keys and sections and backslash continuations.
+- `MiddlewareFiles` no longer runs a command on the host from `repr()`, and
+  `find_file()` honours a target's own baseline suffix instead of a hardcoded
+  `.baseline`.
+- `TemplateTarget.apply_template()` raises a clear `TypeError` for keyword
+  arguments with a text or path template (it said they were accepted).
+- `render_basic_template()` substitutes in one pass: a value containing
+  `%{...}` was substituted again, depending on the context's order.
+- The API header said `MiddlewareFiles.find_template` defaults to
+  `baseline=False`; the default is `True`.
+- `examples/scripts/simple_client_from_yaml.py` verifies TLS certificates
+  unless its config file sets `sslverify: false` (or a CA file path); it turned
+  verification off for every host.
+- README: links are absolute, so the `LICENSE` link works on PyPI; the
+  development setup creates a venv named for the interpreter it uses and
+  installs with `--only-binary=cryptography`, which Windows ARM64 needs.
+- A connection string that does not parse names `[` and `]` (`%5B`, `%5D`)
+  among the characters to percent-encode in the credentials.
+- Inside a CLI fan-out, a record logged through `client.logger` names its
+  host once (`[nas1] ...`), not twice.
+- The `config` extra is described as what it is: the CLI's YAML config
+  file (credentials, TLS and command sources), not a targets file.
 
 ## [0.6.0] - 2026-10-19
 
