@@ -667,7 +667,7 @@ class _CountingPath:
             return value
 
         def call(*args, **kwargs):
-            self._log.append(name)
+            self._log.append((name, self._inner._path))
             result = value(*args, **kwargs)
             if hasattr(result, "_store"):
                 return _CountingPath(result, self._log)
@@ -686,7 +686,9 @@ def test_an_unchanged_write_takes_no_snapshot_and_only_reads():
 
     assert target.write("same\n") is False
     assert list(store) == ["/etc/c.conf"]  # no baseline, no marker
-    assert [name for name in log if name != "with_name"] == ["read_bytes"]
+    assert [call for call in log if call[0] != "with_name"] == [
+        ("read_bytes", "/etc/c.conf")
+    ]
 
 
 def test_a_rewrite_after_the_snapshot_reads_once_and_writes_once():
@@ -700,10 +702,12 @@ def test_a_rewrite_after_the_snapshot_reads_once_and_writes_once():
     log.clear()
 
     assert target.write("v2\n") is True
-    calls = [name for name in log if name != "with_name"]
-    assert calls.count("read_bytes") == 1
-    assert calls.count("write_bytes") == 1
-    assert len(calls) <= 4
+    calls = [call for call in log if call[0] != "with_name"]
+    assert calls.count(("read_bytes", "/etc/c.conf")) == 1
+    assert calls.count(("write_bytes", "/etc/c.conf")) == 1
+    # Beside those: is the baseline there, and the record of the last write
+    # (checked, read, checked again, rewritten).
+    assert len(calls) <= 7, calls
 
 
 def test_apply_template_rejects_kwargs_for_text_and_path_templates(tmp_path):
@@ -881,3 +885,104 @@ def test_an_interrupted_snapshot_leaves_no_baseline_behind():
     target2 = FileTarget(P(store, "/etc/c.conf"), baseline=True)
     target2.write("patched\n")
     assert store["/etc/c.conf.baseline"] == b"original content\n"
+
+
+# -- a file rewritten by something else is the new original -------------------
+
+
+def _layered(target, line):
+    """Read the original, append ``line``, write: what a layering patch does."""
+    try:
+        base = target.read()
+    except FileNotFoundError:
+        base = b""
+    return target.write(base + line)
+
+
+def test_a_file_regenerated_since_the_last_write_is_the_new_original():
+    """TrueNAS regenerates /etc files; patching the old stock would undo that."""
+    from pytruenas.patch.templates import FileTarget
+
+    P = _fake_path_factory()
+    store = {"/etc/c.conf": b"stock v1\n"}
+    target = FileTarget(P(store, "/etc/c.conf"), baseline=True)
+    _layered(target, b"patch\n")
+    assert store["/etc/c.conf"] == b"stock v1\npatch\n"
+
+    store["/etc/c.conf"] = b"stock v2\n"  # the middleware rewrote it
+    assert target.read() == b"stock v2\n"
+    assert target.is_patched() is False
+
+    _layered(target, b"patch\n")
+    assert store["/etc/c.conf"] == b"stock v2\npatch\n"
+    assert store["/etc/c.conf.baseline"] == b"stock v2\n"
+
+    assert target.revert() is True
+    assert store["/etc/c.conf"] == b"stock v2\n"
+    assert list(store) == ["/etc/c.conf"]  # baseline and record removed
+
+
+def test_revert_leaves_a_file_rewritten_since_the_patch():
+    from pytruenas.patch.templates import FileTarget
+
+    P = _fake_path_factory()
+    store = {"/etc/c.conf": b"stock v1\n"}
+    target = FileTarget(P(store, "/etc/c.conf"), baseline=True)
+    target.write("patched\n")
+    store["/etc/c.conf"] = b"stock v2\n"
+
+    assert target.revert() is False
+    assert store["/etc/c.conf"] == b"stock v2\n"
+    assert list(store) == ["/etc/c.conf"]
+
+
+def test_a_created_file_rewritten_by_something_else_gets_a_baseline():
+    from pytruenas.patch.templates import FileTarget
+
+    P = _fake_path_factory()
+    store = {}
+    target = FileTarget(P(store, "/etc/new.conf"), baseline=True)
+    _layered(target, b"mine\n")
+    store["/etc/new.conf"] = b"generated\n"
+
+    _layered(target, b"mine\n")
+    assert store["/etc/new.conf"] == b"generated\nmine\n"
+    assert store["/etc/new.conf.baseline"] == b"generated\n"
+    assert "/etc/new.conf.baseline.absent" not in store
+
+
+def test_an_interrupted_write_is_not_taken_for_a_rewrite():
+    """The record names the content found too, so a write that did not land
+    leaves a file this target still recognises."""
+    from pytruenas.patch.templates import FileTarget
+
+    P = _fake_path_factory()
+    store = {"/etc/c.conf": b"stock\n"}
+    target = FileTarget(P(store, "/etc/c.conf"), baseline=True)
+    target.write("v1\n")
+
+    class Dropped(P):
+        def write_bytes(self, data):
+            if self._path == "/etc/c.conf":
+                raise ConnectionResetError("dropped")
+            super().write_bytes(data)
+
+        def with_name(self, name):
+            return Dropped(self._store, self._path.rsplit("/", 1)[0] + "/" + name)
+
+    with pytest.raises(ConnectionResetError):
+        FileTarget(Dropped(store, "/etc/c.conf"), baseline=True).write("v2\n")
+    assert store["/etc/c.conf"] == b"v1\n"
+    assert target.read() == b"stock\n"  # still the original, not v1
+
+
+def test_a_baseline_without_a_record_keeps_its_old_meaning():
+    """Snapshots taken before records existed are trusted as before."""
+    from pytruenas.patch.templates import FileTarget
+
+    P = _fake_path_factory()
+    store = {"/etc/c.conf": b"patched\n", "/etc/c.conf.baseline": b"stock\n"}
+    target = FileTarget(P(store, "/etc/c.conf"), baseline=True)
+    assert target.read() == b"stock\n"
+    assert target.revert() is True
+    assert store == {"/etc/c.conf": b"stock\n"}

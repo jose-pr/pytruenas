@@ -9,8 +9,10 @@ whether to reload a service or regenerate an etc group from the boolean
 
 from __future__ import annotations
 
+import hashlib as _hashlib
 import logging as _logging
 import stat as _stat
+import typing as _ty
 import uuid as _uuid
 from pathlib import Path as _LocalPath
 
@@ -96,6 +98,12 @@ class FileTarget(TemplateTarget):
     repeated application idempotent: a template that layers changes onto a
     stock config always sees the stock config, not its own previous output.
 
+    Each changing write also records a digest of what it wrote
+    (``<name>.baseline.applied``). When the file no longer matches it,
+    something else has rewritten it since -- TrueNAS regenerating an ``/etc``
+    file, say -- and that content is the original from then on: :meth:`read`
+    returns it, the next write snapshots it, and :meth:`revert` leaves it.
+
     A baseline or marker found beside the target is trusted only when it is a
     regular file with one link, owned by root or by the target's owner; a
     symlink or anything else there raises ``PermissionError`` rather than
@@ -149,6 +157,14 @@ class FileTarget(TemplateTarget):
             return None
         return self.path.with_name(self.path.name + self._baseline + ".absent")
 
+    @property
+    def _record_path(self):
+        """Holds SHA-256 digests (hex, one per line) of what the file may hold
+        from this target's last write."""
+        if not self._baseline:
+            return None
+        return self.path.with_name(self.path.name + self._baseline + ".applied")
+
     def baseline(self):
         """Return the baseline path, creating the snapshot if it is missing.
 
@@ -165,9 +181,24 @@ class FileTarget(TemplateTarget):
         return self.baseline_path
 
     def _snapshot(self, current: "bytes | None") -> None:
-        """Take the snapshot (or the absent marker) unless one exists."""
+        """Take the snapshot (or the absent marker) unless one exists and the
+        file is still what this target last wrote."""
         baseline = self.baseline_path
-        if self._present(baseline) or self._present(self._absent_marker):
+        marker = self._absent_marker
+        kept = baseline if self._present(baseline) else None
+        if kept is None and self._present(marker):
+            kept = marker
+        if kept is not None:
+            if current is None or not self._displaced(current):
+                return
+            LOGGER.warning(
+                "%s was rewritten since this target last wrote it; "
+                "taking its content as the original",
+                self.path,
+            )
+            self._create(baseline, current, self._mode_of(self.path))
+            if kept is marker:
+                self._unlink(marker)
             return
         if current is None:
             self._create(self._absent_marker, b"", None)
@@ -188,9 +219,13 @@ class FileTarget(TemplateTarget):
         """
         if self._baseline:
             baseline = self.baseline_path
-            if self._present(baseline):
-                return baseline.read_bytes()
-            if self._present(self._absent_marker):
+            has_baseline = self._present(baseline)
+            if has_baseline or self._present(self._absent_marker):
+                current = self._displaced()
+                if current is not None:
+                    return current
+                if has_baseline:
+                    return baseline.read_bytes()
                 # The original was absent: template from nothing, not from
                 # this target's own earlier output.
                 raise FileNotFoundError(str(self.path))
@@ -214,6 +249,8 @@ class FileTarget(TemplateTarget):
         baseline = self.baseline_path
         if baseline is None or not self._present(baseline):
             return False
+        if self._displaced() is not None:
+            return False  # rewritten by something else: the patch is gone
         return self._current() != baseline.read_bytes()
 
     def would_change(self, content: "str | bytes") -> bool:
@@ -233,7 +270,9 @@ class FileTarget(TemplateTarget):
         * this target created the file -> the file is left in place (not ours
           to delete) and returns ``False``; by default its ``.absent`` marker
           is removed;
-        * baseline configured but never taken, or no baseline -> a no-op.
+        * baseline configured but never taken, or no baseline -> a no-op;
+        * the file was rewritten by something else since this target wrote it
+          -> left as it is (the patch is already gone) and returns ``False``.
 
         ``remove_baseline=False`` keeps the snapshot or marker, for reverting a
         patch you intend to re-apply.
@@ -244,10 +283,18 @@ class FileTarget(TemplateTarget):
         marker = self._absent_marker
         if self._present(marker):
             if remove_baseline:
-                self._unlink(marker)
+                self._discard(marker, self._record_path)
             return False
         if not self._present(baseline):
             LOGGER.debug("Nothing to revert for %s (no baseline)", self.path)
+            return False
+        if self._displaced() is not None:
+            LOGGER.info(
+                "Not reverting %s: it was rewritten since this target wrote it",
+                self.path,
+            )
+            if remove_baseline:
+                self._discard(baseline, self._record_path)
             return False
 
         original = baseline.read_bytes()
@@ -255,6 +302,7 @@ class FileTarget(TemplateTarget):
         changed = current != original
         if changed:
             LOGGER.info("Reverting %s to its baseline", self.path)
+            self._record(original, current)
             self._write_with_mode(
                 self.path,
                 original,
@@ -262,7 +310,7 @@ class FileTarget(TemplateTarget):
                 exists=current is not None,
             )
         if remove_baseline:
-            self._unlink(baseline)
+            self._discard(baseline, self._record_path)
         return changed
 
     # -- writing ------------------------------------------------------------
@@ -295,6 +343,9 @@ class FileTarget(TemplateTarget):
                 parent.mkdir(DIRECTORY_MODE, True, True)
         if self._baseline:
             self._snapshot(current)
+            # Before the write: should it not complete, the file still
+            # matches a recorded digest and is not taken for a rewrite.
+            self._record(content, current)
 
         # An existing file keeps its own mode: rewriting can reset it to the
         # umask default, and widening /etc/shadow from 0640 to 0644 is a
@@ -316,6 +367,31 @@ class FileTarget(TemplateTarget):
             return self.path.read_bytes()
         except FileNotFoundError:
             return None
+
+    def _record(self, *contents: "bytes | None") -> None:
+        """Note ``contents`` as what the file may hold from this target: what
+        it is about to write, and what it found (should the write not land)."""
+        record = self._record_path
+        self._present(record)  # refuses a planted symlink before writing
+        digests = [_digest(content) for content in contents if content is not None]
+        self._write_with_mode(record, b"\n".join(digests) + b"\n", None)
+
+    def _displaced(self, current: "bytes | None | object" = ...) -> "bytes | None":
+        """The file's content when something else rewrote it since this target
+        last wrote it, else ``None``. Without a record, never displaced."""
+        record = self._record_path
+        if record is None or not self._present(record):
+            return None
+        if current is ...:
+            current = self._current()
+        if current is None or _digest(current) in record.read_bytes().split():
+            return None
+        return _ty.cast(bytes, current)
+
+    def _discard(self, *paths) -> None:
+        for path in paths:
+            if path is not None and self._present(path):
+                self._unlink(path)
 
     def _present(self, path) -> bool:
         """Whether a baseline or marker exists, raising for one not to trust.
@@ -443,3 +519,7 @@ class FileTarget(TemplateTarget):
                 oct(mode),
                 path,
             )
+
+
+def _digest(content: bytes) -> bytes:
+    return _hashlib.sha256(content).hexdigest().encode("ascii")
