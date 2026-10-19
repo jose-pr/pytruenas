@@ -6,7 +6,7 @@ stubs, so editors and type checkers understand
 shapes.
 
 ```bash
-pip install pytruenas[codegen]
+pip install pytruenas
 pytruenas generate-typings --path truenasapi_typings/current nas.example.com
 ```
 
