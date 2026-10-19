@@ -23,6 +23,12 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   are now trusted. The CA-bundle variables (`SSL_CERT_FILE`,
   `REQUESTS_CA_BUNDLE`, `CURL_CA_BUNDLE`, `WEBSOCKET_CLIENT_CA_BUNDLE`) still
   replace that trust.
+- **The CLI's TLS options are `-k/--insecure` and `--ca-bundle FILE`.**
+  `--sslverify`/`--no-sslverify` are gone; `$PYTRUENAS_SSLVERIFY` and the config
+  file's `sslverify` are replaced by `$PYTRUENAS_INSECURE`/`$PYTRUENAS_CA_BUNDLE`
+  and `insecure`/`ca_bundle`, and raise an error naming them if still set.
+  `-k` also skips the SSH host-key check, as `verify=False` does.
+  `PyTrueNASArgs._sslverify_()` is `._verify_()`.
 - **`pytruenas.utils.tls` is gone** (`context`, `ca_bundle`, `CA_BUNDLE_ENV`,
   `SslVerify`); the decision is private now. Pass `verify=` instead.
 

@@ -16,71 +16,94 @@ from pytruenas.utils.cmd import PyTrueNASArgs
 
 @pytest.fixture
 def args(monkeypatch, tmp_path):
-    monkeypatch.delenv("PYTRUENAS_SSLVERIFY", raising=False)
+    for name in ("SSLVERIFY", "INSECURE", "CA_BUNDLE"):
+        monkeypatch.delenv("PYTRUENAS_" + name, raising=False)
     monkeypatch.delenv("TN_CREDS", raising=False)
     monkeypatch.chdir(tmp_path)  # no stray ./pytruenas.yaml
 
     def build(**fields):
         parsed = PyTrueNASArgs()
-        parsed.sslverify = fields.get("sslverify")
         parsed.insecure = fields.get("insecure", False)
+        parsed.ca_bundle = fields.get("ca_bundle")
         return parsed
 
     return build
 
 
-def test_tls_is_verified_by_default(args):
-    assert args()._sslverify_() is True
+@pytest.fixture
+def bundle(tmp_path):
+    path = tmp_path / "lab.pem"
+    path.write_bytes(b"")
+    return str(path)
 
 
-@pytest.mark.parametrize(
-    "fields",
-    [{"insecure": True}, {"sslverify": False}, {"sslverify": False, "insecure": True}],
-)
-def test_verification_can_be_turned_off(args, fields):
-    assert args(**fields)._sslverify_() is False
-
-
-def test_the_environment_and_config_are_honoured(args, monkeypatch, tmp_path):
-    monkeypatch.setenv("PYTRUENAS_SSLVERIFY", "false")
-    pytest.importorskip("yaml")  # only the config-file half needs the extra
-    assert args()._sslverify_() is False
-    # A path is a CA bundle, as it is for TrueNASClient(sslverify=...).
-    bundle = tmp_path / "lab.pem"
-    bundle.write_bytes(b"")
-    monkeypatch.setenv("PYTRUENAS_SSLVERIFY", str(bundle))
-    assert args()._sslverify_() == str(bundle)
-    # An explicit flag still wins over the environment.
-    assert args(sslverify=True)._sslverify_() is True
-    assert args(insecure=True)._sslverify_() is False
-    monkeypatch.delenv("PYTRUENAS_SSLVERIFY")
-    (tmp_path / "pytruenas.yaml").write_text("sslverify: false\n")
-    assert args()._sslverify_() is False
-
-
-@pytest.mark.parametrize("value", ["", "   "])
-def test_an_empty_environment_value_is_unset_not_off(args, monkeypatch, value):
-    """`PYTRUENAS_SSLVERIFY=` turned verification off."""
-    monkeypatch.setenv("PYTRUENAS_SSLVERIFY", value)
-    assert args()._sslverify_() is True
-
-
-@pytest.mark.parametrize("value", ["maybe", "/no/such/bundle.pem"])
-def test_a_value_that_is_neither_a_boolean_nor_a_bundle_is_refused(
-    args, monkeypatch, value
-):
-    """It was taken as a CA bundle path, which verifies nothing."""
-    monkeypatch.setenv("PYTRUENAS_SSLVERIFY", value)
-    with pytest.raises(ValueError, match="PYTRUENAS_SSLVERIFY"):
-        args()._sslverify_()
-
-
-@pytest.mark.parametrize("value", ["0", "''", "[]"])
-def test_a_config_value_that_is_not_a_boolean_or_path_is_refused(args, tmp_path, value):
+def _config(tmp_path, text):
     pytest.importorskip("yaml")
-    (tmp_path / "pytruenas.yaml").write_text("sslverify: " + value)
-    with pytest.raises(ValueError, match="sslverify in"):
-        args()._sslverify_()
+    (tmp_path / "pytruenas.yaml").write_text(text)
+
+
+def test_tls_is_verified_by_default(args):
+    assert args()._verify_() is True
+
+
+def test_each_layer_can_turn_verification_off(args, monkeypatch, tmp_path):
+    assert args(insecure=True)._verify_() is False
+    monkeypatch.setenv("PYTRUENAS_INSECURE", "1")
+    assert args()._verify_() is False
+    monkeypatch.delenv("PYTRUENAS_INSECURE")
+    _config(tmp_path, "insecure: true")
+    assert args()._verify_() is False
+
+
+def test_each_layer_can_name_a_bundle(args, monkeypatch, tmp_path, bundle):
+    assert args(ca_bundle=bundle)._verify_() == bundle
+    monkeypatch.setenv("PYTRUENAS_CA_BUNDLE", bundle)
+    assert args()._verify_() == bundle
+    monkeypatch.delenv("PYTRUENAS_CA_BUNDLE")
+    _config(tmp_path, f"ca_bundle: '{bundle}'")
+    assert args()._verify_() == bundle
+
+
+def test_a_flag_beats_the_environment_and_the_environment_the_config(
+    args, monkeypatch, tmp_path, bundle
+):
+    _config(tmp_path, "insecure: true")
+    monkeypatch.setenv("PYTRUENAS_CA_BUNDLE", bundle)
+    assert args()._verify_() == bundle
+    assert args(insecure=True)._verify_() is False
+
+
+@pytest.mark.parametrize("value", ["", "   ", "0", "false"])
+def test_an_empty_or_false_insecure_leaves_verification_on(args, monkeypatch, value):
+    """`PYTRUENAS_SSLVERIFY=` (empty) turned verification off."""
+    monkeypatch.setenv("PYTRUENAS_INSECURE", value)
+    monkeypatch.setenv("PYTRUENAS_CA_BUNDLE", "")
+    assert args()._verify_() is True
+
+
+def test_a_bundle_that_does_not_exist_is_refused(args, monkeypatch):
+    monkeypatch.setenv("PYTRUENAS_CA_BUNDLE", "/no/such/bundle.pem")
+    with pytest.raises(ValueError, match="PYTRUENAS_CA_BUNDLE"):
+        args()._verify_()
+    with pytest.raises(ValueError, match="--ca-bundle"):
+        args(ca_bundle="/no/such/bundle.pem")._verify_()
+
+
+@pytest.mark.parametrize("value", ["0", "maybe", "[]"])
+def test_a_config_insecure_that_is_not_a_boolean_is_refused(args, tmp_path, value):
+    _config(tmp_path, "insecure: " + value)
+    with pytest.raises(ValueError, match="insecure in"):
+        args()._verify_()
+
+
+def test_the_removed_settings_say_what_replaced_them(args, monkeypatch, tmp_path):
+    monkeypatch.setenv("PYTRUENAS_SSLVERIFY", "false")
+    with pytest.raises(ValueError, match="PYTRUENAS_INSECURE"):
+        args()._verify_()
+    monkeypatch.delenv("PYTRUENAS_SSLVERIFY")
+    _config(tmp_path, "sslverify: false")
+    with pytest.raises(ValueError, match="insecure and ca_bundle"):
+        args()._verify_()
 
 
 def test_credentials_come_from_the_environment_or_config(args, monkeypatch, tmp_path):
@@ -109,11 +132,12 @@ def test_a_target_that_carries_credentials_keeps_them(args, monkeypatch):
 
 
 def test_the_flags_are_registered():
-    """-k is curl's spelling, and --sslverify/--no-sslverify is the pair."""
+    """-k is curl's spelling; --ca-bundle names the trust; --sslverify is gone."""
     out = subprocess.run(
         [sys.executable, "-m", "pytruenas", "call", "--help"],
         capture_output=True,
         text=True,
     ).stdout
     assert "--insecure, -k" in out
-    assert "--sslverify, --no-sslverify" in out
+    assert "--ca-bundle FILE" in out
+    assert "sslverify" not in out

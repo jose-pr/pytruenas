@@ -10,7 +10,7 @@ All three are used here:
 * ``client`` -- the per-target :class:`~pytruenas.TrueNASClient` that
   ``__main__.py`` ``init`` returned (duho's ``ctx``).
 * ``args``   -- the parsed command for THIS target: the global options
-  (``--sslverify``), this flow's own (``--rcopts``), ``args.target``, and any
+  (``--insecure``), this flow's own (``--rcopts``), ``args.target``, and any
   state an earlier hook stashed (``args.findings``).
 * ``logger`` -- already ``[target]``-prefixed by the fan-out, so it needs no
   target of its own and honors ``-v``/``-q``/``--logto``.
@@ -32,7 +32,6 @@ def main(client, args, logger):
     # `args` carries both the parsed options and the per-target state that
     # `__main__.py` stashed; a later step reads what this one appends.
     args.findings.append(("version", info["version"]))
-    # `args.sslverify` is only the flag (None when not given); `_sslverify_()`
-    # is the decision: -k, the flag, $PYTRUENAS_SSLVERIFY, the config file.
-    if args._sslverify_() is not False:
+    # `_verify_()` is the decision: the flags, the environment, the config file.
+    if args._verify_() is not False:
         logger.debug("TLS verification is on for %s", args.target)

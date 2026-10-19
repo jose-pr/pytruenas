@@ -43,17 +43,20 @@ A password in a target string must percent-encode `/`, `?`, `#`, `@`, `[` and
 `]` (`%2F`, `%3F`, `%23`, `%40`, `%5B`, `%5D`): unencoded, they change where the
 host starts, and a target that does not parse is refused with that advice.
 
-TLS certificates are verified, against the same trust store the library uses.
-A lab box with a self-signed certificate needs an explicit opt-out, or a CA
-bundle:
+TLS certificates are verified the way the library verifies them (the operating
+system's trust). A lab box with a self-signed certificate needs an explicit
+opt-out, or a CA bundle:
 
 ```bash
-pytruenas call -k system.version nas            # or --insecure / --no-sslverify
-PYTRUENAS_SSLVERIFY=/etc/pki/lab-ca.pem pytruenas call system.version nas
+pytruenas call -k system.version nas                          # or --insecure
+pytruenas call --ca-bundle /etc/pki/lab-ca.pem system.version nas
+PYTRUENAS_CA_BUNDLE=/etc/pki/lab-ca.pem pytruenas call system.version nas
 ```
 
-The config file's `sslverify` (`false`, or a bundle path) sets the default for
-a whole site; a flag on the command line still wins.
+`-k` also skips the SSH host-key check, as `verify=False` does in the library.
+`$PYTRUENAS_INSECURE` and the config file's `insecure` / `ca_bundle` set the
+default for a whole site; a flag on the command line wins over the
+environment, and the environment over the file.
 
 ## Commands
 
@@ -158,19 +161,19 @@ See [Generating typings](typings.md).
 
 ## Config file
 
-With the `config` extra, a YAML file supplies three settings, and only these;
+With the `config` extra, a YAML file supplies these settings, and only these;
 any other key is ignored (targets and options always come from the command
 line):
 
 ```yaml
 credentials: 1-<64-char-api-key>   # or a mapping: {username: root, password: ...}
-sslverify: /etc/pki/lab-ca.pem     # or false
+ca_bundle: /etc/pki/lab-ca.pem     # or: insecure: true
 commandspath: [mycommands]         # extra command sources, relative to this file
 ```
 
 - `credentials` — used for a target that carries none, after `$TN_CREDS`.
-- `sslverify` — the TLS default, below `-k`/`--[no-]sslverify` and
-  `$PYTRUENAS_SSLVERIFY`.
+- `insecure` / `ca_bundle` — the TLS default, below `-k`/`--ca-bundle` and
+  `$PYTRUENAS_INSECURE`/`$PYTRUENAS_CA_BUNDLE`.
 - `commandspath` — directories or packages to load commands from. Read only
   from a file named with `--config` or `$PYTRUENAS_CONFIG`: the implicit
   `./pytruenas.yaml` is whatever directory the CLI runs in, so its

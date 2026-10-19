@@ -29,7 +29,6 @@ import typing as _ty
 from logging import Logger as _Logger
 from pathlib import Path as _Path
 
-from argparse import BooleanOptionalAction as _BooleanOptional
 
 from duho import Arg, Extend, LoggingArgs, Meta
 from duho.env import Env as _Env
@@ -214,24 +213,26 @@ def register_targets(parser) -> None:
     parser.add_argument("targets", nargs="*", metavar="TARGET", help=_TARGETS_HELP)
 
 
-def _verify_value(text: str, source: str) -> "bool | str":
-    """A TLS setting's text as a bool, or as a CA bundle path that exists.
-
-    An empty value is never "off": the callers treat it as unset. A word that
-    is neither a boolean nor an existing path is an error, so a typo cannot
-    become a bundle that verifies nothing.
-    """
+def _env_bool(name: str) -> bool:
+    """``$PYTRUENAS_<name>`` as a boolean; unset or empty is ``False``."""
     from duho.text import parse_bool
 
+    value = ENV.get(name)
+    if not value or not value.strip():
+        return False
     try:
-        return parse_bool(text)
+        return parse_bool(value)
     except ValueError:
-        pass
-    if _os.path.exists(text):
-        return text
-    raise ValueError(
-        f"{source} is {text!r}: expected true, false or an existing CA bundle path"
-    )
+        raise ValueError(
+            f"${ENV.prefix}{name} is {value!r}: expected true or false"
+        ) from None
+
+
+def _config_bool(config: "_ty.Mapping[str, object]", key: str, path: object) -> bool:
+    value = config.get(key, False)
+    if not isinstance(value, bool):
+        raise ValueError(f"{key} in {path} must be true or false, not {value!r}")
+    return value
 
 
 class PyTrueNASArgs(LoggingArgs):
@@ -259,21 +260,13 @@ class PyTrueNASArgs(LoggingArgs):
     "Extra directories/packages to search for commands"
     ("--cmdspath",)  # type: ignore
 
-    # Tri-state: unset (None) falls through to $PYTRUENAS_SSLVERIFY, then the
-    # config file, then the library default. The CLI used to default to False,
-    # so every `pytruenas call ... nas` sent its credentials over a connection
-    # it did not verify -- the opposite of what the library does.
-    # `_ty.Optional`, not `bool | None`: duho evaluates this annotation when
-    # the class is built, and a PEP 604 union is a TypeError on the 3.9 floor.
-    sslverify: (
-        "Arg[_ty.Optional[bool], Meta(action=_BooleanOptional, default=None)]"
-    ) = None
-    "Verify the server's TLS certificate (default: yes)"
-    ("--sslverify",)  # type: ignore
-
     insecure: bool = False
-    "Do not verify the server's TLS certificate (curl's -k)"
+    "Do not verify the server's TLS certificate or SSH host key (curl's -k)"
     ("--insecure", "-k")  # type: ignore
+
+    ca_bundle: "Arg[_ty.Optional[str], Meta(metavar='FILE')]" = None
+    "Trust this CA bundle (a PEM file or hashed directory) instead of the OS"
+    ("--ca-bundle",)  # type: ignore
 
     # The trailing positionals, declared by each command as its LAST field
     # (`with_targets`). Unannotated on purpose: any annotation here, even
@@ -310,7 +303,7 @@ class PyTrueNASArgs(LoggingArgs):
         and a CLI is routinely run from a directory its user does not control.
         Which matters for two things: an implicit file may be absent, and its
         ``commandspath`` (i.e. "import code from here") is refused while its
-        ``credentials`` and ``sslverify`` are still read. Same reasoning as
+        ``credentials`` and TLS settings are still read. Same reasoning as
         ``ENV``'s ``autoload=False``.
         """
         if ENV.get("CONFIG") or ENV.get("CFG"):
@@ -329,32 +322,46 @@ class PyTrueNASArgs(LoggingArgs):
             return False
         return _Path(self.config) == _Path(default)
 
-    def _sslverify_(self) -> "bool | str":
-        """TLS verification for clients this CLI builds.
+    def _verify_(self) -> "bool | str":
+        """``verify=`` for the clients this CLI builds.
 
-        ``-k``/``--insecure`` wins, then ``--sslverify``/``--no-sslverify``,
-        then ``$PYTRUENAS_SSLVERIFY``, then the config file's ``sslverify``,
-        then the library default (verify). A string is a CA bundle path, as it
-        is for ``TrueNASClient(sslverify=...)``.
+        Each layer in turn -- the flags, then ``$PYTRUENAS_INSECURE`` /
+        ``$PYTRUENAS_CA_BUNDLE``, then the config file's ``insecure`` /
+        ``ca_bundle`` -- can turn verification off or name a CA bundle; the
+        first that does wins. With none, ``True``: the OS trust. An empty
+        variable is unset.
         """
-        if self.insecure:
-            return False
-        if self.sslverify is not None:
-            return self.sslverify
-        value = ENV.get("SSLVERIFY")
-        if value is not None and value.strip():
-            return _verify_value(value, f"${ENV.prefix}SSLVERIFY")
-        value = self._config_dict_().get("sslverify")
-        if value is None:
-            return True
-        if isinstance(value, bool):
-            return value
-        if isinstance(value, str) and value.strip():
-            return _verify_value(value, f"sslverify in {self.config}")
-        raise ValueError(
-            f"sslverify in {self.config} must be true, false or a CA bundle "
-            f"path, not {value!r}"
+        if ENV.get("SSLVERIFY"):
+            raise ValueError(
+                f"${ENV.prefix}SSLVERIFY was replaced by ${ENV.prefix}INSECURE "
+                f"and ${ENV.prefix}CA_BUNDLE"
+            )
+        config = self._config_dict_()
+        if "sslverify" in config:
+            raise ValueError(
+                f"sslverify in {self.config} was replaced by insecure and ca_bundle"
+            )
+        layers = (
+            (self.insecure, self.ca_bundle, "--ca-bundle"),
+            (
+                _env_bool("INSECURE"),
+                ENV.get("CA_BUNDLE") or None,
+                f"${ENV.prefix}CA_BUNDLE",
+            ),
+            (
+                _config_bool(config, "insecure", self.config),
+                config.get("ca_bundle") or None,
+                f"ca_bundle in {self.config}",
+            ),
         )
+        for insecure, bundle, source in layers:
+            if insecure:
+                return False
+            if bundle is not None:
+                if not isinstance(bundle, str) or not _os.path.exists(bundle):
+                    raise ValueError(f"{source}: no CA bundle at {bundle!r}")
+                return bundle
+        return True
 
     def _credentials_(self) -> object:
         """Credentials for a target that carries none.
@@ -379,7 +386,7 @@ class PyTrueNASArgs(LoggingArgs):
         """The client this CLI builds for one target.
 
         One place, so a plain command and a RunPath step connect alike: TLS
-        per :meth:`_sslverify_`, and credentials from the environment or the
+        per :meth:`_verify_`, and credentials from the environment or the
         config file only when the target itself carries none (passing both
         raises).
         """
@@ -389,7 +396,7 @@ class PyTrueNASArgs(LoggingArgs):
         credentials = None
         if not Target.parse(target, resolve_port=False).password:
             credentials = self._credentials_()
-        return TrueNASHost(target, credentials, verify=self._sslverify_())
+        return TrueNASHost(target, credentials, verify=self._verify_())
 
     def _expanded_targets_(self) -> "list[str]":
         """Return the target list with commas split and range patterns expanded.
