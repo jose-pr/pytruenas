@@ -29,6 +29,22 @@ LOGGER = _logging.getLogger(__name__)
 #: takes precedence.
 UNIT_DIR = "/etc/systemd/system"
 
+#: The unit type suffixes of systemd.unit(5). A name ending in one keeps it;
+#: any other name, dotted or not, gets the class's ``SUFFIX``.
+_UNIT_TYPES = (
+    ".service",
+    ".socket",
+    ".device",
+    ".mount",
+    ".automount",
+    ".swap",
+    ".target",
+    ".path",
+    ".timer",
+    ".slice",
+    ".scope",
+)
+
 
 def escape_path(client: "TrueNASClient", path: str) -> str:
     """A filesystem path as a systemd unit name (``/mnt/x`` -> ``mnt-x``).
@@ -36,12 +52,15 @@ def escape_path(client: "TrueNASClient", path: str) -> str:
     Delegated to the host's own ``systemd-escape`` rather than reimplemented:
     the rules are fiddly (``-`` becomes ``\\x2d``, non-ASCII is hex-escaped)
     and getting them subtly wrong produces a unit systemd will not match to the
-    mount point it names.
+    mount point it names. ``/`` escapes to ``-`` (its mount unit is
+    ``-.mount``).
     """
     result = client.run(
-        ["systemd-escape", "--path", path], capture_output="stdout", encoding="utf-8"
+        ["systemd-escape", "--path", "--", path],
+        capture_output="stdout",
+        encoding="utf-8",
     )
-    return result.stdout.strip().lstrip("-")
+    return result.stdout.strip()
 
 
 class Unit(SystemFile):
@@ -51,9 +70,15 @@ class Unit(SystemFile):
     ``False`` means "make sure it is not", and ``None`` means "leave whatever
     is there alone" -- a distinction a plain bool could not express, and the
     one you want when a unit's running state is managed elsewhere.
+
+    ``restart_on_change=True`` runs ``systemctl try-restart`` after a changed
+    unit is reloaded, so a running service picks up its new definition; off
+    by default, since a restart interrupts whatever the service is doing. A
+    unit that is not running is left to ``start``.
     """
 
-    #: Suffix appended when ``name`` carries none. Overridden per unit type.
+    #: Suffix appended when ``name`` does not end in a unit type. Overridden
+    #: per unit type.
     SUFFIX = ".service"
 
     def __init__(
@@ -67,10 +92,12 @@ class Unit(SystemFile):
         after: str = "network.target auditd.service",
         wantedby: str = "multi-user.target",
         conf: "dict[str, dict] | None" = None,
+        restart_on_change: bool = False,
     ) -> None:
-        self.name = name if "." in name else f"{name}{self.SUFFIX}"
+        self.name = name if name.endswith(_UNIT_TYPES) else f"{name}{self.SUFFIX}"
         self.enable = enable
         self.start = start
+        self.restart_on_change = restart_on_change
 
         # A copy: defaults are filled in with setdefault, and a caller's dict
         # shared between units must not carry one unit's settings into the next.
@@ -165,6 +192,9 @@ class Unit(SystemFile):
     def _notify(self) -> None:
         LOGGER.info("Reloading systemd for %s", self.name)
         self.daemon_reload()
+        if self.restart_on_change and self.start is not False:
+            LOGGER.info("Restarting %s if it is running", self.name)
+            self._systemctl("try-restart")
         super()._notify()
 
     def uninstall(self) -> bool:
@@ -180,7 +210,7 @@ class Unit(SystemFile):
     def escape(self, text: str) -> str:
         """``systemd-escape`` ``text`` on the host."""
         result = self.client.run(
-            ["systemd-escape", text], capture_output="stdout", encoding="utf-8"
+            ["systemd-escape", "--", text], capture_output="stdout", encoding="utf-8"
         )
         return result.stdout.strip()
 

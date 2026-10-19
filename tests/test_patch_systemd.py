@@ -120,7 +120,7 @@ def test_parser_does_not_interpolate_systemd_specifiers():
 # -- name / sequence normalization ----------------------------------------
 
 
-def testas_names_treats_a_bare_string_as_one_name():
+def test_as_names_treats_a_bare_string_as_one_name():
     """`services="nfs"` must not iterate into three characters."""
     assert as_names("nfs") == ("nfs",)
     assert as_names("nfs,smb") == ("nfs", "smb")
@@ -260,7 +260,7 @@ def test_mount_unit_name_comes_from_systemd_escape():
     client = _FakeClient(escape="mnt-data")
     unit = MountUnit(client, "/mnt/data", what="//srv/share", type="cifs")
     assert unit.name == "mnt-data.mount"
-    assert ["systemd-escape", "--path", "/mnt/data"] in client.calls
+    assert ["systemd-escape", "--path", "--", "/mnt/data"] in client.calls
     text = unit.render()
     assert "Where = /mnt/data" in text and "What = //srv/share" in text
 
@@ -315,3 +315,117 @@ def test_a_failed_daemon_reload_leaves_the_unit_to_be_written_again():
     client.calls.clear()
     assert unit.apply() is True
     assert ["daemon-reload"] in client.systemctl_calls()
+
+
+# -- names systemd reads as intended -------------------------------------------
+
+
+def test_a_dotted_name_still_gets_the_type_suffix():
+    """systemd ignores a unit file whose name ends in no unit type."""
+    client = _FakeClient()
+    assert ServiceUnit(client, "my.agent").name == "my.agent.service"
+    assert Unit(client, "agent.v2.timer").name == "agent.v2.timer"
+
+
+def test_the_root_mount_unit_is_dash_mount():
+    """`systemd-escape --path /` prints `-`, and `-.mount` is the unit for /."""
+    client = _FakeClient(escape="-")
+    assert MountUnit(client, "/", what="tank/root").name == "-.mount"
+    assert ["systemd-escape", "--path", "--", "/"] in client.calls
+
+
+def test_escape_ends_option_parsing_before_the_text():
+    client = _FakeClient()
+    Unit(client, "agent").escape("-x")
+    assert client.calls[-1] == ["systemd-escape", "--", "-x"]
+
+
+# -- unit-file text --------------------------------------------------------
+
+
+def test_a_list_value_renders_as_repeated_keys():
+    from pytruenas.patch.systemd import render_unit
+
+    text = render_unit({"Service": {"ExecStartPre": ["/a", "/b"], "Type": "simple"}})
+    assert text == "[Service]\nExecStartPre = /a\nExecStartPre = /b\nType = simple\n\n"
+
+
+def test_a_value_spanning_lines_is_refused():
+    import pytest
+
+    from pytruenas.patch.systemd import render_unit
+
+    with pytest.raises(ValueError, match="span lines"):
+        render_unit({"Service": {"ExecStart": "/bin/a\n/bin/b"}})
+
+
+def test_render_matches_configparser_for_single_values():
+    """Byte-identical output keeps an existing unit unchanged on re-apply."""
+    from pytruenas.patch.systemd import render_unit
+
+    conf = {
+        "Unit": {"Description": "Agent %i", "After": "network.target"},
+        "Service": {"ExecStart": "/bin/a --x=1", "RestartSec": 10, "Empty": ""},
+        "Install": {"WantedBy": "multi-user.target"},
+    }
+    parser = UnitConfigParser()
+    parser.read_dict(conf)
+    expected = io.StringIO()
+    parser.write(expected)
+    assert render_unit(conf) == expected.getvalue()
+
+
+def test_parse_reads_repeated_keys_sections_and_continuations():
+    from pytruenas.patch.systemd import parse_unit
+
+    text = (
+        "# a comment\n"
+        "[Service]\n"
+        "ExecStartPre=/a\n"
+        "ExecStartPre = /b\n"
+        "ExecStart=/bin/agent \\\n"
+        "  # skipped inside a continuation\n"
+        "  --flag\n"
+        "[Unit]\n"
+        "Description=x\n"
+        "[Service]\n"
+        "Restart=always\n"
+    )
+    assert parse_unit(text) == {
+        "Service": {
+            "ExecStartPre": ["/a", "/b"],
+            "ExecStart": "/bin/agent  --flag",
+            "Restart": "always",
+        },
+        "Unit": {"Description": "x"},
+    }
+
+
+def test_parse_round_trips_render():
+    from pytruenas.patch.systemd import parse_unit, render_unit
+
+    conf = {"Service": {"Environment": ["A=1", "B=2"], "ExecStart": "/bin/a"}}
+    assert parse_unit(render_unit(conf)) == conf
+
+
+# -- a changed unit reaching a running service ------------------------------
+
+
+def test_restart_on_change_restarts_a_changed_unit_after_reloading():
+    client = _FakeClient(enabled=True, active=True)
+    unit = ServiceUnit(client, "agent", cmd="/bin/v1", restart_on_change=True)
+    unit.apply()
+    assert [call[0] for call in client.systemctl_calls()][:2] == [
+        "daemon-reload",
+        "try-restart",
+    ]
+
+    client.calls.clear()
+    unit.apply()  # unchanged: nothing to restart for
+    assert "try-restart" not in [call[0] for call in client.systemctl_calls()]
+
+
+def test_a_changed_unit_is_not_restarted_by_default():
+    client = _FakeClient(enabled=True, active=True)
+    ServiceUnit(client, "agent", cmd="/bin/v1").apply()
+    assert "try-restart" not in [call[0] for call in client.systemctl_calls()]
