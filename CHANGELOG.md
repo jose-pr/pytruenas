@@ -51,6 +51,37 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - **`pytruenas.utils.tls` is gone** (`context`, `ca_bundle`, `CA_BUNDLE_ENV`,
   `SslVerify`); the decision is private now. Pass `verify=` instead.
 
+### Added
+
+- `verify=` takes an `ssl.SSLContext`, used as it is on the API websocket, the
+  side channels and the web shell: a client certificate for a NAS behind an
+  mTLS reverse proxy (e.g. from `sslcontext.create_context(certificate=, key=)`
+  or `sslcontext.system_context()`), or a pinned CA.
+- Dependency `truststore>=0.10.5,<0.11` on Python 3.10+.
+
+### Fixed
+
+- Uploads and downloads time out (the websocket's connect and read
+  timeouts); a side channel that accepted the connection and then said nothing
+  blocked them for good.
+- A failed download's error message no longer carries the link's `auth_token`.
+- Opening the web shell closes its websocket on every failure (a token that
+  could not be minted leaked it), reads a refusal of any shape (a string
+  `error` raised `AttributeError`), and declines when no `connected` message
+  arrives instead of returning a session with no shell behind it.
+- Turning TLS verification off logs one WARNING per host.
+- `TrueNASWSConnection.close()` sends the close frame without waiting for the
+  peer's answer: the wait read the socket the reader thread was blocked on, so
+  a peer that never answered held `close()` for good.
+- A call's timeout bounds its send: a peer that stopped reading held
+  `call(..., timeout=)` -- and a `close()` behind it -- forever once the socket
+  buffers filled. The send is aborted and the connection closed (part of the
+  request may be on the wire), and the call raises `CallTimeout`.
+- Behind an HTTPS proxy (`HTTPS_PROXY`), uploads and downloads verify with the
+  same trust as the websockets; they ignored a CA bundle and failed (or trusted
+  certifi) while the API connected.
+
+
 ## [0.6.1] - 2026-10-20
 
 ### Changed
@@ -103,11 +134,6 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
-- `verify=` takes an `ssl.SSLContext`, used as it is on the API websocket, the
-  side channels and the web shell: a client certificate for a NAS behind an
-  mTLS reverse proxy (e.g. from `sslcontext.create_context(certificate=, key=)`
-  or `sslcontext.system_context()`), or a pinned CA.
-- Dependency `truststore>=0.10.5,<0.11` on Python 3.10+.
 - `pytruenas.utils.cmd.with_targets(args_cls)` and `TargetsField`: an `Args`
   class with the trailing `targets` positional declared as its last field.
 
@@ -196,25 +222,6 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   URL rather than a file an installed copy does not have.
 - The suite passes with no extras installed: one SSH test lacked its
   `asyncssh` guard.
-- Uploads and downloads time out (the websocket's connect and read
-  timeouts); a side channel that accepted the connection and then said nothing
-  blocked them for good.
-- A failed download's error message no longer carries the link's `auth_token`.
-- Opening the web shell closes its websocket on every failure (a token that
-  could not be minted leaked it), reads a refusal of any shape (a string
-  `error` raised `AttributeError`), and declines when no `connected` message
-  arrives instead of returning a session with no shell behind it.
-- Turning TLS verification off logs one WARNING per host.
-- `TrueNASWSConnection.close()` sends the close frame without waiting for the
-  peer's answer: the wait read the socket the reader thread was blocked on, so
-  a peer that never answered held `close()` for good.
-- A call's timeout bounds its send: a peer that stopped reading held
-  `call(..., timeout=)` -- and a `close()` behind it -- forever once the socket
-  buffers filled. The send is aborted and the connection closed (part of the
-  request may be on the wire), and the call raises `CallTimeout`.
-- Behind an HTTPS proxy (`HTTPS_PROXY`), uploads and downloads verify with the
-  same trust as the websockets; they ignored a CA bundle and failed (or trusted
-  certifi) while the API connected.
 - `examples/simple_client_from_yaml.py` moved to `examples/scripts/`, so
   `--cmdspath examples` no longer warns that it is not a command.
 
