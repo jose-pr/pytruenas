@@ -23,8 +23,6 @@ from pytruenas import codegen
 
 from test_codegen_fidelity import EDGE_SHAPES, edge_dump
 
-pytestmark = pytest.mark.requires("jinja2")
-
 FIXTURE = Path(__file__).parent / "fixtures" / "api_min.json"
 
 #: The directory that holds the `pytruenas` package under test, so a checker

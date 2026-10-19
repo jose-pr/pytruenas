@@ -77,16 +77,12 @@ yaml = ["anycfg[yaml]>=0.14.0,<0.15"]
 # Remote shell + SFTP filesystem leg: both SSH providers are hostctl's (its
 # `ssh` extra is asyncssh and sftppath).
 ssh = ["hostctl[ssh]>=0.4.0,<0.5"]
-# Typings generator (`pytruenas generate-typings`).
-# Series base: `Environment`/`DictLoader`/`tojson` have been stable since 3.0,
-# and 4.x may break them. Validated against 3.1.x.
-codegen = ["jinja2>=3.0,<4"]
 # `pytruenas deploy --source repo`. The core dependency already carries it;
 # the extra stays so an existing `pytruenas[repo]` requirement resolves.
 repo = ["hostctl[deploy]>=0.4.0,<0.5"]
 # Every extra that has tests, by reference so the ranges live in one place.
 dev = [
-    "pytruenas[yaml,ssh,codegen]",
+    "pytruenas[yaml,ssh]",
     "black",
     "build",
     "hatchling",

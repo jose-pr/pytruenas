@@ -30,7 +30,6 @@ provider, the CLI and `deploy`. Extras:
 | --- | --- | --- |
 | `ssh` | `hostctl[ssh]>=0.4.0,<0.5` (asyncssh, sftppath) | `.ssh`, `run()` over SSH, the `sftp` path leg |
 | `yaml` | `anycfg[yaml]` (PyYAML) | a CLI config file written in YAML (`#!yaml`, `.yaml`) |
-| `codegen` | `jinja2` | `pytruenas.codegen` and `generate-typings` |
 | `repo` | `hostctl[deploy]` | `deploy --source repo`; the core dependency already installs it, so the extra only lets a requirement that names it resolve |
 
 A missing extra raises `hostctl.MissingExtraError` (an `ImportError`) at first
@@ -39,8 +38,6 @@ use, never at import time: `FEATURE needs the 'EXTRA' extra: pip install
 `"hostctl[EXTRA]"` for hostctl's. Without `ssh` the host has no `ssh`/`sftp`
 provider and `run()`/`path()` use the websocket ones. Without `yaml`, a
 YAML config file raises naming `pytruenas[yaml]` and the file.
-Without `codegen`, the error comes before anything is written, and before
-`generate-typings` dumps the API from a host.
 
 **Version.** `pytruenas.__version__: str` is resolved from installed package
 metadata (`importlib.metadata`); `"0.0.0.dev0"` when run from a bare checkout
@@ -892,8 +889,8 @@ check=, capture_output=, encoding=)` and `client.api.<ns>.<method>(...)`. A
 Backs the `generate-typings` command; not typically used directly.
 
 - **`Codegen().generate(api: Version, root: Path | str)`** — write one
-  `__init__.pyi` per API namespace under `root`, rendered from the bundled
-  Jinja template (`pytruenas/codegen/namespace.pyi.j2`). `api` is one entry
+  `__init__.pyi` per API namespace under `root`, built in Python (no template
+  engine, no extra). `api` is one entry
   from `client.dump_api()["versions"]` (see `pytruenas.models.apidump`).
   Renders into a temporary sibling and swaps it in only when complete: the
   previous tree is renamed aside and deleted after the new one is in place, so
@@ -901,9 +898,7 @@ Backs the `generate-typings` command; not typically used directly.
   the previous output intact and no temporary directory behind; a previous
   tree that cannot be deleted is logged at WARNING. `root` is replaced only if
   it is absent, empty, or a previous output (marked `.pytruenas-typings`);
-  otherwise `FileExistsError` — hand-written stubs included. Missing `jinja2`
-  raises `hostctl.MissingExtraError` naming `pytruenas[codegen]` before
-  anything is touched.
+  otherwise `FileExistsError` — hand-written stubs included.
 - **`codegen.BadApiName`** (`ValueError`) — a dump name that would write
   outside the output directory.
 
@@ -1242,7 +1237,6 @@ setting is read through (see [Environment variables](#environment-variables)).
   `.pyi` stubs via `pytruenas.codegen.Codegen().generate(version, path)`.
   `--path` defaults to `truenasapi_typings/current`; only an absent or empty
   directory, or one a previous run marked `.pytruenas-typings`, is replaced.
-  Without the `codegen` extra it fails before dumping the API.
 - **`deploy [--path PATH] [--mode pyz|dir] [--source installed|repo]
   [--pkg-root DIST] [--pkg-name PKG] [--extra E] [--skip DIST] [--force]
   [--repo-root PATH] [--ignore-file FILE] [--ignore-pattern PATTERN]

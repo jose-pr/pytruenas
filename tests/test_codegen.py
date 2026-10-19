@@ -30,7 +30,6 @@ def generated(tmp_path):
     return out
 
 
-@pytest.mark.requires("jinja2")
 def test_all_stubs_parse(generated):
     files = list(generated.rglob("*.pyi"))
     assert files, "no stubs generated"
@@ -40,7 +39,6 @@ def test_all_stubs_parse(generated):
         compile(src, str(path), "exec")
 
 
-@pytest.mark.requires("jinja2")
 def test_no_undefined_uppercase_return_types(generated):
     for path in generated.rglob("*.pyi"):
         src = path.read_text(encoding="utf-8")
@@ -62,7 +60,6 @@ def test_no_undefined_uppercase_return_types(generated):
                 ), f"{path.name}: undefined return type {name!r}"
 
 
-@pytest.mark.requires("jinja2")
 def test_expected_namespaces_and_methods(generated):
     user = (generated / "user" / "__init__.pyi").read_text(encoding="utf-8")
     assert "class User(_NS):" in user
@@ -77,7 +74,6 @@ def test_expected_namespaces_and_methods(generated):
     assert "def info(" in system
 
 
-@pytest.mark.requires("jinja2")
 def test_root_namespace_valid_class_name(generated):
     root = (generated / "__init__.pyi").read_text(encoding="utf-8")
     # version v25.04.0 must not become `class 0`
@@ -125,7 +121,6 @@ def test_the_default_path_is_not_pyrights_stub_directory():
     assert Args.path.as_posix() == "truenasapi_typings/current"
 
 
-@pytest.mark.requires("jinja2")
 def test_generate_replaces_its_own_previous_output(tmp_path):
     target = tmp_path / "typings"
     Codegen().generate(_api_version(), target)
@@ -135,42 +130,21 @@ def test_generate_replaces_its_own_previous_output(tmp_path):
     assert not (target / "stale.pyi").exists()
 
 
-@pytest.mark.requires("jinja2")
 def test_a_failed_render_keeps_the_previous_output(tmp_path, monkeypatch):
     target = tmp_path / "typings"
     Codegen().generate(_api_version(), target)
     before = sorted(p.relative_to(target) for p in target.rglob("*"))
 
-    from pytruenas.codegen import jinja
+    import pytruenas.codegen as codegen_pkg
 
-    def boom(self, **ctx):
+    def boom(ns, alias=None):
         raise RuntimeError("render failed")
 
-    monkeypatch.setattr(jinja.Renderer, "render", boom)
+    monkeypatch.setattr(codegen_pkg, "_render", boom)
     with pytest.raises(RuntimeError, match="render failed"):
         Codegen().generate(_api_version(), target)
     assert sorted(p.relative_to(target) for p in target.rglob("*")) == before
     assert [p.name for p in tmp_path.iterdir()] == ["typings"]  # no temp dir left
-
-
-def test_missing_jinja2_names_the_extra_and_touches_nothing(tmp_path, monkeypatch):
-    import sys
-
-    import pytruenas.codegen as codegen_pkg
-
-    # Both: `from . import jinja` finds an already-imported submodule as a
-    # package attribute before it ever consults sys.modules.
-    monkeypatch.setitem(sys.modules, "pytruenas.codegen.jinja", None)
-    monkeypatch.delattr(codegen_pkg, "jinja", raising=False)
-    target = tmp_path / "typings"
-    target.mkdir()
-    (target / ".pytruenas-typings").write_text("")
-    (target / "old.pyi").write_text("# previous")
-    from hostctl import MissingExtraError
-
-    with pytest.raises(MissingExtraError, match=r'"pytruenas\[codegen\]"'):
-        Codegen().generate(_api_version(), target)
-    assert (target / "old.pyi").read_text() == "# previous"
 
 
 _INIT_NAME = "__init__.pyi"
@@ -198,7 +172,6 @@ def test_typeddict_name_from_spacey_title():
     assert " " not in name
 
 
-@pytest.mark.requires("jinja2")
 def test_properties_not_listed_in_required_are_optional(generated):
     """A schema with no `required` list requires nothing (JSON Schema), but
     every property was rendered as required -- so an update payload, a
@@ -213,7 +186,6 @@ def test_properties_not_listed_in_required_are_optional(generated):
     assert '"full_name": _NotRequired[str]' in create
 
 
-@pytest.mark.requires("jinja2")
 def test_optionality_markers_resolve_on_the_39_floor(generated):
     """typing.NotRequired/Unpack exist only from 3.11; a consumer checking
     against 3.9 (this project's floor) could not resolve the stubs at all."""
@@ -226,7 +198,6 @@ def test_optionality_markers_resolve_on_the_39_floor(generated):
             assert "import sys as" not in src
 
 
-@pytest.mark.requires("jinja2")
 def test_the_root_module_exports_current(generated):
     """`TrueNASClient[Current]` is the documented spelling, but the generated
     root class is named after the version, so nothing resolved."""
@@ -240,7 +211,6 @@ def test_the_root_module_exports_current(generated):
     )
 
 
-@pytest.mark.requires("jinja2")
 def test_the_helpers_fields_are_the_payload_not_a_call_option(tmp_path):
     """`**fields` was `_Unpack[bool]`: a fixed index from the end picked the
     `_ioerror` option once the call options grew from three to five."""
@@ -259,7 +229,6 @@ def _tree(root: Path) -> "dict[str, str]":
     }
 
 
-@pytest.mark.requires("jinja2")
 def test_a_failed_swap_keeps_the_previous_output_whole(tmp_path, monkeypatch):
     """Moving the new tree into place fails (a stub held open on Windows):
     the previous output stays whole and no temporary sibling is left."""
@@ -286,7 +255,6 @@ def test_a_failed_swap_keeps_the_previous_output_whole(tmp_path, monkeypatch):
     assert [p.name for p in tmp_path.iterdir()] == ["typings"]
 
 
-@pytest.mark.requires("jinja2")
 def test_an_undeletable_previous_output_does_not_fail_the_run(
     tmp_path, monkeypatch, caplog
 ):
@@ -313,7 +281,6 @@ def test_an_undeletable_previous_output_does_not_fail_the_run(
     assert "could not delete the previous output" in caplog.text
 
 
-@pytest.mark.requires("jinja2")
 @pytest.mark.skipif(sys.platform != "win32", reason="Windows file locking")
 def test_a_stub_held_open_leaves_the_previous_output_whole(tmp_path):
     target = tmp_path / "typings"
@@ -327,26 +294,47 @@ def test_a_stub_held_open_leaves_the_previous_output_whole(tmp_path):
     assert [p.name for p in tmp_path.iterdir()] == ["typings"]
 
 
-def test_a_missing_extra_fails_before_the_api_dump(tmp_path, monkeypatch):
-    import logging
-    from types import SimpleNamespace
+_NO_JINJA = """import runpy, sys
 
-    import pytruenas.codegen as codegen_pkg
-    from hostctl import MissingExtraError
-    from pytruenas.cmd import generate_typings
 
-    monkeypatch.setitem(sys.modules, "pytruenas.codegen.jinja", None)
-    monkeypatch.delattr(codegen_pkg, "jinja", raising=False)
+class Blocked:
+    def find_spec(self, name, path=None, target=None):
+        if name.partition(".")[0] == "jinja2":
+            raise ImportError(name + " is blocked")
 
-    class Client:
-        dumped = False
 
-        def dump_api(self):
-            Client.dumped = True
-            return {"versions": [_api_version()]}
+sys.meta_path.insert(0, Blocked())
+sys.argv = ["pytruenas", *sys.argv[1:]]
+runpy.run_module("pytruenas", run_name="__main__")
+"""
 
-    args = SimpleNamespace(api_cache=None, api_version=None, path=tmp_path / "out")
-    with pytest.raises(MissingExtraError, match=r'"pytruenas\[codegen\]"'):
-        generate_typings.run(Client(), args, logging.getLogger("test.typings"))
-    assert not Client.dumped
-    assert not args.path.exists()
+
+def test_generate_typings_from_a_dump_file_needs_no_extra(tmp_path):
+    """The core install generates stubs: nothing imports a template engine."""
+    import os
+    import subprocess
+
+    import pytruenas
+
+    source = Path(pytruenas.__file__).resolve().parent.parent
+    env = {**os.environ, "PYTHONPATH": str(source)}
+    out = tmp_path / "out"
+    run = subprocess.run(
+        [
+            sys.executable,
+            "-c",
+            _NO_JINJA,
+            "generate-typings",
+            "--api-cache",
+            str(FIXTURE),
+            "--path",
+            str(out),
+            "nas.invalid",
+        ],
+        capture_output=True,
+        text=True,
+        env=env,
+        timeout=120,
+    )
+    assert run.returncode == 0, run.stdout + run.stderr
+    assert (out / "user" / "__init__.pyi").exists()

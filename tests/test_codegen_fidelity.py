@@ -16,8 +16,6 @@ import pytest
 from pytruenas import codegen
 from pytruenas.models import jsonschema as js
 
-pytestmark = pytest.mark.requires("jinja2")
-
 FIXTURE = Path(__file__).parent / "fixtures" / "api_min.json"
 
 
@@ -191,19 +189,6 @@ def test_get_instance_without_an_id_parameter_generates(tmp_path):
             ]
     codegen.Codegen().generate(api, tmp_path / "out")
     assert list((tmp_path / "out").rglob("*.pyi"))
-
-
-# -- the template ---------------------------------------------------------
-
-
-def test_the_template_loads_without_a_filesystem_path(monkeypatch):
-    """`deploy --mode pyz` installs a zipapp, where a FileSystemLoader cannot
-    read the template at all."""
-    from pytruenas.codegen import jinja
-
-    assert jinja._TEMPLATES["namespace.pyi.j2"].strip()
-    renderer = jinja.Renderer("namespace.pyi")
-    assert renderer.template is not None
 
 
 # -- the call options -----------------------------------------------------
