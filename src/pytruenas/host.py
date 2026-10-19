@@ -37,6 +37,7 @@ import threading as _threading
 import typing as _ty
 import weakref as _weakref
 from functools import cached_property as _cached_property
+from urllib.parse import quote as _quote
 from urllib.parse import unquote as _unquote
 from urllib.parse import urlsplit as _urlsplit
 
@@ -99,6 +100,10 @@ _SCHEME_ALIASES = {
     "truenas+https": "truenas+wss",
     "truenas+unix": "truenas+unix",
 }
+
+#: Characters left as written when a socket path is spelled as a URI path:
+#: RFC 3986 ``pchar`` plus ``/``. ``?``, ``#``, ``%`` and space are encoded.
+_SOCKET_PATH_SAFE = "/:@-._~!$&'()*+,;="
 
 #: Hosts that mean "this machine" -- matching ``Target.is_local`` so the
 #: local-socket shortcut behaves exactly as it does today.
@@ -386,6 +391,9 @@ def _normalize_target(target: "str | None") -> str:
 
     if not target:
         return f"{_SCHEME_PREFIX}unix://{DEFAULT_SOCKET_PATH}"
+    if target.startswith("/"):
+        # A filesystem path has no host to reach: it is a unix socket.
+        return f"{_SCHEME_PREFIX}unix://{_quote(target, safe=_SOCKET_PATH_SAFE)}"
 
     # A bare host or "host:port" has no scheme. Detecting that by "://" rather
     # than urlsplit's parsing avoids "nas:8080" being read as scheme "nas".
@@ -498,6 +506,9 @@ class TrueNASConfig(
         #: shell", or any other combination).
         self.executors = _as_names(executor)
         self.paths = _as_names(path)
+        if not (host or port or socket_path or api_path) and secure is None:
+            # Nothing names a remote host, so this is the local middleware.
+            socket_path = DEFAULT_SOCKET_PATH
         self.host = host
         self.port = int(port or 0)
         #: ``True`` -> wss, ``False`` -> ws, ``None`` -> not given, use wss.
@@ -628,17 +639,13 @@ class TrueNASConfig(
 
         scheme = parsed.scheme.casefold()
         if scheme == "truenas+unix":
-            # urlsplit puts a leading "///path" entirely in .path; a
-            # "truenas+unix://var/run/..." spelling lands in .netloc instead.
-            #
-            # Unquoted, as a URI path must be: `unix:///run/a%3Fb/x.sock` names
-            # the file `/run/a?b/x.sock`, and connecting to the literal
-            # `%3F` spelling would open a different one (or nothing). The
-            # encoded form is how such a path is written in a URI at all --
-            # raw, the `?` would end the path.
-            socket_path = _unquote(parsed.path) or f"/{_unquote(parsed.netloc)}"
+            # "truenas+unix:///var/run/x.sock" puts the whole path in .path;
+            # "truenas+unix://var/run/x.sock" puts its first segment in the
+            # authority, so the two are joined. Unquoted: `a%3Fb` names `a?b`.
+            first = parsed.netloc.rpartition("@")[2]
+            socket_path = _unquote(f"/{first}{parsed.path}" if first else parsed.path)
             return cls(
-                socket_path=socket_path or DEFAULT_SOCKET_PATH,
+                socket_path=socket_path.rstrip("/") or DEFAULT_SOCKET_PATH,
                 credentials=creds,
                 **_shared_options(credentials),
             )
@@ -744,16 +751,10 @@ class TrueNASConfig(
         return TrueNASHost(self)
 
 
-#: Keywords `TrueNASHost(...)` should route to the config rather than to
-#: `SystemHost`. Derived from the signature so the two cannot drift: adding a
-#: `TrueNASConfig` parameter makes it accepted here automatically.
-#: `signature(TrueNASConfig)` would resolve through HostConfig's metaclass
-#: `__call__`, not the constructor, so read `__init__` directly.
-_CONFIG_OPTIONS = frozenset(
-    name
-    for name, parameter in _inspect.signature(TrueNASConfig.__init__).parameters.items()
-    if parameter.kind is _inspect.Parameter.KEYWORD_ONLY
-) | frozenset(TrueNASConfig.uri_credentials)
+#: Keywords `TrueNASHost(...)` routes to the config rather than to `PosixHost`:
+#: exactly what `TrueNASConfig.from_target` accepts. `port=`, `secure=` and the
+#: other constructor-only settings are spelled in the connection string.
+_CONFIG_OPTIONS = frozenset(TrueNASConfig.uri_credentials)
 
 #: Keywords that belong to `SystemHost` rather than the config (`info=`,
 #: `initializer=`, ...). Derived from the signature too, so a hostctl release

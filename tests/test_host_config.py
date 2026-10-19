@@ -119,6 +119,51 @@ def test_local_socket_config():
     assert isinstance(config.credentials, LocalAuth)
 
 
+@pytest.mark.parametrize(
+    "spelling",
+    [
+        "truenas+unix:///var/run/x.sock",
+        "truenas+unix://var/run/x.sock",
+        "ws+unix:///var/run/x.sock",
+        "/var/run/x.sock",
+    ],
+)
+def test_every_socket_spelling_names_the_whole_path(spelling):
+    """Through either entry point, no segment of the socket path is lost and a
+    bare path is a local socket, not a remote host named ''."""
+    for config in (TrueNASConfig.from_target(spelling), _via_registry(spelling)):
+        assert config.is_local, config
+        assert config.socket_path == "/var/run/x.sock"
+
+
+def _via_registry(spelling):
+    if "://" not in spelling:
+        return TrueNASConfig.from_target(spelling)
+    return HostConfig(spelling.replace("ws+unix", "truenas+unix"))
+
+
+def test_a_bare_socket_path_keeps_uri_syntax_in_its_name():
+    config = TrueNASConfig.from_target("/run/a?b #c/x.sock")
+    assert config.socket_path == "/run/a?b #c/x.sock"
+
+
+def test_a_config_naming_nothing_is_the_local_socket():
+    config = TrueNASConfig()
+    assert config.is_local
+    assert config.socket_path == DEFAULT_SOCKET_PATH
+
+
+def test_an_unknown_keyword_lists_only_options_that_work():
+    """`port=` is spelled in the connection string; the error must not offer
+    it as a keyword."""
+    from pytruenas import TrueNASHost
+
+    with pytest.raises(ValueError, match="unknown credential argument: 'port'") as e:
+        TrueNASHost("nas", port=8443)
+    listed = str(e.value).split("configuration options: ", 1)[1].rstrip(")")
+    assert set(listed.split(", ")) == set(TrueNASConfig.uri_credentials)
+
+
 def test_explicit_api_path_is_recorded():
     config = TrueNASConfig.from_target("wss://nas/api/current")
     assert config.api_path == "/api/current"
