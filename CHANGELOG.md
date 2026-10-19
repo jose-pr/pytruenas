@@ -220,6 +220,9 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   failed target by its host name through duho's own `run_targets(label=)`, and
   `client.logger.trace()` is duho's `LoggerAdapter.trace`; neither changes
   what is printed.
+- **Dependency floor raised to `websocket-client>=1.2.2,<2`.** Below it the
+  API websocket ignores the TLS context `verify=` builds, so the OS trust, a
+  CA bundle and a caller's `ssl.SSLContext` never applied there.
 
 ### Added
 

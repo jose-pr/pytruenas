@@ -56,7 +56,9 @@ dependencies = [
     "requests>=2.32.3,<3",
     # 2.0.2: below it the shared context fails on an IP-address target.
     "urllib3>=2.0.2,<3",
-    "websocket-client>=1.0,<2",
+    # 1.2.2: below it `sslopt["context"]` is ignored, so the shared context
+    # (truststore, a CA bundle, a caller's client certificate) never applies.
+    "websocket-client>=1.2.2,<2",
     # verify=True checks through the platform verifier, as hostctl's does;
     # 0.10.5 is the range hostctl declares. It needs Python 3.10.
     'truststore>=0.10.5,<0.11; python_version >= "3.10"',
