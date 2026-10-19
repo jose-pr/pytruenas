@@ -11,6 +11,10 @@ from . import auth as _auth
 from . import connection as _connection
 from .utils import query as _q, io as _ioutils
 
+#: duho's TRACE level, by number: `log()` works on any Logger or LoggerAdapter,
+#: where a caller's adapter has no `.trace()`.
+_TRACE = 5
+
 if _ty.TYPE_CHECKING:
     from . import TrueNASClient
 
@@ -298,8 +302,11 @@ class Namespace:
                 # Lazy and redacted: the args carry passwords, API keys and
                 # private keys (auth.login, install_sshcreds), and formatting
                 # them on every call cost time even with TRACE off.
-                self._client.logger.trace(  # type: ignore
-                    "Calling method: %s args: %s", method, _LoggedArgs(method, args)
+                self._client.logger.log(
+                    _TRACE,
+                    "Calling method: %s args: %s",
+                    method,
+                    _LoggedArgs(method, args),
                 )
                 conn = self._client.conn
                 return conn.call(method, *args, **kwds)

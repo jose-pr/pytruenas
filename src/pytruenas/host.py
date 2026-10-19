@@ -121,8 +121,8 @@ class _HostLogger(_logging.LoggerAdapter):
     which :meth:`process` suppresses.
 
     ``.trace`` is forwarded if the underlying logger has it (``duho.logging``
-    installs a TRACE level); :mod:`pytruenas.namespace` calls it for per-call
-    logging, and a plain ``logging.Logger`` has no such method.
+    installs a TRACE level), for code that calls it on ``host.logger``;
+    pytruenas itself logs TRACE through ``log()``, which any logger accepts.
     """
 
     def process(self, msg, kwargs):
@@ -133,8 +133,7 @@ class _HostLogger(_logging.LoggerAdapter):
         return f"{prefix}{text}", kwargs
 
     def trace(self, msg, *args, **kwargs):
-        # LoggerAdapter forwards only the standard levels; TRACE is duho's
-        # addition, and namespace.py calls it on every API call.
+        # LoggerAdapter forwards only the standard levels; TRACE is duho's.
         inner = getattr(self.logger, "trace", None)
         if inner is None:  # pragma: no cover - only without duho's logging setup
             return

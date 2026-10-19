@@ -182,7 +182,7 @@ def test_call_trace_never_carries_a_password():
 
     host = TrueNASClient("wss://nas1", autologin=False)
     rendered = []
-    host.logger.trace = lambda msg, *a, **kw: rendered.append(msg % a)
+    host.logger.log = lambda level, msg, *a, **kw: rendered.append(msg % a)
     host._conn = MagicMock(_closed=MagicMock(is_set=lambda: False))
     host.api.auth.login("root", "hunter2")
     host.api.keychaincredential.create({"attributes": {"private_key": "PEM-SECRET"}})
@@ -190,6 +190,23 @@ def test_call_trace_never_carries_a_password():
         "hunter2" in r or "PEM-SECRET" in r for r in rendered
     ), rendered
     assert "auth.login" in rendered[0] and "<str>" in rendered[0]
+
+
+@pytest.mark.parametrize("assign", [False, True])
+def test_a_callers_logger_adapter_works(assign):
+    """The header says an adapter is used as-is, and every API call raised
+    `AttributeError: 'LoggerAdapter' object has no attribute 'trace'`."""
+    from unittest.mock import MagicMock
+
+    adapter = logging.LoggerAdapter(logging.getLogger("pytruenas.test.mine"), {})
+    if assign:
+        host = TrueNASClient("wss://nas1", autologin=False)
+        host.logger = adapter
+    else:
+        host = TrueNASClient("wss://nas1", autologin=False, logger=adapter)
+    host._conn = MagicMock(_closed=MagicMock(is_set=lambda: False))
+    host._conn.call.return_value = "pong"
+    assert host.api.core.ping() == "pong"
 
 
 def test_connection_shares_the_hosts_logger():

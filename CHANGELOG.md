@@ -40,6 +40,9 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Generated stubs import `sys` unaliased, so mypy reads the
   `sys.version_info >= (3, 11)` guard and stops treating every optional key as
   required on a target below 3.11.
+- A `logging.LoggerAdapter` passed as `logger=` (or assigned to
+  `client.logger`) no longer makes every API call raise `AttributeError`: the
+  per-call TRACE record is written with `logger.log()`, which any logger has.
 - `examples/simple_client_from_yaml.py` moved to `examples/scripts/`, so
   `--cmdspath examples` no longer warns that it is not a command.
 
