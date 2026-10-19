@@ -32,6 +32,8 @@ class _FakePath:
         return self._path in self._store
 
     def read_bytes(self):
+        if self._path not in self._store:
+            raise FileNotFoundError(self._path)
         return self._store[self._path]
 
     def write_bytes(self, data):
@@ -288,3 +290,28 @@ def test_units_built_from_one_conf_do_not_share_settings():
     assert beta.conf["Service"]["ExecStart"] == "/usr/bin/beta"
     assert beta.conf["Unit"]["Description"] == "BETA"
     assert beta.conf["Service"]["Environment"] == "A=1"
+
+
+def test_a_failed_daemon_reload_leaves_the_unit_to_be_written_again():
+    """Otherwise the next apply finds the file written and never reloads."""
+    import pytest
+
+    class _ReloadFails(_FakeClient):
+        fail = True
+
+        def run(self, argv, check=True, **kwargs):
+            if argv[:2] == ["systemctl", "daemon-reload"] and self.fail:
+                self.calls.append(list(argv))
+                raise RuntimeError("daemon-reload failed")
+            return super().run(argv, check=check, **kwargs)
+
+    client = _ReloadFails()
+    unit = ServiceUnit(client, "agent", cmd="/bin/true")
+    with pytest.raises(RuntimeError):
+        unit.apply()
+    assert not unit.path.exists()
+
+    client.fail = False
+    client.calls.clear()
+    assert unit.apply() is True
+    assert ["daemon-reload"] in client.systemctl_calls()

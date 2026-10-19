@@ -7,6 +7,7 @@ reload to see.
 
 from __future__ import annotations
 
+import contextlib as _contextlib
 import logging as _logging
 import typing as _ty
 
@@ -63,38 +64,73 @@ class SystemFile(FileTarget):
         self.writable = writable
 
     def write(self, content) -> bool:
-        if self.writable:
-            from ..zfs import writable as _writable
+        """Write ``content`` if it differs, then notify; return whether it did.
 
-            with _writable(self.client, self.path):
-                return self._write_and_notify(content)
-        return self._write_and_notify(content)
+        With ``writable``, an unchanged file is detected before the dataset is
+        touched, so re-applying a patch toggles nothing. If notifying fails,
+        the previous content is put back before the error is raised: the next
+        apply then sees a change and notifies again, instead of finding the
+        file already written and doing nothing.
+        """
+        if self.writable and not self.would_change(content):
+            return False
+        with self._window():
+            changed, previous = self._write(content)
+        if changed:
+            self._follow_up(previous)
+        return changed
 
     def revert(self, remove_baseline: bool = True) -> bool:
         """Restore the original content, then notify as a write would.
 
         Reverting is a change like any other: a service still holding the
         patched config has to be told, or the file on disk and the running
-        state disagree. Wrapped in the same ``writable`` window as a write,
-        since the file being restored is usually on a read-only mount.
+        state disagree. Done in the same ``writable`` window as a write, since
+        the file being restored is usually on a read-only mount. The snapshot
+        is removed only once notifying succeeded, so a failed revert can be
+        retried.
         """
-        if self.writable:
-            from ..zfs import writable as _writable
-
-            with _writable(self.client, self.path):
-                reverted = super().revert(remove_baseline)
-        else:
-            reverted = super().revert(remove_baseline)
+        with self._window():
+            previous = self._current()
+            reverted = super().revert(remove_baseline=False)
+            if not reverted and remove_baseline:
+                super().revert(remove_baseline=True)
         if reverted:
-            self._notify()
+            self._follow_up(previous)
+            if remove_baseline:
+                with self._window():
+                    super().revert(remove_baseline=True)
         return reverted
 
-    def _write_and_notify(self, content) -> bool:
-        modified = super().write(content)
-        if not modified:
-            return False
-        self._notify()
-        return True
+    def _window(self):
+        """The ``zfs.writable`` window when ``writable`` is set, else nothing."""
+        if not self.writable:
+            return _contextlib.nullcontext()
+        from ..zfs import writable as _writable
+
+        return _writable(self.client, self.path)
+
+    def _follow_up(self, previous: "bytes | None") -> None:
+        """Notify after a change; on failure, put ``previous`` back and raise."""
+        try:
+            self._notify()
+        except Exception:
+            LOGGER.error(
+                "%s changed but notifying failed; putting the previous content "
+                "back so the next apply retries",
+                self.path,
+            )
+            try:
+                with self._window():
+                    if previous is None:
+                        self._unlink(self.path)
+                    else:
+                        self._write_with_mode(
+                            self.path, previous, self._mode_of(self.path), exists=True
+                        )
+            except Exception:
+                LOGGER.exception("could not put back the content of %s", self.path)
+            raise
 
     def _notify(self) -> None:
         """Regenerate etc groups and reload services after a real change."""

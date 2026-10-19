@@ -157,12 +157,15 @@ class Unit(SystemFile):
         self._systemctl("restart")
 
     def write(self, content) -> bool:
+        """Write the unit if it changed, then reconcile enable/start."""
         modified = super().write(content)
-        if modified:
-            LOGGER.info("Reloading systemd for %s", self.name)
-            self.daemon_reload()
         self.configure()
         return modified
+
+    def _notify(self) -> None:
+        LOGGER.info("Reloading systemd for %s", self.name)
+        self.daemon_reload()
+        super()._notify()
 
     def uninstall(self) -> bool:
         """Disable, stop, remove, reload. Returns whether the unit existed."""
