@@ -76,6 +76,10 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
     (pathapi's), which replaces a file or a symlink but never removes a
     directory: remove a directory in the way yourself (`p.rm(recursive=True)`)
     where that is what you mean. `onremove=` has no replacement.
+- **`upload()` and `download()` take no `**kwargs`.** No keyword could work —
+  each reached `auth.generate_token`/`core.download` and was refused — so a
+  stray keyword is now Python's own `TypeError` naming it. Pass the method's
+  parameters positionally after `method`, as before.
 
 ### Added
 

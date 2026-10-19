@@ -208,6 +208,24 @@ def test_upload_generates_token_when_absent(monkeypatch):
     assert captured["files"]["file"] == b"hello"
 
 
+@pytest.mark.parametrize(
+    "transfer",
+    [
+        lambda c: c.upload(b"x", "filesystem.put", foo=1),
+        lambda c: c.download("filesystem.get", "/f", foo=1),
+    ],
+    ids=["upload", "download"],
+)
+def test_a_side_channel_takes_no_stray_keyword(transfer):
+    """A keyword reached `auth.generate_token`/`core.download`, which refused it
+    naming a method the caller never called."""
+    c = TrueNASClient("wss://nas", autologin=False)
+    c._conn = MagicMock()
+    with pytest.raises(TypeError, match="unexpected keyword argument 'foo'"):
+        transfer(c)
+    assert not c._conn.call.called
+
+
 # --------------------------------------------------------------- dump_api ----
 
 

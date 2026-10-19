@@ -1272,9 +1272,8 @@ class TrueNASClient(_PosixHost, _ty.Generic[ApiVersion]):
         *params,
         token=None,
         wait=True,
-        **kwargs,
     ):
-        """Upload ``file`` via ``/_upload``, then call ``method`` with it."""
+        """Upload ``file`` via ``/_upload``, then call ``method(*params)`` with it."""
         target = self._http_target("/_upload")
         data = {"method": method, "params": params}
         if isinstance(file, str):
@@ -1283,7 +1282,7 @@ class TrueNASClient(_PosixHost, _ty.Generic[ApiVersion]):
         if not token:
             # See the web shell: the server defaults match_origin to True and
             # this token is used once, by one HTTP request from this machine.
-            token = self.api.auth.generate_token(5, {}, True, True, **kwargs)
+            token = self.api.auth.generate_token(5, {}, True, True)
 
         # An upload the middleware refuses answers with an HTTP error and an
         # HTML/JSON body; without the status check that surfaced as a KeyError
@@ -1389,7 +1388,6 @@ class TrueNASClient(_PosixHost, _ty.Generic[ApiVersion]):
         filename: "_ty.Optional[str]" = None,
         buffered=False,
         wait=True,
-        **kwargs,
     ):
         """Call ``method`` for a download link and fetch it over HTTP(S).
 
@@ -1402,7 +1400,7 @@ class TrueNASClient(_PosixHost, _ty.Generic[ApiVersion]):
         its ``job_id``, and ``fetch()`` when they are wanted.
         """
         jobid, link = self.api.core.download(
-            method, args, filename or "download", buffered, **kwargs
+            method, args, filename or "download", buffered
         )
         pending = PendingDownload(self, jobid, self._http_target(link).uri, buffered)
         if wait:

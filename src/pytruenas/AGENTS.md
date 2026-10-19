@@ -257,13 +257,14 @@ ssh=None, ...)`
 - **`.job_updates(job_id, *, timeout=None) -> Iterator[dict]`** — the same
   polling as a generator: yields the job record on every change of state or
   progress, the finished record last; does not raise for a failed job.
-- **`.upload(file, method, *params, token=None, wait=True, **kwargs)`** —
+- **`.upload(file, method, *params, token=None, wait=True)`** —
   upload `file` (`str`/`bytes`) via the middleware's `/_upload` HTTP side
-  channel, then call `method(*params, **kwargs)` server-side with it; waits on
+  channel, then call `method(*params)` server-side with it; waits on
   the resulting job by default and returns the job id. Auto-generates a
-  short-lived auth token when none is given.
-- **`.download(method, *args, filename=None, buffered=False, wait=True,
-  **kwargs)`** — call `method` to get a download link/job, fetch it over
+  short-lived auth token when none is given. Any other keyword is a
+  `TypeError`.
+- **`.download(method, *args, filename=None, buffered=False, wait=True)`** —
+  call `method(*args)` to get a download link/job, fetch it over
   HTTP(S), and return the bytes. The bytes come back only once the job
   finished: `buffered=True` waits before fetching, otherwise the job streams
   into the response and is checked after it; a failed job raises
