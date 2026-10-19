@@ -62,13 +62,21 @@ on the 3.9 floor before a release — a 3.9-only breakage is invisible on 3.14.
 Three workflows, one concern each (`.github/workflows/`):
 
 - **`test.yml`** — on demand: `workflow_dispatch`, or by pushing a throwaway
-  `ci-*` tag. Runs the suite on the version/OS matrix, the benchmarks, and a
-  strict docs build. Delete the tag afterwards.
-- **`release.yml`** — on a `v*` tag: test → build → GitHub release → PyPI
-  (Trusted Publishing, `skip-existing`). It **gates** on a strict docs build
-  but never deploys Pages, and publish does not depend on that gate.
-- **`docs.yml`** — owns every Pages deploy: on a published release, on a push
-  to `main` touching docs sources, or on demand. It enables Pages itself.
+  `ci-*` tag. Runs the suite (`pytest -q -rs`) on every supported Python on
+  Linux and on 3.9 and 3.14 on Windows and macOS; at every declared
+  dependency floor on 3.9 (`floors`); with no extras installed (`no-extras`);
+  `black --check`; the benchmarks against the latest PyPI release in the same
+  job; and a strict docs build. Delete the tag afterwards.
+- **`release.yml`** — on a `v*` tag: test and `floors` → build (the tag must
+  equal `project.version`; `twine check`) → `wheel-smoke` (the wheel, no
+  extras, in a clean venv on 3.9 and 3.14: import, shipped files, console
+  script, the suite) and a strict docs build gate → GitHub release → PyPI
+  (Trusted Publishing, `skip-existing`) and a dispatch of `docs.yml` at the
+  tag. A broken docs build blocks the release. A pre-release tag (one with a
+  `-`) gets a GitHub pre-release only: no PyPI upload, no docs deploy.
+- **`docs.yml`** — owns every Pages deploy: on a push to `main` touching docs
+  sources, or on `workflow_dispatch` (which is how a release deploys its
+  docs). It enables Pages itself.
 
 ## Release
 

@@ -30,10 +30,29 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-        # Floor, the previous ceiling, and 3.14 -- the routine dev interpreter,
-        # so a 3.14-only breakage is caught here rather than at a floor check.
-        python-version: ["3.9", "3.13", "3.14"]
+        include:
+          # Every supported version on Linux (the classifiers claim each one).
+          - os: ubuntu-latest
+            python-version: "3.9"
+          - os: ubuntu-latest
+            python-version: "3.10"
+          - os: ubuntu-latest
+            python-version: "3.11"
+          - os: ubuntu-latest
+            python-version: "3.12"
+          - os: ubuntu-latest
+            python-version: "3.13"
+          - os: ubuntu-latest
+            python-version: "3.14"
+          # Windows and macOS at the edges: the floor and the newest.
+          - os: windows-latest
+            python-version: "3.9"
+          - os: windows-latest
+            python-version: "3.14"
+          - os: macos-latest
+            python-version: "3.9"
+          - os: macos-latest
+            python-version: "3.14"
     steps:
       - uses: actions/checkout@v7
         with:
@@ -41,22 +60,99 @@ jobs:
       - uses: actions/setup-python@v7
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Install (all extras + dev)
+      - name: Install (dev, which carries every extra that has tests)
         run: |
           python -m pip install --upgrade pip
-          pip install -e ".[dev,config,ssh,codegen]"
+          python -m pip install -e ".[dev]"
       - name: Run tests
-        run: python -m pytest -q
+        run: python -m pytest -q -rs
+
+  # Every runtime dependency and feature extra installed AT the floor
+  # pyproject.toml declares (`>=X.Y.Z` -> `==X.Y.Z`), on the oldest supported
+  # Python. The matrix above only ever gets the newest releases, so a floor that
+  # no longer works would otherwise go unnoticed.
+  floors:
+    name: Test at the declared dependency floors
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.ref || github.ref }}
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.9"
+      - name: Pin every declared dependency to its floor
+        shell: python
+        run: |
+          import re
+          import subprocess
+          import sys
+
+          subprocess.run([sys.executable, "-m", "pip", "install", "-q", "tomli"], check=True)
+          import tomli
+
+          project = tomli.load(open("pyproject.toml", "rb"))["project"]
+          specs = list(project.get("dependencies", []))
+          for extra, deps in project.get("optional-dependencies", {}).items():
+              if extra not in ("dev", "docs"):
+                  specs += deps
+          pins = []
+          for spec in specs:
+              m = re.match(r"^\s*([A-Za-z0-9._-]+)(\[[^\]]*\])?\s*[^;]*?>=\s*([^,;\s]+)", spec)
+              if m:
+                  pins.append("%s==%s" % (m.group(1), m.group(3)))
+          pins = list(dict.fromkeys(pins))  # hostctl is required more than once
+          open("floors.txt", "w").write("\n".join(pins) + "\n")
+          print("\n".join(pins) or "(no floors declared)")
+      - name: Install at the floors
+        run: python -m pip install -c floors.txt -e ".[dev]"
+      - name: Run tests
+        run: python -m pytest -q -rs
+
+  # The package with no extras: a test whose extra is missing must skip, never
+  # fail, and the core install must import.
+  no-extras:
+    name: Test with no extras installed
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.ref || github.ref }}
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.14"
+      - name: Install the bare package and pytest
+        run: python -m pip install -e . pytest
+      - name: Import it
+        run: python -c "import pytruenas; print(pytruenas.__version__)"
+      - name: Run tests
+        run: python -m pytest -q -rs
+
+  format:
+    name: Formatting (black --check)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.ref || github.ref }}
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.x"
+      - name: Install black
+        run: python -m pip install black
+      - name: Check formatting
+        run: python -m black --check src tests benchmarks examples
 
   benchmark:
-    # Perf numbers for release notes come from here, not a developer laptop.
-    # Single fixed runner + interpreter so results stay comparable across runs.
+    # A hosted runner is not one fixed machine, so absolute numbers from two
+    # runs do not compare. The latest PyPI release is measured in the same job
+    # as the checkout, and the ratio between them is the result.
     name: Benchmark (py${{ matrix.python-version }}, ubuntu)
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.9", "3.13"]
+        python-version: ["3.9", "3.14"]
     steps:
       - uses: actions/checkout@v7
         with:
@@ -64,20 +160,24 @@ jobs:
       - uses: actions/setup-python@v7
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Install package
-        run: python -m pip install -e ".[dev]"
-      - name: Run benchmarks
-        run: python benchmarks/run.py --save --name "pytruenas-ci-py${{ matrix.python-version }}"
-      - name: Upload benchmark result
+      - name: Benchmark the latest release (baseline)
+        run: |
+          python -m venv "$RUNNER_TEMP/baseline"
+          "$RUNNER_TEMP/baseline/bin/python" -m pip install -q pytruenas
+          "$RUNNER_TEMP/baseline/bin/python" benchmarks/run.py --save --results-dir bench-out/baseline
+      - name: Install this checkout
+        run: python -m pip install -e .
+      - name: Benchmark this checkout against the baseline
+        run: python benchmarks/run.py --save --results-dir bench-out/candidate --compare bench-out/baseline/*.json
+      - name: Upload benchmark results
         uses: actions/upload-artifact@v7
         with:
           name: benchmark-py${{ matrix.python-version }}
-          path: benchmarks/results/*.json
+          path: bench-out/
 
   docs:
-    # The release workflow gates its Pages deploy on `mkdocs build --strict`.
-    # Run the same check here so a docs break is caught before a tag is cut,
-    # not halfway through an irreversible release.
+    # The release workflow gates on `mkdocs build --strict`. Run the same check
+    # here so a docs break is caught before a tag is cut.
     name: Build documentation
     runs-on: ubuntu-latest
     steps:
