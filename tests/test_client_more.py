@@ -326,23 +326,19 @@ def test_local_client_uses_the_socket_and_no_ssh_leg():
 
 
 def test_remote_client_carries_the_target():
-    c = TrueNASClient("wss://nas", "1-" + "a" * 64, autologin=False, sslverify=False)
+    c = TrueNASClient("wss://nas", "1-" + "a" * 64, autologin=False, verify=False)
     assert c._config.host == "nas"
     assert not c._config.is_local
-    assert c._config.sslverify is False
+    assert c._config.verify is False
 
 
-def test_sslverify_reaches_every_transport():
-    # The web shell reads `client.sslverify`, the JSON-RPC and REST legs read
-    # `client._config.sslverify`. They must be the one value the caller set --
-    # the property existing at all is the regression: without it the web shell
-    # raised AttributeError on every wss:// connect.
-    c = TrueNASClient("wss://nas", "1-" + "a" * 64, autologin=False, sslverify=False)
-    assert c.sslverify is False
-    assert c.sslverify is c._config.sslverify
-
+def test_verify_is_one_value_for_every_transport():
+    # Every leg -- the web shell, the JSON-RPC and REST legs -- reads
+    # `client.config.verify`, the one value the caller set.
+    c = TrueNASClient("wss://nas", "1-" + "a" * 64, autologin=False, verify=False)
+    assert c.config.verify is False
     d = TrueNASClient("wss://nas", "1-" + "a" * 64, autologin=False)
-    assert d.sslverify is True
+    assert d.config.verify is True
 
 
 def _webshell_sslopt(monkeypatch, **kwargs) -> dict:
@@ -397,12 +393,13 @@ def _webshell_sslopt(monkeypatch, **kwargs) -> dict:
 def test_webshell_sslopt_follows_the_flag(monkeypatch):
     import ssl
 
-    # sslverify=False must reach the socket the web shell actually opens --
+    # verify=False must reach the socket the web shell actually opens --
     # this is the leg that was reading a nonexistent client attribute.
-    assert _webshell_sslopt(monkeypatch, sslverify=False) == {
-        "cert_reqs": ssl.CERT_NONE
-    }
-    # Verifying: the shared context (pytruenas.utils.tls), not ad-hoc options.
+    assert _webshell_sslopt(monkeypatch, verify=False) == {"cert_reqs": ssl.CERT_NONE}
+    # A caller's context is the one the web shell uses.
+    mine = ssl.create_default_context()
+    assert _webshell_sslopt(monkeypatch, verify=mine) == {"context": mine}
+    # Verifying: the shared context (pytruenas._tls), not ad-hoc options.
     assert set(_webshell_sslopt(monkeypatch)) == {"context"}
 
 

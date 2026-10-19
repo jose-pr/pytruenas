@@ -97,7 +97,7 @@ def test_credentials_come_from_the_environment_or_config(args, monkeypatch, tmp_
 def test_the_client_gets_them(args, monkeypatch):
     monkeypatch.setenv("TN_CREDS", "1-" + "k" * 64)
     client = args(insecure=True)._client_("nas")
-    assert client.sslverify is False
+    assert client.config.verify is False
     assert client.config.credentials.api_key.startswith("1-")
 
 

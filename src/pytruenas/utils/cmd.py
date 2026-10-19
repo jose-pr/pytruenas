@@ -389,7 +389,7 @@ class PyTrueNASArgs(LoggingArgs):
         credentials = None
         if not Target.parse(target, resolve_port=False).password:
             credentials = self._credentials_()
-        return TrueNASHost(target, credentials, sslverify=self._sslverify_())
+        return TrueNASHost(target, credentials, verify=self._sslverify_())
 
     def _expanded_targets_(self) -> "list[str]":
         """Return the target list with commas split and range patterns expanded.

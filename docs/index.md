@@ -50,7 +50,7 @@ Optional extras: `pytruenas[ssh]` (SSH commands + the SFTP filesystem leg),
 from pytruenas import TrueNASClient
 
 # Remote host (API key, "user:password", or a token):
-client = TrueNASClient("nas.example.com", "1-<64-char-api-key>", sslverify=False)
+client = TrueNASClient("nas.example.com", "1-<64-char-api-key>", verify=False)
 for user in client.api.user.query():
     print(user["username"])
 

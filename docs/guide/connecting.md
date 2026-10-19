@@ -14,7 +14,7 @@ middleware. The transport is chosen from `target`:
 ```python
 from pytruenas import TrueNASClient
 
-client = TrueNASClient("nas.example.com", "1-<64-char-api-key>", sslverify=False)
+client = TrueNASClient("nas.example.com", "1-<64-char-api-key>", verify=False)
 ```
 
 ## Credentials
@@ -86,23 +86,48 @@ everywhere, and SSH host-key verification). It is the only way to skip the
 host-key check; `known_hosts=None` raises `ValueError`.
 
 ```python
-TrueNASClient("nas", api_key, shell="ssh://root@nas", verify=False)                  # check nothing
-TrueNASClient("nas", api_key, shell="ssh://root@nas", verify=False, sslverify=True)  # TLS only
-TrueNASClient("nas", api_key, shell="ssh://root@nas", sslverify=False)               # host keys only
+from hostctl import SSHConfig
+
+TrueNASClient("nas", api_key, shell="ssh://root@nas", verify=False)  # check nothing
+TrueNASClient("nas", api_key, verify=False,                          # host keys only
+              shell="ssh://root@nas", known_hosts="/srv/known_hosts")
+TrueNASClient("nas", api_key,                                        # TLS only
+              ssh=SSHConfig("nas", username="root", verify=False))
 ```
 
-`sslverify=` overrides `verify` for TLS. Keys named with `known_hosts=` are
-checked even under `verify=False`: the stricter setting wins.
+Keys named with `known_hosts=` are checked even under `verify=False`: the
+stricter setting wins.
 
-Certificates are checked against the operating system's trust store, the same
-for the API websocket, uploads/downloads and the web shell. To trust a private
-CA without adding it to the OS, point `sslverify=` at its bundle, or set
-`SSL_CERT_FILE` (also honored: `REQUESTS_CA_BUNDLE`, `CURL_CA_BUNDLE`,
+Certificates are checked the way the operating system checks them — through
+its own verifier on Python 3.10+ (`truststore`: Windows CryptoAPI, the macOS
+keychain, the system CA paths elsewhere), against OpenSSL's default store on
+3.9 — the same for the API websocket, uploads/downloads and the web shell. To
+trust a private CA without adding it to the OS, give `verify=` its bundle, or
+set `SSL_CERT_FILE` (also honored: `REQUESTS_CA_BUNDLE`, `CURL_CA_BUNDLE`,
 `WEBSOCKET_CLIENT_CA_BUNDLE`, first one set wins). A bundle replaces the OS
-store rather than adding to it.
+trust rather than adding to it.
 
 ```python
-TrueNASClient("nas", api_key, sslverify="/etc/pki/lab-ca.pem")
+TrueNASClient("nas", api_key, verify="/etc/pki/lab-ca.pem")
+```
+
+`verify=` also takes a ready `ssl.SSLContext`, used as it is on every TLS
+connection — the way to present a client certificate to a NAS behind a
+reverse proxy that requires one (mTLS). The
+[`sslcontext`](https://pypi.org/project/sslcontext/) package builds one from
+files, in-memory PEM, or the OS keystores and smart cards:
+
+```python
+import ssl
+import sslcontext
+
+ctx = ssl.create_default_context(cafile="/etc/pki/lab-ca.pem")
+ctx.load_cert_chain("client.pem", "client.key")
+TrueNASClient("nas", api_key, verify=ctx)
+
+# A certificate from the Windows store, the macOS Keychain or a smart card,
+# chosen as the browser would:
+TrueNASClient("nas", api_key, verify=sslcontext.system_context())
 ```
 
 `known_hosts=` applies to the SSH leg built from `shell=` and to the one

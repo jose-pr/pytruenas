@@ -190,18 +190,10 @@ class WebShellSession:
             except ImportError as exc:  # pragma: no cover - dependency present
                 raise ImportError("the web shell requires websocket-client") from exc
 
-            import ssl
+            from . import _tls
 
-            from .utils import tls
-
-            # The same trust as the API websocket -- see pytruenas.utils.tls.
-            context = tls.context(self.client.sslverify)
-            sslopt = (
-                {"cert_reqs": ssl.CERT_NONE}
-                if context is None
-                else {"context": context}
-            )
-            ws = _websocket.WebSocket(sslopt=sslopt)
+            # The same trust as the API websocket -- see pytruenas._tls.
+            ws = _websocket.WebSocket(sslopt=_tls.sslopt(self.client.config.verify))
             ws.connect(self._uri(), timeout=CONNECT_TIMEOUT)
 
             # match_origin=True, single_use=True: the middleware's own default

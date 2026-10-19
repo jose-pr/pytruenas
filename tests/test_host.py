@@ -146,7 +146,7 @@ def test_every_historical_client_setting_is_accepted():
     host = TrueNASHost(
         "wss://nas",
         "1-" + "a" * 64,  # creds, positionally, as the old client took them
-        sslverify=False,
+        verify=False,
         version="v2.0",
         shell="ssh://root@nas",
         autologin=False,
@@ -154,7 +154,7 @@ def test_every_historical_client_setting_is_accepted():
         path=["tnasws"],  # what fsbackend used to express
     )
     config = host._config
-    assert config.sslverify is False
+    assert config.verify is False
     assert config.version == "v2.0"
     assert config.ssh.host == "nas"
     assert config.autologin is False
@@ -218,34 +218,33 @@ def test_known_hosts_none_is_refused_and_names_verify_false(make):
 
 def test_verify_defaults_to_every_check_on():
     config = TrueNASConfig.from_target("wss://nas", shell="ssh://root@nas")
-    assert (config.verify, config.sslverify, config.known_hosts) == (True, True, ())
+    assert (config.verify, config.known_hosts) == (True, ())
     assert (config.ssh.verify, config.ssh.known_hosts) == (True, ())
 
 
 def test_verify_false_turns_off_tls_and_host_key_checks():
     """One switch for a lab box: TLS certificates and SSH host keys alike."""
     client = TrueNASHost("wss://nas", shell="ssh://root@nas", verify=False)
-    assert client.sslverify is False  # websocket, HTTP side channels, web shell
+    assert client.config.verify is False  # websocket, HTTP side channels, web shell
     assert client.config.ssh.verify is False  # SSH commands and SFTP
     assert client.config.ssh.connect_opts()["known_hosts"] is None
 
 
 def test_specific_settings_override_verify():
+    from hostctl import SSHConfig
+
+    # TLS checked, host keys not: an explicit SSHConfig keeps its own verify.
     config = TrueNASConfig.from_target(
-        "wss://nas", shell="ssh://root@nas", verify=False, sslverify=True
+        "wss://nas", ssh=SSHConfig("nas", username="root", verify=False)
     )
-    assert config.sslverify is True and config.ssh.verify is False
-    # Named keys are checked even under verify=False: the stricter setting wins.
+    assert config.verify is True and config.ssh.verify is False
+    # TLS off, host keys checked: named keys are checked even under
+    # verify=False, the stricter setting wins.
     config = TrueNASConfig.from_target(
         "wss://nas", shell="ssh://root@nas", verify=False, known_hosts="/k"
     )
-    assert config.sslverify is False and config.ssh.known_hosts == "/k"
+    assert config.verify is False and config.ssh.known_hosts == "/k"
     assert config.ssh.connect_opts()["known_hosts"] == "/k"
-    # TLS off, host keys checked.
-    config = TrueNASConfig.from_target(
-        "wss://nas", shell="ssh://root@nas", sslverify=False
-    )
-    assert config.sslverify is False and config.ssh.verify is True
 
 
 def test_verify_false_reaches_an_explicit_ssh_config():

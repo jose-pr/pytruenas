@@ -6,6 +6,26 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Upgrade notes
+
+- **`sslverify=` is `verify=`**, one switch for TLS and SSH host keys alike:
+  `TrueNASClient(..., verify=True | False | "<CA bundle>" | ssl.SSLContext)`.
+  `sslverify=` raises `TypeError` naming `verify=`; `client.sslverify` and
+  `config.sslverify` are gone (read `client.config.verify`), and
+  `TrueNASWSConnection(verify_ssl=)` is `verify=`. A path or a context means
+  "verify" for SSH. "TLS off, SSH strict" is `verify=False, known_hosts=<file>`;
+  "TLS on, SSH off" is `ssh=SSHConfig(host, username="root", verify=False)`.
+- **`verify=True` trusts what the operating system trusts, through its own
+  verifier**: `truststore` on Python 3.10+ (Windows CryptoAPI, the macOS
+  keychain, the system CA paths elsewhere) — what hostctl's `verify=True`
+  means — and OpenSSL's default store on 3.9 as before. On Windows a public
+  root the system fetches on demand, and on macOS a CA only in the keychain,
+  are now trusted. The CA-bundle variables (`SSL_CERT_FILE`,
+  `REQUESTS_CA_BUNDLE`, `CURL_CA_BUNDLE`, `WEBSOCKET_CLIENT_CA_BUNDLE`) still
+  replace that trust.
+- **`pytruenas.utils.tls` is gone** (`context`, `ca_bundle`, `CA_BUNDLE_ENV`,
+  `SslVerify`); the decision is private now. Pass `verify=` instead.
+
 ## [0.6.1] - 2026-10-20
 
 ### Changed
@@ -58,6 +78,11 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- `verify=` takes an `ssl.SSLContext`, used as it is on the API websocket, the
+  side channels and the web shell: a client certificate for a NAS behind an
+  mTLS reverse proxy (e.g. from `sslcontext.create_context(certificate=, key=)`
+  or `sslcontext.system_context()`), or a pinned CA.
+- Dependency `truststore>=0.10.5,<0.11` on Python 3.10+.
 - `pytruenas.utils.cmd.with_targets(args_cls)` and `TargetsField`: an `Args`
   class with the trailing `targets` positional declared as its last field.
 
@@ -146,6 +171,9 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   URL rather than a file an installed copy does not have.
 - The suite passes with no extras installed: one SSH test lacked its
   `asyncssh` guard.
+- Behind an HTTPS proxy (`HTTPS_PROXY`), uploads and downloads verify with the
+  same trust as the websockets; they ignored a CA bundle and failed (or trusted
+  certifi) while the API connected.
 - `examples/simple_client_from_yaml.py` moved to `examples/scripts/`, so
   `--cmdspath examples` no longer warns that it is not a command.
 

@@ -14,7 +14,7 @@ Config format::
     host: nas.example.com        # omit, or 'localhost', for the local socket
     username: root               # optional
     password: secret             # optional
-    sslverify: false             # optional: true (default), false, or a CA file
+    verify: false                # optional: true (default), false, or a CA file
 """
 
 from __future__ import annotations
@@ -45,14 +45,14 @@ def load_config(*locations: Path) -> "tuple[dict, Path | None]":
 
 
 def client_from_config(config: dict) -> TrueNASClient:
-    """Build a client from ``host``/``username``/``password``/``sslverify``
+    """Build a client from ``host``/``username``/``password``/``verify``
     keys."""
     host = config.get("host")
     username = config.get("username")
     password = config.get("password")
     # Certificates are verified unless the file says otherwise: a NAS with
-    # its default self-signed certificate needs `sslverify: false` or a CA file.
-    sslverify = config.get("sslverify", True)
+    # its default self-signed certificate needs `verify: false` or a CA file.
+    verify = config.get("verify", True)
 
     credentials = (username, password) if username and password else None
     # A local target resolves to the middleware unix socket, which needs no
@@ -60,7 +60,7 @@ def client_from_config(config: dict) -> TrueNASClient:
     target = None if not host or host == "localhost" else host
 
     LOGGER.info("Connecting to %s", target or "the local middleware socket")
-    return TrueNASClient(target, credentials, sslverify=sslverify)
+    return TrueNASClient(target, credentials, verify=verify)
 
 
 def main(argv: "list[str] | None" = None) -> int:

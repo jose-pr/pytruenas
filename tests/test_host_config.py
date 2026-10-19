@@ -369,9 +369,9 @@ def test_bare_schemes_are_not_claimed_globally(uri):
         HostConfig(uri)
 
 
-def test_sslverify_defaults_true_and_is_settable():
-    assert TrueNASConfig.from_target("wss://nas").sslverify is True
-    assert TrueNASConfig.from_target("wss://nas", sslverify=False).sslverify is False
+def test_verify_defaults_true_and_is_settable():
+    assert TrueNASConfig.from_target("wss://nas").verify is True
+    assert TrueNASConfig.from_target("wss://nas", verify=False).verify is False
 
 
 @pytest.mark.parametrize("target", ["wss://nas", None])
@@ -383,9 +383,9 @@ def test_options_reach_the_config_on_every_branch(target):
     for the other, which is how ``webshell=False`` was accepted and dropped.
     """
     config = TrueNASConfig.from_target(
-        target, sslverify=False, version="v2.0", executor=["local"], path=["local"]
+        target, verify=False, version="v2.0", executor=["local"], path=["local"]
     )
-    assert config.sslverify is False
+    assert config.verify is False
     assert config.version == "v2.0"
     assert config.executors == ("local",)
     assert config.paths == ("local",)

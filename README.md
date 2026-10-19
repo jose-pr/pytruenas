@@ -51,7 +51,7 @@ pip install pytruenas
 from pytruenas import TrueNASClient
 
 # Remote host (api key, or "user:password", or a token)
-client = TrueNASClient("nas.example.com", "1-<64-char-api-key>", sslverify=False)
+client = TrueNASClient("nas.example.com", "1-<64-char-api-key>", verify=False)
 
 # Attribute-style access to any API namespace/method:
 for user in client.api.user.query():

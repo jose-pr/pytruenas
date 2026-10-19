@@ -47,8 +47,8 @@ from ipaddress import IPv6Interface as _IPv6Interface
 
 import websocket as _websocket
 
+from . import _tls
 from .exceptions import TrueNASError as _TrueNASError
-from .utils import tls as _tls
 from .utils.io import json_scalar as _json_scalar
 
 _LOGGER = _logging.getLogger("pytruenas.connection")
@@ -441,7 +441,7 @@ class TrueNASWSConnection:
         self,
         uri: "_ty.Optional[str]" = None,
         *,
-        verify_ssl: "_ty.Union[bool, str, _os.PathLike[str]]" = True,
+        verify: "_ty.Union[bool, str, _os.PathLike[str], _ssl.SSLContext]" = True,
         call_timeout: float = CALL_TIMEOUT,
         connect_timeout: "_ty.Optional[float]" = CONNECT_TIMEOUT,
         py_exceptions: bool = False,
@@ -450,7 +450,8 @@ class TrueNASWSConnection:
         if not uri or uri == _UNIX_PREFIX:
             uri = _UNIX_PREFIX + DEFAULT_UNIX_SOCKET
         self.uri = uri
-        self.verify_ssl = verify_ssl
+        #: TLS verification: see :data:`pytruenas._tls.Verify`.
+        self.verify = _tls.check(verify)
         self.call_timeout = call_timeout
         self.connect_timeout = connect_timeout
         #: Where this connection's records go. A host passes its own
@@ -503,12 +504,8 @@ class TrueNASWSConnection:
             ws.settimeout(None)
             return ws
 
-        # The trust decision is shared with every other leg: pytruenas.utils.tls.
-        context = _tls.context(self.verify_ssl)
-        sslopt = (
-            {"cert_reqs": _ssl.CERT_NONE} if context is None else {"context": context}
-        )
-        ws = _websocket.WebSocket(sslopt=sslopt)
+        # The trust decision is shared with every other leg: pytruenas._tls.
+        ws = _websocket.WebSocket(sslopt=_tls.sslopt(self.verify))
         ws.connect(self.uri, timeout=self.connect_timeout)
         # websocket-client keeps the connect timeout as the socket's read
         # timeout; the reader blocks on recv() for as long as the connection
