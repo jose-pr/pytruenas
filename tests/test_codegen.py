@@ -36,7 +36,8 @@ def test_all_stubs_parse(generated):
     assert files, "no stubs generated"
     for path in files:
         src = path.read_text(encoding="utf-8")
-        ast.parse(src)  # raises SyntaxError on any invalid stub
+        # compile(), not ast.parse(): only compiling rejects a duplicate argument.
+        compile(src, str(path), "exec")
 
 
 @pytest.mark.requires("jinja2")
