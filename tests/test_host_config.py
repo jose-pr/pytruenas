@@ -403,3 +403,15 @@ def test_a_bare_string_override_is_one_name():
     config = TrueNASConfig.from_target("wss://nas", executor="ssh", path="sftp")
     assert config.executors == ("ssh",)
     assert config.paths == ("sftp",)
+
+
+def test_an_unparsable_target_names_every_character_to_encode():
+    """Brackets in a password make current CPython refuse the URI, and the
+    message listed only `/ ? # @`."""
+    try:
+        TrueNASConfig.from_target("wss://root:pa[ss@nas")
+    except ValueError as error:
+        assert "%5B" in str(error) and "%5D" in str(error)
+        assert "pa[ss" not in str(error)
+    else:
+        pytest.skip("this interpreter's urlsplit accepts a bracket in userinfo")

@@ -433,8 +433,8 @@ def _normalize_target(target: "_ty.Optional[str]") -> str:
     except ValueError:
         raise ValueError(
             "this connection string does not parse as a URI; percent-encode "
-            "any '/', '?', '#' or '@' in the credentials (%2F, %3F, %23, "
-            "%40): " + _redact_target(target)
+            "any '/', '?', '#', '@', '[' or ']' in the credentials (%2F, %3F, "
+            "%23, %40, %5B, %5D): " + _redact_target(target)
         ) from None
 
     # Split the authority to spot the local-without-port case. Re-parse via

@@ -1,10 +1,9 @@
-"""One answer to "how many positional arguments does this take?".
+"""How many positional arguments a user-written callable takes.
 
-Three copies of this walk existed -- two here, one private inside duho -- and
-they disagreed in the detail that matters: whether a parameter with a default
-counts, and what ``*args`` means. Both callers below hand a user-written
-callable a fixed argument list, so the answer decides whether an argument lands
-in the parameter its author meant.
+The RunPath step adapter hands a step a fixed argument list, so whether a
+parameter with a default counts, and what ``*args`` means, decide whether an
+argument lands in the parameter its author meant. duho's public
+``accepts_positional`` answers a yes/no question; this returns the count.
 """
 
 import inspect as _inspect
