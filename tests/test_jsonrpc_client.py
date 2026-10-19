@@ -92,17 +92,26 @@ def test_call_returns_result():
         c.close()
 
 
-def test_call_ignores_compat_kwargs():
+@pytest.mark.parametrize(
+    "keyword", ["job", "background", "callback", "register_call", "raise_", "timout"]
+)
+def test_call_takes_no_keyword_but_timeout(keyword):
+    """A misspelt `timout=` was dropped with a debug record and the call ran
+    with the default timeout; the upstream client's keywords did nothing."""
     fake = _FakeWS()
     fake.responder = lambda req: {"jsonrpc": "2.0", "id": req["id"], "result": 42}
     c = _client_with(fake)
     try:
-        # job=/background=/callback= are accepted and ignored (upstream-compat).
-        assert (
-            c.call("core.job_wait", 1, job=True, background=False, callback=None) == 42
-        )
+        with pytest.raises(TypeError, match=keyword):
+            c.call("core.ping", **{keyword: True})
+        assert c.call("core.ping", timeout=5) == 42
     finally:
         c.close()
+
+
+def test_a_connection_has_no_py_exceptions_option():
+    with pytest.raises(TypeError, match="py_exceptions"):
+        Client("ws://127.0.0.1:1", py_exceptions=False)
 
 
 def test_validation_error_mapped():
@@ -166,20 +175,6 @@ def test_timeout_none_waits_for_a_delayed_response():
     fake.responder = _answer_late
     try:
         assert c.call("core.job_wait", timeout=None) == "late"
-    finally:
-        c.close()
-
-
-def test_unexpected_kwarg_is_logged_not_swallowed(caplog):
-    import logging
-
-    fake = _FakeWS()
-    fake.responder = lambda req: {"jsonrpc": "2.0", "id": req["id"], "result": 1}
-    c = _client_with(fake)
-    try:
-        with caplog.at_level(logging.DEBUG, logger="pytruenas.connection"):
-            assert c.call("core.ping", nonsense_kwarg=1) == 1
-        assert any("nonsense_kwarg" in r.message for r in caplog.records)
     finally:
         c.close()
 

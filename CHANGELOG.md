@@ -103,6 +103,18 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   `pytruenas.fs.TnasWsBackend` → `TrueNASWSBackend`;
   `pytruenas.providers.TnasWsPathProvider` → `TrueNASWSPathProvider`;
   `pytruenas.namespace.DbAction` → `DBAction`. The old names are gone.
+- **A call option has one spelling, and no keyword is ignored.**
+  - `client.api.<method>(..., _tries=N)` → `_retries=N` (the same count: the
+    retries after the first attempt). A bare `timeout=` → `_timeout=`.
+  - The upstream client's no-op keywords `background=`, `callback=`,
+    `register_call=` and `raise_=` raise `TypeError`, on a namespace call and
+    on `client.conn.call(...)`; drop them. `job=True` and `job="RETURN"` keep
+    working on a namespace call.
+  - `TrueNASWSConnection.call(method, *params, timeout=)` raises `TypeError`
+    for any other keyword (`job=` included) instead of logging a misspelt one
+    at debug and running the call with the default timeout.
+  - `TrueNASWSConnection(py_exceptions=)` and `.py_exceptions` are gone; the
+    option did nothing.
 
 ### Added
 

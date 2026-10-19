@@ -40,7 +40,7 @@ from pytruenas import TrueNASClient
 def valid(client: "TrueNASClient[Current]") -> None:
     client.api.user.query()
     client.api.user.query([], {"limit": 1})
-    client.api.user.query(_timeout=5.0, _tries=2)
+    client.api.user.query(_timeout=5.0, _retries=2)
     client.api.user.create({"username": "svc"})
     client.api.user._create(username="svc", full_name="Service")
     client.api.user._update(1, full_name="x")

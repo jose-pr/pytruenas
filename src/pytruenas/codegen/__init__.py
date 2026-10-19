@@ -231,7 +231,7 @@ class Method(PyDeclaration):
                 Parameter(
                     {},
                     self.pyname,
-                    title="_tries",
+                    title="_retries",
                     type="integer",
                     default=Source("1"),
                 ),

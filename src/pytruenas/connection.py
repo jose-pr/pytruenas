@@ -98,10 +98,6 @@ class _Unset:
 #: cannot double as the default.
 _UNSET = _Unset()
 
-#: Compatibility kwargs the upstream client accepts that this lean, synchronous
-#: client simply ignores (it does not track jobs client-side).
-_COMPAT_KWARGS = frozenset({"job", "background", "callback", "register_call", "raise_"})
-
 #: Reference point for ``$date`` decoding (the middleware sends milliseconds).
 _EPOCH = _datetime(1970, 1, 1, tzinfo=_timezone.utc)
 
@@ -367,7 +363,6 @@ class TrueNASWSConnection:
         verify: "_ty.Union[bool, str, _os.PathLike[str], _ssl.SSLContext]" = True,
         call_timeout: float = CALL_TIMEOUT,
         connect_timeout: "_ty.Optional[float]" = CONNECT_TIMEOUT,
-        py_exceptions: bool = False,
         logger: "_ty.Optional[_ty.Union[_logging.Logger, _logging.LoggerAdapter]]" = None,
     ) -> None:
         if not uri or uri == _UNIX_PREFIX:
@@ -383,9 +378,6 @@ class TrueNASWSConnection:
         #: the module logger, which is what this class did unconditionally
         #: before (a module global cannot know its caller's target).
         self.logger = logger if logger is not None else _LOGGER
-        # Accepted for parity with the upstream client; this lean client never
-        # asks the server to pickle exceptions.
-        self.py_exceptions = py_exceptions
 
         self._closed = _threading.Event()
         self._send_lock = _threading.Lock()
@@ -595,18 +587,14 @@ class TrueNASWSConnection:
         method: str,
         *params,
         timeout: "_ty.Optional[_ty.Union[float, _Unset]]" = _UNSET,
-        **_ignored,
     ):
         """Call ``method`` with ``params`` and return its result.
 
         Blocks until the response arrives or ``timeout`` seconds elapse. The
         default sentinel uses :attr:`call_timeout`; an explicit ``timeout=None``
-        waits **indefinitely** (a long-running call).
-        Compatibility keyword arguments (``job``, ``background``, ``callback``,
-        …) accepted by the upstream client are ignored here: a job's id is
-        returned. ``client.api.<method>(..., job=True)`` waits for the job (see
-        :class:`~pytruenas.namespace.Namespace`). Any *other* unexpected
-        keyword is logged at debug level rather than silently swallowed.
+        waits **indefinitely** (a long-running call). A job's id is returned:
+        ``client.api.<method>(..., job=True)`` waits for the job (see
+        :class:`~pytruenas.namespace.Namespace`).
 
         Raises :class:`ValidationErrors`/:class:`ClientException` on a server
         error, :class:`CallTimeout` on timeout, :class:`ConnectionClosed`
@@ -614,11 +602,6 @@ class TrueNASWSConnection:
         the call) if the connection dropped, and :class:`TypeError` for a
         parameter JSON cannot encode.
         """
-        unexpected = [k for k in _ignored if k not in _COMPAT_KWARGS]
-        if unexpected:
-            self.logger.debug(
-                "call(%s): ignoring unexpected kwargs %s", method, unexpected
-            )
         if _threading.current_thread() is self._reader:
             # The reader is the only thread that delivers responses; blocking
             # it on one deadlocked until the call timed out.

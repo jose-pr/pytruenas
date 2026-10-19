@@ -213,7 +213,7 @@ def test_the_call_options_are_keyword_only_and_complete(tmp_path):
     """The stub offered `_method`/`_ioerror`/`_filetransfer` POSITIONALLY while
     the runtime takes middleware parameters positionally and raises TypeError
     for any other keyword -- so following the stub shifted a real parameter.
-    `_timeout` and `_tries` were missing entirely."""
+    `_timeout` and the retry count were missing entirely."""
     codegen.Codegen().generate(_api(), tmp_path / "out")
     src = (tmp_path / "out" / "user" / "__init__.pyi").read_text(encoding="utf-8")
     tree = ast.parse(src)
@@ -222,7 +222,7 @@ def test_the_call_options_are_keyword_only_and_complete(tmp_path):
         n for n in cls.body if isinstance(n, ast.FunctionDef) and n.name == "query"
     )
     kwonly = [a.arg for a in query.args.kwonlyargs]
-    assert kwonly == ["_method", "_ioerror", "_filetransfer", "_timeout", "_tries"]
+    assert kwonly == ["_method", "_ioerror", "_filetransfer", "_timeout", "_retries"]
     # And none of them is positional any more.
     assert not [a.arg for a in query.args.args if a.arg.startswith("_")]
 

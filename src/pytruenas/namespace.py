@@ -234,7 +234,7 @@ class Namespace:
     def __call__(
         self,
         *args,
-        _tries=1,
+        _retries=1,
         _method: _ty.Optional[str] = None,
         _ioerror=False,
         _filetransfer: _ty.Union[bool, bytes] = False,
@@ -243,10 +243,10 @@ class Namespace:
     ):
         """Invoke this namespace's middleware method.
 
-        ``_tries`` is the number of *reconnect retries* after a dropped
-        connection, made only when the request was never sent
-        (:class:`~pytruenas.connection.ConnectionClosed` with ``sent=False``);
-        with the default 1 the call is attempted up to twice. ``_timeout`` is
+        ``_retries`` is the number of retries on a new connection after a
+        dropped one, made only when the request was never sent
+        (:class:`~pytruenas.ConnectionClosed` with ``sent=False``); with the
+        default 1 the call is attempted up to twice. ``_timeout`` is
         the per-call timeout in seconds; the default sentinel uses the
         client's configured timeout, ``None`` waits indefinitely. ``_method``
         appends a leaf method name, ``_ioerror`` maps a middleware error to the
@@ -255,11 +255,10 @@ class Namespace:
 
         ``job=True``, as in the upstream client, waits for the job the method
         starts and returns the job's result (:meth:`TrueNASClient.wait`): a
-        failed job raises :class:`~pytruenas.connection.JobFailed`. The wait
-        has no deadline unless ``_timeout`` is given. ``job="RETURN"`` and the
-        other upstream keywords (``background``, ``callback``,
-        ``register_call``, ``raise_``) are accepted and have no effect: the
-        call returns the job id.
+        failed job raises :class:`~pytruenas.JobFailed`. The wait has no
+        deadline unless ``_timeout`` is given. ``job="RETURN"`` returns the
+        job id. Any other keyword raises ``TypeError``: middleware methods take
+        positional parameters.
         """
         method = self._namespace
         if _method:
@@ -278,14 +277,12 @@ class Namespace:
             raise TypeError(_filetransfer)
 
         job = kwds.pop("job", False)
-        if _timeout is not _UNSET:
-            kwds["timeout"] = _timeout
+        call_options = {} if _timeout is _UNSET else {"timeout": _timeout}
 
-        # Middleware methods take POSITIONAL parameters. A keyword went into
-        # `**kwds`, reached `TrueNASWSConnection.call`'s `**_ignored` and was
-        # logged at debug -- so `client.api.user.query(filters=[...])` sent no
-        # filters at all and returned every row, which then drove an update.
-        stray = sorted(set(kwds) - {"timeout"} - _connection._COMPAT_KWARGS)
+        # Middleware methods take POSITIONAL parameters: a dropped
+        # `filters=` would query every row, and that answer then drives an
+        # update.
+        stray = sorted(kwds)
         if stray:
             raise TypeError(
                 f"{method}: middleware methods take positional parameters only; "
@@ -293,10 +290,10 @@ class Namespace:
                 f"query([['uid', '=', 0]]), or use the _query/_get helpers."
             )
 
-        # One initial attempt plus `_tries` reconnect retries after an aborted
+        # One initial attempt plus `_retries` reconnect retries after an aborted
         # connection. The loop ends in a result or a raise, never None: a None
         # reads as "no result" and, via _get, turns an upsert into a create.
-        attempts = max(0, _tries) + 1
+        attempts = max(0, _retries) + 1
         last_exc: "_ty.Optional[_connection.ClientException]" = None
         for attempt in range(attempts):
             conn = None
@@ -311,7 +308,7 @@ class Namespace:
                     _LoggedArgs(method, args),
                 )
                 conn = self._client.conn
-                result = conn.call(method, *args, **kwds)
+                result = conn.call(method, *args, **call_options)
                 break
             except _connection.ClientException as e:
                 last_exc = e

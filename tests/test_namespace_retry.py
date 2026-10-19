@@ -35,7 +35,7 @@ def test_permanent_abort_retries_then_raises():
     with pytest.raises(_conn.ClientException) as ei:
         ns.query([], {})
     assert ei.value.errno == errno.ECONNABORTED
-    # default _tries=1 -> one initial attempt + one retry == 2 calls
+    # default _retries=1 -> one initial attempt + one retry == 2 calls
     assert c.conn.call.call_count == 2
 
 
@@ -107,3 +107,34 @@ def test_timeout_omitted_by_default():
     Namespace(c, "core")(_method="ping")
     _, kwargs = c.conn.call.call_args
     assert "timeout" not in kwargs  # default sentinel -> client default used
+
+
+def test_retries_counts_the_retries(monkeypatch):
+    monkeypatch.setattr("pytruenas.namespace._time.sleep", lambda *_: None)
+    c = _client()
+    c.conn.call.side_effect = _unsent()
+    with pytest.raises(_conn.ConnectionClosed):
+        Namespace(c, "user").query([], {}, _retries=3)
+    assert c.conn.call.call_count == 4
+
+
+@pytest.mark.parametrize(
+    "keyword", ["_tries", "timeout", "background", "callback", "register_call"]
+)
+def test_a_call_option_has_one_spelling(keyword):
+    """`_tries` is `_retries`, a bare `timeout=` is `_timeout=`, and the upstream
+    client's no-op keywords are gone: each is a stray keyword."""
+    c = _client()
+    with pytest.raises(TypeError, match=keyword):
+        Namespace(c, "user").query(**{keyword: 1})
+    assert not c.conn.call.called
+
+
+def test_the_timeout_reaches_the_connection_as_its_own_keyword():
+    c = _client()
+    c.conn.call.return_value = []
+    Namespace(c, "user").query([], _timeout=5)
+    c.conn.call.assert_called_once_with("user.query", [], timeout=5)
+    c.conn.call.reset_mock()
+    Namespace(c, "user").query([])
+    c.conn.call.assert_called_once_with("user.query", [])

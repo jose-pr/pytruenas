@@ -1063,7 +1063,6 @@ class TrueNASClient(_PosixHost, _ty.Generic[ApiVersion]):
         return _connection.TrueNASWSConnection(
             uri,
             verify=self._config.verify,
-            py_exceptions=False,
             # Share the host's name-bound logger, so a record from the
             # connection layer names the host it came from -- with several
             # clients open at once, an unattributed "connection was closed" is

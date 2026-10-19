@@ -414,27 +414,27 @@ below raise `AttributeError` normally.
 
 - **`Namespace(client, *name)`** — not usually constructed directly; reached
   via `client.api` and attribute/`__getitem__` traversal.
-- **`__call__(*args, _tries=1, _method=None, _ioerror=False,
-  _filetransfer=False, _timeout=UNSET, **kwds)`** — invoke this namespace's
+- **`__call__(*args, _retries=1, _method=None, _ioerror=False,
+  _filetransfer=False, _timeout=UNSET, job=False)`** — invoke this namespace's
   middleware method (`self._namespace`, optionally suffixed with `_method`).
   Middleware methods take **positional** parameters: any other keyword raises
-  `TypeError` naming it (a dropped `filters=` would query every row).
-  `timeout` and the upstream-compatibility names are accepted, and the
+  `TypeError` naming it (a dropped `filters=` would query every row). The
   `_query`/`_get`/`_update` helpers below take keywords by design.
   - **`job=True`** — as in the upstream client: wait for the job the method
     starts (`TrueNASClient.wait`) and return the job's **result**; a failed job
     raises `connection.JobFailed` (the matching `OSError` with `_ioerror=True`).
     The wait has no deadline unless `_timeout` is given. A method that does not
-    answer with a job id returns its answer unchanged. `job="RETURN"`,
-    `background`, `callback`, `register_call` and `raise_` are accepted and
-    have no effect (the job id is returned).
-  - **`_tries`** — reconnect retries after a dropped connection
+    answer with a job id returns its answer unchanged. `job="RETURN"` returns
+    the job id. The upstream client's other keywords (`background`,
+    `callback`, `register_call`, `raise_`) raise `TypeError`.
+  - **`_retries`** — retries on a new connection after a dropped one
     (`ECONNABORTED`); default `1` means up to 2 attempts total. Only a request
     that never reached the socket (`ConnectionClosed.sent is False`) is
     repeated. The call **always** returns or raises — never silently returns
     `None` on a connection error.
   - **`_timeout`** — per-call seconds; the default sentinel uses the client's
-    configured timeout, `None` waits indefinitely.
+    configured timeout, `None` waits indefinitely. It is the only spelling: a
+    bare `timeout=` is a stray keyword.
   - **`_ioerror`** — map a middleware `[ERRNO] message` error to the matching
     `OSError` (see `pytruenas.namespace.ioerror`).
   - **`_filetransfer`** — `True` routes through `client.download`; bytes/a
@@ -488,7 +488,7 @@ The synchronous JSON-RPC 2.0 websocket transport backing `TrueNASClient`
 (`client.conn`).
 
 - **`TrueNASWSConnection(uri=None, *, verify=True, call_timeout=CALL_TIMEOUT,
-  connect_timeout=CONNECT_TIMEOUT, py_exceptions=False, logger=None)`** —
+  connect_timeout=CONNECT_TIMEOUT, logger=None)`** —
   builds the connection and does no I/O. `uri` is `wss://`/`ws://` or
   `ws+unix://...`; `None`/bare `ws+unix://` connects to `DEFAULT_UNIX_SOCKET`
   (`/var/run/middleware/middlewared.sock`). `verify` takes the same values as
@@ -499,14 +499,12 @@ The synchronous JSON-RPC 2.0 websocket transport backing `TrueNASClient`
     the background reader thread and returns the connection. Idempotent;
     `with` and the first `.call()` do it too. A closed connection is not
     reopened: `.connect()` and `.call()` raise `ConnectionClosed`.
-  - **`.call(method, *params, timeout=UNSET, **_ignored) -> Any`** — send a
+  - **`.call(method, *params, timeout=UNSET) -> Any`** — send a
     request and block for the matching response. `timeout=None` waits
-    **indefinitely**; the default sentinel uses `call_timeout`. Unknown
-    kwargs in `{"job", "background", "callback", "register_call", "raise_"}`
-    are silently accepted here (upstream-client compatibility; a job id is
-    returned — `Namespace` is what honours `job=True`); any other unknown
-    kwarg is logged at debug level. The timeout bounds the send as well as
-    the wait for the answer: a send still blocked when it expires (a peer
+    **indefinitely**; the default sentinel uses `call_timeout`. Any other
+    keyword raises `TypeError`, a misspelt `timout=` included; a job's id is
+    returned (`Namespace` is what honours `job=True`). The timeout bounds the
+    send as well as the wait for the answer: a send still blocked when it expires (a peer
     that stopped reading) closes the connection, since part of the request
     may be on the wire, and raises `CallTimeout`. Raises `ValidationErrors`/
     `ClientException` on a server error, `CallTimeout` on timeout,
@@ -892,7 +890,7 @@ Backs the `generate-typings` command; not typically used directly.
   3.14 targets) and mypy (3.10 and 3.14) when those are installed. It does not
   run against a full live dump.
 - Every method's call options (`_method`, `_ioerror`, `_filetransfer`,
-  `_timeout`, `_tries`) are **keyword-only** in the stub, matching the runtime:
+  `_timeout`, `_retries`) are **keyword-only** in the stub, matching the runtime:
   middleware parameters are positional and any other keyword raises.
 - `enum`/`const` become `typing.Literal[...]` (a `None` value becomes a union
   member), and an object whose `additionalProperties` is a schema becomes
