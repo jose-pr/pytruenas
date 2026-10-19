@@ -45,12 +45,15 @@ def test_deploy_reads_the_tail_off_the_parsed_instance():
     assert deploy._passthrough(SimpleNamespace()) == []
 
 
+_READS_TAIL = SimpleNamespace(_allow_passthrough_=True)
+
+
 def test_a_tail_no_command_reads_is_reported(caplog):
     """It was dropped in silence."""
     logger = logging.getLogger("pytruenas.test.passthrough")
     with caplog.at_level(logging.WARNING):
         main._warn_stray_passthrough(
-            SimpleNamespace(_parsername_="query"),
+            SimpleNamespace(_parsername_="query", module=SimpleNamespace()),
             SimpleNamespace(_passthrough_=["x"], targets=["nas1"]),
             logger,
         )
@@ -63,7 +66,7 @@ def test_a_target_after_the_separator_is_reported(caplog):
     logger = logging.getLogger("pytruenas.test.passthrough")
     with caplog.at_level(logging.WARNING):
         main._warn_stray_passthrough(
-            SimpleNamespace(_parsername_="deploy"),
+            SimpleNamespace(_parsername_="deploy", module=_READS_TAIL),
             SimpleNamespace(_passthrough_=["call", "x", "nas1"], targets=[]),
             logger,
         )
@@ -74,8 +77,31 @@ def test_a_well_formed_deploy_says_nothing(caplog):
     logger = logging.getLogger("pytruenas.test.passthrough")
     with caplog.at_level(logging.WARNING):
         main._warn_stray_passthrough(
-            SimpleNamespace(_parsername_="deploy"),
+            SimpleNamespace(_parsername_="deploy", module=_READS_TAIL),
             SimpleNamespace(_passthrough_=["call", "x"], targets=["nas1"]),
+            logger,
+        )
+    assert caplog.text == ""
+
+
+@pytest.mark.parametrize("name", ["call", "deploy"])
+def test_the_builtin_commands_that_read_the_tail_say_so(name):
+    """`call` reads its fields after `--`, and was warned about as if it read
+    none while sending them."""
+    import importlib
+
+    module = importlib.import_module(f"pytruenas.cmd.{name}")
+    assert main._reads_passthrough(SimpleNamespace(module=module))
+
+
+def test_a_runpath_command_is_never_warned_about(caplog):
+    """Its steps read the tail (`provision -- --apply`), so the warning said
+    the opposite of what ran."""
+    logger = logging.getLogger("pytruenas.test.passthrough")
+    with caplog.at_level(logging.WARNING):
+        main._warn_stray_passthrough(
+            SimpleNamespace(_parsername_="provision"),
+            SimpleNamespace(_passthrough_=["--apply"], targets=["nas1"]),
             logger,
         )
     assert caplog.text == ""

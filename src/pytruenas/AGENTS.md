@@ -624,6 +624,9 @@ A command is a plain module exposing:
   so a command never declares them itself — declared and `register`-added
   positionals both land ahead of the targets, and the targets are part of the
   command's MCP tool schema.
+- **`_allow_passthrough_ = True`** — optional, module level; the command reads
+  the arguments after `--` (`args._passthrough_`). Without it, a `--` tail is
+  reported as ignored. RunPath commands are taken to read it.
 - **`init(args, logger) -> client`**, **`success(client, args, logger)`**,
   **`finally_(client, args, logger)`** — optional lifecycle hooks
   (`finally_` always runs).

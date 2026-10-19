@@ -58,6 +58,9 @@ from duho import Arg, Meta
 from pytruenas import TrueNASClient
 from pytruenas.utils.cmd import PyTrueNASArgs
 
+#: The command to run on the target once installed comes after `--`.
+_allow_passthrough_ = True
+
 #: Under the persistent system dataset -- see the module docstring for why this
 #: and not ``/var/db``, ``/root`` or ``/data`` (all in the boot environment).
 DEFAULT_PREFIX = "/var/db/system/pytruenas"

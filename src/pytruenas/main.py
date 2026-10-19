@@ -607,8 +607,17 @@ def _dispatch(command: object, instance: "PyTrueNAS") -> int:
     )
 
 
-#: Commands that read the arguments after ``--`` (duho's ``_passthrough_``).
-_PASSTHROUGH_COMMANDS = frozenset({"deploy"})
+def _reads_passthrough(command: object) -> bool:
+    """Whether ``command`` reads the arguments after ``--`` (``_passthrough_``).
+
+    A module command says so with a module-level ``_allow_passthrough_ = True``,
+    the name duho reads on a class command. A RunPath command's steps can read
+    the tail off ``cmd``, so it is taken to read it.
+    """
+    module = getattr(command, "module", None)
+    if module is None:
+        return True
+    return bool(getattr(module, "_allow_passthrough_", False))
 
 
 def _warn_stray_passthrough(
@@ -616,27 +625,25 @@ def _warn_stray_passthrough(
 ) -> None:
     """Warn when a ``--`` tail cannot be used, rather than dropping it silently.
 
-    duho captures the tail on the parsed instance as ``_passthrough_`` (verified
-    with the trailing ``targets`` positional in play: `deploy nas1 -- call x`
-    gives targets ``["nas1"]`` and the tail intact). Two ways to lose it:
-    naming a command that reads none, and putting the target after ``--``
-    (`deploy -- call x nas1`), where the target becomes part of the remote
-    command and the run falls back to ``localhost``.
+    duho captures the tail on the parsed instance as ``_passthrough_``. Two
+    ways to lose it: naming a command that reads none, and putting the target
+    after ``--`` (`deploy -- call x nas1`), where the target becomes part of
+    the tail and the run falls back to ``localhost``.
     """
     extra = list(getattr(instance, "_passthrough_", ()) or ())
     if not extra:
         return
-    name = getattr(command, "_parsername_", None) or getattr(
-        command, "__name__", str(command)
-    )
-    if name not in _PASSTHROUGH_COMMANDS:
+    if not _reads_passthrough(command):
+        name = getattr(command, "_parsername_", None) or getattr(
+            command, "__name__", str(command)
+        )
         logger.warning(
             "ignoring the %d argument(s) after '--': %s reads none", len(extra), name
         )
         return
     if not getattr(instance, "targets", None):
         logger.warning(
-            "no target before '--': the command after it runs on localhost "
+            "no target before '--': running on localhost "
             "(targets must precede the separator)"
         )
 

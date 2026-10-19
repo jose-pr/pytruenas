@@ -13,7 +13,7 @@ the CLI (``pytruenas call ...``) or write a command module instead -- see the
 
 Run it::
 
-    python examples/simple_client_from_yaml.py [path/to/config.yaml]
+    python examples/scripts/simple_client_from_yaml.py [path/to/config.yaml]
 
 Config format::
 

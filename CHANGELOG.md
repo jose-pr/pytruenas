@@ -16,6 +16,12 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Every MCP tool takes `targets`. The hosts were added to each command's parser
   by hand, so they were missing from the tool schema: naming one was refused as
   an unknown argument, and every tool call ran against `localhost`.
+- `call METHOD nas -- --field=value` and a RunPath flow's `-- --apply` no longer
+  log "ignoring the argument(s) after '--'" while using them. A command module
+  now says it reads the tail with a module-level `_allow_passthrough_ = True`
+  (as `call` and `deploy` do); RunPath commands are never warned about.
+- `examples/simple_client_from_yaml.py` moved to `examples/scripts/`, so
+  `--cmdspath examples` no longer warns that it is not a command.
 
 ## [0.6.0] - 2026-10-19
 

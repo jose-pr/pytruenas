@@ -46,6 +46,9 @@ from pytruenas import TrueNASClient
 from pytruenas.utils import apihelp, fields as _fields
 from pytruenas.utils.cmd import PyTrueNASArgs, emit_json, json_value
 
+#: The method's fields come after `--` (see the module docstring).
+_allow_passthrough_ = True
+
 
 class Args(PyTrueNASArgs):
     """Declared CLI fields for ``call`` (added ahead of the trailing targets)."""

@@ -5,7 +5,7 @@ and adapt; none of them is imported by the package.
 
 | | |
 |---|---|
-| [`simple_client_from_yaml.py`](simple_client_from_yaml.py) | Wire a small YAML file to a client by hand. The long way round — the CLI does config, targets, fan-out and logging for you. |
+| [`scripts/simple_client_from_yaml.py`](scripts/simple_client_from_yaml.py) | Wire a small YAML file to a client by hand. The long way round — the CLI does config, targets, fan-out and logging for you. |
 | [`runpath/health/`](runpath/health/) | A read-only flow: system info, pool health, a report. Shows the three step signatures a RunPath accepts. |
 | [`provision/`](provision/) | Provisioning a system end to end — users, DNS, datasets and encryption, shares and their services. **Dry-run by default.** |
 
