@@ -633,6 +633,11 @@ A command is a plain module exposing:
 - **`_allow_passthrough_ = True`** — optional, module level; the command reads
   the arguments after `--` (`args._passthrough_`). Without it, a `--` tail is
   reported as ignored. RunPath commands are taken to read it.
+- **`validate_args(args)`** — optional; called once with the parsed args
+  before any target runs or any client is built. Raise `duho.UsageError` for
+  an invocation the arguments alone show cannot work: it is reported once as
+  `pytruenas: error: MESSAGE` with exit status 2, instead of failing every
+  target.
 - **`init(args, logger) -> client`**, **`success(client, args, logger)`**,
   **`finally_(client, args, logger)`** — optional lifecycle hooks
   (`finally_` always runs).
@@ -741,7 +746,8 @@ way to build a client from parsed args:
   `--source` picks **what** gets bundled and `--mode` the output **layout**
   (zipapp or unpacked tree), with one constraint: `--source repo` requires
   `--mode dir` and is refused with the default `pyz`, because a zipapp needs an
-  importable package root and a working tree has none.
+  importable package root and a working tree has none. That and a relative
+  `--path` are usage errors (exit status 2) reported once, before any target.
   - `installed` (default) — the resolved dependency closure. Probes what the
     host already has (and its PEP 508 marker environment) and bundles only the
     difference. `--pkg-root`/`--pkg-name` name the distribution and its import

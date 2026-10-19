@@ -534,6 +534,12 @@ def _dispatch(command: object, instance: "PyTrueNAS") -> int:
 
         return run_command(_ty.cast(_ty.Any, command), instance)
 
+    # Once, before any client is built: a `duho.UsageError` from here is one
+    # message and exit status 2, not the same failure once per target.
+    validate = getattr(command.module, "validate_args", None)
+    if callable(validate):
+        validate(instance)
+
     targets = instance._expanded_targets_()
     logger.info("Running '%s' on %d target(s)", command._parsername_, len(targets))
     return run_targets(

@@ -5,6 +5,9 @@
 * ``run(client, args, logger)`` -- required; the command body, called once per
   target with a connected :class:`~pytruenas.TrueNASClient`.
 * ``register(parser, args, logger)`` -- optional; add argparse arguments.
+* ``validate_args(args)`` -- optional; called once before any target runs.
+  Raising :class:`duho.UsageError` ends the run with its message and exit
+  status 2.
 * ``init(args, logger) -> client`` / ``success(client, args, logger)`` /
   ``finally_(client, args, logger)`` -- optional lifecycle hooks.
 

@@ -222,19 +222,36 @@ def _passthrough(args: Args) -> "list[str]":
     return list(getattr(args, "_passthrough_", ()) or ())
 
 
+_REPO_PYZ = (
+    "--source repo does not support --mode pyz: a zipapp needs the package at "
+    "the archive root, which a src/-layout repo copy does not have. Use --mode "
+    "dir, whose launcher can PYTHONPATH into src/lib/vendor directly."
+)
+
+
+def validate_args(args: Args) -> None:
+    """Refuse what the arguments alone show cannot work, before any target runs.
+
+    Raises :class:`duho.UsageError` (exit status 2, reported once rather than
+    once per target).
+    """
+    from duho import UsageError
+
+    if args.source == "repo" and args.mode == "pyz":
+        raise UsageError(_REPO_PYZ)
+    if not args.path.startswith("/"):
+        raise UsageError(f"--path must be absolute on the target: {args.path!r}")
+
+
 def run(client: TrueNASClient, args: Args, logger: Logger):
     from hostctl import Exec
     from hostctl.deploy import deploy
     from hostctl.exceptions import BundleError
 
     if args.source == "repo" and args.mode == "pyz":
-        # Before anything reaches the target: the combination cannot work.
-        raise BundleError(
-            "--source repo does not support --mode pyz: a zipapp needs the "
-            "package at the archive root, which a src/-layout repo copy does "
-            "not have. Use --mode dir, whose launcher can PYTHONPATH into "
-            "src/lib/vendor directly."
-        )
+        # Before anything reaches the target, for a caller that runs this
+        # without the CLI's validate_args.
+        raise BundleError(_REPO_PYZ)
     root, package = _resolve_root(args.pkg_root or None, args.pkg_name or None)
     if root != "pytruenas":
         logger.info("Deploying %s (running %s)", root, package)

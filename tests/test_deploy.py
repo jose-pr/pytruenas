@@ -297,3 +297,28 @@ def test_a_real_bundle_of_a_source_tree_has_a_working_launcher(tmp_path):
     out = bundle(SourceTree(tmp_path), tmp_path / "out", mode="dir", package="pkg")
     launcher = (out / "bin" / "pkg").read_text()
     assert f"lib/{tmp_path.name}/src" in launcher
+
+
+@pytest.mark.parametrize(
+    "argv, message",
+    [
+        (["--source", "repo", "--mode", "pyz"], "does not support --mode pyz"),
+        (["--path", "relative/dir"], "--path must be absolute"),
+    ],
+)
+def test_arguments_that_cannot_work_are_refused_once_before_any_target(
+    argv, message, monkeypatch, capsys
+):
+    """Both were found inside the fan-out: exit 1, the same error once per
+    target, and a client built for each."""
+    import pytruenas.host
+
+    built = []
+    monkeypatch.setattr(
+        pytruenas.host, "TrueNASHost", lambda *a, **k: built.append(a) or object()
+    )
+    rc = main.main("pytruenas", ["deploy", *argv, "nas1", "nas2"])
+    assert rc == 2
+    assert built == []
+    err = capsys.readouterr().err
+    assert err.count(message) == 1
