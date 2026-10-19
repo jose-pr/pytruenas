@@ -10,6 +10,14 @@ from hostctl.uri import redact_uri as _redact_uri
 # registration here.
 
 
+#: The start of the error for a connection string that does not parse.
+_UNPARSEABLE = (
+    "this connection string does not parse as a URI; percent-encode any '/', "
+    "'?', '#', '@', '[' or ']' in the credentials (%2F, %3F, %23, %40, %5B, "
+    "%5D): "
+)
+
+
 def redact(connectionstring: str) -> str:
     """Strip the password from a raw connection string, leaving a valid URI.
 
@@ -74,14 +82,29 @@ class Target(_ty.NamedTuple):
 
     @classmethod
     def parse(cls, connectionstring: str, resolve_port=True, **defaults):
+        """Parse a connection string; a bare ``host`` gets ``defaults["scheme"]``.
+
+        Raises :class:`ValueError` for a string that does not parse as a URI,
+        with a message that names the characters to percent-encode and never
+        quotes the credentials.
+        """
         for default in defaults:
             if default not in cls._fields:
                 raise ValueError(default)
+        given = connectionstring
         if "://" not in connectionstring:
             connectionstring = (
                 f"{defaults.get('scheme') or 'http'}://{connectionstring or ''}"
             )
-        parts = _urlparse.urlsplit(connectionstring)
+        try:
+            parts = _urlparse.urlsplit(connectionstring)
+            # Both are properties that raise: an unencoded "/", "?" or "#"
+            # ends the authority early and leaves part of the password as the
+            # port, and current CPython refuses a "[" or "]" outside an IPv6
+            # host (3.14 does; 3.9.10 does not).
+            parts.port, parts.hostname
+        except ValueError:
+            raise ValueError(_UNPARSEABLE + redact(given or "")) from None
         scheme = parts.scheme
         username = (
             _urlparse.unquote(parts.username or "") or defaults.get("username") or ""

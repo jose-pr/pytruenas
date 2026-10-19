@@ -39,6 +39,10 @@ export TN_CREDS='1-<64-char-api-key>'
 pytruenas call system.version nas.example.com
 ```
 
+A password in a target string must percent-encode `/`, `?`, `#`, `@`, `[` and
+`]` (`%2F`, `%3F`, `%23`, `%40`, `%5B`, `%5D`): unencoded, they change where the
+host starts, and a target that does not parse is refused with that advice.
+
 TLS certificates are verified, against the same trust store the library uses.
 A lab box with a self-signed certificate needs an explicit opt-out, or a CA
 bundle:

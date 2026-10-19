@@ -246,3 +246,30 @@ def test_uri_renders_a_fragment():
 def test_uri_without_a_query_is_unchanged():
     target = Target.parse("https://nas/_upload", resolve_port=False)
     assert target.uri == "https://nas/_upload"
+
+
+@pytest.mark.parametrize(
+    "target",
+    ["wss://root:hun/hunter2@nas", "root:hun/hunter2@nas", "wss://root:a?hunter2@nas"],
+)
+def test_parse_refuses_a_malformed_target_without_quoting_its_password(target):
+    """urlsplit's own error quoted the start of the password as the port that
+    did not parse (`'hun'`), and named nothing to do about it."""
+    with pytest.raises(ValueError, match="percent-encode") as ei:
+        Target.parse(target)
+    assert "hun" not in str(ei.value) and "hunter2" not in str(ei.value)
+    assert "%5B" in str(ei.value) and "%2F" in str(ei.value)
+
+
+@pytest.mark.parametrize("target", ["wss://root:p[1]w@nas", "root:p[1]w@nas"])
+def test_a_bracket_in_a_password_parses_or_says_to_encode_it(target):
+    """Current CPython refuses a raw `[`/`]` outside an IPv6 host; older
+    patch releases parse it. Either way the outcome is usable."""
+    try:
+        parsed = Target.parse(target)
+    except ValueError as exc:
+        assert "%5B" in str(exc) and "%5D" in str(exc)
+        assert "p[1]w" not in str(exc)
+    else:
+        assert parsed.password == "p[1]w"
+    assert Target.parse(target.replace("[1]", "%5B1%5D")).password == "p[1]w"

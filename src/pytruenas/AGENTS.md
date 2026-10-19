@@ -938,7 +938,9 @@ uses.
 
 - **`target.Target`** (`NamedTuple`: `scheme, username, password, host, port,
   path, query, fragment`) — a parsed connection string.
-  `Target.parse(connectionstring, resolve_port=True, **defaults) -> Target`;
+  `Target.parse(connectionstring, resolve_port=True, **defaults) -> Target`
+  (raises `ValueError` for a string that does not parse as a URI, naming the
+  characters to percent-encode and never quoting the credentials);
   `.uri` reassembles it; `.is_local` checks for
   `""`/`"localhost"`/`"127.0.0.1"`; `.qsl` / `.query_val(key, default=None,
   *, islist=False)` read the query string.
