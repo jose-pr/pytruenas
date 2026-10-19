@@ -414,6 +414,8 @@ class _ModedPath:
         return self._path in self._store
 
     def read_bytes(self):
+        if self._path not in self._store:
+            raise FileNotFoundError(self._path)
         return self._store[self._path]
 
     def write_bytes(self, data):
@@ -645,3 +647,237 @@ def test_a_new_file_with_a_mode_never_holds_content_at_a_wider_one():
     target.write("token\n")
     assert modes["/etc/secret"] == 0o600
     assert [m for p, d, m in log if d] == [0o600]
+
+
+# -- snapshots only when something changes; few operations per write ----------
+
+
+class _CountingPath:
+    """Wraps a fake path, logging every method called on it or on the paths
+    it hands out."""
+
+    def __init__(self, inner, log):
+        self._inner, self._log = inner, log
+
+    def __getattr__(self, name):
+        value = getattr(self._inner, name)
+        if not callable(value):
+            if hasattr(value, "_store"):
+                return _CountingPath(value, self._log)
+            return value
+
+        def call(*args, **kwargs):
+            self._log.append(name)
+            result = value(*args, **kwargs)
+            if hasattr(result, "_store"):
+                return _CountingPath(result, self._log)
+            return result
+
+        return call
+
+
+def test_an_unchanged_write_takes_no_snapshot_and_only_reads():
+    from pytruenas.patch.templates import FileTarget
+
+    P = _fake_path_factory()
+    store = {"/etc/c.conf": b"same\n"}
+    log = []
+    target = FileTarget(_CountingPath(P(store, "/etc/c.conf"), log), baseline=True)
+
+    assert target.write("same\n") is False
+    assert list(store) == ["/etc/c.conf"]  # no baseline, no marker
+    assert [name for name in log if name != "with_name"] == ["read_bytes"]
+
+
+def test_a_rewrite_after_the_snapshot_reads_once_and_writes_once():
+    from pytruenas.patch.templates import FileTarget
+
+    P = _fake_path_factory()
+    store = {"/etc/c.conf": b"stock\n"}
+    log = []
+    target = FileTarget(_CountingPath(P(store, "/etc/c.conf"), log), baseline=True)
+    target.write("v1\n")
+    log.clear()
+
+    assert target.write("v2\n") is True
+    calls = [name for name in log if name != "with_name"]
+    assert calls.count("read_bytes") == 1
+    assert calls.count("write_bytes") == 1
+    assert len(calls) <= 4
+
+
+def test_apply_template_rejects_kwargs_for_text_and_path_templates(tmp_path):
+    from pytruenas.patch.templates import TemplateTarget
+
+    class Mem(TemplateTarget):
+        def write(self, content):
+            return True
+
+    source = tmp_path / "template.txt"
+    source.write_text("x")
+    with pytest.raises(TypeError, match="template class"):
+        Mem().apply_template("x", flag=1)
+    with pytest.raises(TypeError, match="template class"):
+        Mem().apply_template(source, flag=1)
+    assert Mem().apply_template(source) is True
+
+
+# -- what is found beside the target is not trusted blindly ------------------
+
+
+def _symlink_or_skip(link, target):
+    import os
+
+    try:
+        os.symlink(target, link)
+    except (OSError, NotImplementedError) as exc:
+        pytest.skip(f"cannot create a symlink here: {exc}")
+
+
+def test_a_symlink_at_the_baseline_path_is_refused(tmp_path):
+    from pytruenas.patch.templates import FileTarget
+
+    victim = tmp_path / "victim.txt"
+    victim.write_bytes(b"do not overwrite\n")
+    config = tmp_path / "app.conf"
+    config.write_bytes(b"orig\n")
+    _symlink_or_skip(tmp_path / "app.conf.baseline", victim)
+
+    target = FileTarget(config, baseline=True)
+    with pytest.raises(PermissionError, match="not a regular file"):
+        target.write("patched\n")
+    with pytest.raises(PermissionError):
+        target.read()
+    with pytest.raises(PermissionError):
+        target.revert()
+    assert config.read_bytes() == b"orig\n"
+    assert victim.read_bytes() == b"do not overwrite\n"
+
+
+def test_a_dangling_symlink_at_the_baseline_path_is_not_written_through(tmp_path):
+    from pytruenas.patch.templates import FileTarget
+
+    config = tmp_path / "app.conf"
+    config.write_bytes(b"orig\n")
+    planted = tmp_path / "planted"
+    _symlink_or_skip(tmp_path / "app.conf.baseline", planted)
+
+    with pytest.raises(PermissionError):
+        FileTarget(config, baseline=True).write("patched\n")
+    assert not planted.exists()
+
+
+def test_a_hard_linked_baseline_is_refused(tmp_path):
+    import os
+
+    from pytruenas.patch.templates import FileTarget
+
+    other = tmp_path / "other.txt"
+    other.write_bytes(b"another file\n")
+    config = tmp_path / "app.conf"
+    config.write_bytes(b"orig\n")
+    try:
+        os.link(other, tmp_path / "app.conf.baseline")
+    except OSError as exc:
+        pytest.skip(f"cannot create a hard link here: {exc}")
+
+    with pytest.raises(PermissionError, match="hard links"):
+        FileTarget(config, baseline=True).read()
+
+
+class _OwnedPath:
+    """A fake path whose entries carry an owner, answering lstat/stat."""
+
+    def __init__(self, store, owners, path):
+        self._store, self._owners, self._path = store, owners, path
+
+    def _info(self):
+        import types
+
+        if self._path not in self._store:
+            raise FileNotFoundError(self._path)
+        return types.SimpleNamespace(
+            st_mode=0o100644, st_nlink=1, st_uid=self._owners.get(self._path, 0)
+        )
+
+    def lstat(self):
+        return self._info()
+
+    def stat(self):
+        return self._info()
+
+    def exists(self):
+        return self._path in self._store
+
+    def read_bytes(self):
+        if self._path not in self._store:
+            raise FileNotFoundError(self._path)
+        return self._store[self._path]
+
+    def write_bytes(self, data):
+        self._store[self._path] = data
+
+    def with_name(self, name):
+        return _OwnedPath(
+            self._store, self._owners, self._path.rsplit("/", 1)[0] + "/" + name
+        )
+
+    @property
+    def name(self):
+        return self._path.rsplit("/", 1)[-1]
+
+    @property
+    def parent(self):
+        return _OwnedPath(self._store, self._owners, self._path.rsplit("/", 1)[0])
+
+
+def test_a_marker_owned_by_another_user_is_refused():
+    """A planted `.absent` would make read() deny an existing original."""
+    from pytruenas.patch.templates import FileTarget
+
+    store = {"/srv/app.conf": b"orig\n", "/srv/app.conf.baseline.absent": b""}
+    owners = {"/srv/app.conf.baseline.absent": 1000}
+    target = FileTarget(_OwnedPath(store, owners, "/srv/app.conf"), baseline=True)
+    with pytest.raises(PermissionError, match="uid 1000"):
+        target.read()
+
+
+def test_a_baseline_owned_by_the_targets_owner_is_trusted():
+    from pytruenas.patch.templates import FileTarget
+
+    store = {"/home/u/app.conf": b"patched\n", "/home/u/app.conf.baseline": b"orig\n"}
+    owners = {"/home/u/app.conf": 1000, "/home/u/app.conf.baseline": 1000}
+    target = FileTarget(_OwnedPath(store, owners, "/home/u/app.conf"), baseline=True)
+    assert target.read() == b"orig\n"
+
+
+def test_an_interrupted_snapshot_leaves_no_baseline_behind():
+    """A truncated copy would later be trusted, and restored, as the original."""
+    from pytruenas.patch.templates import FileTarget
+
+    P = _fake_path_factory()
+
+    class Interrupted(P):
+        def write_bytes(self, data):
+            if self._path.endswith(".tmp") and data:
+                self._store[self._path] = data[:3]
+                raise ConnectionResetError("transfer interrupted")
+            super().write_bytes(data)
+
+        def with_name(self, name):
+            return Interrupted(self._store, self._path.rsplit("/", 1)[0] + "/" + name)
+
+        def replace(self, target):
+            self._store[target._path] = self._store.pop(self._path)
+            return target
+
+    store = {"/etc/c.conf": b"original content\n"}
+    target = FileTarget(Interrupted(store, "/etc/c.conf"), baseline=True)
+    with pytest.raises(ConnectionResetError):
+        target.write("patched\n")
+    assert list(store) == ["/etc/c.conf"]
+    assert store["/etc/c.conf"] == b"original content\n"
+
+    target2 = FileTarget(P(store, "/etc/c.conf"), baseline=True)
+    target2.write("patched\n")
+    assert store["/etc/c.conf.baseline"] == b"original content\n"

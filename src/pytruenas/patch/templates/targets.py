@@ -11,7 +11,7 @@ from __future__ import annotations
 
 import logging as _logging
 import stat as _stat
-import typing as _ty
+import uuid as _uuid
 from pathlib import Path as _LocalPath
 
 from .base import BaseTemplate, TextTemplate
@@ -20,9 +20,8 @@ __all__ = ["TemplateTarget", "FileTarget"]
 
 LOGGER = _logging.getLogger(__name__)
 
-#: Mode for directories created on the way to a target. Octal, and stated as
-#: such: the previous code passed a bare ``755``, which Python reads as decimal
-#: -- ``0o1363``, i.e. setuid plus the wrong permission bits.
+#: Mode for directories created on the way to a target. Octal: a bare ``755``
+#: is decimal, i.e. ``0o1363`` (setuid plus the wrong permission bits).
 DIRECTORY_MODE = 0o755
 
 #: Methods a path-like must provide to be usable as a :class:`FileTarget`.
@@ -58,8 +57,8 @@ class TemplateTarget:
         * a ``str`` -- the literal template text;
         * anything else path-like -- read from the LOCAL filesystem.
 
-        ``kwargs`` reach the template's constructor, which is why the class and
-        the path forms accept them and a ready instance does not.
+        ``kwargs`` reach the constructor of a template *class*, and only
+        there: with any other form they raise ``TypeError``.
         """
         if isinstance(template, type) and issubclass(template, BaseTemplate):
             try:
@@ -67,21 +66,23 @@ class TemplateTarget:
             except FileNotFoundError:
                 baseline = b""
             template = template(baseline, **kwargs)
-        elif isinstance(template, BaseTemplate):
-            if kwargs:
-                # Silently dropping these would leave the caller wondering why
-                # their option had no effect on an already-built template.
+        elif kwargs:
+            # Silently dropping these would leave the caller wondering why
+            # their option had no effect.
+            if isinstance(template, BaseTemplate):
                 raise TypeError(
                     "kwargs are not accepted with an already-constructed "
                     f"template ({type(template).__name__}); pass them where it "
                     "is built"
                 )
-        elif isinstance(template, str):
-            template = TextTemplate(template, **kwargs)
-        else:
-            template = TextTemplate(
-                _LocalPath(template).read_text(encoding="utf-8"), **kwargs
+            raise TypeError(
+                "kwargs are accepted only with a template class, which they "
+                f"are passed to; got {type(template).__name__}"
             )
+        elif isinstance(template, str):
+            template = TextTemplate(template)
+        elif not isinstance(template, BaseTemplate):
+            template = TextTemplate(_LocalPath(template).read_text(encoding="utf-8"))
 
         return template.apply(self, context)
 
@@ -89,11 +90,17 @@ class TemplateTarget:
 class FileTarget(TemplateTarget):
     """A file, optionally with a baseline snapshot of its original content.
 
-    With ``baseline`` set, the first write copies the existing file aside
-    (``<name>.baseline`` by default) and :meth:`read` returns *that* rather
-    than the current content. This is what makes repeated application
-    idempotent: a template that layers changes onto a stock config always sees
-    the stock config, not its own previous output.
+    With ``baseline`` set, the first write that changes the file copies the
+    existing file aside (``<name>.baseline`` by default) and :meth:`read`
+    returns *that* rather than the current content. This is what makes
+    repeated application idempotent: a template that layers changes onto a
+    stock config always sees the stock config, not its own previous output.
+
+    A baseline or marker found beside the target is trusted only when it is a
+    regular file with one link, owned by root or by the target's owner; a
+    symlink or anything else there raises ``PermissionError`` rather than
+    being read or written through. (Checked where the path backend offers
+    ``lstat()``.)
     """
 
     def __init__(
@@ -102,10 +109,9 @@ class FileTarget(TemplateTarget):
         baseline: "bool | str" = False,
         mode: "int | None" = None,
     ) -> None:
-        # Duck-typed rather than `isinstance(path, pathapi.Path)`: this
-        # class only calls the methods below, and demanding one concrete type
-        # rejected valid stand-ins (a test double, another backend's path) for
-        # no benefit. The error still fires early, and names what is missing.
+        # Duck-typed: only the methods below are called, so a test double or
+        # another backend's path works. The error still fires here, naming
+        # what is missing.
         missing = [
             attribute
             for attribute in _REQUIRED_PATH_METHODS
@@ -134,12 +140,10 @@ class FileTarget(TemplateTarget):
 
     @property
     def _absent_marker(self):
-        """Marks that the file did not exist when this target first wrote it.
+        """Records that the file did not exist when this target first changed it.
 
-        Without it, the second write found "an existing file with no baseline"
-        -- this target's own output -- and snapshotted it as the original, so
-        layering templates duplicated their additions and ``revert()`` restored
-        patched content.
+        So a later write does not take this target's own output for an
+        original, and :meth:`revert` leaves a file it created in place.
         """
         if not self._baseline:
             return None
@@ -155,57 +159,47 @@ class FileTarget(TemplateTarget):
         original's permission bits: a copy of ``/etc/shadow`` must not be
         world-readable.
         """
+        if self.baseline_path is None:
+            return self.path
+        self._snapshot(self._current())
+        return self.baseline_path
+
+    def _snapshot(self, current: "bytes | None") -> None:
+        """Take the snapshot (or the absent marker) unless one exists."""
         baseline = self.baseline_path
-        if baseline is None:
-            return self.path
-        if baseline.exists() or self._absent_marker.exists():
-            return baseline
-        if not self.path.exists():
-            self._absent_marker.write_bytes(b"")
-            return baseline
-        # Guard against an empty suffix, which would make the "baseline" the
-        # target itself and truncate the file it exists to preserve. Compared
-        # as strings rather than via resolve(): not every path backend has
-        # resolve() (hostctl's CompositePosixPath does not), and a suffix that
-        # is empty is the only way these can collide anyway.
-        if str(baseline) == str(self.path):
-            return self.path
+        if self._present(baseline) or self._present(self._absent_marker):
+            return
+        if current is None:
+            self._create(self._absent_marker, b"", None)
+            return
         LOGGER.info("Snapshotting %s -> %s", self.path, baseline)
-        self._write_with_mode(
-            baseline, self.path.read_bytes(), self._mode_of(self.path)
-        )
-        return baseline
+        self._create(baseline, current, self._mode_of(self.path))
 
     def read(self) -> bytes:
         """The content to template FROM: the baseline if one exists, else the file.
 
-        **Never creates the snapshot.** Taking it is :meth:`write`'s job, and
-        doing it here made reading a mutating operation -- which fails outright
-        on a read-only mount (the middlewared package ships on one; see
-        :meth:`pytruenas.patch.middleware.MiddlewareFiles.find_template`). That
-        turned ``baseline=True`` into "cannot even read this file", which is
-        why the middleware helper used to default it off.
+        **Never creates the snapshot**: that is :meth:`write`'s job. Reading
+        must work on a read-only mount (the middlewared package ships on one),
+        and a caller who only reads has changed nothing that needs undoing.
+        With no snapshot yet, the file's CURRENT content is the original.
 
-        Snapshotting at write time is also the correct moment on its own terms:
-        the mount must be writable by then anyway, and a caller who only reads
-        has changed nothing that needs undoing.
-
-        With no snapshot yet, the file's CURRENT content is the right answer --
-        nothing has displaced it, so it is still its own original.
+        Raises ``FileNotFoundError`` when there is no original: the file is
+        missing, or it did not exist when this target first wrote it.
         """
         if self._baseline:
             baseline = self.baseline_path
-            if baseline is not None and baseline.exists():
+            if self._present(baseline):
                 return baseline.read_bytes()
-            if self._absent_marker.exists():
+            if self._present(self._absent_marker):
                 # The original was absent: template from nothing, not from
                 # this target's own earlier output.
                 raise FileNotFoundError(str(self.path))
-        if not self.path.exists():
-            # No original to template from: distinguishing this from an empty
-            # file is the caller's job (`apply_template` treats it as empty).
+        current = self._current()
+        if current is None:
+            # Distinguishing this from an empty file is the caller's job
+            # (`apply_template` treats it as empty).
             raise FileNotFoundError(str(self.path))
-        return self.path.read_bytes()
+        return current
 
     # -- inspection and undo ----------------------------------------------
 
@@ -218,24 +212,15 @@ class FileTarget(TemplateTarget):
         content differs, including when it has been deleted.
         """
         baseline = self.baseline_path
-        if baseline is None or not baseline.exists():
+        if baseline is None or not self._present(baseline):
             return False
-        if not self.path.exists():
-            return True
-        return self.path.read_bytes() != baseline.read_bytes()
+        return self._current() != baseline.read_bytes()
 
     def would_change(self, content: "str | bytes") -> bool:
-        """Whether writing ``content`` would modify the file. No side effects.
-
-        The dry-run half of :meth:`write`. Without it the only way to find out
-        was to perform the write, which is the wrong tool for "show me what
-        this patch would do".
-        """
+        """Whether writing ``content`` would modify the file. No side effects."""
         if isinstance(content, str):
             content = content.encode()
-        if not self.path.exists():
-            return True
-        return self.path.read_bytes() != content
+        return self._current() != content
 
     def revert(self, remove_baseline: bool = True) -> bool:
         """Restore the original content. Returns whether anything changed.
@@ -257,22 +242,151 @@ class FileTarget(TemplateTarget):
         if baseline is None:
             return False
         marker = self._absent_marker
-        if marker.exists():
+        if self._present(marker):
             if remove_baseline:
                 self._unlink(marker)
             return False
-        if not baseline.exists():
+        if not self._present(baseline):
             LOGGER.debug("Nothing to revert for %s (no baseline)", self.path)
             return False
 
         original = baseline.read_bytes()
-        changed = not self.path.exists() or self.path.read_bytes() != original
+        current = self._current()
+        changed = current != original
         if changed:
             LOGGER.info("Reverting %s to its baseline", self.path)
-            self._write_with_mode(self.path, original, self._mode_of(baseline))
+            self._write_with_mode(
+                self.path,
+                original,
+                self._mode_of(baseline),
+                exists=current is not None,
+            )
         if remove_baseline:
             self._unlink(baseline)
         return changed
+
+    # -- writing ------------------------------------------------------------
+
+    def write(self, content: "str | bytes") -> bool:
+        """Write ``content`` if it differs; return whether it did.
+
+        An existing file keeps its own mode; a new one gets ``mode`` before
+        any content lands. With a baseline configured, the snapshot is taken
+        only when the file is about to change.
+        """
+        return self._write(content)[0]
+
+    def _write(self, content: "str | bytes") -> "tuple[bool, bytes | None]":
+        """``write()``, also returning the content found (``None``: absent)."""
+        if content is None:
+            raise TypeError(
+                f"refusing to write None to {self.path}; the template rendered "
+                "nothing (a render() that returns None, or no return at all)"
+            )
+        if isinstance(content, str):
+            content = content.encode()
+
+        current = self._current()
+        if current == content:
+            return False, current
+        if current is None:
+            parent = self.path.parent
+            if not parent.exists():
+                parent.mkdir(DIRECTORY_MODE, True, True)
+        if self._baseline:
+            self._snapshot(current)
+
+        # An existing file keeps its own mode: rewriting can reset it to the
+        # umask default, and widening /etc/shadow from 0640 to 0644 is a
+        # security regression. A new file gets `self.mode`.
+        mode = self._mode_of(self.path) if current is not None else None
+        self._write_with_mode(
+            self.path,
+            content,
+            mode if mode is not None else self.mode,
+            exists=current is not None,
+        )
+        return True, current
+
+    # -- helpers --------------------------------------------------------------
+
+    def _current(self) -> "bytes | None":
+        """The file's content, or ``None`` when it does not exist."""
+        try:
+            return self.path.read_bytes()
+        except FileNotFoundError:
+            return None
+
+    def _present(self, path) -> bool:
+        """Whether a baseline or marker exists, raising for one not to trust.
+
+        A non-root user who can write the target's directory could plant a
+        symlink or a file there; root would then template from it, write
+        through it, or restore it into the target.
+        """
+        lstat = getattr(path, "lstat", None)
+        if not callable(lstat):
+            return path.exists()
+        try:
+            info = lstat()
+        except FileNotFoundError:
+            return False
+        except ConnectionError:
+            raise
+        except (OSError, NotImplementedError, AttributeError):
+            return path.exists()
+        mode = getattr(info, "st_mode", None)
+        if mode is not None and not _stat.S_ISREG(mode):
+            raise PermissionError(
+                f"refusing {path}: not a regular file (a symlink or other "
+                "entry where this target keeps its baseline)"
+            )
+        if (getattr(info, "st_nlink", 1) or 1) > 1:
+            raise PermissionError(f"refusing {path}: it has other hard links")
+        uid = getattr(info, "st_uid", None)
+        if uid:
+            owner = self._owner_uid()
+            if owner is not None and uid != owner:
+                raise PermissionError(
+                    f"refusing {path}: owned by uid {uid}, which is neither root "
+                    f"nor the owner of {self.path}"
+                )
+        return True
+
+    def _owner_uid(self) -> "int | None":
+        """The uid owning the target, or its directory while it is absent."""
+        for candidate in (self.path, self.path.parent):
+            try:
+                return getattr(candidate.stat(), "st_uid", None)
+            except FileNotFoundError:
+                continue
+            except ConnectionError:
+                raise
+            except (OSError, NotImplementedError, AttributeError):
+                return None
+        return None
+
+    def _create(self, path, data: bytes, mode: "int | None") -> None:
+        """Create ``path`` holding ``data``, complete or not at all.
+
+        Written to a randomly named sibling and renamed into place where the
+        backend can replace, so an interrupted transfer leaves no truncated
+        snapshot to be trusted as the original, and the rename replaces
+        whatever sits at ``path`` instead of writing through it.
+        """
+        temporary = path.with_name(f".{path.name}.{_uuid.uuid4().hex[:12]}.tmp")
+        if not callable(getattr(temporary, "replace", None)):
+            self._write_with_mode(path, data, mode)
+            return
+        try:
+            self._write_with_mode(temporary, data, mode, exists=False)
+            temporary.replace(path)
+        except BaseException:
+            try:
+                self._unlink(temporary)
+            except Exception:
+                LOGGER.warning("could not remove %s", temporary)
+            raise
 
     def _unlink(self, path) -> None:
         unlink = getattr(path, "unlink", None)
@@ -297,14 +411,19 @@ class FileTarget(TemplateTarget):
         except (OSError, AttributeError, NotImplementedError):
             return None
 
-    def _write_with_mode(self, path, data: bytes, mode: "int | None") -> None:
+    def _write_with_mode(
+        self, path, data: bytes, mode: "int | None", exists: "bool | None" = None
+    ) -> None:
         """Write ``data`` to ``path`` without ever exposing it at a wider mode.
 
-        A new file is created empty and chmod'ed BEFORE the content goes in:
-        writing first and chmod'ing after leaves e.g. a copy of ``/etc/shadow``
-        readable at the backend's default mode for the length of the call.
+        A new file is created empty and chmod'ed BEFORE the content goes in,
+        so a copy of e.g. ``/etc/shadow`` is never readable at the backend's
+        default mode, not even for the length of the call. ``exists`` saves
+        the check when the caller already knows.
         """
-        if mode is not None and not path.exists():
+        if exists is None:
+            exists = mode is not None and path.exists()
+        if mode is not None and not exists:
             path.write_bytes(b"")
             self._chmod(path, mode)
         path.write_bytes(data)
@@ -324,35 +443,3 @@ class FileTarget(TemplateTarget):
                 oct(mode),
                 path,
             )
-
-    def write(self, content: "str | bytes") -> bool:
-        if content is None:
-            raise TypeError(
-                f"refusing to write None to {self.path}; the template rendered "
-                "nothing (a render() that returns None, or no return at all)"
-            )
-        if isinstance(content, str):
-            content = content.encode()
-
-        parent = self.path.parent
-        if not parent.exists():
-            parent.mkdir(DIRECTORY_MODE, True, True)
-        if self._baseline:
-            self.baseline()
-
-        if self.path.exists() and self.path.read_bytes() == content:
-            return False
-
-        # An existing file keeps its own mode: rewriting can reset it to the
-        # umask default, and silently widening /etc/shadow from 0640 to 0644 is
-        # a security regression. A new file gets `self.mode`, applied before
-        # the content lands (see _write_with_mode).
-        existing = self._mode_of(self.path) if self.path.exists() else None
-        self._write_with_mode(
-            self.path, content, existing if existing is not None else self.mode
-        )
-        return True
-
-
-if _ty.TYPE_CHECKING:  # pragma: no cover - typing only
-    pass
