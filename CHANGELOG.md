@@ -47,6 +47,10 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   (`tnasws`) leg joined the segments with `/` and operated on `/mnt//etc`, so
   on a host without SSH a read, write or `unlink()` reached a different file;
   `fs.path()` joins as the composite path does.
+- A reconnect after a login with a one-time code asks `otp_provider` for a new
+  code instead of sending the spent one again (which the server refused, so the
+  session never came back); without a provider it raises
+  `AuthenticationError("OTP_REQUIRED")`.
 - `examples/simple_client_from_yaml.py` moved to `examples/scripts/`, so
   `--cmdspath examples` no longer warns that it is not a command.
 

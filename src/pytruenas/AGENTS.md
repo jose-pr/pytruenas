@@ -157,8 +157,10 @@ version="current", executor=None, path=None, ssh=None, ...)`
   the server's answer (`True`) and raises `AuthenticationError` when it is
   `False` (a wrong password or key — the server does not error). On any
   failure the new connection is closed, not left open unauthenticated. A
-  one-time OTP is not replayable, so a session that must survive a reconnect
-  needs `otp_provider`.
+  reconnect repeats the login without the credential's one-time code (it is
+  spent; the caller's object is unchanged), so a session that must survive a
+  reconnect needs `otp_provider` — without one the reconnect raises
+  `AuthenticationError("OTP_REQUIRED")`.
 - **`.close()`** — closes the transports and then the websocket; also a
   context manager (`with TrueNASClient(...) as client:`). A client that is
   garbage-collected without it closes its connection from a finalizer, so a

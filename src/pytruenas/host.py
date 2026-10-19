@@ -28,6 +28,7 @@ server itself; nothing in this package performs such a request.
 
 from __future__ import annotations
 
+import copy as _copy
 import inspect as _inspect
 import json as _js
 import logging as _logging
@@ -139,6 +140,19 @@ class _HostLogger(_logging.LoggerAdapter):
             return
         msg, kwargs = self.process(msg, kwargs)
         inner(msg, *args, **kwargs)
+
+
+def _without_otp(creds: "_auth.Credentials") -> "_auth.Credentials":
+    """``creds`` with its one-time code spent, for a reconnect to repeat.
+
+    The server accepts a code once: replaying it failed the reconnect, and
+    ``otp_provider`` was never asked. The caller's object is left as it was.
+    """
+    if not getattr(creds, "otp_token", None):
+        return creds
+    spent = _copy.copy(creds)
+    spent.otp_token = None  # type: ignore[attr-defined]
+    return spent
 
 
 def _close_quietly(closeable: object) -> None:
@@ -1068,9 +1082,10 @@ class TrueNASHost(_PosixHost, _ty.Generic[ApiVersion]):
 
         Refused credentials raise :class:`~pytruenas.auth.AuthenticationError`
         on both paths, and the connection is closed rather than left open and
-        unauthenticated. After a success, a reconnect repeats this login; a
-        one-time OTP cannot be replayed, so give a session that must survive a
-        reconnect an ``otp_provider``.
+        unauthenticated. After a success, a reconnect repeats this login
+        without the credential's one-time code, which is spent: on the
+        ``login_ex`` path it asks ``otp_provider`` for a new one, and raises
+        ``AuthenticationError("OTP_REQUIRED")`` without one.
         """
         options = {
             "login_ex": login_ex,
@@ -1099,7 +1114,7 @@ class TrueNASHost(_PosixHost, _ty.Generic[ApiVersion]):
                 conn, self._conn = self._conn, None
                 conn.close()
                 raise
-            self._last_login = (creds, options)
+            self._last_login = (_without_otp(creds), options)
             return result
 
     @_cached_property

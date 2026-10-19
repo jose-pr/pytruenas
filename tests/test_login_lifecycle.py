@@ -104,3 +104,53 @@ def test_concurrent_first_use_opens_one_connection(host, monkeypatch):
         t.join()
     assert _Conn.opened == 1
     assert len({id(c) for c in seen}) == 1
+
+
+class _OneTimeCodes:
+    """`auth.login_ex` that wants a code, and accepts each code once."""
+
+    def __init__(self):
+        self.sent = []
+
+    def login_ex(self, data):
+        return {"response_type": "OTP_REQUIRED"}
+
+    def login_ex_continue(self, data):
+        code = data["otp_token"]
+        fresh = code not in self.sent
+        self.sent.append(code)
+        return {"response_type": "SUCCESS" if fresh else "AUTH_ERR"}
+
+
+def _otp_host(host, monkeypatch):
+    from types import SimpleNamespace
+
+    server = _OneTimeCodes()
+    api = SimpleNamespace(auth=server)
+    monkeypatch.setattr(type(host), "api", property(lambda self: api))
+    return server
+
+
+def test_a_reconnect_asks_for_a_new_one_time_code(host, monkeypatch):
+    """The stored code was sent again on reconnect, refused, and the
+    `otp_provider` the docstring recommends was never asked."""
+    from pytruenas.auth import BasicAuth
+
+    server = _otp_host(host, monkeypatch)
+    creds = BasicAuth("root", "pw", "111111")
+    host.login(creds, login_ex=True, otp_provider=lambda: "222222")
+    host._conn.close()
+    host.conn
+    assert server.sent == ["111111", "222222"]
+    assert creds.otp_token == "111111"  # the caller's object is untouched
+
+
+def test_a_reconnect_without_a_provider_says_a_code_is_needed(host, monkeypatch):
+    from pytruenas.auth import BasicAuth
+
+    server = _otp_host(host, monkeypatch)
+    host.login(BasicAuth("root", "pw", "111111"), login_ex=True)
+    host._conn.close()
+    with pytest.raises(AuthenticationError, match="OTP_REQUIRED"):
+        host.conn
+    assert server.sent == ["111111"]
