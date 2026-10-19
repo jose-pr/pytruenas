@@ -312,13 +312,19 @@ def _sibling(client: "TrueNASHost", version: str, kind: str) -> "_pathlib.Path":
     )
 
 
-def services(client: "TrueNASHost", *, refresh: bool = False) -> "dict":
+def services(
+    client: "TrueNASHost", *, refresh: bool = False, version: "str | None" = None
+) -> "dict":
     """Every service (namespace) the appliance exposes, via ``core.get_services``.
 
     Shell-free and role-free, so this works for an API-key account that cannot
     run commands at all. 121 services / 79 KB / ~5.5 s measured on 26.0.
+    ``version`` keys the cache as it does for :func:`load`; omitted, it is read
+    with one ``system.info()`` call.
     """
-    cache = _sibling(client, _version_of(client), "services")
+    if version is None:
+        version = _version_of(client)
+    cache = _sibling(client, version, "services")
     if not refresh and cache.exists():
         try:
             return _json.loads(_gzip.decompress(cache.read_bytes()))
@@ -331,7 +337,11 @@ def services(client: "TrueNASHost", *, refresh: bool = False) -> "dict":
 
 
 def service_methods(
-    client: "TrueNASHost", service: str, *, refresh: bool = False
+    client: "TrueNASHost",
+    service: str,
+    *,
+    refresh: bool = False,
+    version: "str | None" = None,
 ) -> "dict":
     """The methods of one service, via ``core.get_methods(service)``.
 
@@ -351,8 +361,12 @@ def service_methods(
 
     Asking for the whole set at once (``core.get_methods()`` with no service) is
     **not** an option: the server closes the websocket on that payload.
+
+    ``version`` keys the cache as it does for :func:`load`; omitted, it is read
+    with one ``system.info()`` call.
     """
-    version = _version_of(client)
+    if version is None:
+        version = _version_of(client)
     cache = _sibling(client, version, f"svc.{_safe_component(service)}")
     if not refresh and cache.exists():
         try:

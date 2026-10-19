@@ -158,15 +158,17 @@ def _from_api(client: TrueNASClient, args: "Args", logger: Logger, name: str):
     for" and "the method to render" -- and a name that is itself a service is
     listed whole.
     """
+    # Read once: every cache key below needs it, and each read is a round trip.
+    api_version = str(client.api.system.info()["version"])
     if name in Args.INDEX_NAMES:
-        found = apicache.services(client, refresh=args.refresh_api)
+        found = apicache.services(client, refresh=args.refresh_api, version=api_version)
         if args.json:
             emit_json(sorted(found), args)
         else:
             emit(_render_services(found).rstrip("\n"))
         return 0
 
-    services = apicache.services(client, refresh=args.refresh_api)
+    services = apicache.services(client, refresh=args.refresh_api, version=api_version)
 
     # `name` is either a service itself, or <service>.<method>.
     service = name if name in services else name.rpartition(".")[0]
@@ -178,7 +180,9 @@ def _from_api(client: TrueNASClient, args: "Args", logger: Logger, name: str):
         raise LookupError(f"no service named {service or name!r}{hint}")
 
     methods = apihelp.methods_from_get_methods(
-        apicache.service_methods(client, service, refresh=args.refresh_api)
+        apicache.service_methods(
+            client, service, refresh=args.refresh_api, version=api_version
+        )
     )
 
     if name in methods:
@@ -189,10 +193,7 @@ def _from_api(client: TrueNASClient, args: "Args", logger: Logger, name: str):
         return 0
 
     if name == service:
-        version = {
-            "version": str(client.api.system.info()["version"]),
-            "methods": list(methods.values()),
-        }
+        version = {"version": api_version, "methods": list(methods.values())}
         if args.json:
             emit_json(methods, args)
         else:
