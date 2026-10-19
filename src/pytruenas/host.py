@@ -66,8 +66,7 @@ if _ty.TYPE_CHECKING:  # pragma: no cover - typing only
     from hostctl.provider import ExecutorProvider, PathProvider
     from truenasapi_typings.current import Current
 
-    #: Mirrors `TrueNASClient`'s parameter so `TrueNASHost[Current]` gives the
-    #: same completion on `.api` that `TrueNASClient[Current]` does.
+    #: `TrueNASClient[Current]` types `.api` with the generated stubs.
     ApiVersion = _ty.TypeVar("ApiVersion", bound=_Namespace, default=Current)
 else:
     ApiVersion = _ty.TypeVar("ApiVersion", bound=_Namespace)
@@ -180,7 +179,7 @@ class PendingDownload:
     single-use and carries a token, so it is not shown in the ``repr``.
     """
 
-    def __init__(self, host: "TrueNASHost", job_id: int, uri: str, buffered: bool):
+    def __init__(self, host: "TrueNASClient", job_id: int, uri: str, buffered: bool):
         self.job_id = job_id
         self._host = host
         self._uri = uri
@@ -252,7 +251,7 @@ def _public_key(private_key: str) -> str:
     """Derive the OpenSSH public key for ``private_key``.
 
     Only reached when the public half is genuinely unknown -- a caller who
-    passed ``private_key=`` to :meth:`TrueNASHost.install_sshcreds` and nothing
+    passed ``private_key=`` to :meth:`TrueNASClient.install_sshcreds` and nothing
     else. Every other path gets both halves from the middleware, which is what
     keeps ``install_sshcreds`` usable without the optional ``ssh`` extra: it
     provisions a keypair through the API and never opens an SSH connection.
@@ -547,7 +546,7 @@ class TrueNASConfig(
         self.logger = logger
         #: Explicit provider selection, overriding the defaults. Each is a name
         #: or a sequence of names, in preference order; ``None`` means "decide
-        #: from the target". See :meth:`TrueNASHost.default_providers`.
+        #: from the target". See :meth:`TrueNASClient.default_providers`.
         #:
         #: This replaced a ``webshell: bool`` flag, which was only ever the one
         #: hardcoded case of it (``executor=["ssh"]`` says the same thing, and
@@ -580,7 +579,7 @@ class TrueNASConfig(
         #: have to import and assemble an SSHConfig for the common case.
         #:
         #: ``known_hosts`` names the trusted host keys for an SSH leg built
-        #: here -- from ``shell=`` or by :meth:`TrueNASHost.install_sshcreds`
+        #: here -- from ``shell=`` or by :meth:`TrueNASClient.install_sshcreds`
         #: -- with hostctl's values: ``()`` is the ssh_config's
         #: ``UserKnownHostsFile``, else ``~/.ssh/known_hosts``; a path or list
         #: names the file(s). ``verify=False`` skips the ``()`` lookup;
@@ -790,10 +789,10 @@ class TrueNASConfig(
         return f"{type(self).__name__}({self.connection_uri!r})"
 
     def _create_host(self) -> "Host":
-        return TrueNASHost(self)
+        return TrueNASClient(self)
 
 
-#: Keywords `TrueNASHost(...)` routes to the config rather than to `PosixHost`:
+#: Keywords `TrueNASClient(...)` routes to the config rather than to `PosixHost`:
 #: exactly what `TrueNASConfig.from_target` accepts. `port=`, `secure=` and the
 #: other constructor-only settings are spelled in the connection string.
 _CONFIG_OPTIONS = frozenset(TrueNASConfig.uri_credentials)
@@ -808,7 +807,7 @@ _HOST_OPTIONS = frozenset(
 ) | {"client"}
 
 
-def _ssh_pair(host: "TrueNASHost"):
+def _ssh_pair(host: "TrueNASClient"):
     """The ``ssh`` and ``sftp`` providers: one resolver, so both share a transport.
 
     hostctl calls a resolver once per resolution however many names reach it;
@@ -825,13 +824,13 @@ def _ssh_pair(host: "TrueNASHost"):
     return ssh_providers(_ty.cast(_ty.Any, ssh))
 
 
-def _webshell(host: "TrueNASHost"):
+def _webshell(host: "TrueNASClient"):
     from .webshell import WebShellExecutorProvider
 
     return WebShellExecutorProvider(_ty.cast(_ty.Any, host)), None
 
 
-def _tnasws(host: "TrueNASHost"):
+def _tnasws(host: "TrueNASClient"):
     from .providers import TnasWsPathProvider
 
     # The provider reaches the websocket lazily through the host, so building
@@ -839,7 +838,7 @@ def _tnasws(host: "TrueNASHost"):
     return None, TnasWsPathProvider(_ty.cast(_ty.Any, host))
 
 
-class TrueNASHost(_PosixHost, _ty.Generic[ApiVersion]):
+class TrueNASClient(_PosixHost, _ty.Generic[ApiVersion]):
     """A TrueNAS middleware host: POSIX semantics over composed transports.
 
     Everything generic -- ``run``, ``path``, ``spawn``, ``info``, ``connect``,
@@ -851,13 +850,13 @@ class TrueNASHost(_PosixHost, _ty.Generic[ApiVersion]):
     Construct it from a connection string, a :class:`TrueNASConfig`, or nothing
     at all (the local middleware socket)::
 
-        TrueNASHost("wss://nas")
-        TrueNASHost("nas", credentials="1-...", executor=["ssh"])
-        TrueNASHost(TrueNASConfig.from_target("wss://nas"))
-        TrueNASHost()
+        TrueNASClient("wss://nas")
+        TrueNASClient("nas", credentials="1-...", executor=["ssh"])
+        TrueNASClient(TrueNASConfig.from_target("wss://nas"))
+        TrueNASClient()
 
-    A string accepts every form :class:`~pytruenas.TrueNASClient` does and takes
-    the same keyword options as :meth:`TrueNASConfig.from_target`.
+    A string is normalized by :func:`_normalize_target`, and the keyword
+    options are those of :meth:`TrueNASConfig.from_target`.
 
     Provider order depends on the target, and is overridable per selector with
     ``executor=``/``path=``:
@@ -1208,8 +1207,8 @@ class TrueNASHost(_PosixHost, _ty.Generic[ApiVersion]):
     def api(self) -> "ApiVersion":
         """The root API namespace (``host.api.<namespace>.<method>(...)``).
 
-        Parameterise the host to type it: ``TrueNASHost[Current]("nas").api``
-        (or ``TrueNASClient[Current]``) completes the generated API stubs.
+        Parameterise the client to type it: ``TrueNASClient[Current]("nas").api``
+        completes the generated API stubs.
         """
         return _ty.cast("ApiVersion", _Namespace(_ty.cast(_ty.Any, self)))
 
@@ -1695,13 +1694,13 @@ class TrueNASHost(_PosixHost, _ty.Generic[ApiVersion]):
 
 # `auth` and `namespace` name the client in their annotations, but this module
 # imports them, so they cannot import it: bind it for `typing.get_type_hints`.
-setattr(_auth, "TrueNASClient", TrueNASHost)
-setattr(_namespace, "TrueNASClient", TrueNASHost)
+setattr(_auth, "TrueNASClient", TrueNASClient)
+setattr(_namespace, "TrueNASClient", TrueNASClient)
 
 __all__ = [
     "AUTO_SCHEME",
     "DEFAULT_SOCKET_PATH",
     "PendingDownload",
+    "TrueNASClient",
     "TrueNASConfig",
-    "TrueNASHost",
 ]

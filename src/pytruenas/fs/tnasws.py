@@ -26,7 +26,7 @@ from pathapi.providers import CommitOnClose as _CommitOnClose
 from uripath import URIPath as _URIPath
 
 from ..connection import ClientException as _ClientException
-from ..host import TrueNASHost as TrueNASClient
+from ..host import TrueNASClient
 from ..namespace import ioerror as _ioerror
 
 #: URI scheme(s) that resolve to :class:`TnasWsPath`. Not a real network scheme --

@@ -55,7 +55,7 @@ class _Client:
 @pytest.fixture(autouse=True)
 def _fake_clients(monkeypatch):
     _Client.built = []
-    monkeypatch.setattr(pytruenas.host, "TrueNASHost", _Client)
+    monkeypatch.setattr(pytruenas.host, "TrueNASClient", _Client)
 
 
 def _command(run, **hooks):

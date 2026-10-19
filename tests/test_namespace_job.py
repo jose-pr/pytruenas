@@ -5,7 +5,7 @@ import errno
 
 import pytest
 
-from pytruenas import TrueNASHost
+from pytruenas import TrueNASClient
 from pytruenas.connection import JobFailed
 
 
@@ -35,7 +35,7 @@ class _Middleware:
 
 
 def _host(middleware):
-    host = TrueNASHost("wss://nas.example", autologin=False)
+    host = TrueNASClient("wss://nas.example", autologin=False)
     host._conn = middleware
     return host
 

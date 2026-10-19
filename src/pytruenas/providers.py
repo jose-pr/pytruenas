@@ -10,7 +10,7 @@ hostctl's stock pair (:func:`hostctl.local_providers`). A target reached over th
 this machine, so a command there is a plain ``subprocess`` call and a path is a
 plain local path -- there is nothing about TrueNAS to add.
 
-**On ordering** (see ``TrueNASHost.default_providers``):
+**On ordering** (see ``TrueNASClient.default_providers``):
 
 ``local`` -> ``ssh`` -> ``webshell``, and ``local`` -> ``sftp`` -> ``tnasws``.
 
@@ -41,7 +41,7 @@ from hostctl.provider import (
 
 from pathapi import Path
 
-from .host import TrueNASHost as TrueNASClient
+from .host import TrueNASClient
 
 #: Path operations the middleware ``filesystem.*`` API can actually serve.
 #: Deliberately narrower than ``PathProvider.DEFAULT_CAPABILITIES``: the
@@ -89,7 +89,7 @@ class TnasWsPathProvider(_PathProvider):
     def _client(self):
         """The client whose websocket serves these paths.
 
-        A ``TrueNASHost`` passes *itself* here (the two are built together, and
+        A ``TrueNASClient`` passes *itself* here (the two are built together, and
         the client is created lazily from the host's config), so unwrap it:
         ``pytruenas.fs.path`` needs the client, not the host.
         """

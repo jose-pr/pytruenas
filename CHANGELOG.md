@@ -50,6 +50,11 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   are new.
 - **`pytruenas.utils.tls` is gone** (`context`, `ca_bundle`, `CA_BUNDLE_ENV`,
   `SslVerify`); the decision is private now. Pass `verify=` instead.
+- **`TrueNASHost` is gone: the class is `TrueNASClient`.** It was the same class
+  under a second name; `from pytruenas import TrueNASHost` and
+  `pytruenas.host.TrueNASHost` raise `ImportError`/`AttributeError`. Replace
+  the name with `TrueNASClient` (`TrueNASClient[Current]` for typed `.api`);
+  nothing else about the class changed with it.
 
 ### Added
 

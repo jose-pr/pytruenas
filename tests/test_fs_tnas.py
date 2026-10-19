@@ -100,9 +100,9 @@ class _JobMiddleware:
 
 
 def _job_path(middleware):
-    from pytruenas import TrueNASHost
+    from pytruenas import TrueNASClient
 
-    host = TrueNASHost("wss://nas.example", autologin=False)
+    host = TrueNASClient("wss://nas.example", autologin=False)
     host._conn = middleware
     return fs_path(host, "/mnt/tank/f", backend="ws")
 

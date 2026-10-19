@@ -3,7 +3,7 @@
 This is a deliberately small client covering exactly what ``pytruenas`` needs:
 open a websocket to the middleware, send a request, wait for the matching
 response, and surface errors as exceptions. Jobs are not tracked here: a
-job's id is returned, and :meth:`pytruenas.TrueNASHost.wait` polls
+job's id is returned, and :meth:`pytruenas.TrueNASClient.wait` polls
 ``core.get_jobs`` for its outcome (``core.job_wait`` is itself a job and does
 not block). Event subscriptions (``core.subscribe``) ARE supported: see
 :meth:`TrueNASWSConnection.subscribe` and :class:`Subscription` -- a bounded queue drained on
@@ -435,7 +435,7 @@ class TrueNASWSConnection:
     reader thread demultiplexes responses so concurrent calls from different
     threads are safe, and routes ``collection_update`` notifications to any
     :meth:`subscribe` sinks. Job tracking is intentionally omitted -- use the
-    :meth:`pytruenas.TrueNASHost.wait` for jobs.
+    :meth:`pytruenas.TrueNASClient.wait` for jobs.
     """
 
     def __init__(

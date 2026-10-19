@@ -27,8 +27,7 @@ from .connection import (
     ValidationErrors,
 )
 from .exceptions import TrueNASError
-from .host import TrueNASConfig, TrueNASHost
-from .host import TrueNASHost as TrueNASClient
+from .host import TrueNASClient, TrueNASConfig
 from .namespace import Namespace
 
 try:
@@ -40,11 +39,7 @@ except PackageNotFoundError:  # not installed (e.g. running from a bare checkout
 
 __all__ = [
     "Namespace",
-    # `TrueNASClient` and `TrueNASHost` are the same class. "Client" reads
-    # better at a call site; "Host" is the name its hostctl half is documented
-    # under, and what the URI registry dispatches `truenas+wss://` to.
     "TrueNASClient",
-    "TrueNASHost",
     "TrueNASConfig",
     "Credentials",
     "LocalAuth",

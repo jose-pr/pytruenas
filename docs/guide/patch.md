@@ -141,7 +141,7 @@ import subprocess
 
 
 class FakeNAS:
-    """A stand-in for TrueNASHost, for running a patch offline."""
+    """A stand-in for TrueNASClient, for running a patch offline."""
 
     PACKAGE = "/usr/lib/python3/dist-packages/middlewared"
 

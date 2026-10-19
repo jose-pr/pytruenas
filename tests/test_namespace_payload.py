@@ -7,7 +7,7 @@ mocked helper was called.
 
 import pytest
 
-from pytruenas import TrueNASHost
+from pytruenas import TrueNASClient
 
 
 class _Collection:
@@ -43,7 +43,7 @@ class _Collection:
 
 
 def _group(collection):
-    host = TrueNASHost("wss://nas.example", autologin=False)
+    host = TrueNASClient("wss://nas.example", autologin=False)
     host._conn = collection
     return host.api.group
 

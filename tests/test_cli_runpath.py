@@ -99,7 +99,7 @@ def record_path(tmp_path, monkeypatch):
     # is what matters. (There used to be a second patch of `pytruenas.client`,
     # a re-export shim that no longer exists.)
     # Patched where `cmd._client_()` resolves it, not on the runpath module.
-    monkeypatch.setattr(pytruenas.host, "TrueNASHost", _FakeClient)
+    monkeypatch.setattr(pytruenas.host, "TrueNASClient", _FakeClient)
     monkeypatch.delenv("PYTRUENAS_PATH", raising=False)
     return path
 

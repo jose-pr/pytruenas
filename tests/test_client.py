@@ -99,7 +99,7 @@ def test_upload_builds_upload_target(monkeypatch):
     c.upload(b"data", "config.upload", token="tok", wait=False)
     assert "/_upload" in captured["url"]
     assert captured["headers"]["Authorization"] == "Token tok"
-    # Always passed per request -- see TrueNASHost._http_verify.
+    # Always passed per request -- see TrueNASClient._http_verify.
     assert captured["verify"] is True
     # A silent side channel blocked for good.
     assert captured["method"] == "POST" and all(captured["timeout"])

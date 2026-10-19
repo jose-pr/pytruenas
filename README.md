@@ -139,7 +139,7 @@ may be comma-separated and supports `[A-Z]`/`[0-9]` range expansion (e.g.
 
 | Module | Purpose |
 | --- | --- |
-| `pytruenas` | `TrueNASClient` (the same class as `TrueNASHost`), `TrueNASConfig`, `Credentials`, `Namespace`, `Event`, `Subscription`, `__version__` |
+| `pytruenas` | `TrueNASClient`, `TrueNASConfig`, `Credentials`, `Namespace`, `Event`, `Subscription`, `__version__` |
 | `pytruenas.host` | The client: connection and login, `client.api`, events, and hostctl's `run()` / `path()` |
 | `pytruenas.namespace` | `Namespace`: middleware calls by attribute, and the `_get`/`_query`/`_create`/`_update`/`_upsert` helpers |
 | `pytruenas.connection` | The JSON-RPC 2.0 websocket transport, the extended-JSON codec and the call exceptions |

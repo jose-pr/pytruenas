@@ -29,7 +29,7 @@ from hostctl import uri_host as _uri_host
 from pathapi import LocalPath as LocalPath
 from pathapi import Path
 
-from ..host import TrueNASHost as TrueNASClient
+from ..host import TrueNASClient
 from .tnasws import _SCHEME
 from .tnasws import TnasWsBackend as TnasWsBackend
 from .tnasws import TnasWsPath as TnasWsPath

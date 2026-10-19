@@ -1,6 +1,6 @@
 # Host
 
-`TrueNASHost` is a [hostctl](https://github.com/jose-pr/hostctl) `PosixHost`:
+`TrueNASClient` is a [hostctl](https://github.com/jose-pr/hostctl) `PosixHost`:
 `run`, `path`, `spawn`, `info`, `connect`, `close`, `shell`, `capabilities`, and
 `last_selection` are inherited, and it adds the TrueNAS surface (`api`,
 `websocket`, `login`, `subscribe`, `upload`, `download`, `dump_api`,

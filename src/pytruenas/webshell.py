@@ -65,7 +65,7 @@ from hostctl.provider import (
     ProviderSelector as _ProviderSelector,
 )
 
-from .host import TrueNASHost as TrueNASClient
+from .host import TrueNASClient
 
 #: Terminal escape sequences a PTY emits around real output.
 _ANSI = _re.compile(

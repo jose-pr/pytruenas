@@ -12,7 +12,7 @@ import typing as _ty
 from .systemd.files import SystemFile
 
 if _ty.TYPE_CHECKING:  # pragma: no cover - typing only
-    from ..host import TrueNASHost as TrueNASClient
+    from ..host import TrueNASClient
 
 __all__ = ["MiddlewareFiles", "middlewared_path"]
 
@@ -62,9 +62,9 @@ class MiddlewareFiles:
         module_path: "str | None" = None,
     ) -> None:
         if client is None:
-            from ..host import TrueNASHost
+            from ..host import TrueNASClient
 
-            client = TrueNASHost()
+            client = TrueNASClient()
         self.client = client
         self._module_path = client.path(module_path) if module_path else None
 

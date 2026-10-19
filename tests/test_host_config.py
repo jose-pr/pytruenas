@@ -156,10 +156,10 @@ def test_a_config_naming_nothing_is_the_local_socket():
 def test_an_unknown_keyword_lists_only_options_that_work():
     """`port=` is spelled in the connection string; the error must not offer
     it as a keyword."""
-    from pytruenas import TrueNASHost
+    from pytruenas import TrueNASClient
 
     with pytest.raises(ValueError, match="unknown credential argument: 'port'") as e:
-        TrueNASHost("nas", port=8443)
+        TrueNASClient("nas", port=8443)
     listed = str(e.value).split("configuration options: ", 1)[1].rstrip(")")
     assert set(listed.split(", ")) == set(TrueNASConfig.uri_credentials)
 

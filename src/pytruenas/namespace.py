@@ -254,7 +254,7 @@ class Namespace:
         upload/download.
 
         ``job=True``, as in the upstream client, waits for the job the method
-        starts and returns the job's result (:meth:`TrueNASHost.wait`): a
+        starts and returns the job's result (:meth:`TrueNASClient.wait`): a
         failed job raises :class:`~pytruenas.connection.JobFailed`. The wait
         has no deadline unless ``_timeout`` is given. ``job="RETURN"`` and the
         other upstream keywords (``background``, ``callback``,

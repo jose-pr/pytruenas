@@ -39,7 +39,7 @@ import typing as _ty
 from pathlib import PurePosixPath as _PurePosixPath
 
 if _ty.TYPE_CHECKING:  # pragma: no cover - typing only
-    from ..host import TrueNASHost as TrueNASClient
+    from ..host import TrueNASClient
 
 #: A path on the *host*: a ``client.path(...)`` instance or its string form.
 PathLike = _ty.Union[str, "_ty.Any"]

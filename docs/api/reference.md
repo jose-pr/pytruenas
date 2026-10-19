@@ -10,5 +10,5 @@ Generated from docstrings, organized by module:
   (`dumps`/`loads`), and the errors: `TrueNASError` and its subclasses.
 - **[Auth](auth.md)** — `Credentials` and the credential types.
 - **[Filesystem](fs.md)** — `fs.path`, `fs.symlink_to`, `LocalPath` / `TnasWsPath`.
-- **[Host](host.md)** — `TrueNASHost` / `TrueNASConfig`, the transport
+- **[Host](host.md)** — `TrueNASClient`'s hostctl half and `TrueNASConfig`, the transport
   providers, and the web-shell executor.

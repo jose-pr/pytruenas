@@ -8,7 +8,7 @@ self-contained. Development documentation lives with the source at
 <https://jose-pr.github.io/pytruenas/>.
 
 **Imports.** Everything a caller needs is importable from `pytruenas`:
-`__all__ = ["Namespace", "TrueNASClient", "TrueNASHost", "TrueNASConfig",
+`__all__ = ["Namespace", "TrueNASClient", "TrueNASConfig",
 "Credentials", "LocalAuth", "ApiKeyAuth", "TokenAuth", "BasicAuth", "Event",
 "Subscription", "TrueNASWSConnection", "__version__", "TrueNASError",
 "ClientException", "ValidationErrors", "CallTimeout", "ConnectionClosed",
@@ -47,9 +47,9 @@ with the package not installed.
 
 ## Client (`pytruenas.host`)
 
-**`TrueNASClient` is `TrueNASHost`** — one class, two names. `client` is the
-friendlier word at a call site; `TrueNASHost` is where the host half of the API
-is documented (next section).
+**`TrueNASClient`** is the client and the TrueNAS host in one class; its host
+half (transports, configuration) is documented in the next section. There is
+no second name for it.
 
 `TrueNASClient(config=None, credentials=None, *, verify=True, shell=None,
 known_hosts=(), logger=None, autologin=True, version="current",
@@ -317,21 +317,21 @@ executor=None, path=None, ssh=None, ...)`
 
 ## Host, transports and configuration (`pytruenas.host`)
 
-`TrueNASHost` **is** `TrueNASClient` (same class). Constructible from a
-connection string, a `TrueNASConfig`, or nothing:
+`TrueNASClient` is constructible from a connection string, a `TrueNASConfig`,
+or nothing:
 
 ```python
-TrueNASHost("wss://nas")
-TrueNASHost("nas", credentials="1-...", executor=["ssh"])
-TrueNASHost()                       # the local middleware socket
+TrueNASClient("wss://nas")
+TrueNASClient("nas", credentials="1-...", executor=["ssh"])
+TrueNASClient()                       # the local middleware socket
 ```
 
 It is a `hostctl.PosixHost`, so `run`, `path`, `spawn`, `info`, `connect`,
 `close`, `shell`, `capabilities`, and `last_selection` are all inherited; the
 middleware surface (`api`, `websocket`, `login`, `logout`, `me`, `ping`,
 `subscribe`, `upload`, `download`, `dump_api`, `install_sshcreds`) is what this
-class adds. Generic in `ApiVersion`: `TrueNASHost[Current]("nas").api`
-completes like `TrueNASClient[Current]`.
+class adds. Generic in `ApiVersion`: `TrueNASClient[Current]("nas").api`
+completes the generated stubs.
 
 Transports are *composed*, and the order is deliberate:
 
@@ -378,16 +378,16 @@ TrueNASConfig.from_target("wss://nas", executor=[])                   # no run c
 ```
 
 Valid names are `local`/`ssh`/`webshell` for executors and
-`local`/`sftp`/`tnasws` for paths: hostctl descriptors, which `TrueNASHost`
+`local`/`sftp`/`tnasws` for paths: hostctl descriptors, which `TrueNASClient`
 declares in `provider_resolvers` (`ssh` and `sftp` share one resolver, so
 one transport; hostctl's `winrm` is hidden) beside hostctl's global `local`.
 An unknown one raises hostctl's `ValueError` listing the known names rather
 than silently composing a host with nothing. Requesting `ssh`/`sftp` without
 an `SSHConfig` also raises. `None` (the default) means "decide from the
-target": `TrueNASHost.default_providers()` returns the table above, and
+target": `TrueNASClient.default_providers()` returns the table above, and
 hostctl drops a default `ssh`/`sftp` when its `ssh` extra is missing (a name
-you give is kept and fails at use). `TrueNASHost.resolve_providers()` builds
-the providers for the current config, for `TrueNASHost.replace_providers()`.
+you give is kept and fails at use). `TrueNASClient.resolve_providers()` builds
+the providers for the current config, for `TrueNASClient.replace_providers()`.
 
 `TrueNASConfig` is the `hostctl.host.HostConfig`. It accepts every connection
 string `TrueNASClient` does and normalizes to a `truenas+*` scheme
@@ -428,7 +428,7 @@ below raise `AttributeError` normally.
   `timeout` and the upstream-compatibility names are accepted, and the
   `_query`/`_get`/`_update` helpers below take keywords by design.
   - **`job=True`** — as in the upstream client: wait for the job the method
-    starts (`TrueNASHost.wait`) and return the job's **result**; a failed job
+    starts (`TrueNASClient.wait`) and return the job's **result**; a failed job
     raises `connection.JobFailed` (the matching `OSError` with `_ioerror=True`).
     The wait has no deadline unless `_timeout` is given. A method that does not
     answer with a job id returns its answer unchanged. `job="RETURN"`,
@@ -657,7 +657,7 @@ builds the individual path types (below).
   `"ws"`/`"api"` -> `TnasWsPath`, `"truenas"` -> `client.path(...)` (the
   host's composite path, rooted at `/`), `"auto"`/`None` -> `LocalPath` for a
   local client, else `client.path(...)`. Another value raises `ValueError`. A
-  remote client must be a `TrueNASHost` (it calls `client.path`).
+  remote client must be a `TrueNASClient` (it calls `client.path`).
 - **`symlink_to(path, target, target_is_directory=False, *, force=False,
   onremove=None)`** — make `path` (any `pathapi` path: `client.path(...)`, a
   `LocalPath`) a symlink to `target` (a `str` or a path). `force` (bool, a
@@ -734,7 +734,7 @@ What a client must offer: `client.path(str)` (a path object with `exists`,
 `read_bytes`, `write_bytes`, `with_name`, `name`, `parent`, `mkdir`; `stat`,
 `chmod`, `unlink`, `lstat`, `replace` are used when present), `client.run(argv,
 check=, capture_output=, encoding=)` and `client.api.<ns>.<method>(...)`. A
-`TrueNASHost` offers all three; so can a test double.
+`TrueNASClient` offers all three; so can a test double.
 
 - **`templates`** — rendering and targets.
   - `BaseTemplate.render(context) -> str` (abstract: raises
@@ -819,7 +819,7 @@ check=, capture_output=, encoding=)` and `client.api.<ns>.<method>(...)`. A
     `client.path`, by running `python3 -c "import middlewared ..."` on the host
     (no API method reports it on 26.0); `RuntimeError` on an empty answer.
   - `MiddlewareFiles(client=None, module_path=None)` — `client=None` is a
-    local `TrueNASHost()`; `module_path` is located on first use (`repr()`
+    local `TrueNASClient()`; `module_path` is located on first use (`repr()`
     never locates it). `find_template(template, etc=None, services=None,
     baseline=True, writable=False) -> SystemFile` searches `TEMPLATE_DIRS`
     (`etc_files`, then `etc_files/local`; the first match wins) for `template`
@@ -1041,7 +1041,7 @@ of these, and every one is exported from `pytruenas`:
   one.
 - **`ValidationErrors(errors)`** (`ClientException`) — per-field validation
   errors; `.errors` is `list[(attribute, errmsg, errcode)]`.
-- **`JobFailed(job)`** (`ClientException`) — raised by `TrueNASHost.wait` (and
+- **`JobFailed(job)`** (`ClientException`) — raised by `TrueNASClient.wait` (and
   `job=True`, `.download`) for a `FAILED`/`ABORTED` job; `.job` is the
   `core.get_jobs` record, `.errno` the middleware's errno when it reports one.
 - **`CallTimeout()`** (`ClientException`) — a call exceeded its timeout, or

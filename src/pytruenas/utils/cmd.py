@@ -121,7 +121,7 @@ def emit_json(value: object, args: "PyTrueNASArgs | None" = None) -> None:
 
 
 if _ty.TYPE_CHECKING:
-    from ..host import TrueNASHost as TrueNASClient
+    from ..host import TrueNASClient
 
 #: Every ``PYTRUENAS_*`` setting, read through one accessor, so the full set is
 #: enumerable (``list(ENV)``). ``.paths()`` splits on ``os.pathsep``, so a
@@ -425,13 +425,13 @@ class PyTrueNASArgs(LoggingArgs):
         config file only when the target itself carries none (passing both
         raises).
         """
-        from ..host import TrueNASHost
+        from ..host import TrueNASClient
         from .target import Target
 
         credentials = None
         if not Target.parse(target, resolve_port=False).password:
             credentials = self._credentials_()
-        return TrueNASHost(target, credentials, verify=self._verify_())
+        return TrueNASClient(target, credentials, verify=self._verify_())
 
     def _expanded_targets_(self) -> "list[str]":
         """Return the target list with commas split and range patterns expanded.

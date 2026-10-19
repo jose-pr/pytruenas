@@ -329,7 +329,7 @@ def test_arguments_that_cannot_work_are_refused_once_before_any_target(
 
     built = []
     monkeypatch.setattr(
-        pytruenas.host, "TrueNASHost", lambda *a, **k: built.append(a) or object()
+        pytruenas.host, "TrueNASClient", lambda *a, **k: built.append(a) or object()
     )
     rc = main.main("pytruenas", ["deploy", *argv, "nas1", "nas2"])
     assert rc == 2

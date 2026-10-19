@@ -1,4 +1,4 @@
-"""``TrueNASHost`` -- provider composition (step 4 of the migration).
+"""``TrueNASClient`` -- provider composition (step 4 of the migration).
 
 The point of this step is that the *generic* half is inherited: ``run``,
 ``path``, ``spawn``, ``info``, ``connect``, ``close`` and the shell all come
@@ -18,7 +18,7 @@ from hostctl.shell import POSIX_SHELL  # noqa: E402
 from pytruenas.host import (  # noqa: E402
     DEFAULT_SOCKET_PATH,
     TrueNASConfig,
-    TrueNASHost,
+    TrueNASClient,
 )
 from pytruenas.providers import TnasWsPathProvider  # noqa: E402
 
@@ -27,7 +27,7 @@ SSH = SSHConfig(host="nas")
 
 
 def _host(target="wss://nas", **options):
-    return TrueNASHost(TrueNASConfig.from_target(target), **options)
+    return TrueNASClient(TrueNASConfig.from_target(target), **options)
 
 
 def _names(providers):
@@ -52,26 +52,26 @@ def test_config_round_trips_onto_the_host():
 
 def test_config_creates_the_host():
     config = TrueNASConfig.from_target("wss://nas")
-    assert isinstance(config._create_host(), TrueNASHost)
+    assert isinstance(config._create_host(), TrueNASClient)
 
 
 def test_dispatches_from_a_uri():
     host = HostConfig("truenas+wss://nas")._create_host()
-    assert isinstance(host, TrueNASHost)
+    assert isinstance(host, TrueNASClient)
 
 
 # -- construction from a connection string ---------------------------------
 
 
 def test_constructs_from_a_connection_string():
-    """`TrueNASHost("wss://nas")` -- no need to build a config first.
+    """`TrueNASClient("wss://nas")` -- no need to build a config first.
 
     hostctl's own `Host("uri")` shortcut cannot cover this: its metaclass only
     intercepts when `cls is Host`, so a subclass falls through to normal
     construction.
     """
-    host = TrueNASHost("wss://nas")
-    assert isinstance(host, TrueNASHost)
+    host = TrueNASClient("wss://nas")
+    assert isinstance(host, TrueNASClient)
     assert host.connection_uri == "truenas+wss://nas"
 
 
@@ -85,12 +85,12 @@ def test_constructs_from_a_connection_string():
     ],
 )
 def test_string_construction_accepts_every_target_form(target, expected):
-    assert TrueNASHost(target).connection_uri == expected
+    assert TrueNASClient(target).connection_uri == expected
 
 
 @pytest.mark.requires("asyncssh")
 def test_string_construction_takes_config_options():
-    host = TrueNASHost("wss://nas", ssh=SSH, executor=["ssh"])
+    host = TrueNASClient("wss://nas", ssh=SSH, executor=["ssh"])
     assert _names(host.executor_providers) == ["ssh"]
     # The selectors are independent: overriding one leaves the other default.
     assert _names(host.path_providers) == ["sftp", "tnasws"]
@@ -99,13 +99,13 @@ def test_string_construction_takes_config_options():
 def test_string_construction_takes_credentials():
     from pytruenas.auth import ApiKeyAuth
 
-    host = TrueNASHost("wss://nas", credentials="1-" + "a" * 64)
+    host = TrueNASClient("wss://nas", credentials="1-" + "a" * 64)
     assert isinstance(host._config.credentials, ApiKeyAuth)
 
 
 def test_an_existing_config_is_used_as_is():
     config = TrueNASConfig.from_target("wss://nas")
-    assert TrueNASHost(config)._config is config
+    assert TrueNASClient(config)._config is config
 
 
 def test_config_options_alongside_a_config_are_rejected():
@@ -116,12 +116,12 @@ def test_config_options_alongside_a_config_are_rejected():
     """
     config = TrueNASConfig.from_target("wss://nas")
     with pytest.raises(TypeError, match="may not be combined"):
-        TrueNASHost(config, executor=["ssh"])
+        TrueNASClient(config, executor=["ssh"])
 
 
 def test_client_keyword_is_accepted_and_ignored():
     """`client=` predates the host/client merge; old callers must not break."""
-    host = TrueNASHost("wss://nas", client=object())
+    host = TrueNASClient("wss://nas", client=object())
     assert host.client is host
 
 
@@ -134,7 +134,7 @@ def test_truenasclient_is_the_same_class():
     """
     from pytruenas import TrueNASClient
 
-    assert TrueNASClient is TrueNASHost
+    assert TrueNASClient is TrueNASClient
 
 
 def test_every_historical_client_setting_is_accepted():
@@ -143,7 +143,7 @@ def test_every_historical_client_setting_is_accepted():
     `target` and `creds` were positional; `fsbackend` is superseded by the
     finer-grained `path=`. The rest are keywords on the config.
     """
-    host = TrueNASHost(
+    host = TrueNASClient(
         "wss://nas",
         "1-" + "a" * 64,  # creds, positionally, as the old client took them
         verify=False,
@@ -209,7 +209,7 @@ def test_known_hosts_reaches_the_ssh_leg_built_from_shell():
     assert config.ssh.verify is True
 
 
-@pytest.mark.parametrize("make", [TrueNASHost, TrueNASConfig.from_target])
+@pytest.mark.parametrize("make", [TrueNASClient, TrueNASConfig.from_target])
 def test_known_hosts_none_is_refused_and_names_verify_false(make):
     """hostctl refuses ``known_hosts=None``; ``verify=False`` is the one switch."""
     with pytest.raises(ValueError, match="verify=False"):
@@ -224,7 +224,7 @@ def test_verify_defaults_to_every_check_on():
 
 def test_verify_false_turns_off_tls_and_host_key_checks():
     """One switch for a lab box: TLS certificates and SSH host keys alike."""
-    client = TrueNASHost("wss://nas", shell="ssh://root@nas", verify=False)
+    client = TrueNASClient("wss://nas", shell="ssh://root@nas", verify=False)
     assert client.config.verify is False  # websocket, HTTP side channels, web shell
     assert client.config.ssh.verify is False  # SSH commands and SFTP
     assert client.config.ssh.connect_opts()["known_hosts"] is None
@@ -284,11 +284,11 @@ def test_path_falls_back_to_tnasws_when_sftp_cannot_connect(monkeypatch):
             return {"mode": 0o100644, "size": 3, "mtime": 0, "uid": 0, "gid": 0}
         raise AssertionError(method)
 
-    host = TrueNASHost(
+    host = TrueNASClient(
         "wss://nas", ssh=SSHConfig(host="127.0.0.1", port=1, username="root")
     )
     conn = SimpleNamespace(call=call, close=lambda: None)
-    monkeypatch.setattr(TrueNASHost, "conn", property(lambda self: conn))
+    monkeypatch.setattr(TrueNASClient, "conn", property(lambda self: conn))
     assert host.path("/mnt/tank/f.txt").exists()
     assert calls == ["filesystem.stat"]
 
@@ -314,11 +314,11 @@ def test_a_relative_remote_path_is_rooted_at_slash_on_every_leg(
         seen.append((method, args[0]))
         return {"mode": 0o100644, "size": 3, "mtime": 0, "uid": 0, "gid": 0}
 
-    host = TrueNASHost(
+    host = TrueNASClient(
         "wss://nas", ssh=SSHConfig(host="127.0.0.1", port=1, username="root")
     )
     conn = SimpleNamespace(call=call, close=lambda: None)
-    monkeypatch.setattr(TrueNASHost, "conn", property(lambda self: conn))
+    monkeypatch.setattr(TrueNASClient, "conn", property(lambda self: conn))
     path = host.path(*segments)
     assert str(path) == expected
     assert path.exists()
@@ -344,14 +344,14 @@ def test_path_backend_pins_every_operation_to_that_provider(monkeypatch):
         puts.append(method)
         return None
 
-    host = TrueNASHost("wss://nas", autologin=False)
+    host = TrueNASClient("wss://nas", autologin=False)
     memory = MemPath("/")
     first = PathProvider("sftp", lambda *segments: memory.joinpath(*segments))
     host.replace_providers(path=(first, TnasWsPathProvider(host)))
     conn = SimpleNamespace(call=call, close=lambda: None)
-    monkeypatch.setattr(TrueNASHost, "conn", property(lambda self: conn))
+    monkeypatch.setattr(TrueNASClient, "conn", property(lambda self: conn))
     monkeypatch.setattr(
-        TrueNASHost,
+        TrueNASClient,
         "upload",
         lambda self, data, method, *params, **kw: puts.append(method),
     )
@@ -422,7 +422,7 @@ def test_autologin_and_logger_are_honoured(monkeypatch):
     monkeypatch.setattr(
         requests, "get", lambda *a, **k: pytest.fail("constructed over the network")
     )
-    host = TrueNASHost("wss://nas", autologin=False, logger="mylog")
+    host = TrueNASClient("wss://nas", autologin=False, logger="mylog")
     assert host._config.autologin is False
     assert host.logger.name == "mylog"
 
@@ -449,7 +449,7 @@ def test_ssh_property_is_the_ssh_executor_providers_connection(monkeypatch):
     monkeypatch.setattr(
         SSHExecutorProvider, "connection", property(lambda self: connection)
     )
-    host = TrueNASHost("wss://nas", autologin=False, shell="ssh://root@nas")
+    host = TrueNASClient("wss://nas", autologin=False, shell="ssh://root@nas")
     assert host.ssh is connection
 
 
@@ -462,14 +462,14 @@ def test_unknown_constructor_argument_is_rejected_clearly(typo):
     accurate but useless to someone who wrote `passwrd=` on a TrueNASClient.
     """
     with pytest.raises(ValueError, match="unknown credential argument"):
-        TrueNASHost("wss://nas", **{typo: "value"})
+        TrueNASClient("wss://nas", **{typo: "value"})
 
 
 def test_host_options_still_reach_systemhost():
     """`info=` and friends belong to SystemHost, not the config."""
     from hostctl.host import HostInfo
 
-    host = TrueNASHost("wss://nas", info=HostInfo(hostname="pinned"))
+    host = TrueNASClient("wss://nas", info=HostInfo(hostname="pinned"))
     assert host.info().hostname == "pinned"
 
 
@@ -489,7 +489,7 @@ def test_without_ssh_the_webshell_stands_in():
 
 
 def _built(target="wss://nas", **options):
-    return TrueNASHost(TrueNASConfig.from_target(target, **options))
+    return TrueNASClient(TrueNASConfig.from_target(target, **options))
 
 
 # -- explicit provider overrides -------------------------------------------
@@ -585,7 +585,7 @@ def test_local_target_uses_only_hostctls_local_providers():
     through the HTTP side channel, which resolves to https://localhost and
     trips the appliance's self-signed certificate.
     """
-    host = TrueNASHost(TrueNASConfig.from_target(None))
+    host = TrueNASClient(TrueNASConfig.from_target(None))
     assert _names(host.executor_providers) == ["local"]
     assert _names(host.path_providers) == ["local"]
 
@@ -595,7 +595,7 @@ def test_local_target_ignores_an_ssh_config():
     from hostctl import SSHConfig
 
     config = TrueNASConfig.from_target(None, ssh=SSHConfig(host="nas"))
-    host = TrueNASHost(config)
+    host = TrueNASClient(config)
     assert _names(host.executor_providers) == ["local"]
     assert _names(host.path_providers) == ["local"]
 
@@ -606,7 +606,7 @@ def test_with_ssh_the_ssh_providers_come_first():
     and its path surface (symlink/rename/realpath) is richer."""
     from hostctl import SSHConfig
 
-    host = TrueNASHost(
+    host = TrueNASClient(
         TrueNASConfig.from_target("wss://nas", ssh=SSHConfig(host="nas")),
     )
     assert _names(host.executor_providers) == ["ssh", "webshell"]
@@ -635,21 +635,21 @@ def test_remote_without_ssh_still_has_run_via_the_webshell():
 
 def test_remote_without_any_executor_reports_no_run():
     """With every executor excluded, the honest answer is "no run"."""
-    host = TrueNASHost(TrueNASConfig.from_target("wss://nas", executor=[]))
+    host = TrueNASClient(TrueNASConfig.from_target("wss://nas", executor=[]))
     assert "run" not in host.capabilities
     # Paths still work -- the websocket serves those.
     assert "path" in host.capabilities
 
 
 def test_local_target_reports_run():
-    host = TrueNASHost(TrueNASConfig.from_target(None))
+    host = TrueNASClient(TrueNASConfig.from_target(None))
     assert "run" in host.capabilities
 
 
 def test_remote_with_ssh_reports_run():
     from hostctl import SSHConfig
 
-    host = TrueNASHost(
+    host = TrueNASClient(
         TrueNASConfig.from_target("wss://nas", ssh=SSHConfig(host="nas")),
     )
     assert "run" in host.capabilities
@@ -864,8 +864,8 @@ def test_building_a_host_does_no_network_io(monkeypatch):
 
     monkeypatch.setattr(requests, "get", explode)
     monkeypatch.setattr(requests, "post", explode)
-    TrueNASHost(TrueNASConfig.from_target("wss://nas"))
-    TrueNASHost(TrueNASConfig.from_target("nas"))
+    TrueNASClient(TrueNASConfig.from_target("wss://nas"))
+    TrueNASClient(TrueNASConfig.from_target("nas"))
 
 
 # -- HTTP side-channel URLs -----------------------------------------------
@@ -876,7 +876,7 @@ def test_building_a_host_does_no_network_io(monkeypatch):
 
 
 def test_http_target_keeps_a_download_links_query_string():
-    host = TrueNASHost(TrueNASConfig.from_target("wss://nas"))
+    host = TrueNASClient(TrueNASConfig.from_target("wss://nas"))
     target = host._http_target("/_download/12345?auth_token=abc")
 
     assert target.path == "/_download/12345"
@@ -886,7 +886,7 @@ def test_http_target_keeps_a_download_links_query_string():
 
 
 def test_http_target_without_a_query_is_unchanged():
-    host = TrueNASHost(TrueNASConfig.from_target("wss://nas"))
+    host = TrueNASClient(TrueNASConfig.from_target("wss://nas"))
     assert host._http_target("/_upload").uri == "https://nas/_upload"
 
 
@@ -926,7 +926,7 @@ def test_default_providers_drop_ssh_when_asyncssh_is_missing(no_ssh_extra):
     from hostctl import SSHConfig
 
     config = TrueNASConfig.from_target("wss://nas", ssh=SSHConfig(host="nas"))
-    host = TrueNASHost(config)
+    host = TrueNASClient(config)
 
     assert [p.name for p in host.path_providers] == ["tnasws"]
     assert [p.name for p in host.executor_providers] == ["webshell"]
@@ -943,7 +943,7 @@ def test_an_explicitly_named_ssh_provider_is_still_honored(no_ssh_extra):
     config = TrueNASConfig.from_target(
         "wss://nas", ssh=SSHConfig(host="nas"), path=["sftp"], executor=["ssh"]
     )
-    host = TrueNASHost(config)
+    host = TrueNASClient(config)
 
     assert [p.name for p in host.path_providers] == ["sftp"]
     assert [p.name for p in host.executor_providers] == ["ssh"]
@@ -966,12 +966,12 @@ def test_an_explicitly_named_ssh_provider_is_still_honored(no_ssh_extra):
     ],
 )
 def test_http_side_channels_keep_the_targets_port(target, expected):
-    assert TrueNASHost(target)._http_target("/_upload").uri == expected
+    assert TrueNASClient(target)._http_target("/_upload").uri == expected
 
 
 def test_an_ipv6_target_is_bracketed():
     """Its colons used to be parsed as a port on the first connect."""
-    assert TrueNASHost("wss://[fe80::1]:8443")._target.uri == (
+    assert TrueNASClient("wss://[fe80::1]:8443")._target.uri == (
         "wss://[fe80::1]:8443/api/current"
     )
 
@@ -990,5 +990,5 @@ def test_a_custom_socket_path_reaches_the_connection(monkeypatch):
             return self
 
     monkeypatch.setattr(connection, "TrueNASWSConnection", _Conn)
-    TrueNASHost("unix:///run/custom/middleware.sock", autologin=False)._openwss()
+    TrueNASClient("unix:///run/custom/middleware.sock", autologin=False)._openwss()
     assert seen["uri"] == "ws+unix:///run/custom/middleware.sock"

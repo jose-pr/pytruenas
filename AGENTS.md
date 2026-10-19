@@ -12,9 +12,8 @@ docs site; [`CONTRIBUTING.md`](CONTRIBUTING.md) covers the human workflow.
 ## Layout
 
 - `src/pytruenas/` — the package. `host.py` is the entry point
-  (`TrueNASHost`, and `TrueNASClient` as an alias for it — one class, two
-  names); `connection.py` the JSON-RPC websocket transport; `namespace.py` the
-  dynamic API dispatcher; `auth.py` credentials; `exceptions.py` the
+  (`TrueNASClient`, a hostctl `PosixHost`); `connection.py` the JSON-RPC
+  websocket transport; `namespace.py` the dynamic API dispatcher; `auth.py` credentials; `exceptions.py` the
   `TrueNASError` base; `providers.py` and `webshell.py` the transport
   providers; `fs/` remote path objects; `main.py` the CLI and `cmd/` its
   built-in command modules; `codegen/` the typings generator; `models/` the

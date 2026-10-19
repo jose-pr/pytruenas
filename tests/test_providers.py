@@ -75,7 +75,7 @@ def test_ws_path_capabilities_exclude_what_the_api_cannot_do():
 
 
 def test_ws_path_provider_unwraps_a_host(monkeypatch):
-    """A TrueNASHost passes *itself*; the fs layer needs the client.
+    """A TrueNASClient passes *itself*; the fs layer needs the client.
 
     Regression: the host builds its providers with `self` (the client is
     created lazily from the host's own config), so a provider that assumed it

@@ -32,7 +32,7 @@ from duho.runtime import accepts_positional
 from hostctl.exceptions import MissingExtraError as _MissingExtraError
 
 from .host import TrueNASConfig
-from .host import TrueNASHost as TrueNASClient
+from .host import TrueNASClient
 from .utils.cmd import ENV, PyTrueNASArgs, with_targets
 from .utils.runpath import PyTrueNASRunPathArgs, step_adapter as _step_adapter
 from .utils.target import redact as _redact

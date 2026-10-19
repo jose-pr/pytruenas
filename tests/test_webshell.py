@@ -415,9 +415,9 @@ def test_a_web_shell_that_cannot_connect_declines_with_the_cause():
 
 
 def test_a_failed_write_before_typing_falls_back_to_the_next_provider(caplog):
-    from pytruenas.host import TrueNASConfig, TrueNASHost
+    from pytruenas.host import TrueNASConfig, TrueNASClient
 
-    host = TrueNASHost(TrueNASConfig.from_target("wss://nas", autologin=False))
+    host = TrueNASClient(TrueNASConfig.from_target("wss://nas", autologin=False))
     terminal = _Terminal()
     terminal.close()
     webshell = _provider(terminal)

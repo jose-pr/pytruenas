@@ -107,7 +107,7 @@ def _fake(monkeypatch, tmp_path):
     FakeClient.calls = collections.Counter()
     FakeClient.sent = []
     FakeClient.get_methods_error = None
-    monkeypatch.setattr(pytruenas.host, "TrueNASHost", FakeClient)
+    monkeypatch.setattr(pytruenas.host, "TrueNASClient", FakeClient)
     monkeypatch.setenv("PYTRUENAS_CACHE", str(tmp_path / "cache"))
     monkeypatch.delenv("TN_CREDS", raising=False)
     monkeypatch.delenv("PYTRUENAS_CONFIG", raising=False)

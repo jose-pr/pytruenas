@@ -14,7 +14,7 @@ from pytruenas.utils.cmd import PyTrueNASArgs
 
 def _fake_clients(monkeypatch):
     """Patch where the client is actually built (args._client_ imports it)."""
-    monkeypatch.setattr(pytruenas.host, "TrueNASHost", lambda *a, **k: MagicMock())
+    monkeypatch.setattr(pytruenas.host, "TrueNASClient", lambda *a, **k: MagicMock())
 
 
 def _cli(*args):
@@ -147,7 +147,7 @@ def test_a_logger_named_by_loglevel_keeps_its_level(monkeypatch):
         seen.update({n: logging.getLogger(n).level for n in names})
         return MagicMock()
 
-    monkeypatch.setattr(pytruenas.host, "TrueNASHost", client)
+    monkeypatch.setattr(pytruenas.host, "TrueNASClient", client)
     main.main(
         "pytruenas",
         ["--loglevel", "websocket:DEBUG,requests:INFO", "dump-api", "nas1"],

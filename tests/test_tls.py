@@ -7,7 +7,7 @@ from types import SimpleNamespace
 import pytest
 
 from pytruenas import _tls
-from pytruenas.host import TrueNASHost, _TrustAdapter
+from pytruenas.host import TrueNASClient, _TrustAdapter
 
 
 @pytest.fixture(autouse=True)
@@ -104,22 +104,24 @@ def test_anything_else_is_a_type_error():
 
 
 def test_the_config_keeps_a_path_as_a_string_and_a_context_as_it_is(tmp_path):
-    host = TrueNASHost("wss://nas", autologin=False, verify=tmp_path / "ca.pem")
+    host = TrueNASClient("wss://nas", autologin=False, verify=tmp_path / "ca.pem")
     assert host.config.verify == str(tmp_path / "ca.pem")
     mine = ssl.create_default_context()
-    assert TrueNASHost("wss://nas", autologin=False, verify=mine).config.verify is mine
+    assert (
+        TrueNASClient("wss://nas", autologin=False, verify=mine).config.verify is mine
+    )
 
 
 def test_sslverify_is_gone_and_says_what_replaced_it():
     with pytest.raises(TypeError, match="verify="):
-        TrueNASHost("wss://nas", autologin=False, sslverify=False)
+        TrueNASClient("wss://nas", autologin=False, sslverify=False)
 
 
 @pytest.mark.parametrize("verify", ["ca.pem", "context"])
 def test_a_path_or_a_context_still_verifies_ssh_host_keys(verify):
     """hostctl's SSHConfig takes a bool: anything but False means verify."""
     value = ssl.create_default_context() if verify == "context" else verify
-    host = TrueNASHost("wss://nas", autologin=False, verify=value, shell="root@nas")
+    host = TrueNASClient("wss://nas", autologin=False, verify=value, shell="root@nas")
     assert host.config.ssh.verify is True
 
 
@@ -127,7 +129,7 @@ def test_side_channels_use_the_shared_context_and_no_bundle_file(bundle):
     """requests verified against certifi, the websocket against the OS store,
     so a certificate trusted by one leg failed the other (measured: the API
     connected and every download raised SSLError)."""
-    host = TrueNASHost("wss://nas", autologin=False, verify=bundle)
+    host = TrueNASClient("wss://nas", autologin=False, verify=bundle)
     adapter = host._http.get_adapter("https://nas/_upload")
     assert isinstance(adapter, _TrustAdapter)
     assert len(adapter._context.get_ca_certs()) == 1
@@ -140,7 +142,7 @@ def test_side_channels_use_the_shared_context_and_no_bundle_file(bundle):
 def test_a_proxied_side_channel_gets_the_shared_context(bundle):
     """Behind HTTPS_PROXY, requests built a proxy manager with its own trust,
     so uploads and downloads ignored the bundle the websockets used."""
-    host = TrueNASHost("wss://nas", autologin=False, verify=bundle)
+    host = TrueNASClient("wss://nas", autologin=False, verify=bundle)
     adapter = host._http.get_adapter("https://nas/_upload")
     manager = adapter.proxy_manager_for("http://127.0.0.1:3128")
     assert manager.connection_pool_kw["ssl_context"] is adapter._context
@@ -148,14 +150,14 @@ def test_a_proxied_side_channel_gets_the_shared_context(bundle):
 
 def test_a_callers_context_reaches_the_side_channels_and_the_websocket():
     mine = ssl.create_default_context()
-    host = TrueNASHost("wss://nas", autologin=False, verify=mine)
+    host = TrueNASClient("wss://nas", autologin=False, verify=mine)
     assert host._http.get_adapter("https://nas/")._context is mine
     assert host._http_verify is True  # urllib3 writes it into the context
     assert _tls.sslopt(host.config.verify) == {"context": mine}
 
 
 def test_side_channels_do_not_verify_when_verification_is_off(monkeypatch):
-    host = TrueNASHost("wss://nas", autologin=False, verify=False)
+    host = TrueNASClient("wss://nas", autologin=False, verify=False)
     assert not isinstance(host._http.get_adapter("https://nas/"), _TrustAdapter)
     # A bundle in the environment must not switch verification back on:
     # requests fills an unset per-request verify from $REQUESTS_CA_BUNDLE.
@@ -196,13 +198,13 @@ def test_turning_verification_off_is_logged_once(caplog):
     """It logged nothing: a lab setting copied to production went unnoticed."""
     import logging
 
-    host = TrueNASHost("wss://nas", autologin=False, verify=False)
+    host = TrueNASClient("wss://nas", autologin=False, verify=False)
     with caplog.at_level(logging.WARNING):
         host._http
         host._warn_if_unverified()
     assert caplog.text.count("TLS certificate verification is off") == 1
     caplog.clear()
     with caplog.at_level(logging.WARNING):
-        TrueNASHost("ws://nas", autologin=False, verify=False)._http
-        TrueNASHost(None, autologin=False, verify=False)._http
+        TrueNASClient("ws://nas", autologin=False, verify=False)._http
+        TrueNASClient(None, autologin=False, verify=False)._http
     assert "verification is off" not in caplog.text  # no TLS to skip

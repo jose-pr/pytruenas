@@ -64,3 +64,13 @@ def test_names_the_root_always_had_stay_importable():
     """Explicit imports replaced `from .auth import *`; nothing it brought in
     is gone."""
     from pytruenas import redact_call_args  # noqa: F401
+
+
+def test_the_client_class_has_one_name():
+    """`TrueNASClient` is the class; there is no second name for it."""
+    import pytruenas.host
+
+    assert pytruenas.TrueNASClient.__name__ == "TrueNASClient"
+    assert "TrueNASHost" not in pytruenas.__all__
+    assert not hasattr(pytruenas, "TrueNASHost")
+    assert not hasattr(pytruenas.host, "TrueNASHost")

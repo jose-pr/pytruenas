@@ -14,7 +14,7 @@ import typing as _ty
 from ..templates import FileTarget
 
 if _ty.TYPE_CHECKING:  # pragma: no cover - typing only
-    from ...host import TrueNASHost as TrueNASClient
+    from ...host import TrueNASClient
 
 __all__ = ["SystemFile", "as_names"]
 

@@ -52,7 +52,7 @@ import shlex as _shlex
 import typing as _ty
 
 if _ty.TYPE_CHECKING:  # pragma: no cover - typing only
-    from ..host import TrueNASHost
+    from ..host import TrueNASClient
     from ..models.apidump import Api
 
 #: Where the dump is built on the target. ``/var/db/system`` is a dataset on a
@@ -150,7 +150,7 @@ def _dump_command(remote_dir: str = REMOTE_DIR) -> str:
     )
 
 
-def _build_remote(client: "TrueNASHost") -> "tuple[str, int, str]":
+def _build_remote(client: "TrueNASClient") -> "tuple[str, int, str]":
     """Dump and compress on the target; return ``(gz_path, size, sha256)``."""
     client.logger.info("Dumping the API definition on the target (this takes ~75s)")
     result = client.run(
@@ -180,7 +180,7 @@ def _build_remote(client: "TrueNASHost") -> "tuple[str, int, str]":
     return gz, size, digest
 
 
-def _fetch_sftp(client: "TrueNASHost", remote: str) -> "bytes | None":
+def _fetch_sftp(client: "TrueNASClient", remote: str) -> "bytes | None":
     """Pull the file over SFTP, or ``None`` when this host has no such leg.
 
     This is the ``scp`` of the plan, done in process: the SFTP leg is already a
@@ -199,7 +199,7 @@ def _fetch_sftp(client: "TrueNASHost", remote: str) -> "bytes | None":
         return None
 
 
-def _fetch_chunked(client: "TrueNASHost", remote: str, size: int) -> bytes:
+def _fetch_chunked(client: "TrueNASClient", remote: str, size: int) -> bytes:
     """Read the file in base64 chunks through the command channel.
 
     ``tail -c +N | head -c K`` rather than ``dd``: ``dd bs=1`` reads a byte at a
@@ -254,7 +254,7 @@ def _fetch_chunked(client: "TrueNASHost", remote: str, size: int) -> bytes:
     return bytes(out)
 
 
-def fetch(client: "TrueNASHost", *, keep_remote: bool = False) -> "Api":
+def fetch(client: "TrueNASClient", *, keep_remote: bool = False) -> "Api":
     """Build the API definition on the target and return the parsed dump.
 
     The dump is written to a file of its own under :data:`REMOTE_DIR`, removed
@@ -295,7 +295,7 @@ def fetch(client: "TrueNASHost", *, keep_remote: bool = False) -> "Api":
 
 
 def load(
-    client: "TrueNASHost",
+    client: "TrueNASClient",
     *,
     refresh: bool = False,
     version: "str | None" = None,
@@ -323,11 +323,11 @@ def load(
     return api
 
 
-def _version_of(client: "TrueNASHost") -> str:
+def _version_of(client: "TrueNASClient") -> str:
     return str(client.api.system.info()["version"])
 
 
-def _sibling(client: "TrueNASHost", version: str, kind: str) -> "_pathlib.Path":
+def _sibling(client: "TrueNASClient", version: str, kind: str) -> "_pathlib.Path":
     """A cache file beside the dump's, named for what it holds.
 
     ``<version>.<kind>.json.gz`` -- built from the version rather than from
@@ -340,7 +340,7 @@ def _sibling(client: "TrueNASHost", version: str, kind: str) -> "_pathlib.Path":
 
 
 def services(
-    client: "TrueNASHost", *, refresh: bool = False, version: "str | None" = None
+    client: "TrueNASClient", *, refresh: bool = False, version: "str | None" = None
 ) -> "dict":
     """Every service (namespace) the appliance exposes, via ``core.get_services``.
 
@@ -364,7 +364,7 @@ def services(
 
 
 def service_methods(
-    client: "TrueNASHost",
+    client: "TrueNASClient",
     service: str,
     *,
     refresh: bool = False,

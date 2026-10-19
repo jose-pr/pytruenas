@@ -18,7 +18,7 @@ from .files import SystemFile
 from .unitfile import render_unit
 
 if _ty.TYPE_CHECKING:  # pragma: no cover - typing only
-    from ...host import TrueNASHost as TrueNASClient
+    from ...host import TrueNASClient
 
 __all__ = ["Unit", "ServiceUnit", "MountUnit", "AutomountUnit", "escape_path"]
 
