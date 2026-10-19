@@ -286,9 +286,12 @@ executor=None, path=None, ssh=None, ...)`
   Its `repr` shows only the job id; the link carries a single-use token.
   For both, `wait=` may also be a callable: it waits, and is passed to
   `.wait(callback=...)` for progress. Both side channels use the websocket's
-  timeouts (`config.timeouts.connect` to connect, `.read` per read), raise
-  `requests`' own exceptions for an HTTP or transport error, and never name
-  a token in the message (`auth_token=<redacted>`).
+  timeouts (`config.timeouts.connect` to connect, `.read` per read), and
+  raise what the websocket raises for the same failure, never a `requests`
+  exception: the socket's or TLS layer's `OSError` (`ssl.SSLError`,
+  `ConnectionRefusedError`, `TimeoutError` while connecting), `CallTimeout`
+  for a read that timed out, `ClientException` for an HTTP error status. A
+  message never names a token (`auth_token=<redacted>`).
 - **`.dump_api(*, cache=True, refresh=False) -> dict`** — the middleware API
   definition (see `pytruenas.models.apidump.API`). The dump is built **and
   gzipped on the target**, then fetched over SFTP when the host has an SSH leg
@@ -1080,8 +1083,9 @@ or a dropped connection would pass for a missing file. Catch `CallTimeout` and
 A caller's mistake (an unknown keyword, a malformed target) is a plain
 `TypeError`/`ValueError`, not a `TrueNASError`. An `OSError` that already
 describes a failure — a refused port, an unresolvable host, a TLS error while
-connecting — is raised as it is. The side channels (`upload`, `download`)
-raise `requests`' own exceptions for an HTTP or transport error. Other
+connecting — is raised as it is, on the websocket and on the side channels
+(`upload`, `download`) alike; an HTTP error status there is a
+`ClientException`, and no `requests` exception crosses the API. Other
 exceptions, documented where they arise: `hostctl.MissingExtraError` (a missing
 extra), `hostctl.OperationNotStartedError` (a provider declined:
 `path(backend=)`, the web shell), `codegen.BadAPIName`, and `duho.UsageError`

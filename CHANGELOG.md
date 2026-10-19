@@ -200,6 +200,13 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   a `dump-api` output, or a gzipped file from `$PYTRUENAS_CACHE`. Without it
   the definition comes from `client.dump_api()`, which already caches it per
   host and API version.
+- **Uploads and downloads raise no `requests` exception.** A TLS or socket
+  failure is the `OSError` beneath it (`ssl.SSLCertVerificationError`,
+  `ConnectionRefusedError`, ...), as the API websocket raises for the same
+  failure; a read that timed out is `CallTimeout`; an HTTP error status (a
+  refused upload) is `ClientException`. Code that caught
+  `requests.RequestException` around `upload()`/`download()` catches those
+  instead.
 - **`deploy` is not an MCP tool** under `PYTRUENAS_MCP=stdio`: installing
   software on an appliance is for a person to choose. The command line is
   unchanged.
