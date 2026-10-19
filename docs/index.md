@@ -41,8 +41,7 @@ pip install pytruenas
 ```
 
 Optional extras: `pytruenas[ssh]` (SSH commands + the SFTP filesystem leg),
-`pytruenas[yaml]` (a CLI config file in YAML), `pytruenas[codegen]`
-(`generate-typings`).
+`pytruenas[yaml]` (a CLI config file in YAML).
 
 ## Quickstart
 

@@ -47,7 +47,7 @@ section and `CONTRIBUTING.md` give.
 
 Two things about the extras are easy to get wrong:
 
-- `dev` carries every extra that has tests (`config`, `ssh`, `codegen`). A
+- `dev` carries every extra that has tests (`yaml`, `ssh`). A
   test whose extra is missing **skips**, so a partial install still prints
   green; `-rs` lists the skips.
 - On Windows ARM64, recent `cryptography` releases have no wheel and the

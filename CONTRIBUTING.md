@@ -20,8 +20,8 @@ the interpreter it holds: on Linux, for example,
 `cryptography` from source, which fails on Windows ARM64, where recent
 releases ship no wheel; on a platform with a wheel it changes nothing.
 
-The `dev` extra carries every extra that has tests (`config`, `ssh`,
-`codegen`); `docs` adds the site tooling. Tests for a missing extra **skip**,
+The `dev` extra carries every extra that has tests (`yaml`, `ssh`); `docs`
+adds the site tooling. Tests for a missing extra **skip**,
 so a partial install still reports green -- read the `-rs` summary before
 concluding anything about a change.
 
