@@ -33,7 +33,7 @@ from hostctl.exceptions import MissingExtraError as _MissingExtraError
 from .host import TrueNASConfig
 from .host import TrueNASHost as TrueNASClient
 from .utils._introspect import positional_arity
-from .utils.cmd import ENV, PyTrueNASArgs, register_targets
+from .utils.cmd import ENV, PyTrueNASArgs, with_targets
 from .utils.runpath import PyTrueNASRunPathArgs, step_adapter as _step_adapter
 from .utils.target import redact as _redact
 
@@ -198,42 +198,57 @@ def _with_targets(command: object) -> object:
     """Make ``targets`` the trailing positional of a module command, centrally.
 
     Every pytruenas command takes the same trailing ``TARGET...`` positionals, so
-    no command should have to opt in. duho reads a module command's ``register``
-    hook off the :class:`~duho.discovery.ModuleCommand` wrapper, which lets us
-    wrap it here: run the module's own hook first (adding ITS positionals), then
-    add ``targets`` -- argparse binds positionals in registration order, so
-    adding last is what keeps them trailing, e.g. ``query <namespace>
-    <host>...``.
+    no command should have to opt in. The command's ``Args`` (or
+    :class:`PyTrueNASArgs`) is replaced by :func:`~pytruenas.utils.cmd.
+    with_targets` of it, which declares ``targets`` after the command's own
+    fields: argparse binds positionals in that order (``query <namespace>
+    <host>...``), and duho publishes a declared field in the command's MCP tool
+    schema, where a positional added by a ``register`` hook is missing.
 
-    Class commands (RunPath) get the same positional from
+    duho adds declared fields before the module's ``register`` hook runs, so a
+    hook that adds positionals is wrapped and :func:`_targets_last` moves the
+    hosts behind them; a hook that adds its own ``targets`` keeps it. Class
+    commands (RunPath) declare the field on
     :class:`pytruenas.utils.runpath.PyTrueNASRunPathArgs` and are returned
-    untouched. The guard against a duplicate ``targets`` action covers a command
-    module that still registers its own.
-
-    Wrapping ``ModuleCommand.register`` is a supported seam as of duho 0.4.1,
-    which gates and introspects the hook on the same object it calls -- so this
-    wrapper runs even for a command that defines no ``register`` of its own
-    (``dump-api``, whose only positionals are the targets). Fields a module
-    declares via its own ``Args`` class are added by duho *before* the hook
-    runs, so they too land ahead of the targets.
+    untouched.
     """
     if not isinstance(command, ModuleCommand):
         return command
 
+    command.args_cls = with_targets(command.args_cls)
     inner = getattr(command.module, "register", None)
-    wants_logger = callable(inner) and _wants_logger(inner)
+    if not callable(inner):
+        return command
+    wants_logger = _wants_logger(inner)
 
     def register(parser, args, logger=None):
-        if callable(inner):
-            if wants_logger:
-                inner(parser, args, logger)
-            else:
-                inner(parser, args)
-        if not any(action.dest == "targets" for action in parser._actions):
-            register_targets(parser)
+        if wants_logger:
+            inner(parser, args, logger)
+        else:
+            inner(parser, args)
+        _targets_last(parser)
 
     command.register = register
     return command
+
+
+def _targets_last(parser: "_ty.Any") -> None:
+    """Move the declared ``targets`` positional behind any a hook added.
+
+    duho adds declared fields before the ``register`` hook runs, so a
+    positional the hook adds would otherwise come after the hosts. A hook that
+    added its own ``targets`` keeps that one.
+    """
+    found = [action for action in parser._actions if action.dest == "targets"]
+    if not found:
+        return
+    declared = found[0]
+    groups = [group._group_actions for group in parser._action_groups]
+    for container in [parser._actions, *groups]:
+        if declared in container:
+            container.remove(declared)
+            if len(found) == 1:
+                container.append(declared)
 
 
 def _discover(

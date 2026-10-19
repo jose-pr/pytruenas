@@ -619,9 +619,11 @@ A command is a plain module exposing:
   greedy option swallows the trailing targets.
 - **`register(parser, args, logger)`** — optional; the imperative escape hatch,
   for what declarations can't express (mutually-exclusive/titled groups). The
-  trailing `TARGET...` positionals are added centrally, after this hook runs
-  (`main._with_targets`), so a command never registers them itself — declared
-  and `register`-added positionals both land ahead of the targets.
+  trailing `TARGET...` positionals are declared centrally as the command's last
+  field (`pytruenas.utils.cmd.with_targets`, applied by `main._with_targets`),
+  so a command never declares them itself — declared and `register`-added
+  positionals both land ahead of the targets, and the targets are part of the
+  command's MCP tool schema.
 - **`init(args, logger) -> client`**, **`success(client, args, logger)`**,
   **`finally_(client, args, logger)`** — optional lifecycle hooks
   (`finally_` always runs).
@@ -632,7 +634,8 @@ global fields every command sees: `config` (path, default
 (`--sslverify`/`--no-sslverify`, unset by default), `insecure`
 (`--insecure`/`-k`), `parallel` (default `1`), `logto` (default `-` for
 stderr, or a `{target}`/`{isodate}` path template), plus `targets` (the
-trailing positionals, not a flag) and helper methods
+trailing positionals, not a flag; each command declares the field last through
+`with_targets(args_cls)`, whose field type is `TargetsField`) and helper methods
 `._config_dict_()`/`._expanded_targets_()`. Target expansion (commas and
 `[A-Z]`/`[0-9]` ranges) applies to the HOST part only -- a comma or a range
 inside credentials is part of them -- and credentials are carried onto every
@@ -1024,7 +1027,8 @@ a directory the user does not control.
   `duho`'s (≥0.6.0) own `<PREFIX>_MCP` launch trigger, keyed off this app's
   `Env` prefix. Setting `PYTRUENAS_MCP=stdio` makes `main()` serve MCP over
   stdio instead of the normal CLI dispatch, exposing every built-in command
-  (`call`, `query`, `deploy`, ...) as an MCP tool. Checked in both `duho.main`
+  (`call`, `query`, `deploy`, ...) and RunPath command as an MCP tool, whose
+  `targets` argument names the hosts (none: `localhost`). Checked in both `duho.main`
   and `duho.app`, so it applies here regardless of entry point. No opt-out is
   set — `_mcp_ = False` on `PyTrueNAS` (`main.py`) or `app(mcp=False)` in its
   `app(...)` call would disable it — so this is accepted, documented behavior.

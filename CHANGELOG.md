@@ -6,6 +6,17 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- `pytruenas.utils.cmd.with_targets(args_cls)` and `TargetsField`: an `Args`
+  class with the trailing `targets` positional declared as its last field.
+
+### Fixed
+
+- Every MCP tool takes `targets`. The hosts were added to each command's parser
+  by hand, so they were missing from the tool schema: naming one was refused as
+  an unknown argument, and every tool call ran against `localhost`.
+
 ## [0.6.0] - 2026-10-19
 
 ### Upgrade notes

@@ -52,7 +52,7 @@ from ._introspect import positional_arity
 import typing as _ty
 from logging import Logger as _Logger
 
-from .cmd import PyTrueNASArgs, register_targets
+from .cmd import PyTrueNASArgs, TargetsField
 from ..host import TrueNASHost as TrueNASClient
 
 __all__ = ["default_init", "PyTrueNASRunPathArgs", "step"]
@@ -70,25 +70,13 @@ class PyTrueNASRunPathArgs(PyTrueNASArgs):
     ``LoggingArgs``, the ``_logger_``/``_set_loglevels_`` a step reads off
     ``cmd``.
 
-    Using bare :class:`PyTrueNASArgs` leaves the ``targets`` field
-    ``argparse.SUPPRESS``-ed -- so no trailing ``TARGET`` positional is
-    registered on a class command's parser (module commands add it imperatively
-    in their own ``register`` hook, which a class command has no equivalent of).
-    This subclass closes that gap by overriding :meth:`_initparser_` to add the
-    trailing ``targets`` positional LAST, after the RunPath command's own fields
-    (``--rcopts`` etc.), exactly as :func:`pytruenas.utils.cmd.register_targets`
-    does for a module command -- keeping ``pytruenas <flow> <host>...`` grammar
-    uniform across command kinds.
+    It also declares the trailing ``targets`` positional, as
+    :func:`pytruenas.utils.cmd.with_targets` does for a module command, so
+    ``pytruenas <flow> <host>...`` reads the same for both kinds of command and
+    the hosts are part of a RunPath command's MCP tool schema.
     """
 
-    @classmethod
-    def _initparser_(cls, parser, **kwargs):  # type: ignore[override]
-        result = super()._initparser_(parser, **kwargs)
-        # Add the trailing positional only once (a parents=/re-entrant build may
-        # revisit the same parser); register_targets would otherwise duplicate it.
-        if not any(action.dest == "targets" for action in parser._actions):
-            register_targets(parser)
-        return result
+    targets: TargetsField = []
 
 
 #: Marks a callable as already wrapped by :func:`step`, so the automatic

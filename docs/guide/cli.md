@@ -172,6 +172,14 @@ with no extra wiring on pytruenas's side. This is `duho`'s own trigger (checked
 in both `duho.main` and `duho.app`, so it applies here too), keyed off the
 app's `Env` prefix (`PYTRUENAS_`); pytruenas does not opt out of it.
 
+Each tool takes the command's own arguments plus `targets`, the hosts it runs
+on — the same trailing positionals as on the command line, so with none it runs
+against `localhost`:
+
+```json
+{"name": "pytruenas.query", "arguments": {"namespace": "user", "targets": ["nas1"]}}
+```
+
 ```bash
 PYTRUENAS_MCP=stdio pytruenas   # serves MCP tools over stdio
 pytruenas --help                # unaffected: the env var is unset here

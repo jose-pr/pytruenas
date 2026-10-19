@@ -25,7 +25,6 @@ import typing as _ty
 from logging import Logger as _Logger
 from pathlib import Path as _Path
 
-from argparse import SUPPRESS as _SUPPRESS
 from argparse import BooleanOptionalAction as _BooleanOptional
 
 from duho import Arg, Extend, LoggingArgs, Meta
@@ -168,25 +167,48 @@ def _load_config(path: "_Path") -> dict:
     return loaded
 
 
-def register_targets(parser) -> None:
-    """Add the trailing ``targets`` positional to a command parser.
+_TARGETS_HELP = (
+    "Target host(s) as trailing arguments; comma-separated and "
+    "[A-Z]/[0-9] range patterns supported. Defaults to localhost."
+)
 
-    Applied centrally -- a command module never calls this itself.
-    :func:`pytruenas.main._with_targets` wraps every module command's
-    ``register`` hook and calls this *after* it, so the target host(s) are the
-    trailing positionals (``pytruenas query <namespace> <host>...``) whatever
-    positionals the command added; :class:`~pytruenas.utils.runpath.
-    PyTrueNASRunPathArgs` does the same for class/RunPath commands. Targets
-    support comma-separated lists and ``[A-Z]``/``[0-9]`` range patterns,
-    expanded by ``PyTrueNASArgs._expanded_targets_`` (empty -> ``localhost``).
+#: The ``targets`` field every command declares as its last field.
+TargetsField = Arg[
+    list[str], Meta(flags=("targets",), metavar="TARGET", help=_TARGETS_HELP)
+]
+
+
+def with_targets(args_cls: "type | None" = None) -> type:
+    """``args_cls`` (default :class:`PyTrueNASArgs`) with ``targets`` declared last.
+
+    A field declared by a subclass comes after its base's fields, so the hosts
+    stay the trailing positionals (``pytruenas query <namespace> <host>...``),
+    and a declared field is also what duho publishes in a command's MCP tool
+    schema -- a positional added in a ``register`` hook is not.
+    :func:`pytruenas.main._with_targets` applies this to every module command.
     """
-    parser.add_argument(
-        "targets",
-        nargs="*",
-        metavar="TARGET",
-        help="Target host(s) as trailing arguments; comma-separated and "
-        "[A-Z]/[0-9] range patterns supported. Defaults to localhost.",
-    )
+    base = args_cls if args_cls is not None else PyTrueNASArgs
+    namespace = {
+        "__annotations__": {"targets": TargetsField},
+        "targets": [],
+        "__module__": base.__module__,
+        "__qualname__": base.__qualname__,
+        "__doc__": base.__doc__,
+        # A class built by type() has no source for duho to read field
+        # docstrings from; the help comes from the Meta above.
+        "_duho_constants_": {},
+    }
+    return type(base.__name__, (base,), namespace)
+
+
+def register_targets(parser) -> None:
+    """Add the trailing ``targets`` positional to a parser imperatively.
+
+    Commands no longer need it: :func:`with_targets` declares the positional,
+    which also puts it in the MCP tool schema. Kept for code that builds its
+    own parser.
+    """
+    parser.add_argument("targets", nargs="*", metavar="TARGET", help=_TARGETS_HELP)
 
 
 class PyTrueNASArgs(LoggingArgs):
@@ -230,14 +252,10 @@ class PyTrueNASArgs(LoggingArgs):
     "Do not verify the server's TLS certificate (curl's -k)"
     ("--insecure", "-k")  # type: ignore
 
-    # Targets are supplied as the TRAILING POSITIONAL arguments of the command
-    # (after any command-specific positionals), not a -t/--target flag. The
-    # positional is added centrally, after each command's own register() hook
-    # (main._with_targets), so argparse can split e.g. `query <namespace>
-    # <host>...` without the command taking part. SUPPRESS keeps duho from
-    # auto-registering this field as a `--targets` option; it only holds the
-    # parsed value + default, populated by the imperative positional.
-    targets: "Arg[list[str], _SUPPRESS]" = []
+    # The trailing positionals, declared by each command as its LAST field
+    # (`with_targets`). Unannotated on purpose: any annotation here, even
+    # ClassVar, would fix the field's position ahead of the command's own.
+    targets = []  # type: list[str]
 
     parallel: int = 1
     "Number of targets to operate on concurrently"
@@ -397,6 +415,9 @@ class CommandModule(_ty.Protocol):
 
 __all__ = [
     "PyTrueNASArgs",
+    "TargetsField",
+    "with_targets",
+    "register_targets",
     "CommandModule",
     "json_value",
     "json_default",
