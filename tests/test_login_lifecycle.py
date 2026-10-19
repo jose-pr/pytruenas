@@ -142,7 +142,7 @@ def test_a_reconnect_asks_for_a_new_one_time_code(host, monkeypatch):
     host._conn.close()
     host.conn
     assert server.sent == ["111111", "222222"]
-    assert creds.otp_token == "111111"  # the caller's object is untouched
+    assert creds.otp == "111111"  # the caller's object is untouched
 
 
 def test_a_reconnect_without_a_provider_says_a_code_is_needed(host, monkeypatch):

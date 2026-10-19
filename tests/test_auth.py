@@ -171,7 +171,7 @@ def test_login_ex_otp_continuation_uses_credential_token():
         {"response_type": "OTP_REQUIRED"},
         {"response_type": "SUCCESS"},
     )
-    resp = BasicAuth("root", "pw", otp_token="123456").login_ex(client)
+    resp = BasicAuth("root", "pw", otp="123456").login_ex(client)
     assert resp["response_type"] == "SUCCESS"
     cont = client.api.auth.login_ex_continue.call_args[0][0]
     assert cont == {"mechanism": "OTP_TOKEN", "otp_token": "123456"}

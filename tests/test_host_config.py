@@ -211,7 +211,7 @@ def test_userinfo_otp_extra_reaches_the_credential():
     config = TrueNASConfig.from_target("wss://root:secret%0Aotp:123456@nas")
     assert isinstance(config.credentials, BasicAuth)
     assert config.credentials.password == "secret"
-    assert config.credentials.otp_token == "123456"
+    assert config.credentials.otp == "123456"
 
 
 def test_raw_newline_in_userinfo_is_honored():
@@ -231,7 +231,7 @@ def test_raw_newline_in_userinfo_is_honored():
     config = TrueNASConfig.from_target("wss://root:secret\notp:123456@nas")
     assert isinstance(config.credentials, BasicAuth)
     assert config.credentials.password == "secret"
-    assert config.credentials.otp_token == "123456"
+    assert config.credentials.otp == "123456"
 
 
 def test_explicit_credentials_argument():

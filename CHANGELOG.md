@@ -115,6 +115,12 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
     at debug and running the call with the default timeout.
   - `TrueNASWSConnection(py_exceptions=)` and `.py_exceptions` are gone; the
     option did nothing.
+- **The one-time code is `otp`, everywhere.** `BasicAuth(user, pw,
+  otp_token=)` → `BasicAuth(user, pw, otp=)`, and the attribute
+  `credential.otp_token` → `credential.otp`. `Credentials(...,
+  otp_token=)` raises `ValueError` (`otp=` is the keyword, as on
+  `TrueNASClient`), and any keyword outside `username`/`password`/`otp`/
+  `api_key`/`token` does too.
 
 ### Added
 

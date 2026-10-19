@@ -173,7 +173,7 @@ def test_an_otp_is_split_the_documented_way(raw, otp):
     cred = Credentials(raw)
     assert isinstance(cred, BasicAuth)
     assert cred.password == "hunter2"
-    assert cred.otp_token == otp
+    assert cred.otp == otp
 
 
 # -- the unix socket path -------------------------------------------------

@@ -77,14 +77,12 @@ def _mask_args(args: tuple) -> tuple:
 def _split_extras(raw: str) -> "tuple[str, _ty.Optional[str]]":
     """``(credential, otp)`` from a raw credential string.
 
-    Split by :func:`hostctl.uri.parse_credentials`, the same function the URI
-    path already used -- so the documented ``otp:<token>`` line means the same
-    thing in both. Parsing it here by hand read that key as part of the token
-    (``otp_token="otp:123456"``), which the server then rejected.
+    Split by :func:`hostctl.uri.parse_credentials`, the function the URI path
+    uses, so the documented ``otp:<token>`` line means the same thing in both.
 
-    A bare token on the second line (``"user:pw\n123456"``, which this package
-    accepted before) still works: hostctl reports a valueless extra, and a
-    single one of those is taken as the OTP.
+    A bare token on the second line (``"user:pw\n123456"``) is the OTP too:
+    hostctl reports a valueless extra, and a single one of those is taken as
+    the code.
     """
     try:
         from hostctl.uri import parse_credentials
@@ -159,23 +157,12 @@ class _CredentialsMeta(type):
         elif args:
             return BasicAuth(*args)
         else:
-            # Dispatch on the names, not by trying each subclass until one
-            # does not raise TypeError: LocalAuth accepted anything, so every
-            # keyword form -- Credentials(api_key=...), (token=...),
-            # (username=, password=) -- returned LOCAL auth and the client
-            # connected unauthenticated.
+            # Dispatch on the names, never by trying each subclass: a
+            # permissive constructor would turn any keyword set into the
+            # wrong credential.
             known = {"username", "password", "otp", "api_key", "token"}
             if set(kwargs) <= known:
                 return Credentials.from_host_credentials(**kwargs)
-            for scls in Credentials.__subclasses__():
-                try:
-                    return scls(**kwargs)
-                except TypeError:
-                    # These kwargs don't fit this subclass's __init__ -> try the
-                    # next. Narrowed from `except Exception` so a genuine bug in
-                    # a subclass __init__ surfaces instead of being hidden behind
-                    # the generic "Credentials not supported" below.
-                    pass
 
         # Mask secret-bearing values: this exception (with its args) is likely
         # to be logged, and the raw kwargs carry the password/token/api_key.
@@ -232,7 +219,7 @@ class Credentials(metaclass=_CredentialsMeta):
 
         Handles the discriminated response: ``SUCCESS`` returns the response
         dict; ``OTP_REQUIRED`` calls ``auth.login_ex_continue`` with an OTP
-        token (from this credential's own ``otp_token`` if set, else from
+        token (from this credential's own ``otp`` if set, else from
         ``otp_provider()`` if given, else raises); any other ``response_type``
         raises :class:`AuthenticationError`. A credential with no login_ex
         mechanism (e.g. :class:`LocalAuth`) falls back to legacy :meth:`login`.
@@ -252,7 +239,7 @@ class Credentials(metaclass=_CredentialsMeta):
         rtype = resp.get("response_type")
 
         if rtype == "OTP_REQUIRED":
-            otp = getattr(self, "otp_token", None)
+            otp = getattr(self, "otp", None)
             if not otp and otp_provider is not None:
                 otp = otp_provider()
             if not otp:
@@ -391,16 +378,16 @@ class BasicAuth(Credentials):
     MECHANISM = "PASSWORD_PLAIN"
 
     def __init__(
-        self, username: str, password: str, otp_token: _ty.Optional[str] = None
+        self, username: str, password: str, otp: _ty.Optional[str] = None
     ) -> None:
         self.username = username
         self.password = password
-        self.otp_token = otp_token
+        self.otp = otp
 
     def _args(self):
         args = [self.username, self.password]
-        if self.otp_token:
-            args.append(self.otp_token)
+        if self.otp:
+            args.append(self.otp)
         return args
 
     def _login_data(self):

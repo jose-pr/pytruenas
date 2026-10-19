@@ -22,7 +22,7 @@ def test_password_maps_to_basic_auth():
     assert isinstance(cred, BasicAuth)
     assert cred.username == "root"
     assert cred.password == "hunter2"
-    assert cred.otp_token is None
+    assert cred.otp is None
 
 
 def test_password_with_otp_carries_the_token():
@@ -30,7 +30,7 @@ def test_password_with_otp_carries_the_token():
         username="admin", password="hunter2", otp="123456"
     )
     assert isinstance(cred, BasicAuth)
-    assert cred.otp_token == "123456"
+    assert cred.otp == "123456"
     # The OTP must reach the legacy auth.login positionally, third.
     assert cred._args() == ["admin", "hunter2", "123456"]
 
@@ -122,7 +122,7 @@ def test_round_trip_through_hostctl_parse_credentials(raw, password, otp):
     )
     assert isinstance(cred, BasicAuth)
     assert cred.password == password
-    assert cred.otp_token == otp
+    assert cred.otp == otp
 
 
 def test_hostctl_extras_are_lowercased_keys():
@@ -132,7 +132,7 @@ def test_hostctl_extras_are_lowercased_keys():
     assert extras == {"otp": "9999"}
     cred = Credentials.from_host_credentials(password="pw", **extras)
     assert isinstance(cred, BasicAuth)
-    assert cred.otp_token == "9999"
+    assert cred.otp == "9999"
 
 
 # -- keyword credentials override the URI's (hostctl's dispatcher) -----------
@@ -172,3 +172,16 @@ def test_the_host_constructor_takes_the_same_credential_keywords():
     )
     with pytest.raises(ValueError, match="unknown credential argument"):
         TrueNASClient("wss://nas", passwrd="p", autologin=False)
+
+
+def test_the_otp_has_one_keyword():
+    """`otp=` (hostctl's name); `otp_token=` went through a second dispatch path."""
+    cred = Credentials(username="root", password="pw", otp="123456")
+    assert type(cred) is BasicAuth
+    assert cred.otp == "123456"
+    assert not hasattr(cred, "otp_token")
+    assert BasicAuth("root", "pw", otp="1").otp == "1"
+    with pytest.raises(ValueError, match="Credentials not supported"):
+        Credentials(username="root", password="pw", otp_token="123456")
+    with pytest.raises(TypeError):
+        BasicAuth("root", "pw", otp_token="1")  # type: ignore[call-arg]

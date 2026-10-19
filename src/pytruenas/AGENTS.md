@@ -202,7 +202,7 @@ ssh=None, ...)`
   authenticate (`creds` or the client's configured credentials). Default uses
   the server's legacy `auth.login`/`login_with_*` methods. `login_ex=True` uses
   the `auth.login_ex` mechanism, handling an `OTP_REQUIRED` 2FA challenge via
-  `auth.login_ex_continue` (OTP from the credential's `otp_token` or
+  `auth.login_ex_continue` (OTP from the credential's `otp` or
   `otp_provider()`), raising `auth.AuthenticationError` on failure and returning
   the success response dict. `login_options` overrides the server defaults
   (`{"user_info": True, "reconnect_token": False}`). The legacy path returns
@@ -565,10 +565,13 @@ The synchronous JSON-RPC 2.0 websocket transport backing `TrueNASClient`
   - a single `Credentials` instance -> returned as-is;
   - a single `(user, password)` list/tuple -> `BasicAuth(*it)`;
   - a single string containing `:` -> `user:password` (optionally
-    `password\notp_token`) -> `BasicAuth`;
+    `password\n<otp>` or `password\notp:<otp>`) -> `BasicAuth`;
   - a single string shaped `<numeric-id>-<64 alnum chars>` -> `APIKeyAuth`;
   - any other single string -> `TokenAuth`;
-  - multiple positional args -> `BasicAuth(*args)`.
+  - multiple positional args -> `BasicAuth(*args)`;
+  - keywords: `username`/`password`/`otp`/`api_key`/`token`, selected as
+    `from_host_credentials` does; any other keyword raises `ValueError`
+    (`Credentials not supported`, values masked).
   - Instantiating a `Credentials` **subclass** directly (e.g. `BasicAuth(...)`)
     bypasses the factory and behaves like a normal constructor.
 - **`.login(client)`** — the server's legacy login: `client.api.auth[self.METHOD]
@@ -580,7 +583,7 @@ The synchronous JSON-RPC 2.0 websocket transport backing `TrueNASClient`
 - **`.login_ex(client, *, login_options=None, otp_provider=None) -> dict|None`**
   — `auth.login_ex` using this credential's `MECHANISM`
   (`PASSWORD_PLAIN`/`API_KEY_PLAIN`/`TOKEN_PLAIN`). Handles `OTP_REQUIRED`
-  (continues with `auth.login_ex_continue`, OTP from `self.otp_token` or
+  (continues with `auth.login_ex_continue`, OTP from `self.otp` or
   `otp_provider()`), returns the `SUCCESS` response dict, raises
   `AuthenticationError` otherwise. Falls back to `.login()` for a credential
   with no `login_ex` form.
@@ -591,8 +594,8 @@ The synchronous JSON-RPC 2.0 websocket transport backing `TrueNASClient`
 - **`LocalAuth`** — no-op auth (local socket). **`APIKeyAuth(api_key,
   username=None)`** — `login_with_api_key` (legacy) / `API_KEY_PLAIN` (login_ex,
   needs `username`). **`TokenAuth(token)`** — `login_with_token` / `TOKEN_PLAIN`.
-  **`BasicAuth(username, password, otp_token=None)`** — `login` /
-  `PASSWORD_PLAIN`.
+  **`BasicAuth(username, password, otp=None)`** — `login` /
+  `PASSWORD_PLAIN`; the one-time code is `.otp`.
 - **`redact_call_args(method: str, args: tuple) -> tuple`** — `args` of an RPC
   call, safe to log: an `auth.*` method's arguments are reduced to type names;
   elsewhere a dict value under a secret-looking key (`password`, `*_token`,

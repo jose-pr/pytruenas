@@ -161,10 +161,10 @@ def _without_otp(creds: "_auth.Credentials") -> "_auth.Credentials":
     The server accepts a code once: replaying it failed the reconnect, and
     ``otp_provider`` was never asked. The caller's object is left as it was.
     """
-    if not getattr(creds, "otp_token", None):
+    if not getattr(creds, "otp", None):
         return creds
     spent = _copy.copy(creds)
-    spent.otp_token = None  # type: ignore[attr-defined]
+    spent.otp = None  # type: ignore[attr-defined]
     return spent
 
 
@@ -1138,7 +1138,7 @@ class TrueNASClient(_PosixHost, _ty.Generic[ApiVersion]):
         By default uses the legacy ``auth.login``/``login_with_*`` path. Pass
         ``login_ex=True`` for the modern mechanism, which supports 2FA via an
         ``OTP_REQUIRED`` continuation: the OTP comes from the credential's own
-        ``otp_token`` if set, else from ``otp_provider()``. A credential with no
+        ``otp`` if set, else from ``otp_provider()``. A credential with no
         login_ex form (e.g. local-socket auth) falls back automatically.
 
         Refused credentials raise :class:`~pytruenas.auth.AuthenticationError`
