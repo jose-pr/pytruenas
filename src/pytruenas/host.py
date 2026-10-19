@@ -29,6 +29,7 @@ server itself; nothing in this package performs such a request.
 from __future__ import annotations
 
 import copy as _copy
+import dataclasses as _dataclasses
 import inspect as _inspect
 import json as _js
 import logging as _logging
@@ -550,9 +551,7 @@ class TrueNASConfig(
             )
         self.known_hosts = known_hosts
         if ssh is not None and not verify and getattr(ssh, "verify", False):
-            import dataclasses
-
-            ssh = dataclasses.replace(_ty.cast(_ty.Any, ssh), verify=False)
+            ssh = _dataclasses.replace(_ty.cast(_ty.Any, ssh), verify=False)
         self.ssh = (
             ssh if ssh is not None else _ssh_config_from(shell, known_hosts, verify)
         )
@@ -1448,7 +1447,10 @@ class TrueNASHost(_PosixHost, _ty.Generic[ApiVersion]):
                 known_hosts=_ty.cast(_ty.Any, self._config.known_hosts),
             )
         elif not existing.password and not existing.client_keys:
-            existing.client_keys = [private_key.encode()]
+            # A copy: the caller's `ssh=` object may serve other hosts too.
+            self._config.ssh = _dataclasses.replace(
+                existing, client_keys=[private_key.encode()]
+            )
         else:
             # Explicit credentials win: a caller who configured their own auth
             # is not silently overridden by a provisioning call.

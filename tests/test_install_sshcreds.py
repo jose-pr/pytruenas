@@ -291,3 +291,21 @@ def test_does_not_overwrite_explicit_credentials(monkeypatch):
     remote.install_sshcreds()
     assert remote._config.ssh.password == "hunter2"
     assert remote._config.ssh.client_keys is None
+
+
+def test_the_callers_ssh_config_is_left_as_given(monkeypatch):
+    """The key goes on a copy: an `SSHConfig` shared with another host must not
+    start authenticating with this NAS's key."""
+    from hostctl import SSHConfig
+
+    shared = SSHConfig(host="nas", username="root")
+    remote = TrueNASClient("wss://nas", ssh=shared, autologin=False)
+    monkeypatch.setattr("pytruenas.host._public_key", lambda _key: PUBLIC_KEY)
+    monkeypatch.setattr(type(remote), "api", MagicMock())
+    _wire(remote)
+
+    remote.install_sshcreds()
+    assert shared.client_keys is None
+    assert remote._config.ssh is not shared
+    assert remote._config.ssh.client_keys == [PRIVATE_KEY.encode()]
+    assert remote._config.ssh.host == "nas"
