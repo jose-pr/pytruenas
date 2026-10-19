@@ -23,16 +23,16 @@ import typing as _ty
 from pathlib import Path
 
 import duho.runpath as _runpath
-from duho import AUTO, Cli, parse_globals, run
+from duho import AUTO, Cli, command_name, parse_globals, run
 from duho import logging as _logging
-from duho.discovery import CmdBuilder, ModuleCommand, discover_commands
+from duho.discovery import ModuleCommand, discover_commands
 from duho.fanout import run_targets
-from duho.runpath import RunPathCmd, is_runpath_dir
+from duho.runpath import RunPathCmd
+from duho.runtime import accepts_positional
 from hostctl.exceptions import MissingExtraError as _MissingExtraError
 
 from .host import TrueNASConfig
 from .host import TrueNASHost as TrueNASClient
-from .utils._introspect import positional_arity
 from .utils.cmd import ENV, PyTrueNASArgs, with_targets
 from .utils.runpath import PyTrueNASRunPathArgs, step_adapter as _step_adapter
 from .utils.target import redact as _redact
@@ -132,66 +132,23 @@ def _config_sources(value: object, config_path: object) -> "list[str]":
 
 
 def _commands_from_source(source: str) -> "list":
-    """Yield the commands one source contributes, RunPath directories included.
+    """The commands one source contributes, RunPath directories included.
 
-    ``duho.discover_commands`` resolves a package name or a directory of loose
-    ``*.py`` command files, but it does NOT consult the RunPath command provider
-    for a *directory* shape -- it only globs ``*.py`` files, so a RunPath
-    directory (numbered ``NN-name.py`` steps, no ``__init__.py``) handed to it is
-    mis-parsed step-by-step into loose module commands, and a RunPath directory
-    nested inside a source directory is never inspected at all. Restoring the
-    predecessor's RunPath support therefore needs this discovery-side seam, not
-    only the ``_dispatch`` fan-out branch:
+    ``providers=True`` offers the source directory, and each of its child
+    directories, to the RunPath provider: a RunPath directory is one command,
+    and its numbered ``NN-name.py`` steps are not read as loose module commands.
 
-    * a source that IS a RunPath directory -> build it as ONE RunPath command via
-      :class:`duho.discovery.CmdBuilder` (which consults the provider), NOT
-      ``discover_commands`` (which would mis-parse its steps);
-    * a source directory whose immediate children include RunPath directories ->
-      build each such child as its own RunPath command, and still run
-      ``discover_commands`` on the parent for any ordinary loose command files
-      beside them;
-    * anything else (a dotted package, a directory of loose command files) ->
-      plain ``discover_commands``, unchanged.
-
-    A source that resolves to neither an existing directory nor an importable
-    package (a stray ``--cmdspath`` token, a config path that isn't present) is
-    skipped with a warning rather than crashing the whole app -- mirroring
-    ``duho.discover_commands``'s own resilience toward an individual bad command.
+    A source that is neither an existing directory nor an importable package (a
+    stray ``--cmdspath`` token, a config path that is not present) is skipped
+    with a warning rather than stopping the app.
     """
-    from pathlib import Path as _Path
-
-    path = _Path(source)
-    if path.is_dir() and is_runpath_dir(path):
-        return [CmdBuilder(path.name.replace("_", "-"), path).command]
-
     try:
-        commands: "list" = list(discover_commands(source))
+        return list(discover_commands(source, providers=True))
     except (ImportError, NotImplementedError, TypeError, ValueError) as exc:
         _pylogging.getLogger("pytruenas").warning(
             "skipping command source %r: %s", source, exc
         )
-        commands = []
-    if path.is_dir():
-        for child in sorted(path.iterdir()):
-            if child.is_dir() and is_runpath_dir(child):
-                commands.append(CmdBuilder(child.name.replace("_", "-"), child).command)
-    return commands
-
-
-def _wants_logger(hook: "_ty.Callable[..., object]") -> bool:
-    """True if a module ``register`` hook accepts a 3rd ``logger`` positional.
-
-    Mirrors duho's own arity tolerance for the ``register`` hook (2-arg
-    ``(parser, args)`` or 3-arg ``(parser, args, logger)``), which
-    :func:`_with_targets` must reproduce because it calls the module's hook
-    itself. duho's version is private (``duho.runtime._wants_logger_arg``,
-    absent from its ``__all__``), so the walk lives in
-    :mod:`pytruenas.utils._introspect` -- once, rather than in the two copies
-    that had drifted apart. A ``*args`` hook can absorb the logger; a signature
-    ``inspect`` refuses falls back to the 2-arg call, which never
-    over-supplies an argument.
-    """
-    return positional_arity(hook, cap=3, varargs=3, unknown=0) >= 3
+        return []
 
 
 def _with_targets(command: object) -> object:
@@ -219,7 +176,9 @@ def _with_targets(command: object) -> object:
     inner = getattr(command.module, "register", None)
     if not callable(inner):
         return command
-    wants_logger = _wants_logger(inner)
+    # duho calls a `register` hook with 2 or 3 positionals by what it accepts;
+    # this wrapper calls the module's hook itself, so it has to do the same.
+    wants_logger = accepts_positional(inner, 3)
 
     def register(parser, args, logger=None):
         if wants_logger:
@@ -261,8 +220,8 @@ def _discover(
     sources win on a name clash (a user command shadows a built-in), then the list
     is de-duplicated by subcommand name preserving that precedence.
 
-    Each source is resolved through :func:`_commands_from_source`, which layers
-    RunPath-directory discovery on top of ``duho.discover_commands`` (see there).
+    Each source is resolved through :func:`_commands_from_source`, so RunPath
+    directories are found as well as module commands.
     """
     # The resolved root, not the default one: a derived tool's own global
     # options (and its `_ARGS_`) are part of what has to be parsed here, and
@@ -292,9 +251,7 @@ def _discover(
         if not source:
             continue
         for command in _commands_from_source(source):
-            name = getattr(command, "_parsername_", None) or getattr(
-                command, "__name__", None
-            )
+            name = command_name(command)
             if name and _is_runnable(command, name):
                 by_name[name] = command  # later source wins
     return [_with_targets(command) for command in by_name.values()]
@@ -377,10 +334,9 @@ def _detach_logto(
 def _target_label(target: str) -> str:
     """The short name to tag this target's log records with.
 
-    ``duho.fanout`` prefixes every record for a target with ``[%s]``, so this
-    is what a reader sees on every single line. Passing the raw positional put
-    the whole connection string there -- scheme, port, API path, and any
-    userinfo -- which is unreadable at fan-out width and leaks the password.
+    ``run_targets(label=...)`` prefixes every record for a target with it, and
+    ``--logto`` names the target's file after it, so it is the host's short
+    name and never the connection string (which may carry a password).
 
     Falls back to the password-free rendering of the target if it does not
     parse: an unparseable target must still run (and fail) on its own terms,
@@ -390,34 +346,6 @@ def _target_label(target: str) -> str:
         return TrueNASConfig.from_target(target).name
     except Exception:
         return _redact(target)
-
-
-class _Target:
-    """What ``duho.fanout`` tags records with: renders as the short label.
-
-    ``fanout`` stringifies whatever object it is handed to build each record's
-    ``[...]`` prefix, and passes that same object to the worker. So the display
-    form lives in ``__str__`` and the real connection string stays on
-    :attr:`target`, where the worker reads it.
-
-    Deliberately *not* a ``str`` subclass with an overridden ``__str__``. That
-    was tried: it makes the object silently render as the label anywhere user
-    code interpolates it, which a RunPath test caught when a step's context
-    value turned from ``ctx-nasA`` into ``ctx-nasa``. Keeping the two roles on
-    separate attributes means nothing can confuse the value with its label.
-    """
-
-    __slots__ = ("target", "label")
-
-    def __init__(self, target: str) -> None:
-        self.target = target
-        self.label = _target_label(target)
-
-    def __str__(self) -> str:
-        return self.label
-
-    def __repr__(self) -> str:
-        return repr(self.label)
 
 
 #: Exit status of a target whose command needs an optional extra that is not
@@ -433,13 +361,12 @@ def _run_module_on_target(
 ) -> int:
     """Run one module command against one target; return an exit code.
 
-    Builds the client (module ``init`` if present, else a plain
-    :class:`TrueNASClient`) and runs the module lifecycle ``run`` +
-    ``success``/``finally_``. Records are already ``[target]``-prefixed by
-    ``duho.fanout`` (a ``TargetPrefixFilter`` installed for the fan-out), so no
-    per-target logger/handler naming is needed here. When ``--logto`` is a path
-    template a per-target :class:`~logging.FileHandler` is attached for the run
-    (fanout tags the message but does not route files).
+    Builds the client (module ``init`` if present, else the one
+    :meth:`PyTrueNASArgs._client_` builds) and runs the module lifecycle ``run``
+    + ``success``/``finally_``. Records are already ``[label]``-prefixed by
+    ``duho.fanout``. When ``--logto`` is a path template a per-target
+    :class:`~logging.FileHandler` is attached for the run (fanout tags the
+    message but does not route files).
     """
     module = command.module
     init = getattr(module, "init", None)
@@ -453,17 +380,10 @@ def _run_module_on_target(
     # was building a client for.
     args = _copy.copy(args)
 
-    # ``shown`` is the ``--logto`` filename's {target}: the host's short name,
-    # which is credential-free. Log records get the same name from the fan-out
-    # prefix. It is NOT automatically a legal filename (an earlier comment here
-    # claimed it was): `nas:8443` and an {isodate} both carry colons, which
-    # Windows refuses -- see _logto_path.
-    if isinstance(target, _Target):
-        target, shown = target.target, target.label
-    else:
-        shown = _redact(target)
     args.target = target
-    file_handler = _attach_logto(args.logto, shown, logger)
+    # The `--logto` {target} is the credential-free label the fan-out prefixes
+    # records with; _logto_path makes it a legal filename.
+    file_handler = _attach_logto(args.logto, _target_label(target), logger)
 
     # The target is already on every record as the ``[name]`` prefix, so naming
     # it again here would just read "[nas1] Started: nas1".
@@ -534,16 +454,9 @@ def _run_runpath_on_target(
     :func:`_run_module_on_target` exactly (fanout tags the message but does not
     route files).
     """
-    # Unwrap BEFORE the copy: a step reads ``cmd.target`` and may format it, so
-    # it must receive the real connection string, never the display wrapper.
-    if isinstance(target, _Target):
-        target, shown = target.target, target.label
-    else:
-        shown = _redact(target)
-
     per_target = _copy.copy(instance)
     per_target.target = target
-    file_handler = _attach_logto(instance.logto, shown, logger)
+    file_handler = _attach_logto(instance.logto, _target_label(target), logger)
 
     # Already on every record as the ``[name]`` prefix -- see
     # _run_module_on_target.
@@ -583,13 +496,14 @@ def _dispatch(command: object, instance: "PyTrueNAS") -> int:
         isinstance(command, type) and issubclass(command, RunPathCmd)
     ):
         runpath = _ty.cast("RunPathCmd", instance)
-        targets = [_Target(target) for target in runpath._expanded_targets_()]
+        targets = runpath._expanded_targets_()
         logger.info("Running '%s' on %d target(s)", runpath._parsername_, len(targets))
         return run_targets(
             lambda target: _run_runpath_on_target(runpath, target, logger),
             targets,
             max_workers=max(1, instance.parallel),
             logger=logger,
+            label=_target_label,
         )
 
     if not isinstance(command, ModuleCommand):
@@ -597,13 +511,14 @@ def _dispatch(command: object, instance: "PyTrueNAS") -> int:
 
         return run_command(_ty.cast(_ty.Any, command), instance)
 
-    targets = [_Target(target) for target in instance._expanded_targets_()]
+    targets = instance._expanded_targets_()
     logger.info("Running '%s' on %d target(s)", command._parsername_, len(targets))
     return run_targets(
         lambda target: _run_module_on_target(command, instance, target, logger),
         targets,
         max_workers=max(1, instance.parallel),
         logger=logger,
+        label=_target_label,
     )
 
 
@@ -634,9 +549,7 @@ def _warn_stray_passthrough(
     if not extra:
         return
     if not _reads_passthrough(command):
-        name = getattr(command, "_parsername_", None) or getattr(
-            command, "__name__", str(command)
-        )
+        name = command_name(command) or str(command)
         logger.warning(
             "ignoring the %d argument(s) after '--': %s reads none", len(extra), name
         )
