@@ -47,12 +47,15 @@ dependencies = [
     "duho>=0.7.5,<0.8",
     # Series base; only `get_default_port` (utils/target.py) is used.
     "netimps>=0.4.0,<0.5",
-    # Series base: `LocalPath`, `FileStat` and `providers.CommitOnClose`.
-    "pathapi>=0.1.0,<0.2",
+    # hostctl 0.4.0 requires 0.1.2; `LocalPath`, `FileStat`, `CommitOnClose`.
+    "pathapi>=0.1.2,<0.2",
     # Series base; import name `uripath`. `URIPath` is the base of the
     # `truenas://` and `truenas+ws://` path types.
     "pathapi-uri>=0.1.0,<0.2",
-    "requests>=2.0,<3",
+    # 2.32.3: below it the side channels drop the adapter's SSLContext.
+    "requests>=2.32.3,<3",
+    # 2.0.2: below it the shared context fails on an IP-address target.
+    "urllib3>=2.0.2,<3",
     "websocket-client>=1.0,<2",
     # Series base. TrueNASHost is a hostctl PosixHost; every path a provider
     # returns must be a pathapi path. `deploy` is a built-in command and runs
@@ -63,7 +66,8 @@ dependencies = [
 
 [project.optional-dependencies]
 # Config-file support for the CLI (YAML targets/config).
-config = ["pyyaml"]
+# 6.0.1: 6.0 no longer builds from source (Cython 3), where no wheel exists.
+config = ["pyyaml>=6.0.1,<7"]
 # Remote shell + SFTP filesystem leg: both SSH providers are hostctl's (its
 # `ssh` extra is asyncssh and sftppath).
 ssh = ["hostctl[ssh]>=0.4.0,<0.5"]

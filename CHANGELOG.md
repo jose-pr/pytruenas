@@ -6,6 +6,15 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Changed
+
+- Dependency floors that hold, measured by installing every floor on Python
+  3.9 and running the suite: `pathapi>=0.1.2` (what hostctl 0.4.0 requires;
+  `0.1.0` could not be installed with it), `requests>=2.32.3` (older releases
+  drop the side channels' TLS context, so uploads and downloads ignored
+  `sslverify`), a new `urllib3>=2.0.2,<3` (1.26 fails on an IP-address target),
+  and `pytruenas[config]` now `pyyaml>=6.0.1,<7`.
+
 ### Added
 
 - `pytruenas.utils.cmd.with_targets(args_cls)` and `TargetsField`: an `Args`

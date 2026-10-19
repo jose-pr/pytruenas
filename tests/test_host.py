@@ -441,6 +441,7 @@ def test_ssh_property_raises_clearly_without_a_transport():
         _host().ssh
 
 
+@pytest.mark.requires("asyncssh")
 def test_ssh_property_is_the_ssh_executor_providers_connection(monkeypatch):
     """`.ssh` is hostctl's public accessor, read from the SSH executor."""
     from hostctl.transports.ssh import SSHExecutorProvider
