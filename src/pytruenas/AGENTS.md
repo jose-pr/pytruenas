@@ -1058,7 +1058,8 @@ a directory the user does not control.
 ### Generated typings (`generate-typings` output)
 
 - The package root exports **`Current`**, an alias for the generated version
-  class (`V26000`), so the documented `TrueNASClient[Current]` resolves.
+  class (`V2600` for v26.0.0), so the documented `TrueNASClient[Current]`
+  resolves.
 - Optional TypedDict keys are `NotRequired`, and an array that admits no items
   (`items: false`) is `list[Never]`; both are imported from `typing_extensions`
   below Python 3.11 (a `sys.version_info` guard in every stub), so the output
@@ -1075,6 +1076,16 @@ a directory the user does not control.
   of failing the run; `JsonValue`/`JsonObject`/`JsonArray` are real aliases.
 - Generation never mutates the dump it is given, and never writes outside the
   output directory (`codegen.BadApiName` if a dump name would escape it).
+- The synthetic helpers `_create`/`_update`/`_upsert`/`_get` type a
+  namespace's payload, so they narrow the runtime `Namespace` signatures; each
+  carries `# type: ignore[override]`. One is omitted (logged at INFO) when the
+  method has no object payload, or `get_instance` returns no object with
+  properties. Parameter names are unique in a signature (`self` and a repeated
+  or colliding title get a trailing `_`; an untitled one is `argN`).
+- The suite compiles the stubs generated from a small fixture dump and from a
+  set of unusual schema shapes, and type-checks them with pyright (3.9 and
+  3.14 targets) and mypy (3.10 and 3.14) when those are installed. It does not
+  run against a full live dump.
 - Every method's call options (`_method`, `_ioerror`, `_filetransfer`,
   `_timeout`, `_tries`) are **keyword-only** in the stub, matching the runtime:
   middleware parameters are positional and any other keyword raises.

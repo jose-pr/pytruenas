@@ -701,9 +701,8 @@ class Codegen:
                     ns=ns,
                     path=ns_path,
                     modpath=ns_path.parent,
-                    # The root module also gets the documented `Current` alias:
-                    # the generated class is named after the version (V26000),
-                    # so `TrueNASClient[Current]` had nothing to resolve to.
+                    # The root class is named after the version (`V2600` for
+                    # v26.0.0); `Current` is the documented name for it.
                     alias="Current" if ns.qualname == version else None,
                 ),
                 encoding="utf-8",

@@ -17,15 +17,17 @@ Options:
   `.pytruenas-typings` marker) is replaced; any other directory that is not
   empty is refused rather than emptied — hand-written stubs included.
 - `--api-version VERSION` — target a specific API version (e.g. `v26.0.0`);
-  defaults to the host's current version.
+  defaults to the newest version in the dump.
 - `--api-cache FILE` — read/write a cached API dump instead of hitting the host.
 
-The generator dumps the whole API and writes one `.pyi` per namespace. On a real
-TrueNAS 26.0 host this produces ~129 stub files covering every namespace; all
-output is valid Python that parses cleanly.
+The generator dumps the whole API and writes one `.pyi` per namespace (about
+129 files for a TrueNAS 26.0 host). The test suite generates stubs from a small
+fixture dump and from a set of unusual schema shapes, compiles them, and
+type-checks them and calls against them with pyright and mypy; it does not run
+against a full live dump.
 
 The root module of the generated package exports `Current`, an alias for the
-version class it generated (`V26000`), which is what makes the documented
+version class it generated (`V2600` for v26.0.0), which is what makes the documented
 annotation resolve:
 
 ```python
@@ -45,6 +47,6 @@ whichever Python version runs the generator.
 
 !!! note
     Generated stubs are **not** shipped in the package — they are produced on
-    demand for your target's exact API version. `src/truenasapi_typings/` is an
-    empty namespace package that your generated `current/` (or versioned)
-    stubs drop into.
+    demand for your target's exact API version. Generate them inside your
+    project (the default `--path` does) so that pyright or mypy, run from the
+    project root, resolves `truenasapi_typings.current`.
