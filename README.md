@@ -42,7 +42,6 @@ pip install pytruenas
 | ----- | ------- |
 | `pytruenas[ssh]` | SSH commands + the SFTP filesystem leg (`asyncssh`) |
 | `pytruenas[yaml]` | A CLI config file written in YAML (`#!yaml`, `.yaml`); TOML needs no extra (`anycfg[yaml]`) |
-| `pytruenas[repo]` | `deploy --source repo`; included in the core install (`hostctl[deploy]`) |
 
 ## Quick start
 
@@ -141,12 +140,15 @@ may be comma-separated and supports `[A-Z]`/`[0-9]` range expansion (e.g.
 | `pytruenas` | `TrueNASClient`, `TrueNASConfig`, `Credentials`, `Namespace`, `Event`, `Subscription`, `__version__` |
 | `pytruenas.host` | The client: connection and login, `client.api`, events, and hostctl's `run()` / `path()` |
 | `pytruenas.namespace` | `Namespace`: middleware calls by attribute, and the `_get`/`_query`/`_create`/`_update`/`_upsert` helpers |
-| `pytruenas.connection` | The JSON-RPC 2.0 websocket transport, the extended-JSON codec and the call exceptions |
+| `pytruenas.connection` | The JSON-RPC 2.0 websocket transport and the extended-JSON codec |
 | `pytruenas.auth` | Credentials: API key, user and password (with OTP), token, local socket |
 | `pytruenas.fs` | Remote paths over the middleware `filesystem.*` API |
+| `pytruenas.query` | Filter operators (`EQ`, `GT`, `IN`, ...) and `Option` for `_query`/`_get`/`_upsert` |
+| `pytruenas.target`, `pytruenas.apicache` | Connection strings (`Target`, `redact`); the cached API definition |
+| `pytruenas.exceptions` | Every error, under `TrueNASError` |
 | `pytruenas.providers`, `pytruenas.webshell` | The transports behind `run()` and `path()`, the web shell among them |
-| `pytruenas.main`, `pytruenas.cmd` | The CLI and its built-in commands |
-| `pytruenas.utils.runpath` | `step` and `default_init` for RunPath flows (numbered step directories) |
+| `pytruenas.cli` | The CLI: `main`, its global options (`PyTrueNASArgs`) and output helpers for your own commands |
+| `pytruenas.cli.runpath` | `step` and `default_init` for RunPath flows (numbered step directories) |
 | `pytruenas.patch` | Changing a host beyond what the API exposes: templates, systemd units, the middleware itself |
 | `pytruenas.codegen`, `pytruenas.models` | The typings generator and the API-dump schemas it reads |
 

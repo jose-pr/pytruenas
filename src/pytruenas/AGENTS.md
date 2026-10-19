@@ -16,8 +16,8 @@ self-contained. Development documentation lives with the source at
 "UnknownMethod", "FieldError"]`, each defined in the module named in its
 section below (every error in `pytruenas.exceptions`); `redact_call_args` (from `auth`) is importable from the root
 too, outside `__all__`. The modules documented below are public. A name with a
-leading underscore is private, as are `pytruenas.utils.io` and the `_`-prefixed
-modules — with two deliberate exceptions: `Namespace`'s helpers and call
+leading underscore is private, and so is every `_`-prefixed module
+(`pytruenas._utils`, `pytruenas.cli._app`, ...) — with two deliberate exceptions: `Namespace`'s helpers and call
 options (`_query`, `_get`, `_timeout`, ...), which carry the underscore so they
 cannot collide with a middleware name, and the `_name_()` hook methods of the
 CLI's args classes, which are duho's convention.
@@ -30,7 +30,6 @@ provider, the CLI and `deploy`. Extras:
 | --- | --- | --- |
 | `ssh` | `hostctl[ssh]>=0.4.0,<0.5` (asyncssh, sftppath) | `.ssh`, `run()` over SSH, the `sftp` path leg |
 | `yaml` | `anycfg[yaml]` (PyYAML) | a CLI config file written in YAML (`#!yaml`, `.yaml`) |
-| `repo` | `hostctl[deploy]` | `deploy --source repo`; the core dependency already installs it, so the extra only lets a requirement that names it resolve |
 
 A missing extra raises `hostctl.MissingExtraError` (an `ImportError`) at first
 use, never at import time: `FEATURE needs the 'EXTRA' extra: pip install
@@ -480,7 +479,7 @@ below raise `AttributeError` normally.
   client has no `subscribe()` of its own.
 - **`._query(*opts, **filter) -> list[dict]`** — calls `<namespace>.query`
   with filters built from `**filter` kwargs (equality by default; wrap a value
-  in `EQ`/`NE`/`RE`/`GT`/`GE`/`LT`/`LE`/`IN`/`NIN` from `pytruenas.utils.query`
+  in `EQ`/`NE`/`RE`/`GT`/`GE`/`LT`/`LE`/`IN`/`NIN` from `pytruenas.query`
   for other operators) plus any `Option`/dict in `opts`.
 - **`._get(id_or_filter=None, **filter) -> dict | None`** — `.get_instance(id)`
   by id (via `_ioerror=True`, `FileNotFoundError` -> `None`), or the first
@@ -629,7 +628,7 @@ The synchronous JSON-RPC 2.0 websocket transport backing `TrueNASClient`
   `AuthenticationError` otherwise. Falls back to `.login()` for a credential
   with no `login_ex` form.
 - **`Credentials.from_env(env=None) -> Credentials`** —
-  `Credentials($PYTRUENAS_CREDENTIALS)` (read through `utils.cmd.ENV`), or
+  `Credentials($PYTRUENAS_CREDENTIALS)` (read through `pytruenas.cli.ENV`), or
   `env["PYTRUENAS_CREDENTIALS"]` from a mapping you pass; unset or empty is
   `LocalAuth()`.
 - **`Credentials.from_host_credentials(...)`** — the keyword selection
@@ -960,22 +959,9 @@ directly. Generated stubs import `pytruenas.models.jsonschema` for
   `Any`), `TypeDeclaration`, and the aliases `JsonValue`, `JsonObject`,
   `JsonArray`, `JsonNumber`.
 
-## Utilities (`pytruenas.utils`)
+## Query filters (`pytruenas.query`)
 
-- **`target.Target`** (`NamedTuple`: `scheme, username, password, host, port,
-  path, query, fragment`) — a parsed connection string.
-  `Target.parse(connectionstring, resolve_port=True, **defaults) -> Target`
-  (raises `ValueError` for a string that does not parse as a URI, naming the
-  characters to percent-encode and never quoting the credentials);
-  `.uri` reassembles it; `.redacted` is that URI without the password;
-  `.is_local` checks for `""`/`"localhost"`/`"127.0.0.1"`; `.qsl` /
-  `.query_val(key, default=None, *, islist=False)` read the query string.
-- **`target.redact(connectionstring) -> str`** — the string with its password
-  **removed** (`wss://root:secret@nas` -> `wss://root@nas`), never masked, so
-  the result is still a usable target; delegates to `hostctl.host.redact_uri`,
-  so pytruenas and hostctl render a target identically. Never raises; a string
-  with no userinfo comes back unchanged.
-- **`query`** — `EQ`/`NE`/`RE`/`GT`/`GE`/`LT`/`LE`/`IN`/`NIN` filter-operator
+- `EQ`/`NE`/`RE`/`GT`/`GE`/`LT`/`LE`/`IN`/`NIN` filter-operator
   wrappers for `Namespace._query`/`_get` kwargs (bare values default to
   `EQ`); `EXCLUDE` sentinel to drop a kwarg from a filter/update entirely;
   `Option(name, value)` + `Option.options(*opts)` merge dict/tuple/`Option`
@@ -988,12 +974,28 @@ directly. Generated stubs import `pytruenas.models.jsonschema` for
   middleware's filter list those kwargs stand for —
   `[("username", "=", "root"), ("uid", ">", 0)]` — what `_query` uses
   internally, and the way to build a filter without a client.
-- **`cmd`** — the CLI's args root and output helpers; see
-  [Command line](#command-line).
-- **`runpath`** — helpers for authoring a RunPath step directory; see
-  [Command line](#command-line).
-- **`apicache`** — fetch and cache the API definition, two ways.
-  **Preferred, over the API alone:** `services(client, *, refresh=False,
+
+## Connection strings (`pytruenas.target`)
+
+- **`Target`** (`NamedTuple`: `scheme, username, password, host, port,
+  path, query, fragment`) — a parsed connection string.
+  `Target.parse(connectionstring, resolve_port=True, **defaults) -> Target`
+  (raises `ValueError` for a string that does not parse as a URI, naming the
+  characters to percent-encode and never quoting the credentials);
+  `.uri` reassembles it; `.redacted` is that URI without the password;
+  `.is_local` checks for `""`/`"localhost"`/`"127.0.0.1"`; `.qsl` /
+  `.query_val(key, default=None, *, islist=False)` read the query string.
+- **`redact(connectionstring) -> str`** — the string with its password
+  **removed** (`wss://root:secret@nas` -> `wss://root@nas`), never masked, so
+  the result is still a usable target; delegates to `hostctl.host.redact_uri`,
+  so pytruenas and hostctl render a target identically. Never raises; a string
+  with no userinfo comes back unchanged.
+
+## The API definition (`pytruenas.apicache`)
+
+Fetch and cache the API definition, two ways.
+
+- **Preferred, over the API alone:** `services(client, *, refresh=False,
   version=None)` (`core.get_services` — the namespace index) and
   `service_methods(client, service, *, refresh=False, version=None)`
   (`core.get_methods(<service>)`). `version` keys the cache as it does for
@@ -1005,7 +1007,7 @@ directly. Generated stubs import `pytruenas.models.jsonschema` for
   **service**, not method name — `core.get_methods("user.create")` returns `{}` —
   and the unfiltered call is not usable at all, because the server closes the
   websocket on that payload.
-  **The whole definition:** `load(client, *, refresh=False, version=None) -> API`
+- **The whole definition:** `load(client, *, refresh=False, version=None) -> API`
   and `fetch(client, *, keep_remote=False)`, via `middlewared --dump-api`. Needs
   command access and weighs 24 MB, so it is the fallback — but it is the only
   source for an *older* API version, and what `generate-typings` consumes.
@@ -1013,39 +1015,13 @@ directly. Generated stubs import `pytruenas.models.jsonschema` for
   platform user cache directory), `path_for(host, version)`, `store(api,
   path)` (atomic); a transfer that does not reproduce the target's sha256
   raises `APIDumpError` (a `RuntimeError` too);
-  `CHUNK_SIZE`/`CHUNK_ATTEMPTS`/`CHUNK_TIMEOUT`/`DUMP_TIMEOUT`/
+  `CHUNK_SIZE`/`CHUNK_ATTEMPTS`/`CHUNK_TIMEOUT`/`DUMP_TIMEOUT`/`CLEANUP_TIMEOUT`/
   `SERVICE_TIMEOUT`, and `REMOTE_DIR` (`/var/db/system` — on a data pool so it
   survives an update, and not `noexec` the way `/tmp` is). Each fetch dumps
   into a `mktemp` file of its own there, so concurrent fetches of one appliance
   do not collide, and removes it afterwards. Every command carries
   a timeout on purpose: the web shell waits forever by default, which turns a
   stalled channel into an indefinite hang instead of a retry.
-- **`apihelp`** — render help from a dump slice; pure functions, no client.
-  `find(version, name)` (raises `UnknownMethod`, a `LookupError` too, with
-  near-misses), `methods(version)`, `namespaces(names)`, `parameters(method)`,
-  `returns(method)`, `payload_index(method)` (the **last** object-typed
-  parameter — the payload), `fields(method)` (the `--field=value` names),
-  `type_label(schema)`, `usage(name, method)`, `render(name, method)`,
-  `render_namespace(version, ns)`, `render_index(version)`. A parameter list is
-  `schemas.properties["Call parameters"].prefixItems`; the result is
-  `["Return value"]`.
-  `from_get_methods(name, entry)` and `methods_from_get_methods(found)`
-  normalize the **other** envelope — what `core.get_methods` returns, where the
-  parameters are `accepts`, the result is `returns` (a list), the doc is
-  `description`, and a `job` flag exists that the dump does not carry. Both
-  envelopes render through one path afterwards; `render` calls a job out **above**
-  the doc, because a job returns an id rather than a result and some docs run to
-  hundreds of words.
-- **`fields`** — coerce `--field=value` text per a property's schema.
-  `collect(tokens, fields) -> dict` builds a payload (dotted names nest, a
-  repeated name accumulates, `name:json=` takes literal JSON, `name=@file` reads
-  a file); `coerce(name, schema, raw)` casts one value; `split(token)` accepts
-  both spellings via `cmd.split_assignment`; `FieldError` (a
-  `ValueError` too) carries the message, and an unknown name or bad enum value
-  names the alternatives. `TRUE`/`FALSE` are the accepted boolean spellings —
-  strict sets, because `bool("false")` is `True` and would send the wrong
-  value.
-- **`io`** — internal helpers (byte-like checks); no stable external contract.
 
 ## Exceptions
 
@@ -1096,8 +1072,10 @@ or a dropped connection would pass for a missing file. Catch `CallTimeout` and
   raised by `login_ex` on a non-`SUCCESS` response and by the legacy `login` on
   a `False` answer; `.response_type` is the server discriminator, `.response`
   the full dict; the message names `method`.
-- **`APIDumpError`**, **`UnknownMethod`**, **`FieldError`** — see
-  `utils.apicache`, `utils.apihelp` and `utils.fields` above.
+- **`APIDumpError`** — see `pytruenas.apicache` above. **`UnknownMethod`**
+  — `help` or `call` named a method the API definition lacks; the message
+  lists near-misses. **`FieldError`** — a `call` field (`--name=value`) the
+  method's schema refuses; the message names the alternatives.
 
 A caller's mistake (an unknown keyword, a malformed target) is a plain
 `TypeError`/`ValueError`, not a `TrueNASError`. An `OSError` that already
@@ -1111,16 +1089,23 @@ from the CLI.
 
 ## Command line
 
-`pytruenas = "pytruenas.main:main"` is the installed console script; `python
+`pytruenas = "pytruenas.cli:main"` is the installed console script; `python
 -m pytruenas` is the same. User guide: <https://jose-pr.github.io/pytruenas/guide/cli/>.
 
-### Entry point (`pytruenas.main`)
+### Entry point (`pytruenas.cli`)
 
-- **`main(name=None, argv=None, args=None, root=None) -> int`** — build the
-  `duho` app (`root`, default `PyTrueNAS`), discover commands (built-ins in
-  `pytruenas.cmd` plus any `PYTRUENAS_PATH` / `--cmdspath` / config
-  `commandspath` entries), parse `argv`, and dispatch the selected command
-  against every target concurrently. `args` is the shared args class every
+`pytruenas.cli` is the command line, and everything below is importable from
+it (`__all__`): `main`, `PyTrueNAS`, `PyTrueNASArgs`, `TargetsField`,
+`with_targets`, `register_targets`, `load_config`, `default_config_path`,
+`emit`, `emit_json`, `json_default`, `json_value`, `ENV`. The modules it is
+built from are private; `pytruenas.cli.runpath` is public.
+
+- **`main(argv=None, *, name=None, args=None, root=None) -> int`** — build the
+  `duho` app (`root`, default `PyTrueNAS`; `name`, default `"pytruenas"`, is
+  the program name in usage and error lines), discover commands (built-ins in
+  `pytruenas.cli.commands` plus the `--cmdspath`, `$PYTRUENAS_PATH` and
+  config `cmdspath` sources), parse `argv` (`None`: `sys.argv[1:]`), and
+  dispatch the selected command against every target concurrently. `args` is the shared args class every
   command inherits (a `PyTrueNASArgs` subclass, default `root._ARGS_`; anything
   else raises `TypeError`); a derived tool adds global options through it or by
   subclassing `PyTrueNAS` with `_ARGS_` set. Raises `SystemExit` for `--help`,
@@ -1132,12 +1117,12 @@ from the CLI.
 - **`PyTrueNAS(PyTrueNASArgs, duho.Cli)`** — the app root; `--version` resolves
   from installed package metadata.
 
-### Global options (`pytruenas.utils.cmd.PyTrueNASArgs`)
+### Global options (`pytruenas.cli.PyTrueNASArgs`)
 
 `PyTrueNASArgs` (a `duho.LoggingArgs` mixin) carries the global fields every
 command sees: `config` (`--config`/`-c`, a path; `None` when not given),
-`cmdspath` (`--cmdspath`,
-split on `:`), `insecure` (`--insecure`/`-k`), `ca_bundle` (`--ca-bundle
+`cmdspath` (`--cmdspath SOURCE`, repeatable, one directory or package per
+occurrence, never split), `insecure` (`--insecure`/`-k`), `ca_bundle` (`--ca-bundle
 FILE`), `parallel` (default `1`), `logto` (default `-`
 for stderr, or a `{target}`/`{isodate}` path template; each target's file gets
 only that target's records, `--parallel` included), plus `targets` (the
@@ -1147,18 +1132,25 @@ methods `._config_path_()`/`._config_dict_()`/`._expanded_targets_()`.
 
 The config file is `--config`, else `$PYTRUENAS_CONFIG` (either must exist:
 `duho.UsageError`, exit status 2), else
-`pytruenas.utils.cmd.default_config_path()` — `pytruenas/pytruenas.cfg` in
+`pytruenas.cli.default_config_path()` — `pytruenas/pytruenas.cfg` in
 the platform's configuration directory (`%APPDATA%` on Windows,
 `$XDG_CONFIG_HOME` or `~/.config` elsewhere), read only when present. The
 working directory is never searched. Its format is the one a `#!<format>` first line names (`#!toml`, `#!yaml`,
 `#!json`, also `#!/usr/bin/env yaml`; the line is not part of the
 document), else the one the file name's suffix selects (`.toml`,
 `.yaml`/`.yml`, `.json`; `.cfg` and no suffix select none), else TOML. YAML needs the `yaml` extra. `load_config(path) -> dict` reads one
-(`pytruenas.utils.cmd`); a file that does not parse, is not a table, or is in
+(`pytruenas.cli`); a file that does not parse, is not a table, or is in
 another format (INI) is a `duho.UsageError` naming it. The CLI reads four keys
-— `credentials`, `insecure`, `ca_bundle` and `commandspath` (relative entries
-resolve against the file's directory) — and ignores any other, which a derived
-tool may read through `._config_dict_()`. Target
+— `credentials`, `insecure`, `ca_bundle` and `cmdspath` (a string or a list;
+relative entries resolve against the file's directory) — and ignores any
+other, which a derived tool may read through `._config_dict_()`; the old
+`commandspath` key is a `duho.UsageError` naming `cmdspath`.
+
+Command sources add up: the built-ins, then `$PYTRUENAS_PATH`
+(`os.pathsep`-separated), then each `--cmdspath`, then the config file's
+`cmdspath`. A later source's command replaces a same-named earlier one, so a
+user command can shadow a built-in. A source that is neither a directory nor
+an importable package is skipped with a warning. Target
 expansion (commas and `[A-Z]`/`[0-9]` ranges) applies to the HOST part only —
 a comma or a range inside credentials is part of them — and credentials are
 carried onto every expanded host.
@@ -1185,19 +1177,20 @@ to build a client from parsed args:
   none (passing both raises). `main` and `runpath.default_init` both use it,
   so a plain command and a RunPath step connect alike.
 
-Also in `pytruenas.utils.cmd`: **`with_targets(args_cls=None) -> type`**
+Also in `pytruenas.cli`: **`with_targets(args_cls=None) -> type`**
 (`args_cls`, default `PyTrueNASArgs`, with `targets` declared last),
 **`TargetsField`** (that field's annotated type), **`register_targets(parser)`**
 (adds the trailing `targets` positional to a parser you build yourself; a
-command does not need it), **`CommandModule`** (a `Protocol` naming the
-`run(client, args, logger)` a command module exposes), **`emit(text)`** /
+command does not need it), **`emit(text)`** /
 **`emit_json(value, args=None)`** and **`json_default`** (below),
 **`json_value(raw)`** (the decoding `call -p` and `query -f` share: a JSON
 value, falling back to the raw string), and **`ENV`**, the single
 `duho.env.Env("pytruenas", autoload=False)` accessor every `PYTRUENAS_*`
-setting is read through (see [Environment variables](#environment-variables)).
+setting is read through (see [Environment variables](#environment-variables)),
+and **`load_config(path) -> dict`** / **`default_config_path() -> Path`**
+(above).
 
-### Built-in commands (`pytruenas.cmd`)
+### Built-in commands (`pytruenas.cli.commands`)
 
 - **`query <namespace> [-f/--filter KEY=VALUE ...] [targets...]`** — prints
   `client.api[namespace]._query(**filters)` as JSON. Only works on queryable
@@ -1236,9 +1229,11 @@ setting is read through (see [Environment variables](#environment-variables)).
   descriptions, defaults, enum values and required-ness exist solely in the
   definition the stubs are generated from.
 - **`dump-api [targets...]`** — prints `client.dump_api()` as JSON.
-- **`generate-typings [--api-version V] [--path DIR] [--api-cache FILE]
-  [targets...]`** — dumps (or reads a cached) API definition and writes
-  `.pyi` stubs via `pytruenas.codegen.Codegen().generate(version, path)`.
+- **`generate-typings [--api-version V] [--path DIR] [--from FILE]
+  [targets...]`** — reads the API definition (`client.dump_api()`, cached per
+  host and version, or with `--from` a dump file — `dump-api` output, or a
+  gzipped file from `$PYTRUENAS_CACHE` — without connecting) and writes `.pyi`
+  stubs via `pytruenas.codegen.Codegen().generate(version, path)`.
   `--path` defaults to `truenasapi_typings/current`; only an absent or empty
   directory, or one a previous run marked `.pytruenas-typings`, is replaced.
 - **`deploy [--path PATH] [--mode pyz|dir] [--source installed|repo]
@@ -1292,7 +1287,7 @@ setting is read through (see [Environment variables](#environment-variables)).
     exclude wins). `--skip` is the `installed`-mode counterpart and has no
     effect here.
 
-### Writing a command module (`pytruenas.cmd.*` or a `--cmdspath` entry)
+### Writing a command module (`pytruenas.cli.commands.*` or a `--cmdspath` entry)
 
 A command is a plain module exposing:
 
@@ -1309,10 +1304,10 @@ A command is a plain module exposing:
   hostctl's or pytruenas's) ends that target with one ERROR line and status
   125, as hostctl's own command line does; any other exception keeps its
   traceback.
-  Write results through `utils.cmd.emit_json(value, args)` (or `emit(text)`):
+  Write results through `pytruenas.cli.emit_json(value, args)` (or `emit(text)`):
   one locked write, so concurrent targets cannot interleave mid-line, and with
   more than one target each line is `{"target": ..., "result": ...}` with the
-  credentials removed. `utils.cmd.json_default` is the encoder fallback (sets
+  credentials removed. `pytruenas.cli.json_default` is the encoder fallback (sets
   become sorted lists, dates ISO strings, bytes text, anything else its
   `str()`).
 - **`Args`** — optional; a `PyTrueNASArgs` subclass declaring the command's own
@@ -1324,13 +1319,15 @@ A command is a plain module exposing:
 - **`register(parser, args, logger)`** — optional; the imperative escape hatch,
   for what declarations can't express (mutually-exclusive/titled groups). The
   trailing `TARGET...` positionals are declared centrally as the command's last
-  field (`pytruenas.utils.cmd.with_targets`, applied by `main()` to every
+  field (`pytruenas.cli.with_targets`, applied by `main()` to every
   module command), so a command never declares them itself — declared and
   `register`-added positionals both land ahead of the targets, and the targets
   are part of the command's MCP tool schema.
 - **`_allow_passthrough_ = True`** — optional, module level; the command reads
   the arguments after `--` (`args._passthrough_`). Without it, a `--` tail is
   reported as ignored. RunPath commands are taken to read it.
+- **`_mcp_ = False`** — optional, module level; the command is not offered as
+  an MCP tool under `PYTRUENAS_MCP=stdio` (as `deploy` is not).
 - **`validate_args(args)`** — optional; called once with the parsed args
   before any target runs or any client is built. Raise `duho.UsageError` for
   an invocation the arguments alone show cannot work: it is reported once as
@@ -1340,11 +1337,11 @@ A command is a plain module exposing:
   **`finally_(client, args, logger)`** — optional lifecycle hooks
   (`finally_` always runs).
 
-### RunPath step directories (`pytruenas.utils.runpath`)
+### RunPath step directories (`pytruenas.cli.runpath`)
 
 A **RunPath** is a directory of numbered `NN-name.py` *step* files run in
 order, with no `__init__.py` — placed among the command sources
-(`PYTRUENAS_PATH` / `--cmdspath` / config `commandspath`, or nested one level
+(`PYTRUENAS_PATH` / `--cmdspath` / config `cmdspath`, or nested one level
 inside a source directory) it becomes a subcommand named after the directory.
 The discovery, ordering, filename modifiers and `--rcopts` selection are
 `duho.runpath`'s (requires `duho>=0.7.7,<0.8`); pytruenas fans the whole step
@@ -1389,7 +1386,7 @@ The module exports:
 
 ## Environment variables
 
-Every `PYTRUENAS_*` setting is read through one accessor, `utils.cmd.ENV` (a
+Every `PYTRUENAS_*` setting is read through one accessor, `pytruenas.cli.ENV` (a
 `duho.env.Env("pytruenas")`), so the set is enumerable with `sorted(ENV)`.
 `autoload=False` on purpose: the companion-module feature would import a
 `pytruenas_env` module from anywhere on `sys.path` including the CWD, and a CLI
@@ -1406,7 +1403,7 @@ is routinely run from a directory the user does not control.
   bundles, and the package the deployed copy runs. For when pytruenas is a
   *dependency* of the thing being deployed rather than the deliverable.
 - **`PYTRUENAS_CACHE`** — directory for the cached API definition (read by
-  `utils.apicache`), one gzipped file per host and API version. Default: the
+  `pytruenas.apicache`), one gzipped file per host and API version. Default: the
   platform user cache directory (`$XDG_CACHE_HOME/pytruenas`, `XDG_CACHE_HOME`
   defaulting to `~/.cache`; or `%LOCALAPPDATA%\pytruenas\cache`). A host label
   is sanitized to a single path component, so a connection string cannot
@@ -1419,12 +1416,14 @@ is routinely run from a directory the user does not control.
 - **`PYTRUENAS_MCP`** — not read by pytruenas itself, nor through `ENV`:
   `duho`'s own `<PREFIX>_MCP` launch trigger, keyed off this app's `Env`
   prefix. Setting `PYTRUENAS_MCP=stdio` makes `main()` serve MCP over stdio
-  instead of the normal CLI dispatch, exposing every built-in command
-  (`call`, `query`, `deploy`, ...) and RunPath command as an MCP tool, whose
-  `targets` argument names the hosts (none: `localhost`). Checked in both
-  `duho.main` and `duho.app`, so it applies here regardless of entry point.
-  It is enabled: no opt-out is set (`_mcp_ = False` on `PyTrueNAS`, or
-  `app(mcp=False)`, would disable it).
+  instead of the normal CLI dispatch, exposing the built-in commands
+  (`call`, `query`, `help`, `dump-api`, `generate-typings`) and every RunPath
+  command as MCP tools, whose `targets` argument names the hosts (none:
+  `localhost`). `deploy` is not a tool (module-level `_mcp_ = False`):
+  installing software on an appliance is for a person to choose. `call` is,
+  and can change the target like any middleware call. A command module of your
+  own opts out the same way. Checked in both `duho.main` and `duho.app`, so it
+  applies here regardless of entry point.
 - **`PYTRUENAS_CREDENTIALS`** — **a secret**: credentials in any one-string
   form `Credentials(...)` takes (an API key, `user:password`, a token). Read by
   `Credentials.from_env()`, and by the CLI (`PyTrueNASArgs._credentials_`) for
@@ -1473,6 +1472,4 @@ is routinely run from a directory the user does not control.
   directory.
 - **Stats from a listing carry `st_mtime` 0** (`filesystem.listdir` reports no
   mtime); call `stat()` when you need it.
-- **`--cmdspath` splits on `:`**, which breaks a Windows drive letter; use
-  `PYTRUENAS_PATH` (split on `os.pathsep`) there.
 - **Never raise `SystemExit` from a command body**: return an exit code.

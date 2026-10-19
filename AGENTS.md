@@ -15,11 +15,14 @@ docs site; [`CONTRIBUTING.md`](CONTRIBUTING.md) covers the human workflow.
   (`TrueNASClient`, a hostctl `PosixHost`); `connection.py` the JSON-RPC
   websocket transport; `namespace.py` the dynamic API dispatcher; `auth.py` credentials; `exceptions.py` the
   `TrueNASError` base; `providers.py` and `webshell.py` the transport
-  providers; `fs/` remote path objects; `main.py` the CLI and `cmd/` its
-  built-in command modules; `codegen/` the typings generator; `models/` the
-  API-dump TypedDicts; `patch/` host modification beyond the API; `utils/`
-  shared helpers. `deploy` runs on `hostctl.deploy`; `cmd/deploy.py` holds
-  only pytruenas's policy.
+  providers; `fs/` remote path objects; `query.py` the filter operators,
+  `target.py` connection strings, `apicache.py` the cached API definition;
+  `cli/` the command line (`_app.py` the app and fan-out, `_args.py` the
+  global options and config file, `runpath.py` RunPath helpers, `commands/`
+  the built-in commands); `codegen/` the typings generator; `models/` the
+  API-dump TypedDicts; `patch/` host modification beyond the API; `_utils/`
+  private helpers. `deploy` runs on `hostctl.deploy`;
+  `cli/commands/deploy.py` holds only pytruenas's policy.
 - `tests/` — the suite, one module per area. `benchmarks/` — a runnable perf
   suite plus its tracked results. `examples/` — runnable scripts.
   `docs/` — the MkDocs site sources.

@@ -18,7 +18,10 @@ Options:
   empty is refused rather than emptied — hand-written stubs included.
 - `--api-version VERSION` — target a specific API version (e.g. `v26.0.0`);
   defaults to the newest version in the dump.
-- `--api-cache FILE` — read/write a cached API dump instead of hitting the host.
+- `--from FILE` — read the API definition from a dump file instead of the
+  host: `pytruenas dump-api` output, or a gzipped file from
+  `$PYTRUENAS_CACHE`. Nothing connects. Without it, the definition comes
+  from `client.dump_api()`, which caches it per host and API version.
 
 The generator dumps the whole API and writes one `.pyi` per namespace (about
 129 files for a TrueNAS 26.0 host). The test suite generates stubs from a small

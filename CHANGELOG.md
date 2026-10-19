@@ -44,9 +44,9 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   selects none), else TOML. A YAML file keeps working as `pytruenas.yaml`, or
   as a `.cfg` starting with `#!yaml`, with the new `yaml` extra, which replaces
   `config`. A file that does not parse, or is not a table, is now an error
-  naming it (exit status 2) instead of being ignored. `commandspath` is read
-  from any config file. `PyTrueNASArgs._config_is_implicit_()` is gone;
-  `._config_path_()` and `utils.cmd.load_config()`/`default_config_path()`
+  naming it (exit status 2) instead of being ignored. `cmdspath` (below) is
+  read from any config file. `PyTrueNASArgs._config_is_implicit_()` is gone;
+  `._config_path_()` and `pytruenas.cli.load_config()`/`default_config_path()`
   are new.
 - **`pytruenas.utils.tls` is gone** (`context`, `ca_bundle`, `CA_BUNDLE_ENV`,
   `SslVerify`); the decision is private now. Pass `verify=` instead.
@@ -127,7 +127,7 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   a method answering with a record id returns that id instead of waiting on an
   unrelated job of the same number. Pass `{"job": True}` for a method whose
   schema cannot be read (the lookup logs a WARNING and waits on nothing).
-  `utils.apicache.service_methods` raises `UnknownMethod` (still a
+  `pytruenas.apicache.service_methods` raises `UnknownMethod` (still a
   `LookupError`) for an unknown service.
 - **`with TrueNASClient(...)` opens the API connection, not a shell.**
   Entering (and `client.connect()`) opens and authenticates `client.conn`;
@@ -174,6 +174,38 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - **Removed from `pytruenas.patch`:** `zfs.PathLike`, which was
   `Union[str, Any]` (the `zfs` functions take `str | os.PathLike[str]`), and
   `systemd.parse_unit()`; `render_unit()` and `UnitConfigParser` stay.
+- **`pytruenas.utils` is gone, and the command line is `pytruenas.cli`.**
+  Change the imports:
+  - `pytruenas.utils.query` → `pytruenas.query`; `pytruenas.utils.target` →
+    `pytruenas.target`; `pytruenas.utils.apicache` → `pytruenas.apicache`.
+  - `pytruenas.utils.cmd` (`PyTrueNASArgs`, `with_targets`, `TargetsField`,
+    `register_targets`, `emit`, `emit_json`, `json_default`, `json_value`,
+    `ENV`, `load_config`, `default_config_path`) and `pytruenas.main`
+    (`main`, `PyTrueNAS`) → `pytruenas.cli`.
+  - `pytruenas.utils.runpath` → `pytruenas.cli.runpath`.
+  - `pytruenas.cmd.*` → `pytruenas.cli.commands.*`.
+  - `pytruenas.utils.apihelp`, `pytruenas.utils.fields` and
+    `pytruenas.utils.io` are private now; `UnknownMethod` and `FieldError`
+    stay in `pytruenas.exceptions`. `utils.cmd.CommandModule` is gone.
+  - The console script is `pytruenas.cli:main`; a wrapper that named
+    `pytruenas.main:main` must change.
+- **`pytruenas.cli.main(argv=None, *, name=None, args=None, root=None)`**:
+  `argv` is the one positional. `main("mytool", argv)` becomes
+  `main(argv, name="mytool")`.
+- **`--cmdspath` is repeated, not split**: `--cmdspath a --cmdspath b`, not
+  `--cmdspath a:b`, which cut a Windows drive letter off its path. The
+  config file's `commandspath` is `cmdspath`, and the old key is an error
+  naming it. `$PYTRUENAS_PATH` is unchanged (`os.pathsep`-separated).
+- **`generate-typings --api-cache FILE` is `--from FILE`**, which only reads:
+  a `dump-api` output, or a gzipped file from `$PYTRUENAS_CACHE`. Without it
+  the definition comes from `client.dump_api()`, which already caches it per
+  host and API version.
+- **`deploy` is not an MCP tool** under `PYTRUENAS_MCP=stdio`: installing
+  software on an appliance is for a person to choose. The command line is
+  unchanged.
+- **The `repo` extra is gone**: `deploy --source repo` needs nothing beyond
+  the core install, which already carries `hostctl[deploy]`. Drop `[repo]`
+  from a requirement.
 
 ### Changed
 

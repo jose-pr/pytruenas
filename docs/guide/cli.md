@@ -168,7 +168,7 @@ unless it says otherwise:
 ```toml
 credentials = "1-<64-char-api-key>"   # or a table: {username = "root", password = "..."}
 ca_bundle = "/etc/pki/lab-ca.pem"     # or: insecure = true
-commandspath = ["mycommands"]         # extra command sources, relative to this file
+cmdspath = ["mycommands"]             # extra command sources, relative to this file
 ```
 
 Its format is the one a `#!<format>` first line names (`#!toml`, `#!yaml`,
@@ -187,7 +187,7 @@ ca_bundle: /etc/pki/lab-ca.pem
   `$PYTRUENAS_CREDENTIALS`.
 - `insecure` / `ca_bundle` — the TLS default, below `-k`/`--ca-bundle` and
   `$PYTRUENAS_INSECURE`/`$PYTRUENAS_CA_BUNDLE`.
-- `commandspath` — directories or packages to load commands from.
+- `cmdspath` — directories or packages to load commands from.
 
 The file is `--config FILE` (`-c`), else `$PYTRUENAS_CONFIG`, else
 `pytruenas/pytruenas.cfg` in your configuration directory (`%APPDATA%` on
@@ -196,14 +196,39 @@ is never searched. The default file may be absent; a file you named must exist,
 and a file that does not parse stops the run with exit status 2 before any
 target.
 
+## Your own commands
+
+A command source is a directory of command modules (or RunPath step
+directories), or an importable package of them. Sources add up, and a later
+one's command replaces a same-named earlier one:
+
+1. the built-ins;
+2. `$PYTRUENAS_PATH`, separated by `os.pathsep` (`:`, or `;` on Windows);
+3. each `--cmdspath SOURCE`, repeated for more than one;
+4. the config file's `cmdspath`.
+
+```bash
+pytruenas --cmdspath ./ops --cmdspath C:\work\more-commands mytask nas1
+```
+
+A source that is neither a directory nor an importable package is skipped with
+a warning.
+
 ## MCP
 
 Since `duho` 0.6.0, setting `PYTRUENAS_MCP=stdio` makes `pytruenas` serve MCP
 over stdio instead of running its normal CLI dispatch, exposing `call`,
-`query`, `deploy` and the rest as MCP tools for an agent to call directly —
-with no extra wiring on pytruenas's side. This is `duho`'s own trigger (checked
-in both `duho.main` and `duho.app`, so it applies here too), keyed off the
-app's `Env` prefix (`PYTRUENAS_`); pytruenas does not opt out of it.
+`query`, `help`, `dump-api`, `generate-typings` and your RunPath commands as
+MCP tools for an agent to call directly — with no extra wiring on pytruenas's
+side. This is `duho`'s own trigger (checked in both `duho.main` and
+`duho.app`, so it applies here too), keyed off the app's `Env` prefix
+(`PYTRUENAS_`).
+
+`deploy` is not a tool: installing software on an appliance is for a person to
+choose. `call` is, and it reaches every middleware method — including ones
+that change the target — so give an agent credentials scoped to what it should
+be able to do. A command module of your own leaves the tool list with a
+module-level `_mcp_ = False`.
 
 Each tool takes the command's own arguments plus `targets`, the hosts it runs
 on — the same trailing positionals as on the command line, so with none it runs

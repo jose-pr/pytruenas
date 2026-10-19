@@ -26,7 +26,7 @@ patterns you'd otherwise hand-write:
 
 ```python
 # Filters from kwargs, with operator helpers:
-from pytruenas.utils import query as q
+from pytruenas import query as q
 admins = client.api.user._query(uid=q.GT(0), locked=False)
 
 # Fetch-or-None:
@@ -114,11 +114,11 @@ error is an `OSError`, so a timeout never reads as "not there" in a path's
 
 ## Query filters
 
-`pytruenas.utils.query` provides operator wrappers so kwargs map to middleware
+`pytruenas.query` provides operator wrappers so kwargs map to middleware
 filter tuples:
 
 ```python
-from pytruenas.utils import query as q
+from pytruenas import query as q
 q.filter_from_kwargs(username="root", uid=q.GT(0))
 # -> [("username", "=", "root"), ("uid", ">", 0)]
 ```
