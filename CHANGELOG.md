@@ -153,6 +153,27 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   compared it to a bare `truenas+wss://host` string, or parsed it, sees the
   query. `TrueNASConfig` compares and hashes by `connection_uri` (it compared
   by identity): credentials and `name` are not part of equality.
+- **The `codegen` extra is gone**: `pip install pytruenas` runs
+  `generate-typings`, which builds the stubs in Python (byte for byte the
+  same output) and no longer needs jinja2. Drop `[codegen]` from a
+  requirement; pip warns about an extra that does not exist.
+  `pytruenas.codegen.jinja`, its template and `codegen.Renderer` are gone.
+- **`pytruenas.models` holds TypedDicts and type aliases only.**
+  `Schema.get_type`, every `python_declaration`, `TYPES` and `_typeddict_name`
+  leave `models.jsonschema`; turning a schema into a type is private to
+  `codegen`. Stubs already generated keep working: they import
+  `pytruenas.models.jsonschema` for `JsonValue`/`JsonObject`/`JsonArray`/
+  `JsonNumber`, which stay.
+- **Renamed:** `models.apidump.Api` → `API`, `models.apidump.Method` →
+  `APIMethod`, `models.apidump.Event` → `APIEvent`, and `codegen.BadApiName` →
+  `codegen.BadAPIName`, which is now a `pytruenas.TrueNASError` as well as a
+  `ValueError`.
+- **`pytruenas.codegen` exports `Codegen` and `BadAPIName` only.** `Namespace`,
+  `Method`, `Parameter`, `PyDeclaration` and `Source`, and `docstring()`, are
+  private to it.
+- **Removed from `pytruenas.patch`:** `zfs.PathLike`, which was
+  `Union[str, Any]` (the `zfs` functions take `str | os.PathLike[str]`), and
+  `systemd.parse_unit()`; `render_unit()` and `UnitConfigParser` stay.
 
 ### Added
 
