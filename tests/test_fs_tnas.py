@@ -424,6 +424,57 @@ def test_stat_from_listdir_entry_without_mode():
     assert stat.S_ISDIR(st.st_mode)
 
 
+def test_stat_follows_a_symlink_to_its_target():
+    link = {"type": "SYMLINK", "mode": 0o120777, "realpath": "/mnt/tank/dir"}
+    target = {"type": "DIRECTORY", "mode": 0o40755, "uid": 1000, "gid": 100}
+    client = _client()
+    client.api.filesystem.stat.side_effect = lambda path, **kw: (
+        link if path == "/mnt/tank/link" else target
+    )
+    p = _ws(client, "/mnt/tank/link")
+    assert p.is_dir()
+    assert p.stat().st_uid == 1000
+    assert stat.S_ISLNK(p.stat(follow_symlinks=False).st_mode)
+    assert p.is_symlink()
+
+
+def test_stat_of_a_dangling_symlink_is_not_found_but_lstat_works():
+    link = {"type": "SYMLINK", "mode": 0o120777, "realpath": "/mnt/tank/gone"}
+
+    def stat_(path, **kw):
+        if path == "/mnt/tank/gone":
+            raise FileNotFoundError(2, "No such file or directory")
+        return link
+
+    client = _client()
+    client.api.filesystem.stat.side_effect = stat_
+    p = _ws(client, "/mnt/tank/link")
+    with pytest.raises(FileNotFoundError):
+        p.stat()
+    assert not p.exists()
+    assert p.is_symlink()
+
+
+def test_stat_reports_owner_and_times():
+    st = _stat_from_info(
+        {
+            "mode": 0o100640,
+            "size": 3,
+            "uid": 1000,
+            "gid": 100,
+            "atime": 11.5,
+            "mtime": 12.5,
+            "ctime": 13.5,
+        }
+    )
+    assert (st.st_uid, st.st_gid) == (1000, 100)
+    assert (st.st_atime, st.st_mtime, st.st_ctime) == (11.5, 12.5, 13.5)
+
+
+def test_a_symlink_entry_without_mode_is_a_link():
+    assert stat.S_ISLNK(_stat_from_info({"type": "SYMLINK"}).st_mode)
+
+
 # -- fs.path() for a remote host is the host's own composite path -------------
 
 

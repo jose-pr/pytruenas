@@ -61,9 +61,10 @@ _SCHEME = "truenas+ws"
 _LISTDIR_NAME_ONLY = {"select": ["name"]}
 
 #: ``_scandir`` seeds each child's stat from the listing, so it needs everything
-#: :func:`_stat_from_info` reads: ``mode`` (the full ``st_mode``), ``size``, and
-#: ``type`` as the coarse fallback for an entry that reports no ``mode``.
-_LISTDIR_STAT = {"select": ["name", "type", "size", "mode"]}
+#: :func:`_stat_from_info` reads that ``listdir`` has: ``mode`` (the full
+#: ``st_mode``), ``size``, the owner, and ``type`` as the coarse fallback for an
+#: entry that reports no ``mode``.
+_LISTDIR_STAT = {"select": ["name", "type", "size", "mode", "uid", "gid"]}
 
 
 class TnasWsBackend:
@@ -135,10 +136,19 @@ class TnasWsPath(_URIPath):
     # -- stat / listing ----------------------------------------------------
 
     def stat(self, *, follow_symlinks=True) -> "_FileStat":
+        """The path's status; ``follow_symlinks=False`` describes a link itself.
+
+        ``filesystem.stat`` describes a link itself (``type: SYMLINK``) and
+        names its target in ``realpath``, so following one is a second stat.
+        """
         hint = self._pop_stat_hint()
         if hint is not None and not follow_symlinks:
             return hint
         info = self._fs.stat(self.path, _ioerror=True)
+        if follow_symlinks and _entry_type(info) == "SYMLINK":
+            target = info.get("realpath")
+            if target and target != self.path:
+                info = self._fs.stat(target, _ioerror=True)
         return _stat_from_info(info)
 
     def _listdir(self):
@@ -319,18 +329,32 @@ def _oserror(error: Exception, path: str) -> OSError:
     return OSError(getattr(error, "errno", None) or _errno.EIO, str(error), path)
 
 
+#: ``st_mode`` file-type bits for a ``filesystem.*`` entry's ``type``, used
+#: when the entry reports no ``mode``.
+_TYPE_MODE = {"DIRECTORY": _stat.S_IFDIR, "SYMLINK": _stat.S_IFLNK}
+
+
+def _entry_type(info: "dict") -> str:
+    return str(info.get("type") or "").upper()
+
+
 def _stat_from_info(info: "dict") -> "_FileStat":
     """Map a middleware ``filesystem.stat``/``listdir`` entry to a ``FileStat``.
 
-    The middleware reports ``mode`` (full ``st_mode`` incl. type bits), ``size``,
-    and ``mtime``; missing pieces default sanely (a directory entry from
-    ``listdir`` carries ``type`` when ``mode`` is absent).
+    The middleware reports ``mode`` (full ``st_mode`` incl. type bits),
+    ``size``, ``uid``/``gid`` and the times; ``listdir`` has no times. A field
+    it leaves out is 0, and ``type`` stands in for a missing ``mode``.
     """
     mode = info.get("mode")
     if mode is None:
-        # listdir entries may carry only a coarse type.
-        entry_type = (info.get("type") or "").upper()
-        mode = _stat.S_IFDIR if entry_type == "DIRECTORY" else _stat.S_IFREG
-    size = info.get("size") or 0
-    mtime = info.get("mtime") or 0
-    return _FileStat(st_mode=int(mode), st_size=int(size), st_mtime=mtime)
+        mode = _TYPE_MODE.get(_entry_type(info), _stat.S_IFREG)
+    result = _FileStat(
+        st_mode=int(mode),
+        st_size=int(info.get("size") or 0),
+        st_mtime=info.get("mtime") or 0,
+    )
+    result.st_uid = int(info.get("uid") or 0)
+    result.st_gid = int(info.get("gid") or 0)
+    result.st_atime = info.get("atime") or 0
+    result.st_ctime = info.get("ctime") or 0
+    return result
