@@ -195,37 +195,53 @@ class WebShellSession:
             # The same trust as the API websocket -- see pytruenas._tls.
             ws = _websocket.WebSocket(sslopt=_tls.sslopt(self.client.config.verify))
             ws.connect(self._uri(), timeout=CONNECT_TIMEOUT)
-
-            # match_origin=True, single_use=True: the middleware's own default
-            # for the first is True. This token is handed straight to a
-            # websocket opened here, from this machine, exactly once.
-            token = self.client.api.auth.generate_token(60, {}, True, True)
-            ws.send(_json.dumps({"token": token, "options": self.options}))
-
-            # Catch a rejected token before the first command; the banner that
-            # follows a good one is simply outside every command's frame.
-            ws.settimeout(_SETTLE)
-            while True:
-                try:
-                    frame = ws.recv()
-                except Exception:
-                    break
-                if isinstance(frame, str):
-                    try:
-                        message = _json.loads(frame)
-                    except ValueError:
-                        continue
-                    if message.get("msg") == "connected":
-                        self.shell_id = message.get("id")
-                    elif message.get("msg") == "failed":
-                        ws.close()
-                        raise _OperationNotStartedError(
-                            "web shell rejected the token: "
-                            f"{message.get('error', {}).get('reason', 'unknown')}"
-                        )
+            try:
+                self._authenticate(ws)
+            except BaseException:
+                # A failed token, or a refusal of any shape, left the
+                # websocket open.
+                ws.close()
+                raise
             self._ws = ws
             self._stream = _WebSocketStream(ws)
             return ws
+
+    def _authenticate(self, ws: _ty.Any) -> None:
+        # match_origin=True, single_use=True: the middleware's own default
+        # for the first is True. This token is handed straight to a
+        # websocket opened here, from this machine, exactly once.
+        token = self.client.api.auth.generate_token(60, {}, True, True)
+        ws.send(_json.dumps({"token": token, "options": self.options}))
+
+        # Catch a rejected token before the first command; the banner that
+        # follows a good one is simply outside every command's frame.
+        ws.settimeout(_SETTLE)
+        while True:
+            try:
+                frame = ws.recv()
+            except Exception:
+                break
+            if not isinstance(frame, str):
+                continue
+            try:
+                message = _json.loads(frame)
+            except ValueError:
+                continue
+            if not isinstance(message, dict):
+                continue
+            if message.get("msg") == "connected":
+                self.shell_id = message.get("id")
+            elif message.get("msg") == "failed":
+                error = message.get("error")
+                reason = error.get("reason") if isinstance(error, dict) else error
+                raise _OperationNotStartedError(
+                    f"web shell rejected the token: {reason or 'unknown'}"
+                )
+        if self.shell_id is None:
+            raise _OperationNotStartedError(
+                "web shell sent no 'connected' message: the endpoint closed or "
+                "stayed silent after the token"
+            )
 
     @property
     def stream(self) -> _WebSocketStream:

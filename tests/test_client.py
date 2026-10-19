@@ -86,14 +86,13 @@ def test_upload_builds_upload_target(monkeypatch):
     c = TrueNASClient(None, autologin=False)
     captured = {}
 
-    def fake_post(url, headers=None, verify=None, files=None):
-        captured["url"] = url
-        captured["headers"] = headers
-        captured["verify"] = verify
+    def fake_request(method, url, headers=None, verify=None, files=None, timeout=None):
+        captured.update(method=method, url=url, headers=headers, verify=verify)
+        captured["timeout"] = timeout
         return MagicMock(json=lambda: {"job_id": 7})
 
     monkeypatch.setattr(
-        "requests.Session.post", lambda self, *a, **k: fake_post(*a, **k)
+        "requests.Session.request", lambda self, *a, **k: fake_request(*a, **k)
     )
     # a pre-supplied token avoids the auth.generate_token API round trip
     c.api = MagicMock()
@@ -102,6 +101,8 @@ def test_upload_builds_upload_target(monkeypatch):
     assert captured["headers"]["Authorization"] == "Token tok"
     # Always passed per request -- see TrueNASHost._http_verify.
     assert captured["verify"] is True
+    # A silent side channel blocked for good.
+    assert captured["method"] == "POST" and all(captured["timeout"])
 
 
 def test_upload_reports_a_refused_upload(monkeypatch):
@@ -116,13 +117,13 @@ def test_upload_reports_a_refused_upload(monkeypatch):
 
     resp = MagicMock(status_code=413, text="<html>Payload Too Large</html>")
     resp.raise_for_status.side_effect = requests.HTTPError("413 Client Error")
-    monkeypatch.setattr("requests.Session.post", lambda self, *a, **k: resp)
+    monkeypatch.setattr("requests.Session.request", lambda self, *a, **k: resp)
     with pytest.raises(requests.HTTPError):
         c.upload(b"data", "config.upload", token="tok", wait=False)
 
     ok = MagicMock(status_code=200, text="not json")
     ok.raise_for_status.return_value = None
     ok.json.side_effect = ValueError("no json")
-    monkeypatch.setattr("requests.Session.post", lambda self, *a, **k: ok)
+    monkeypatch.setattr("requests.Session.request", lambda self, *a, **k: ok)
     with pytest.raises(ClientException, match="no job id"):
         c.upload(b"data", "config.upload", token="tok", wait=False)

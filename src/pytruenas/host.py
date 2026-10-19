@@ -34,6 +34,7 @@ import inspect as _inspect
 import json as _js
 import logging as _logging
 import os as _os
+import re as _re
 import ssl as _ssl
 import threading as _threading
 import typing as _ty
@@ -166,6 +167,41 @@ def _without_otp(creds: "_auth.Credentials") -> "_auth.Credentials":
     spent = _copy.copy(creds)
     spent.otp_token = None  # type: ignore[attr-defined]
     return spent
+
+
+#: A token in a URL's query: what `_side_request` strips from a message.
+_TOKEN_IN_QUERY = _re.compile(r"((?:auth_)?token=)[^&#\s'\")]+")
+
+
+class PendingDownload:
+    """A download the middleware prepared: its ``job_id``, and the bytes on ``fetch()``.
+
+    ``TrueNASClient.download(..., wait=False)`` returns one. The link is
+    single-use and carries a token, so it is not shown in the ``repr``.
+    """
+
+    def __init__(self, host: "TrueNASHost", job_id: int, uri: str, buffered: bool):
+        self.job_id = job_id
+        self._host = host
+        self._uri = uri
+        self._buffered = buffered
+
+    def fetch(self, callback: "_ty.Optional[_ty.Callable[..., object]]" = None) -> bytes:
+        """The downloaded bytes, once the job that produced them has finished.
+
+        A failed job raises :class:`~pytruenas.connection.JobFailed`. A
+        buffered download's job is waited for before the fetch; an unbuffered
+        one streams into the response and is checked after it.
+        """
+        if self._buffered:
+            self._host.wait(self.job_id, callback=callback)
+        content = self._host._side_request("GET", self._uri).content
+        if not self._buffered:
+            self._host.wait(self.job_id, callback=callback)
+        return content
+
+    def __repr__(self) -> str:
+        return f"PendingDownload(job_id={self.job_id!r})"
 
 
 def _close_quietly(closeable: object) -> None:
@@ -956,6 +992,8 @@ class TrueNASHost(_PosixHost, _ty.Generic[ApiVersion]):
         self._conn_finalizer: "_ty.Optional[_weakref.finalize]" = None
         #: One warning per host about credentials over plaintext ws://.
         self._plaintext_warned = False
+        #: One warning per host when TLS verification is off.
+        self._unverified_warned = False
         #: HTTP(S) session for the side channels; see `_http`.
         self._http_session: "_ty.Optional[_req.Session]" = None
         # `client=` is accepted and ignored: the host *is* the client now.
@@ -1025,6 +1063,7 @@ class TrueNASHost(_PosixHost, _ty.Generic[ApiVersion]):
 
     def _openwss(self):
         config = self._config
+        self._warn_if_unverified()
         # A unix socket is addressed by its path as given, not re-parsed as a
         # URI: `None` here meant "the default socket", so a configured
         # `socket_path` was silently ignored.
@@ -1285,16 +1324,15 @@ class TrueNASHost(_PosixHost, _ty.Generic[ApiVersion]):
             # this token is used once, by one HTTP request from this machine.
             token = self.api.auth.generate_token(5, {}, True, True, **kwargs)
 
-        resp = self._http.post(
+        # An upload the middleware refuses answers with an HTTP error and an
+        # HTML/JSON body; without the status check that surfaced as a KeyError
+        # or a JSON decode error, naming neither the status nor the reason.
+        resp = self._side_request(
+            "POST",
             target.uri,
             headers={"Authorization": f"Token {token}"},
-            verify=self._http_verify,
             files={"data": _js.dumps(data).encode(), "file": file},
         )
-        # An upload the middleware refuses answers with an HTTP error and an
-        # HTML/JSON body; without these checks that surfaced as a KeyError or a
-        # JSON decode error, naming neither the status nor the reason.
-        resp.raise_for_status()
         try:
             jobid = resp.json()["job_id"]
         except (ValueError, KeyError, TypeError):
@@ -1399,23 +1437,37 @@ class TrueNASHost(_PosixHost, _ty.Generic[ApiVersion]):
         :class:`~pytruenas.connection.JobFailed` rather than returning what
         was sent before it failed. ``buffered=True`` waits before fetching;
         otherwise the job streams into the response and is checked after it.
-        ``wait=False`` returns the job id without fetching anything.
+        ``wait=False`` returns a :class:`PendingDownload` instead of the bytes:
+        its ``job_id``, and ``fetch()`` when they are wanted.
         """
         jobid, link = self.api.core.download(
             method, args, filename or "download", buffered, **kwargs
         )
-        target = self._http_target(link)
-
+        pending = PendingDownload(self, jobid, self._http_target(link).uri, buffered)
         if wait:
-            callback = wait if callable(wait) else None
-            if buffered:
-                self.wait(jobid, callback=callback)
-            resp = self._http.get(target.uri, verify=self._http_verify)
+            return pending.fetch(callback=wait if callable(wait) else None)
+        return pending
+
+    def _side_request(self, method: str, uri: str, **kwargs) -> "_req.Response":
+        """One HTTP(S) side-channel request, checked, bounded and token-free.
+
+        ``requests`` names the URL in its errors, and a download link carries
+        its ``auth_token`` in the query, so the message is re-raised without
+        it. The connect and read timeouts are the websocket's own.
+        """
+        try:
+            resp = self._http.request(
+                method,
+                uri,
+                verify=self._http_verify,
+                timeout=(_connection.CONNECT_TIMEOUT, _connection.CALL_TIMEOUT),
+                **kwargs,
+            )
             resp.raise_for_status()
-            if not buffered:
-                self.wait(jobid, callback=callback)
-            return resp.content
-        return jobid
+        except _req.RequestException as exc:
+            message = _TOKEN_IN_QUERY.sub(r"\1<redacted>", str(exc))
+            raise type(exc)(message, response=exc.response) from None
+        return resp
 
     def dump_api(self, *, cache: bool = True, refresh: bool = False):
         """Return the middleware API definition (``middlewared --dump-api``).
@@ -1530,6 +1582,18 @@ class TrueNASHost(_PosixHost, _ty.Generic[ApiVersion]):
         self.replace_providers(executor=executors, path=paths)
         return private_key
 
+    def _warn_if_unverified(self) -> None:
+        """Warn once when TLS certificates go unchecked for a remote target."""
+        config = self._config
+        if config.verify is not False or config.is_local or config.secure is False:
+            return
+        if self._unverified_warned:
+            return
+        self._unverified_warned = True
+        self.logger.warning(
+            "TLS certificate verification is off for %s (verify=False)", config.name
+        )
+
     def _warn_if_plaintext(self, creds: object) -> None:
         """Warn once when credentials would travel over plain ``ws://``.
 
@@ -1583,6 +1647,7 @@ class TrueNASHost(_PosixHost, _ty.Generic[ApiVersion]):
         """
         if self._http_session is None:
             session = _req.Session()
+            self._warn_if_unverified()
             context = _tls.context(self._config.verify)
             if context is not None:
                 session.mount("https://", _TrustAdapter(context))
@@ -1631,4 +1696,10 @@ class TrueNASHost(_PosixHost, _ty.Generic[ApiVersion]):
 setattr(_auth, "TrueNASClient", TrueNASHost)
 setattr(_namespace, "TrueNASClient", TrueNASHost)
 
-__all__ = ["AUTO_SCHEME", "DEFAULT_SOCKET_PATH", "TrueNASConfig", "TrueNASHost"]
+__all__ = [
+    "AUTO_SCHEME",
+    "DEFAULT_SOCKET_PATH",
+    "PendingDownload",
+    "TrueNASConfig",
+    "TrueNASHost",
+]

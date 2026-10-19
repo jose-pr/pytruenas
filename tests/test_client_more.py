@@ -38,12 +38,14 @@ def test_download_buffered_builds_target_and_waits(monkeypatch):
 
     captured = {}
 
-    def fake_get(url, verify=None):
+    def fake_request(method, url, verify=None, timeout=None):
         captured["url"] = url
         captured["verify"] = verify
         return MagicMock(content=b"payload", raise_for_status=lambda: None)
 
-    monkeypatch.setattr("requests.Session.get", lambda self, *a, **k: fake_get(*a, **k))
+    monkeypatch.setattr(
+        "requests.Session.request", lambda self, *a, **k: fake_request(*a, **k)
+    )
     monkeypatch.setattr("time.sleep", lambda _s: None)
     # The job is still running on the first poll: the fetch must wait for it.
     states = iter(["RUNNING", "SUCCESS"])
@@ -71,7 +73,7 @@ def _streamed_download(monkeypatch, state):
     c.api.core.download.return_value = (33, "/_download/33?auth=x")
     events = []
 
-    def fake_get(self, url, verify=None):
+    def fake_get(self, method, url, **kwargs):
         events.append("GET")
         return MagicMock(content=b"partial", raise_for_status=lambda: None)
 
@@ -88,7 +90,7 @@ def _streamed_download(monkeypatch, state):
             }
         ]
 
-    monkeypatch.setattr("requests.Session.get", fake_get)
+    monkeypatch.setattr("requests.Session.request", fake_get)
     c.api.core.get_jobs.side_effect = get_jobs
     return c, events
 
@@ -131,8 +133,8 @@ def test_read_bytes_of_a_failed_download_is_an_oserror(monkeypatch):
             ]
 
     monkeypatch.setattr(
-        "requests.Session.get",
-        lambda self, url, verify=None: MagicMock(
+        "requests.Session.request",
+        lambda self, method, url, **kwargs: MagicMock(
             content=b"partial", raise_for_status=lambda: None
         ),
     )
@@ -143,15 +145,45 @@ def test_read_bytes_of_a_failed_download_is_an_oserror(monkeypatch):
     assert error.value.errno == errno.EIO
 
 
-def test_download_no_wait_returns_jobid(monkeypatch):
+def test_download_no_wait_returns_a_handle_that_can_still_fetch(monkeypatch):
+    """It returned the job id and discarded the link, so the bytes of a
+    `wait=False` download could never be fetched."""
     c = TrueNASClient(None, autologin=False)
     c.api = MagicMock()
-    c.api.core.download.return_value = (22, "/_download/22")
-    # wait=False must NOT touch requests.get at all
-    monkeypatch.setattr(
-        "requests.Session.get", MagicMock(side_effect=AssertionError("should not GET"))
-    )
-    assert c.download("config.save", wait=False) == 22
+    c.api.core.download.return_value = (22, "/_download/22?auth_token=SECRET")
+    c.api.core.get_jobs.return_value = [
+        {"id": 22, "state": "SUCCESS", "progress": {}, "result": None}
+    ]
+    fetched = []
+
+    def fake_request(self, method, url, **kwargs):
+        fetched.append(url)
+        return MagicMock(content=b"payload", raise_for_status=lambda: None)
+
+    monkeypatch.setattr("requests.Session.request", fake_request)
+    pending = c.download("config.save", wait=False)
+    assert fetched == []  # wait=False GETs nothing until asked
+    assert pending.job_id == 22 and "SECRET" not in repr(pending)
+    assert pending.fetch() == b"payload"
+    assert "/_download/22" in fetched[0]
+
+
+def test_a_failed_download_does_not_name_its_token(monkeypatch):
+    """requests names the URL, and a download link carries its auth_token."""
+    import requests
+
+    c = TrueNASClient(None, autologin=False)
+    c.api = MagicMock()
+    c.api.core.download.return_value = (5, "/_download/5?auth_token=SECRET-TOKEN")
+
+    def fake_request(self, method, url, **kwargs):
+        raise requests.ConnectionError(f"Max retries exceeded with url: {url}")
+
+    monkeypatch.setattr("requests.Session.request", fake_request)
+    with pytest.raises(requests.ConnectionError) as raised:
+        c.download("config.save")
+    assert "SECRET-TOKEN" not in str(raised.value)
+    assert "auth_token=<redacted>" in str(raised.value)
 
 
 def test_upload_generates_token_when_absent(monkeypatch):
@@ -160,13 +192,13 @@ def test_upload_generates_token_when_absent(monkeypatch):
     c.api.auth.generate_token.return_value = "gen-tok"
     captured = {}
 
-    def fake_post(url, headers=None, verify=None, files=None):
+    def fake_request(method, url, headers=None, verify=None, files=None, timeout=None):
         captured["headers"] = headers
         captured["files"] = files
         return MagicMock(json=lambda: {"job_id": 3})
 
     monkeypatch.setattr(
-        "requests.Session.post", lambda self, *a, **k: fake_post(*a, **k)
+        "requests.Session.request", lambda self, *a, **k: fake_request(*a, **k)
     )
     # a str file is encoded; no token supplied -> generate_token path
     jobid = c.upload("hello", "filesystem.put", wait=False)
@@ -353,6 +385,7 @@ def _webshell_sslopt(monkeypatch, **kwargs) -> dict:
     class _StubWS:
         def __init__(self, sslopt=None):
             seen["sslopt"] = sslopt
+            self.frames = ['{"msg": "connected", "id": "shell-1"}']
 
         def connect(self, uri, **options):
             seen["connect_timeout"] = options.get("timeout")
@@ -364,7 +397,10 @@ def _webshell_sslopt(monkeypatch, **kwargs) -> dict:
             pass
 
         def recv(self):
-            # Ends the banner drain loop: connect() reads until it times out.
+            # The session's greeting, then the end of the banner drain loop:
+            # connect() reads until it times out.
+            if self.frames:
+                return self.frames.pop()
             raise TimeoutError
 
     monkeypatch.setitem(

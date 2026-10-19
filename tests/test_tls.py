@@ -183,3 +183,19 @@ def test_the_websocket_gets_the_shared_context(monkeypatch, bundle):
     conn.verify = False
     conn._connect()
     assert seen["sslopt"] == {"cert_reqs": ssl.CERT_NONE}
+
+
+def test_turning_verification_off_is_logged_once(caplog):
+    """It logged nothing: a lab setting copied to production went unnoticed."""
+    import logging
+
+    host = TrueNASHost("wss://nas", autologin=False, verify=False)
+    with caplog.at_level(logging.WARNING):
+        host._http
+        host._warn_if_unverified()
+    assert caplog.text.count("TLS certificate verification is off") == 1
+    caplog.clear()
+    with caplog.at_level(logging.WARNING):
+        TrueNASHost("ws://nas", autologin=False, verify=False)._http
+        TrueNASHost(None, autologin=False, verify=False)._http
+    assert "verification is off" not in caplog.text  # no TLS to skip

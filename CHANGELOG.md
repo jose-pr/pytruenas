@@ -32,6 +32,9 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - **`TrueNASWSConnection(...)` does no I/O.** It opened the websocket and
   started its reader in the constructor; `.connect()` (returning the
   connection), `with` or the first `.call()` does that now.
+- **`download(..., wait=False)` returns a `PendingDownload`** (`.job_id`,
+  `.fetch()`), not the job id: the link was discarded, so the bytes could
+  never be fetched.
 - **`pytruenas.utils.tls` is gone** (`context`, `ca_bundle`, `CA_BUNDLE_ENV`,
   `SslVerify`); the decision is private now. Pass `verify=` instead.
 
@@ -180,6 +183,15 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   URL rather than a file an installed copy does not have.
 - The suite passes with no extras installed: one SSH test lacked its
   `asyncssh` guard.
+- Uploads and downloads time out (the websocket's connect and read
+  timeouts); a side channel that accepted the connection and then said nothing
+  blocked them for good.
+- A failed download's error message no longer carries the link's `auth_token`.
+- Opening the web shell closes its websocket on every failure (a token that
+  could not be minted leaked it), reads a refusal of any shape (a string
+  `error` raised `AttributeError`), and declines when no `connected` message
+  arrives instead of returning a session with no shell behind it.
+- Turning TLS verification off logs one WARNING per host.
 - A call's timeout bounds its send: a peer that stopped reading held
   `call(..., timeout=)` -- and a `close()` behind it -- forever once the socket
   buffers filled. The send is aborted and the connection closed (part of the
