@@ -313,3 +313,140 @@ def test_a_method_named_like_a_namespace_method_is_not_emitted(tmp_path, caplog)
     assert "_method=" in caplog.text  # it says how to reach it instead
     # The synthetic helpers, whose names also exist on Namespace, stay.
     assert "def _update" in src and "def _get" in src
+
+
+# -- dump shapes that are valid JSON Schema but unusual -------------------
+
+
+def _method(api, name):
+    return next(m for m in api["methods"] if m["name"] == name)
+
+
+def _params(api, name):
+    return _method(api, name)["schemas"]["properties"]["Call parameters"]["prefixItems"]
+
+
+def _set_return(name, schema):
+    def mutate(api):
+        _method(api, name)["schemas"]["properties"]["Return value"] = schema
+
+    return mutate
+
+
+def _add_params(name, *schemas):
+    def mutate(api):
+        _params(api, name).extend(copy.deepcopy(schemas))
+
+    return mutate
+
+
+def _drop_params(name):
+    def mutate(api):
+        _params(api, name).clear()
+
+    return mutate
+
+
+#: ``{label: mutate(api)}`` over the fixture: each one a shape the generator
+#: must turn into stubs that compile and type-check.
+EDGE_SHAPES = {
+    "duplicate_title": _add_params("user.update", {"title": "id", "type": "string"}),
+    "sanitized_collision": _add_params(
+        "system.info", {"title": "a-b", "type": "string"}, {"title": "a_b"}
+    ),
+    "self_title": _add_params("system.info", {"title": "self", "type": "string"}),
+    "untitled_parameter": _add_params("system.info", {"type": "integer"}),
+    "empty_array": _add_params(
+        "system.info", {"title": "nothing", "type": "array", "items": False}
+    ),
+    "get_instance_optional_return": _set_return(
+        "user.get_instance",
+        {
+            "anyOf": [
+                {
+                    "type": "object",
+                    "title": "entry",
+                    "properties": {"x": {"type": "string"}},
+                },
+                {"type": "null"},
+            ]
+        },
+    ),
+    "get_instance_bare_object_return": _set_return(
+        "user.get_instance", {"type": "object"}
+    ),
+    "get_instance_array_return": _set_return(
+        "user.get_instance", {"type": "array", "items": {"type": "string"}}
+    ),
+    "create_without_parameters": _drop_params("user.create"),
+}
+
+
+def edge_dump(label):
+    api = _api()
+    EDGE_SHAPES[label](api)
+    return api
+
+
+def _compile_all(root: Path) -> None:
+    files = list(root.rglob("*.pyi"))
+    assert files
+    for path in files:
+        # compile(), not ast.parse(): a duplicate argument parses.
+        compile(path.read_text(encoding="utf-8"), str(path), "exec")
+
+
+@pytest.mark.parametrize("label", sorted(EDGE_SHAPES))
+def test_an_unusual_shape_generates_stubs_that_compile(tmp_path, label):
+    codegen.Codegen().generate(edge_dump(label), tmp_path / "out")
+    _compile_all(tmp_path / "out")
+
+
+def test_parameter_names_are_unique_in_a_signature(tmp_path):
+    api = edge_dump("sanitized_collision")
+    EDGE_SHAPES["self_title"](api)
+    EDGE_SHAPES["untitled_parameter"](api)
+    codegen.Codegen().generate(api, tmp_path / "out")
+    tree = ast.parse(
+        (tmp_path / "out" / "system" / "__init__.pyi").read_text(encoding="utf-8")
+    )
+    info = next(n for n in ast.walk(tree) if getattr(n, "name", "") == "info")
+    names = [a.arg for a in info.args.args]
+    assert names[:5] == ["self", "a_b", "a_b_", "self_", "arg4"]
+
+
+def test_an_optional_get_instance_return_still_gets_a_get_helper(tmp_path):
+    codegen.Codegen().generate(
+        edge_dump("get_instance_optional_return"), tmp_path / "out"
+    )
+    src = (tmp_path / "out" / "user" / "__init__.pyi").read_text(encoding="utf-8")
+    tree = ast.parse(src)
+    get = next(n for n in ast.walk(tree) if getattr(n, "name", "") == "_get")
+    members = [m.strip() for m in ast.unparse(get.returns).split("|")]
+    assert members[-1] == "None" and len(members) == 2, members
+    # The object member is a TypedDict this module defines.
+    assert f"\n{members[0]} = _ty.TypedDict(" in src, members
+
+
+@pytest.mark.parametrize(
+    "label",
+    ["get_instance_bare_object_return", "get_instance_array_return"],
+)
+def test_no_get_helper_without_properties_to_filter_on(tmp_path, caplog, label):
+    with caplog.at_level(logging.INFO, logger="pytruenas.codegen"):
+        codegen.Codegen().generate(edge_dump(label), tmp_path / "out")
+    src = (tmp_path / "out" / "user" / "__init__.pyi").read_text(encoding="utf-8")
+    assert "def _get(" not in src
+    assert "def get_instance(" in src
+    assert "no _get stub emitted" in caplog.text
+
+
+def test_no_create_helper_without_a_payload(tmp_path, caplog):
+    with caplog.at_level(logging.INFO, logger="pytruenas.codegen"):
+        codegen.Codegen().generate(
+            edge_dump("create_without_parameters"), tmp_path / "out"
+        )
+    src = (tmp_path / "out" / "user" / "__init__.pyi").read_text(encoding="utf-8")
+    assert "def _create(" not in src
+    assert "_Unpack[int]" not in src
+    assert "no _create stub emitted" in caplog.text

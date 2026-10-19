@@ -119,8 +119,10 @@ class Parameter:
         self.schema = _ty.cast(_schema.Schema, schema or {})
         self.schema.update(kwargs)  # type: ignore
 
-    def argument_declaration(self, typeddicts: dict[str, object]):
-        name = self.name
+    def argument_declaration(
+        self, typeddicts: dict[str, object], name: "str | None" = None
+    ):
+        name = name or self.name
         typedef = self.type_def(typeddicts)
         if name.startswith("**"):
             # ``**kwargs`` unpacks a TypedDict and can never carry a default --
@@ -215,7 +217,10 @@ class Method(PyDeclaration):
     @_ftools.cached_property
     def parameters(self) -> list[Parameter]:
         params = []
-        for item in _read.parameters(self.definition):
+        for index, item in enumerate(_read.parameters(self.definition)):
+            if not item.get("title"):
+                # The name `help` shows for an untitled parameter.
+                item = {**item, "title": f"arg{index + 1}"}
             params.append(Parameter(item, self.pyname.relative_to(self.pyname.parent)))
 
         if not self.pyname.name.startswith("_"):
@@ -287,6 +292,9 @@ class Method(PyDeclaration):
         decls: "list[str]" = []
         seen_default = False
         star_emitted = False
+        # Two titles can sanitize to one name (`a-b`, `a_b`) and a title can be
+        # `self`; either is a duplicate argument, which `compile()` rejects.
+        used = {"self"}
         for param in self.parameters:
             if getattr(param, "keyword_only", False) and not star_emitted:
                 # Everything after this is keyword-only, which also ends the
@@ -294,7 +302,15 @@ class Method(PyDeclaration):
                 decls.append("*")
                 star_emitted = True
                 seen_default = False
-            decl = param.argument_declaration(typeddicts)
+            name = param.name
+            bare = name.lstrip("*")
+            unique = bare
+            while unique in used:
+                unique += "_"
+            used.add(unique)
+            decl = param.argument_declaration(
+                typeddicts, name[: len(name) - len(bare)] + unique
+            )
             is_var = param.name.startswith("*")
             if not is_var:
                 if "=" in decl:
@@ -333,159 +349,110 @@ class Namespace(PyDeclaration):
 
     def init(self):
         for method in self.methods():
-            if method.qualname.name == "update":
-                fields = _payload(method)
-                update_return = _read.returns(method.definition)
-                idtype = None
-                for param in method.parameters:
-                    if param.name == "id":
-                        idtype = {
-                            "anyOf": [
-                                param.schema.get("type", "!str|int"),
-                                "!_ty.Sequence[str]",
-                            ]
-                        }
-                update = Method(
-                    {
-                        "name": "_update",
-                        "roles": method.definition["roles"],
-                        "doc": "",
-                        "schemas": {
-                            "type": "object",
-                            "properties": {
-                                "Call parameters": {
-                                    "type": "array",
-                                    "prefixItems": [
-                                        {
-                                            "title": "__selector",
-                                            **(idtype or {}),
-                                            "default": (
-                                                ... if idtype is not None else None
-                                            ),
-                                        },
-                                        {
-                                            **fields.schema,
-                                            "title": "**fields",
-                                            "_name": fields.name,  # type: ignore
-                                        },
-                                    ],
-                                    "items": True,
-                                },
-                                "Return value": update_return,
-                            },
-                        },
-                    }
+            name = method.qualname.name
+            if name == "get_instance":
+                self._add_get(method)
+                continue
+            if name not in ("update", "create"):
+                continue
+            fields = _payload(method)
+            if fields is None:
+                # `**fields` must unpack a TypedDict, and this method takes no
+                # object payload to build one from: the runtime helper's own
+                # signature is left to describe it.
+                _LOGGER.info(
+                    "%s has no object payload; no _%s stub emitted",
+                    method.definition["name"],
+                    name,
                 )
-                self.childs.append(update)
-                if idtype:
-                    upsert = Method(
-                        {
-                            "name": "_upsert",
-                            "roles": method.definition["roles"],
-                            "doc": "",
-                            "schemas": {
-                                "type": "object",
-                                "properties": {
-                                    "Call parameters": {
-                                        "type": "array",
-                                        "prefixItems": [
-                                            {
-                                                "title": "__selector",
-                                                **(idtype or {}),
-                                                "default": (
-                                                    ... if idtype is not None else None
-                                                ),
-                                            },
-                                            {
-                                                **fields.schema,
-                                                "title": "**fields",
-                                                "_name": fields.name,  # type: ignore
-                                            },
-                                        ],
-                                        "items": True,
-                                    },
-                                    "Return value": update_return,
-                                },
-                            },
-                        }
-                    )
-                    self.childs.append(upsert)
+                continue
+            payload = {**fields.schema, "title": "**fields", "_name": fields.name}
+            ret = _read.returns(method.definition)
+            if name == "create":
+                self.childs.append(_helper(method, "_create", [payload], ret))
+                continue
+            idtype = _id_type(method)
+            selector = {
+                "title": "__selector",
+                **(idtype or {}),
+                "default": ... if idtype is not None else None,
+            }
+            self.childs.append(_helper(method, "_update", [selector, payload], ret))
+            if idtype:
+                self.childs.append(
+                    _helper(method, "_upsert", [dict(selector), dict(payload)], ret)
+                )
 
-            elif method.qualname.name == "create":
-                fields = _payload(method)
-                create_return = _read.returns(method.definition)
-                update = Method(
-                    {
-                        "name": "_create",
-                        "roles": method.definition["roles"],
-                        "doc": "",
-                        "schemas": {
-                            "type": "object",
-                            "properties": {
-                                "Call parameters": {
-                                    "type": "array",
-                                    "prefixItems": [
-                                        {
-                                            **fields.schema,
-                                            "title": "**fields",
-                                            "_name": fields.name,  # type: ignore
-                                        },
-                                    ],
-                                    "items": True,
-                                },
-                                "Return value": create_return,
-                            },
-                        },
-                    }
-                )
-                self.childs.append(update)
-            elif method.qualname.name == "get_instance":
-                idtype = None
-                for param in method.parameters:
-                    if param.name == "id":
-                        idtype = {
-                            "anyOf": [
-                                param.schema.get("type", "!str|int"),
-                                "!_ty.Sequence[str]",
-                                "!None",
-                            ]
-                        }
-                props = {}
-                for name, schema in method.returns.schema["properties"].items():
-                    schema = {**schema}
-                    schema["required"] = False
-                    props[name] = schema
-                update = Method(
-                    {
-                        "name": "_get",
-                        "roles": method.definition["roles"],
-                        "doc": "",
-                        "schemas": {
-                            "type": "object",
-                            "properties": {
-                                "Call parameters": {
-                                    "type": "array",
-                                    "prefixItems": [
-                                        {
-                                            "title": "__id_or_filter",
-                                            **(idtype or {}),
-                                            "default": None,
-                                        },
-                                        {
-                                            "type": "object",
-                                            "properties": props,
-                                            "title": "**fields",
-                                            "_name": "get",  # type: ignore
-                                        },
-                                    ],
-                                    "items": True,
-                                },
-                                "Return value": "!GetInstanceReturn|None",
-                            },
-                        },
-                    }
-                )
-                self.childs.append(update)
+    def _add_get(self, method: "Method") -> None:
+        returned = method.returns.schema
+        props = _read.properties(returned)
+        if props is None:
+            # The filter keywords are the returned object's properties; with
+            # none to read, the runtime helper's own signature describes it.
+            _LOGGER.info(
+                "%s returns no object with properties; no _get stub emitted",
+                method.definition["name"],
+            )
+            return
+        if returned.get("properties"):
+            # The TypedDict that `get_instance`'s own return renders to.
+            ret: object = "!GetInstanceReturn|None"
+        else:
+            # A union (`anyOf[object, null]`), rendered again under `_get`.
+            members = _copy.deepcopy(returned.get("anyOf") or returned.get("oneOf"))
+            if not any(
+                isinstance(m, dict) and m.get("type") == "null" for m in members
+            ):
+                members.append({"type": "null"})
+            ret = {"anyOf": members}
+        idtype = _id_type(method, "!None")
+        filters = {
+            "type": "object",
+            "properties": {
+                prop: {**schema, "required": False} for prop, schema in props.items()
+            },
+            "title": "**fields",
+            "_name": "get",
+        }
+        selector = {"title": "__id_or_filter", **(idtype or {}), "default": None}
+        self.childs.append(_helper(method, "_get", [selector, filters], ret))
+
+
+def _id_type(method: "Method", *extra: str) -> "dict | None":
+    """A synthetic helper's selector type: the method's `id` parameter's type
+    or a list of filters; ``None`` when it has no `id` parameter."""
+    for param in method.parameters:
+        if param.name == "id":
+            return {
+                "anyOf": [
+                    param.schema.get("type", "!str|int"),
+                    "!_ty.Sequence[str]",
+                    *extra,
+                ]
+            }
+    return None
+
+
+def _helper(method: "Method", name: str, params: list, ret: object) -> "Method":
+    """A synthetic method entry describing a runtime `Namespace` helper."""
+    return Method(
+        {
+            "name": name,
+            "roles": method.definition.get("roles") or [],
+            "doc": "",
+            "schemas": {
+                "type": "object",
+                "properties": {
+                    _read.CALL_PARAMS: {
+                        "type": "array",
+                        "prefixItems": params,
+                        "items": True,
+                    },
+                    _read.RETURN: ret,
+                },
+            },
+        }
+    )
 
 
 class Renderer:
@@ -501,17 +468,12 @@ _INIT = "__init__.pyi"
 _MARKER = ".pytruenas-typings"
 
 
-def _payload(method: "Method") -> "Parameter":
-    """The parameter a synthetic helper's ``**fields`` stands for.
-
-    The payload as the ``call`` command finds it (the last object-typed
-    parameter), else the last real one. Never a call option: a fixed index from
-    the end picked ``_ioerror`` once the options grew.
-    """
+def _payload(method: "Method") -> "Parameter | None":
+    """The parameter a synthetic helper's ``**fields`` stands for: the payload
+    as the ``call`` command finds it (the last object-typed parameter), never a
+    call option. ``None`` when the method has no object parameter."""
     index = _read.payload_index(method.definition)
-    if index is None:
-        index = len(_read.parameters(method.definition)) - 1
-    return method.parameters[index]
+    return None if index is None else method.parameters[index]
 
 
 def _check_replaceable(root: _P) -> None:
