@@ -78,17 +78,16 @@ Without it the call returns the job id at once. The wait has no deadline unless
 
 ## Errors
 
-Every error pytruenas raises at run time is a `pytruenas.TrueNASError`, and the
-common ones also carry the builtin you would catch anyway:
+Every error pytruenas raises at run time is a `pytruenas.TrueNASError`:
 
-| Error | Also a | Raised when |
-| --- | --- | --- |
-| `ClientException` | — | the middleware failed the call (`.errno`, `.extra`) |
-| `ValidationErrors` | `ValueError` | the server rejected the arguments, per field |
-| `CallTimeout` | `TimeoutError` | no answer within the timeout |
-| `ConnectionClosed` | `ConnectionError` | the connection dropped before the answer |
-| `JobFailed` | — | a job ended `FAILED` or `ABORTED` |
-| `AuthenticationError` | — | a login was refused |
+| Error | Raised when |
+| --- | --- |
+| `ClientException` | the middleware failed the call (`.errno`, `.extra`) |
+| `ValidationErrors` | the server rejected the arguments, per field |
+| `CallTimeout` | no answer within the timeout |
+| `ConnectionClosed` | the connection dropped before the answer |
+| `JobFailed` | a job ended `FAILED` or `ABORTED` |
+| `AuthenticationError` | a login was refused |
 
 ```python
 from pytruenas import TrueNASError, ValidationErrors

@@ -27,23 +27,20 @@ here; `redact_call_args` (from `auth`) is importable from the root too, outside
 - **`TrueNASError(Exception)`** — the base of every error pytruenas raises at
   run time. `except pytruenas.TrueNASError` catches all of these:
 
-  | class (module) | also a | raised when |
-  | --- | --- | --- |
-  | `ClientException` (`connection`) | — | the middleware failed a call (`.errno`, `.trace`, `.extra`) |
-  | `ValidationErrors` (`connection`) | `ValueError` | the server rejected the arguments, per field |
-  | `CallTimeout` (`connection`) | `TimeoutError` | no answer within the timeout |
-  | `ConnectionClosed` (`connection`) | `ConnectionError` | the connection dropped before the answer |
-  | `JobFailed` (`connection`) | — | a middleware job ended `FAILED`/`ABORTED` |
-  | `AuthenticationError` (`auth`) | — | a login was refused |
+  | class (module) | raised when |
+  | --- | --- |
+  | `ClientException` (`connection`) | the middleware failed a call (`.errno`, `.trace`, `.extra`) |
+  | `ValidationErrors` (`connection`) | the server rejected the arguments, per field |
+  | `CallTimeout` (`connection`) | no answer within the timeout |
+  | `ConnectionClosed` (`connection`) | the connection dropped before the answer |
+  | `JobFailed` (`connection`) | a middleware job ended `FAILED`/`ABORTED` |
+  | `AuthenticationError` (`auth`) | a login was refused |
 
   The four `connection` subclasses are also `ClientException`s. A caller's
   mistake (an unknown keyword, a malformed target) is a plain
   `TypeError`/`ValueError`, not a `TrueNASError`. A failure before the
   websocket is open (a refused port, a TLS or HTTP error during the handshake)
   is raised by the socket or `websocket-client` as it is.
-- **Gotcha:** `CallTimeout` and `ConnectionClosed` are `OSError`s, so
-  `except OSError` catches them, and pathlib-style `exists()`/`is_dir()`/
-  `is_file()` read them as "not there", as they read any `OSError`.
 
 ## `TrueNASClient` (`pytruenas.host`)
 
@@ -513,16 +510,15 @@ The synchronous JSON-RPC 2.0 websocket transport backing `TrueNASClient`
   (`TrueNASError` subclass) — base error for any call/connection failure;
   `errno` carries a POSIX errno when the middleware's `[ERRNO] message` prefix
   maps to one.
-- **`ValidationErrors(errors)`** (`ClientException` and `ValueError`
-  subclass) — per-field validation errors; `.errors` is
+- **`ValidationErrors(errors)`** (`ClientException` subclass) — per-field validation errors; `.errors` is
   `list[(attribute, errmsg, errcode)]`.
 - **`JobFailed(job)`** (`ClientException` subclass) — raised by
   `TrueNASHost.wait` for a `FAILED`/`ABORTED` job; `.job` is the
   `core.get_jobs` record, `.errno` the middleware's errno when it reports one.
-- **`CallTimeout()`** (`ClientException` and `TimeoutError` subclass) —
+- **`CallTimeout()`** (`ClientException` subclass) —
   raised when a call exceeds its timeout.
-- **`ConnectionClosed(sent)`** (`ClientException` and `ConnectionError`
-  subclass, `errno` is `ECONNABORTED`) — the connection closed before the
+- **`ConnectionClosed(sent)`** (`ClientException` subclass, `errno` is
+  `ECONNABORTED`) — the connection closed before the
   response arrived.
   **`.sent`** is `False` when the request never reached the socket (safe to
   repeat: `Namespace` retries exactly these) and `True` when the server may
