@@ -93,6 +93,8 @@ dev = [
     # tests/test_codegen_typecheck.py checks the generated stubs with both.
     "pyright",
     "mypy; python_version >= '3.10'",
+    # The tests' throwaway certificate authority (real TLS handshakes).
+    "sslcontext>=2.0.0,<3",
 ]
 docs = ["mkdocs", "mkdocs-material", "mkdocstrings[python]"]
 

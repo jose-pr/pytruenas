@@ -18,13 +18,20 @@ def _no_bundle_env(monkeypatch):
 
 @pytest.fixture
 def bundle(tmp_path):
-    # A real PEM, so load_verify_locations accepts it: the OS store's own
-    # first CA, or skip where the store is not exportable (e.g. some Linux).
-    ders = ssl.create_default_context().get_ca_certs(binary_form=True)
-    if not ders:
-        pytest.skip("no exportable CA in the OS store")
+    # A real PEM, so load_verify_locations accepts it: a throwaway CA, else
+    # the OS store's own first CA (not exportable on some Linux).
     path = tmp_path / "ca.pem"
-    path.write_text(ssl.DER_cert_to_PEM_cert(ders[0]))
+    try:
+        from sslcontext.issuing import CertificateAuthority
+    except ImportError:
+        ders = ssl.create_default_context().get_ca_certs(binary_form=True)
+        if not ders:
+            pytest.skip("no sslcontext, and no exportable CA in the OS store")
+        path.write_text(ssl.DER_cert_to_PEM_cert(ders[0]))
+    else:
+        path.write_bytes(
+            CertificateAuthority.create("bundle test CA", days=1).certificate
+        )
     return path
 
 
