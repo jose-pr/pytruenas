@@ -65,8 +65,7 @@ from hostctl.provider import (
     ProviderSelector as _ProviderSelector,
 )
 
-if _ty.TYPE_CHECKING:  # pragma: no cover - typing only
-    from . import TrueNASClient
+from .host import TrueNASHost as TrueNASClient
 
 #: Terminal escape sequences a PTY emits around real output.
 _ANSI = _re.compile(
@@ -123,7 +122,7 @@ class _WebSocketStream:
         #: Bytes received but not yet read: a frame may exceed `size`.
         self._pending = bytearray()
 
-    def read(self, size: int = -1, *, timeout: "float | None" = None) -> bytes:
+    def read(self, size: int = -1, *, timeout: "_ty.Optional[float]" = None) -> bytes:
         if not self._pending:
             # websocket-client reads 0 as non-blocking, which raises rather
             # than returning empty; a millisecond keeps "only what is there".
@@ -162,15 +161,17 @@ class _WebSocketStream:
 class WebShellSession:
     """One authenticated ``/_shell`` websocket running a login shell."""
 
-    def __init__(self, client: "TrueNASClient", *, options: "dict | None" = None):
+    def __init__(
+        self, client: "TrueNASClient", *, options: "_ty.Optional[dict]" = None
+    ):
         self.client = client
         self.options = options or {}
         self._ws = None
-        self._stream: "_WebSocketStream | None" = None
+        self._stream: "_ty.Optional[_WebSocketStream]" = None
         #: Guards opening and closing; never held while a command runs, so a
         #: timed-out command's session can be closed from another thread.
         self._lock = _threading.RLock()
-        self.shell_id: "str | None" = None
+        self.shell_id: "_ty.Optional[str]" = None
 
     # -- connection --------------------------------------------------------
 
@@ -252,7 +253,7 @@ class WebShellSession:
                 except Exception:
                     pass
 
-    def _drop(self, stream: "_WebSocketStream | None") -> None:
+    def _drop(self, stream: "_ty.Optional[_WebSocketStream]") -> None:
         """Close the session if ``stream`` is still its terminal.
 
         A newer session that replaced it stays open.
@@ -296,7 +297,7 @@ class WebShellExecutorProvider(_ExecutorProvider):
 
     def __init__(self, client: "TrueNASClient"):
         self.client = client
-        self._session: "WebShellSession | None" = None
+        self._session: "_ty.Optional[WebShellSession]" = None
         # No `args`: the terminal takes one line of shell text, so hostctl
         # renders the whole invocation to a single string rather than an argv.
         super().__init__("webshell", WebShellExecutor(self), capabilities=())

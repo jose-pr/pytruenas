@@ -27,22 +27,19 @@ import typing as _ty
 
 from hostctl import uri_host as _uri_host
 from pathapi import LocalPath as LocalPath
+from pathapi import Path
 
+from ..host import TrueNASHost as TrueNASClient
 from .tnasws import _SCHEME
 from .tnasws import TnasWsBackend as TnasWsBackend
 from .tnasws import TnasWsPath as TnasWsPath
-
-if _ty.TYPE_CHECKING:
-    from pathapi import Path
-
-    from .. import TrueNASClient
 
 __all__ = ["LocalPath", "TnasWsPath", "TnasWsBackend", "path", "symlink_to"]
 
 _FTYPE = _ty.Literal["file", "link", "directory"]
 
 
-def path(client: "TrueNASClient", *segments, backend: "str | None" = None):
+def path(client: "TrueNASClient", *segments, backend: "_ty.Optional[str]" = None):
     """Build the path type for ``client`` and ``segments``.
 
     ``backend`` chooses it: ``"local"`` -> :class:`LocalPath`, ``"ws"``/
@@ -80,8 +77,8 @@ def symlink_to(
     target: object,
     target_is_directory: bool = False,
     *,
-    force: "bool | _FTYPE | _ty.Sequence[_FTYPE]" = False,
-    onremove: "_ty.Callable[[_ty.Any, str], bool] | None" = None,
+    force: "_ty.Union[bool, _FTYPE, _ty.Sequence[_FTYPE]]" = False,
+    onremove: "_ty.Optional[_ty.Callable[[_ty.Any, str], bool]]" = None,
 ):
     """Make ``path`` a symlink to ``target``, replacing a conflicting entry.
 

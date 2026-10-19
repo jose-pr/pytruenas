@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import typing as _ty
+
 # NOTE: a `STAT_FIELDS` constant used to live here, derived by stat-ing this
 # very file at import time and regex-parsing the repr of the result. It was
 # already dead -- the `fs/api.py` code that consumed it is gone -- and it made
@@ -15,13 +17,13 @@ def isbytelike(obj):
     return isinstance(obj, (memoryview, bytes, bytearray))
 
 
-def bytes_(txt: "bytes|str") -> bytes:
+def bytes_(txt: "_ty.Union[bytes, str]") -> bytes:
     if isinstance(txt, str):
         return txt.encode()
     return txt
 
 
-def str_(txt: "bytes|str") -> str:
+def str_(txt: "_ty.Union[bytes, str]") -> str:
     if isinstance(txt, str):
         return txt
     return txt.decode()

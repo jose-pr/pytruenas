@@ -51,13 +51,16 @@ from hostctl.host import HostConfig as _HostConfig
 from . import auth as _auth
 from . import connection as _connection
 from .connection import DEFAULT_UNIX_SOCKET
+from . import namespace as _namespace
 from .namespace import Namespace as _Namespace
 from .utils import tls as _tls
 from .utils.target import Target as _TGT
 from .utils.target import redact as _redact_target
 
 if _ty.TYPE_CHECKING:  # pragma: no cover - typing only
-    from hostctl.host import Host
+    from hostctl import SSHConfig
+    from hostctl.host import Host, HostInfo
+    from hostctl.provider import ExecutorProvider, PathProvider
     from truenasapi_typings.current import Current
 
     #: Mirrors `TrueNASClient`'s parameter so `TrueNASHost[Current]` gives the
@@ -171,7 +174,7 @@ def _close_quietly(closeable: object) -> None:
         pass
 
 
-def _resolve_logger(logger: object, name: "str | None" = None):
+def _resolve_logger(logger: object, name: "_ty.Optional[str]" = None):
     """A ``Logger`` from a name, an instance, or ``None``.
 
     When ``name`` is given the result is wrapped in a :class:`_HostLogger` so
@@ -309,7 +312,7 @@ class _TrustAdapter(_req.adapters.HTTPAdapter):
 
 
 def _ssh_config_from(
-    shell: "str | None", known_hosts: object = (), verify: bool = True
+    shell: "_ty.Optional[str]", known_hosts: object = (), verify: bool = True
 ):
     """Build an :class:`hostctl.SSHConfig` from a shell connection string.
 
@@ -361,7 +364,9 @@ def _ssh_config_from(
     )
 
 
-def _as_names(value: "_ty.Iterable[str] | str | None") -> "tuple[str, ...] | None":
+def _as_names(
+    value: "_ty.Optional[_ty.Union[_ty.Iterable[str], str]]",
+) -> "_ty.Optional[tuple[str, ...]]":
     """Normalize a provider override to a tuple of names, or ``None``.
 
     A bare string is a single name, not an iterable of characters -- ``"ssh"``
@@ -374,7 +379,7 @@ def _as_names(value: "_ty.Iterable[str] | str | None") -> "tuple[str, ...] | Non
     return tuple(str(item) for item in value)
 
 
-def _normalize_target(target: "str | None") -> str:
+def _normalize_target(target: "_ty.Optional[str]") -> str:
     """Rewrite any accepted connection string into a canonical ``truenas+*`` URI.
 
     This is the single place the non-``truenas`` spellings are understood, and
@@ -475,24 +480,24 @@ class TrueNASConfig(
         host: str = "",
         *,
         port: int = 0,
-        secure: "bool | None" = None,
-        socket_path: "str | None" = None,
-        api_path: "str | None" = None,
+        secure: "_ty.Optional[bool]" = None,
+        socket_path: "_ty.Optional[str]" = None,
+        api_path: "_ty.Optional[str]" = None,
         version: str = "current",
         verify: bool = True,
-        sslverify: "bool | str | _os.PathLike[str] | None" = None,
+        sslverify: "_ty.Optional[_ty.Union[bool, str, _os.PathLike[str]]]" = None,
         credentials: object = None,
         ssh: object = None,
-        shell: "str | None" = None,
+        shell: "_ty.Optional[str]" = None,
         known_hosts: object = (),
-        executor: "_ty.Iterable[str] | str | None" = None,
-        path: "_ty.Iterable[str] | str | None" = None,
+        executor: "_ty.Optional[_ty.Union[_ty.Iterable[str], str]]" = None,
+        path: "_ty.Optional[_ty.Union[_ty.Iterable[str], str]]" = None,
         autologin: bool = True,
         logger: object = None,
     ) -> None:
         super().__init__()
         #: A label assigned to `name`, replacing the derived one.
-        self._name: "str | None" = None
+        self._name: "_ty.Optional[str]" = None
         #: Whether the first websocket access logs in automatically.
         self.autologin = autologin
         #: Logger for the client built from this config; a name or a Logger.
@@ -531,7 +536,7 @@ class TrueNASConfig(
             sslverify = verify
         elif not isinstance(sslverify, bool):
             sslverify = _os.fspath(sslverify)
-        self.sslverify: "bool | str" = sslverify
+        self.sslverify: "_ty.Union[bool, str]" = sslverify
         #: The SSH leg. Accepts a ready :class:`hostctl.SSHConfig` or, via
         #: ``shell=``, the connection string ``TrueNASClient`` has always taken
         #: (``"ssh://root@nas"``, ``"root@nas:22"``) -- so a caller does not
@@ -568,7 +573,7 @@ class TrueNASConfig(
 
     @classmethod
     def from_target(
-        cls, target: "str | None" = None, **options: object
+        cls, target: "_ty.Optional[str]" = None, **options: object
     ) -> "TrueNASConfig":
         """Build a config from any connection string ``TrueNASClient`` accepts.
 
@@ -840,9 +845,52 @@ class TrueNASHost(_PosixHost, _ty.Generic[ApiVersion]):
         "winrm": None,
     }
 
+    # The overloads spell out the keywords `**options` routes, for an editor or
+    # a type checker; `__init__` below is the one that runs.
+    @_ty.overload
     def __init__(
         self,
-        config: "TrueNASConfig | str | None" = None,
+        config: "_ty.Optional[str]" = None,
+        credentials: object = None,
+        *,
+        username: "_ty.Optional[str]" = ...,
+        password: "_ty.Optional[str]" = ...,
+        otp: "_ty.Optional[str]" = ...,
+        api_key: "_ty.Optional[str]" = ...,
+        token: "_ty.Optional[str]" = ...,
+        verify: bool = ...,
+        sslverify: "_ty.Optional[_ty.Union[bool, str, _os.PathLike[str]]]" = ...,
+        ssh: "_ty.Optional[SSHConfig]" = ...,
+        version: str = ...,
+        shell: "_ty.Optional[str]" = ...,
+        known_hosts: object = ...,
+        executor: "_ty.Optional[_ty.Union[_ty.Iterable[str], str]]" = ...,
+        path: "_ty.Optional[_ty.Union[_ty.Iterable[str], str]]" = ...,
+        autologin: bool = ...,
+        logger: "_ty.Union[str, _logging.Logger, _logging.LoggerAdapter, None]" = ...,
+        executor_providers: "_ty.Optional[_ty.Iterable[ExecutorProvider]]" = ...,
+        path_providers: "_ty.Optional[_ty.Iterable[PathProvider]]" = ...,
+        info: "_ty.Optional[HostInfo]" = ...,
+        initializer: object = ...,
+        client: object = ...,
+    ) -> None: ...
+
+    @_ty.overload
+    def __init__(
+        self,
+        config: TrueNASConfig,
+        *,
+        executor_providers: "_ty.Optional[_ty.Iterable[ExecutorProvider]]" = ...,
+        path_providers: "_ty.Optional[_ty.Iterable[PathProvider]]" = ...,
+        shell: object = ...,
+        info: "_ty.Optional[HostInfo]" = ...,
+        initializer: object = ...,
+        client: object = ...,
+    ) -> None: ...
+
+    def __init__(
+        self,
+        config: "_ty.Optional[_ty.Union[TrueNASConfig, str]]" = None,
         credentials: object = None,
         *,
         client: object = None,
@@ -891,7 +939,7 @@ class TrueNASHost(_PosixHost, _ty.Generic[ApiVersion]):
             )
         self._config = config
         #: The live JSON-RPC connection, opened on first `.conn` access.
-        self._conn: "_connection.TrueNASWSConnection | None" = None
+        self._conn: "_ty.Optional[_connection.TrueNASWSConnection]" = None
         # hostctl logs a provider fallback here too, once per skipped provider.
         self.logger = _resolve_logger(config.logger, config.name)
         #: Guards opening, replacing and dropping `_conn`. Reentrant: logging
@@ -899,13 +947,13 @@ class TrueNASHost(_PosixHost, _ty.Generic[ApiVersion]):
         self._conn_lock = _threading.RLock()
         #: How the session last authenticated -- `login()`'s arguments -- so a
         #: reconnect repeats *that* login, not whatever the config would do.
-        self._last_login: "tuple[object, dict] | None" = None
+        self._last_login: "_ty.Optional[tuple[object, dict]]" = None
         #: Closes the websocket if this host is collected without close().
-        self._conn_finalizer: "_weakref.finalize | None" = None
+        self._conn_finalizer: "_ty.Optional[_weakref.finalize]" = None
         #: One warning per host about credentials over plaintext ws://.
         self._plaintext_warned = False
         #: HTTP(S) session for the side channels; see `_http`.
-        self._http_session: "_req.Session | None" = None
+        self._http_session: "_ty.Optional[_req.Session]" = None
         # `client=` is accepted and ignored: the host *is* the client now.
         # Kept so existing callers (and tests that injected a stand-in) do not
         # break on an unexpected keyword.
@@ -1031,7 +1079,7 @@ class TrueNASHost(_PosixHost, _ty.Generic[ApiVersion]):
             finalizer.detach()
         self._conn_finalizer = _weakref.finalize(self, _close_quietly, conn)
 
-    def _drop_conn(self, conn: "_connection.TrueNASWSConnection | None") -> None:
+    def _drop_conn(self, conn: "_ty.Optional[_connection.TrueNASWSConnection]") -> None:
         """Discard ``conn`` so the next :attr:`conn` access reconnects.
 
         Only if it is still the current connection -- another thread may have
@@ -1060,11 +1108,11 @@ class TrueNASHost(_PosixHost, _ty.Generic[ApiVersion]):
 
     def login(
         self,
-        creds: "_auth.Credentials | None" = None,
+        creds: "_ty.Optional[_auth.Credentials]" = None,
         *,
         login_ex: bool = False,
-        login_options: "dict | None" = None,
-        otp_provider: "_ty.Callable[[], str] | None" = None,
+        login_options: "_ty.Optional[dict]" = None,
+        otp_provider: "_ty.Optional[_ty.Callable[[], str]]" = None,
     ):
         """Open a fresh connection and authenticate.
 
@@ -1165,7 +1213,7 @@ class TrueNASHost(_PosixHost, _ty.Generic[ApiVersion]):
     def subscribe(
         self,
         event: str,
-        callback: "_ty.Callable[..., object] | None" = None,
+        callback: "_ty.Optional[_ty.Callable[..., object]]" = None,
         *,
         maxsize: int = _connection.DEFAULT_EVENT_QUEUE_SIZE,
     ):
@@ -1214,7 +1262,13 @@ class TrueNASHost(_PosixHost, _ty.Generic[ApiVersion]):
         return api._replace(scheme=scheme, path=path, query=query, port=port)
 
     def upload(
-        self, file: "str | bytes", method: str, *params, token=None, wait=True, **kwargs
+        self,
+        file: "_ty.Union[str, bytes]",
+        method: str,
+        *params,
+        token=None,
+        wait=True,
+        **kwargs,
     ):
         """Upload ``file`` via ``/_upload``, then call ``method`` with it."""
         target = self._http_target("/_upload")
@@ -1255,7 +1309,7 @@ class TrueNASHost(_PosixHost, _ty.Generic[ApiVersion]):
         self,
         job_id: int,
         *,
-        timeout: "float | None" = None,
+        timeout: "_ty.Optional[float]" = None,
         poll: float = 0.25,
         max_poll: float = 2.0,
     ) -> "_ty.Iterator[dict]":
@@ -1302,8 +1356,8 @@ class TrueNASHost(_PosixHost, _ty.Generic[ApiVersion]):
         self,
         job_id: int,
         *,
-        callback: "_ty.Callable[[dict], object] | None" = None,
-        timeout: "float | None" = None,
+        callback: "_ty.Optional[_ty.Callable[[dict], object]]" = None,
+        timeout: "_ty.Optional[float]" = None,
     ) -> object:
         """Block until middleware job ``job_id`` finishes; return its result.
 
@@ -1329,7 +1383,7 @@ class TrueNASHost(_PosixHost, _ty.Generic[ApiVersion]):
         self,
         method: str,
         *args,
-        filename: "str | None" = None,
+        filename: "_ty.Optional[str]" = None,
         buffered=False,
         wait=True,
         **kwargs,
@@ -1381,7 +1435,7 @@ class TrueNASHost(_PosixHost, _ty.Generic[ApiVersion]):
         return _apicache.load(self, refresh=refresh)
 
     def install_sshcreds(
-        self, name: "str | None" = None, private_key: "str | None" = None
+        self, name: "_ty.Optional[str]" = None, private_key: "_ty.Optional[str]" = None
     ):
         """Provision an SSH keypair and wire it into this host's SSH transport.
 
@@ -1408,7 +1462,7 @@ class TrueNASHost(_PosixHost, _ty.Generic[ApiVersion]):
         # The middleware hands back BOTH halves on the paths it generates or
         # stores, so the public key is usually already known -- see `_public_key`
         # for why that matters.
-        pubkey: "str | None" = None
+        pubkey: "_ty.Optional[str]" = None
         if not keypair and not private_key:
             generated = self.api.keychaincredential.generate_ssh_key_pair()
             private_key = generated["private_key"]
@@ -1519,7 +1573,7 @@ class TrueNASHost(_PosixHost, _ty.Generic[ApiVersion]):
         return super().path(*segments, backend=backend)
 
     @property
-    def sslverify(self) -> "bool | str":
+    def sslverify(self) -> "_ty.Union[bool, str]":
         """TLS verification for this host -- see :attr:`TrueNASConfig.sslverify`.
 
         Read from the config rather than stored, so every transport -- the
@@ -1579,5 +1633,10 @@ class TrueNASHost(_PosixHost, _ty.Generic[ApiVersion]):
                     # an error raised by the provider teardown above.
                     pass
 
+
+# `auth` and `namespace` name the client in their annotations, but this module
+# imports them, so they cannot import it: bind it for `typing.get_type_hints`.
+_auth.TrueNASClient = TrueNASHost  # type: ignore[attr-defined]
+_namespace.TrueNASClient = TrueNASHost  # type: ignore[attr-defined]
 
 __all__ = ["AUTO_SCHEME", "DEFAULT_SOCKET_PATH", "TrueNASConfig", "TrueNASHost"]

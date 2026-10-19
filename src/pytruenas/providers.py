@@ -34,18 +34,14 @@ remote host without SSH a real command channel.
 
 from __future__ import annotations
 
-import typing as _ty
-
 from hostctl.provider import (
     PathProvider as _PathProvider,
     ProviderProbe as _ProviderProbe,
 )
 
-if _ty.TYPE_CHECKING:  # pragma: no cover - typing only
-    from pathapi import Path
+from pathapi import Path
 
-    from . import TrueNASClient
-
+from .host import TrueNASHost as TrueNASClient
 
 #: Path operations the middleware ``filesystem.*`` API can actually serve.
 #: Deliberately narrower than ``PathProvider.DEFAULT_CAPABILITIES``: the

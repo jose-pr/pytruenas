@@ -169,7 +169,7 @@ def dumps(obj, **kwargs) -> str:
     return _json.dumps(obj, cls=_EJSONEncoder, **kwargs)
 
 
-def loads(data: "str | bytes | bytearray", **kwargs):
+def loads(data: "_ty.Union[str, bytes, bytearray]", **kwargs):
     """Deserialize a JSON string, decoding the middleware's extended types."""
     return _json.loads(data, object_hook=_object_hook, **kwargs)
 
@@ -191,9 +191,9 @@ class ClientException(_TrueNASError):
     def __init__(
         self,
         error: str,
-        errno: "int | None" = None,
-        trace: "object | None" = None,
-        extra: "list | None" = None,
+        errno: "_ty.Optional[int]" = None,
+        trace: "_ty.Optional[object]" = None,
+        extra: "_ty.Optional[list]" = None,
     ) -> None:
         super().__init__(error)
         self.error = error
@@ -303,8 +303,8 @@ class Event(_ty.NamedTuple):
 
     collection: str
     msg: str
-    fields: "dict | None"
-    id: "object | None" = None
+    fields: "_ty.Optional[dict]"
+    id: "_ty.Optional[object]" = None
 
 
 #: Sentinel put on a subscription's queue to wake a blocked ``events()``
@@ -332,12 +332,12 @@ class Subscription:
     def __init__(
         self,
         event: str,
-        callback: "_ty.Callable[[Event], object] | None",
+        callback: "_ty.Optional[_ty.Callable[[Event], object]]",
         maxsize: int,
         client: "TrueNASWSConnection",
     ) -> None:
         self.event = event
-        self.id: "str | None" = (
+        self.id: "_ty.Optional[str]" = (
             None  # set by TrueNASWSConnection.subscribe after core.subscribe
         )
         self.dropped = 0
@@ -388,7 +388,7 @@ class Subscription:
 
     # -- consumer side ------------------------------------------------------
 
-    def events(self, timeout: "float | None" = None) -> "_ty.Iterator[Event]":
+    def events(self, timeout: "_ty.Optional[float]" = None) -> "_ty.Iterator[Event]":
         """Yield events until the subscription (or the connection) closes.
 
         Blocks on each event up to ``timeout`` seconds; ``timeout=None`` waits
@@ -439,13 +439,13 @@ class TrueNASWSConnection:
 
     def __init__(
         self,
-        uri: "str | None" = None,
+        uri: "_ty.Optional[str]" = None,
         *,
-        verify_ssl: "bool | str | _os.PathLike[str]" = True,
+        verify_ssl: "_ty.Union[bool, str, _os.PathLike[str]]" = True,
         call_timeout: float = CALL_TIMEOUT,
-        connect_timeout: "float | None" = CONNECT_TIMEOUT,
+        connect_timeout: "_ty.Optional[float]" = CONNECT_TIMEOUT,
         py_exceptions: bool = False,
-        logger: "_logging.Logger | _logging.LoggerAdapter | None" = None,
+        logger: "_ty.Optional[_ty.Union[_logging.Logger, _logging.LoggerAdapter]]" = None,
     ) -> None:
         if not uri or uri == _UNIX_PREFIX:
             uri = _UNIX_PREFIX + DEFAULT_UNIX_SOCKET
@@ -623,7 +623,7 @@ class TrueNASWSConnection:
         self,
         method: str,
         *params,
-        timeout: "float | None | _Unset" = _UNSET,
+        timeout: "_ty.Optional[_ty.Union[float, _Unset]]" = _UNSET,
         **_ignored,
     ):
         """Call ``method`` with ``params`` and return its result.
@@ -708,7 +708,7 @@ class TrueNASWSConnection:
     def subscribe(
         self,
         event: str,
-        callback: "_ty.Callable[[Event], object] | None" = None,
+        callback: "_ty.Optional[_ty.Callable[[Event], object]]" = None,
         *,
         maxsize: int = DEFAULT_EVENT_QUEUE_SIZE,
     ) -> "Subscription":
@@ -808,8 +808,8 @@ class _Pending:
 
     def __init__(self) -> None:
         self._event = _threading.Event()
-        self._message: "dict | None" = None
-        self._error: "ClientException | None" = None
+        self._message: "_ty.Optional[dict]" = None
+        self._error: "_ty.Optional[ClientException]" = None
 
     def resolve(self, message: dict) -> None:
         self._message = message
@@ -819,7 +819,7 @@ class _Pending:
         self._error = error
         self._event.set()
 
-    def wait(self, timeout: float) -> "dict | None":
+    def wait(self, timeout: float) -> "_ty.Optional[dict]":
         if not self._event.wait(timeout):
             return None
         if self._error is not None:

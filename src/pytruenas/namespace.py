@@ -57,7 +57,7 @@ def ioerror(error: _connection.ClientException) -> Exception:
 
 _T = _ty.TypeVar("_T", bound="dict[str, object]")
 
-_DBSelector = "int | str | _ty.Sequence[str] | None | _q._Exclude"
+_DBSelector = _ty.Optional[_ty.Union[int, str, _ty.Sequence[str], _q._Exclude]]
 
 
 class DbAction(str, _enum.Enum):
@@ -75,7 +75,7 @@ class DbAction(str, _enum.Enum):
         __action,
         __namespace: "Namespace",
         __selector: _DBSelector = None,
-        *__opts: dict | _q.Option | tuple[str, object],
+        *__opts: _ty.Union[dict, _q.Option, tuple[str, object]],
         **__fields,
     ) -> _T:
         opts = _q.Option.options(*__opts)
@@ -241,10 +241,10 @@ class Namespace:
         self,
         *args,
         _tries=1,
-        _method: str | None = None,
+        _method: _ty.Optional[str] = None,
         _ioerror=False,
-        _filetransfer: bool | bytes = False,
-        _timeout: "float | None | _Unset" = _UNSET,
+        _filetransfer: _ty.Union[bool, bytes] = False,
+        _timeout: "_ty.Optional[_ty.Union[float, _Unset]]" = _UNSET,
         **kwds,
     ):
         """Invoke this namespace's middleware method.
@@ -303,7 +303,7 @@ class Namespace:
         # connection. The loop ends in a result or a raise, never None: a None
         # reads as "no result" and, via _get, turns an upsert into a create.
         attempts = max(0, _tries) + 1
-        last_exc: "_connection.ClientException | None" = None
+        last_exc: "_ty.Optional[_connection.ClientException]" = None
         for attempt in range(attempts):
             conn = None
             try:
@@ -372,9 +372,9 @@ class Namespace:
 
     def subscribe(
         self,
-        __callback: "_ty.Callable[[_connection.Event], object] | None" = None,
+        __callback: "_ty.Optional[_ty.Callable[[_connection.Event], object]]" = None,
         *,
-        event: "str | None" = None,
+        event: "_ty.Optional[str]" = None,
         maxsize: int = _connection.DEFAULT_EVENT_QUEUE_SIZE,
     ) -> "_connection.Subscription":
         """Subscribe to this namespace's collection events.
@@ -398,16 +398,18 @@ class Namespace:
             )
         return self._client.conn.subscribe(name, __callback, maxsize=maxsize)
 
-    def _query(self, *__opts: dict | _q.Option, **filter):
+    def _query(self, *__opts: _ty.Union[dict, _q.Option], **filter):
         opts = _q.Option.options(*__opts)
         filter = _q.filter_from_kwargs(**filter)
         return _ty.cast(list[dict[str, object]], self.query(filter, opts))
 
     def _get(
         self,
-        __id_or_filter: _ty.Mapping | int | str | None | _q._Exclude = None,
+        __id_or_filter: _ty.Optional[
+            _ty.Union[_ty.Mapping, int, str, _q._Exclude]
+        ] = None,
         **__filter,
-    ) -> dict[str, object] | None:
+    ) -> _ty.Optional[dict[str, object]]:
         if isinstance(__id_or_filter, _ty.Mapping):
             id = None
             filter = {**__id_or_filter}
@@ -431,14 +433,15 @@ class Namespace:
     def _upsert(
         self,
         __selector: _DBSelector = None,
-        __callback: (
-            _ty.Callable[[DbAction, str | int, dict[str, object]], None]
-            | None
-            | dict
-            | _q.Option
-            | _ty.Tuple[str, object]
-        ) = None,
-        *__opts: dict | _q.Option | _ty.Tuple[str, object],
+        __callback: _ty.Optional[
+            _ty.Union[
+                _ty.Callable[[DbAction, _ty.Union[str, int], dict[str, object]], None],
+                dict,
+                _q.Option,
+                _ty.Tuple[str, object],
+            ]
+        ] = None,
+        *__opts: _ty.Union[dict, _q.Option, _ty.Tuple[str, object]],
         **__fields,
     ):
         opts = [*__opts]
@@ -452,14 +455,14 @@ class Namespace:
     def _update(
         self,
         __selector: _DBSelector = None,
-        *__opts: dict | _q.Option | _ty.Tuple[str, object],
+        *__opts: _ty.Union[dict, _q.Option, _ty.Tuple[str, object]],
         **__fields,
     ):
         return DbAction.UPDATE.execute(self, __selector, *__opts, **__fields)
 
     def _create(
         self,
-        *__opts: dict | _q.Option | _ty.Tuple[str, object],
+        *__opts: _ty.Union[dict, _q.Option, _ty.Tuple[str, object]],
         **__fields,
     ):
         return DbAction.CREATE.execute(self, _q.EXCLUDE, *__opts, **__fields)

@@ -26,10 +26,8 @@ from pathapi.providers import CommitOnClose as _CommitOnClose
 from uripath import URIPath as _URIPath
 
 from ..connection import ClientException as _ClientException
+from ..host import TrueNASHost as TrueNASClient
 from ..namespace import ioerror as _ioerror
-
-if _ty.TYPE_CHECKING:
-    from .. import TrueNASClient
 
 #: URI scheme(s) that resolve to :class:`TnasWsPath`. Not a real network scheme --
 #: just a registration handle so the ``URIPath`` machinery + backend propagation
@@ -186,7 +184,7 @@ class TnasWsPath(_URIPath):
         return _ty.cast(bytes, data)
 
     def _write_bytes(
-        self, data: bytes, *, append: bool = False, mode: "int | None" = None
+        self, data: bytes, *, append: bool = False, mode: "_ty.Optional[int]" = None
     ):
         opts: dict = {"append": bool(append)}
         if mode is not None:

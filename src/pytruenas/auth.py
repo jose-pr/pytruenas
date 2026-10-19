@@ -75,7 +75,7 @@ def _mask_args(args: tuple) -> tuple:
     return tuple(f"<{type(a).__name__}>" if a is not None else None for a in args)
 
 
-def _split_extras(raw: str) -> "tuple[str, str | None]":
+def _split_extras(raw: str) -> "tuple[str, _ty.Optional[str]]":
     """``(credential, otp)`` from a raw credential string.
 
     Split by :func:`hostctl.uri.parse_credentials`, the same function the URI
@@ -206,7 +206,7 @@ class Credentials(metaclass=_CredentialsMeta):
     #: Modern ``auth.login_ex`` mechanism name (``PASSWORD_PLAIN``/
     #: ``API_KEY_PLAIN``/``TOKEN_PLAIN``). ``None`` means this credential has no
     #: login_ex form (e.g. local-socket auth) -- :meth:`login_ex` falls back.
-    MECHANISM: "str | None" = None
+    MECHANISM: "_ty.Optional[str]" = None
 
     def __init__(self, *args, **kwargs) -> None:
         pass
@@ -233,7 +233,7 @@ class Credentials(metaclass=_CredentialsMeta):
 
     # -- modern login_ex path ----------------------------------------------
 
-    def _login_data(self) -> "dict | None":
+    def _login_data(self) -> "_ty.Optional[dict]":
         """The ``login_ex`` payload for this credential, or ``None`` if it has
         no login_ex mechanism (falls back to legacy :meth:`login`)."""
         return None
@@ -242,9 +242,9 @@ class Credentials(metaclass=_CredentialsMeta):
         self,
         client: "TrueNASClient",
         *,
-        login_options: "dict | None" = None,
-        otp_provider: "_ty.Callable[[], str] | None" = None,
-    ) -> "dict | None":
+        login_options: "_ty.Optional[dict]" = None,
+        otp_provider: "_ty.Optional[_ty.Callable[[], str]]" = None,
+    ) -> "_ty.Optional[dict]":
         """Authenticate via the modern ``auth.login_ex`` mechanism.
 
         Handles the discriminated response: ``SUCCESS`` returns the response
@@ -290,7 +290,7 @@ class Credentials(metaclass=_CredentialsMeta):
         raise AuthenticationError(rtype or "UNKNOWN", resp)
 
     @staticmethod
-    def from_env(env: _ty.Mapping | None = None):
+    def from_env(env: _ty.Optional[_ty.Mapping] = None):
         if env is None:
             import os
 
@@ -299,11 +299,11 @@ class Credentials(metaclass=_CredentialsMeta):
 
     @staticmethod
     def from_host_credentials(
-        username: "str | None" = None,
-        password: "str | None" = None,
-        otp: "str | None" = None,
-        api_key: "str | None" = None,
-        token: "str | None" = None,
+        username: "_ty.Optional[str]" = None,
+        password: "_ty.Optional[str]" = None,
+        otp: "_ty.Optional[str]" = None,
+        api_key: "_ty.Optional[str]" = None,
+        token: "_ty.Optional[str]" = None,
     ) -> "Credentials":
         """Select a credential from an already-parsed credential mapping.
 
@@ -369,7 +369,7 @@ class ApiKeyAuth(Credentials):
     METHOD = "login_with_api_key"
     MECHANISM = "API_KEY_PLAIN"
 
-    def __init__(self, api_key: str, username: str | None = None) -> None:
+    def __init__(self, api_key: str, username: _ty.Optional[str] = None) -> None:
         self.api_key = api_key
         # login_ex's API_KEY_PLAIN wants the username too; the legacy
         # login_with_api_key does not. If unknown, the modern path can't be used
@@ -408,7 +408,7 @@ class BasicAuth(Credentials):
     MECHANISM = "PASSWORD_PLAIN"
 
     def __init__(
-        self, username: str, password: str, otp_token: str | None = None
+        self, username: str, password: str, otp_token: _ty.Optional[str] = None
     ) -> None:
         self.username = username
         self.password = password

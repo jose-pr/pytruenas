@@ -1,8 +1,26 @@
 from __future__ import annotations
 
 import re as _re
+import sys as _sys
 import typing as _ty
+
 from duho import qualname as _qn
+
+if _sys.version_info >= (3, 11):
+    from typing import NotRequired as _NotRequired
+else:  # pragma: no cover - exercised on the 3.9 floor
+    try:
+        from typing_extensions import NotRequired as _NotRequired
+    except ImportError:
+
+        class _NotRequired:
+            """``NotRequired[X]`` resolves to ``X`` where neither ``typing``
+            nor ``typing_extensions`` has it; the key's optionality is the
+            class's ``total=False``."""
+
+            def __class_getitem__(cls, item):
+                return item
+
 
 JsonNumber = _ty.Union[float, int]
 # Real aliases, not strings: a stub annotation naming `_jsonschema.JsonValue`
@@ -41,11 +59,11 @@ def _typeddict_name(namespace: "_qn.PythonName", title: str) -> str:
 
 
 class Schema(_ty.TypedDict, total=False):
-    title: _ty.NotRequired[str]
-    description: _ty.NotRequired[str]
-    default: _ty.NotRequired[object | None]
+    title: _NotRequired[str]
+    description: _NotRequired[str]
+    default: _NotRequired[_ty.Optional[object]]
 
-    def get_type(schema) -> "type[AnyOf|BaseType|OneOf]":  # type: ignore
+    def get_type(schema) -> "type[_ty.Union[AnyOf, BaseType, OneOf]]":  # type: ignore
         if "anyOf" in schema:
             return AnyOf
         elif "oneOf" in schema:
@@ -65,7 +83,7 @@ class Schema(_ty.TypedDict, total=False):
         )
 
 
-def _literal_declaration(schema: "_ty.Mapping[str, object]") -> "str | None":
+def _literal_declaration(schema: "_ty.Mapping[str, object]") -> "_ty.Optional[str]":
     """``Literal[...]`` for a ``const``/``enum`` schema, or ``None``.
 
     ``None`` among the values becomes a union member rather than a Literal
@@ -98,7 +116,7 @@ def _literal_declaration(schema: "_ty.Mapping[str, object]") -> "str | None":
 
 
 class BaseType(Schema):
-    type: _ty.NotRequired[str]
+    type: _NotRequired[str]
 
     def python_declaration(
         self, typeddicts: dict[str, object], namespace: _qn.PythonName
@@ -234,13 +252,13 @@ class String(BaseType):
 
 class Object(BaseType):
     type: _ty.Literal["object"] = "object"  # type: ignore
-    properties: _ty.NotRequired[dict[str, Schema]]
+    properties: _NotRequired[dict[str, Schema]]
     #: The dump's own spelling. A bool ("anything"/"nothing else allowed") or a
     #: schema the extra VALUES must match, which is how the middleware writes a
     #: map. The old declaration named it `additional_properties` and typed it
     #: `bool`, neither of which appears in a dump.
-    additionalProperties: _ty.NotRequired["bool | Schema"]
-    required: _ty.NotRequired[list[str]]
+    additionalProperties: _NotRequired["_ty.Union[bool, Schema]"]
+    required: _NotRequired[list[str]]
 
     def python_declaration(
         self, typeddicts: dict[str, object], namespace: _qn.PythonName
@@ -302,9 +320,9 @@ class Array(BaseType):
     type: _ty.Literal["array"] = "array"  # type: ignore
     #: A schema every item matches, or a bool (`True`/`{}` any item,
     #: `False` none). Absent for an array with no item constraint at all.
-    items: _ty.NotRequired["Schema | bool"]
+    items: _NotRequired["_ty.Union[Schema, bool]"]
     #: Positional item schemas (the middleware's call-parameter lists).
-    prefixItems: _ty.NotRequired[list[Schema]]
+    prefixItems: _NotRequired[list[Schema]]
 
     def python_declaration(
         self, typeddicts: dict[str, object], namespace: _qn.PythonName
