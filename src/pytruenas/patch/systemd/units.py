@@ -8,6 +8,7 @@ reconciled against what the host reports rather than commands fired blindly.
 
 from __future__ import annotations
 
+import copy as _copy
 import logging as _logging
 import typing as _ty
 from pathlib import PurePath as _PurePath
@@ -71,7 +72,9 @@ class Unit(SystemFile):
         self.enable = enable
         self.start = start
 
-        self.conf: "dict[str, dict]" = conf if conf is not None else {}
+        # A copy: defaults are filled in with setdefault, and a caller's dict
+        # shared between units must not carry one unit's settings into the next.
+        self.conf: "dict[str, dict]" = _copy.deepcopy(conf) if conf is not None else {}
         unit = self.conf.setdefault("Unit", {})
         unit.setdefault(
             "Description", description or self.name.rsplit(".", 1)[0].upper()

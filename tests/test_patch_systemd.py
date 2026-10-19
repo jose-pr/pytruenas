@@ -273,3 +273,18 @@ def test_optional_mount_fields_are_omitted_when_empty():
     """An empty `Options =` is not the same as no Options at all."""
     text = MountUnit(_FakeClient(), "/mnt/d", what="/dev/sda1").render()
     assert "Options" not in text and "Type" not in text
+
+
+def test_units_built_from_one_conf_do_not_share_settings():
+    """Each unit gets its own ExecStart and Description; the caller's dict is
+    left as it was passed."""
+    base = {"Service": {"Environment": "A=1"}}
+    client = _FakeClient()
+    alpha = ServiceUnit(client, "alpha", cmd="/usr/bin/alpha", conf=base)
+    beta = ServiceUnit(client, "beta", cmd="/usr/bin/beta", conf=base)
+
+    assert base == {"Service": {"Environment": "A=1"}}
+    assert alpha.conf["Service"]["ExecStart"] == "/usr/bin/alpha"
+    assert beta.conf["Service"]["ExecStart"] == "/usr/bin/beta"
+    assert beta.conf["Unit"]["Description"] == "BETA"
+    assert beta.conf["Service"]["Environment"] == "A=1"
