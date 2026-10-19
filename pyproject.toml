@@ -128,6 +128,10 @@ exclude = ["*.local.*", "CLAUDE*"]
 [tool.pytest.ini_options]
 pythonpath = ["src"]
 testpaths = ["tests"]
+# A warning fails the test that raised it; an exception goes here, narrow.
+filterwarnings = ["error"]
+# An expected failure that starts passing fails, so its marker comes out.
+xfail_strict = true
 
 # Pinned to the *floor* (requires-python = ">=3.9"), not the interpreter used
 # for dev: black must never emit syntax 3.9 cannot parse, and routine work now
