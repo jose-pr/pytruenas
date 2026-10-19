@@ -1,7 +1,8 @@
 """Systemd units and system files, applied idempotently.
 
-* :mod:`.unitfile` -- unit-file syntax. Pure text: parse and render systemd's
-  INI-shaped format, with the three deviations from real INI handled.
+* :mod:`.unitfile` -- unit-file syntax. Pure text: render systemd's
+  INI-shaped format, and a ``ConfigParser`` set up for it, with the three
+  deviations from real INI handled.
 * :mod:`.files` -- :class:`~.files.SystemFile`, a file plus the etc groups and
   services to notify when it changes.
 * :mod:`.units` -- :class:`~.units.Unit` and the service/mount/automount
@@ -16,7 +17,7 @@ Typical use::
 """
 
 from .files import SystemFile, as_names
-from .unitfile import UnitConfigParser, parse_unit, render_unit
+from .unitfile import UnitConfigParser, render_unit
 from .units import (
     UNIT_DIR,
     AutomountUnit,
@@ -31,7 +32,6 @@ __all__ = [
     "as_names",
     "UnitConfigParser",
     "render_unit",
-    "parse_unit",
     "Unit",
     "ServiceUnit",
     "MountUnit",

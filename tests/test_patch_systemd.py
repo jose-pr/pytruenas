@@ -372,39 +372,6 @@ def test_render_matches_configparser_for_single_values():
     assert render_unit(conf) == expected.getvalue()
 
 
-def test_parse_reads_repeated_keys_sections_and_continuations():
-    from pytruenas.patch.systemd import parse_unit
-
-    text = (
-        "# a comment\n"
-        "[Service]\n"
-        "ExecStartPre=/a\n"
-        "ExecStartPre = /b\n"
-        "ExecStart=/bin/agent \\\n"
-        "  # skipped inside a continuation\n"
-        "  --flag\n"
-        "[Unit]\n"
-        "Description=x\n"
-        "[Service]\n"
-        "Restart=always\n"
-    )
-    assert parse_unit(text) == {
-        "Service": {
-            "ExecStartPre": ["/a", "/b"],
-            "ExecStart": "/bin/agent  --flag",
-            "Restart": "always",
-        },
-        "Unit": {"Description": "x"},
-    }
-
-
-def test_parse_round_trips_render():
-    from pytruenas.patch.systemd import parse_unit, render_unit
-
-    conf = {"Service": {"Environment": ["A=1", "B=2"], "ExecStart": "/bin/a"}}
-    assert parse_unit(render_unit(conf)) == conf
-
-
 # -- a changed unit reaching a running service ------------------------------
 
 

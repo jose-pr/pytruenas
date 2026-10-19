@@ -41,9 +41,6 @@ from pathlib import PurePosixPath as _PurePosixPath
 if _ty.TYPE_CHECKING:  # pragma: no cover - typing only
     from ..host import TrueNASClient
 
-#: A path on the *host*: a ``client.path(...)`` instance or its string form.
-PathLike = _ty.Union[str, "_ty.Any"]
-
 __all__ = [
     "dataset_for",
     "get_properties",
@@ -55,11 +52,10 @@ __all__ = [
     "set_readonly",
     "writable",
     "host_path",
-    "PathLike",
 ]
 
 
-def host_path(path: "PathLike") -> str:
+def host_path(path: "_ty.Union[str, _os.PathLike[str]]") -> str:
     """The plain filesystem path ``path`` names *on the host*.
 
     A remote path does not always stringify to something usable in a command
@@ -82,7 +78,9 @@ def host_path(path: "PathLike") -> str:
 LOGGER = _logging.getLogger(__name__)
 
 
-def dataset_for(client: "TrueNASClient", path: "PathLike") -> str:
+def dataset_for(
+    client: "TrueNASClient", path: "_ty.Union[str, _os.PathLike[str]]"
+) -> str:
     """The ZFS dataset backing ``path``.
 
     ``path`` is a remote path -- a ``client.path(...)`` instance, or the string
@@ -110,7 +108,9 @@ def dataset_for(client: "TrueNASClient", path: "PathLike") -> str:
     return source
 
 
-def _mount_for(client: "TrueNASClient", path: "PathLike") -> "tuple[str, str]":
+def _mount_for(
+    client: "TrueNASClient", path: "_ty.Union[str, _os.PathLike[str]]"
+) -> "tuple[str, str]":
     """``(FSTYPE, SOURCE)`` of the mount holding ``path`` or its nearest
     existing ancestor, as ``findmnt`` reports them."""
     # Walk with the path's own `.parent` when it has one (it keeps the type,
@@ -327,7 +327,9 @@ _RESTORE_MARK = "pytruenas:restore-readonly"
 
 
 @_contextlib.contextmanager
-def writable(client: "TrueNASClient", path: "PathLike") -> "_ty.Iterator[str]":
+def writable(
+    client: "TrueNASClient", path: "_ty.Union[str, _os.PathLike[str]]"
+) -> "_ty.Iterator[str]":
     """Make the dataset holding ``path`` writable for the duration.
 
     Yields the dataset name. Restores ``readonly`` on exit however the block

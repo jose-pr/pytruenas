@@ -834,11 +834,8 @@ check=, capture_output=, encoding=)` and `client.api.<ns>.<method>(...)`. A
     `escape_path(client, where)` (`systemd-escape --path`; `/` is `-.mount`).
   - `render_unit(conf) -> str` — `Key = value` lines; a list value is one line
     per item; a value with a line break raises `ValueError`, `None` raises
-    `TypeError`. `parse_unit(text) -> dict` per systemd.syntax(7): a repeated
-    key becomes a list, repeated sections merge, backslash continuations join,
-    `#`/`;` comments; `ValueError` on a malformed line. `UnitConfigParser` is a
-    `ConfigParser` set up for unit syntax (case-sensitive keys, `=` only, no
-    interpolation).
+    `TypeError`. `UnitConfigParser` is a `ConfigParser` set up for unit
+    syntax (case-sensitive keys, `=` only, no interpolation).
 - **`middleware`**
   - `middlewared_path(client)` — the `middlewared` package directory as a
     `client.path`, by running `python3 -c "import middlewared ..."` on the host
@@ -881,8 +878,8 @@ check=, capture_output=, encoding=)` and `client.api.<ns>.<method>(...)`. A
     `client.path(...)` composite gives its logical path, and a URI path gives
     the host path when its scheme names a host filesystem (`truenas`,
     `truenas+ws`, `sftp`); a `str` passes through. Any other scheme raises
-    rather than putting a URI into a command line. `PathLike` is
-    `str | path`.
+    rather than putting a URI into a command line. Every `path` argument in
+    `zfs` is a `str` or an `os.PathLike[str]`.
 
 ## Typings generator (`pytruenas.codegen`)
 
