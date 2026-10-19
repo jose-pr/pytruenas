@@ -46,7 +46,9 @@ from urllib.parse import urlsplit as _urlsplit
 
 import requests as _req
 from duho import fanout as _fanout
+from hostctl import DEFAULT as _DEFAULT
 from hostctl import PosixHost as _PosixHost
+from hostctl import Timeout
 from hostctl import uri_host as _uri_host
 from hostctl import uri_hostname as _uri_hostname
 from hostctl.host import HostConfig as _HostConfig
@@ -321,6 +323,7 @@ def _shared_options(credentials: "_ty.Mapping[str, object]") -> "dict[str, objec
         "executor": _ty.cast(_ty.Any, credentials.get("executor")),
         "path": _ty.cast(_ty.Any, credentials.get("path")),
         "autologin": _ty.cast(bool, credentials.get("autologin", True)),
+        "timeout": _ty.cast(_ty.Any, credentials.get("timeout", Timeout())),
     }
 
 
@@ -404,6 +407,21 @@ def _ssh_config_from(
         known_hosts=_ty.cast(_ty.Any, known_hosts),
         default_username="root",
     )
+
+
+def _timeout(value: object) -> Timeout:
+    """``value`` as the `Timeout` a `TrueNASConfig` keeps, or ``ValueError``.
+
+    A number or ``None`` is ``total``, as hostctl's configs take it. ``write``
+    has no meaning here, and neither has ``read=0`` (a call always waits for
+    its answer).
+    """
+    timeout = Timeout.coerce(_ty.cast(_ty.Any, value))
+    if timeout.write is not _DEFAULT:
+        raise ValueError("TrueNASConfig: timeout.write is not supported")
+    if timeout.read == 0:
+        raise ValueError("TrueNASConfig: timeout.read=0 (do not wait) is not supported")
+    return timeout
 
 
 def _as_names(
@@ -534,12 +552,17 @@ class TrueNASConfig(
         executor: "_ty.Optional[_ty.Union[_ty.Iterable[str], str]]" = None,
         path: "_ty.Optional[_ty.Union[_ty.Iterable[str], str]]" = None,
         autologin: bool = True,
+        timeout: "_ty.Union[float, None, Timeout]" = Timeout(),
     ) -> None:
         super().__init__()
         #: A label assigned to `name`, replacing the derived one.
         self._name: "_ty.Optional[str]" = None
         #: Whether the first websocket access logs in automatically.
         self.autologin = autologin
+        #: hostctl's `Timeout`: `connect` opens the websocket, `read` bounds one
+        #: middleware call (and a side-channel read), `total` is `run()`'s
+        #: default. `write` is not supported. See :attr:`timeouts`.
+        self.timeout = _timeout(timeout)
         #: Explicit provider selection, overriding the defaults. Each is a name
         #: or a sequence of names, in preference order; ``None`` means "decide
         #: from the target". See :meth:`TrueNASClient.default_providers`.
@@ -641,6 +664,7 @@ class TrueNASConfig(
         "executor",
         "path",
         "autologin",
+        "timeout",
     )
 
     @classmethod
@@ -711,6 +735,31 @@ class TrueNASConfig(
         )
 
     # -- derived state -----------------------------------------------------
+
+    @property
+    def timeouts(self) -> Timeout:
+        """:attr:`timeout` with each ``DEFAULT`` replaced by what applies.
+
+        ``connect`` is :data:`~pytruenas.connection.CONNECT_TIMEOUT`; ``read``
+        is ``$PYTRUENAS_CALL_TIMEOUT`` when set, else
+        :data:`~pytruenas.connection.CALL_TIMEOUT` (read now, not at import);
+        ``total`` stays ``DEFAULT``: the command transport that runs a command
+        applies its own.
+        """
+        given = self.timeout
+        return Timeout(
+            given.total,
+            connect=(
+                _connection.CONNECT_TIMEOUT
+                if given.connect is _DEFAULT
+                else given.connect
+            ),
+            read=(
+                _connection.default_call_timeout()
+                if given.read is _DEFAULT
+                else given.read
+            ),
+        )
 
     @property
     def is_local(self) -> bool:
@@ -898,6 +947,7 @@ class TrueNASClient(_PosixHost, _ty.Generic[ApiVersion]):
         executor: "_ty.Optional[_ty.Union[_ty.Iterable[str], str]]" = ...,
         path: "_ty.Optional[_ty.Union[_ty.Iterable[str], str]]" = ...,
         autologin: bool = ...,
+        timeout: "_ty.Union[float, None, Timeout]" = ...,
         executor_providers: "_ty.Optional[_ty.Iterable[ExecutorProvider]]" = ...,
         path_providers: "_ty.Optional[_ty.Iterable[PathProvider]]" = ...,
         info: "_ty.Optional[HostInfo]" = ...,
@@ -1062,9 +1112,12 @@ class TrueNASClient(_PosixHost, _ty.Generic[ApiVersion]):
             if config.is_local
             else self._target.uri
         )
+        timeouts = config.timeouts
         return _connection.TrueNASWSConnection(
             uri,
-            verify=self._config.verify,
+            verify=config.verify,
+            call_timeout=_ty.cast("_ty.Optional[float]", timeouts.read),
+            connect_timeout=_ty.cast("_ty.Optional[float]", timeouts.connect),
             # Share the host's name-bound logger, so a record from the
             # connection layer names the host it came from -- with several
             # clients open at once, an unattributed "connection was closed" is
@@ -1454,14 +1507,16 @@ class TrueNASClient(_PosixHost, _ty.Generic[ApiVersion]):
 
         ``requests`` names the URL in its errors, and a download link carries
         its ``auth_token`` in the query, so the message is re-raised without
-        it. The connect and read timeouts are the websocket's own.
+        it. The connect and read timeouts are the websocket's own
+        (``config.timeouts``).
         """
+        timeouts = self._config.timeouts
         try:
             resp = self._http.request(
                 method,
                 uri,
                 verify=self._http_verify,
-                timeout=(_connection.CONNECT_TIMEOUT, _connection.CALL_TIMEOUT),
+                timeout=(timeouts.connect, timeouts.read),
                 **kwargs,
             )
             resp.raise_for_status()

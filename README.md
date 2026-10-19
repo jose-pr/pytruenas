@@ -107,7 +107,7 @@ through a temporary file, never typed into the terminal.
 - a `(user, password)` tuple,
 - `None` / omitted → local socket auth.
 
-`Credentials.from_env()` reads `TN_CREDS`. Credentials may also travel in the
+`Credentials.from_env()` reads `PYTRUENAS_CREDENTIALS`. Credentials may also travel in the
 target (`wss://root:secret@nas`). In a **URI** an OTP follows the password after
 a newline as a keyed line — `otp:<token>`, with the newline percent-encoded:
 `wss://root:secret%0Aotp:123456@nas`. In the plain credential string above the

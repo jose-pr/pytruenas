@@ -31,11 +31,11 @@ client and its own log prefix.
 
 Credentials come from the target string (`wss://root:pw@nas`,
 `wss://nas` with `1-<api-key>` as the password). A target that carries none
-falls back to `$TN_CREDS`, then to `credentials:` in the config file — either
-a connection string or a mapping of keyword arguments:
+falls back to `$PYTRUENAS_CREDENTIALS`, then to `credentials:` in the config
+file — either a connection string or a mapping of keyword arguments:
 
 ```bash
-export TN_CREDS='1-<64-char-api-key>'
+export PYTRUENAS_CREDENTIALS='1-<64-char-api-key>'
 pytruenas call system.version nas.example.com
 ```
 
@@ -183,7 +183,8 @@ credentials: 1-<64-char-api-key>
 ca_bundle: /etc/pki/lab-ca.pem
 ```
 
-- `credentials` — used for a target that carries none, after `$TN_CREDS`.
+- `credentials` — used for a target that carries none, after
+  `$PYTRUENAS_CREDENTIALS`.
 - `insecure` / `ca_bundle` — the TLS default, below `-k`/`--ca-bundle` and
   `$PYTRUENAS_INSECURE`/`$PYTRUENAS_CA_BUNDLE`.
 - `commandspath` — directories or packages to load commands from.

@@ -19,7 +19,7 @@ from pytruenas.utils.cmd import PyTrueNASArgs
 def args(monkeypatch, tmp_path):
     for name in ("SSLVERIFY", "INSECURE", "CA_BUNDLE"):
         monkeypatch.delenv("PYTRUENAS_" + name, raising=False)
-    monkeypatch.delenv("TN_CREDS", raising=False)
+    monkeypatch.delenv("PYTRUENAS_CREDENTIALS", raising=False)
     # `_config` names a file through the variable; until then, no config.
     monkeypatch.setenv("APPDATA", str(tmp_path / "appdata"))
     monkeypatch.setenv("XDG_CONFIG_HOME", str(tmp_path / "xdg"))
@@ -120,12 +120,12 @@ def test_credentials_come_from_the_environment_or_config(args, monkeypatch, tmp_
     assert args()._credentials_() is None
     _config(tmp_path, "credentials: root:hunter2")
     assert isinstance(args()._credentials_(), BasicAuth)
-    monkeypatch.setenv("TN_CREDS", "1-" + "k" * 64)
+    monkeypatch.setenv("PYTRUENAS_CREDENTIALS", "1-" + "k" * 64)
     assert isinstance(args()._credentials_(), APIKeyAuth)  # env wins
 
 
 def test_the_client_gets_them(args, monkeypatch):
-    monkeypatch.setenv("TN_CREDS", "1-" + "k" * 64)
+    monkeypatch.setenv("PYTRUENAS_CREDENTIALS", "1-" + "k" * 64)
     client = args(insecure=True)._client_("nas")
     assert client.config.verify is False
     assert client.config.credentials.api_key.startswith("1-")
@@ -133,7 +133,7 @@ def test_the_client_gets_them(args, monkeypatch):
 
 def test_a_target_that_carries_credentials_keeps_them(args, monkeypatch):
     """Passing both raises, so the fallback must stay out of the way."""
-    monkeypatch.setenv("TN_CREDS", "1-" + "k" * 64)
+    monkeypatch.setenv("PYTRUENAS_CREDENTIALS", "1-" + "k" * 64)
     client = args()._client_("wss://root:hunter2@nas")
     assert client.config.credentials.password == "hunter2"
 

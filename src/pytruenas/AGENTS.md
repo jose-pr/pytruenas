@@ -53,8 +53,8 @@ half (transports, configuration) is documented in the next section. There is
 no second name for it.
 
 `TrueNASClient(config=None, *, credentials=None, verify=True, shell=None,
-known_hosts=(), autologin=True, version="current", executor=None, path=None,
-ssh=None, ...)`
+known_hosts=(), autologin=True, version="current", timeout=Timeout(),
+executor=None, path=None, ssh=None, ...)`
 
 - **`config`** (positional) — the target: a host, `"host:port"`, or full
   `scheme://...` URI, a socket path (`"/var/run/x.sock"`), or a
@@ -139,6 +139,15 @@ ssh=None, ...)`
   the provider table in the next section.
 - **`version`** — API path used when the target carries none (default
   `"current"`, i.e. `/api/current`).
+- **`timeout`** (default `hostctl.Timeout()`) — hostctl's `Timeout`, or a
+  number or `None` for `total` alone, as every hostctl config takes it:
+  `connect` bounds opening the websocket (default
+  `connection.CONNECT_TIMEOUT`, 30 s); `read` bounds one middleware call and
+  one side-channel read (default `$PYTRUENAS_CALL_TIMEOUT`, else 60 s; a
+  call's `_timeout=` overrides it); `total` is `run()`'s default, left to the
+  command transport when `DEFAULT`. `write`, and `read=0`, raise `ValueError`.
+  Stored on `.config.timeout`; `.config.timeouts` is it resolved, the
+  variable read at that moment.
 - **Other keywords** — hostctl's `PosixHost` options (`info=`,
   `initializer=`, `executor_providers=`, `path_providers=`). The port, scheme and API path are spelled in the
   target string, not as keywords: any other keyword raises `ValueError:
@@ -281,7 +290,7 @@ ssh=None, ...)`
   Its `repr` shows only the job id; the link carries a single-use token.
   For both, `wait=` may also be a callable: it waits, and is passed to
   `.wait(callback=...)` for progress. Both side channels use the websocket's
-  timeouts (`CONNECT_TIMEOUT` to connect, `CALL_TIMEOUT` per read), raise
+  timeouts (`config.timeouts.connect` to connect, `.read` per read), raise
   `requests`' own exceptions for an HTTP or transport error, and never name
   a token in the message (`auth_token=<redacted>`).
 - **`.dump_api(*, cache=True, refresh=False) -> dict`** — the middleware API
@@ -498,8 +507,9 @@ below raise `AttributeError` normally.
 The synchronous JSON-RPC 2.0 websocket transport backing `TrueNASClient`
 (`client.conn`).
 
-- **`TrueNASWSConnection(uri=None, *, verify=True, call_timeout=CALL_TIMEOUT,
-  connect_timeout=CONNECT_TIMEOUT, logger=None)`** —
+- **`TrueNASWSConnection(uri=None, *, verify=True, call_timeout=UNSET,
+  connect_timeout=CONNECT_TIMEOUT, logger=None)`** — `call_timeout` left
+  out is `default_call_timeout()`, read now; `None` waits indefinitely. It
   builds the connection and does no I/O. `uri` is `wss://`/`ws://` or
   `ws+unix://...`; `None`/bare `ws+unix://` connects to `DEFAULT_UNIX_SOCKET`
   (`/var/run/middleware/middlewared.sock`). `verify` takes the same values as
@@ -550,9 +560,13 @@ The synchronous JSON-RPC 2.0 websocket transport backing `TrueNASClient`
   dict (the shape TrueNAS 26.0 sends).
 - **`DEFAULT_EVENT_QUEUE_SIZE`** — default `maxsize` (1000) for a subscription's
   event queue.
-- **`CALL_TIMEOUT`** — default per-call timeout in seconds (int, 60;
-  overridable via the `CALL_TIMEOUT` environment variable, read at import
-  time).
+- **`CALL_TIMEOUT`** — `60.0`, the per-call timeout in seconds when neither
+  the caller nor `$PYTRUENAS_CALL_TIMEOUT` sets one. A constant: no variable
+  is read at import.
+- **`default_call_timeout() -> float`** — `$PYTRUENAS_CALL_TIMEOUT` (a
+  positive number of seconds) when set and not empty, else `CALL_TIMEOUT`;
+  another value raises `ValueError` naming the variable. Read each time a
+  connection is built.
 - **`CONNECT_TIMEOUT`** — default timeout in seconds (30) for opening a
   connection. It is not the reader's timeout: an idle connection stays open.
 - **`DEFAULT_UNIX_SOCKET`** — `"/var/run/middleware/middlewared.sock"`.
@@ -599,7 +613,9 @@ The synchronous JSON-RPC 2.0 websocket transport backing `TrueNASClient`
   `AuthenticationError` otherwise. Falls back to `.login()` for a credential
   with no `login_ex` form.
 - **`Credentials.from_env(env=None) -> Credentials`** —
-  `Credentials(env.get("TN_CREDS"))`, defaulting `env` to `os.environ`.
+  `Credentials($PYTRUENAS_CREDENTIALS)` (read through `utils.cmd.ENV`), or
+  `env["PYTRUENAS_CREDENTIALS"]` from a mapping you pass; unset or empty is
+  `LocalAuth()`.
 - **`Credentials.from_host_credentials(...)`** — the keyword selection
   (`username`/`password`/`otp`/`api_key`/`token`) `TrueNASConfig` uses.
 - **`LocalAuth`** — no-op auth (local socket). **`APIKeyAuth(api_key,
@@ -1143,7 +1159,7 @@ to build a client from parsed args:
   non-boolean `$PYTRUENAS_INSECURE` or config `insecure` is a `ValueError`.
   The removed `$PYTRUENAS_SSLVERIFY` and config `sslverify` raise
   `ValueError` naming their replacements.
-- **`._credentials_() -> Credentials|None`** — `$TN_CREDS`, else the config
+- **`._credentials_() -> Credentials|None`** — `$PYTRUENAS_CREDENTIALS`, else the config
   file's `credentials` (a connection string, or a mapping of keyword
   arguments), else `None`.
 - **`._client_(target) -> TrueNASClient`** — the client for one target: the
@@ -1392,12 +1408,16 @@ is routinely run from a directory the user does not control.
   `duho.main` and `duho.app`, so it applies here regardless of entry point.
   It is enabled: no opt-out is set (`_mcp_ = False` on `PyTrueNAS`, or
   `app(mcp=False)`, would disable it).
-- **`TN_CREDS`** — read by `Credentials.from_env()`, and by the CLI
-  (`PyTrueNASArgs._credentials_`) for a target that carries no credentials of
-  its own. Not prefixed, and not routed through `ENV`.
-- **`CALL_TIMEOUT`** — default per-call JSON-RPC timeout in seconds (60), read
-  at import time by `pytruenas.connection`. Not prefixed, and not routed
-  through `ENV`.
+- **`PYTRUENAS_CREDENTIALS`** — **a secret**: credentials in any one-string
+  form `Credentials(...)` takes (an API key, `user:password`, a token). Read by
+  `Credentials.from_env()`, and by the CLI (`PyTrueNASArgs._credentials_`) for
+  a target that carries no credentials of its own. Empty is unset.
+- **`PYTRUENAS_CALL_TIMEOUT`** — the per-call JSON-RPC timeout in seconds (a
+  positive number, fractions allowed) when neither `timeout=` nor
+  `TrueNASWSConnection(call_timeout=)` sets one; default 60. Read when a
+  connection is built (`connection.default_call_timeout()`), never at import;
+  a value that is not a positive number raises `ValueError` then. Also the
+  default of the side channels' read timeout.
 - **`SSL_CERT_FILE`**, **`REQUESTS_CA_BUNDLE`**, **`CURL_CA_BUNDLE`**,
   **`WEBSOCKET_CLIENT_CA_BUNDLE`**, in that order — the first one set
   (non-empty) is the CA bundle `verify=True` trusts instead of the operating
@@ -1439,5 +1459,3 @@ is routinely run from a directory the user does not control.
 - **`--cmdspath` splits on `:`**, which breaks a Windows drive letter; use
   `PYTRUENAS_PATH` (split on `os.pathsep`) there.
 - **Never raise `SystemExit` from a command body**: return an exit code.
-- **`TN_CREDS` and `CALL_TIMEOUT` are unprefixed**, and `CALL_TIMEOUT` is read
-  once, at import.

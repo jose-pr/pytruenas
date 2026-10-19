@@ -135,9 +135,22 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   without SSH was a root web-shell session. Those connect when first used, so
   a wrong password now fails on entry, and an SSH or web-shell problem on the
   first `run()`/`path()` operation instead.
+- **The environment variables are `PYTRUENAS_CREDENTIALS` and
+  `PYTRUENAS_CALL_TIMEOUT`.** `TN_CREDS` and `CALL_TIMEOUT` are no longer read:
+  rename them. `PYTRUENAS_CALL_TIMEOUT` takes a fraction and is read when a
+  connection is built, so it can change at run time, and a bad value raises
+  `ValueError` naming the variable then — not at `import pytruenas`, which
+  reads no variable. `connection.CALL_TIMEOUT` is the constant `60.0`;
+  `TrueNASWSConnection(call_timeout=)` left out is
+  `connection.default_call_timeout()`. `PYTRUENAS_CREDENTIALS` is documented
+  as a secret.
 
 ### Added
 
+- `TrueNASClient(..., timeout=)` / `TrueNASConfig(timeout=)` take hostctl's
+  `Timeout`: `connect` opens the websocket, `read` bounds one call and a
+  side-channel read, `total` is `run()`'s default; `config.timeouts` resolves
+  them.
 - `verify=` takes an `ssl.SSLContext`, used as it is on the API websocket, the
   side channels and the web shell: a client certificate for a NAS behind an
   mTLS reverse proxy (e.g. from `sslcontext.create_context(certificate=, key=)`

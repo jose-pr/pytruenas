@@ -133,10 +133,19 @@ def test_call_args_are_redacted_for_logging():
 
 
 def test_from_env(monkeypatch):
-    monkeypatch.setenv("TN_CREDS", "root:pw")
+    monkeypatch.setenv("PYTRUENAS_CREDENTIALS", "root:pw")
     cred = Credentials.from_env()
     assert isinstance(cred, BasicAuth)
     assert cred.username == "root"
+    assert isinstance(Credentials.from_env({"PYTRUENAS_CREDENTIALS": "t"}), TokenAuth)
+
+
+def test_from_env_reads_only_the_prefixed_variable(monkeypatch):
+    """`TN_CREDS` was the unprefixed spelling, outside the `ENV` accessor."""
+    monkeypatch.setenv("TN_CREDS", "root:pw")
+    assert isinstance(Credentials.from_env(), LocalAuth)
+    monkeypatch.setenv("PYTRUENAS_CREDENTIALS", "")
+    assert isinstance(Credentials.from_env(), LocalAuth)
 
 
 def test_login_method_names():

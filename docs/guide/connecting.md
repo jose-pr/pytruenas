@@ -28,7 +28,8 @@ The `creds` argument accepts:
 - `None` — local socket auth (the root-owned socket authenticates by ownership,
   so no credentials are needed when running on the NAS).
 
-`Credentials.from_env()` reads the `TN_CREDS` environment variable.
+`Credentials.from_env()` reads the `PYTRUENAS_CREDENTIALS` environment
+variable.
 
 Credentials may also travel in the target itself
 (`wss://root:secret@nas`). An OTP follows the password after a newline — but a

@@ -21,8 +21,9 @@ import pytest
 def fake_home(tmp_path_factory, monkeypatch):
     """An empty home directory, with ``.ssh/``, where ``~`` resolves.
 
-    The CLI's config file lives under it too, and ``$PYTRUENAS_CONFIG`` is
-    unset (set-then-deleted, so a test that sets it is undone as well): the
+    The CLI's config file lives under it too, and ``$PYTRUENAS_CONFIG``,
+    ``$PYTRUENAS_CREDENTIALS`` and ``$PYTRUENAS_CALL_TIMEOUT`` are unset
+    (set-then-deleted, so a test that sets one is undone as well): the
     developer's own configuration must not reach a test.
     """
     home = tmp_path_factory.mktemp("home")
@@ -31,8 +32,9 @@ def fake_home(tmp_path_factory, monkeypatch):
     monkeypatch.setenv("USERPROFILE", str(home))
     monkeypatch.setenv("APPDATA", str(home / "AppData"))
     monkeypatch.setenv("XDG_CONFIG_HOME", str(home / ".config"))
-    monkeypatch.setenv("PYTRUENAS_CONFIG", "")
-    monkeypatch.delenv("PYTRUENAS_CONFIG")
+    for name in ("CONFIG", "CREDENTIALS", "CALL_TIMEOUT"):
+        monkeypatch.setenv(f"PYTRUENAS_{name}", "")
+        monkeypatch.delenv(f"PYTRUENAS_{name}")
     return home
 
 

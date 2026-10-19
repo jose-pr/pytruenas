@@ -30,6 +30,7 @@ import calendar as _calendar
 import errno as _errno
 import json as _json
 import logging as _logging
+import math as _math
 import os as _os
 import queue as _queue
 import socket as _socket
@@ -65,6 +66,7 @@ __all__ = [
     "TrueNASWSConnection",
     "CALL_TIMEOUT",
     "CONNECT_TIMEOUT",
+    "default_call_timeout",
     "Event",
     "Subscription",
     "dumps",
@@ -76,8 +78,9 @@ __all__ = [
 #: incremented) rather than blocking the shared reader thread.
 DEFAULT_EVENT_QUEUE_SIZE = 1000
 
-#: Default per-call timeout in seconds (overridable via ``CALL_TIMEOUT`` env var).
-CALL_TIMEOUT = int(_os.environ.get("CALL_TIMEOUT", 60))
+#: Per-call timeout in seconds when neither the caller nor
+#: ``$PYTRUENAS_CALL_TIMEOUT`` sets one (see :func:`default_call_timeout`).
+CALL_TIMEOUT = 60.0
 
 #: Default timeout in seconds for opening the websocket (TCP/unix connect, TLS
 #: and the HTTP upgrade). Without one, an unresponsive host blocked forever.
@@ -87,6 +90,31 @@ CONNECT_TIMEOUT = 30
 DEFAULT_UNIX_SOCKET = "/var/run/middleware/middlewared.sock"
 
 _UNIX_PREFIX = "ws+unix://"
+
+
+def default_call_timeout() -> float:
+    """The per-call timeout a connection gets when it is given none.
+
+    ``$PYTRUENAS_CALL_TIMEOUT`` (seconds, a positive number) when set and not
+    empty, else :data:`CALL_TIMEOUT`. Read each time a connection is built,
+    never at import. A value that is not a positive number raises
+    ``ValueError`` naming the variable.
+    """
+    from .utils.cmd import ENV
+
+    raw = (ENV.get("CALL_TIMEOUT") or "").strip()
+    if not raw:
+        return CALL_TIMEOUT
+    try:
+        value = float(raw)
+    except ValueError:
+        value = _math.nan
+    if not (value > 0 and _math.isfinite(value)):
+        raise ValueError(
+            f"${ENV.prefix}CALL_TIMEOUT is {raw!r}: expected a positive number "
+            "of seconds"
+        )
+    return value
 
 
 class _Unset:
@@ -361,7 +389,7 @@ class TrueNASWSConnection:
         uri: "_ty.Optional[str]" = None,
         *,
         verify: "_ty.Union[bool, str, _os.PathLike[str], _ssl.SSLContext]" = True,
-        call_timeout: float = CALL_TIMEOUT,
+        call_timeout: "_ty.Optional[_ty.Union[float, _Unset]]" = _UNSET,
         connect_timeout: "_ty.Optional[float]" = CONNECT_TIMEOUT,
         logger: "_ty.Optional[_ty.Union[_logging.Logger, _logging.LoggerAdapter]]" = None,
     ) -> None:
@@ -370,7 +398,10 @@ class TrueNASWSConnection:
         self.uri = uri
         #: TLS verification: see :data:`pytruenas._tls.Verify`.
         self.verify = _tls.check(verify)
-        self.call_timeout = call_timeout
+        #: Seconds a call waits by default; ``None`` waits indefinitely.
+        self.call_timeout: "_ty.Optional[float]" = (
+            default_call_timeout() if isinstance(call_timeout, _Unset) else call_timeout
+        )
         self.connect_timeout = connect_timeout
         #: Where this connection's records go. A host passes its own
         #: name-bound logger, so "connection was closed" says *which* host

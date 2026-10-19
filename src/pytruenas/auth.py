@@ -260,12 +260,20 @@ class Credentials(metaclass=_CredentialsMeta):
         raise AuthenticationError(rtype or "UNKNOWN", resp)
 
     @staticmethod
-    def from_env(env: _ty.Optional[_ty.Mapping] = None):
-        if env is None:
-            import os
+    def from_env(env: _ty.Optional[_ty.Mapping] = None) -> "Credentials":
+        """The credentials in ``$PYTRUENAS_CREDENTIALS`` (a secret).
 
-            env = os.environ
-        return Credentials(env.get("TN_CREDS"))
+        Any form ``Credentials(...)`` takes as one string; unset or empty is
+        :class:`LocalAuth`. ``env`` is a mapping to read the variable from in
+        place of the process environment.
+        """
+        if env is None:
+            from .utils.cmd import ENV
+
+            raw = ENV.get("CREDENTIALS")
+        else:
+            raw = env.get("PYTRUENAS_CREDENTIALS")
+        return Credentials(raw or None)
 
     @staticmethod
     def from_host_credentials(
@@ -282,8 +290,8 @@ class Credentials(metaclass=_CredentialsMeta):
         trailing ``key:value`` extras -- the OTP arrives here as ``otp``, not
         embedded in ``password``. So this method deliberately does **no string
         parsing**: it only picks the matching subclass. Contrast
-        ``Credentials(...)``, which still accepts (and must keep accepting) the
-        raw single-string form used by ``TN_CREDS`` and the ``creds=`` argument.
+        ``Credentials(...)``, which accepts the raw single-string form used by
+        ``$PYTRUENAS_CREDENTIALS`` and ``credentials=``.
 
         Both projects encode an OTP the same way -- a newline after the
         password, then ``otp:<token>`` -- so the two paths agree on meaning

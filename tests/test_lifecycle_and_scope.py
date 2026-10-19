@@ -252,3 +252,78 @@ def test_entering_without_autologin_opens_without_logging_in(monkeypatch):
     )
     with TrueNASClient("wss://nas.example", autologin=False) as client:
         assert client._conn is conn
+
+
+# -- PYTRUENAS_CALL_TIMEOUT and timeout= ---------------------------------------
+
+
+def test_importing_reads_no_variable():
+    """`CALL_TIMEOUT` was parsed with int() at import, so an unrelated
+    variable of that name (or a fraction) broke `import pytruenas`."""
+    import os
+    import subprocess
+    import sys
+
+    env = dict(os.environ, CALL_TIMEOUT="abc", PYTRUENAS_CALL_TIMEOUT="abc")
+    done = subprocess.run(
+        [sys.executable, "-c", "import pytruenas, pytruenas.connection"],
+        env=env,
+        capture_output=True,
+        text=True,
+    )
+    assert done.returncode == 0, done.stderr
+
+
+def test_the_call_timeout_variable_is_read_when_a_connection_is_built(monkeypatch):
+    from pytruenas.connection import CALL_TIMEOUT, TrueNASWSConnection
+
+    assert TrueNASWSConnection("ws://nas/api/current").call_timeout == CALL_TIMEOUT
+    monkeypatch.setenv("CALL_TIMEOUT", "5")
+    assert TrueNASWSConnection("ws://nas/api/current").call_timeout == CALL_TIMEOUT
+    monkeypatch.setenv("PYTRUENAS_CALL_TIMEOUT", "1.5")
+    assert TrueNASWSConnection("ws://nas/api/current").call_timeout == 1.5
+    assert (
+        TrueNASWSConnection("ws://nas/api/current", call_timeout=None).call_timeout
+        is None
+    )
+    monkeypatch.setenv("PYTRUENAS_CALL_TIMEOUT", "soon")
+    with pytest.raises(ValueError, match="PYTRUENAS_CALL_TIMEOUT"):
+        TrueNASWSConnection("ws://nas/api/current")
+
+
+def test_the_config_timeout_reaches_the_connection(monkeypatch):
+    from hostctl import Timeout
+
+    built = {}
+
+    class Recorder:
+        def __init__(self, uri, **options):
+            built.update(options)
+
+        def connect(self):
+            return self
+
+    monkeypatch.setattr("pytruenas.connection.TrueNASWSConnection", Recorder)
+    host = TrueNASClient(
+        "wss://nas", autologin=False, timeout=Timeout(connect=4, read=9)
+    )
+    host._openwss()
+    assert (built["connect_timeout"], built["call_timeout"]) == (4, 9)
+
+    monkeypatch.setenv("PYTRUENAS_CALL_TIMEOUT", "12")
+    TrueNASClient("wss://nas", autologin=False)._openwss()
+    assert (built["connect_timeout"], built["call_timeout"]) == (30, 12)
+
+
+def test_the_config_takes_hostctls_timeout():
+    from hostctl import DEFAULT, Timeout
+
+    from pytruenas import TrueNASConfig
+
+    config = TrueNASConfig.from_target("wss://nas", timeout=20)
+    assert config.timeout == Timeout(total=20)
+    assert config.timeouts == Timeout(20, connect=30, read=60)
+    assert TrueNASConfig().timeout.read is DEFAULT
+    for bad in (Timeout(write=1), Timeout(read=0)):
+        with pytest.raises(ValueError, match="TrueNASConfig: timeout"):
+            TrueNASConfig.from_target("wss://nas", timeout=bad)

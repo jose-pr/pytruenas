@@ -401,14 +401,14 @@ class PyTrueNASArgs(LoggingArgs):
     def _credentials_(self) -> object:
         """Credentials for a target that carries none.
 
-        ``$TN_CREDS`` (the spelling :meth:`Credentials.from_env` documents),
+        ``$PYTRUENAS_CREDENTIALS`` (as :meth:`Credentials.from_env` reads it),
         else the config file's ``credentials`` -- a connection string or a
         mapping of keyword arguments. ``None`` when neither is set, which is
         what a local socket wants.
         """
         from ..auth import Credentials
 
-        raw: object = _os.environ.get("TN_CREDS")
+        raw: object = ENV.get("CREDENTIALS")
         if not raw:
             raw = self._config_dict_().get("credentials")
         if not raw:
