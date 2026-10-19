@@ -4,7 +4,7 @@ from . import jsonschema as _schema
 
 # The annotations MethodSchema inherits from `jsonschema.Object` are resolved
 # in this module, so the names they use are bound here too.
-from .jsonschema import Schema, _NotRequired  # noqa: F401
+from .jsonschema import Schema  # noqa: F401
 
 
 class Api(_ty.TypedDict):

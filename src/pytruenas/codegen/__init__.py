@@ -12,6 +12,7 @@ import typing as _ty
 import functools as _ftools
 from ..models import apidump as _api, jsonschema as _schema
 from ..utils import _schema as _read
+from . import _types
 from duho import qualname as _qn
 from duho import text as _text
 
@@ -31,20 +32,6 @@ class Source(str):
     """A default that is already Python SOURCE, not a string value: what the
     synthetic helpers and call options write (``None``, ``False``). Every
     default from the API dump is data, rendered with ``repr``."""
-
-
-def _camelcase(name: str) -> str:
-    """CamelCase a dump name into a class name.
-
-    Every non-alphanumeric character, underscore included, separates two words
-    and empty parts are dropped: ``global_`` (a ``pysafe`` output) becomes
-    ``Global`` and ``acl(nfs4)`` ``AclNfs4``. A leading digit gets an ``N``.
-    """
-    parts = _read.words(name)
-    result = "".join(part[:1].upper() + part[1:] for part in parts)
-    if not result:
-        return "Unnamed"
-    return f"N{result}" if result[0].isdigit() else result
 
 
 def docstring(text: str) -> str:
@@ -110,9 +97,7 @@ class Parameter:
         return decl
 
     def type_def(self, typeddicts: dict[str, object]):
-        return _schema.Schema.python_declaration(
-            self.schema, typeddicts, self.namespace
-        )
+        return _types.declaration(self.schema, typeddicts, self.namespace)
 
     @property
     def name(self):
@@ -139,9 +124,8 @@ class PyDeclaration:
 
     @property
     def classname(self) -> str:
-        """CamelCase class/type name for this declaration's last segment
-        (see :func:`_camelcase`)."""
-        return _camelcase(self.pyname.name)
+        """CamelCase class/type name for this declaration's last segment."""
+        return _types.class_name(self.pyname.name)
 
     @property
     def doc(self) -> str:
@@ -593,7 +577,7 @@ def _rename(source: _P, target: _P) -> None:
 
 
 def _empty_arrays(node: object) -> None:
-    """Rewrite ``items: false`` in place, so that the stub names the template's
+    """Rewrite ``items: false`` in place, so that the stub names the header's
     ``_Never`` (``typing`` has ``Never`` only from 3.11) whatever interpreter
     generates it. With ``prefixItems`` it closes a tuple: any JSON array."""
     if isinstance(node, dict):

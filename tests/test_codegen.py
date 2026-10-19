@@ -15,8 +15,8 @@ from pathlib import Path
 
 import pytest
 
-from pytruenas.codegen import Codegen, _camelcase, docstring
-from pytruenas.models.jsonschema import _typeddict_name
+from pytruenas.codegen import Codegen, docstring
+from pytruenas.codegen._types import class_name, typeddict_name
 from duho.qualname import PythonName
 
 FIXTURE = Path(__file__).parent / "fixtures" / "api_min.json"
@@ -154,9 +154,9 @@ _INIT_NAME = "__init__.pyi"
 
 
 def test_camelcase_handles_trailing_separator():
-    assert _camelcase("global_") == "Global"
-    assert _camelcase("query-options") == "QueryOptions"
-    assert _camelcase("a__b") == "AB"
+    assert class_name("global_") == "Global"
+    assert class_name("query-options") == "QueryOptions"
+    assert class_name("a__b") == "AB"
 
 
 def test_docstring_escapes_triple_quotes_and_nulls():
@@ -167,7 +167,7 @@ def test_docstring_escapes_triple_quotes_and_nulls():
 
 def test_typeddict_name_from_spacey_title():
     ns = PythonName("user")
-    name = _typeddict_name(ns, "Filesystem Count")
+    name = typeddict_name(ns, "Filesystem Count")
     assert name.isidentifier()
     assert " " not in name
 

@@ -14,6 +14,7 @@ from pathlib import Path
 import pytest
 
 from pytruenas import codegen
+from pytruenas.codegen import _types
 from pytruenas.models import jsonschema as js
 
 FIXTURE = Path(__file__).parent / "fixtures" / "api_min.json"
@@ -39,11 +40,11 @@ def _api():
 def test_valid_schema_forms_do_not_crash(schema, expected):
     """A list `type` raised NotImplementedError and `items: true` a TypeError,
     each aborting the whole generation."""
-    assert js.Schema.python_declaration(schema, {}, None) == expected
+    assert _types.declaration(schema, {}, None) == expected
 
 
 def test_an_empty_array_schema_is_an_empty_list():
-    rendered = js.Schema.python_declaration({"type": "array", "items": False}, {}, None)
+    rendered = _types.declaration({"type": "array", "items": False}, {}, None)
     assert rendered.startswith("list")
 
 
@@ -79,14 +80,14 @@ def test_any_docstring_still_compiles(doc):
 def test_every_name_becomes_an_identifier(raw, expected):
     """Parens, colons, quotes, brackets and leading digits used to survive into
     a name no stub can define."""
-    assert codegen._camelcase(raw) == expected
+    assert _types.class_name(raw) == expected
     assert expected.isidentifier()
 
 
 def test_a_typeddict_name_is_an_identifier():
     from duho.qualname import PythonName
 
-    name = js._typeddict_name(PythonName("pool.dataset"), "acl(nfs4) options")
+    name = _types.typeddict_name(PythonName("pool.dataset"), "acl(nfs4) options")
     assert name.isidentifier(), name
 
 
@@ -103,12 +104,12 @@ def test_two_shapes_with_one_name_do_not_overwrite_each_other():
         "title": "Opts",
         "properties": {"b": {"type": "integer"}},
     }
-    name_a = js.Schema.python_declaration(first, typeddicts, ns)
-    name_b = js.Schema.python_declaration(second, typeddicts, ns)
+    name_a = _types.declaration(first, typeddicts, ns)
+    name_b = _types.declaration(second, typeddicts, ns)
     assert name_a != name_b
     assert typeddicts[name_a] != typeddicts[name_b]
     # The same shape twice reuses the one name.
-    assert js.Schema.python_declaration(dict(first), typeddicts, ns) == name_a
+    assert _types.declaration(dict(first), typeddicts, ns) == name_a
 
 
 # -- values ---------------------------------------------------------------
@@ -136,6 +137,20 @@ def test_a_string_default_stays_a_string(default, expected):
 
 def test_the_packages_own_source_defaults_still_render_as_source():
     assert codegen._default_literal(codegen.Source("None")) == "None"
+
+
+def test_the_schema_models_are_data_only():
+    """`pytruenas.models` holds TypedDicts and aliases; rendering is codegen's."""
+    import pytruenas.models as models
+
+    for path in Path(models.__file__).parent.glob("*.py"):
+        tree = ast.parse(path.read_text(encoding="utf-8"))
+        functions = [
+            node.name
+            for node in ast.walk(tree)
+            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
+        ]
+        assert functions == [], (path.name, functions)
 
 
 def test_the_json_aliases_are_types_not_strings():
@@ -257,11 +272,11 @@ def test_enum_const_and_maps_render_precisely(schema, expected):
     """All of these read as `JsonValue`/`JsonObject` before -- and the
     appliance's dump uses enum 6413 times and const 6420 times, so this is most
     of what the stubs describe."""
-    assert js.Schema.python_declaration(schema, {}, None) == expected
+    assert _types.declaration(schema, {}, None) == expected
 
 
 def test_a_literal_annotation_is_valid_python():
-    rendered = js.Schema.python_declaration({"enum": ["a", None]}, {}, None)
+    rendered = _types.declaration({"enum": ["a", None]}, {}, None)
     ast.parse(f"x: {rendered}")
 
 
@@ -443,7 +458,7 @@ def test_an_empty_array_names_never_whatever_interpreter_generates(
 ):
     """`typing.Never` exists from 3.11 and the stubs target 3.9: the output
     names the template's `_Never` alias on every generating interpreter."""
-    monkeypatch.setattr(js, "_HAS_NEVER", has_never)
+    monkeypatch.setattr(_types, "_HAS_NEVER", has_never)
     codegen.Codegen().generate(edge_dump("empty_array"), tmp_path / "out")
     src = (tmp_path / "out" / "system" / "__init__.pyi").read_text(encoding="utf-8")
     assert "nothing:list[_Never]" in src.replace(" ", "")

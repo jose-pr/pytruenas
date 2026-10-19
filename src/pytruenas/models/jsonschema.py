@@ -1,28 +1,17 @@
+"""JSON Schema shapes, as the middleware's API definition writes them.
+
+TypedDicts and type aliases only. Generated stubs import this module for the
+``Json*`` aliases, so those names and this import path are part of every stub
+tree already generated.
+"""
+
 from __future__ import annotations
 
-import re as _re
-import sys
 import typing as _ty
 
-from duho import qualname as _qn
-
-if sys.version_info >= (3, 11):
-    from typing import NotRequired as _NotRequired
-else:  # pragma: no cover - exercised on the 3.9 floor
-
-    class _NotRequired:
-        """``NotRequired[X]`` before 3.11: resolves to ``X``, so the hints
-        resolve; a key's optionality there is the class's ``total``."""
-
-        def __class_getitem__(cls, item):
-            return item
-
-
 JsonNumber = _ty.Union[float, int]
-# Real aliases, not strings: a stub annotation naming `_jsonschema.JsonValue`
-# used to resolve to a `str` VARIABLE, which is not a type at all. Written with
-# `_ty.Any` at the leaves because a recursive alias needs 3.12 to be expressed
-# directly, and the stubs must resolve on the 3.9 floor.
+# Real aliases: a stub annotation names them as types. `_ty.Any` at the leaves,
+# because a recursive alias needs 3.12 and the stubs resolve on the 3.9 floor.
 JsonValue = _ty.Union[
     str, int, float, bool, None, _ty.Sequence[_ty.Any], _ty.Mapping[str, _ty.Any]
 ]
@@ -30,138 +19,15 @@ JsonObject = _ty.Mapping[str, JsonValue]
 JsonArray = _ty.Sequence[JsonValue]
 
 
-def _typeddict_name(namespace: "_qn.PythonName", title: str) -> str:
-    """Build a valid CamelCase TypedDict name from ``namespace`` + ``title``.
-
-    ``title`` may contain spaces/dashes/dots (real dumps have titles like
-    ``"Filesystem Count"`` or ``"query-options"``); those all become word
-    boundaries, and empty parts are dropped (so a ``pysafe`` trailing ``_`` does
-    not crash camelcasing -- see the ``duho.text.camelcase`` trailing-separator
-    bug). The namespace prefix keeps names unique across sibling namespaces.
-    """
-    raw = "/".join([*namespace.parts, title])
-    parts = []
-    # Split on every non-alphanumeric character (underscore included, which
-    # `\W` would keep), not only . _ - /: a title like
-    # "acl(nfs4)" or "smb:share" otherwise produced a name no stub can define.
-    for chunk in _re.split(r"[^0-9A-Za-z]+", raw):
-        if chunk:
-            parts.append(chunk[:1].upper() + chunk[1:])
-    name = "".join(parts) or "Anon"
-    # Ensure a valid identifier start (a title beginning with a digit, etc.).
-    if not (name[0].isalpha() or name[0] == "_"):
-        name = "_" + name
-    return name
-
-
-# These TypedDicts also carry the methods codegen calls; a type checker
-# reports each method and default as `[misc]` (a TypedDict body holds keys).
 class Schema(_ty.TypedDict, total=False):
-    title: _NotRequired[str]
-    description: _NotRequired[str]
-    default: _NotRequired[_ty.Optional[object]]
-
-    def get_type(schema) -> "type[_ty.Union[AnyOf, BaseType, OneOf]]":  # type: ignore[misc]
-        if "anyOf" in schema:
-            return AnyOf
-        elif "oneOf" in schema:
-            return OneOf
-        else:
-            return BaseType
-
-    def python_declaration(  # type: ignore[misc]
-        self, typeddicts: dict[str, object], namespace: _qn.PythonName
-    ):
-        if isinstance(self, str):
-            self = _ty.cast(Schema, {"type": self})
-        return Schema.get_type(self).python_declaration(
-            self,
-            typeddicts,
-            namespace,
-        )
+    title: str
+    description: str
+    default: _ty.Optional[object]
 
 
-def _literal_declaration(schema: "_ty.Mapping[str, object]") -> "_ty.Optional[str]":
-    """``Literal[...]`` for a ``const``/``enum`` schema, or ``None``.
+class BaseType(Schema, total=False):
+    type: str
 
-    ``None`` among the values becomes a union member rather than a Literal
-    argument (`Literal[None]` is legal but reads worse than `| None`, and a
-    checker treats them the same). A value no Literal can carry -- a list, a
-    dict, a float -- falls back to the ordinary ``type`` handling.
-    """
-    if "const" in schema:
-        values = [schema["const"]]
-    elif "enum" in schema:
-        values = list(schema.get("enum") or [])
-        if not values:
-            return None
-    else:
-        return None
-    literals = []
-    optional = False
-    for value in values:
-        if value is None:
-            optional = True
-        elif isinstance(value, bool) or isinstance(value, (str, int)):
-            # bool first: it is an int, and `Literal[True]` is not `Literal[1]`.
-            literals.append(repr(value))
-        else:
-            return None
-    if not literals:
-        return "None" if optional else None
-    rendered = f"_ty.Literal[{', '.join(literals)}]"
-    return f"{rendered}|None" if optional else rendered
-
-
-class BaseType(Schema):
-    type: _NotRequired[str]
-
-    def python_declaration(  # type: ignore[misc]
-        self, typeddicts: dict[str, object], namespace: _qn.PythonName
-    ):
-        # `enum`/`const` say more than `type` does, and the appliance's dump
-        # is full of them (6413 and 6420 occurrences on 26.0): rendering them
-        # as `Literal` is the difference between "some string" and the five
-        # strings the method actually accepts.
-        literal = _literal_declaration(self)
-        if literal is not None:
-            return literal
-        if "allOf" in self:
-            members = [
-                Schema.python_declaration(member, typeddicts, namespace)
-                for member in self.get("allOf") or []
-            ]
-            # One member is just that member; several would need a real
-            # intersection type, which Python has no syntax for.
-            if len(members) == 1:
-                return members[0]
-        type = self.get("type", "any")
-        if isinstance(type, str) and type.startswith("!"):
-            return type.removeprefix("!")
-        if isinstance(type, (list, tuple)):
-            # A list of types is a union of them (JSON Schema allows it, and the
-            # middleware dump uses it); this used to raise NotImplementedError
-            # and abort the whole generation.
-            members = []
-            for member in type:
-                rendered = BaseType.python_declaration(
-                    _ty.cast(_ty.Any, {**self, "type": member}), typeddicts, namespace
-                )
-                if rendered not in members:
-                    members.append(rendered)
-            return "|".join(members) if members else "_jsonschema.JsonValue"
-        for ty in TYPES:
-            if ty.type == type:
-                return ty.python_declaration(self, typeddicts, namespace)
-        # An unknown type name is imprecise, not fatal: the stub says "some
-        # JSON value" rather than failing to generate at all.
-        return "_jsonschema.JsonValue"
-
-        ...
-
-
-#: `typing.Never` is 3.11+; the stubs must resolve on the 3.9 floor.
-_HAS_NEVER = hasattr(_ty, "Never")
 
 TypeDeclaration = _ty.Union[BaseType, str]
 
@@ -169,192 +35,65 @@ TypeDeclaration = _ty.Union[BaseType, str]
 class AnyOf(Schema):
     anyOf: list[TypeDeclaration]
 
-    def python_declaration(  # type: ignore[misc]
-        self, typeddicts: dict[str, object], namespace: _qn.PythonName
-    ):
-        return "|".join(
-            [
-                Schema.python_declaration(_ty.cast(Schema, t), typeddicts, namespace)
-                for t in self["anyOf"]
-            ]
-        )
-
 
 class OneOf(Schema):
     oneOf: list[TypeDeclaration]
 
-    def python_declaration(  # type: ignore[misc]
-        self, typeddicts: dict[str, object], namespace: _qn.PythonName
-    ):
-        return "|".join(
-            [
-                Schema.python_declaration(_ty.cast(Schema, t), typeddicts, namespace)
-                for t in self["oneOf"]
-            ]
-        )
+
+# Each type below narrows `type` to its one value, which a checker reports as
+# overwriting a TypedDict key (`[misc]`).
 
 
 class Float(BaseType):
-    type: _ty.Literal["float"] = "float"  # type: ignore[misc]
-
-    def python_declaration(  # type: ignore[misc]
-        self, typeddicts: dict[str, object], namespace: _qn.PythonName
-    ):
-        return "float"
+    type: _ty.Literal["float"]  # type: ignore[misc]
 
 
 class Null(BaseType):
-    type: _ty.Literal["null"] = "null"  # type: ignore[misc]
-
-    def python_declaration(  # type: ignore[misc]
-        self, typeddicts: dict[str, object], namespace: _qn.PythonName
-    ):
-        return "None"
+    type: _ty.Literal["null"]  # type: ignore[misc]
 
 
 class Boolean(BaseType):
-    type: _ty.Literal["boolean"] = "boolean"  # type: ignore[misc]
-
-    def python_declaration(  # type: ignore[misc]
-        self, typeddicts: dict[str, object], namespace: _qn.PythonName
-    ):
-        return "bool"
+    type: _ty.Literal["boolean"]  # type: ignore[misc]
 
 
 class Integer(BaseType):
-    type: _ty.Literal["integer"] = "integer"  # type: ignore[misc]
-
-    def python_declaration(  # type: ignore[misc]
-        self, typeddicts: dict[str, object], namespace: _qn.PythonName
-    ):
-        return "int"
+    type: _ty.Literal["integer"]  # type: ignore[misc]
 
 
 class Number(BaseType):
-    type: _ty.Literal["number"] = "number"  # type: ignore[misc]
-
-    def python_declaration(  # type: ignore[misc]
-        self, typeddicts: dict[str, object], namespace: _qn.PythonName
-    ):
-        return "_jsonschema.JsonNumber"
+    type: _ty.Literal["number"]  # type: ignore[misc]
 
 
 class String(BaseType):
-    type: _ty.Literal["string"] = "string"  # type: ignore[misc]
-
-    def python_declaration(  # type: ignore[misc]
-        self, typeddicts: dict[str, object], namespace: _qn.PythonName
-    ):
-        return "str"
+    type: _ty.Literal["string"]  # type: ignore[misc]
 
 
-class Object(BaseType):
-    type: _ty.Literal["object"] = "object"  # type: ignore[misc]
-    properties: _NotRequired[dict[str, Schema]]
-    #: The dump's own spelling. A bool ("anything"/"nothing else allowed") or a
-    #: schema the extra VALUES must match, which is how the middleware writes a
-    #: map. The old declaration named it `additional_properties` and typed it
-    #: `bool`, neither of which appears in a dump.
-    additionalProperties: _NotRequired["_ty.Union[bool, Schema]"]
-    required: _NotRequired[list[str]]
+class _ObjectKeys(BaseType, total=False):
+    properties: dict[str, Schema]
+    #: A bool ("anything"/"nothing else allowed"), or a schema the extra
+    #: VALUES must match, which is how the middleware writes a map.
+    additionalProperties: _ty.Union[bool, Schema]
+    required: list[str]
 
-    def python_declaration(  # type: ignore[misc]
-        self, typeddicts: dict[str, object], namespace: _qn.PythonName
-    ):
-        properties = self.get("properties")
-        if not properties:
-            extra = self.get("additional_properties", self.get("additionalProperties"))
-            if isinstance(extra, dict) and extra:
-                # A free-form object whose VALUES have a schema: the dump uses
-                # this for maps (19309 occurrences on 26.0), and they all read
-                # as "some JSON object" before.
-                value = Schema.python_declaration(extra, typeddicts, namespace)
-                return f"_ty.Mapping[str, {value}]"
-            return "_jsonschema.JsonObject"
 
-        # Absent (or empty) `required` means NOTHING is required -- JSON
-        # Schema's own rule. Reading a missing list as "all required" made
-        # every update payload and query-options TypedDict demand every key.
-        required = self.get("required") or []
-        title = self.get("_name", self.get("title"))
-        if not title:
-            # An anonymous inline object with properties: derive a stable name
-            # from the property set so codegen never crashes on a missing title.
-            title = "obj_" + "_".join(sorted(properties)[:3])
-        name = _typeddict_name(namespace, title)
-
-        typedict = {}
-        for prop, defintion in properties.items():
-            typedef = Schema.python_declaration(defintion, typeddicts, namespace)
-            if prop not in required:
-                typedef = f"_NotRequired[{typedef}]"
-            typedict[prop] = typedef
-
-        existing = typeddicts.get(name)
-        if existing is not None and existing != typedict:
-            # Two different shapes wanted the same name (two namespaces with
-            # the same title, or a title that sanitizes to an existing name).
-            # The later one used to overwrite the earlier, leaving every
-            # reference to the first pointing at the wrong shape.
-            suffix = 2
-            while typeddicts.get(f"{name}{suffix}") not in (None, typedict):
-                suffix += 1
-            name = f"{name}{suffix}"
-        typeddicts[name] = typedict
-
-        return name
+class Object(_ObjectKeys):
+    type: _ty.Literal["object"]  # type: ignore[misc]
 
 
 class Any(BaseType):
-    type: _ty.Literal["any"] = "any"  # type: ignore[misc]
-
-    def python_declaration(  # type: ignore[misc]
-        self, typeddicts: dict[str, object], namespace: _qn.PythonName
-    ):
-        return "_jsonschema.JsonValue"
+    type: _ty.Literal["any"]  # type: ignore[misc]
 
 
-class Array(BaseType):
-    type: _ty.Literal["array"] = "array"  # type: ignore[misc]
-    #: A schema every item matches, or a bool (`True`/`{}` any item,
-    #: `False` none). Absent for an array with no item constraint at all.
-    items: _NotRequired["_ty.Union[Schema, bool]"]
+class _ArrayKeys(BaseType, total=False):
+    #: A schema every item matches, or a bool (`True`/`{}` any item, `False`
+    #: none). Absent for an array with no item constraint at all.
+    items: _ty.Union[Schema, bool]
     #: Positional item schemas (the middleware's call-parameter lists).
-    prefixItems: _NotRequired[list[Schema]]
-
-    def python_declaration(  # type: ignore[misc]
-        self, typeddicts: dict[str, object], namespace: _qn.PythonName
-    ):
-        items = self.get("items")
-        if items is True or items == {}:
-            # "any item is allowed" -- a list of anything.
-            return "_jsonschema.JsonArray"
-        if items is False:
-            # Nothing may appear in the array; the only valid value is empty.
-            return "list[_ty.Never]" if _HAS_NEVER else "list"
-        if not items:
-            return "_jsonschema.JsonArray"
-        return f"list[{Schema.python_declaration(items, typeddicts, namespace)}]"
+    prefixItems: list[Schema]
 
 
-TYPES: list[type[BaseType]] = [
-    Float,
-    Null,
-    Boolean,
-    Integer,
-    String,
-    Object,
-    Array,
-    Any,
-    Number,
-]
-# name: str
-# title: str #type: ignore
-# required: bool
-# type: "str|list[str|Parameter]"
-# description: str
-# items: 'list[Parameter]'
-# properties: 'dict[str,Parameter]'
+class Array(_ArrayKeys):
+    type: _ty.Literal["array"]  # type: ignore[misc]
 
 
 __all__ = [
@@ -376,5 +115,4 @@ __all__ = [
     "Object",
     "Any",
     "Array",
-    "TYPES",
 ]

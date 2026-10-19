@@ -946,9 +946,9 @@ Backs the `generate-typings` command; not typically used directly.
 
 ## Schemas (`pytruenas.models`)
 
-TypedDict schemas; import the submodules directly. The `models.jsonschema`
-types also carry `get_type`/`python_declaration`, which the typings generator
-uses.
+TypedDicts and type aliases only (no runtime behavior); import the submodules
+directly. Generated stubs import `pytruenas.models.jsonschema` for
+`JsonValue`/`JsonObject`/`JsonArray`/`JsonNumber`, so those names stay.
 
 - **`pytruenas.models.apidump`** — `Api` (`{"versions": [Version, ...]}`),
   `Version` (`{"version", "methods", "events"}`), `Method`

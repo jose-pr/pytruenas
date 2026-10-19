@@ -8,7 +8,6 @@ pure and tolerant: a missing key reads as empty rather than raising.
 
 from __future__ import annotations
 
-import re as _re
 import typing as _ty
 
 CALL_PARAMS = "Call parameters"
@@ -100,9 +99,3 @@ def unwrap_optional(schema: "_ty.Any") -> "dict":
             return merged
         return {"type": [*(m.get("type") for m in members)]}
     return dict(schema)
-
-
-def words(name: str) -> "list[str]":
-    """The words of a dump name: every non-alphanumeric character, underscore
-    included, separates two (titles hold spaces, dashes, parens and colons)."""
-    return [part for part in _re.split(r"[^0-9A-Za-z]+", name) if part]
