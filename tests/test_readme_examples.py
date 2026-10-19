@@ -322,3 +322,13 @@ def test_the_yaml_script_example_runs(middleware, tmp_path, capsys, monkeypatch)
     assert namespace["main"]([str(config)]) == 0
     assert "fake-nas -- TrueNAS 26.0.0, 4 cores" in capsys.readouterr().out
     assert middleware.methods()[-1] == "system.info"
+
+
+@pytest.mark.requires("yaml")
+@pytest.mark.parametrize("given, verify", [({}, True), ({"sslverify": False}, False)])
+def test_the_yaml_script_verifies_certificates_unless_told_not_to(given, verify):
+    namespace = {"__name__": "example"}
+    script = EXAMPLES / "scripts" / "simple_client_from_yaml.py"
+    exec(compile(script.read_bytes(), str(script), "exec"), namespace)  # noqa: S102
+    client = namespace["client_from_config"]({"host": "nas1", **given})
+    assert client.config.sslverify is verify

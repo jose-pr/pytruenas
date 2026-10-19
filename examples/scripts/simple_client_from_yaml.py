@@ -1,12 +1,6 @@
 """Build a client from a small YAML file.
 
-An example, not library code -- it used to live at ``pytruenas/ops/main.py``,
-where it was imported by nothing, duplicated the config loading that
-``pytruenas.utils.cmd`` already does properly for the CLI, and still referred
-in its docstrings to a ``pytruenas.client`` module deleted in 0.2.0. As an
-example it is honest about what it is: one way to wire a config file to a
-client, for copying into your own tool.
-
+One way to wire a config file to a client, for copying into your own tool.
 If you want config loading, targets, fan-out and logging handled for you, use
 the CLI (``pytruenas call ...``) or write a command module instead -- see the
 "Commands" guide.
@@ -20,6 +14,7 @@ Config format::
     host: nas.example.com        # omit, or 'localhost', for the local socket
     username: root               # optional
     password: secret             # optional
+    sslverify: false             # optional: true (default), false, or a CA file
 """
 
 from __future__ import annotations
@@ -50,10 +45,14 @@ def load_config(*locations: Path) -> "tuple[dict, Path | None]":
 
 
 def client_from_config(config: dict) -> TrueNASClient:
-    """Build a client from ``host``/``username``/``password`` keys."""
+    """Build a client from ``host``/``username``/``password``/``sslverify``
+    keys."""
     host = config.get("host")
     username = config.get("username")
     password = config.get("password")
+    # Certificates are verified unless the file says otherwise: a NAS with
+    # its default self-signed certificate needs `sslverify: false` or a CA file.
+    sslverify = config.get("sslverify", True)
 
     credentials = (username, password) if username and password else None
     # A local target resolves to the middleware unix socket, which needs no
@@ -61,7 +60,7 @@ def client_from_config(config: dict) -> TrueNASClient:
     target = None if not host or host == "localhost" else host
 
     LOGGER.info("Connecting to %s", target or "the local middleware socket")
-    return TrueNASClient(target, credentials, sslverify=False)
+    return TrueNASClient(target, credentials, sslverify=sslverify)
 
 
 def main(argv: "list[str] | None" = None) -> int:
