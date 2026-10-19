@@ -22,6 +22,8 @@ from pytruenas.utils import apicache
 API = {"versions": [{"version": "26.0.0-BETA.1", "methods": [], "events": []}]}
 BLOB = gzip.compress(json.dumps(API).encode("utf-8"))
 DIGEST = hashlib.sha256(BLOB).hexdigest()
+#: What the target's `mktemp` named this fetch's file.
+REMOTE_GZ = "/var/db/system/pytruenas-apidump.Ab12Cd.gz"
 
 
 class FakeClient:
@@ -45,7 +47,7 @@ class FakeClient:
     def run(self, cmd, **kwargs):
         self.commands.append(cmd)
         if "--dump-api" in cmd:
-            out = f"{len(self._blob)}\n{DIGEST}\n"
+            out = f"{REMOTE_GZ}\n{len(self._blob)}\n{DIGEST}\n"
             return subprocess.CompletedProcess(cmd, 0, out, "")
         if "tail -c" in cmd:
             import base64
@@ -200,6 +202,33 @@ def test_a_failed_dump_reports_the_targets_error():
     client.run = failing
     with pytest.raises(apicache.ApiDumpError, match="not found"):
         apicache.fetch(client)
+
+
+def test_each_fetch_has_a_file_of_its_own_and_removes_only_that():
+    """One fixed name per appliance let a second fetch overwrite the first's
+    file mid-transfer, and its cleanup delete it."""
+    client = FakeClient(sftp=FakePath(BLOB))
+    apicache.fetch(client)
+    dump, *_, cleanup = client.commands
+    assert f"mktemp -p {apicache.REMOTE_DIR} {apicache._REMOTE_PREFIX}XXXXXX" in dump
+    assert cleanup == f"rm -f {REMOTE_GZ}"
+
+
+@pytest.mark.parametrize(
+    "stdout",
+    [
+        f"{len(BLOB)}\n{DIGEST}\n",
+        f"/etc/passwd\n{len(BLOB)}\n{DIGEST}\n",
+        f"/var/db/system/pytruenas-apidump.x/../../../etc/x.gz\n{len(BLOB)}\n{DIGEST}",
+    ],
+)
+def test_a_dump_that_does_not_name_its_file_is_refused(stdout):
+    """The path comes back from the target; only one in the dump directory, with
+    the dump's own prefix, is ever read or removed."""
+    client = FakeClient(sftp=FakePath(BLOB))
+    client.run = lambda cmd, **kw: subprocess.CompletedProcess(cmd, 0, stdout, "")
+    with pytest.raises(apicache.ApiDumpError, match="path, size and digest"):
+        apicache.fetch(client, keep_remote=True)
 
 
 def test_load_writes_then_reuses_the_cache(tmp_path, monkeypatch):

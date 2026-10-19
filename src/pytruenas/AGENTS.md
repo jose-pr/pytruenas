@@ -983,7 +983,9 @@ uses.
   `ApiDumpError` (raised when a transfer does not reproduce the target's
   sha256), `CHUNK_SIZE`/`CHUNK_ATTEMPTS`/`CHUNK_TIMEOUT`/`DUMP_TIMEOUT`/
   `SERVICE_TIMEOUT`, and `REMOTE_DIR` (`/var/db/system` — on a data pool so it
-  survives an update, and not `noexec` the way `/tmp` is). Every command carries
+  survives an update, and not `noexec` the way `/tmp` is). Each fetch dumps
+  into a `mktemp` file of its own there, so concurrent fetches of one appliance
+  do not collide, and removes it afterwards. Every command carries
   a timeout on purpose: the web shell waits forever by default, which turns a
   stalled channel into an indefinite hang instead of a retry.
 - **`apihelp`** — render help from a dump slice; pure functions, no client.

@@ -47,6 +47,8 @@ import hashlib as _hashlib
 import json as _json
 import os as _os
 import pathlib as _pathlib
+import re as _re
+import shlex as _shlex
 import typing as _ty
 
 if _ty.TYPE_CHECKING:  # pragma: no cover - typing only
@@ -126,21 +128,33 @@ def path_for(host: str, version: str) -> _pathlib.Path:
     return cache_root() / _safe_component(host) / f"{_safe_component(version)}.json.gz"
 
 
-def _remote_paths(client: "TrueNASHost") -> "tuple[str, str]":
-    # One name per connected host, not per call: a second fetch reuses (and
-    # overwrites) it rather than littering the dataset.
-    stem = f"{REMOTE_DIR}/pytruenas-apidump"
-    return f"{stem}.json", f"{stem}.json.gz"
+#: Name prefix of the dump's file on the target; ``mktemp`` completes it.
+_REMOTE_PREFIX = "pytruenas-apidump."
+
+
+def _dump_command(remote_dir: str = REMOTE_DIR) -> str:
+    """The target-side command: dump into a fresh file and gzip it.
+
+    A file of its own per fetch, so two fetches from one appliance (two
+    processes, or one box named twice) cannot overwrite or delete each other's.
+    Prints the ``.gz`` path, its size and its sha256; on failure removes what
+    it wrote and keeps the failing status. ``set -e`` is not portable across
+    every login shell here, so each step is chained explicitly.
+    """
+    return (
+        f"raw=$(mktemp -p {remote_dir} {_REMOTE_PREFIX}XXXXXX) && "
+        '(middlewared --dump-api > "$raw" && gzip -9 -f "$raw" && '
+        'echo "$raw.gz" && wc -c < "$raw.gz" && '
+        "sha256sum \"$raw.gz\" | cut -d' ' -f1 || "
+        '{ rc=$?; rm -f "$raw" "$raw.gz"; exit $rc; })'
+    )
 
 
 def _build_remote(client: "TrueNASHost") -> "tuple[str, int, str]":
     """Dump and compress on the target; return ``(gz_path, size, sha256)``."""
-    raw, gz = _remote_paths(client)
     client.logger.info("Dumping the API definition on the target (this takes ~75s)")
-    # `set -e` is not portable across every login shell here; check explicitly.
     result = client.run(
-        f"middlewared --dump-api > {raw} && gzip -9 -f {raw} && "
-        f"wc -c < {gz} && sha256sum {gz} | cut -d' ' -f1",
+        _dump_command(),
         capture_output=True,
         encoding="utf-8",
         check=False,
@@ -152,9 +166,16 @@ def _build_remote(client: "TrueNASHost") -> "tuple[str, int, str]":
             f"{(result.stderr or '').strip()[:400]}"
         )
     fields = (result.stdout or "").split()
-    if len(fields) < 2 or not fields[0].isdigit():
-        raise ApiDumpError(f"could not read the dump's size and digest: {fields!r}")
-    size, digest = int(fields[0]), fields[1]
+    # The path is read back from the target and later removed: accept only the
+    # shape mktemp gives it.
+    own_file = _re.compile(
+        _re.escape(f"{REMOTE_DIR}/{_REMOTE_PREFIX}") + r"[A-Za-z0-9]+\.gz"
+    )
+    if len(fields) < 3 or not own_file.fullmatch(fields[0]) or not fields[1].isdigit():
+        raise ApiDumpError(
+            f"could not read the dump's path, size and digest: {fields!r}"
+        )
+    gz, size, digest = fields[0], int(fields[1]), fields[2]
     client.logger.info("Dump compressed to %d bytes on the target", size)
     return gz, size, digest
 
@@ -236,6 +257,9 @@ def _fetch_chunked(client: "TrueNASHost", remote: str, size: int) -> bytes:
 def fetch(client: "TrueNASHost", *, keep_remote: bool = False) -> "Api":
     """Build the API definition on the target and return the parsed dump.
 
+    The dump is written to a file of its own under :data:`REMOTE_DIR`, removed
+    afterwards unless ``keep_remote``.
+
     Raises :class:`ApiDumpError` when the transfer does not reproduce the
     target's own digest -- a truncated dump parses as nothing useful and would
     otherwise be cached as if it were real.
@@ -258,13 +282,16 @@ def fetch(client: "TrueNASHost", *, keep_remote: bool = False) -> "Api":
         return _json.loads(_gzip.decompress(blob))
     finally:
         if not keep_remote:
-            raw, gz = _remote_paths(client)
             try:
-                client.run(f"rm -f {raw} {gz}", check=False, timeout=CLEANUP_TIMEOUT)
+                client.run(
+                    f"rm -f {_shlex.quote(remote)}",
+                    check=False,
+                    timeout=CLEANUP_TIMEOUT,
+                )
             except Exception as exc:  # noqa: BLE001
                 # Cleanup is courtesy: failing it must not mask the fetch's own
-                # result (or its exception), and the next fetch overwrites these.
-                client.logger.debug("could not remove %s/%s: %s", raw, gz, exc)
+                # result (or its exception).
+                client.logger.debug("could not remove %s: %s", remote, exc)
 
 
 def load(

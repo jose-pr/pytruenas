@@ -120,7 +120,9 @@ def test_dump_api_compresses_on_the_target_and_verifies_the_transfer(
     def fake_run(self, cmd, *a, **k):
         commands.append(cmd)
         if "--dump-api" in cmd:
-            return subprocess.CompletedProcess(cmd, 0, f"{len(blob)}\n{digest}\n", "")
+            gz = "/var/db/system/pytruenas-apidump.Ab12Cd.gz"  # what mktemp named
+            out = f"{gz}\n{len(blob)}\n{digest}\n"
+            return subprocess.CompletedProcess(cmd, 0, out, "")
         return subprocess.CompletedProcess(cmd, 0, "", "")
 
     monkeypatch.setattr(TrueNASClient, "run", fake_run)
