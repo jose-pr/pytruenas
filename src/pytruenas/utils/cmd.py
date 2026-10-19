@@ -212,6 +212,26 @@ def register_targets(parser) -> None:
     parser.add_argument("targets", nargs="*", metavar="TARGET", help=_TARGETS_HELP)
 
 
+def _verify_value(text: str, source: str) -> "bool | str":
+    """A TLS setting's text as a bool, or as a CA bundle path that exists.
+
+    An empty value is never "off": the callers treat it as unset. A word that
+    is neither a boolean nor an existing path is an error, so a typo cannot
+    become a bundle that verifies nothing.
+    """
+    from duho.text import parse_bool
+
+    try:
+        return parse_bool(text)
+    except ValueError:
+        pass
+    if _os.path.exists(text):
+        return text
+    raise ValueError(
+        f"{source} is {text!r}: expected true, false or an existing CA bundle path"
+    )
+
+
 class PyTrueNASArgs(LoggingArgs):
     """Global options shared by every ``pytruenas`` command.
 
@@ -301,18 +321,19 @@ class PyTrueNASArgs(LoggingArgs):
         if self.sslverify is not None:
             return self.sslverify
         value = ENV.get("SSLVERIFY")
-        if value is None:
-            value = self._config_dict_().get("sslverify")
+        if value is not None and value.strip():
+            return _verify_value(value, f"${ENV.prefix}SSLVERIFY")
+        value = self._config_dict_().get("sslverify")
         if value is None:
             return True
-        if isinstance(value, str):
-            lowered = value.strip().casefold()
-            if lowered in ("1", "true", "yes", "on"):
-                return True
-            if lowered in ("0", "false", "no", "off", ""):
-                return False
-            return value  # a CA bundle path
-        return bool(value)
+        if isinstance(value, bool):
+            return value
+        if isinstance(value, str) and value.strip():
+            return _verify_value(value, f"sslverify in {self.config}")
+        raise ValueError(
+            f"sslverify in {self.config} must be true, false or a CA bundle "
+            f"path, not {value!r}"
+        )
 
     def _credentials_(self) -> object:
         """Credentials for a target that carries none.

@@ -1024,8 +1024,11 @@ a directory the user does not control.
   platform user cache directory (`$XDG_CACHE_HOME/pytruenas`, or
   `%LOCALAPPDATA%\pytruenas\cache`). A host label is sanitized to a single path
   component, so a connection string cannot choose where the file lands.
-- **`PYTRUENAS_SSLVERIFY`** — the CLI's TLS default when no flag is given:
-  `true`/`false`/`1`/`0`/`yes`/`no`/`on`/`off`, or a CA bundle path.
+- **`PYTRUENAS_SSLVERIFY`** — the CLI's TLS default when no flag is given: a
+  boolean (`true`/`false`/`1`/`0`/`yes`/`no`/`on`/`off`, ...) or an existing CA
+  bundle path. Empty is unset (the config file, then verify); anything else is
+  a `ValueError` naming the variable. The config file's `sslverify` takes the
+  same values.
 - **`PYTRUENAS_MCP`** — not read by pytruenas itself, nor through `ENV`:
   `duho`'s (≥0.6.0) own `<PREFIX>_MCP` launch trigger, keyed off this app's
   `Env` prefix. Setting `PYTRUENAS_MCP=stdio` makes `main()` serve MCP over

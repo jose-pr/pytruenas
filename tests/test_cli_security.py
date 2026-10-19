@@ -46,14 +46,41 @@ def test_the_environment_and_config_are_honoured(args, monkeypatch, tmp_path):
     pytest.importorskip("yaml")  # only the config-file half needs the extra
     assert args()._sslverify_() is False
     # A path is a CA bundle, as it is for TrueNASClient(sslverify=...).
-    monkeypatch.setenv("PYTRUENAS_SSLVERIFY", "/etc/pki/lab.pem")
-    assert args()._sslverify_() == "/etc/pki/lab.pem"
+    bundle = tmp_path / "lab.pem"
+    bundle.write_bytes(b"")
+    monkeypatch.setenv("PYTRUENAS_SSLVERIFY", str(bundle))
+    assert args()._sslverify_() == str(bundle)
     # An explicit flag still wins over the environment.
     assert args(sslverify=True)._sslverify_() is True
     assert args(insecure=True)._sslverify_() is False
     monkeypatch.delenv("PYTRUENAS_SSLVERIFY")
     (tmp_path / "pytruenas.yaml").write_text("sslverify: false\n")
     assert args()._sslverify_() is False
+
+
+@pytest.mark.parametrize("value", ["", "   "])
+def test_an_empty_environment_value_is_unset_not_off(args, monkeypatch, value):
+    """`PYTRUENAS_SSLVERIFY=` turned verification off."""
+    monkeypatch.setenv("PYTRUENAS_SSLVERIFY", value)
+    assert args()._sslverify_() is True
+
+
+@pytest.mark.parametrize("value", ["maybe", "/no/such/bundle.pem"])
+def test_a_value_that_is_neither_a_boolean_nor_a_bundle_is_refused(
+    args, monkeypatch, value
+):
+    """It was taken as a CA bundle path, which verifies nothing."""
+    monkeypatch.setenv("PYTRUENAS_SSLVERIFY", value)
+    with pytest.raises(ValueError, match="PYTRUENAS_SSLVERIFY"):
+        args()._sslverify_()
+
+
+@pytest.mark.parametrize("value", ["0", "''", "[]"])
+def test_a_config_value_that_is_not_a_boolean_or_path_is_refused(args, tmp_path, value):
+    pytest.importorskip("yaml")
+    (tmp_path / "pytruenas.yaml").write_text("sslverify: " + value)
+    with pytest.raises(ValueError, match="sslverify in"):
+        args()._sslverify_()
 
 
 def test_credentials_come_from_the_environment_or_config(args, monkeypatch, tmp_path):
