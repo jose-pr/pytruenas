@@ -3,13 +3,12 @@ from __future__ import annotations
 from pathlib import Path as _P
 import copy as _copy
 import logging as _logging
-import re as _re
 import shutil
 import tempfile
 import typing as _ty
 import functools as _ftools
 from ..models import apidump as _api, jsonschema as _schema
-from ..utils import apihelp as _apihelp
+from ..utils import _schema as _read
 from duho import qualname as _qn
 from duho import text as _text
 
@@ -50,7 +49,7 @@ def _camelcase(name: str) -> str:
     # "smb:share"; parens, colons, quotes and brackets used to survive into the
     # name. A leading digit gets a prefix, since no identifier may start with
     # one.
-    parts = [part for part in _re.split(r"[^0-9A-Za-z]+", name) if part]
+    parts = _read.words(name)
     result = "".join(part[:1].upper() + part[1:] for part in parts)
     if not result:
         return "Unnamed"
@@ -215,10 +214,8 @@ class Method(PyDeclaration):
 
     @_ftools.cached_property
     def parameters(self) -> list[Parameter]:
-        callparams = self.definition["schemas"]["properties"]["Call parameters"]
-        items = callparams["prefixItems"]  # type: ignore
         params = []
-        for item in items:
+        for item in _read.parameters(self.definition):
             params.append(Parameter(item, self.pyname.relative_to(self.pyname.parent)))
 
         if not self.pyname.name.startswith("_"):
@@ -272,7 +269,7 @@ class Method(PyDeclaration):
 
     @_ftools.cached_property
     def returns(self):
-        returns = self.definition["schemas"]["properties"]["Return value"]
+        returns = _read.returns(self.definition)
         return Parameter(
             returns, self.pyname.relative_to(self.pyname.parent), title="return"
         )
@@ -338,9 +335,7 @@ class Namespace(PyDeclaration):
         for method in self.methods():
             if method.qualname.name == "update":
                 fields = _payload(method)
-                update_return = method.definition["schemas"]["properties"][
-                    "Return value"
-                ]
+                update_return = _read.returns(method.definition)
                 idtype = None
                 for param in method.parameters:
                     if param.name == "id":
@@ -418,9 +413,7 @@ class Namespace(PyDeclaration):
 
             elif method.qualname.name == "create":
                 fields = _payload(method)
-                create_return = method.definition["schemas"]["properties"][
-                    "Return value"
-                ]
+                create_return = _read.returns(method.definition)
                 update = Method(
                     {
                         "name": "_create",
@@ -515,9 +508,9 @@ def _payload(method: "Method") -> "Parameter":
     parameter), else the last real one. Never a call option: a fixed index from
     the end picked ``_ioerror`` once the options grew.
     """
-    index = _apihelp.payload_index(method.definition)
+    index = _read.payload_index(method.definition)
     if index is None:
-        index = len(_apihelp.parameters(method.definition)) - 1
+        index = len(_read.parameters(method.definition)) - 1
     return method.parameters[index]
 
 

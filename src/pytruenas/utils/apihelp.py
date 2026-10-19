@@ -22,11 +22,13 @@ from __future__ import annotations
 import textwrap as _textwrap
 import typing as _ty
 
+from . import _schema
+
 #: Width the descriptions wrap to.
 WIDTH = 88
 
-_CALL_PARAMS = "Call parameters"
-_RETURN = "Return value"
+_CALL_PARAMS = _schema.CALL_PARAMS
+_RETURN = _schema.RETURN
 
 
 class UnknownMethod(LookupError):
@@ -107,14 +109,6 @@ def find(version: "_ty.Mapping[str, _ty.Any]", name: str) -> dict:
 # -- schema -> human text ---------------------------------------------------
 
 
-def _enum_values(schema: "_ty.Mapping[str, _ty.Any]") -> "list | None":
-    if "const" in schema:
-        return [schema["const"]]
-    if schema.get("enum"):
-        return list(schema["enum"])
-    return None
-
-
 def type_label(schema: "_ty.Any") -> str:
     """A short human type for one schema (``string``, ``integer|null``, ...).
 
@@ -184,43 +178,13 @@ def _describe(schema: "_ty.Mapping[str, _ty.Any]") -> str:
     return " ".join(str(text).split())
 
 
-def _properties(schema: "_ty.Any") -> "dict[str, dict] | None":
-    """The properties of an object schema, looking through a single-member
-    union -- the dump writes an optional payload as ``anyOf[object, null]``."""
-    if not isinstance(schema, dict):
-        return None
-    if schema.get("properties"):
-        return schema["properties"]
-    for key in ("anyOf", "oneOf"):
-        for member in schema.get(key) or []:
-            if isinstance(member, dict) and member.get("properties"):
-                return member["properties"]
-    return None
-
-
-def _required(schema: "_ty.Any") -> "set[str]":
-    if not isinstance(schema, dict):
-        return set()
-    if schema.get("properties"):
-        return set(schema.get("required") or [])
-    for key in ("anyOf", "oneOf"):
-        for member in schema.get(key) or []:
-            if isinstance(member, dict) and member.get("properties"):
-                return set(member.get("required") or [])
-    return set()
-
-
 def parameters(method: "_ty.Mapping[str, _ty.Any]") -> "list[dict]":
     """The positional parameter schemas, in order."""
-    schemas = method.get("schemas") or {}
-    props = schemas.get("properties") or {}
-    call = props.get(_CALL_PARAMS) or {}
-    return list(call.get("prefixItems") or [])
+    return _schema.parameters(method)
 
 
 def returns(method: "_ty.Mapping[str, _ty.Any]") -> "dict":
-    schemas = method.get("schemas") or {}
-    return (schemas.get("properties") or {}).get(_RETURN) or {}
+    return _schema.returns(method)
 
 
 def payload_index(method: "_ty.Mapping[str, _ty.Any]") -> "int | None":
@@ -230,11 +194,7 @@ def payload_index(method: "_ty.Mapping[str, _ty.Any]") -> "int | None":
     ``user.update(id, payload)`` puts it second, so the earlier positionals stay
     with ``-p`` where they belong.
     """
-    found = None
-    for index, schema in enumerate(parameters(method)):
-        if _properties(schema) is not None:
-            found = index
-    return found
+    return _schema.payload_index(method)
 
 
 def fields(method: "_ty.Mapping[str, _ty.Any]") -> "dict[str, dict]":
@@ -242,7 +202,7 @@ def fields(method: "_ty.Mapping[str, _ty.Any]") -> "dict[str, dict]":
     index = payload_index(method)
     if index is None:
         return {}
-    return _properties(parameters(method)[index]) or {}
+    return _schema.properties(parameters(method)[index]) or {}
 
 
 # -- rendering ---------------------------------------------------------------
@@ -273,7 +233,7 @@ def _field_lines(
         bits.append(f"default {default}")
     head = f"  --{name}=<{type_label(schema)}>"
     lines = [f"{head:<40}{('(' + ', '.join(bits) + ')') if bits else ''}".rstrip()]
-    values = _enum_values(schema)
+    values = _schema.enum_values(schema)
     if values:
         rendered = ", ".join(repr(v) for v in values)
         lines += _textwrap.wrap(
@@ -333,7 +293,7 @@ def render(name: str, method: "_ty.Mapping[str, _ty.Any]") -> str:
 
     if payload is not None:
         props = fields(method)
-        required = _required(params[payload])
+        required = _schema.required(params[payload])
         out.append("Fields (after --):" if props else "Fields: none")
         for field, schema in props.items():
             out += _field_lines(field, schema, field in required)

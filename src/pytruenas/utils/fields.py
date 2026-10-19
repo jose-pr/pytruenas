@@ -25,6 +25,8 @@ import json as _json
 import pathlib as _pathlib
 import typing as _ty
 
+from . import _schema
+
 #: Accepted spellings for a boolean, matching duho's own strict sets rather
 #: than Python's truthiness (``bool("false")`` is ``True``, which would be a
 #: quietly wrong value sent to an appliance).
@@ -93,48 +95,11 @@ def _coerce_scalar(name: str, schema: "_ty.Mapping[str, _ty.Any]", raw: str) -> 
     raise FieldError(f"--{name}: {raw!r} is not a valid {expected}")
 
 
-def _enum_values(schema: "_ty.Mapping[str, _ty.Any]") -> "list | None":
-    if "const" in schema:
-        return [schema["const"]]
-    if schema.get("enum"):
-        return list(schema["enum"])
-    return None
-
-
-def _unwrap(schema: "_ty.Any") -> "dict":
-    """Collapse a union to the member that carries the shape.
-
-    The dump writes an optional field as ``anyOf: [<real>, {"type": "null"}]``.
-    For coercion the real member decides the cast, and nullability is handled by
-    ``_coerce_scalar`` seeing ``null`` among the types.
-    """
-    if not isinstance(schema, dict):
-        return {}
-    for key in ("anyOf", "oneOf"):
-        members = [m for m in (schema.get(key) or []) if isinstance(m, dict)]
-        if not members:
-            continue
-        real = [m for m in members if m.get("type") != "null"]
-        nullable = len(real) != len(members)
-        if len(real) == 1:
-            merged = dict(real[0])
-            if nullable:
-                declared = merged.get("type")
-                if isinstance(declared, str):
-                    merged["type"] = [declared, "null"]
-                elif isinstance(declared, (list, tuple)):
-                    merged["type"] = [*declared, "null"]
-            return merged
-        # A real union of several shapes: keep the nullability only.
-        return {"type": [*(m.get("type") for m in members)]}
-    return dict(schema)
-
-
 def coerce(name: str, schema: "_ty.Any", raw: str) -> object:
     """Cast one raw command-line value per ``schema``."""
-    resolved = _unwrap(schema)
+    resolved = _schema.unwrap_optional(schema)
 
-    values = _enum_values(resolved)
+    values = _schema.enum_values(resolved)
     if values is not None:
         # Compare as text so `--uid=0` matches an integer enum member, then
         # return the schema's own value (the appliance wants its type).
@@ -187,7 +152,7 @@ def _resolve(
             where = ".".join(parts[:index]) or "this method"
             hint = f"; did you mean: {', '.join(close)}" if close else ""
             raise FieldError(f"unknown field {part!r} for {where}{hint}")
-        schema = _unwrap(available[part])
+        schema = _schema.unwrap_optional(available[part])
         available = schema.get("properties") or {}
     return parts, schema
 
