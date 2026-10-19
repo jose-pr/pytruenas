@@ -22,6 +22,7 @@ These are real ``pathapi`` path types, so every generic operation
 
 from __future__ import annotations
 
+import posixpath as _posixpath
 import typing as _ty
 
 from pathapi import LocalPath as LocalPath
@@ -50,7 +51,9 @@ def path(client: "TrueNASClient", *segments, backend: "str | None" = None):
     ``client.path(...)``. Another value raises ``ValueError``.
     """
     backend = backend or "auto"
-    posix = "/".join(str(s) for s in segments) if segments else "/"
+    # Joined as the composite path joins: an absolute segment restarts the
+    # path, so every leg names the same file.
+    posix = _posixpath.join(*(str(s) for s in segments)) if segments else "/"
 
     if backend == "local" or (backend == "auto" and _settings(client).is_local):
         return LocalPath(*segments) if segments else LocalPath("/")

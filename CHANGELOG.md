@@ -43,6 +43,10 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - A `logging.LoggerAdapter` passed as `logger=` (or assigned to
   `client.logger`) no longer makes every API call raise `AttributeError`: the
   per-call TRACE record is written with `logger.log()`, which any logger has.
+- `client.path("/mnt", "/etc")` names `/etc` on every leg. Its websocket
+  (`tnasws`) leg joined the segments with `/` and operated on `/mnt//etc`, so
+  on a host without SSH a read, write or `unlink()` reached a different file;
+  `fs.path()` joins as the composite path does.
 - `examples/simple_client_from_yaml.py` moved to `examples/scripts/`, so
   `--cmdspath examples` no longer warns that it is not a command.
 

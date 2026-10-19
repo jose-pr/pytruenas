@@ -540,6 +540,16 @@ def test_path_construction_joins_segments_before_encoding():
     assert p.name == "c#d"
 
 
+def test_an_absolute_later_segment_restarts_the_path_on_every_leg():
+    """`client.path("/mnt", "/etc")` named `/etc`, while its websocket leg
+    operated on `/mnt//etc` -- `unlink()` removed a different file."""
+    assert fs_path(_path_client(), "/mnt", "/etc", backend="ws").path == "/etc"
+    from pytruenas.providers import TnasWsPathProvider
+
+    host = TrueNASClient("wss://nas.example", autologin=False)
+    assert TnasWsPathProvider(host)._make_path("/mnt", "/etc").path == "/etc"
+
+
 # -- symlink_to(force=) must not remove before it can create ------------------
 
 
