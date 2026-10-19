@@ -32,7 +32,13 @@ from pathlib import Path
 import pytruenas
 from pytruenas import connection as ejson
 from pytruenas.namespace import Namespace
-from pytruenas import query as q
+
+# The script also measures the latest release, which may predate the move of
+# `query` out of `pytruenas.utils`.
+try:
+    from pytruenas import query as q
+except ImportError:
+    from pytruenas.utils import query as q
 
 EJSON_INNER = 20000
 BUILD_INNER = 200000
