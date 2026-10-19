@@ -2,8 +2,7 @@
 
 The template is read through ``importlib.resources``, not a
 ``FileSystemLoader``: a zipapp (what ``deploy --mode pyz`` installs, and the
-default) has no filesystem path for it, so loading by directory failed with
-``TemplateNotFound`` there while working in a checkout.
+default) has no filesystem path for it.
 """
 
 from pathlib import Path as _P

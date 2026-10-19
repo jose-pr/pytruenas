@@ -27,30 +27,18 @@ _MISSING = _Missing()
 
 
 class Source(str):
-    """A default that is already Python SOURCE, not a string value.
-
-    The synthetic helpers below emit defaults like ``None``; everything coming
-    from the API dump is data. Without this marker the two were told apart by
-    trying to parse the string, which quietly turned a default of ``"0"`` into
-    the integer ``0``.
-    """
+    """A default that is already Python SOURCE, not a string value: what the
+    synthetic helpers and call options write (``None``, ``False``). Every
+    default from the API dump is data, rendered with ``repr``."""
 
 
 def _camelcase(name: str) -> str:
-    """CamelCase a single identifier, tolerating empty/trailing segments.
+    """CamelCase a dump name into a class name.
 
-    Splits on ``.``/``_``/``-`` and drops empty parts, so a ``pysafe`` output like
-    ``global_`` becomes ``Global``. duho 0.3.0 fixed ``text.camelcase``'s
-    trailing-separator crash, so this is now belt-and-suspenders on that front;
-    it is kept because it is a one-liner and the empty-part handling is exactly
-    what the codegen names (which may carry pysafe suffixes) rely on.
+    Every non-alphanumeric character, underscore included, separates two words
+    and empty parts are dropped: ``global_`` (a ``pysafe`` output) becomes
+    ``Global`` and ``acl(nfs4)`` ``AclNfs4``. A leading digit gets an ``N``.
     """
-    # Every non-alphanumeric character is a word boundary (underscore
-    # included -- `\W` treats it as a word character) -- a real dump has
-    # titles like "Filesystem Count", "query-options", "acl(nfs4)" and
-    # "smb:share"; parens, colons, quotes and brackets used to survive into the
-    # name. A leading digit gets a prefix, since no identifier may start with
-    # one.
     parts = _read.words(name)
     result = "".join(part[:1].upper() + part[1:] for part in parts)
     if not result:
@@ -61,42 +49,25 @@ def _camelcase(name: str) -> str:
 def docstring(text: str) -> str:
     """Return ``text`` as the safe *inside* of a ``\"\"\" ... \"\"\"`` docstring.
 
-    Neutralises the two things that break a triple-quoted literal: a backslash
-    (would start an escape) and an embedded/trailing ``"`` run (would close the
-    string early -- e.g. a doc ending ``Always returns "pong"`` produced
-    ``"pong\"\"\"``). Also drops null bytes, which are a hard ``SyntaxError``
-    ("source code string cannot contain null bytes") and appear in some dumps.
+    Escapes every backslash (it would start an escape) and every ``"`` (three
+    in a row, or one at the end, close the literal early), and drops null
+    bytes, which no source file may contain and some dumps do.
     """
     text = (text or "").replace("\x00", "")
-    # Every double quote, not just a `"""` run or a single trailing one: a doc
-    # ending in `"""` produced `\"\"\\"`, which does not compile at all.
-    # Escaping them all is correct for any position and needs no special case.
     return text.replace("\\", "\\\\").replace('"', '\\"')
 
 
 def _default_literal(default: object) -> str:
-    """Render a schema default as a valid Python default-value expression.
+    """Render a schema default as a Python default-value expression.
 
-    Schema defaults arrive either as already-Python-source strings (the
-    synthetic ``_create``/``_update`` helpers pass e.g. ``"None"``) or as raw
-    JSON values from the real dump (``[]``, ``{}``, ``""``, ``True``, numbers,
-    nested dicts). A plain ``f"={default}"`` mis-renders every non-string JSON
-    value (an empty string became ``=`` with nothing after it; a dict became an
-    unparenthesised ``{...}``; ``None``/booleans leaked JSON casing). This
-    normalises to a literal that always parses.
+    A :class:`Source` is emitted as written. Anything else is a JSON value
+    from the dump, and ``repr`` renders it as a literal of the same type: the
+    string ``"0"`` stays ``'0'``, never the integer ``0``.
     """
     if default is ... or default is _MISSING:
         return "..."
     if isinstance(default, Source):
-        # Python source this package wrote itself (a synthetic helper's `None`).
         return str(default)
-    if isinstance(default, str):
-        # A plain string from the dump is a STRING VALUE. It used to be handed
-        # to ast.literal_eval and returned verbatim when that parsed, so a
-        # default of "0" became the int literal 0 and "true"/"None" changed
-        # meaning -- the stub then disagreed with the API about the type.
-        return repr(default)
-    # A real JSON value (list/dict/number/bool/None): repr() is valid Python.
     return repr(default)
 
 
@@ -113,9 +84,8 @@ class Parameter:
         else:
             schema = __schema
 
-        #: Rendered after a ``*`` separator, i.e. not positional. The call
-        #: options are keyword-only at runtime, so a stub that offered them
-        #: positionally invited a call that shifts a real parameter.
+        #: Rendered after a ``*`` separator, i.e. not positional: the call
+        #: options are keyword-only at runtime.
         self.keyword_only = False
         self.namespace = __namespace or _qn.PythonName("")
         self.schema = _ty.cast(_schema.Schema, schema or {})
@@ -168,12 +138,8 @@ class PyDeclaration:
 
     @property
     def classname(self) -> str:
-        """CamelCase class/type name for this declaration's last segment.
-
-        Uses :func:`_camelcase` (empty-part-safe) so a ``pysafe``-suffixed name
-        like ``global_`` becomes ``Global`` rather than crashing on the trailing
-        underscore (see ``duho.text.camelcase`` trailing-separator bug).
-        """
+        """CamelCase class/type name for this declaration's last segment
+        (see :func:`_camelcase`)."""
         return _camelcase(self.pyname.name)
 
     @property
@@ -230,12 +196,9 @@ class Method(PyDeclaration):
             params.append(Parameter(item, self.pyname.relative_to(self.pyname.parent)))
 
         if not self.pyname.name.startswith("_"):
-            # The call options `Namespace.__call__` accepts. They are
-            # KEYWORD-ONLY in the stub (the `*` below): the runtime takes
-            # middleware parameters positionally and raises TypeError for any
-            # other keyword, so a stub offering these positionally invited a
-            # call that shifts a real parameter. `_timeout` and `_tries` were
-            # missing entirely.
+            # The call options `Namespace.__call__` accepts, keyword-only (the
+            # `*` below) as at runtime, which takes middleware parameters
+            # positionally and raises TypeError for any other keyword.
             options = [
                 Parameter(
                     {},
@@ -621,10 +584,8 @@ class Codegen:
         api: _api.Version,
         root: _P | str,
     ):
-        # A copy: this used to prefix the method names of the CALLER's dump
-        # (`user.query` -> `v26_0_0.user.query`) and overwrite its return
-        # titles, so a caller generating twice from one dump got different
-        # output the second time.
+        # A copy: method names are prefixed and return titles rewritten below,
+        # and the caller's dump must come back as it was given.
         api = _copy.deepcopy(api)
         _empty_arrays(api)
         declarations: list[PyDeclaration] = []
@@ -637,13 +598,10 @@ class Codegen:
             method["name"] = version / method["name"]
             declaration = Method(method)
             if _shadows_runtime(declaration):
-                # A middleware method whose name is also a real `Namespace`
-                # method (`core.subscribe` vs `Namespace.subscribe`). Emitting
-                # it redefined the class member, so a checker accepted
-                # `ns.subscribe(event)` -- which at runtime calls the REAL
-                # method with a positional callback -- and rejected the correct
-                # `ns.subscribe()`. The runtime way to reach the middleware one
-                # is `ns(_method="subscribe", ...)`, which needs no stub.
+                # A middleware method named like a real `Namespace` method
+                # (`core.subscribe`): a stub would redefine the class member, and
+                # a checker would type the runtime method with the middleware's
+                # signature. `ns(_method="subscribe", ...)` reaches it.
                 _LOGGER.info(
                     "%s is shadowed by Namespace.%s; call it as "
                     '_method="%s" (no stub emitted)',
