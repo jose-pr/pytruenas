@@ -252,12 +252,20 @@ class Namespace:
         ``_tries`` is the number of *reconnect retries* after a dropped
         connection, made only when the request was never sent
         (:class:`~pytruenas.connection.ConnectionClosed` with ``sent=False``);
-        with the default 1 the call is attempted up to twice. ``_timeout`` is the per-call timeout in seconds; the
-        default sentinel uses the client's configured timeout, ``None`` waits
-        indefinitely (used by ``core.job_wait`` for long jobs). ``_method``
+        with the default 1 the call is attempted up to twice. ``_timeout`` is
+        the per-call timeout in seconds; the default sentinel uses the
+        client's configured timeout, ``None`` waits indefinitely. ``_method``
         appends a leaf method name, ``_ioerror`` maps a middleware error to the
         matching ``OSError``, and ``_filetransfer`` routes through
         upload/download.
+
+        ``job=True``, as in the upstream client, waits for the job the method
+        starts and returns the job's result (:meth:`TrueNASHost.wait`): a
+        failed job raises :class:`~pytruenas.connection.JobFailed`. The wait
+        has no deadline unless ``_timeout`` is given. ``job="RETURN"`` and the
+        other upstream keywords (``background``, ``callback``,
+        ``register_call``, ``raise_``) are accepted and have no effect: the
+        call returns the job id.
         """
         method = self._namespace
         if _method:
@@ -275,6 +283,7 @@ class Namespace:
         elif _filetransfer:
             raise TypeError(_filetransfer)
 
+        job = kwds.pop("job", False)
         if _timeout is not _UNSET:
             kwds["timeout"] = _timeout
 
@@ -291,9 +300,8 @@ class Namespace:
             )
 
         # One initial attempt plus `_tries` reconnect retries after an aborted
-        # connection. The loop always ends in a return or a raise -- it must
-        # never fall through to None (a None here reads as "no result" and, via
-        # _get, silently turns an upsert into a create).
+        # connection. The loop ends in a result or a raise, never None: a None
+        # reads as "no result" and, via _get, turns an upsert into a create.
         attempts = max(0, _tries) + 1
         last_exc: "_connection.ClientException | None" = None
         for attempt in range(attempts):
@@ -309,7 +317,8 @@ class Namespace:
                     _LoggedArgs(method, args),
                 )
                 conn = self._client.conn
-                return conn.call(method, *args, **kwds)
+                result = conn.call(method, *args, **kwds)
+                break
             except _connection.ClientException as e:
                 last_exc = e
                 # Only a call the server never received is repeated: one lost
@@ -324,9 +333,20 @@ class Namespace:
                     _time.sleep(1)
                     continue
                 raise (ioerror(e) if _ioerror else e) from None
-        # Unreachable in practice (the loop returns or raises), but guarantees
-        # we never return None on a connection error.
-        raise ioerror(last_exc) if _ioerror else last_exc  # type: ignore[misc]
+        else:
+            # Unreachable: the last attempt raises rather than continuing.
+            raise ioerror(last_exc) if _ioerror else last_exc  # type: ignore[misc]
+
+        # `type(...) is int`: a job id. bool is an int subclass, and a method
+        # answering True is not job 1.
+        if job and job != "RETURN" and type(result) is int:
+            try:
+                result = self._client.wait(
+                    result, timeout=None if _timeout is _UNSET else _timeout
+                )
+            except _connection.ClientException as e:
+                raise (ioerror(e) if _ioerror else e) from None
+        return result
 
     if not _ty.TYPE_CHECKING:
 

@@ -632,8 +632,9 @@ class TrueNASWSConnection:
         default sentinel uses :attr:`call_timeout`; an explicit ``timeout=None``
         waits **indefinitely** (a long-running call).
         Compatibility keyword arguments (``job``, ``background``, ``callback``,
-        …) accepted by the upstream client are ignored -- this client is
-        synchronous and does not track jobs client-side. Any *other* unexpected
+        …) accepted by the upstream client are ignored here: a job's id is
+        returned. ``client.api.<method>(..., job=True)`` waits for the job (see
+        :class:`~pytruenas.namespace.Namespace`). Any *other* unexpected
         keyword is logged at debug level rather than silently swallowed.
 
         Raises :class:`ValidationErrors`/:class:`ClientException` on a server
