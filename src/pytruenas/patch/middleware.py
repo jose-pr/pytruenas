@@ -54,8 +54,9 @@ def middlewared_path(client: "TrueNASClient"):
 class MiddlewareFiles:
     """Locate files under the host's ``middlewared`` package."""
 
-    #: Searched in order for :meth:`find_template`. ``local`` is where
-    #: site-specific overrides go, so it wins by being checked second.
+    #: Searched in order by :meth:`find_template`; the first match wins.
+    #: ``local`` holds templates for other outputs, not overrides of the ones
+    #: in ``etc_files``.
     TEMPLATE_DIRS = ("etc_files", "etc_files/local")
 
     def __init__(
@@ -84,7 +85,9 @@ class MiddlewareFiles:
         return self._module_path
 
     def __repr__(self) -> str:
-        return f"{type(self).__name__}({self.module_path})"
+        # Never resolves: locating the package runs a command on the host.
+        shown = self._module_path if self._module_path is not None else "<unresolved>"
+        return f"{type(self).__name__}({shown})"
 
     def find_template(
         self,
@@ -92,26 +95,21 @@ class MiddlewareFiles:
         etc: "str | _ty.Sequence[str] | None" = None,
         services: "str | _ty.Sequence[str] | None" = None,
         baseline: bool = True,
+        writable: bool = False,
     ) -> SystemFile:
         """Find an ``etc_files`` template by name, with or without ``.mako``.
 
-        ``baseline`` defaults to **True**, matching
-        :class:`~pytruenas.patch.systemd.SystemFile` and everything else in
-        this package. Overwriting a stock template with no snapshot beside it
-        leaves no way back: the original ships in the middlewared package, so
-        recovering it means reinstalling or pulling the file from another
-        system. Losing the undo path is the more expensive failure, so keeping
-        it is the default and skipping it (``baseline=False``) is the opt-in.
+        Returns a :class:`~pytruenas.patch.systemd.SystemFile` for the first
+        match in :attr:`TEMPLATE_DIRS`; ``etc``, ``services``, ``baseline``
+        and ``writable`` are passed to it.
 
-        This USED to default to ``False``, on the grounds that the middlewared
-        package sits on a read-only mount (``boot-pool/ROOT/<version>/usr`` --
-        verified ``ro`` on 26.0.0-BETA.1) and snapshotting beside the template
-        would fail. That reasoning does not survive: writing the patched
-        template fails on a read-only mount too, so any caller reaching a write
-        has already made the dataset writable (see
-        :func:`pytruenas.patch.zfs.writable`). Once it is, the snapshot works.
-        A default that only helped while the operation could not succeed anyway
-        was trading a real safety net for nothing.
+        ``baseline`` defaults to **True**: the original ships in the
+        middlewared package, so overwriting it with no snapshot beside it
+        leaves no way back short of reinstalling. The package is on a
+        read-only dataset (``boot-pool/ROOT/<version>/usr`` on 26.0), which
+        :meth:`~pytruenas.patch.templates.FileTarget.read` never writes to;
+        the snapshot is taken by the first changing write, which needs the
+        dataset writable anyway -- pass ``writable=True`` for that.
 
         Raises ``FileNotFoundError`` naming every location tried, rather than
         just the template name -- on a host where the middlewared layout has
@@ -127,7 +125,11 @@ class MiddlewareFiles:
                 tried.append(str(candidate))
                 try:
                     return self.find_file(
-                        candidate, etc=etc, services=services, baseline=baseline
+                        candidate,
+                        etc=etc,
+                        services=services,
+                        baseline=baseline,
+                        writable=writable,
                     )
                 except FileNotFoundError:
                     continue
@@ -138,12 +140,17 @@ class MiddlewareFiles:
     ) -> SystemFile:
         """Wrap an existing file under the middlewared package as a target.
 
-        A file with only a ``.baseline`` beside it still counts as present: a
-        previous patch may have replaced the original, and the baseline is what
-        that patch templates from.
+        ``args`` and ``kwargs`` reach ``cls`` (default ``SystemFile``) after
+        the path and client. A file with only its baseline beside it (under
+        the target's own baseline suffix) still counts as present: a previous
+        patch may have replaced the original, and the baseline is what that
+        patch templates from. Raises ``FileNotFoundError`` otherwise.
         """
         resolved = self.module_path / path
-        baseline = resolved.with_name(resolved.name + ".baseline")
-        if not resolved.exists() and not baseline.exists():
+        target = (cls or SystemFile)(str(resolved), self.client, *args, **kwargs)
+        snapshot = target.baseline_path
+        if not target.path.exists() and not (
+            snapshot is not None and snapshot.exists()
+        ):
             raise FileNotFoundError(str(resolved))
-        return (cls or SystemFile)(str(resolved), self.client, *args, **kwargs)
+        return target
