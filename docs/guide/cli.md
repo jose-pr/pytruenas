@@ -158,14 +158,28 @@ See [Generating typings](typings.md).
 
 ## Config file
 
-With the `config` extra, `--config file.yaml` (`-c`) supplies targets and
-defaults so you don't repeat the target hosts every invocation. It also
-carries `credentials:` and `sslverify:` for the hosts it names:
+With the `config` extra, a YAML file supplies three settings, and only these;
+any other key is ignored (targets and options always come from the command
+line):
 
 ```yaml
 credentials: 1-<64-char-api-key>   # or a mapping: {username: root, password: ...}
 sslverify: /etc/pki/lab-ca.pem     # or false
+commandspath: [mycommands]         # extra command sources, relative to this file
 ```
+
+- `credentials` — used for a target that carries none, after `$TN_CREDS`.
+- `sslverify` — the TLS default, below `-k`/`--[no-]sslverify` and
+  `$PYTRUENAS_SSLVERIFY`.
+- `commandspath` — directories or packages to load commands from. Read only
+  from a file named with `--config` or `$PYTRUENAS_CONFIG`: the implicit
+  `./pytruenas.yaml` is whatever directory the CLI runs in, so its
+  `commandspath` is refused with a warning.
+
+The file is `--config FILE` (`-c`), else `$PYTRUENAS_CONFIG`, else
+`./pytruenas.yaml` in the current directory. The implicit file may be absent; a
+file you named must exist, or the run stops with exit status 2 before any
+target.
 
 ## MCP
 

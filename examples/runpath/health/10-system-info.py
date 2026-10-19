@@ -32,5 +32,7 @@ def main(client, args, logger):
     # `args` carries both the parsed options and the per-target state that
     # `__main__.py` stashed; a later step reads what this one appends.
     args.findings.append(("version", info["version"]))
-    if args.sslverify:
+    # `args.sslverify` is only the flag (None when not given); `_sslverify_()`
+    # is the decision: -k, the flag, $PYTRUENAS_SSLVERIFY, the config file.
+    if args._sslverify_() is not False:
         logger.debug("TLS verification is on for %s", args.target)

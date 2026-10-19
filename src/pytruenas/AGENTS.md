@@ -583,12 +583,18 @@ around `path()`.
 
 ## `main` (`pytruenas.main`) — CLI entry point
 
-- **`main(name=None, argv=None) -> int`** — build the `duho` app
-  (`PyTrueNAS`), discover commands (built-ins in `pytruenas.cmd` plus any
-  `PYTRUENAS_PATH` / `--cmdspath` / config `commandspath` entries), parse
-  `argv`, and dispatch the selected command against every target
-  concurrently. `pytruenas = "pytruenas.main:main"` is the installed console
-  script.
+- **`main(name=None, argv=None, args=None, root=None) -> int`** — build the
+  `duho` app (`root`, default `PyTrueNAS`), discover commands (built-ins in
+  `pytruenas.cmd` plus any `PYTRUENAS_PATH` / `--cmdspath` / config
+  `commandspath` entries), parse `argv`, and dispatch the selected command
+  against every target concurrently. `args` is the shared args class every
+  command inherits (a `PyTrueNASArgs` subclass, default `root._ARGS_`; anything
+  else raises `TypeError`); a derived tool adds global options through it or by
+  subclassing `PyTrueNAS` with `_ARGS_` set. Raises `SystemExit` for `--help`,
+  `--version` and a usage error found while parsing; a `--config`/
+  `$PYTRUENAS_CONFIG` file that does not exist returns 2 with
+  `NAME: error: config file not found: PATH`. `pytruenas = "pytruenas.main:main"`
+  is the installed console script.
 - **`PyTrueNAS(PyTrueNASArgs, duho.Cli)`** — the app root; `--version` resolves
   from installed package metadata.
 
@@ -620,9 +626,8 @@ A command is a plain module exposing:
   CLI fields (duho ≥0.4.1 adds them to the subparser before `register` runs).
   Preferred over `register`: an annotated attr + docstring + bare flags-tuple
   becomes a CLI field, e.g. `("method",)` for a positional or `("--param",
-  "-p")` for an option. For a repeatable `list[str]` option use
-  `Meta(action='append', nargs=None)` — duho otherwise infers `nargs='*'`, and a
-  greedy option swallows the trailing targets.
+  "-p")` for an option. A `list[str]` option is repeatable as declared (`-f a
+  -f b`, one value per occurrence), so it never swallows the trailing targets.
 - **`register(parser, args, logger)`** — optional; the imperative escape hatch,
   for what declarations can't express (mutually-exclusive/titled groups). The
   trailing `TARGET...` positionals are declared centrally as the command's last
@@ -644,13 +649,20 @@ A command is a plain module exposing:
 
 `pytruenas.utils.cmd.PyTrueNASArgs` (a `duho.LoggingArgs` mixin) carries the
 global fields every command sees: `config` (path, default
-`$PYTRUENAS_CFG` or `./pytruenas.yaml`), `cmdspath`, `sslverify`
+`$PYTRUENAS_CONFIG`, else the older `$PYTRUENAS_CFG`, else `./pytruenas.yaml`),
+`cmdspath`, `sslverify`
 (`--sslverify`/`--no-sslverify`, unset by default), `insecure`
 (`--insecure`/`-k`), `parallel` (default `1`), `logto` (default `-` for
-stderr, or a `{target}`/`{isodate}` path template), plus `targets` (the
+stderr, or a `{target}`/`{isodate}` path template; each target's file gets only
+that target's records, `--parallel` included), plus `targets` (the
 trailing positionals, not a flag; each command declares the field last through
 `with_targets(args_cls)`, whose field type is `TargetsField`) and helper methods
-`._config_dict_()`/`._expanded_targets_()`. Target expansion (commas and
+`._config_dict_()`/`._expanded_targets_()`. `._config_dict_()` is the YAML
+mapping (the `config` extra); the CLI reads three keys from it —
+`credentials`, `sslverify` and `commandspath` — and ignores any other. The
+implicit `./pytruenas.yaml` may be absent; a file named with `--config` or
+`$PYTRUENAS_CONFIG` must exist (`duho.UsageError`, exit status 2). Target
+expansion (commas and
 `[A-Z]`/`[0-9]` ranges) applies to the HOST part only -- a comma or a range
 inside credentials is part of them -- and credentials are carried onto every
 expanded host.
@@ -968,9 +980,12 @@ uses.
   shared root every RunPath command inherits — supplies the target fields /
   fan-out methods and the trailing `TARGET` positional).
 - **`apicache`** — fetch and cache the API definition, two ways.
-  **Preferred, over the API alone:** `services(client, *, refresh=False)`
-  (`core.get_services` — the namespace index) and `service_methods(client,
-  service, *, refresh=False)` (`core.get_methods(<service>)`). Both middleware
+  **Preferred, over the API alone:** `services(client, *, refresh=False,
+  version=None)` (`core.get_services` — the namespace index) and
+  `service_methods(client, service, *, refresh=False, version=None)`
+  (`core.get_methods(<service>)`). `version` keys the cache as it does for
+  `load`; omitted, each call reads it with a `system.info()` round trip, so a
+  caller making several reads it once and passes it. Both middleware
   methods declare **no roles** and need **no command access**, so they work for
   an API-key account with no shell, no SSH and no web shell; one namespace is a
   small answer (`user`: 13 methods / 100 KB on 26.0). The filter is by
@@ -1032,8 +1047,8 @@ on purpose: the companion-module feature would import a `pytruenas_env` module
 from anywhere on `sys.path` including the CWD, and a CLI is routinely run from
 a directory the user does not control.
 
-- **`PYTRUENAS_CONFIG`** — default path for the CLI's `--config` (YAML).
-  `PYTRUENAS_CFG` is still accepted as the older spelling.
+- **`PYTRUENAS_CONFIG`** — default path for the CLI's `--config` (YAML); the
+  file must exist. `PYTRUENAS_CFG` is still accepted as the older spelling.
 - **`PYTRUENAS_PATH`** — `os.pathsep`-separated extra command source(s) for CLI
   discovery (read with `ENV.paths`, which splits on the platform separator, so
   a Windows `C:\...` entry is not mis-split on its drive colon).
