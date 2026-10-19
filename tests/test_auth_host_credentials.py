@@ -9,7 +9,7 @@ actually agree on the wire format, by feeding hostctl's own parser output in.
 import pytest
 
 from pytruenas.auth import (
-    ApiKeyAuth,
+    APIKeyAuth,
     BasicAuth,
     Credentials,
     LocalAuth,
@@ -43,7 +43,7 @@ def test_password_without_username_defaults_to_root():
 
 def test_api_key_maps_to_api_key_auth():
     cred = Credentials.from_host_credentials(api_key="1-" + "a" * 64)
-    assert isinstance(cred, ApiKeyAuth)
+    assert isinstance(cred, APIKeyAuth)
     assert cred.username is None
     # No username -> no login_ex form, so it must fall back to the legacy path.
     assert cred._login_data() is None
@@ -51,7 +51,7 @@ def test_api_key_maps_to_api_key_auth():
 
 def test_api_key_with_username_enables_login_ex():
     cred = Credentials.from_host_credentials(username="admin", api_key="k")
-    assert isinstance(cred, ApiKeyAuth)
+    assert isinstance(cred, APIKeyAuth)
     assert cred._login_data() == {
         "mechanism": "API_KEY_PLAIN",
         "username": "admin",
@@ -85,7 +85,7 @@ def test_otp_without_password_is_an_error():
     "kwargs, expected",
     [
         ({"token": "t", "api_key": "k"}, TokenAuth),
-        ({"api_key": "k", "password": "p"}, ApiKeyAuth),
+        ({"api_key": "k", "password": "p"}, APIKeyAuth),
         ({"token": "t", "password": "p"}, TokenAuth),
     ],
 )

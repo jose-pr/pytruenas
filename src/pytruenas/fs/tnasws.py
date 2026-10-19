@@ -1,7 +1,7 @@
-"""``TnasWsPath`` -- a URI path backed by the TrueNAS middleware.
+"""``TrueNASWSPath`` -- a URI path backed by the TrueNAS middleware.
 
 The TrueNAS ``filesystem.*`` websocket API is a genuine filesystem accessible
-only through the middleware connection, so ``TnasWsPath`` is a
+only through the middleware connection, so ``TrueNASWSPath`` is a
 :class:`uripath.URIPath` whose **backend** holds the
 :class:`~pytruenas.TrueNASClient`. Path I/O is implemented by calling
 ``client.api.filesystem.<op>`` (``stat``/``mkdir``/``get``/``put``/
@@ -9,7 +9,7 @@ only through the middleware connection, so ``TnasWsPath`` is a
 stays custom while local and SFTP paths are ``pathapi``'s and ``sftppath``'s.
 
 ``client.path(..., backend="tnasws")`` serves paths through one (the provider
-threads the client in via the backend); a ``TnasWsPath`` built from a bare URI
+threads the client in via the backend); a ``TrueNASWSPath`` built from a bare URI
 with no client backend raises a clear error on the first I/O call.
 """
 
@@ -31,7 +31,7 @@ from ..connection import ClientException as _ClientException
 from ..host import TrueNASClient
 from ..namespace import ioerror as _ioerror
 
-#: URI scheme(s) that resolve to :class:`TnasWsPath`. Not a real network scheme --
+#: URI scheme(s) that resolve to :class:`TrueNASWSPath`. Not a real network scheme --
 #: just a registration handle so the ``URIPath`` machinery + backend propagation
 #: work; the connection lives on the backend, not in the URI.
 _SCHEME = "truenas+ws"
@@ -67,8 +67,8 @@ _LISTDIR_NAME_ONLY = {"select": ["name"]}
 _LISTDIR_STAT = {"select": ["name", "type", "size", "mode", "uid", "gid"]}
 
 
-class TnasWsBackend:
-    """Backend state for :class:`TnasWsPath`: it just holds the client.
+class TrueNASWSBackend:
+    """Backend state for :class:`TrueNASWSPath`: it just holds the client.
 
     Mirrors the role of an SFTP backend (which holds an SSH connection); here
     the "connection" is the middleware
@@ -82,7 +82,7 @@ class TnasWsBackend:
         self.client = client
 
 
-class TnasWsPath(_URIPath):
+class TrueNASWSPath(_URIPath):
     """A path on a TrueNAS host, served by the middleware ``filesystem.*`` API."""
 
     __SCHEMES = (_SCHEME,)
@@ -99,10 +99,10 @@ class TnasWsPath(_URIPath):
     # -- backend / client access -------------------------------------------
 
     def _initbackend(self):
-        # A TnasWsPath is only useful with a client-carrying backend; one built
+        # A TrueNASWSPath is only useful with a client-carrying backend; one built
         # from a bare URI has none, so fail clearly rather than at a random attr.
         raise RuntimeError(
-            "TnasWsPath has no TrueNAS client backend; use "
+            "TrueNASWSPath has no TrueNAS client backend; use "
             'client.path(..., backend="tnasws") rather than a bare URI'
         )
 
@@ -294,7 +294,7 @@ class TnasWsPath(_URIPath):
         raise error
 
 
-def _for_host(client: "TrueNASClient", *segments: object) -> TnasWsPath:
+def _for_host(client: "TrueNASClient", *segments: object) -> TrueNASWSPath:
     """The websocket-leg path of ``segments`` on ``client``, rooted at ``/``.
 
     Joined as the host's composite path joins them (an absolute segment
@@ -306,7 +306,9 @@ def _for_host(client: "TrueNASClient", *segments: object) -> TnasWsPath:
     if not posix.startswith("/"):
         posix = "/" + posix
     host = client._config.host or "localhost"
-    root = TnasWsPath(f"{_SCHEME}://{_uri_host(host)}/", backend=TnasWsBackend(client))
+    root = TrueNASWSPath(
+        f"{_SCHEME}://{_uri_host(host)}/", backend=TrueNASWSBackend(client)
+    )
     return root.with_path(posix)
 
 
@@ -376,4 +378,4 @@ def _stat_from_info(info: "dict") -> "_FileStat":
     return result
 
 
-__all__ = ["TnasWsPath", "TnasWsBackend"]
+__all__ = ["TrueNASWSPath", "TrueNASWSBackend"]

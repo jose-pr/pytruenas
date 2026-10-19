@@ -115,13 +115,13 @@ def test_the_removed_settings_say_what_replaced_them(args, monkeypatch, tmp_path
 
 def test_credentials_come_from_the_environment_or_config(args, monkeypatch, tmp_path):
     pytest.importorskip("yaml")
-    from pytruenas.auth import ApiKeyAuth, BasicAuth
+    from pytruenas.auth import APIKeyAuth, BasicAuth
 
     assert args()._credentials_() is None
     _config(tmp_path, "credentials: root:hunter2")
     assert isinstance(args()._credentials_(), BasicAuth)
     monkeypatch.setenv("TN_CREDS", "1-" + "k" * 64)
-    assert isinstance(args()._credentials_(), ApiKeyAuth)  # env wins
+    assert isinstance(args()._credentials_(), APIKeyAuth)  # env wins
 
 
 def test_the_client_gets_them(args, monkeypatch):

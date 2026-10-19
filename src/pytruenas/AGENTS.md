@@ -9,7 +9,7 @@ self-contained. Development documentation lives with the source at
 
 **Imports.** Everything a caller needs is importable from `pytruenas`:
 `__all__ = ["Namespace", "TrueNASClient", "TrueNASConfig",
-"Credentials", "LocalAuth", "ApiKeyAuth", "TokenAuth", "BasicAuth", "Event",
+"Credentials", "LocalAuth", "APIKeyAuth", "TokenAuth", "BasicAuth", "Event",
 "Subscription", "TrueNASWSConnection", "__version__", "TrueNASError",
 "ClientException", "ValidationErrors", "CallTimeout", "ConnectionClosed",
 "JobFailed", "ConnectError", "AuthenticationError", "APIDumpError",
@@ -470,12 +470,12 @@ below raise `AttributeError` normally.
   unchanged when either half matches, so it is not rewritten on every call.
 - **`._upsert(selector=None, callback=None, *opts, **fields)`** — `._update`
   if a matching record exists, else `._create`. `callback(action, id,
-  result)` fires after the call when given: `action` is `DbAction.CREATE` or
-  `DbAction.UPDATE`, or `None` when nothing changed, and `id` is `None` after a
+  result)` fires after the call when given: `action` is `DBAction.CREATE` or
+  `DBAction.UPDATE`, or `None` when nothing changed, and `id` is `None` after a
   create (read it from `result`). Common opts: `idkey` (default `"id"`),
   `update_exclude`/`create_exclude` (field names to drop for that path),
   `wait` (wait on a returned job id; default `True`), `force`.
-- **`DbAction`** — `str` enum, `CREATE = "create"`, `UPDATE = "update"`; the
+- **`DBAction`** — `str` enum, `CREATE = "create"`, `UPDATE = "update"`; the
   mutation an `_upsert`/`_update`/`_create` resolves to.
 - **`ioerror(error: ClientException) -> Exception`** — map a middleware
   `[ENAME] message` or `[Errno N] message` error to an `OSError` with that
@@ -568,7 +568,7 @@ The synchronous JSON-RPC 2.0 websocket transport backing `TrueNASClient`
   - a single `(user, password)` list/tuple -> `BasicAuth(*it)`;
   - a single string containing `:` -> `user:password` (optionally
     `password\notp_token`) -> `BasicAuth`;
-  - a single string shaped `<numeric-id>-<64 alnum chars>` -> `ApiKeyAuth`;
+  - a single string shaped `<numeric-id>-<64 alnum chars>` -> `APIKeyAuth`;
   - any other single string -> `TokenAuth`;
   - multiple positional args -> `BasicAuth(*args)`.
   - Instantiating a `Credentials` **subclass** directly (e.g. `BasicAuth(...)`)
@@ -590,7 +590,7 @@ The synchronous JSON-RPC 2.0 websocket transport backing `TrueNASClient`
   `Credentials(env.get("TN_CREDS"))`, defaulting `env` to `os.environ`.
 - **`Credentials.from_host_credentials(...)`** — the keyword selection
   (`username`/`password`/`otp`/`api_key`/`token`) `TrueNASConfig` uses.
-- **`LocalAuth`** — no-op auth (local socket). **`ApiKeyAuth(api_key,
+- **`LocalAuth`** — no-op auth (local socket). **`APIKeyAuth(api_key,
   username=None)`** — `login_with_api_key` (legacy) / `API_KEY_PLAIN` (login_ex,
   needs `username`). **`TokenAuth(token)`** — `login_with_token` / `TOKEN_PLAIN`.
   **`BasicAuth(username, password, otp_token=None)`** — `login` /
@@ -608,10 +608,10 @@ The synchronous JSON-RPC 2.0 websocket transport backing `TrueNASClient`
 `CompositePosixPath` over the host's path providers (`sftp`, then `tnasws`, for
 a remote host; `local`, a `pathapi.LocalPath`, for the unix socket), with a
 relative path rooted at `/`. This package holds the websocket leg's path type.
-`__all__ = ["TnasWsPath", "TnasWsBackend"]`.
-- **`TnasWsPath`** (`pytruenas.fs.tnasws`) — a `uripath.URIPath` (distribution
+`__all__ = ["TrueNASWSPath", "TrueNASWSBackend"]`.
+- **`TrueNASWSPath`** (`pytruenas.fs.tnasws`) — a `uripath.URIPath` (distribution
   `pathapi-uri`; scheme `truenas+ws`) backed entirely by the middleware
-  `filesystem.*` API via a `TnasWsBackend(client)`. Implements
+  `filesystem.*` API via a `TrueNASWSBackend(client)`. Implements
   stat/listdir/open/read/write/mkdir/chmod/chown; `unlink`/`rmdir` shell out
   (`rm --` / `rmdir --`) because `filesystem.*` has no delete op, and raise
   what pathlib would: `FileNotFoundError` (unless `missing_ok`),
@@ -626,7 +626,7 @@ relative path rooted at `/`. This package holds the websocket leg's path type.
   carries `st_mode`, `st_size`, `st_uid`, `st_gid` and the times. Built from a
   bare URI (no backend) raises `RuntimeError` on first use — reach one with
   `client.path(..., backend="tnasws")`, a `CompositePosixPath` whose websocket
-  leg is a `TnasWsPath`.
+  leg is a `TrueNASWSPath`.
   Listing calls `filesystem.listdir` with an explicit `select` projection
   (`name` for `_listdir`; `name`/`type`/`size`/`mode`/`uid`/`gid` for
   `_scandir`, which seeds each child's stat in the same round trip). That is
@@ -646,14 +646,14 @@ relative path rooted at `/`. This package holds the websocket leg's path type.
   Two paths are the same filesystem (for pathapi's same-file and overlap
   guards) when their backends talk to the same client or to clients with the
   same `connection_uri` — not merely when they share a backend object.
-- **`TnasWsBackend(client)`** — the backend object `TnasWsPath` carries; just
+- **`TrueNASWSBackend(client)`** — the backend object `TrueNASWSPath` carries; just
   holds `.client`.
 
-**Segments are filesystem paths, not URIs.** `TnasWsPath` is a `URIPath`, so
+**Segments are filesystem paths, not URIs.** `TrueNASWSPath` is a `URIPath`, so
 the `tnasws` provider percent-encodes each segment into the `truenas+ws://` URI
 it builds: a name containing `?`, `#`, `%`, a space or non-ASCII survives
 `p.path` unchanged, and the host's SFTP leg is given the same decoded name.
-Constructing a `TnasWsPath` *directly* from a URI string is URI syntax — `?`
+Constructing a `TrueNASWSPath` *directly* from a URI string is URI syntax — `?`
 there really is a query; encode the path yourself if you go around
 `client.path()`.
 
@@ -665,10 +665,10 @@ consumer can compose a host of its own.
 
 - **`providers.local_providers()`** — `hostctl.local_providers()` unchanged: a
   fresh `(executor_provider, path_provider)` pair, both named `"local"`.
-- **`providers.TnasWsPathProvider(client)`** — the `filesystem.*` path provider
+- **`providers.TrueNASWSPathProvider(client)`** — the `filesystem.*` path provider
   (`"tnasws"`), which works over the API websocket with no SSH.
 - **`providers.WS_PATH_CAPABILITIES`** — the `frozenset` of path capabilities
-  `TnasWsPathProvider` declares to hostctl.
+  `TrueNASWSPathProvider` declares to hostctl.
 - **`webshell.WebShellExecutorProvider(client)`** — the `"webshell"`
   executor provider. `.session` is its `WebShellSession` (created on first
   use); `.connect()` opens it, raising `hostctl.OperationNotStartedError`

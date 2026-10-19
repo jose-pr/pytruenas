@@ -1,4 +1,4 @@
-"""TnasWsPath (the middleware filesystem.* backend) and the paths built on it.
+"""TrueNASWSPath (the middleware filesystem.* backend) and the paths built on it.
 
 All mocked -- no server. Asserts the right ``filesystem.*`` calls are made, and
 that a host path names the decoded file on every leg.
@@ -11,11 +11,16 @@ from unittest.mock import MagicMock
 import pytest
 
 from pytruenas import TrueNASClient
-from pytruenas.fs.tnasws import TnasWsBackend, TnasWsPath, _for_host, _stat_from_info
+from pytruenas.fs.tnasws import (
+    TrueNASWSBackend,
+    TrueNASWSPath,
+    _for_host,
+    _stat_from_info,
+)
 
 
 def _client(ssh=None, **fs):
-    """A fake host for a `TnasWsPath`: websocket-only by default.
+    """A fake host for a `TrueNASWSPath`: websocket-only by default.
 
     `config.ssh` is a real attribute (or a real `hostctl.SSHConfig`): a bare
     `MagicMock` would auto-vivify any attribute name.
@@ -35,12 +40,12 @@ def _ssh_config(**overrides):
     return SSHConfig(**opts)
 
 
-# -- TnasWsPath ---------------------------------------------------------------
+# -- TrueNASWSPath ---------------------------------------------------------------
 
 
 def test_stat_maps_mode_and_exists():
     client = _client(stat={"mode": 0o40755, "size": 4096, "mtime": 10})
-    p = TnasWsPath("truenas+ws://nas/etc", backend=TnasWsBackend(client))
+    p = TrueNASWSPath("truenas+ws://nas/etc", backend=TrueNASWSBackend(client))
     st = p.stat()
     assert stat.S_ISDIR(st.st_mode)
     assert p.exists() and p.is_dir()
@@ -48,7 +53,7 @@ def test_stat_maps_mode_and_exists():
 
 def test_read_and_write_bytes():
     client = _client(stat={"mode": 0o100644}, get=b"hello")
-    p = TnasWsPath("truenas+ws://nas/f.txt", backend=TnasWsBackend(client))
+    p = TrueNASWSPath("truenas+ws://nas/f.txt", backend=TrueNASWSBackend(client))
     assert p.read_bytes() == b"hello"
     p.write_bytes(b"data")
     fs = client.api.filesystem
@@ -58,7 +63,7 @@ def test_read_and_write_bytes():
 
 def test_read_write_text():
     client = _client(stat={"mode": 0o100644}, get=b"line")
-    p = TnasWsPath("truenas+ws://nas/f.txt", backend=TnasWsBackend(client))
+    p = TrueNASWSPath("truenas+ws://nas/f.txt", backend=TrueNASWSBackend(client))
     assert p.read_text() == "line"
     p.write_text("hi")
     assert client.api.filesystem.put.called
@@ -66,7 +71,7 @@ def test_read_write_text():
 
 def test_mkdir_and_chmod():
     client = _client()
-    p = TnasWsPath("truenas+ws://nas/d", backend=TnasWsBackend(client))
+    p = TrueNASWSPath("truenas+ws://nas/d", backend=TrueNASWSBackend(client))
     p.mkdir()
     assert client.api.filesystem.mkdir.call_args[0][0]["path"] == "/d"
     p.chmod(0o644)
@@ -143,7 +148,7 @@ def test_iterdir_uses_listdir():
             {"name": "sub", "mode": 0o40755, "size": 0, "mtime": 1},
         ]
     )
-    p = TnasWsPath("truenas+ws://nas/dir", backend=TnasWsBackend(client))
+    p = TrueNASWSPath("truenas+ws://nas/dir", backend=TrueNASWSBackend(client))
     names = sorted(child.name for child in p.iterdir())
     assert names == ["a", "sub"]
 
@@ -273,7 +278,7 @@ def test_iterdir_works_on_a_filesystem_without_zfs_attributes():
     supported.`, exactly as it failed live.
     """
     client = _non_zfs_client()
-    p = TnasWsPath("truenas+ws://nas/tmp", backend=TnasWsBackend(client))
+    p = TrueNASWSPath("truenas+ws://nas/tmp", backend=TrueNASWSBackend(client))
 
     children = sorted(p.iterdir(), key=lambda c: c.name)
     assert [c.name for c in children] == ["note.txt", "sub"]
@@ -288,7 +293,7 @@ def test_scandir_seeds_the_stat_it_promises_without_zfs_columns():
     for a silent one, so pin the seeded stat rather than the column list.
     """
     client = _non_zfs_client()
-    p = TnasWsPath("truenas+ws://nas/tmp", backend=TnasWsBackend(client))
+    p = TrueNASWSPath("truenas+ws://nas/tmp", backend=TrueNASWSBackend(client))
 
     seeded = dict(p._scandir())
     assert stat.S_ISDIR(seeded["sub"].st_mode)
@@ -306,7 +311,7 @@ def test_scandir_seeds_the_stat_it_promises_without_zfs_columns():
 def test_listdir_asks_only_for_the_name():
     """`_listdir` yields names, so it has no reason to pull anything else."""
     client = _non_zfs_client()
-    p = TnasWsPath("truenas+ws://nas/tmp", backend=TnasWsBackend(client))
+    p = TrueNASWSPath("truenas+ws://nas/tmp", backend=TrueNASWSBackend(client))
 
     assert sorted(p._listdir()) == ["note.txt", "sub"]
     (call,) = _listdir_calls(client)
@@ -326,7 +331,7 @@ def test_every_listing_call_projects_away_the_zfs_column(listing):
     ZFS pool as on a tmpfs, so there is never a second round trip.
     """
     client = _non_zfs_client()
-    p = TnasWsPath("truenas+ws://nas/tmp", backend=TnasWsBackend(client))
+    p = TrueNASWSPath("truenas+ws://nas/tmp", backend=TrueNASWSBackend(client))
     listing(p)
 
     calls = _listdir_calls(client)
@@ -358,7 +363,7 @@ def _removal_client(returncode=0, stderr=b"", stat=None):
 
 
 def _ws(client, path="/f"):
-    return TnasWsPath(f"truenas+ws://nas{path}", backend=TnasWsBackend(client))
+    return TrueNASWSPath(f"truenas+ws://nas{path}", backend=TrueNASWSBackend(client))
 
 
 def test_unlink_removes_without_forcing():
@@ -487,7 +492,7 @@ def _ws_only_host(**fs):
 def test_the_tnasws_provider_builds_a_plain_websocket_path():
     host = TrueNASClient("wss://nas", autologin=False)
     p = host.path("/mnt/tank/f.txt", backend="tnasws")
-    assert type(p._backend_path) is TnasWsPath
+    assert type(p._backend_path) is TrueNASWSPath
     assert p._backend_path.path == "/mnt/tank/f.txt"
 
 
@@ -538,13 +543,15 @@ def test_mkdir_default_mode_is_not_world_writable():
     Measured live: a default `mkdir()` produced a 0o777 directory.
     """
     client, sent, _ = _mkdir_client()
-    TnasWsPath("truenas+ws://nas/mnt/tank/d", backend=TnasWsBackend(client)).mkdir()
+    TrueNASWSPath(
+        "truenas+ws://nas/mnt/tank/d", backend=TrueNASWSBackend(client)
+    ).mkdir()
     assert sent == [("/mnt/tank/d", "0o755")]
 
 
 def test_mkdir_explicit_mode_is_sent_as_given():
     client, sent, _ = _mkdir_client()
-    p = TnasWsPath("truenas+ws://nas/mnt/tank/d", backend=TnasWsBackend(client))
+    p = TrueNASWSPath("truenas+ws://nas/mnt/tank/d", backend=TrueNASWSBackend(client))
     p.mkdir(mode=0o750)
     assert sent == [("/mnt/tank/d", "0o750")]
 
@@ -556,7 +563,7 @@ def test_mkdir_parents_creates_the_missing_parents():
     the call fails with ENOENT (measured live).
     """
     client, sent, dirs = _mkdir_client()
-    p = TnasWsPath("truenas+ws://nas/mnt/tank/a/b", backend=TnasWsBackend(client))
+    p = TrueNASWSPath("truenas+ws://nas/mnt/tank/a/b", backend=TrueNASWSBackend(client))
     p.mkdir(parents=True)
     assert {"/mnt/tank/a", "/mnt/tank/a/b"} <= dirs
     assert all(mode == "0o755" for _, mode in sent)
@@ -681,7 +688,7 @@ def test_path_construction_survives_uri_syntax_in_a_filename(remote):
     another file. What is pinned is the round-trip, not the encoded spelling.
     """
     p = _for_host(_path_client(), remote)
-    assert isinstance(p, TnasWsPath)
+    assert isinstance(p, TrueNASWSPath)
     assert p.path == remote
 
 
@@ -713,10 +720,10 @@ def test_an_absolute_later_segment_restarts_the_path_on_every_leg():
     """`client.path("/mnt", "/etc")` named `/etc`, while its websocket leg
     operated on `/mnt//etc` -- `unlink()` removed a different file."""
     assert _for_host(_path_client(), "/mnt", "/etc").path == "/etc"
-    from pytruenas.providers import TnasWsPathProvider
+    from pytruenas.providers import TrueNASWSPathProvider
 
     host = TrueNASClient("wss://nas.example", autologin=False)
-    assert TnasWsPathProvider(host)._make_path("/mnt", "/etc").path == "/etc"
+    assert TrueNASWSPathProvider(host)._make_path("/mnt", "/etc").path == "/etc"
 
 
 # -- symlink_to(force=) must not remove before it can create ------------------
@@ -740,7 +747,7 @@ def test_the_fs_package_has_no_second_constructor():
 
     for name in ("path", "symlink_to", "LocalPath"):
         assert not hasattr(fs, name), name
-    assert fs.__all__ == ["TnasWsPath", "TnasWsBackend"]
+    assert fs.__all__ == ["TrueNASWSPath", "TrueNASWSBackend"]
 
 
 @pytest.mark.requires("asyncssh")

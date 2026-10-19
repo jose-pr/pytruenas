@@ -826,11 +826,11 @@ def _webshell(host: "TrueNASClient"):
 
 
 def _tnasws(host: "TrueNASClient"):
-    from .providers import TnasWsPathProvider
+    from .providers import TrueNASWSPathProvider
 
     # The provider reaches the websocket lazily through the host, so building
     # it connects nothing.
-    return None, TnasWsPathProvider(_ty.cast(_ty.Any, host))
+    return None, TrueNASWSPathProvider(_ty.cast(_ty.Any, host))
 
 
 class TrueNASClient(_PosixHost, _ty.Generic[ApiVersion]):
@@ -1498,7 +1498,7 @@ class TrueNASClient(_PosixHost, _ty.Generic[ApiVersion]):
             authorized.append(pubkey)
             # `("username",)` -- a one-item SEQUENCE, not the bare string. A
             # bare `str` selector is read as a record *id* (see
-            # `DbAction.execute`); the tuple says "match on this field name",
+            # `DBAction.execute`); the tuple says "match on this field name",
             # which is what selecting root by username means.
             self.api.user._upsert(
                 ("username",), username="root", sshpubkey="\n".join(authorized)

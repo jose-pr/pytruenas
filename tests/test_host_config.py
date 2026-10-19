@@ -14,7 +14,7 @@ import pytest
 
 from hostctl.host import HostConfig  # noqa: E402
 
-from pytruenas.auth import ApiKeyAuth, BasicAuth, LocalAuth, TokenAuth  # noqa: E402
+from pytruenas.auth import APIKeyAuth, BasicAuth, LocalAuth, TokenAuth  # noqa: E402
 from pytruenas.host import (  # noqa: E402
     DEFAULT_SOCKET_PATH,
     TrueNASConfig,
@@ -236,7 +236,7 @@ def test_raw_newline_in_userinfo_is_honored():
 
 def test_explicit_credentials_argument():
     config = TrueNASConfig.from_target("wss://nas", credentials="1-" + "a" * 64)
-    assert isinstance(config.credentials, ApiKeyAuth)
+    assert isinstance(config.credentials, APIKeyAuth)
 
     config = TrueNASConfig.from_target("wss://nas", credentials=("root", "pw"))
     assert isinstance(config.credentials, BasicAuth)

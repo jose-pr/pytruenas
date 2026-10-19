@@ -11,7 +11,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from pytruenas import TrueNASClient
-from pytruenas.auth import ApiKeyAuth, BasicAuth, LocalAuth
+from pytruenas.auth import APIKeyAuth, BasicAuth, LocalAuth
 from pathapi import LocalPath
 
 
@@ -46,7 +46,7 @@ def test_creds_wired_from_target():
 
 def test_api_key_creds():
     c = TrueNASClient(None, credentials="1-" + "a" * 64, autologin=False)
-    assert isinstance(c._config.credentials, ApiKeyAuth)
+    assert isinstance(c._config.credentials, APIKeyAuth)
 
 
 def test_path_selection_local_vs_remote():

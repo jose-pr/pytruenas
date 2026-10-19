@@ -172,7 +172,7 @@ def test_a_blank_stored_public_key_falls_back_to_deriving(no_derivation):
 
 def test_root_is_selected_by_field_name_not_by_id(client):
     # `("username",)` is a one-item SEQUENCE, not the bare string "username".
-    # DbAction.execute reads a bare `str` selector as a record *id*, so the
+    # DBAction.execute reads a bare `str` selector as a record *id*, so the
     # string form would ask the middleware to update the user whose id is
     # "username" rather than the one whose username is "root".
     api = _wire(client, root_sshpubkey="ssh-rsa EXISTING other@host")

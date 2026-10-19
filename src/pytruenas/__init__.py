@@ -8,7 +8,7 @@ from __future__ import annotations
 from duho import logging as _logging  # noqa: F401  (registers the TRACE level)
 
 from .auth import (
-    ApiKeyAuth,
+    APIKeyAuth,
     BasicAuth,
     Credentials,
     LocalAuth,
@@ -45,7 +45,7 @@ __all__ = [
     "TrueNASConfig",
     "Credentials",
     "LocalAuth",
-    "ApiKeyAuth",
+    "APIKeyAuth",
     "TokenAuth",
     "BasicAuth",
     "Event",

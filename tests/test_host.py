@@ -20,7 +20,7 @@ from pytruenas.host import (  # noqa: E402
     TrueNASConfig,
     TrueNASClient,
 )
-from pytruenas.providers import TnasWsPathProvider  # noqa: E402
+from pytruenas.providers import TrueNASWSPathProvider  # noqa: E402
 
 #: A minimal SSH leg, for the cases that need one to exist.
 SSH = SSHConfig(host="nas")
@@ -97,10 +97,10 @@ def test_string_construction_takes_config_options():
 
 
 def test_string_construction_takes_credentials():
-    from pytruenas.auth import ApiKeyAuth
+    from pytruenas.auth import APIKeyAuth
 
     host = TrueNASClient("wss://nas", credentials="1-" + "a" * 64)
-    assert isinstance(host._config.credentials, ApiKeyAuth)
+    assert isinstance(host._config.credentials, APIKeyAuth)
 
 
 def test_an_existing_config_is_used_as_is():
@@ -147,7 +147,7 @@ def test_every_client_setting_is_a_keyword():
     assert config.ssh.host == "nas"
     assert config.autologin is False
     assert config.paths == ("tnasws",)
-    assert type(config.credentials).__name__ == "ApiKeyAuth"
+    assert type(config.credentials).__name__ == "APIKeyAuth"
 
 
 @pytest.mark.parametrize(
@@ -323,7 +323,7 @@ def test_path_backend_pins_every_operation_to_that_provider(monkeypatch):
     from hostctl.provider import PathProvider
     from pathapi import MemPath
 
-    from pytruenas.providers import TnasWsPathProvider
+    from pytruenas.providers import TrueNASWSPathProvider
 
     puts = []
 
@@ -334,7 +334,7 @@ def test_path_backend_pins_every_operation_to_that_provider(monkeypatch):
     host = TrueNASClient("wss://nas", autologin=False)
     memory = MemPath("/")
     first = PathProvider("sftp", lambda *segments: memory.joinpath(*segments))
-    host.replace_providers(path=(first, TnasWsPathProvider(host)))
+    host.replace_providers(path=(first, TrueNASWSPathProvider(host)))
     conn = SimpleNamespace(call=call, close=lambda: None)
     monkeypatch.setattr(TrueNASClient, "conn", property(lambda self: conn))
     monkeypatch.setattr(
@@ -604,7 +604,7 @@ def test_with_ssh_the_ssh_providers_come_first():
 
 def test_provider_types():
     host = _host()
-    assert isinstance(host.path_providers[0], TnasWsPathProvider)
+    assert isinstance(host.path_providers[0], TrueNASWSPathProvider)
 
 
 # -- capabilities are reported truthfully ----------------------------------

@@ -10,6 +10,6 @@ Generated from docstrings, organized by module:
   (`dumps`/`loads`), and the errors (`pytruenas.exceptions`): `TrueNASError`
   and its subclasses.
 - **[Auth](auth.md)** — `Credentials` and the credential types.
-- **[Filesystem](fs.md)** — `TnasWsPath`, the websocket leg of `client.path()`.
+- **[Filesystem](fs.md)** — `TrueNASWSPath`, the websocket leg of `client.path()`.
 - **[Host](host.md)** — `TrueNASClient`'s hostctl half and `TrueNASConfig`, the transport
   providers, and the web-shell executor.

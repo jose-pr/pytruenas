@@ -22,7 +22,7 @@ from pathapi import LocalPath  # noqa: E402
 
 from pytruenas.providers import (  # noqa: E402
     WS_PATH_CAPABILITIES,
-    TnasWsPathProvider,
+    TrueNASWSPathProvider,
     local_providers,
 )
 
@@ -45,11 +45,11 @@ def _client(is_local=False):
     return client
 
 
-# -- TnasWsPathProvider ----------------------------------------------------
+# -- TrueNASWSPathProvider ----------------------------------------------------
 
 
 def test_ws_path_provider_is_a_path_provider():
-    provider = TnasWsPathProvider(_client())
+    provider = TrueNASWSPathProvider(_client())
     assert isinstance(provider, PathProvider)
     assert provider.name == "tnasws"
 
@@ -58,7 +58,7 @@ def test_ws_path_provider_is_always_available():
     # The middleware socket is the client's own connection: there is no
     # separate transport that could be down.
     for is_local in (True, False):
-        assert TnasWsPathProvider(_client(is_local)).probe().usable
+        assert TrueNASWSPathProvider(_client(is_local)).probe().usable
 
 
 def test_ws_path_capabilities_exclude_what_the_api_cannot_do():
@@ -94,7 +94,7 @@ def test_ws_path_provider_always_uses_the_websocket_backend(monkeypatch):
     monkeypatch.setattr(tnasws, "_for_host", fake_path)
 
     for is_local in (True, False):
-        TnasWsPathProvider(_client(is_local=is_local)).path("/etc/hostname")
+        TrueNASWSPathProvider(_client(is_local=is_local)).path("/etc/hostname")
     assert seen == [("/etc/hostname",), ("/etc/hostname",)]
 
 
@@ -114,7 +114,7 @@ def test_ws_path_provider_builds_a_ws_path(monkeypatch):
 
     monkeypatch.setattr(tnasws, "_for_host", fake_path)
     client = _client()
-    assert TnasWsPathProvider(client).path("/etc/hosts") is sentinel
+    assert TrueNASWSPathProvider(client).path("/etc/hosts") is sentinel
     assert seen == {"client": client, "segments": ("/etc/hosts",)}
 
 
@@ -190,7 +190,7 @@ def test_executor_order_prefers_local_then_ssh():
 def test_path_selector_prefers_sftp_then_websocket():
     """SFTP is preferred and the websocket serves when it declines."""
     sftp = PathProvider("sftp", lambda *s: LocalPath("/sftp-path"))
-    ws = TnasWsPathProvider(_client())
+    ws = TrueNASWSPathProvider(_client())
 
     selector = ProviderSelector((sftp, ws))
     assert selector.select().provider is sftp

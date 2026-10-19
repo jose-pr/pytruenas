@@ -155,7 +155,7 @@ class _CredentialsMeta(type):
                     # only thing split/unpack raises here; anything else is a
                     # real bug and should surface, not be swallowed.
                     is_api_key = False
-                return ApiKeyAuth(cred) if is_api_key else TokenAuth(cred)
+                return APIKeyAuth(cred) if is_api_key else TokenAuth(cred)
         elif args:
             return BasicAuth(*args)
         else:
@@ -321,7 +321,7 @@ class Credentials(metaclass=_CredentialsMeta):
         if token:
             return TokenAuth(token)
         if api_key:
-            return ApiKeyAuth(api_key, username)
+            return APIKeyAuth(api_key, username)
         if password:
             # username defaults to root to match the rest of the stack: hostctl's
             # SSHConfig and pytruenas' own shell handling both treat a missing
@@ -348,7 +348,7 @@ class LocalAuth(Credentials):
         return []
 
 
-class ApiKeyAuth(Credentials):
+class APIKeyAuth(Credentials):
     METHOD = "login_with_api_key"
     MECHANISM = "API_KEY_PLAIN"
 
@@ -414,7 +414,7 @@ class BasicAuth(Credentials):
 __all__ = [
     "Credentials",
     "LocalAuth",
-    "ApiKeyAuth",
+    "APIKeyAuth",
     "TokenAuth",
     "BasicAuth",
     "redact_call_args",

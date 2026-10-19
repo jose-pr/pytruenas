@@ -2,4 +2,4 @@
 
 ::: pytruenas.namespace.Namespace
 
-::: pytruenas.namespace.DbAction
+::: pytruenas.namespace.DBAction

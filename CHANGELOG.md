@@ -98,6 +98,11 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   - Import them from `pytruenas` or `pytruenas.exceptions`;
     `pytruenas.connection` and `pytruenas.auth` no longer list them in
     `__all__`.
+- **CapWords names spell their acronyms in capitals.** Rename:
+  `ApiKeyAuth` → `APIKeyAuth`; `pytruenas.fs.TnasWsPath` → `TrueNASWSPath`;
+  `pytruenas.fs.TnasWsBackend` → `TrueNASWSBackend`;
+  `pytruenas.providers.TnasWsPathProvider` → `TrueNASWSPathProvider`;
+  `pytruenas.namespace.DbAction` → `DBAction`. The old names are gone.
 
 ### Added
 

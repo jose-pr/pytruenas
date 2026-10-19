@@ -1,15 +1,15 @@
-"""Namespace attribute proxy + DbAction (create/update/upsert/get) logic.
+"""Namespace attribute proxy + DBAction (create/update/upsert/get) logic.
 
 All mocked at ``client.conn.call`` -- no server. Exercises the method
 name-building, the ``_query``/``_get`` filter shaping, and the
-create/update/upsert decision tree in ``DbAction.execute``.
+create/update/upsert decision tree in ``DBAction.execute``.
 """
 
 from unittest.mock import MagicMock
 
 import pytest
 
-from pytruenas.namespace import DbAction, Namespace
+from pytruenas.namespace import DBAction, Namespace
 from pytruenas.utils import query as q
 
 
@@ -89,11 +89,11 @@ def test_get_missing_returns_none():
     assert Namespace(client, "user")._get(999) is None
 
 
-# -- DbAction.execute decision tree -------------------------------------------
+# -- DBAction.execute decision tree -------------------------------------------
 
 
 def _namespace_with(existing=None, create_ret=1, update_ret=1):
-    """A Namespace with _get/create/update/config stubbed for DbAction tests."""
+    """A Namespace with _get/create/update/config stubbed for DBAction tests."""
     client = _client()
     ns = Namespace(client, "user")
     ns._get = MagicMock(return_value=existing)
@@ -126,14 +126,14 @@ def test_update_on_absent_selector_raises_not_found():
     # FileNotFoundError (update must not create).
     ns, _ = _namespace_with(existing=None)
     with pytest.raises(FileNotFoundError):
-        DbAction.UPDATE.execute(ns, ("username",), username="ghost")
+        DBAction.UPDATE.execute(ns, ("username",), username="ghost")
 
 
 def test_create_by_explicit_action():
     # A tuple selector that resolves absent + CREATE -> create; a non-int
     # result is returned as-is (no job_wait).
     ns, _ = _namespace_with(existing=None, create_ret={"id": 42})
-    out = DbAction.CREATE.execute(ns, ("username",), username="svc")
+    out = DBAction.CREATE.execute(ns, ("username",), username="svc")
     ns.create.assert_called_once()
     assert out == {"id": 42}
 
@@ -142,7 +142,7 @@ def test_create_action_on_existing_id_raises_exists():
     # An explicit int id with CREATE (not update/upsert) is a conflict.
     ns, _ = _namespace_with()
     with pytest.raises(FileExistsError):
-        DbAction.CREATE.execute(ns, 5, username="svc")
+        DBAction.CREATE.execute(ns, 5, username="svc")
 
 
 def test_create_maps_already_exists_validation_to_file_exists():
@@ -153,7 +153,7 @@ def test_create_maps_already_exists_validation_to_file_exists():
     err.error = "user with this name already exists"
     ns.create = MagicMock(side_effect=err)
     with pytest.raises(FileExistsError):
-        DbAction.CREATE.execute(ns, ("username",), username="dup")
+        DBAction.CREATE.execute(ns, ("username",), username="dup")
 
 
 def test_no_selector_update_diffs_against_config():
@@ -161,7 +161,7 @@ def test_no_selector_update_diffs_against_config():
     # only with the changed field.
     ns, _ = _namespace_with(existing=None, update_ret=None)
     ns.config = MagicMock(return_value={"motd": "old"})
-    DbAction.UPDATE.execute(ns, None, motd="new")
+    DBAction.UPDATE.execute(ns, None, motd="new")
     ns.update.assert_called_once()
     assert ns.update.call_args[0][0] == {"motd": "new"}
 
@@ -169,13 +169,13 @@ def test_no_selector_update_diffs_against_config():
 def test_callback_receives_action_and_result():
     ns, _ = _namespace_with(existing=None, create_ret={"id": 99})
     seen = {}
-    DbAction.CREATE.execute(
+    DBAction.CREATE.execute(
         ns,
         ("username",),
         {"callback": lambda a, i, r: seen.update(action=a, result=r)},
         username="svc",
     )
-    assert seen["action"] == DbAction.CREATE
+    assert seen["action"] == DBAction.CREATE
     assert seen["result"] == {"id": 99}
 
 
@@ -183,12 +183,12 @@ def test_int_result_triggers_job_wait():
     # An int create result is treated as a job id and waited on.
     ns, client = _namespace_with(existing=None, create_ret=7)
     client.wait.return_value = {"id": 7, "done": True}
-    out = DbAction.CREATE.execute(ns, ("username",), {"wait": True}, username="svc")
+    out = DBAction.CREATE.execute(ns, ("username",), {"wait": True}, username="svc")
     client.wait.assert_called_once_with(7, callback=None)
     assert out == {"id": 7, "done": True}
 
 
-# -- DbAction over a real Namespace ------------------------------------------
+# -- DBAction over a real Namespace ------------------------------------------
 #
 # These go through the real `Namespace` with only `conn.call` faked, so the
 # assertions are about what reaches the middleware.

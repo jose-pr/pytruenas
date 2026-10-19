@@ -8,14 +8,14 @@ a plain local path. ``client.path(..., backend="tnasws")`` pins the websocket
 leg.
 
 This package holds the ``tnasws`` provider's path type,
-:class:`~pytruenas.fs.tnasws.TnasWsPath`, a real ``pathapi`` path, so every
+:class:`~pytruenas.fs.tnasws.TrueNASWSPath`, a real ``pathapi`` path, so every
 generic operation (``read_bytes``/``walk``/``glob``/``copy``/...) comes from
 ``pathapi``.
 """
 
 from __future__ import annotations
 
-from .tnasws import TnasWsBackend as TnasWsBackend
-from .tnasws import TnasWsPath as TnasWsPath
+from .tnasws import TrueNASWSBackend as TrueNASWSBackend
+from .tnasws import TrueNASWSPath as TrueNASWSPath
 
-__all__ = ["TnasWsPath", "TnasWsBackend"]
+__all__ = ["TrueNASWSPath", "TrueNASWSBackend"]

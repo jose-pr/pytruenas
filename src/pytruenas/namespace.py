@@ -60,7 +60,7 @@ _T = _ty.TypeVar("_T", bound="dict[str, object]")
 _DBSelector = _ty.Optional[_ty.Union[int, str, _ty.Sequence[str], _q._Exclude]]
 
 
-class DbAction(str, _enum.Enum):
+class DBAction(str, _enum.Enum):
     """The database mutation an ``_upsert``/``_update``/``_create`` resolves to.
 
     A ``str`` enum (``StrEnum`` is 3.11+, so this uses the 3.9-compatible
@@ -124,9 +124,9 @@ class DbAction(str, _enum.Enum):
                 result = None
             if fields:
                 result = __namespace.update(fields)
-                action = DbAction.UPDATE
+                action = DBAction.UPDATE
         elif _id not in (None, _q.EXCLUDE):
-            if __action not in (DbAction.UPDATE, DbAction.UPSERT):
+            if __action not in (DBAction.UPDATE, DBAction.UPSERT):
                 raise FileExistsError(_id)
             exclude = (idkey, *(opts.get("update_exclude") or []))
             # Drop a field only when it is a selector the record already
@@ -157,7 +157,7 @@ class DbAction(str, _enum.Enum):
 
             if fields:
                 result = __namespace.update(_id, fields)
-                action = DbAction.UPDATE
+                action = DBAction.UPDATE
             else:
                 result = None
 
@@ -166,7 +166,7 @@ class DbAction(str, _enum.Enum):
             elif result is None:
                 result = __namespace._get(_id) if not current else current
         else:
-            if __action not in (DbAction.CREATE, DbAction.UPSERT):
+            if __action not in (DBAction.CREATE, DBAction.UPSERT):
                 raise FileNotFoundError(selectors)
             exclude = (idkey, *(opts.get("create_exclude") or []))
             fields = {name: val for name, val in fields.items() if name not in exclude}
@@ -177,7 +177,7 @@ class DbAction(str, _enum.Enum):
                     raise FileExistsError(e.error)
                 else:
                     raise e
-            action = DbAction.CREATE
+            action = DBAction.CREATE
 
         wait = opts.get("wait", True)
         # `type(...) is int`, not isinstance: bool is a subclass of int, so a
@@ -431,7 +431,7 @@ class Namespace:
         __selector: _DBSelector = None,
         __callback: _ty.Optional[
             _ty.Union[
-                _ty.Callable[[DbAction, _ty.Union[str, int], dict[str, object]], None],
+                _ty.Callable[[DBAction, _ty.Union[str, int], dict[str, object]], None],
                 dict,
                 _q.Option,
                 _ty.Tuple[str, object],
@@ -446,7 +446,7 @@ class Namespace:
         elif __callback:
             opts.append(__callback)
 
-        return DbAction.UPSERT.execute(self, __selector, *opts, **__fields)
+        return DBAction.UPSERT.execute(self, __selector, *opts, **__fields)
 
     def _update(
         self,
@@ -454,14 +454,14 @@ class Namespace:
         *__opts: _ty.Union[dict, _q.Option, _ty.Tuple[str, object]],
         **__fields,
     ):
-        return DbAction.UPDATE.execute(self, __selector, *__opts, **__fields)
+        return DBAction.UPDATE.execute(self, __selector, *__opts, **__fields)
 
     def _create(
         self,
         *__opts: _ty.Union[dict, _q.Option, _ty.Tuple[str, object]],
         **__fields,
     ):
-        return DbAction.CREATE.execute(self, _q.EXCLUDE, *__opts, **__fields)
+        return DBAction.CREATE.execute(self, _q.EXCLUDE, *__opts, **__fields)
 
 
-__all__ = ["Namespace", "DbAction", "ioerror"]
+__all__ = ["Namespace", "DBAction", "ioerror"]

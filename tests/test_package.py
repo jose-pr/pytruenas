@@ -47,12 +47,12 @@ def test_public_module_declares_all(name):
 
 
 def test_the_root_declares_the_auth_classes_it_documents():
-    """`from pytruenas import ApiKeyAuth` is what the docs write; a name
+    """`from pytruenas import APIKeyAuth` is what the docs write; a name
     outside `__all__` is private to a type checker."""
     for name in (
         "Credentials",
         "LocalAuth",
-        "ApiKeyAuth",
+        "APIKeyAuth",
         "TokenAuth",
         "BasicAuth",
         "AuthenticationError",
@@ -74,3 +74,24 @@ def test_the_client_class_has_one_name():
     assert "TrueNASHost" not in pytruenas.__all__
     assert not hasattr(pytruenas, "TrueNASHost")
     assert not hasattr(pytruenas.host, "TrueNASHost")
+
+
+@pytest.mark.parametrize(
+    "module, old, new",
+    [
+        ("pytruenas", "ApiKeyAuth", "APIKeyAuth"),
+        ("pytruenas.auth", "ApiKeyAuth", "APIKeyAuth"),
+        ("pytruenas.fs", "TnasWsPath", "TrueNASWSPath"),
+        ("pytruenas.fs", "TnasWsBackend", "TrueNASWSBackend"),
+        ("pytruenas.providers", "TnasWsPathProvider", "TrueNASWSPathProvider"),
+        ("pytruenas.namespace", "DbAction", "DBAction"),
+        ("pytruenas", "ApiDumpError", "APIDumpError"),
+    ],
+)
+def test_capwords_names_spell_acronyms_in_capitals(module, old, new):
+    import importlib
+
+    mod = importlib.import_module(module)
+    assert hasattr(mod, new)
+    assert not hasattr(mod, old)
+    assert new in mod.__all__

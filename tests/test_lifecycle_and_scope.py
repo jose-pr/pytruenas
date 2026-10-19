@@ -12,7 +12,7 @@ import weakref
 import pytest
 
 from pytruenas import TrueNASClient
-from pytruenas.auth import ApiKeyAuth, BasicAuth, Credentials, LocalAuth
+from pytruenas.auth import APIKeyAuth, BasicAuth, Credentials, LocalAuth
 
 
 class _Conn:
@@ -103,7 +103,7 @@ def test_paths_and_commands_share_the_host_s_one_ssh_transport():
     "target,creds,warns",
     [
         # Credentials over plain ws to another machine: worth a line.
-        ("ws://nas", ApiKeyAuth("1-" + "k" * 64), True),
+        ("ws://nas", APIKeyAuth("1-" + "k" * 64), True),
         ("ws://nas", BasicAuth("root", "pw"), True),
         # Loopback, or no credential at all: nothing to warn about.
         ("ws://127.0.0.1:6000", BasicAuth("root", "pw"), False),

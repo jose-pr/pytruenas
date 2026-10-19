@@ -3,7 +3,7 @@
 from pathapi import LocalPath
 
 from pytruenas import TrueNASClient
-from pytruenas.fs import TnasWsPath
+from pytruenas.fs import TrueNASWSPath
 
 
 def _local_path(*segments):
@@ -20,7 +20,7 @@ def test_a_remote_client_pins_the_websocket_leg_on_request():
     p = TrueNASClient("wss://nas.example.com", autologin=False).path(
         "/mnt/tank/x", backend="tnasws"
     )
-    assert isinstance(p._backend_path, TnasWsPath)
+    assert isinstance(p._backend_path, TrueNASWSPath)
     assert p._backend_path.path == "/mnt/tank/x"
 
 

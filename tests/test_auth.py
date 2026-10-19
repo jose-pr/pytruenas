@@ -5,7 +5,7 @@ from unittest.mock import MagicMock
 import pytest
 
 from pytruenas.auth import (
-    ApiKeyAuth,
+    APIKeyAuth,
     AuthenticationError,
     BasicAuth,
     Credentials,
@@ -44,14 +44,14 @@ def test_user_password_with_otp():
 def test_api_key():
     key = "1-" + "a" * 64
     cred = Credentials(key)
-    assert isinstance(cred, ApiKeyAuth)
+    assert isinstance(cred, APIKeyAuth)
     assert cred._args() == [key]
 
 
 def test_token_fallback():
     # Not user:pass (no colon) and not an api-key shape -> token.
     cred = Credentials("sometoken")
-    assert isinstance(cred, (TokenAuth, ApiKeyAuth))
+    assert isinstance(cred, (TokenAuth, APIKeyAuth))
 
 
 def test_existing_credentials_passthrough():
@@ -95,7 +95,7 @@ def test_unsupported_credentials_error_hides_the_secret():
 @pytest.mark.parametrize(
     "kwargs,expected",
     [
-        ({"api_key": "1-" + "k" * 64}, "ApiKeyAuth"),
+        ({"api_key": "1-" + "k" * 64}, "APIKeyAuth"),
         ({"token": "tok"}, "TokenAuth"),
         ({"username": "root", "password": "pw"}, "BasicAuth"),
         ({"password": "pw"}, "BasicAuth"),
@@ -141,7 +141,7 @@ def test_from_env(monkeypatch):
 
 def test_login_method_names():
     assert LocalAuth().METHOD is None
-    assert ApiKeyAuth("1-" + "a" * 64).METHOD == "login_with_api_key"
+    assert APIKeyAuth("1-" + "a" * 64).METHOD == "login_with_api_key"
     assert TokenAuth("t").METHOD == "login_with_token"
     assert BasicAuth("u", "p").METHOD == "login"
 
@@ -211,8 +211,8 @@ def test_login_ex_token_and_apikey_data():
         "token": "tok",
     }
     # api key needs a username for login_ex; without one it falls back (None)
-    assert ApiKeyAuth("k")._login_data() is None
-    assert ApiKeyAuth("k", username="root")._login_data() == {
+    assert APIKeyAuth("k")._login_data() is None
+    assert APIKeyAuth("k", username="root")._login_data() == {
         "mechanism": "API_KEY_PLAIN",
         "username": "root",
         "api_key": "k",

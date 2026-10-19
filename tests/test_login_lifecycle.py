@@ -6,7 +6,7 @@ import time
 import pytest
 
 from pytruenas import TrueNASClient
-from pytruenas.auth import ApiKeyAuth, AuthenticationError, Credentials
+from pytruenas.auth import APIKeyAuth, AuthenticationError, Credentials
 
 
 class _Conn:
@@ -50,7 +50,7 @@ def host(monkeypatch):
 def test_a_refused_legacy_login_raises_and_closes(host, monkeypatch):
     """auth.login_with_api_key answers a wrong key with False (measured on
     26.0), which was ignored: the session stayed open and unauthenticated."""
-    creds = ApiKeyAuth("1-" + "x" * 64)
+    creds = APIKeyAuth("1-" + "x" * 64)
     monkeypatch.setattr(
         type(host), "api", property(lambda self: _Api(lambda *a: False))
     )
@@ -66,7 +66,7 @@ class _Api:
 
 def test_a_successful_legacy_login_returns_its_result(host, monkeypatch):
     monkeypatch.setattr(type(host), "api", property(lambda self: _Api(lambda *a: True)))
-    assert host.login(ApiKeyAuth("1-" + "x" * 64)) is True
+    assert host.login(APIKeyAuth("1-" + "x" * 64)) is True
 
 
 def test_a_reconnect_repeats_the_login_that_was_used(host):

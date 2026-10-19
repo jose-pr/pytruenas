@@ -1,6 +1,6 @@
 """``hostctl`` providers for a TrueNAS middleware target.
 
-Only **one** adapter is TrueNAS-specific: :class:`TnasWsPathProvider`, paths
+Only **one** adapter is TrueNAS-specific: :class:`TrueNASWSPathProvider`, paths
 served by the middleware ``filesystem.*`` API. It is deliberately thin -- it
 owns *connection* behaviour only, and leaves operating-system semantics to
 :class:`hostctl.host.PosixHost`.
@@ -68,7 +68,7 @@ WS_PATH_CAPABILITIES = frozenset(
 )
 
 
-class TnasWsPathProvider(_PathProvider):
+class TrueNASWSPathProvider(_PathProvider):
     """Paths served by the middleware ``filesystem.*`` websocket API.
 
     Always available for a connected client -- the middleware socket *is* the
@@ -112,7 +112,7 @@ def local_providers():
 
 
 __all__ = [
-    "TnasWsPathProvider",
+    "TrueNASWSPathProvider",
     "WS_PATH_CAPABILITIES",
     "local_providers",
 ]
