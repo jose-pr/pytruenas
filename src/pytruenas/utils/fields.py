@@ -26,6 +26,7 @@ import pathlib as _pathlib
 import typing as _ty
 
 from . import _schema
+from ..exceptions import FieldError
 
 #: Accepted spellings for a boolean, matching duho's own strict sets rather
 #: than Python's truthiness (``bool("false")`` is ``True``, which would be a
@@ -35,10 +36,6 @@ FALSE = frozenset({"0", "false", "no", "off", "n", "f"})
 
 #: Suffix that forces a raw JSON value: ``filters:json=[["id","=",1]]``.
 JSON_SUFFIX = ":json"
-
-
-class FieldError(ValueError):
-    """A field name or value the schema does not accept."""
 
 
 def split(token: str) -> "tuple[str, str]":

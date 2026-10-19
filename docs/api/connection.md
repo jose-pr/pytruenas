@@ -12,18 +12,10 @@ The JSON-RPC 2.0 transport to the middleware. `TrueNASWSConnection` is what
         - Event
         - dumps
         - loads
-        - ClientException
-        - ValidationErrors
-        - CallTimeout
-        - ConnectionClosed
-        - JobFailed
 
 ## Errors
 
-Every error above, and `pytruenas.auth.AuthenticationError`, derives from one
-base, exported from the package root with them:
+Every error pytruenas raises derives from one base, `TrueNASError`; all of them
+are defined in `pytruenas.exceptions` and exported from the package root.
 
 ::: pytruenas.exceptions
-    options:
-      members:
-        - TrueNASError

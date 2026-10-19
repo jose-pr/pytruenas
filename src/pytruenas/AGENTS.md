@@ -12,8 +12,9 @@ self-contained. Development documentation lives with the source at
 "Credentials", "LocalAuth", "ApiKeyAuth", "TokenAuth", "BasicAuth", "Event",
 "Subscription", "TrueNASWSConnection", "__version__", "TrueNASError",
 "ClientException", "ValidationErrors", "CallTimeout", "ConnectionClosed",
-"JobFailed", "AuthenticationError"]`, each defined in the module named in its
-section below; `redact_call_args` (from `auth`) is importable from the root
+"JobFailed", "ConnectError", "AuthenticationError", "APIDumpError",
+"UnknownMethod", "FieldError"]`, each defined in the module named in its
+section below (every error in `pytruenas.exceptions`); `redact_call_args` (from `auth`) is importable from the root
 too, outside `__all__`. The modules documented below are public. A name with a
 leading underscore is private, as are `pytruenas.utils.io` and the `_`-prefixed
 modules — with two deliberate exceptions: `Namespace`'s helpers and call
@@ -283,7 +284,7 @@ ssh=None, ...)`
   gzipped on the target**, then fetched over SFTP when the host has an SSH leg
   and in verified 256 KiB chunks through the command channel otherwise; the
   transfer is checked against the target's own sha256 and a mismatch raises
-  `utils.apicache.ApiDumpError`. It is not captured from `run()`'s stdout: the
+  `APIDumpError`. It is not captured from `run()`'s stdout: the
   dump is 24 MB on 26.0, which loses a web shell connection outright, and the
   `filesystem.get` HTTP side channel truncates it at both 23 MB and 2 MB.
   Building it costs ~75 s, so the result is cached per host and API version
@@ -546,9 +547,11 @@ The synchronous JSON-RPC 2.0 websocket transport backing `TrueNASClient`
 - **`CONNECT_TIMEOUT`** — default timeout in seconds (30) for opening a
   connection. It is not the reader's timeout: an idle connection stays open.
 - **`DEFAULT_UNIX_SOCKET`** — `"/var/run/middleware/middlewared.sock"`.
-- **`ClientException`**, **`ValidationErrors`**, **`JobFailed`**,
-  **`CallTimeout`**, **`ConnectionClosed`** — defined here; see
-  [Exceptions](#exceptions).
+- `.connect()` and the first `.call()` raise **`ConnectError`** when the HTTP
+  upgrade is refused (`.status` 404 for a wrong API path) or the handshake
+  fails, with websocket-client's exception as `__cause__`; an `OSError` (a
+  refused port, an unresolvable host, a TLS error) is raised as it is. The
+  call errors are in [Exceptions](#exceptions).
 - **`dumps(obj, **kwargs) -> str`** / **`loads(data, **kwargs)`** — JSON
   (de)serialization with the middleware's extended-type wrappers
   (`datetime`/`date`/`time`/`set`/`IPv4Interface`/`IPv6Interface`)
@@ -596,7 +599,8 @@ The synchronous JSON-RPC 2.0 websocket transport backing `TrueNASClient`
   call, safe to log: an `auth.*` method's arguments are reduced to type names;
   elsewhere a dict value under a secret-looking key (`password`, `*_token`,
   `private_key`, ...) is masked at any depth.
-- **`AuthenticationError`** — defined here; see [Exceptions](#exceptions).
+- A refused login raises **`AuthenticationError`**; see
+  [Exceptions](#exceptions).
 
 ## Remote paths (`pytruenas.fs`)
 
@@ -961,8 +965,8 @@ uses.
   source for an *older* API version, and what `generate-typings` consumes.
   Also `cache_root()` (the cache directory: `$PYTRUENAS_CACHE`, else the
   platform user cache directory), `path_for(host, version)`, `store(api,
-  path)` (atomic), `ApiDumpError` (`RuntimeError`, raised when a transfer does
-  not reproduce the target's sha256),
+  path)` (atomic); a transfer that does not reproduce the target's sha256
+  raises `APIDumpError` (a `RuntimeError` too);
   `CHUNK_SIZE`/`CHUNK_ATTEMPTS`/`CHUNK_TIMEOUT`/`DUMP_TIMEOUT`/
   `SERVICE_TIMEOUT`, and `REMOTE_DIR` (`/var/db/system` — on a data pool so it
   survives an update, and not `noexec` the way `/tmp` is). Each fetch dumps
@@ -971,7 +975,7 @@ uses.
   a timeout on purpose: the web shell waits forever by default, which turns a
   stalled channel into an indefinite hang instead of a retry.
 - **`apihelp`** — render help from a dump slice; pure functions, no client.
-  `find(version, name)` (raises `apihelp.UnknownMethod`, a `LookupError`, with
+  `find(version, name)` (raises `UnknownMethod`, a `LookupError` too, with
   near-misses), `methods(version)`, `namespaces(names)`, `parameters(method)`,
   `returns(method)`, `payload_index(method)` (the **last** object-typed
   parameter — the payload), `fields(method)` (the `--field=value` names),
@@ -990,8 +994,8 @@ uses.
   `collect(tokens, fields) -> dict` builds a payload (dotted names nest, a
   repeated name accumulates, `name:json=` takes literal JSON, `name=@file` reads
   a file); `coerce(name, schema, raw)` casts one value; `split(token)` accepts
-  both spellings via `cmd.split_assignment`; `fields.FieldError` (a
-  `ValueError`) carries the message, and an unknown name or bad enum value
+  both spellings via `cmd.split_assignment`; `FieldError` (a
+  `ValueError` too) carries the message, and an unknown name or bad enum value
   names the alternatives. `TRUE`/`FALSE` are the accepted boolean spellings —
   strict sets, because `bool("false")` is `True` and would send the wrong
   value.
@@ -999,50 +1003,65 @@ uses.
 
 ## Exceptions
 
-**`TrueNASError(Exception)`** (`pytruenas.exceptions`) is the base of every
-error pytruenas raises at run time; `except pytruenas.TrueNASError` catches all
-of these, and every one is exported from `pytruenas`:
+Every error is defined in **`pytruenas.exceptions`** and exported from
+`pytruenas`. **`TrueNASError(Exception)`** is the base of all of them, so
+`except pytruenas.TrueNASError` catches any error pytruenas raises at run time:
 
-| class (module) | raised when |
-| --- | --- |
-| `ClientException` (`connection`) | the middleware failed a call (`.errno`, `.trace`, `.extra`) |
-| `ValidationErrors` (`connection`) | the server rejected the arguments, per field |
-| `CallTimeout` (`connection`) | no answer within the timeout |
-| `ConnectionClosed` (`connection`) | the connection dropped before the answer |
-| `JobFailed` (`connection`) | a middleware job ended `FAILED`/`ABORTED` |
-| `AuthenticationError` (`auth`) | a login was refused |
+| class | builtin base too | raised when |
+| --- | --- | --- |
+| `ClientException` | — | the middleware failed a call (`.errno`, `.trace`, `.extra`) |
+| `ValidationErrors` (`ClientException`) | `ValueError` | the server rejected the arguments, per field |
+| `CallTimeout` (`ClientException`) | — | no answer within the timeout |
+| `ConnectionClosed` (`ClientException`) | — | the connection dropped before the answer |
+| `JobFailed` (`ClientException`) | — | a middleware job ended `FAILED`/`ABORTED` |
+| `ConnectError` | — | the websocket upgrade was refused or its handshake failed |
+| `AuthenticationError` | — | a login was refused |
+| `APIDumpError` | `RuntimeError` | the API definition was not fetched intact |
+| `UnknownMethod` | `LookupError` | a method name the API definition lacks |
+| `FieldError` | `ValueError` | a `--field=value` the schema refuses |
 
-- **`ClientException(error, errno=None, trace=None, extra=None)`**
-  (`TrueNASError`) — base error for any call/connection failure; `errno`
-  carries a POSIX errno when the middleware's `[ERRNO] message` prefix maps to
-  one.
-- **`ValidationErrors(errors)`** (`ClientException`) — per-field validation
-  errors; `.errors` is `list[(attribute, errmsg, errcode)]`.
-- **`JobFailed(job)`** (`ClientException`) — raised by `TrueNASClient.wait` (and
-  `job=True`, `.download`) for a `FAILED`/`ABORTED` job; `.job` is the
-  `core.get_jobs` record, `.errno` the middleware's errno when it reports one.
-- **`CallTimeout()`** (`ClientException`) — a call exceeded its timeout, or
-  `.wait(timeout=)` ran out (the job keeps running).
-- **`ConnectionClosed(sent)`** (`ClientException`, `errno` is `ECONNABORTED`) —
-  the connection closed before the response arrived. **`.sent`** is `False`
-  when the request never reached the socket (safe to repeat: `Namespace`
-  retries exactly these) and `True` when the server may have run it — a
-  create, a delete, a job start — so only the caller can decide. A plain
+No error derives `OSError`, `TimeoutError` or `ConnectionError`: path code
+reads any `OSError` from `exists()`/`is_dir()` as "not there", so a timeout
+or a dropped connection would pass for a missing file. Catch `CallTimeout` and
+`ConnectionClosed` by name.
+
+- **`ClientException(error, errno=None, trace=None, extra=None)`** — base error
+  for any call/connection failure; `errno` carries a POSIX errno when the
+  middleware's `[ERRNO] message` prefix maps to one.
+- **`ValidationErrors(errors)`** — per-field validation errors; `.errors` is
+  `list[(attribute, errmsg, errcode)]`.
+- **`JobFailed(job)`** — raised by `TrueNASClient.wait` (and `job=True`,
+  `.download`) for a `FAILED`/`ABORTED` job; `.job` is the `core.get_jobs`
+  record, `.errno` the middleware's errno when it reports one.
+- **`CallTimeout()`** — a call exceeded its timeout, or `.wait(timeout=)` ran
+  out (the job keeps running).
+- **`ConnectionClosed(sent)`** (`errno` is `ECONNABORTED`) — the connection
+  closed before the response arrived. **`.sent`** is `False` when the request
+  never reached the socket (safe to repeat: `Namespace` retries exactly these)
+  and `True` when the server may have run it — a create, a delete, a job start
+  — so only the caller can decide. A plain
   `ClientException(errno=ECONNABORTED)` carries no `.sent` and is treated as
   "may have run".
-- **`AuthenticationError(response_type, response, method="login_ex")`**
-  (`TrueNASError`) — raised by `login_ex` on a non-`SUCCESS` response and by
-  the legacy `login` on a `False` answer; `.response_type` is the server
-  discriminator, `.response` the full dict; the message names `method`.
+- **`ConnectError(message, status=None)`** — opening the websocket failed at
+  the HTTP upgrade or the websocket handshake. `.status` is the HTTP status the
+  server answered (404 for a wrong API path) or `None`; `__cause__` is
+  websocket-client's exception.
+- **`AuthenticationError(response_type, response, method="login_ex")`** —
+  raised by `login_ex` on a non-`SUCCESS` response and by the legacy `login` on
+  a `False` answer; `.response_type` is the server discriminator, `.response`
+  the full dict; the message names `method`.
+- **`APIDumpError`**, **`UnknownMethod`**, **`FieldError`** — see
+  `utils.apicache`, `utils.apihelp` and `utils.fields` above.
 
 A caller's mistake (an unknown keyword, a malformed target) is a plain
-`TypeError`/`ValueError`, not a `TrueNASError`. A failure before the websocket
-is open (a refused port, a TLS or HTTP error during the handshake) is raised by
-the socket or `websocket-client` as it is. Other exceptions, documented where
-they arise: `hostctl.MissingExtraError` (a missing extra),
-`hostctl.OperationNotStartedError` (a provider declined: `path(backend=)`, the
-web shell), `utils.apicache.ApiDumpError`, `apihelp.UnknownMethod`,
-`fields.FieldError`, `codegen.BadApiName`, and `duho.UsageError` from the CLI.
+`TypeError`/`ValueError`, not a `TrueNASError`. An `OSError` that already
+describes a failure — a refused port, an unresolvable host, a TLS error while
+connecting — is raised as it is. The side channels (`upload`, `download`)
+raise `requests`' own exceptions for an HTTP or transport error. Other
+exceptions, documented where they arise: `hostctl.MissingExtraError` (a missing
+extra), `hostctl.OperationNotStartedError` (a provider declined:
+`path(backend=)`, the web shell), `codegen.BadApiName`, and `duho.UsageError`
+from the CLI.
 
 ## Command line
 

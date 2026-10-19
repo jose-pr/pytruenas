@@ -87,7 +87,9 @@ Every error pytruenas raises at run time is a `pytruenas.TrueNASError`:
 | `CallTimeout` | no answer within the timeout |
 | `ConnectionClosed` | the connection dropped before the answer |
 | `JobFailed` | a job ended `FAILED` or `ABORTED` |
+| `ConnectError` | the websocket upgrade was refused (a wrong API path is a 404) |
 | `AuthenticationError` | a login was refused |
+| `APIDumpError` | the API definition was not fetched intact |
 
 ```python
 from pytruenas import TrueNASError, ValidationErrors
@@ -100,10 +102,12 @@ except TrueNASError as error:
     print("TrueNAS refused:", error)
 ```
 
-A mistake in the call itself — an unknown keyword, a malformed target — is a
-plain `TypeError` or `ValueError`. Because `CallTimeout` and `ConnectionClosed`
-are `OSError`s, a path's `exists()` reads them as "not there", as it does any
-`OSError`.
+All of them are defined in `pytruenas.exceptions`. `ValidationErrors` is also
+a `ValueError`. A mistake in the call itself — an unknown keyword, a malformed
+target — is a plain `TypeError` or `ValueError`. A refused port, an
+unresolvable host or a TLS error is the `OSError` it already is. No pytruenas
+error is an `OSError`, so a timeout never reads as "not there" in a path's
+`exists()`.
 
 ## Query filters
 

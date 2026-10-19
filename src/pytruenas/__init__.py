@@ -9,24 +9,26 @@ from duho import logging as _logging  # noqa: F401  (registers the TRACE level)
 
 from .auth import (
     ApiKeyAuth,
-    AuthenticationError,
     BasicAuth,
     Credentials,
     LocalAuth,
     TokenAuth,
 )
 from .auth import redact_call_args  # noqa: F401  (importable here; not in __all__)
-from .connection import (
+from .connection import Event, Subscription, TrueNASWSConnection
+from .exceptions import (
+    APIDumpError,
+    AuthenticationError,
     CallTimeout,
     ClientException,
+    ConnectError,
     ConnectionClosed,
-    Event,
+    FieldError,
     JobFailed,
-    Subscription,
-    TrueNASWSConnection,
+    TrueNASError,
+    UnknownMethod,
     ValidationErrors,
 )
-from .exceptions import TrueNASError
 from .host import TrueNASClient, TrueNASConfig
 from .namespace import Namespace
 
@@ -57,5 +59,9 @@ __all__ = [
     "CallTimeout",
     "ConnectionClosed",
     "JobFailed",
+    "ConnectError",
     "AuthenticationError",
+    "APIDumpError",
+    "UnknownMethod",
+    "FieldError",
 ]

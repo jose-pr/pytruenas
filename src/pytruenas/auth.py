@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import typing as _ty
-from .exceptions import TrueNASError as _TrueNASError
+from .exceptions import AuthenticationError
 from .utils import io as _ioutils
 
 if _ty.TYPE_CHECKING:
@@ -180,23 +180,6 @@ class _CredentialsMeta(type):
         # Mask secret-bearing values: this exception (with its args) is likely
         # to be logged, and the raw kwargs carry the password/token/api_key.
         raise ValueError("Credentials not supported", _mask_kwargs(kwargs))
-
-
-class AuthenticationError(_TrueNASError):
-    """A login was refused.
-
-    ``response_type`` is the server's discriminator (``AUTH_ERR``/``DENIED``/
-    ``EXPIRED``/…); ``response`` is the full response dict for callers that need
-    the detail (e.g. a ``REDIRECT`` target). A refused legacy login -- whose
-    only answer is ``False`` -- is ``AUTH_ERR`` with ``{"method": ...}``.
-    """
-
-    def __init__(
-        self, response_type: str, response: dict, method: str = "login_ex"
-    ) -> None:
-        super().__init__(f"{method} failed: {response_type}")
-        self.response_type = response_type
-        self.response = response
 
 
 class Credentials(metaclass=_CredentialsMeta):
@@ -434,6 +417,5 @@ __all__ = [
     "ApiKeyAuth",
     "TokenAuth",
     "BasicAuth",
-    "AuthenticationError",
     "redact_call_args",
 ]

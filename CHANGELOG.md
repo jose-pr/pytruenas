@@ -80,6 +80,24 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   each reached `auth.generate_token`/`core.download` and was refused — so a
   stray keyword is now Python's own `TypeError` naming it. Pass the method's
   parameters positionally after `method`, as before.
+- **Every error is defined in `pytruenas.exceptions` and derives
+  `TrueNASError`**, and every one is exported from `pytruenas`:
+  - `pytruenas.utils.apicache.ApiDumpError` is **`APIDumpError`** (still a
+    `RuntimeError`); `UnknownMethod` (still a `LookupError`) and `FieldError`
+    (still a `ValueError`) are `TrueNASError`s now.
+  - `ValidationErrors` is also a `ValueError`. A `try` that catches
+    `ValueError` around a middleware call now catches a server-side
+    validation failure too; catch `ValidationErrors` first if the two need
+    different handling.
+  - A refused websocket upgrade or a failed handshake (a wrong API path is a
+    404) raises **`ConnectError`** (`.status`, websocket-client's exception as
+    `__cause__`) instead of `websocket.WebSocketBadStatusException` and the
+    other websocket-client exceptions; catch `ConnectError` or
+    `TrueNASError`. A refused port, an unresolvable host and a TLS error are
+    still the `OSError`s they were.
+  - Import them from `pytruenas` or `pytruenas.exceptions`;
+    `pytruenas.connection` and `pytruenas.auth` no longer list them in
+    `__all__`.
 
 ### Added
 

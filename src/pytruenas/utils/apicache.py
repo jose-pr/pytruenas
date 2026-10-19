@@ -51,6 +51,8 @@ import re as _re
 import shlex as _shlex
 import typing as _ty
 
+from ..exceptions import APIDumpError
+
 if _ty.TYPE_CHECKING:  # pragma: no cover - typing only
     from ..host import TrueNASClient
     from ..models.apidump import Api
@@ -86,10 +88,6 @@ CLEANUP_TIMEOUT = 60
 #: default per-call timeout is 60 and a big namespace really takes longer:
 #: ``pool.dataset`` measured 36.9 s and 348 KB on 26.0.
 SERVICE_TIMEOUT = 300
-
-
-class ApiDumpError(RuntimeError):
-    """The API definition could not be fetched or did not survive the trip."""
 
 
 def cache_root() -> _pathlib.Path:
@@ -161,7 +159,7 @@ def _build_remote(client: "TrueNASClient") -> "tuple[str, int, str]":
         timeout=DUMP_TIMEOUT,
     )
     if result.returncode != 0:
-        raise ApiDumpError(
+        raise APIDumpError(
             f"middlewared --dump-api failed on the target (rc={result.returncode}): "
             f"{(result.stderr or '').strip()[:400]}"
         )
@@ -172,7 +170,7 @@ def _build_remote(client: "TrueNASClient") -> "tuple[str, int, str]":
         _re.escape(f"{REMOTE_DIR}/{_REMOTE_PREFIX}") + r"[A-Za-z0-9]+\.gz"
     )
     if len(fields) < 3 or not own_file.fullmatch(fields[0]) or not fields[1].isdigit():
-        raise ApiDumpError(
+        raise APIDumpError(
             f"could not read the dump's path, size and digest: {fields!r}"
         )
     gz, size, digest = fields[0], int(fields[1]), fields[2]
@@ -236,14 +234,14 @@ def _fetch_chunked(client: "TrueNASClient", remote: str, size: int) -> bytes:
                 ).stdout
                 chunk = _base64.b64decode(encoded)
                 if len(chunk) != count:
-                    raise ApiDumpError(
+                    raise APIDumpError(
                         f"chunk at {offset} returned {len(chunk)} of {count} bytes"
                     )
                 out += chunk
                 break
             except Exception as exc:  # noqa: BLE001, PERF203
                 if attempt == CHUNK_ATTEMPTS:
-                    raise ApiDumpError(
+                    raise APIDumpError(
                         f"chunk at offset {offset} failed after "
                         f"{CHUNK_ATTEMPTS} attempts: {exc}"
                     ) from exc
@@ -260,7 +258,7 @@ def fetch(client: "TrueNASClient", *, keep_remote: bool = False) -> "Api":
     The dump is written to a file of its own under :data:`REMOTE_DIR`, removed
     afterwards unless ``keep_remote``.
 
-    Raises :class:`ApiDumpError` when the transfer does not reproduce the
+    Raises :class:`APIDumpError` when the transfer does not reproduce the
     target's own digest -- a truncated dump parses as nothing useful and would
     otherwise be cached as if it were real.
     """
@@ -273,7 +271,7 @@ def fetch(client: "TrueNASClient", *, keep_remote: bool = False) -> "Api":
             how = "chunked"
         got = _hashlib.sha256(blob).hexdigest()
         if len(blob) != size or got != digest:
-            raise ApiDumpError(
+            raise APIDumpError(
                 f"fetched dump does not match the target ({how}): "
                 f"{len(blob)} of {size} bytes, digest "
                 f"{'matches' if got == digest else 'differs'}"

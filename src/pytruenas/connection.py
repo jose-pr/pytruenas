@@ -49,18 +49,20 @@ from time import monotonic as _monotonic
 import websocket as _websocket
 
 from . import _tls
-from .exceptions import TrueNASError as _TrueNASError
+from .exceptions import (
+    CallTimeout,
+    ClientException,
+    ConnectError,
+    ConnectionClosed,
+    JobFailed,
+    ValidationErrors,
+)
 from .utils.io import json_scalar as _json_scalar
 
 _LOGGER = _logging.getLogger("pytruenas.connection")
 
 __all__ = [
     "TrueNASWSConnection",
-    "ClientException",
-    "ValidationErrors",
-    "CallTimeout",
-    "ConnectionClosed",
-    "JobFailed",
     "CALL_TIMEOUT",
     "CONNECT_TIMEOUT",
     "Event",
@@ -175,97 +177,6 @@ def loads(data: "_ty.Union[str, bytes, bytearray]", **kwargs):
     return _json.loads(data, object_hook=_object_hook, **kwargs)
 
 
-# --------------------------------------------------------------------------
-# Exceptions
-# --------------------------------------------------------------------------
-
-
-class ClientException(_TrueNASError):
-    """Any error surfaced by a :class:`TrueNASWSConnection` call or connection.
-
-    ``errno`` carries the middleware's error number when it maps to a POSIX
-    errno (used by the filesystem layer to raise the right ``OSError``);
-    ``trace``/``extra`` carry the server-side traceback and per-field error
-    detail when present.
-    """
-
-    def __init__(
-        self,
-        error: str,
-        errno: "_ty.Optional[int]" = None,
-        trace: "_ty.Optional[object]" = None,
-        extra: "_ty.Optional[list]" = None,
-    ) -> None:
-        super().__init__(error)
-        self.error = error
-        self.errno = errno
-        self.trace = trace
-        self.extra = extra
-
-    def __str__(self) -> str:
-        return self.error
-
-
-class ValidationErrors(ClientException):
-    """A collection of per-attribute validation errors from the server.
-
-    Each entry is ``(attribute, errmsg, errcode)``. The stringified form lists
-    every attribute + message, matching how the middleware reports them.
-    """
-
-    def __init__(self, errors: "_ty.Iterable") -> None:
-        self.errors = [tuple(e) for e in errors]
-        super().__init__(str(self))
-
-    def __str__(self) -> str:
-        msgs = []
-        for attribute, errmsg, errcode in self.errors:
-            name = _errno.errorcode.get(errcode, "EUNKNOWN")
-            msgs.append(f"[{name}] {attribute or 'ALL'}: {errmsg}")
-        return "\n".join(msgs)
-
-
-class JobFailed(ClientException):
-    """A middleware job ended in ``FAILED`` or ``ABORTED``.
-
-    ``job`` is the job record from ``core.get_jobs`` (``error``,
-    ``exception``, ``exc_info``, ...); ``errno`` comes from ``exc_info`` when
-    the middleware reports one.
-    """
-
-    def __init__(self, job: dict) -> None:
-        info = job.get("exc_info") or {}
-        super().__init__(
-            job.get("error") or f"job {job.get('id')} {job.get('state', '').lower()}",
-            info.get("errno"),
-            job.get("exception"),
-            info.get("extra"),
-        )
-        self.job = job
-
-
-class CallTimeout(ClientException):
-    """Raised when a call does not return within its timeout."""
-
-    def __init__(self) -> None:
-        super().__init__("Call timeout", _errno.ETIMEDOUT)
-
-
-class ConnectionClosed(ClientException):
-    """The connection closed before a call's response arrived.
-
-    ``errno`` is ``ECONNABORTED``, as before this class existed. ``sent`` says
-    whether the request had been written to the socket: ``False`` means the
-    server never saw it and the call can safely be made again; ``True`` means
-    the server may have run it -- a create, a delete, a job start -- and only
-    the caller knows whether repeating it is safe.
-    """
-
-    def __init__(self, sent: bool) -> None:
-        super().__init__("Connection closed", _errno.ECONNABORTED)
-        self.sent = sent
-
-
 def _parse_error(error: dict) -> ClientException:
     """Turn a JSON-RPC error object into the appropriate exception."""
     code = error.get("code")
@@ -282,6 +193,17 @@ def _parse_error(error: dict) -> ClientException:
     return ClientException(
         error.get("message") or (data if isinstance(data, str) else str(code))
     )
+
+
+def _handshake_error(uri: str, error: Exception) -> ConnectError:
+    """A websocket-client handshake failure as a :class:`ConnectError`."""
+    status = getattr(error, "status_code", None)
+    message = f"could not open the websocket to {uri}: "
+    if status is not None:
+        message += f"the server answered the upgrade with HTTP {status}"
+    else:
+        message += str(error) or type(error).__name__
+    return ConnectError(message, status if isinstance(status, int) else None)
 
 
 # --------------------------------------------------------------------------
@@ -501,6 +423,9 @@ class TrueNASWSConnection:
         Blocks for at most ``connect_timeout`` (connect, TLS and the HTTP
         upgrade). A call opens the connection itself if this was not called;
         a closed connection is not reopened (:class:`ConnectionClosed`).
+        A refused upgrade or a failed handshake raises :class:`ConnectError`;
+        an ``OSError`` (a refused port, an unresolvable host, TLS) is raised
+        as it is.
         """
         with self._open_lock:
             if self._ws is None:
@@ -522,17 +447,25 @@ class TrueNASWSConnection:
             ws = _websocket.WebSocket()
             # A dummy hostname is used for the HTTP upgrade over the unix
             # socket, per the middleware docs.
-            ws.connect(
-                "ws://localhost/api/current",
-                socket=sock,
-                timeout=self.connect_timeout,
-            )
+            try:
+                ws.connect(
+                    "ws://localhost/api/current",
+                    socket=sock,
+                    timeout=self.connect_timeout,
+                )
+            except _websocket.WebSocketException as exc:
+                sock.close()
+                raise _handshake_error(self.uri, exc) from exc
             ws.settimeout(None)
             return ws
 
         # The trust decision is shared with every other leg: pytruenas._tls.
         ws = _websocket.WebSocket(sslopt=_tls.sslopt(self.verify))
-        ws.connect(self.uri, timeout=self.connect_timeout)
+        try:
+            ws.connect(self.uri, timeout=self.connect_timeout)
+        except _websocket.WebSocketException as exc:
+            ws.shutdown()
+            raise _handshake_error(self.uri, exc) from exc
         # websocket-client keeps the connect timeout as the socket's read
         # timeout; the reader blocks on recv() for as long as the connection
         # is idle, so clear it.

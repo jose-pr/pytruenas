@@ -131,7 +131,7 @@ def test_a_failed_chunk_is_retried():
 
 def test_a_chunk_that_keeps_failing_is_an_error_not_a_short_dump():
     client = FakeClient(sftp=None, chunk_failures=apicache.CHUNK_ATTEMPTS)
-    with pytest.raises(apicache.ApiDumpError, match="offset 0 failed"):
+    with pytest.raises(apicache.APIDumpError, match="offset 0 failed"):
         apicache.fetch(client)
 
 
@@ -188,7 +188,7 @@ def test_a_truncated_transfer_is_refused():
     # The HTTP side channel really did return a short read; a dump that does
     # not match the target's digest must never be returned or cached.
     client = FakeClient(sftp=FakePath(BLOB[:-20]))
-    with pytest.raises(apicache.ApiDumpError, match="does not match the target"):
+    with pytest.raises(apicache.APIDumpError, match="does not match the target"):
         apicache.fetch(client)
 
 
@@ -200,7 +200,7 @@ def test_a_failed_dump_reports_the_targets_error():
         return subprocess.CompletedProcess(cmd, 127, "", "middlewared: not found")
 
     client.run = failing
-    with pytest.raises(apicache.ApiDumpError, match="not found"):
+    with pytest.raises(apicache.APIDumpError, match="not found"):
         apicache.fetch(client)
 
 
@@ -227,7 +227,7 @@ def test_a_dump_that_does_not_name_its_file_is_refused(stdout):
     the dump's own prefix, is ever read or removed."""
     client = FakeClient(sftp=FakePath(BLOB))
     client.run = lambda cmd, **kw: subprocess.CompletedProcess(cmd, 0, stdout, "")
-    with pytest.raises(apicache.ApiDumpError, match="path, size and digest"):
+    with pytest.raises(apicache.APIDumpError, match="path, size and digest"):
         apicache.fetch(client, keep_remote=True)
 
 

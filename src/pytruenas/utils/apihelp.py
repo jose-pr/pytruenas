@@ -23,16 +23,13 @@ import textwrap as _textwrap
 import typing as _ty
 
 from . import _schema
+from ..exceptions import UnknownMethod
 
 #: Width the descriptions wrap to.
 WIDTH = 88
 
 _CALL_PARAMS = _schema.CALL_PARAMS
 _RETURN = _schema.RETURN
-
-
-class UnknownMethod(LookupError):
-    """No such method in this API definition."""
 
 
 def methods(version: "_ty.Mapping[str, _ty.Any]") -> "dict[str, dict]":
