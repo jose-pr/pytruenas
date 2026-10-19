@@ -88,7 +88,7 @@ class Args(PyTrueNASArgs):
     )
     """Where the bundled content comes from: the installed dependency closure
     (default), or a repo working tree copied as-is, filtered by ignore files.
-    Orthogonal to --mode, which decides the OUTPUT layout either way."""
+    `repo` requires `--mode dir`: a zipapp needs an importable package root."""
     ("--source",)  # type: ignore
 
     repo_root: "Arg[str, Meta(metavar='PATH')]" = "."
