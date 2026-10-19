@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import errno as _errno
 import io as _io
+import os as _os
 import stat as _stat
 import typing as _ty
 
@@ -242,15 +243,69 @@ class TnasWsPath(_URIPath):
             raise _oserror(error, self.path) from error
 
     def unlink(self, missing_ok=False):
-        # The middleware has no filesystem.unlink; deletion is not part of the
-        # filesystem.* API. Shell out on the host (the client runs commands
-        # there). A host path routes this to SFTP first when it has a leg.
-        if missing_ok and not self.exists():
+        """Remove this file or link; a directory raises ``IsADirectoryError``.
+
+        The ``filesystem.*`` API has no deletion, so this runs ``rm`` on the
+        host. A failure is re-read with ``filesystem.stat`` to raise the
+        ``OSError`` subclass pathlib would.
+        """
+        done = self.backend.client.run(("rm", "--", self.path), check=False)
+        if done.returncode == 0:
             return
-        self.backend.client.run(("rm", "-f", self.path))
+        try:
+            info = self._fs.stat(self.path, _ioerror=True)
+        except FileNotFoundError:
+            if missing_ok:
+                return
+            raise
+        if (info.get("type") or "").upper() == "DIRECTORY":
+            raise _error(_errno.EISDIR, self.path)
+        raise _command_error(done, self.path)
 
     def rmdir(self):
-        self.backend.client.run(("rmdir", self.path))
+        """Remove this empty directory, as ``rmdir`` on the host does.
+
+        Raises ``FileNotFoundError``, ``NotADirectoryError``, or ``OSError``
+        with ``ENOTEMPTY`` when it has entries.
+        """
+        done = self.backend.client.run(("rmdir", "--", self.path), check=False)
+        if done.returncode == 0:
+            return
+        info = self._fs.stat(self.path, _ioerror=True)
+        if (info.get("type") or "").upper() != "DIRECTORY":
+            raise _error(_errno.ENOTDIR, self.path)
+        error = _command_error(done, self.path)
+        if error.errno == _errno.EIO and any(self._listdir()):
+            raise _error(_errno.ENOTEMPTY, self.path)
+        raise error
+
+
+#: What ``rm``/``rmdir`` print for the errors a caller branches on. Only a
+#: fallback: a missing path or a wrong type is decided by ``filesystem.stat``.
+_STDERR_ERRNO = {
+    "Permission denied": _errno.EACCES,
+    "Operation not permitted": _errno.EPERM,
+    "Read-only file system": _errno.EROFS,
+    "Directory not empty": _errno.ENOTEMPTY,
+    "Device or resource busy": _errno.EBUSY,
+}
+
+
+def _error(code: int, path: str) -> OSError:
+    """The ``OSError`` subclass for ``code``, as the OS would raise it."""
+    return OSError(code, _os.strerror(code), path)
+
+
+def _command_error(done, path: str) -> OSError:
+    """An ``OSError`` for a failed ``rm``/``rmdir`` of ``path``."""
+    stderr = done.stderr or b""
+    if isinstance(stderr, bytes):
+        stderr = stderr.decode(errors="replace")
+    for text, code in _STDERR_ERRNO.items():
+        if text in stderr:
+            return _error(code, path)
+    message = stderr.strip() or f"{done.args!r} exited {done.returncode}"
+    return OSError(_errno.EIO, message, path)
 
 
 def _oserror(error: "_ClientException", path: str) -> OSError:

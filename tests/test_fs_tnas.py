@@ -340,11 +340,83 @@ def test_every_listing_call_projects_away_the_zfs_column(listing):
         assert "name" in select
 
 
-def test_unlink_shells_out():
+def _removal_client(returncode=0, stderr=b"", stat=None):
+    """A websocket-only host whose `rm`/`rmdir` exits `returncode`.
+
+    `stat` is what `filesystem.stat` answers afterwards; an exception instance
+    is raised instead (`FileNotFoundError` for a path that is gone).
+    """
+    import subprocess
+
     client = _client()
-    p = TnasWsPath("truenas+ws://nas/f", backend=TnasWsBackend(client))
-    p.unlink()
-    assert client.run.call_args[0][0] == ("rm", "-f", "/f")
+    client.run.side_effect = lambda cmd, **kw: subprocess.CompletedProcess(
+        cmd, returncode, b"", stderr
+    )
+    if isinstance(stat, BaseException):
+        client.api.filesystem.stat.side_effect = stat
+    else:
+        client.api.filesystem.stat.return_value = stat
+    return client
+
+
+def _ws(client, path="/f"):
+    return TnasWsPath(f"truenas+ws://nas{path}", backend=TnasWsBackend(client))
+
+
+def test_unlink_removes_without_forcing():
+    """`rm -f` exits 0 for a missing file, so it cannot report one."""
+    client = _removal_client()
+    _ws(client).unlink()
+    assert client.run.call_args[0][0] == ("rm", "--", "/f")
+    assert client.run.call_args[1]["check"] is False
+    assert not client.api.filesystem.stat.called
+
+
+def test_unlink_of_a_missing_file_raises_file_not_found():
+    gone = FileNotFoundError(2, "No such file or directory")
+    client = _removal_client(1, b"rm: cannot remove '/f': No such file", gone)
+    with pytest.raises(FileNotFoundError):
+        _ws(client).unlink()
+    _ws(client).unlink(missing_ok=True)
+
+
+def test_unlink_of_a_directory_raises_is_a_directory():
+    client = _removal_client(1, b"rm: cannot remove '/d': Is a directory", {})
+    client.api.filesystem.stat.return_value = {"type": "DIRECTORY"}
+    with pytest.raises(IsADirectoryError):
+        _ws(client, "/d").unlink()
+
+
+def test_unlink_refused_raises_permission_error():
+    client = _removal_client(
+        1, b"rm: cannot remove '/f': Permission denied", {"type": "FILE"}
+    )
+    with pytest.raises(PermissionError) as error:
+        _ws(client).unlink()
+    assert error.value.filename == "/f"
+
+
+def test_rmdir_of_a_non_empty_directory_raises_enotempty():
+    import errno
+
+    client = _removal_client(1, b"", {"type": "DIRECTORY"})
+    client.api.filesystem.listdir.return_value = [{"name": "child"}]
+    with pytest.raises(OSError) as error:
+        _ws(client, "/d").rmdir()
+    assert error.value.errno == errno.ENOTEMPTY
+    assert client.run.call_args[0][0] == ("rmdir", "--", "/d")
+
+
+def test_rmdir_of_a_file_raises_not_a_directory():
+    client = _removal_client(1, b"rmdir: failed: Not a directory", {"type": "FILE"})
+    with pytest.raises(NotADirectoryError):
+        _ws(client).rmdir()
+
+
+def test_rmdir_of_a_missing_directory_raises_file_not_found():
+    gone = FileNotFoundError(2, "No such file or directory")
+    with pytest.raises(FileNotFoundError):
+        _ws(_removal_client(1, b"", gone), "/d").rmdir()
 
 
 def test_stat_from_listdir_entry_without_mode():
