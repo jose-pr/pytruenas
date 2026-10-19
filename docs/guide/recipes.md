@@ -6,8 +6,9 @@ complete enough to paste and adapt.
 ## Connect once, reuse
 
 A client opens its websocket lazily and reconnects if the connection drops, so
-build one and keep it. As a context manager it also closes the transports it
-opened:
+build one and keep it. As a context manager it opens and authenticates the API
+connection on entry, and closes everything it opened on exit; a command or path
+transport (SSH, the web shell) opens only when first used:
 
 ```python
 from pytruenas import TrueNASClient

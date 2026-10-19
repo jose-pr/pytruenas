@@ -8,6 +8,7 @@ import gc
 import logging
 import threading
 import weakref
+from unittest.mock import MagicMock
 
 import pytest
 
@@ -215,3 +216,39 @@ def test_the_default_socket_is_unchanged():
     host = TrueNASClient(None, autologin=False)
     assert host.config.socket_path == DEFAULT_SOCKET_PATH
     assert host.config.is_local
+
+
+# -- `with TrueNASClient(...)` opens what an API script uses ------------------
+
+
+def test_entering_opens_and_authenticates_the_api_connection(monkeypatch):
+    """Entering opened the first executor -- a root web-shell PTY on a host
+    without SSH -- and left the JSON-RPC connection closed."""
+    import pytruenas.webshell as webshell
+
+    opened = []
+    monkeypatch.setattr(
+        webshell.WebShellSession, "connect", lambda self: opened.append("shell")
+    )
+    monkeypatch.setattr(webshell.WebShellSession, "close", lambda self: None)
+    logins = []
+    conn = MagicMock(_closed=MagicMock(is_set=lambda: False))
+    monkeypatch.setattr(TrueNASClient, "_openwss", lambda self: conn)
+    monkeypatch.setattr(
+        APIKeyAuth, "login", lambda self, client: logins.append(client) or True
+    )
+    with TrueNASClient("wss://nas.example", api_key="1-" + "a" * 64) as client:
+        assert client._conn is conn
+        assert logins == [client]
+        assert opened == []
+    assert conn.close.called
+
+
+def test_entering_without_autologin_opens_without_logging_in(monkeypatch):
+    conn = MagicMock(_closed=MagicMock(is_set=lambda: False))
+    monkeypatch.setattr(TrueNASClient, "_openwss", lambda self: conn)
+    monkeypatch.setattr(
+        TrueNASClient, "login", lambda self, *a, **k: pytest.fail("logged in")
+    )
+    with TrueNASClient("wss://nas.example", autologin=False) as client:
+        assert client._conn is conn

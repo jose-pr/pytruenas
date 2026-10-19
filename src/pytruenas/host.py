@@ -1111,6 +1111,16 @@ class TrueNASClient(_PosixHost, _ty.Generic[ApiVersion]):
             finalizer.detach()
         self._conn_finalizer = _weakref.finalize(self, _close_quietly, conn)
 
+    def connect(self) -> None:
+        """Open the JSON-RPC connection, logging in when ``autologin`` is set.
+
+        This is what ``with TrueNASClient(...)`` does on entry. The command and
+        path transports (SSH, the web shell, SFTP) connect when first used, so
+        an API-only script opens no shell session and dials no SSH port.
+        Raises what opening :attr:`conn` raises.
+        """
+        self.conn
+
     def _drop_conn(self, conn: "_ty.Optional[_connection.TrueNASWSConnection]") -> None:
         """Discard ``conn`` so the next :attr:`conn` access reconnects.
 

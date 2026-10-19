@@ -213,8 +213,13 @@ ssh=None, ...)`
   spent; the caller's object is unchanged), so a session that must survive a
   reconnect needs `otp_provider` — without one the reconnect raises
   `AuthenticationError("OTP_REQUIRED")`.
-- **`.close()`** — closes the transports and then the websocket; also a
-  context manager (`with TrueNASClient(...) as client:`). A client that is
+- **`.connect()`** — opens `.conn`, logging in when `autologin` is set (what
+  the first `.conn` access does); raises what that raises. Entering
+  `with TrueNASClient(...) as client:` calls it. The command and path
+  transports (SSH, the web shell, SFTP) are not opened here: each connects
+  when first used, so an API-only `with` block opens no shell session.
+- **`.close()`** — closes the transports and then the websocket; leaving the
+  `with` block calls it. A client that is
   garbage-collected without it closes its connection (socket and reader
   thread) from a finalizer, which runs whenever the collector gets to it;
   `close()` is how you decide *when*.
@@ -320,10 +325,10 @@ TrueNASClient("nas", credentials="1-...", executor=["ssh"])
 TrueNASClient()                       # the local middleware socket
 ```
 
-It is a `hostctl.PosixHost`, so `run`, `path`, `spawn`, `info`, `connect`,
-`close`, `shell`, `capabilities`, and `last_selection` are all inherited; the
-middleware surface (`api`, `conn`, `login`, `logout`, `me`, `ping`, `upload`,
-`download`, `dump_api`, `install_sshcreds`) is what this
+It is a `hostctl.PosixHost`, so `run`, `path`, `spawn`, `info`, `close`,
+`shell`, `capabilities`, and `last_selection` are all inherited; the
+middleware surface (`api`, `conn`, `connect`, `login`, `logout`, `me`, `ping`,
+`upload`, `download`, `dump_api`, `install_sshcreds`) is what this
 class adds. Generic in `ApiVersion`: `TrueNASClient[Current]("nas").api`
 completes the generated stubs.
 

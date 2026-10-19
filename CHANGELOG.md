@@ -129,6 +129,12 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   schema cannot be read (the lookup logs a WARNING and waits on nothing).
   `utils.apicache.service_methods` raises `UnknownMethod` (still a
   `LookupError`) for an unknown service.
+- **`with TrueNASClient(...)` opens the API connection, not a shell.**
+  Entering (and `client.connect()`) opens and authenticates `client.conn`;
+  it no longer opens the first command and path transports, which on a host
+  without SSH was a root web-shell session. Those connect when first used, so
+  a wrong password now fails on entry, and an SSH or web-shell problem on the
+  first `run()`/`path()` operation instead.
 
 ### Added
 
