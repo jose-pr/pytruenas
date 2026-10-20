@@ -51,28 +51,7 @@ __all__ = [
     "set_property",
     "set_readonly",
     "writable",
-    "host_path",
 ]
-
-
-def host_path(path: "_ty.Union[str, _os.PathLike[str]]") -> str:
-    """The plain filesystem path ``path`` names *on the host*.
-
-    A remote path does not always stringify to something usable in a command
-    line: ``str()`` on a ``uripath.URIPath`` gives a whole URI, and
-    ``as_posix()`` gives scp syntax (``root@nas:/usr/lib/x``). ``os.fspath()``
-    is the protocol for this: a ``client.path(...)`` composite answers with its
-    logical path, and a URI path answers with the host path when its scheme is
-    marked ``_host_filesystem_path`` -- ``sftp``, plus pytruenas' own
-    ``truenas``/``truenas+ws`` (see :mod:`pytruenas.fs.tnasws`).
-
-    A plain ``str`` passes through. Anything else raises whatever ``fspath``
-    raises: a scheme that has not opted in has no host-local path, and
-    inventing one from ``str()`` would put a URI into an argv.
-    """
-    if isinstance(path, str):
-        return path
-    return _os.fspath(path)
 
 
 LOGGER = _logging.getLogger(__name__)
@@ -119,7 +98,7 @@ def _mount_for(
     candidate = path if hasattr(path, "parent") else _PurePosixPath(path)
     tried: "list[str]" = []
     while True:
-        target = host_path(candidate)
+        target = _os.fspath(candidate)
         tried.append(target)
         # --raw: columns split by one space, a space inside a value escaped.
         # --nofsroot: a bind mount's SOURCE without the "[/subdir]" suffix,
@@ -144,7 +123,7 @@ def _mount_for(
         if result.returncode == 0 and source:
             return _unescape(fstype), _unescape(source)
         parent = candidate.parent
-        if host_path(parent) == target:  # reached "/" without an answer
+        if _os.fspath(parent) == target:  # reached "/" without an answer
             break
         candidate = parent
 
@@ -155,8 +134,13 @@ def _mount_for(
 
 
 def _unescape(value: str) -> str:
-    """Undo the ``\\xNN`` escapes of ``findmnt --raw``."""
-    return _re.sub(r"\\x([0-9a-fA-F]{2})", lambda m: chr(int(m.group(1), 16)), value)
+    """Undo the ``\\xNN`` escapes of ``findmnt --raw``: bytes of UTF-8 text."""
+    escaped = _re.sub(
+        rb"\\x([0-9a-fA-F]{2})",
+        lambda m: bytes((int(m.group(1), 16),)),
+        value.encode("utf-8", "surrogateescape"),
+    )
+    return escaped.decode("utf-8", "surrogateescape")
 
 
 #: What ``zfs get`` prints for a property that has no value set. ZFS uses this

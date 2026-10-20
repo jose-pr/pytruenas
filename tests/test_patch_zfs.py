@@ -5,6 +5,8 @@ writable because a patch raised halfway is the failure this module exists to
 prevent -- so it is tested explicitly rather than assumed from the `finally`.
 """
 
+import os
+
 import pytest
 
 from pytruenas.patch import zfs
@@ -269,17 +271,10 @@ def test_set_readonly_builds_one_argv():
     assert client.calls[-1] == ["zfs", "set", "readonly=off", "pool/ds"]
 
 
-# -- host_path ------------------------------------------------------------
+# -- os.fspath of a remote path ------------------------------------------------------------
 
 
-def test_host_path_accepts_str_and_pure_paths():
-    from pathlib import PurePosixPath
-
-    assert zfs.host_path("/usr/lib/x") == "/usr/lib/x"
-    assert zfs.host_path(PurePosixPath("/usr/lib/x")) == "/usr/lib/x"
-
-
-def test_host_path_unwraps_a_uripath_and_never_leaks_credentials():
+def test_fspath_unwraps_a_uripath_and_never_leaks_credentials():
     """A URI path renders several ways and most are wrong for argv.
 
     `str()` gives a whole URI and `as_posix()` gives scp syntax. `os.fspath()`
@@ -290,13 +285,13 @@ def test_host_path_unwraps_a_uripath_and_never_leaks_credentials():
     pytest.importorskip("sftppath.uri")
 
     path = uripath.URIPath("sftp://root:hunter2@nas/usr/lib/x.conf")
-    assert zfs.host_path(path) == "/usr/lib/x.conf"
-    assert "hunter2" not in zfs.host_path(path)
-    assert "nas" not in zfs.host_path(path)
-    assert "sftp://" not in zfs.host_path(path)
+    assert os.fspath(path) == "/usr/lib/x.conf"
+    assert "hunter2" not in os.fspath(path)
+    assert "nas" not in os.fspath(path)
+    assert "sftp://" not in os.fspath(path)
 
 
-def test_host_path_handles_pytruenas_own_path_types():
+def test_fspath_handles_pytruenas_own_path_types():
     """A `TrueNASWSPath` names a file ON the NAS, so fspath applies.
 
     It opts in via `_host_filesystem_path`; without it, fspath raises for the
@@ -305,18 +300,23 @@ def test_host_path_handles_pytruenas_own_path_types():
     from pytruenas.fs.tnasws import TrueNASWSPath
 
     path = TrueNASWSPath("truenas+ws://root:hunter2@nas/usr/lib/x.conf")
-    assert zfs.host_path(path) == "/usr/lib/x.conf"
-    assert "hunter2" not in zfs.host_path(path)
-    assert "truenas" not in zfs.host_path(path)
+    assert os.fspath(path) == "/usr/lib/x.conf"
+    assert "hunter2" not in os.fspath(path)
+    assert "truenas" not in os.fspath(path)
 
 
-def test_host_path_refuses_to_invent_a_path_for_a_non_host_scheme():
+def test_fspath_refuses_to_invent_a_path_for_a_non_host_scheme():
     """Falling back to `str()` would put a URI -- possibly with credentials --
     into an argv. Raising is the correct outcome."""
     uripath = pytest.importorskip("uripath")
 
     with pytest.raises((NotImplementedError, TypeError)):
-        zfs.host_path(uripath.URI("https://example.com/some/path"))
+        os.fspath(uripath.URI("https://example.com/some/path"))
+
+
+def test_findmnt_escapes_are_utf8_bytes():
+    """`findmnt --raw` escapes each byte of a non-ASCII name: `é` is two."""
+    assert zfs._unescape(r"/mnt/caf\xc3\xa9\x20x") == "/mnt/café x"
 
 
 def test_dataset_for_walks_up_to_an_existing_ancestor():
