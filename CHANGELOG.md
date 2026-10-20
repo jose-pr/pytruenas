@@ -6,6 +6,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-10-20
+
 ### Upgrade notes
 
 - **`sslverify=` is `verify=`**, one switch for TLS and SSH host keys alike:
@@ -1302,7 +1304,8 @@ pytruenas now runs on hostctl 0.4, which moves from `pathlib_next` to
 
 0.0.0 to 0.4.6 are in [CHANGELOG-0.x.md](https://github.com/jose-pr/pytruenas/blob/main/CHANGELOG-0.x.md).
 
-[Unreleased]: https://github.com/jose-pr/pytruenas/compare/v0.6.1...HEAD
+[Unreleased]: https://github.com/jose-pr/pytruenas/compare/v0.7.0...HEAD
+[0.7.0]: https://github.com/jose-pr/pytruenas/compare/v0.6.1...v0.7.0
 [0.6.1]: https://github.com/jose-pr/pytruenas/compare/v0.6.0...v0.6.1
 [0.6.0]: https://github.com/jose-pr/pytruenas/compare/v0.5.4...v0.6.0
 [0.5.4]: https://github.com/jose-pr/pytruenas/compare/v0.5.3...v0.5.4

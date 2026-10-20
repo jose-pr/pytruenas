@@ -8,6 +8,65 @@ user-facing; this file is the durable record.
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-10-20
+
+### What changed
+
+The API-breaking half of the review of 0.6.0: one name for each thing, one
+place for each setting, no checks or aliases for removed spellings, and the
+dependencies' own helpers where pytruenas had copies of them. Every change a
+caller has to make is under "Upgrade notes" in `CHANGELOG.md`; the ones that
+touch most code:
+
+- **One class, one constructor, one switch.** `TrueNASClient` is the only
+  name for the client; `client.path()` the only path constructor; `verify=`
+  the only TLS setting (`True` trusts the operating system through
+  truststore on 3.10+, a path is a CA bundle, an `ssl.SSLContext` is used as
+  it is, `False` turns every check off, SSH host keys included).
+- **One error hierarchy.** Every error is in `pytruenas.exceptions` under
+  `TrueNASError`, and no `requests` or websocket-client exception crosses the
+  API: a transport failure is the `OSError` beneath it, on the websocket and
+  the HTTP side channels alike.
+- **The package layout.** `pytruenas.utils` is gone: `query`, `target` and
+  `apicache` are at the root, the command line is the `pytruenas.cli`
+  package, and the rest is private. `pytruenas.models` holds TypedDicts only;
+  the `codegen` and `repo` extras are gone.
+- **The command line.** The config file is `pytruenas.cfg` in the user's
+  configuration directory, read with `anycfg.load` (a `.cfg` is the format its
+  `#!` line names, else TOML), never from the working directory;
+  `-k`/`--ca-bundle` replace `--sslverify`; `--cmdspath` is repeated, not
+  split; `generate-typings --from FILE`; `deploy` is not an MCP tool.
+- **The API definition** is pruned on the target to the version the
+  appliance runs before it is transferred: 402,171 of 2,025,242 gzipped
+  bytes on 26.0, which serves eight versions. `all_versions=True` keeps them
+  all.
+- **An idle API connection stays open**: it pings every 30 s, under the
+  middleware's 60 s limit.
+
+### Validation
+
+- Suite: 1387 passed / 17 skipped on Python 3.14 with warnings as errors,
+  1385 passed / 19 skipped on the 3.9 floor; the skips are the POSIX-shell
+  tests and the version-gated type-checker cases. The CI matrix (3.9-3.14 on
+  Linux, 3.9 and 3.14 on Windows and macOS, the declared floors, no extras,
+  black, the docs build, the benchmarks) passes at the released commit.
+- Live, against TrueNAS 26.0.0-BETA.1: the provisioning example dry-run,
+  `--apply`, and a second `--apply` that changes nothing (the appliance was
+  restored afterwards); the pruned and the whole API definition fetched and
+  timed (the running version's entry is identical, and so are the 129 stubs
+  generated from each); an idle connection open after 150 s with the
+  keepalive, closed at 60.0 s without it.
+- Known: an intermittent ResourceWarning for a socket collected unclosed,
+  seen in 2 of about 10 Windows 3.14 CI runs, with no test leaking it
+  deterministically.
+
+### Publication state
+
+Released as 0.7.0 on the owner's instruction (minor: the documented API
+broke).
+
+---
+
 ## [0.6.1] - 2026-10-20
 
 ### What changed
