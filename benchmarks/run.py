@@ -81,7 +81,9 @@ _ns = Namespace(_client_stub, "pool")
 def sample(fn, inner, repeat=REPEAT):
     """Return ms-per-call as min/median/max over `repeat` samples."""
     fn()  # warmup
-    per_call = [timeit.timeit(fn, number=inner) / inner * 1000 for _ in range(repeat)]
+    per_call = [
+        t / inner * 1000 for t in timeit.repeat(fn, number=inner, repeat=repeat)
+    ]
     return {
         "median_ms": round(statistics.median(per_call), 6),
         "min_ms": round(min(per_call), 6),

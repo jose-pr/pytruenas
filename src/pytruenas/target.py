@@ -4,6 +4,7 @@ import urllib.parse as _urlparse
 
 import netimps as _netimps
 from hostctl.uri import redact_uri as _redact_uri
+from hostctl.uri import uri_host as _uri_host
 
 # ws/wss default ports (80/443) come from netimps' built-in scheme table; no
 # system services database knows the websocket schemes, so they need no
@@ -46,12 +47,7 @@ def redact(connectionstring: str) -> str:
         # before the LAST "@" is userinfo (a raw "@" or "/" in a password
         # included); keep the user.
         return _strip_userinfo("", connectionstring)
-    try:
-        return _redact_uri(connectionstring)
-    except Exception:
-        # A malformed target must never turn a log call into a crash; fall back
-        # to dropping any ``:pass@`` run so we still don't leak.
-        return _re.sub(r"://([^/@]*):([^/@]*)@", r"://\1@", connectionstring)
+    return _redact_uri(connectionstring)
 
 
 def _strip_userinfo(prefix: str, rest: str) -> str:
@@ -146,12 +142,7 @@ class Target(_ty.NamedTuple):
                 # claim from "no password given" -- and it is what `redacted`
                 # produces, so it must render as the plain ``user@host`` form.
                 uri = f"{uri}{user}@"
-        host = self.host
-        if ":" in host and not host.startswith("["):
-            # urlsplit strips an IPv6 literal's brackets; put them back, or its
-            # colons read as a port separator.
-            host = f"[{host}]"
-        uri = f"{uri}{host}"
+        uri = f"{uri}{_uri_host(self.host)}"
         if self.port:
             uri = f"{uri}:{self.port}"
         if self.path:

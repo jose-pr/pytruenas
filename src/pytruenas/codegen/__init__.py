@@ -16,6 +16,7 @@ import typing as _ty
 from pathlib import Path as _P
 
 from duho import qualname as _qn
+from pathapi.providers import is_safe_child_name as _is_safe_child_name
 from duho import text as _text
 
 from ..exceptions import TrueNASError
@@ -133,17 +134,19 @@ def _empty_arrays(node: object) -> None:
 
 
 def _check_inside(root: _P, path: _P) -> None:
-    """Refuse a generated path that escapes ``root``.
+    """Refuse a generated path a filesystem would not take as written.
 
-    Every component of it comes from the API dump (namespace and method names),
-    so a name carrying a separator or a ``..`` would otherwise write outside the
-    output directory.
+    Every component comes from the API dump (namespace and method names): one
+    holding a separator or ``..`` would escape ``root``, and one naming a
+    Windows device (``nul``, ``con``) would write to it.
     """
     try:
-        resolved = path.resolve()
-        resolved.relative_to(root.resolve())
+        parts = path.relative_to(root).parts
     except ValueError:
         raise BadAPIName(f"{path} would be written outside {root}") from None
+    bad = [part for part in parts if not _is_safe_child_name(part, windows=True)]
+    if bad:
+        raise BadAPIName(f"{path}: {bad[0]!r} cannot be a file name")
 
 
 class BadAPIName(TrueNASError, ValueError):

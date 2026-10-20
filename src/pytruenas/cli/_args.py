@@ -29,6 +29,7 @@ from pathlib import Path as _Path
 
 import anycfg
 from duho import Arg, LoggingArgs, Meta, UsageError, expand
+from duho.config import user_path
 
 from .._utils.env import ENV
 from ..auth import Credentials
@@ -114,14 +115,11 @@ def emit_json(value: object, args: "PyTrueNASArgs | None" = None) -> None:
 def default_config_path() -> _Path:
     """Where the CLI's config file is when nothing names one.
 
-    ``pytruenas.cfg`` in the platform's configuration directory:
-    ``%APPDATA%`` on Windows, ``$XDG_CONFIG_HOME`` or ``~/.config`` elsewhere.
+    ``pytruenas.cfg`` in the platform's configuration directory (duho's
+    ``user_path``): ``%APPDATA%`` on Windows, ``$XDG_CONFIG_HOME`` or
+    ``~/.config`` elsewhere.
     """
-    if _sys.platform == "win32" and _os.environ.get("APPDATA"):
-        base = _Path(_os.environ["APPDATA"])
-    else:
-        base = _Path(_os.environ.get("XDG_CONFIG_HOME") or _Path.home() / ".config")
-    return base / "pytruenas.cfg"
+    return _Path(user_path("pytruenas.cfg"))
 
 
 _TARGETS_HELP = (

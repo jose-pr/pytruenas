@@ -191,6 +191,14 @@ def test_a_name_cannot_escape_the_output_directory(tmp_path):
     codegen._check_inside(root, root / "user" / "__init__.pyi")  # fine
 
 
+@pytest.mark.parametrize("name", ["nul", "con", "com1"])
+def test_a_name_cannot_be_a_windows_device(tmp_path, name):
+    """A valid identifier, and on Windows a write to a device."""
+    root = tmp_path / "typings"
+    with pytest.raises(codegen.BadAPIName, match=name):
+        codegen._check_inside(root, root / name / "__init__.pyi")
+
+
 def test_a_bad_name_is_a_pytruenas_error_and_a_value_error():
     from pytruenas import TrueNASError
 

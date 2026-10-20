@@ -1,6 +1,5 @@
 """Opening the web shell: every way it can fail closes the websocket it opened."""
 
-import sys
 import types
 
 import pytest
@@ -8,6 +7,7 @@ from hostctl import OperationNotStartedError
 
 from pytruenas import TrueNASClient
 from pytruenas.connection import ClientException
+import pytruenas.webshell as webshell
 from pytruenas.webshell import WebShellSession
 
 
@@ -37,7 +37,7 @@ def _connect(monkeypatch, frames, generate_token=lambda *a, **k: "tok"):
         def close(self):
             self.closed = True
 
-    monkeypatch.setitem(sys.modules, "websocket", types.SimpleNamespace(WebSocket=_WS))
+    monkeypatch.setattr(webshell._websocket, "WebSocket", _WS)
     client = TrueNASClient("wss://nas", autologin=False)
     api = types.SimpleNamespace(
         auth=types.SimpleNamespace(generate_token=generate_token)

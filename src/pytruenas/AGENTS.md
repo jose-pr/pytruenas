@@ -886,12 +886,11 @@ check=, capture_output=, encoding=)` and `client.api.<ns>.<method>(...)`. A
     as `on`/`off`), `inherit_property(client, dataset, name, *,
     received=False)`, `is_readonly`, `set_readonly`. User properties (a name
     with a colon) work throughout.
-  - `host_path(path) -> str` unwraps a path for argv through `os.fspath()`: a
-    `client.path(...)` composite gives its logical path, and a URI path gives
-    the host path when its scheme names a host filesystem (`truenas`,
-    `truenas+ws`, `sftp`); a `str` passes through. Any other scheme raises
-    rather than putting a URI into a command line. Every `path` argument in
-    `zfs` is a `str` or an `os.PathLike[str]`.
+  - Every `path` argument in `zfs` is a `str` or an `os.PathLike[str]`, put
+    into argv with `os.fspath()`: a `client.path(...)` composite gives its
+    logical path, and a URI path gives the host path when its scheme names a
+    host filesystem (`truenas`, `truenas+ws`, `sftp`). Any other scheme raises
+    rather than putting a URI into a command line.
 
 ## Typings generator (`pytruenas.codegen`)
 

@@ -57,6 +57,9 @@ import re as _re
 import shlex as _shlex
 import typing as _ty
 
+from netimps import retry as _retry
+from pathapi.providers import is_safe_child_name as _is_safe_child_name
+
 from .exceptions import APIDumpError, UnknownMethod
 
 if _ty.TYPE_CHECKING:  # pragma: no cover - typing only
@@ -124,7 +127,9 @@ def _safe_component(value: str) -> str:
     """
     keep = "-._"
     cleaned = "".join(c if (c.isalnum() or c in keep) else "_" for c in value)
-    return cleaned.strip("._") or "unknown"
+    cleaned = cleaned.strip("._") or "unknown"
+    # `nul`, `con`, `com1` would name a device on Windows.
+    return cleaned if _is_safe_child_name(cleaned, windows=True) else f"_{cleaned}"
 
 
 def path_for(host: str, version: str) -> _pathlib.Path:
@@ -252,30 +257,34 @@ def _fetch_chunked(client: "TrueNASClient", remote: str, size: int) -> bytes:
             count,
             offset,
         )
-        for attempt in range(1, CHUNK_ATTEMPTS + 1):
-            try:
-                encoded = client.run(
-                    f"tail -c +{offset + 1} < {remote} | head -c {count} | base64 -w0",
-                    capture_output=True,
-                    encoding="utf-8",
-                    timeout=CHUNK_TIMEOUT,
-                ).stdout
-                chunk = _base64.b64decode(encoded)
-                if len(chunk) != count:
-                    raise APIDumpError(
-                        f"chunk at {offset} returned {len(chunk)} of {count} bytes"
-                    )
-                out += chunk
-                break
-            except Exception as exc:  # noqa: BLE001, PERF203
-                if attempt == CHUNK_ATTEMPTS:
-                    raise APIDumpError(
-                        f"chunk at offset {offset} failed after "
-                        f"{CHUNK_ATTEMPTS} attempts: {exc}"
-                    ) from exc
-                client.logger.debug(
-                    "retrying chunk at %d (attempt %d): %s", offset, attempt, exc
+
+        def read(offset=offset, count=count) -> bytes:
+            encoded = client.run(
+                f"tail -c +{offset + 1} < {remote} | head -c {count} | base64 -w0",
+                capture_output=True,
+                encoding="utf-8",
+                timeout=CHUNK_TIMEOUT,
+            ).stdout
+            chunk = _base64.b64decode(encoded)
+            if len(chunk) != count:
+                raise APIDumpError(
+                    f"chunk at {offset} returned {len(chunk)} of {count} bytes"
                 )
+            return chunk
+
+        try:
+            out += _retry(
+                read,
+                CHUNK_ATTEMPTS,
+                retryable=(Exception,),
+                on_retry=lambda attempt, exc, wait: client.logger.debug(
+                    "retrying chunk at %d (attempt %d): %s", offset, attempt, exc
+                ),
+            )
+        except Exception as exc:  # noqa: BLE001
+            raise APIDumpError(
+                f"chunk at offset {offset} failed after {CHUNK_ATTEMPTS} attempts: {exc}"
+            ) from exc
         offset += count
     return bytes(out)
 

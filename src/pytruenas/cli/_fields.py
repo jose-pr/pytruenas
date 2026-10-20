@@ -23,14 +23,16 @@ import json as _json
 import pathlib as _pathlib
 import typing as _ty
 
+from duho.text import BOOL_FALSE as _BOOL_FALSE
+from duho.text import BOOL_TRUE as _BOOL_TRUE
+
 from .._utils import schema as _schema
 from ..exceptions import FieldError
 
-#: Accepted spellings for a boolean, matching duho's own strict sets rather
-#: than Python's truthiness (``bool("false")`` is ``True``, which would be a
-#: quietly wrong value sent to an appliance).
-TRUE = frozenset({"1", "true", "yes", "on", "y", "t"})
-FALSE = frozenset({"0", "false", "no", "off", "n", "f"})
+#: Accepted spellings for a boolean: duho's sets, without its empty "false",
+#: so ``--flag=`` is an error rather than a quiet ``false``.
+TRUE = _BOOL_TRUE
+FALSE = _BOOL_FALSE - {""}
 
 #: Suffix that forces a raw JSON value: ``filters:json=[["id","=",1]]``.
 JSON_SUFFIX = ":json"

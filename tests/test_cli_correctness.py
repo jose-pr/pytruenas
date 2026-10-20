@@ -120,3 +120,15 @@ def test_the_success_hook_is_skipped_for_a_failed_run():
         SimpleNamespace(module=module), args, "nas", logging.getLogger("t")
     )
     assert rc == 2 and calls == ["finally"]
+
+
+def test_a_logto_target_never_names_a_windows_device(tmp_path):
+    rendered = main._logto_path(str(tmp_path / "{target}.log"), "nul")
+    assert Path(rendered).name == "_nul.log"
+
+
+def test_a_cache_directory_never_names_a_windows_device(tmp_path, monkeypatch):
+    from pytruenas import apicache
+
+    monkeypatch.setenv("PYTRUENAS_CACHE", str(tmp_path))
+    assert apicache.path_for("con", "26.0").parent.name == "_con"

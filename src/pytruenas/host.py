@@ -47,6 +47,8 @@ from urllib.parse import urlencode as _urlencode
 from urllib.parse import urlsplit as _urlsplit
 
 import requests as _req
+from netimps import Backoff as _Backoff
+from netimps import is_local_host as _is_local_host
 from duho import fanout as _fanout
 from hostctl import DEFAULT as _DEFAULT
 from hostctl import PosixHost as _PosixHost
@@ -1275,10 +1277,7 @@ class TrueNASClient(_PosixHost, _ty.Generic[ApiVersion]):
             socket_path = config.socket_path or DEFAULT_SOCKET_PATH
             return _TGT("ws+unix", "", "", "", 0, socket_path, "", "")
         scheme = "ws" if config.secure is False else "wss"
-        authority = config.host
-        if ":" in authority and not authority.startswith("["):
-            # An IPv6 literal: without brackets its colons read as a port.
-            authority = f"[{authority}]"
+        authority = _uri_host(config.host)
         if config.port:
             authority = f"{authority}:{config.port}"
         api_path = config.api_path or f"/api/{config.version}"
@@ -1615,7 +1614,7 @@ class TrueNASClient(_PosixHost, _ty.Generic[ApiVersion]):
         import time as _time
 
         deadline = None if timeout is None else _time.monotonic() + timeout
-        delay = poll
+        backoff = _Backoff(poll, max_delay=max_poll)
         last = None
         while True:
             found = self.api.core.get_jobs([["id", "=", job_id]])
@@ -1625,14 +1624,14 @@ class TrueNASClient(_PosixHost, _ty.Generic[ApiVersion]):
             seen = (job.get("state"), _js.dumps(job.get("progress"), default=str))
             if seen != last:
                 last = seen
-                delay = poll
+                backoff.reset()
                 yield job
             if job.get("state") in self.JOB_DONE:
                 return
-            if deadline is not None and _time.monotonic() + delay > deadline:
+            if deadline is not None and _time.monotonic() + backoff.delay > deadline:
                 raise _connection.CallTimeout()
-            _time.sleep(delay)
-            delay = min(delay * 2, max_poll)
+            _time.sleep(backoff.delay)
+            backoff.advance()
 
     def wait(
         self,
@@ -1852,8 +1851,7 @@ class TrueNASClient(_PosixHost, _ty.Generic[ApiVersion]):
         config = self._config
         if config.is_local or config.secure is not False:
             return
-        host = (config.host or "").lower()
-        if host in _LOCAL_HOSTS or host in ("::1", "[::1]"):
+        if _is_local_host(config.host or "localhost"):
             return
         if creds is None or isinstance(creds, _auth.LocalAuth):
             return

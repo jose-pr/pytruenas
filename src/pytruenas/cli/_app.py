@@ -26,6 +26,8 @@ import duho.runpath as _runpath
 from duho import AUTO, Cli, UsageError, command_name, parse_globals, run
 from duho import logging as _logging
 from duho.discovery import ModuleCommand, discover_commands
+from duho.parsers import insert_action, pop_action
+from pathapi.providers import is_safe_child_name as _is_safe_child_name
 from duho.fanout import current_target, run_targets
 from duho.runpath import RunPathCmd
 from duho.runtime import accepts_positional
@@ -200,16 +202,12 @@ def _targets_last(parser: "_ty.Any") -> None:
     positional the hook adds would otherwise come after the hosts. A hook that
     added its own ``targets`` keeps that one.
     """
-    found = [action for action in parser._actions if action.dest == "targets"]
-    if not found:
+    try:
+        declared = pop_action(parser, "targets")
+    except KeyError:
         return
-    declared = found[0]
-    groups = [group._group_actions for group in parser._action_groups]
-    for container in [parser._actions, *groups]:
-        if declared in container:
-            container.remove(declared)
-            if len(found) == 1:
-                container.append(declared)
+    if not any(action.dest == "targets" for action in parser._actions):
+        insert_action(parser, declared)
 
 
 def _discover(
@@ -286,7 +284,9 @@ def _logto_path(template: str, shown: str) -> str:
     """
 
     def _safe(value: str) -> str:
-        return "".join("_" if ch in _ILLEGAL_IN_FILENAME else ch for ch in value)
+        value = "".join("_" if ch in _ILLEGAL_IN_FILENAME else ch for ch in value)
+        # `nul`, `con`, `com1` would name a device on Windows.
+        return value if _is_safe_child_name(value, windows=True) else f"_{value}"
 
     now = _dt.datetime.now().isoformat(timespec="seconds")
     return template.format(target=_safe(shown), isodate=_safe(now))

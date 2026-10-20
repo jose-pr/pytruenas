@@ -53,6 +53,7 @@ import re as _re
 import threading as _threading
 import typing as _ty
 
+import websocket as _websocket
 from hostctl.console import (
     ConsoleExecutor as _ConsoleExecutor,
     PosixConsoleProfile as _PosixConsoleProfile,
@@ -65,6 +66,7 @@ from hostctl.provider import (
     ProviderSelector as _ProviderSelector,
 )
 
+from . import _tls
 from .host import TrueNASClient
 
 #: Terminal escape sequences a PTY emits around real output.
@@ -130,7 +132,7 @@ class _WebSocketStream:
             try:
                 data = self._ws.recv()
             except Exception as exc:
-                if type(exc).__name__ == "WebSocketTimeoutException":
+                if isinstance(exc, _websocket.WebSocketTimeoutException):
                     return b""
                 raise ConnectionError(
                     f"web shell connection lost: {type(exc).__name__}"
@@ -185,13 +187,6 @@ class WebShellSession:
         with self._lock:
             if self._ws is not None:
                 return self._ws
-            try:
-                import websocket as _websocket
-            except ImportError as exc:  # pragma: no cover - dependency present
-                raise ImportError("the web shell requires websocket-client") from exc
-
-            from . import _tls
-
             # The same trust as the API websocket -- see pytruenas._tls.
             ws = _websocket.WebSocket(sslopt=_tls.sslopt(self.client.config.verify))
             ws.connect(self._uri(), timeout=CONNECT_TIMEOUT)

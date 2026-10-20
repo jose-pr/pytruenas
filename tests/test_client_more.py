@@ -458,7 +458,6 @@ def test_verify_is_one_value_for_every_transport():
 
 def _webshell_sslopt(monkeypatch, **kwargs) -> dict:
     """Run WebShellSession.connect() against a stub and report the sslopt used."""
-    import sys
     import types
 
     from pytruenas.webshell import WebShellSession
@@ -486,9 +485,9 @@ def _webshell_sslopt(monkeypatch, **kwargs) -> dict:
                 return self.frames.pop()
             raise TimeoutError
 
-    monkeypatch.setitem(
-        sys.modules, "websocket", types.SimpleNamespace(WebSocket=_StubWS)
-    )
+    import pytruenas.webshell as webshell
+
+    monkeypatch.setattr(webshell._websocket, "WebSocket", _StubWS)
 
     client = TrueNASClient("wss://nas", autologin=False, **kwargs)
     # The token call is the only real I/O left in connect(); stub the API leg.
