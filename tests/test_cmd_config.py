@@ -140,3 +140,15 @@ def test_expanded_targets_comma_and_range():
     args = PyTrueNASArgs()
     args.targets = ["nas1,nas2", "web[1-2]"]
     assert args._expanded_targets_() == ["nas1", "nas2", "web1", "web2"]
+
+
+def test_a_bom_is_dropped_and_bad_utf8_is_a_usage_error(tmp_path):
+    """anycfg decodes the file: strictly UTF-8, one BOM ignored."""
+    good = tmp_path / "pytruenas.cfg"
+    good.write_bytes(b'\xef\xbb\xbf#!json\n{"credentials": "root:pw"}\n')
+    assert _cmd.load_config(good) == {"credentials": "root:pw"}
+    bad = tmp_path / "bad.cfg"
+    bad.write_bytes(b'credentials = "\xff"\n')
+    with pytest.raises(UsageError, match="utf-8") as raised:
+        _cmd.load_config(bad)
+    assert str(bad) in str(raised.value)

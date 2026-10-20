@@ -161,17 +161,12 @@ def load_config(path: "_ty.Union[str, _os.PathLike[str]]") -> dict:
     from anycfg import formats
     from duho import UsageError
 
+    # Read here, not with anycfg.load(path): that picks the format from the
+    # suffix alone, where `.cfg` is INI and a `#!` line is not consulted.
+    # anycfg decodes the bytes (UTF-8, strictly, one BOM dropped).
     path = _Path(path)
     raw = path.read_bytes()
-    try:
-        text = raw.decode("utf-8")
-    except UnicodeDecodeError as error:
-        raise UsageError(
-            f"config file {path}: not UTF-8 at byte {error.start}"
-        ) from None
-    if text.startswith("\ufeff"):
-        text = text[1:]
-    declared, _ = formats.declared(text)
+    declared, _ = formats.declared(raw)
     try:
         chosen = formats.get(declared or _format_for(path) or "toml").name
     except anycfg.UnsupportedFormatError as error:
@@ -182,7 +177,7 @@ def load_config(path: "_ty.Union[str, _os.PathLike[str]]") -> dict:
             f"write it as {', '.join(CONFIG_FORMATS)}"
         )
     try:
-        data = anycfg.loads(text) if declared else anycfg.loads(text, format=chosen)
+        data = anycfg.loads(raw) if declared else anycfg.loads(raw, format=chosen)
     except anycfg.MissingDependencyError as exc:
         from hostctl import MissingExtraError
 
