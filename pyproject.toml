@@ -68,15 +68,14 @@ dependencies = [
     # on `hostctl.deploy`, whose extra brings packaging and pathspec (and tomli
     # below Python 3.11).
     "hostctl[deploy]>=0.4.0,<0.5",
-    # The CLI's config file, TOML unless a `#!<format>` line or the file name
-    # says otherwise; TOML is read by tomllib, before Python 3.11 by tomli.
-    "anycfg>=0.14.0,<0.15",
-    "tomli>=2.0,<3; python_version < '3.11'",
+    # The CLI's config file. 0.15.0: its `cfg` format reads the format a
+    # `#!<format>` line names, else TOML, and it brings tomli below 3.11.
+    "anycfg>=0.15.0,<0.16",
 ]
 
 [project.optional-dependencies]
 # A CLI config file written in YAML (`#!yaml`, `.yaml`/`.yml`).
-yaml = ["anycfg[yaml]>=0.14.0,<0.15"]
+yaml = ["anycfg[yaml]>=0.15.0,<0.16"]
 # Remote shell + SFTP filesystem leg: both SSH providers are hostctl's (its
 # `ssh` extra is asyncssh and sftppath).
 ssh = ["hostctl[ssh]>=0.4.0,<0.5"]

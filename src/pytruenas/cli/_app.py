@@ -29,6 +29,7 @@ from duho.discovery import ModuleCommand, discover_commands
 from duho.fanout import current_target, run_targets
 from duho.runpath import RunPathCmd
 from duho.runtime import accepts_positional
+from anycfg import ConfigError as _ConfigError
 from hostctl.exceptions import MissingExtraError as _MissingExtraError
 
 from ..host import TrueNASConfig
@@ -688,14 +689,9 @@ def main(
             description=root.__doc__,
             dispatch=_dispatch,
         )
-    except _MissingExtraError as exc:
-        # Raised before any target runs (reading the config file): one line
-        # and the status a target's missing extra gets.
-        print(f"{name}: {exc}", file=_sys.stderr)
-        return _MISSING_EXTRA_STATUS
-    except UsageError as exc:
+    except (UsageError, _ConfigError) as exc:
         # Raised by discovery, before duho's own error reporting is in place
-        # (a --config file that does not exist): reported the way duho reports
-        # one raised by a command.
+        # (a --config file that does not exist, or does not read): reported
+        # the way duho reports one raised by a command.
         print(f"{name}: error: {exc}", file=_sys.stderr)
-        return exc.code
+        return getattr(exc, "code", 2)

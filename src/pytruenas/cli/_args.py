@@ -118,85 +118,29 @@ def emit_json(value: object, args: "PyTrueNASArgs | None" = None) -> None:
 if _ty.TYPE_CHECKING:
     from ..host import TrueNASClient
 
-#: The formats a config file may be written in; anycfg reads others too, but
-#: their documents are not a table of settings (INI is sections of strings).
-CONFIG_FORMATS = ("toml", "yaml", "json")
-
 
 def default_config_path() -> _Path:
     """Where the CLI's config file is when nothing names one.
 
-    ``pytruenas/pytruenas.cfg`` in the platform's configuration directory:
+    ``pytruenas.cfg`` in the platform's configuration directory:
     ``%APPDATA%`` on Windows, ``$XDG_CONFIG_HOME`` or ``~/.config`` elsewhere.
     """
     if _sys.platform == "win32" and _os.environ.get("APPDATA"):
         base = _Path(_os.environ["APPDATA"])
     else:
         base = _Path(_os.environ.get("XDG_CONFIG_HOME") or _Path.home() / ".config")
-    return base / "pytruenas" / "pytruenas.cfg"
-
-
-def _format_for(path: _Path) -> "_ty.Optional[str]":
-    """The format a file name selects; ``.cfg`` and no suffix select none."""
-    if path.suffix.lower() in ("", ".cfg"):
-        return None
-    from anycfg import formats
-
-    found = formats.find_for_filename(path.name)
-    return found.name if found is not None else None
+    return base / "pytruenas.cfg"
 
 
 def load_config(path: "_ty.Union[str, _os.PathLike[str]]") -> dict:
-    """The settings in the CLI's config file at ``path``, read by anycfg.
+    """The settings in the CLI's config file at ``path``: ``anycfg.load(path)``.
 
-    The format is the one a ``#!<format>`` first line names (``#!toml``,
-    ``#!yaml``, ``#!json``, also ``#!/usr/bin/env yaml``; the line is not part
-    of the document), else the one the file name's suffix selects (``.toml``,
-    ``.yaml``/``.yml``, ``.json``; ``.cfg`` and no suffix select none), else
-    TOML. YAML needs the ``yaml`` extra (:class:`hostctl.MissingExtraError`
-    naming it otherwise). A document that does not parse, is not a table, or
-    is in another format raises :class:`duho.UsageError` naming the file.
+    The suffix picks the format; a ``.cfg`` file is the format its ``#!<format>``
+    first line names, else TOML. Raises ``anycfg.ConfigError``.
     """
     import anycfg
-    from anycfg import formats
-    from duho import UsageError
 
-    # Read here, not with anycfg.load(path): that picks the format from the
-    # suffix alone, where `.cfg` is INI and a `#!` line is not consulted.
-    # anycfg decodes the bytes (UTF-8, strictly, one BOM dropped).
-    path = _Path(path)
-    raw = path.read_bytes()
-    declared, _ = formats.declared(raw)
-    try:
-        chosen = formats.get(declared or _format_for(path) or "toml").name
-    except anycfg.UnsupportedFormatError as error:
-        raise UsageError(f"config file {path}: {error}") from None
-    if chosen not in CONFIG_FORMATS:
-        raise UsageError(
-            f"config file {path}: a {chosen} document is not supported; "
-            f"write it as {', '.join(CONFIG_FORMATS)}"
-        )
-    try:
-        data = anycfg.loads(raw) if declared else anycfg.loads(raw, format=chosen)
-    except anycfg.MissingDependencyError as exc:
-        from hostctl import MissingExtraError
-
-        raise MissingExtraError(
-            chosen, f"reading the config file {path}", distribution="pytruenas"
-        ) from exc
-    except anycfg.ParseError as error:
-        where = f" line {error.lineno}:" if error.lineno else ""
-        raise UsageError(f"config file {path}:{where} {error.msg}") from None
-    except anycfg.ConfigError as error:
-        raise UsageError(f"config file {path}: {error}") from None
-    if data is None:
-        return {}
-    if not isinstance(data, dict):
-        raise UsageError(
-            f"config file {path}: expected a table of settings, "
-            f"got {type(data).__name__}"
-        )
-    return data
+    return anycfg.load(path) or {}
 
 
 _TARGETS_HELP = (
@@ -277,7 +221,7 @@ class PyTrueNASArgs(LoggingArgs):
     # `None` until resolved by `_config_path_()`, so `$PYTRUENAS_CONFIG` is
     # read when the file is needed, not when this module is imported.
     config: "Arg[_ty.Optional[_Path], Meta(metavar='FILE')]" = None
-    "Config file (default: $PYTRUENAS_CONFIG, else pytruenas/pytruenas.cfg in the user's config directory)"
+    "Config file (default: $PYTRUENAS_CONFIG, else pytruenas.cfg in the user's config directory)"
     ("--config", "-c")  # type: ignore
 
     # Repeated, never split: a separator character would cut a Windows

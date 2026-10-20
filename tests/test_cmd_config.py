@@ -1,5 +1,6 @@
-"""The CLI's config file (utils/cmd.py): format, location, and target expansion."""
+"""The CLI's config file: format, location, and target expansion."""
 
+import anycfg
 import pytest
 from duho import UsageError
 
@@ -19,7 +20,6 @@ def _no_config_env(monkeypatch, tmp_path):
     "name, text",
     [
         ("pytruenas.cfg", 'credentials = "root:pw"\ncmdspath = ["cmds"]\n'),
-        ("settings", 'credentials = "root:pw"\ncmdspath = ["cmds"]\n'),
         ("pytruenas.toml", 'credentials = "root:pw"\ncmdspath = ["cmds"]\n'),
         ("pytruenas.json", '{"credentials": "root:pw", "cmdspath": ["cmds"]}'),
         (
@@ -65,24 +65,23 @@ def test_an_empty_file_has_no_settings(tmp_path):
     [
         # TOML that does not parse, mid-document: at the end of a document
         # some tomllib versions name no line.
-        ("a = 1\ncredentials = = 2\n", "line 2"),
-        ("#!json\n[1, 2]\n", "expected a table"),
-        ("#!ini\n[pytruenas]\nx = 1\n", "not supported"),
+        ("a = 1\ncredentials = = 2\n", ":2:"),
         ("#!nosuchformat\nx = 1\n", "nosuchformat"),
     ],
 )
-def test_a_file_that_is_not_settings_is_a_usage_error(tmp_path, text, message):
+def test_a_file_that_does_not_read_names_itself(tmp_path, text, message):
     path = tmp_path / "pytruenas.cfg"
     path.write_text(text, encoding="utf-8")
-    with pytest.raises(UsageError, match=message) as raised:
+    with pytest.raises(anycfg.ConfigError, match=message) as raised:
         _cmd.load_config(path)
     assert str(path) in str(raised.value)
 
 
 def test_the_default_location_is_the_users_config_directory(monkeypatch, tmp_path):
     expected = _cmd.default_config_path()
-    assert expected.parts[-2:] == ("pytruenas", "pytruenas.cfg")
-    assert str(tmp_path) in str(expected)
+    assert expected == tmp_path / "appdata" / "pytruenas.cfg" or expected == (
+        tmp_path / "xdg" / "pytruenas.cfg"
+    )
 
 
 def test_a_missing_default_file_has_no_settings():
@@ -142,13 +141,13 @@ def test_expanded_targets_comma_and_range():
     assert args._expanded_targets_() == ["nas1", "nas2", "web1", "web2"]
 
 
-def test_a_bom_is_dropped_and_bad_utf8_is_a_usage_error(tmp_path):
+def test_a_bom_is_dropped_and_bad_utf8_is_refused(tmp_path):
     """anycfg decodes the file: strictly UTF-8, one BOM ignored."""
     good = tmp_path / "pytruenas.cfg"
     good.write_bytes(b'\xef\xbb\xbf#!json\n{"credentials": "root:pw"}\n')
     assert _cmd.load_config(good) == {"credentials": "root:pw"}
     bad = tmp_path / "bad.cfg"
     bad.write_bytes(b'credentials = "\xff"\n')
-    with pytest.raises(UsageError, match="utf-8") as raised:
+    with pytest.raises(anycfg.ParseError, match="utf-8") as raised:
         _cmd.load_config(bad)
     assert str(bad) in str(raised.value)

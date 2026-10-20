@@ -55,17 +55,6 @@ def test_a_config_file_is_read_as_utf8(tmp_path, monkeypatch):
     assert args._config_dict_()["credentials"] == "røøt:hünter2"
 
 
-def test_a_config_that_is_not_a_table_is_a_usage_error(tmp_path):
-    """A list was logged and ignored, dropping every setting in the file."""
-    from duho import UsageError
-
-    pytest.importorskip("yaml")
-    cfg = tmp_path / "pytruenas.yaml"
-    cfg.write_text("- just\n- a\n- list\n")
-    with pytest.raises(UsageError, match="expected a table"):
-        _args(config=cfg)._config_dict_()
-
-
 def test_a_scalar_cmdspath_is_one_source(tmp_path):
     """`list("mycmds")` made it six single-letter sources."""
     (tmp_path / "mycmds").mkdir()

@@ -59,38 +59,36 @@ def test_a_plain_import_error_is_not_mapped():
 # -- pytruenas's own extras --------------------------------------------------
 
 
-def test_a_yaml_config_file_without_pyyaml_names_pytruenas_yaml(tmp_path, monkeypatch):
+def test_a_yaml_config_file_without_pyyaml_names_the_extra(tmp_path, monkeypatch):
     import sys
+
+    import anycfg
 
     from pytruenas.cli import _args as cmd
 
     monkeypatch.setitem(sys.modules, "yaml", None)
     cfg = tmp_path / "pytruenas.yaml"
     cfg.write_bytes(b"credentials: x\n")
-    with pytest.raises(MissingExtraError) as caught:
+    with pytest.raises(anycfg.MissingDependencyError, match="yaml") as caught:
         cmd.load_config(cfg)
-    assert caught.value.distribution == "pytruenas"
-    assert 'pip install "pytruenas[yaml]"' in str(caught.value)
     assert str(cfg) in str(caught.value)
 
 
-def test_the_cli_reports_a_missing_config_extra_in_one_line(
+def test_the_cli_reports_an_unreadable_config_in_one_line(
     tmp_path, monkeypatch, capsys
 ):
     """The config file is read before any target runs, so `main()` itself
-    maps the error: one line on stderr and the status a target gets."""
+    reports it: one line on stderr, a usage error's status."""
     import sys
 
     monkeypatch.setitem(sys.modules, "yaml", None)
     cfg = tmp_path / "pytruenas.yaml"
     cfg.write_bytes(b"credentials: x\n")
     status = main.main(argv=["--config", str(cfg), "call", "system.info", "nas"])
-    assert status == 125
-    err = capsys.readouterr().err
-    assert err.splitlines() == [
-        f"pytruenas: reading the config file {cfg} needs the 'yaml' extra: "
-        'pip install "pytruenas[yaml]"'
-    ]
+    assert status == 2
+    err = capsys.readouterr().err.splitlines()
+    assert len(err) == 1 and err[0].startswith("pytruenas: error: ")
+    assert "yaml" in err[0] and str(cfg) in err[0]
 
 
 def test_deriving_a_public_key_without_asyncssh_names_pytruenas_ssh(monkeypatch):
