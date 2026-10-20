@@ -210,6 +210,12 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - **`deploy` is not an MCP tool** under `PYTRUENAS_MCP=stdio`: installing
   software on an appliance is for a person to choose. The command line is
   unchanged.
+- **`client.dump_api()` returns the API version the appliance runs, not every
+  version it serves**: the dump is pruned on the target before the transfer,
+  so `"versions"` has one entry. Pass `all_versions=True` (CLI: `dump-api
+  --all-versions`) for all of them; `generate-typings --api-version` and
+  `help --api-version` do so themselves. `apicache.load()`/`fetch()` take the
+  same keyword.
 - **The `repo` extra is gone**: `deploy --source repo` needs nothing beyond
   the core install, which already carries `hostctl[deploy]`. Drop `[repo]`
   from a requirement.

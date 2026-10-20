@@ -292,16 +292,22 @@ executor=None, path=None, ssh=None, ...)`
   `ConnectionRefusedError`, `TimeoutError` while connecting), `CallTimeout`
   for a read that timed out, `ClientException` for an HTTP error status. A
   message never names a token (`auth_token=<redacted>`).
-- **`.dump_api(*, cache=True, refresh=False) -> dict`** — the middleware API
-  definition (see `pytruenas.models.apidump.API`). The dump is built **and
-  gzipped on the target**, then fetched over SFTP when the host has an SSH leg
+- **`.dump_api(*, cache=True, refresh=False, all_versions=False) -> dict`** —
+  the middleware API definition (see `pytruenas.models.apidump.API`). It holds
+  the API version the appliance runs, as the one entry of `"versions"`; the
+  dump is pruned to it on the target, before the transfer (402 KB of 2 MB
+  gzipped on 26.0, which serves eight versions). `all_versions=True` keeps every
+  version, the current one first and the rest in no particular order; a failed
+  prune also yields every version. The dump is built **and gzipped on the
+  target**, then fetched over SFTP when the host has an SSH leg
   and in verified 256 KiB chunks through the command channel otherwise; the
   transfer is checked against the target's own sha256 and a mismatch raises
   `APIDumpError`. It is not captured from `run()`'s stdout: the
   dump is 24 MB on 26.0, which loses a web shell connection outright, and the
   `filesystem.get` HTTP side channel truncates it at both 23 MB and 2 MB.
   Building it costs ~75 s, so the result is cached per host and API version
-  under `$PYTRUENAS_CACHE`; `cache=False` skips the cache entirely (and with it
+  under `$PYTRUENAS_CACHE` (the current version and every version apart; a
+  cached whole dump also answers for the current version); `cache=False` skips the cache entirely (and with it
   the `system.info()` version lookup), `refresh=True` re-fetches and overwrites.
   A full `core.get_methods()` is **not** an alternative — the server closes the
   websocket on it, and there is no per-method accessor.
@@ -1010,8 +1016,11 @@ Fetch and cache the API definition, two ways.
   **service**, not method name — `core.get_methods("user.create")` returns `{}` —
   and the unfiltered call is not usable at all, because the server closes the
   websocket on that payload.
-- **The whole definition:** `load(client, *, refresh=False, version=None) -> API`
-  and `fetch(client, *, keep_remote=False)`, via `middlewared --dump-api`. Needs
+- **The whole definition:** `load(client, *, refresh=False, version=None,
+  all_versions=False) -> API` and `fetch(client, *, keep_remote=False,
+  all_versions=False)`, via `middlewared --dump-api`, pruned on the target to
+  the current API version unless `all_versions` (`PRUNE` is the `python3 -c`
+  filter it runs there; a filter that fails leaves every version). Needs
   command access and weighs 24 MB, so it is the fallback — but it is the only
   source for an *older* API version, and what `generate-typings` consumes.
   Also `cache_root()` (the cache directory: `$PYTRUENAS_CACHE`, else the
@@ -1232,7 +1241,8 @@ and **`load_config(path) -> dict`** / **`default_config_path() -> Path`**
   definition, never generated stubs: a `.pyi` carries names and types only, while
   descriptions, defaults, enum values and required-ness exist solely in the
   definition the stubs are generated from.
-- **`dump-api [targets...]`** — prints `client.dump_api()` as JSON.
+- **`dump-api [--all-versions] [targets...]`** — prints `client.dump_api()`
+  as JSON: the current API version, or with `--all-versions` every one.
 - **`generate-typings [--api-version V] [--path DIR] [--from FILE]
   [targets...]`** — reads the API definition (`client.dump_api()`, cached per
   host and version, or with `--from` a dump file — `dump-api` output, or a

@@ -155,6 +155,11 @@ otherwise. It is ~24 MB on 26.0 and takes about 75 s to produce, so it is cached
 per host and API version under `$PYTRUENAS_CACHE` and shared with `help` and
 `generate-typings`.
 
+It holds the API version the appliance runs. The appliance serves older ones
+too — eight on 26.0, five times the bytes — and the dump is pruned to the
+current one on the target before anything is transferred; `--all-versions`
+keeps them all.
+
 ### `generate-typings` — build `.pyi` stubs
 
 See [Generating typings](typings.md).

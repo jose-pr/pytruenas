@@ -16,14 +16,16 @@ Options:
   `truenasapi_typings/current`). A previous output (it carries a
   `.pytruenas-typings` marker) is replaced; any other directory that is not
   empty is refused rather than emptied — hand-written stubs included.
-- `--api-version VERSION` — target a specific API version (e.g. `v26.0.0`);
-  defaults to the newest version in the dump.
+- `--api-version VERSION` — target a specific API version (e.g. `v25.10.2`);
+  defaults to the one the appliance runs. Naming one fetches every version the
+  appliance serves (about five times the bytes on 26.0); without it only the
+  current one is transferred.
 - `--from FILE` — read the API definition from a dump file instead of the
   host: `pytruenas dump-api` output, or a gzipped file from
   `$PYTRUENAS_CACHE`. Nothing connects. Without it, the definition comes
   from `client.dump_api()`, which caches it per host and API version.
 
-The generator dumps the whole API and writes one `.pyi` per namespace (about
+The generator dumps the API and writes one `.pyi` per namespace (about
 129 files for a TrueNAS 26.0 host). The test suite generates stubs from a small
 fixture dump and from a set of unusual schema shapes, compiles them, and
 type-checks them and calls against them with pyright and mypy; it does not run
