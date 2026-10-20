@@ -265,3 +265,131 @@ def test_store_leaves_no_partial_file(tmp_path, monkeypatch):
     apicache.store(API, cache)
     assert cache.exists()
     assert not list(cache.parent.glob("*.part"))
+
+
+# -- pruning on the target ----------------------------------------------------
+
+WHOLE = {
+    "versions": [
+        {"version": "v26.0.0", "methods": [{"name": "a"}], "events": []},
+        {"version": "v24.10", "methods": [], "events": []},
+        {"version": "v25.10.2", "methods": [{"name": "b"}], "events": []},
+    ]
+}
+
+
+def test_prune_keeps_the_current_version_in_the_same_envelope(tmp_path):
+    """The first entry is the version the appliance runs (the rest are not in
+    version order), so that is the one kept."""
+    import sys
+
+    dump = tmp_path / "dump"
+    dump.write_text(json.dumps(WHOLE))
+    subprocess.run([sys.executable, "-c", apicache.PRUNE, str(dump)], check=True)
+    pruned = json.loads((tmp_path / "dump.pruned").read_text())
+    assert pruned == {"versions": [WHOLE["versions"][0]]}
+    assert json.loads(dump.read_text()) == WHOLE  # the original is untouched
+
+
+def test_only_the_default_fetch_prunes():
+    pruned = apicache._dump_command()
+    whole = apicache._dump_command(all_versions=True)
+    assert "python3 -c" in pruned and "python3" not in whole
+    assert "'" not in apicache.PRUNE  # it is single-quoted on the target
+
+
+def _posix_sh():
+    import shutil
+    import sys
+
+    if sys.platform == "win32":
+        return None
+    return shutil.which("sh")
+
+
+@pytest.mark.skipif(_posix_sh() is None, reason="needs a POSIX shell")
+@pytest.mark.parametrize("prune_works", [True, False])
+def test_the_target_command_prunes_or_falls_back_to_the_whole_dump(
+    tmp_path, prune_works
+):
+    """A prune that fails must leave a complete dump, never fail the fetch."""
+    import os
+    import sys
+
+    bin_dir = tmp_path / "bin"
+    bin_dir.mkdir()
+    source = tmp_path / "whole.json"
+    source.write_text(json.dumps(WHOLE))
+    (bin_dir / "middlewared").write_text(f"#!/bin/sh\ncat '{source}'\n")
+    python3 = (
+        f'#!/bin/sh\nexec "{sys.executable}" "$@"\n'
+        if prune_works
+        else "#!/bin/sh\nexit 3\n"
+    )
+    (bin_dir / "python3").write_text(python3)
+    for tool in bin_dir.iterdir():
+        tool.chmod(0o755)
+    work = tmp_path / "work"
+    work.mkdir()
+    out = subprocess.run(
+        [_posix_sh(), "-c", apicache._dump_command(str(work))],
+        capture_output=True,
+        text=True,
+        env={**os.environ, "PATH": f"{bin_dir}{os.pathsep}{os.environ['PATH']}"},
+        check=True,
+    ).stdout.split()
+    gz, size = out[0], int(out[1])
+    blob = open(gz, "rb").read()
+    assert len(blob) == size and hashlib.sha256(blob).hexdigest() == out[2]
+    expected = {"versions": WHOLE["versions"][:1]} if prune_works else WHOLE
+    assert json.loads(gzip.decompress(blob)) == expected
+    assert [p.name for p in work.iterdir()] == [os.path.basename(gz)]
+
+
+class WholeDumpClient(FakeClient):
+    """A target whose dump holds every version unless the command prunes."""
+
+    def __init__(self):
+        self.pruned = gzip.compress(
+            json.dumps({"versions": WHOLE["versions"][:1]}).encode()
+        )
+        self.whole = gzip.compress(json.dumps(WHOLE).encode())
+        super().__init__(sftp=None)
+
+    def run(self, cmd, **kwargs):
+        if "--dump-api" in cmd:
+            self._blob = self.pruned if "python3" in cmd else self.whole
+            digest = hashlib.sha256(self._blob).hexdigest()
+            self.commands.append(cmd)
+            out = f"{REMOTE_GZ}\n{len(self._blob)}\n{digest}\n"
+            return subprocess.CompletedProcess(cmd, 0, out, "")
+        return super().run(cmd, **kwargs)
+
+
+def test_load_caches_the_current_version_and_the_whole_dump_apart(
+    tmp_path, monkeypatch
+):
+    monkeypatch.setenv("PYTRUENAS_CACHE", str(tmp_path))
+    client = WholeDumpClient()
+    current = apicache.load(client)
+    assert [v["version"] for v in current["versions"]] == ["v26.0.0"]
+    assert apicache.path_for("nas1", "26.0.0-BETA.1").exists()
+
+    every = apicache.load(client, all_versions=True)
+    assert every == WHOLE
+    assert (tmp_path / "nas1" / "26.0.0-BETA.1.all.json.gz").exists()
+
+    # Both are cache hits now.
+    client.commands.clear()
+    assert apicache.load(client) == current
+    assert apicache.load(client, all_versions=True) == WHOLE
+    assert client.commands == []
+
+
+def test_a_cached_whole_dump_answers_for_the_current_version(tmp_path, monkeypatch):
+    monkeypatch.setenv("PYTRUENAS_CACHE", str(tmp_path))
+    client = WholeDumpClient()
+    apicache.load(client, all_versions=True)
+    client.commands.clear()
+    assert apicache.load(client) == {"versions": WHOLE["versions"][:1]}
+    assert client.commands == []

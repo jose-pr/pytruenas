@@ -243,7 +243,11 @@ def test_a_tail_the_command_does_not_read_is_reported(caplog):
 
 @pytest.fixture
 def _cached_dump():
-    """A whole definition in the cache, so `--dump` reads it with no shell."""
+    """A whole definition in the cache, so `--dump` reads it with no shell.
+
+    Stored as the every-version file, which `--api-version` reads and which
+    also answers for the current version.
+    """
     from test_cli_help import USER_CREATE, USER_UPDATE
 
     from pytruenas import apicache
@@ -251,7 +255,8 @@ def _cached_dump():
     older = {"version": "v25.10.0", "methods": [USER_CREATE], "events": []}
     newest = {"version": "v26.0.0", "methods": [USER_CREATE, USER_UPDATE]}
     api = {"versions": [{**newest, "events": []}, older]}
-    apicache.store(api, apicache.path_for("nas1", "26.0.0"))
+    whole = apicache.path_for("nas1", "26.0.0").with_name("26.0.0.all.json.gz")
+    apicache.store(api, whole)
 
 
 @pytest.mark.parametrize(

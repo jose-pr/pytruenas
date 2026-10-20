@@ -54,7 +54,7 @@ class Args(PyTrueNASArgs):
     "Re-fetch the API definition instead of using the cache"
 
     api_version: str = None
-    "Describe this API version from the dump (default: the newest)"
+    "Describe this API version from the dump (default: the one the appliance runs)"
 
     json: bool = False
     "Emit the definition slice as JSON instead of prose, for tooling"
@@ -67,7 +67,7 @@ class Args(PyTrueNASArgs):
 
 def _version_from_dump(args: "Args", api: dict, logger: Logger):
     versions = api["versions"]
-    # The dump lists versions newest-first; `generate-typings` reads it the same way.
+    # The first entry is the version the appliance runs; `generate-typings` agrees.
     if not args.api_version:
         return versions[0]
     version = next((v for v in versions if v["version"] == args.api_version), None)
@@ -97,7 +97,9 @@ def run(client: TrueNASClient, args: Args, logger: Logger):
             logger.error("%s", exc)
             return 2
 
-    api = apicache.load(client, refresh=args.refresh_api)
+    api = apicache.load(
+        client, refresh=args.refresh_api, all_versions=bool(args.api_version)
+    )
     version = _version_from_dump(args, api, logger)
     if version is None:
         return 2

@@ -1719,8 +1719,14 @@ class TrueNASClient(_PosixHost, _ty.Generic[ApiVersion]):
             raise _side_channel_error(exc) from None
         return resp
 
-    def dump_api(self, *, cache: bool = True, refresh: bool = False):
+    def dump_api(
+        self, *, cache: bool = True, refresh: bool = False, all_versions: bool = False
+    ):
         """Return the middleware API definition (``middlewared --dump-api``).
+
+        The current API version only, pruned on the target before the
+        transfer; ``all_versions=True`` keeps every version the appliance
+        serves (current first), which is about five times the bytes on 26.0.
 
         The dump is built and **compressed on the target**, then fetched over
         SFTP when this host has an SSH leg and in verified chunks otherwise.
@@ -1736,8 +1742,8 @@ class TrueNASClient(_PosixHost, _ty.Generic[ApiVersion]):
         from . import apicache as _apicache
 
         if not cache:
-            return _apicache.fetch(self)
-        return _apicache.load(self, refresh=refresh)
+            return _apicache.fetch(self, all_versions=all_versions)
+        return _apicache.load(self, refresh=refresh, all_versions=all_versions)
 
     def install_sshcreds(
         self, name: "_ty.Optional[str]" = None, private_key: "_ty.Optional[str]" = None

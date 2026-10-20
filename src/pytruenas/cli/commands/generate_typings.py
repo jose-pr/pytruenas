@@ -24,7 +24,7 @@ class Args(PyTrueNASArgs):
     """Declared CLI fields for ``generate-typings``."""
 
     api_version: str = None
-    "API version to generate (default: the newest in the dump)"
+    "API version to generate (default: the one the appliance runs)"
 
     path: Path = Path("truenasapi_typings/current")
     "Output directory for the generated stubs (default: ./truenasapi_typings/current)"
@@ -51,7 +51,9 @@ def run(client: TrueNASClient, args: Args, logger: Logger):
         apidump = _read_dump(Path(args.dump))
     else:
         logger.info("Dumping API definition from server")
-        apidump = client.dump_api()
+        # Only an older version needs the whole dump; the current one is the
+        # pruned dump's only entry.
+        apidump = client.dump_api(all_versions=bool(args.api_version))
 
     versions = apidump["versions"]
     available = [v["version"] for v in versions]
@@ -67,7 +69,7 @@ def run(client: TrueNASClient, args: Args, logger: Logger):
             )
             return 2
     else:
-        # The dump lists versions newest-first; default to the newest.
+        # The first entry is the version the appliance runs.
         version = versions[0]
 
     logger.info("Generating typings for %s into %s", version["version"], args.path)

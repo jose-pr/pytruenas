@@ -36,6 +36,12 @@ in-process ``scp``, needing no ``scp``/``rsync`` binary), else verified 256 KiB
 chunks through the command channel, which is what carries a host reachable only
 on 443.
 
+Most of the dump is API versions nobody asked for: 26.0's carries eight, and
+the current one is 402,094 of its 2,025,353 gzipped bytes. So by default the
+dump is pruned **on the target**, before it is compressed, to the current
+version (the first entry); ``all_versions=True`` keeps every one, which naming
+an older version needs.
+
 Everything is cached under ``$PYTRUENAS_CACHE``, per host and API version, with
 per-service answers in their own small files beside the dump's.
 """
@@ -130,29 +136,51 @@ def path_for(host: str, version: str) -> _pathlib.Path:
 _REMOTE_PREFIX = "pytruenas-apidump."
 
 
-def _dump_command(remote_dir: str = REMOTE_DIR) -> str:
-    """The target-side command: dump into a fresh file and gzip it.
+#: Run on the target as ``python3 -c PRUNE FILE``: keep only the first (the
+#: current) API version, writing ``FILE.pruned``. One line, no single quote,
+#: stdlib only: the appliance runs middlewared, so ``python3`` is there.
+PRUNE = (
+    "import json,sys;p=sys.argv[1];d=json.load(open(p));"
+    'd["versions"]=d["versions"][:1];json.dump(d,open(p+".pruned","w"))'
+)
+
+
+def _dump_command(remote_dir: str = REMOTE_DIR, *, all_versions: bool = False) -> str:
+    """The target-side command: dump into a fresh file, prune it, gzip it.
 
     A file of its own per fetch, so two fetches from one appliance (two
     processes, or one box named twice) cannot overwrite or delete each other's.
     Prints the ``.gz`` path, its size and its sha256; on failure removes what
     it wrote and keeps the failing status. ``set -e`` is not portable across
     every login shell here, so each step is chained explicitly.
+
+    A prune that fails leaves the whole dump in place: it is an optimisation,
+    and must never be the reason a fetch fails.
     """
+    prune = (
+        ""
+        if all_versions
+        else (
+            f"{{ python3 -c '{PRUNE}' \"$raw\" && "
+            'mv -f "$raw.pruned" "$raw" || rm -f "$raw.pruned"; } && '
+        )
+    )
     return (
         f"raw=$(mktemp -p {remote_dir} {_REMOTE_PREFIX}XXXXXX) && "
-        '(middlewared --dump-api > "$raw" && gzip -9 -f "$raw" && '
+        '(middlewared --dump-api > "$raw" && ' + prune + 'gzip -9 -f "$raw" && '
         'echo "$raw.gz" && wc -c < "$raw.gz" && '
         "sha256sum \"$raw.gz\" | cut -d' ' -f1 || "
-        '{ rc=$?; rm -f "$raw" "$raw.gz"; exit $rc; })'
+        '{ rc=$?; rm -f "$raw" "$raw.pruned" "$raw.gz"; exit $rc; })'
     )
 
 
-def _build_remote(client: "TrueNASClient") -> "tuple[str, int, str]":
+def _build_remote(
+    client: "TrueNASClient", all_versions: bool
+) -> "tuple[str, int, str]":
     """Dump and compress on the target; return ``(gz_path, size, sha256)``."""
     client.logger.info("Dumping the API definition on the target (this takes ~75s)")
     result = client.run(
-        _dump_command(),
+        _dump_command(all_versions=all_versions),
         capture_output=True,
         encoding="utf-8",
         check=False,
@@ -252,17 +280,21 @@ def _fetch_chunked(client: "TrueNASClient", remote: str, size: int) -> bytes:
     return bytes(out)
 
 
-def fetch(client: "TrueNASClient", *, keep_remote: bool = False) -> "API":
+def fetch(
+    client: "TrueNASClient", *, keep_remote: bool = False, all_versions: bool = False
+) -> "API":
     """Build the API definition on the target and return the parsed dump.
 
-    The dump is written to a file of its own under :data:`REMOTE_DIR`, removed
-    afterwards unless ``keep_remote``.
+    It holds the current API version only, unless ``all_versions`` (every
+    version the appliance serves, current first). The dump is written to a
+    file of its own under :data:`REMOTE_DIR`, removed afterwards unless
+    ``keep_remote``.
 
     Raises :class:`APIDumpError` when the transfer does not reproduce the
     target's own digest -- a truncated dump parses as nothing useful and would
     otherwise be cached as if it were real.
     """
-    remote, size, digest = _build_remote(client)
+    remote, size, digest = _build_remote(client, all_versions)
     try:
         blob = _fetch_sftp(client, remote)
         how = "sftp"
@@ -297,28 +329,45 @@ def load(
     *,
     refresh: bool = False,
     version: "str | None" = None,
+    all_versions: bool = False,
 ) -> "API":
     """Return the API definition for ``client``, from cache when possible.
 
-    ``version`` names the appliance's version for cache keying; omitted, it is
-    read with one cheap ``system.info()`` call. ``refresh=True`` re-fetches and
-    overwrites. A cache file that cannot be read is treated as absent rather
-    than fatal -- a corrupt cache should cost a re-fetch, not an error.
+    The current API version only, unless ``all_versions``; each is cached on
+    its own (``<version>.json.gz`` and ``<version>.all.json.gz``), and a
+    cached whole dump also answers for the current version. ``version`` names
+    the appliance's version for cache keying; omitted, it is read with one
+    cheap ``system.info()`` call. ``refresh=True`` re-fetches and overwrites.
+    A cache file that cannot be read is treated as absent rather than fatal --
+    a corrupt cache should cost a re-fetch, not an error.
     """
     if version is None:
         version = str(client.api.system.info()["version"])
-    cache = path_for(client.name, version)
-    if not refresh and cache.exists():
-        try:
-            data = _json.loads(_gzip.decompress(cache.read_bytes()))
-            client.logger.info("Using the cached API definition at %s", cache)
-            return data
-        except Exception as exc:  # noqa: BLE001
-            client.logger.warning("Ignoring an unreadable cache at %s: %s", cache, exc)
-    api = fetch(client)
+    whole = _sibling(client, version, "all")
+    cache = whole if all_versions else path_for(client.name, version)
+    if not refresh:
+        for candidate in (cache,) if all_versions else (cache, whole):
+            data = _read_cache(client, candidate)
+            if data is not None:
+                if candidate is whole and not all_versions:
+                    data = {**data, "versions": data["versions"][:1]}
+                return data
+    api = fetch(client, all_versions=all_versions)
     store(api, cache)
     client.logger.info("Cached the API definition at %s", cache)
     return api
+
+
+def _read_cache(client: "TrueNASClient", cache: "_pathlib.Path") -> "API | None":
+    if not cache.exists():
+        return None
+    try:
+        data = _json.loads(_gzip.decompress(cache.read_bytes()))
+    except Exception as exc:  # noqa: BLE001
+        client.logger.warning("Ignoring an unreadable cache at %s: %s", cache, exc)
+        return None
+    client.logger.info("Using the cached API definition at %s", cache)
+    return data
 
 
 def _version_of(client: "TrueNASClient") -> str:
@@ -429,6 +478,7 @@ __all__ = [
     "store",
     "cache_root",
     "path_for",
+    "PRUNE",
     "REMOTE_DIR",
     "CHUNK_SIZE",
     "CHUNK_ATTEMPTS",
