@@ -14,6 +14,7 @@ import gzip
 import hashlib
 import json
 import subprocess
+from pathlib import Path
 
 import pytest
 
@@ -339,7 +340,7 @@ def test_the_target_command_prunes_or_falls_back_to_the_whole_dump(
         check=True,
     ).stdout.split()
     gz, size = out[0], int(out[1])
-    blob = open(gz, "rb").read()
+    blob = Path(gz).read_bytes()
     assert len(blob) == size and hashlib.sha256(blob).hexdigest() == out[2]
     expected = {"versions": WHOLE["versions"][:1]} if prune_works else WHOLE
     assert json.loads(gzip.decompress(blob)) == expected
