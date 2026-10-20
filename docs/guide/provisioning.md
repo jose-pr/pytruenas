@@ -37,12 +37,15 @@ namespace. The schema comes from the API itself and needs no shell access — se
 pytruenas call group.create nas1 -- --name=svc-backup --smb=false
 pytruenas call user.create nas1 -- \
     --username=svc-backup --full_name='Backup service' \
-    --group_create=true --home=/var/empty --shell=/usr/sbin/nologin \
+    --group_create=true --home=/mnt/tank/homes --home_create=true \
+    --shell=/usr/sbin/nologin \
     --password_disabled=true --sshpubkey=@~/.ssh/id_ed25519.pub
 ```
 
 `=@path` reads the value from a file, which is what you want for a key or a
-certificate. Booleans are real JSON booleans — `--smb=false` sends `false`, not
+certificate. A user with an SSH key needs a home on a data pool — TrueNAS
+refuses the key with the default `/var/empty` — and `home_create` makes
+`<home>/<username>` for it. Booleans are real JSON booleans — `--smb=false` sends `false`, not
 `"false"`.
 
 In Python, `_upsert` makes the same thing idempotent: it matches on the selector
