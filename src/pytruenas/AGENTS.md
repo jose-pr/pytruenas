@@ -14,8 +14,7 @@ self-contained. Development documentation lives with the source at
 "ClientException", "ValidationErrors", "CallTimeout", "ConnectionClosed",
 "JobFailed", "ConnectError", "AuthenticationError", "APIDumpError",
 "UnknownMethod", "FieldError"]`, each defined in the module named in its
-section below (every error in `pytruenas.exceptions`); `redact_call_args` (from `auth`) is importable from the root
-too, outside `__all__`. The modules documented below are public. A name with a
+section below (every error in `pytruenas.exceptions`). The modules documented below are public. A name with a
 leading underscore is private, and so is every `_`-prefixed module
 (`pytruenas._utils`, `pytruenas.cli._app`, ...) — with two deliberate exceptions: `Namespace`'s helpers and call
 options (`_query`, `_get`, `_timeout`, ...), which carry the underscore so they
@@ -106,7 +105,6 @@ executor=None, path=None, ssh=None, ...)`
     `known_hosts=` are checked even under `verify=False`, which is "TLS off,
     SSH strict": `verify=False, known_hosts=...`. For "TLS on, SSH off", pass
     `ssh=SSHConfig(host, username="root", verify=False)`.
-  - There is no `sslverify=`: it raises `TypeError` naming `verify=`.
 - **Plaintext** — a credential sent over plain `ws://` to a non-loopback host
   logs one warning per host. `ws://` is not refused: it is legitimate for a
   loopback target or an already-private link.
@@ -126,8 +124,8 @@ executor=None, path=None, ssh=None, ...)`
   built from `shell=` or by `.install_sshcreds()`, with hostctl's values: `()`
   is `~/.ssh/config`'s `UserKnownHostsFile`, else `~/.ssh/known_hosts`
   (skipped under `verify=False`); a path or list of paths names the file(s),
-  checked either way. `known_hosts=None` raises `ValueError` naming
-  `verify=False`. An explicit `ssh=SSHConfig(...)` keeps its own. Both the
+  checked either way; hostctl's `SSHConfig` refuses `known_hosts=None`
+  (`ValueError`) when the leg is built. An explicit `ssh=SSHConfig(...)` keeps its own. Both the
   command and SFTP halves verify by default; an unverifiable key (or an
   unreachable SSH port) makes `run()` and `path()` fall back to the websocket
   providers, and the host logs one WARNING per skipped provider.
@@ -1162,8 +1160,7 @@ document), else the one the file name's suffix selects (`.toml`,
 another format (INI) is a `duho.UsageError` naming it. The CLI reads four keys
 — `credentials`, `insecure`, `ca_bundle` and `cmdspath` (a string or a list;
 relative entries resolve against the file's directory) — and ignores any
-other, which a derived tool may read through `._config_dict_()`; the old
-`commandspath` key is a `duho.UsageError` naming `cmdspath`.
+other, which a derived tool may read through `._config_dict_()`.
 
 Command sources add up: the built-ins, then `$PYTRUENAS_PATH`
 (`os.pathsep`-separated), then each `--cmdspath`, then the config file's
@@ -1186,8 +1183,6 @@ to build a client from parsed args:
   bundle (its path, which must exist, else `ValueError` naming the source);
   the first that does wins, else `True`. An empty variable is unset; a
   non-boolean `$PYTRUENAS_INSECURE` or config `insecure` is a `ValueError`.
-  The removed `$PYTRUENAS_SSLVERIFY` and config `sslverify` raise
-  `ValueError` naming their replacements.
 - **`._credentials_() -> Credentials|None`** — `$PYTRUENAS_CREDENTIALS`, else the config
   file's `credentials` (a connection string, or a mapping of keyword
   arguments), else `None`.

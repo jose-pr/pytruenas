@@ -84,7 +84,7 @@ TrueNASClient("nas", credentials=api_key, shell="ssh://root@nas", known_hosts="/
 For a lab box with a self-signed certificate and an unrecorded host key,
 `verify=False` turns off both checks at once (TLS certificate verification
 everywhere, and SSH host-key verification). It is the only way to skip the
-host-key check; `known_hosts=None` raises `ValueError`.
+host-key check; `known_hosts=None` is refused (`ValueError`).
 
 ```python
 from hostctl import SSHConfig

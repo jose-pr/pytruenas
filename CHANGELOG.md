@@ -10,7 +10,7 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - **`sslverify=` is `verify=`**, one switch for TLS and SSH host keys alike:
   `TrueNASClient(..., verify=True | False | "<CA bundle>" | ssl.SSLContext)`.
-  `sslverify=` raises `TypeError` naming `verify=`; `client.sslverify` and
+  `sslverify=` is an unknown keyword (`ValueError`); `client.sslverify` and
   `config.sslverify` are gone (read `client.config.verify`), and
   `TrueNASWSConnection(verify_ssl=)` is `verify=`. A path or a context means
   "verify" for SSH. "TLS off, SSH strict" is `verify=False, known_hosts=<file>`;
@@ -26,7 +26,7 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - **The CLI's TLS options are `-k/--insecure` and `--ca-bundle FILE`.**
   `--sslverify`/`--no-sslverify` are gone; `$PYTRUENAS_SSLVERIFY` and the config
   file's `sslverify` are replaced by `$PYTRUENAS_INSECURE`/`$PYTRUENAS_CA_BUNDLE`
-  and `insecure`/`ca_bundle`, and raise an error naming them if still set.
+  and `insecure`/`ca_bundle`; the old names are no longer read.
   `-k` also skips the SSH host-key check, as `verify=False` does.
   `PyTrueNASArgs._sslverify_()` is `._verify_()`.
 - **`TrueNASWSConnection(...)` does no I/O.** It opened the websocket and
@@ -194,8 +194,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   `main(argv, name="mytool")`.
 - **`--cmdspath` is repeated, not split**: `--cmdspath a --cmdspath b`, not
   `--cmdspath a:b`, which cut a Windows drive letter off its path. The
-  config file's `commandspath` is `cmdspath`, and the old key is an error
-  naming it. `$PYTRUENAS_PATH` is unchanged (`os.pathsep`-separated).
+  config file's `commandspath` is `cmdspath`; the old key is no longer
+  read. `$PYTRUENAS_PATH` is unchanged (`os.pathsep`-separated).
 - **`generate-typings --api-cache FILE` is `--from FILE`**, which only reads:
   a `dump-api` output, or a gzipped file from `$PYTRUENAS_CACHE`. Without it
   the definition comes from `client.dump_api()`, which already caches it per
@@ -216,6 +216,10 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   --all-versions`) for all of them; `generate-typings --api-version` and
   `help --api-version` do so themselves. `apicache.load()`/`fetch()` take the
   same keyword.
+- **`redact_call_args` is imported from `pytruenas.auth`**, not from the
+  package root, where it was importable outside `__all__`.
+- **`known_hosts=None`** is refused by hostctl when the SSH leg is built, not
+  by `TrueNASClient` itself: a client with no SSH leg accepts it.
 - **The `repo` extra is gone**: `deploy --source repo` needs nothing beyond
   the core install, which already carries `hostctl[deploy]`. Drop `[repo]`
   from a requirement.
