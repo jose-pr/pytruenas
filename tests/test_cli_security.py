@@ -80,7 +80,7 @@ def test_a_flag_beats_the_environment_and_the_environment_the_config(
     assert args(insecure=True)._verify_() is False
 
 
-@pytest.mark.parametrize("value", ["", "   ", "0", "false"])
+@pytest.mark.parametrize("value", ["", "   ", "0", "false", "maybe"])
 def test_an_empty_or_false_insecure_leaves_verification_on(args, monkeypatch, value):
     """Only a true value turns verification off; empty is unset."""
     monkeypatch.setenv("PYTRUENAS_INSECURE", value)
@@ -96,11 +96,12 @@ def test_a_bundle_that_does_not_exist_is_refused(args, monkeypatch):
         args(ca_bundle="/no/such/bundle.pem")._verify_()
 
 
-@pytest.mark.parametrize("value", ["0", "maybe", "[]"])
-def test_a_config_insecure_that_is_not_a_boolean_is_refused(args, tmp_path, value):
+@pytest.mark.parametrize("value", ["0", "maybe", "[]", "'true'"])
+def test_a_config_insecure_that_is_not_true_leaves_verification_on(
+    args, tmp_path, value
+):
     _config(tmp_path, "insecure: " + value)
-    with pytest.raises(ValueError, match="insecure in"):
-        args()._verify_()
+    assert args()._verify_() is True
 
 
 def test_credentials_come_from_the_environment_or_config(args, monkeypatch, tmp_path):

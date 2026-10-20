@@ -82,7 +82,7 @@ def test_include_exclude_ignore_flags_are_repeatable():
 
 def test_targets_still_trail_after_the_new_flags():
     """The new flags must not swallow the trailing TARGET positional --
-    see AGENTS.md's note on greedy list options and register_targets."""
+    a list option takes one value per occurrence."""
     c = _parse(["deploy", "--source", "repo", "nas1", "nas2"])
     assert c["targets"] == ["nas1", "nas2"]
 

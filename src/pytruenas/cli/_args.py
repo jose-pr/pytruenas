@@ -18,16 +18,22 @@ client and logger.
 
 from __future__ import annotations
 
+import datetime as _dt
+import json as _json
 import os as _os
-import sys as _sys
 import re as _re
+import sys as _sys
 import threading as _threading
 import typing as _ty
 from pathlib import Path as _Path
 
+import anycfg
+from duho import Arg, LoggingArgs, Meta, UsageError, expand
 
-from duho import Arg, LoggingArgs, Meta
 from .._utils.env import ENV
+from ..auth import Credentials
+from .. import host as _host
+from ..target import Target, redact
 
 
 def json_value(raw: str):
@@ -37,10 +43,8 @@ def json_value(raw: str):
     a string, so a filter on a numeric or boolean field silently matches
     nothing (``-f uid=0`` compares ``"0"`` against ``0``).
     """
-    import json
-
     try:
-        return json.loads(raw)
+        return _json.loads(raw)
     except (ValueError, TypeError):
         return raw
 
@@ -78,11 +82,9 @@ def json_default(obj):
     anything else its ``str()``. Each is a value JSON can read back, which a
     Python repr (``"{1, 2}"``) is not.
     """
-    import datetime
-
     if isinstance(obj, (set, frozenset)):
         return sorted(obj, key=str)
-    if isinstance(obj, (datetime.datetime, datetime.date, datetime.time)):
+    if isinstance(obj, (_dt.datetime, _dt.date, _dt.time)):
         return obj.isoformat()
     if isinstance(obj, (bytes, bytearray)):
         return obj.decode("utf-8", "replace")
@@ -91,11 +93,9 @@ def json_default(obj):
 
 def emit(text: str) -> None:
     """Write one result line to stdout atomically."""
-    import sys
-
     with _WRITE_LOCK:
-        sys.stdout.write(text + "\n")
-        sys.stdout.flush()
+        _sys.stdout.write(text + "\n")
+        _sys.stdout.flush()
 
 
 def emit_json(value: object, args: "PyTrueNASArgs | None" = None) -> None:
@@ -105,18 +105,10 @@ def emit_json(value: object, args: "PyTrueNASArgs | None" = None) -> None:
     indistinguishable, so each becomes ``{"target": ..., "result": ...}``. A
     single target keeps the bare result, which is what scripts already parse.
     """
-    import json
-
     target = getattr(args, "target", None)
     if target is not None and args is not None and len(args._expanded_targets_()) > 1:
-        from ..target import redact
-
         value = {"target": redact(str(target)), "result": value}
-    emit(json.dumps(value, default=json_default))
-
-
-if _ty.TYPE_CHECKING:
-    from ..host import TrueNASClient
+    emit(_json.dumps(value, default=json_default))
 
 
 def default_config_path() -> _Path:
@@ -130,17 +122,6 @@ def default_config_path() -> _Path:
     else:
         base = _Path(_os.environ.get("XDG_CONFIG_HOME") or _Path.home() / ".config")
     return base / "pytruenas.cfg"
-
-
-def load_config(path: "_ty.Union[str, _os.PathLike[str]]") -> dict:
-    """The settings in the CLI's config file at ``path``: ``anycfg.load(path)``.
-
-    The suffix picks the format; a ``.cfg`` file is the format its ``#!<format>``
-    first line names, else TOML. Raises ``anycfg.ConfigError``.
-    """
-    import anycfg
-
-    return anycfg.load(path) or {}
 
 
 _TARGETS_HELP = (
@@ -175,38 +156,6 @@ def with_targets(args_cls: "type | None" = None) -> type:
         "_duho_constants_": {},
     }
     return type(base.__name__, (base,), namespace)
-
-
-def register_targets(parser) -> None:
-    """Add the trailing ``targets`` positional to a parser imperatively.
-
-    For code that builds its own parser. A command does not need it:
-    :func:`with_targets` declares the positional, which also puts it in the MCP
-    tool schema.
-    """
-    parser.add_argument("targets", nargs="*", metavar="TARGET", help=_TARGETS_HELP)
-
-
-def _env_bool(name: str) -> bool:
-    """``$PYTRUENAS_<name>`` as a boolean; unset or empty is ``False``."""
-    from duho.text import parse_bool
-
-    value = ENV.get(name)
-    if not value or not value.strip():
-        return False
-    try:
-        return parse_bool(value)
-    except ValueError:
-        raise ValueError(
-            f"${ENV.prefix}{name} is {value!r}: expected true or false"
-        ) from None
-
-
-def _config_bool(config: "_ty.Mapping[str, object]", key: str, path: object) -> bool:
-    value = config.get(key, False)
-    if not isinstance(value, bool):
-        raise ValueError(f"{key} in {path} must be true or false, not {value!r}")
-    return value
 
 
 class PyTrueNASArgs(LoggingArgs):
@@ -264,22 +213,18 @@ class PyTrueNASArgs(LoggingArgs):
         return default_config_path(), False
 
     def _config_dict_(self) -> dict:
-        """The settings in the config file (:func:`load_config`).
+        """The settings in the config file, read by ``anycfg.load``.
 
-        Empty when the default file is absent. Raises :class:`duho.UsageError`
-        (exit status 2) when a named file is missing or cannot be read as
-        settings.
+        ``{}`` when the default file is absent. A named file that is missing is
+        a :class:`duho.UsageError`; one that does not read, an
+        ``anycfg.ConfigError``.
         """
-        if isinstance(self.config, dict):
-            return self.config
         path, required = self._config_path_()
         if not path.exists():
             if required:
-                from duho import UsageError
-
                 raise UsageError(f"config file not found: {path}")
             return {}
-        return load_config(path)
+        return anycfg.load(path) or {}
 
     def _verify_(self) -> "bool | str":
         """``verify=`` for the clients this CLI builds.
@@ -287,20 +232,21 @@ class PyTrueNASArgs(LoggingArgs):
         Each layer in turn -- the flags, then ``$PYTRUENAS_INSECURE`` /
         ``$PYTRUENAS_CA_BUNDLE``, then the config file's ``insecure`` /
         ``ca_bundle`` -- can turn verification off or name a CA bundle; the
-        first that does wins. With none, ``True``: the OS trust. An empty
-        variable is unset.
+        first that does wins. With none, ``True``: the OS trust. Only a true
+        value turns it off (``ENV.bool``; a config ``insecure = true``), so a
+        value that is not one leaves it on.
         """
         config = self._config_dict_()
         where = self._config_path_()[0]
         layers = (
             (self.insecure, self.ca_bundle, "--ca-bundle"),
             (
-                _env_bool("INSECURE"),
+                ENV.bool("INSECURE"),
                 ENV.get("CA_BUNDLE") or None,
                 f"${ENV.prefix}CA_BUNDLE",
             ),
             (
-                _config_bool(config, "insecure", where),
+                config.get("insecure") is True,
                 config.get("ca_bundle") or None,
                 f"ca_bundle in {where}",
             ),
@@ -322,8 +268,6 @@ class PyTrueNASArgs(LoggingArgs):
         mapping of keyword arguments. ``None`` when neither is set, which is
         what a local socket wants.
         """
-        from ..auth import Credentials
-
         raw: object = ENV.get("CREDENTIALS")
         if not raw:
             raw = self._config_dict_().get("credentials")
@@ -333,7 +277,7 @@ class PyTrueNASArgs(LoggingArgs):
             return Credentials(**raw)
         return Credentials(raw)
 
-    def _client_(self, target: str) -> "TrueNASClient":
+    def _client_(self, target: str) -> "_host.TrueNASClient":
         """The client this CLI builds for one target.
 
         One place, so a plain command and a RunPath step connect alike: TLS
@@ -341,13 +285,12 @@ class PyTrueNASArgs(LoggingArgs):
         config file only when the target itself carries none (passing both
         raises).
         """
-        from ..host import TrueNASClient
-        from ..target import Target
-
         credentials = None
         if not Target.parse(target, resolve_port=False).password:
             credentials = self._credentials_()
-        return TrueNASClient(target, credentials=credentials, verify=self._verify_())
+        return _host.TrueNASClient(
+            target, credentials=credentials, verify=self._verify_()
+        )
 
     def _expanded_targets_(self) -> "list[str]":
         """Return the target list with commas split and range patterns expanded.
@@ -355,22 +298,13 @@ class PyTrueNASArgs(LoggingArgs):
         Targets arrive as the trailing positionals (a flat ``list[str]``); each
         item may itself be a comma-separated list (``nas1,nas2``) and/or carry a
         ``[A-Z]``/``[0-9]`` range pattern. An empty list defaults to
-        ``localhost``. Flattens defensively in case a nested list slips through.
+        ``localhost``.
         """
-        from duho import expand
-
-        def _flatten(values):
-            for value in values:
-                if isinstance(value, (list, tuple)):
-                    yield from _flatten(value)
-                else:
-                    yield value
-
-        items = list(_flatten(self.targets)) or ["localhost"]
-        expanded: "list[str]" = []
-        for item in items:
-            expanded.extend(_expand_target(str(item), expand))
-        return expanded
+        return [
+            target
+            for item in self.targets or ["localhost"]
+            for target in _expand_target(item)
+        ]
 
 
 def _split_userinfo(target: str) -> "tuple[str, str]":
@@ -397,7 +331,7 @@ def _split_userinfo(target: str) -> "tuple[str, str]":
 _NEXT_TARGET = _re.compile(r",(?=[A-Za-z][A-Za-z0-9+.-]*://)")
 
 
-def _expand_target(item: str, expand) -> "list[str]":
+def _expand_target(item: str) -> "list[str]":
     """One positional into its targets, expanding only the HOST part.
 
     A comma separates targets and ``[A-Z]``/``[0-9]`` is a range -- but only
@@ -409,13 +343,11 @@ def _expand_target(item: str, expand) -> "list[str]":
     part's credentials share them.
     """
     return [
-        target
-        for chunk in _NEXT_TARGET.split(item)
-        for target in _expand_one(chunk, expand)
+        target for chunk in _NEXT_TARGET.split(item) for target in _expand_one(chunk)
     ]
 
 
-def _expand_one(item: str, expand) -> "list[str]":
+def _expand_one(item: str) -> "list[str]":
     prefix, hostpart = _split_userinfo(item)
     scheme, sep, userinfo = prefix.partition("://")
     scheme, userinfo = (scheme + sep, userinfo) if sep else ("", prefix)
@@ -435,10 +367,7 @@ __all__ = [
     "PyTrueNASArgs",
     "TargetsField",
     "with_targets",
-    "register_targets",
-    "load_config",
     "default_config_path",
-    "json_value",
     "json_default",
     "emit",
     "emit_json",

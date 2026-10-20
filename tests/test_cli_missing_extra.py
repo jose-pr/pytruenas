@@ -70,7 +70,9 @@ def test_a_yaml_config_file_without_pyyaml_names_the_extra(tmp_path, monkeypatch
     cfg = tmp_path / "pytruenas.yaml"
     cfg.write_bytes(b"credentials: x\n")
     with pytest.raises(anycfg.MissingDependencyError, match="yaml") as caught:
-        cmd.load_config(cfg)
+        args = cmd.PyTrueNASArgs()
+        args.config = cfg
+        args._config_dict_()
     assert str(cfg) in str(caught.value)
 
 

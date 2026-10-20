@@ -8,6 +8,13 @@ from pytruenas.cli import _args as _cmd
 from pytruenas.cli._args import PyTrueNASArgs
 
 
+def _read(path):
+    """The settings the CLI reads from ``path``, named with ``--config``."""
+    args = PyTrueNASArgs()
+    args.config = path
+    return args._config_dict_()
+
+
 @pytest.fixture(autouse=True)
 def _no_config_env(monkeypatch, tmp_path):
     monkeypatch.delenv("PYTRUENAS_CONFIG", raising=False)
@@ -33,7 +40,7 @@ def test_a_cfg_is_toml_unless_its_first_line_or_suffix_says_otherwise(
 ):
     path = tmp_path / name
     path.write_text(text, encoding="utf-8")
-    assert _cmd.load_config(path) == {
+    assert _read(path) == {
         "credentials": "root:pw",
         "cmdspath": ["cmds"],
     }
@@ -44,20 +51,20 @@ def test_a_shebang_names_yaml(tmp_path, first_line):
     pytest.importorskip("yaml")
     path = tmp_path / "pytruenas.cfg"
     path.write_text(f"{first_line}\ncredentials: root:pw\n", encoding="utf-8")
-    assert _cmd.load_config(path) == {"credentials": "root:pw"}
+    assert _read(path) == {"credentials": "root:pw"}
 
 
 def test_a_yaml_suffix_is_yaml(tmp_path):
     pytest.importorskip("yaml")
     path = tmp_path / "pytruenas.yaml"
     path.write_text("credentials: root:pw\n", encoding="utf-8")
-    assert _cmd.load_config(path) == {"credentials": "root:pw"}
+    assert _read(path) == {"credentials": "root:pw"}
 
 
 def test_an_empty_file_has_no_settings(tmp_path):
     path = tmp_path / "pytruenas.cfg"
     path.write_bytes(b"")
-    assert _cmd.load_config(path) == {}
+    assert _read(path) == {}
 
 
 @pytest.mark.parametrize(
@@ -73,7 +80,7 @@ def test_a_file_that_does_not_read_names_itself(tmp_path, text, message):
     path = tmp_path / "pytruenas.cfg"
     path.write_text(text, encoding="utf-8")
     with pytest.raises(anycfg.ConfigError, match=message) as raised:
-        _cmd.load_config(path)
+        _read(path)
     assert str(path) in str(raised.value)
 
 
@@ -123,12 +130,6 @@ def test_a_named_file_must_exist(monkeypatch, tmp_path, via):
         args._config_dict_()
 
 
-def test_config_dict_from_mapping():
-    args = PyTrueNASArgs()
-    args.config = {"already": "loaded"}
-    assert args._config_dict_() == {"already": "loaded"}
-
-
 def test_expanded_targets_default_localhost():
     args = PyTrueNASArgs()
     args.targets = []
@@ -145,9 +146,9 @@ def test_a_bom_is_dropped_and_bad_utf8_is_refused(tmp_path):
     """anycfg decodes the file: strictly UTF-8, one BOM ignored."""
     good = tmp_path / "pytruenas.cfg"
     good.write_bytes(b'\xef\xbb\xbf#!json\n{"credentials": "root:pw"}\n')
-    assert _cmd.load_config(good) == {"credentials": "root:pw"}
+    assert _read(good) == {"credentials": "root:pw"}
     bad = tmp_path / "bad.cfg"
     bad.write_bytes(b'credentials = "\xff"\n')
     with pytest.raises(anycfg.ParseError, match="utf-8") as raised:
-        _cmd.load_config(bad)
+        _read(bad)
     assert str(bad) in str(raised.value)

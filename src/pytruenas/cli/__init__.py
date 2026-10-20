@@ -15,9 +15,6 @@ from ._args import (
     emit,
     emit_json,
     json_default,
-    json_value,
-    load_config,
-    register_targets,
     with_targets,
 )
 
@@ -27,12 +24,9 @@ __all__ = [
     "PyTrueNASArgs",
     "TargetsField",
     "with_targets",
-    "register_targets",
-    "load_config",
     "default_config_path",
     "emit",
     "emit_json",
     "json_default",
-    "json_value",
     "ENV",
 ]
