@@ -1,4 +1,7 @@
-"""Step 3 -- verify or create a dataset, and unlock an encrypted one.
+"""Step 1 -- verify or create a dataset, and unlock an encrypted one.
+
+It comes first because the later steps use the dataset: the service account's
+home and the shares live on it.
 
 Three things here are specific to TrueNAS and catch people out:
 

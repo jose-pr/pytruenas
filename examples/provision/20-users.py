@@ -1,4 +1,4 @@
-"""Step 1 -- a group, a service account, and an SSH key for it.
+"""Step 2 -- a group, a service account, and an SSH key for it.
 
 Shows the ``_upsert`` helper doing the work a hand-written script gets wrong:
 it looks for a match on the selector fields, creates when there is none,
@@ -14,6 +14,10 @@ from __future__ import annotations
 
 GROUP = "svc-backup"
 USER = "svc-backup"
+
+#: Where the account's home is created: the dataset step 1 made. TrueNAS
+#: refuses an SSH key for a user whose home is not on a data pool.
+HOME_PARENT = "/mnt/data/provision-example"
 
 #: A real deployment reads this from wherever it keeps public keys; the CLI's
 #: `--sshpubkey=@path` does the same thing for a one-off.
@@ -40,7 +44,7 @@ def main(client, args, logger):
     existing = client.api.user._get(username=USER)
     desired = dict(
         full_name="Backup service account",
-        home="/var/empty",
+        home=f"{HOME_PARENT}/{USER}",
         shell="/usr/sbin/nologin",
         # A service account authenticates by key, never by password.
         password_disabled=True,
@@ -51,10 +55,12 @@ def main(client, args, logger):
     if existing is None:
         plan.change(
             f"create user {USER}",
+            # `home` names the parent; `home_create` makes `<home>/<username>`,
+            # which is the home the record then reports.
             lambda: client.api.user._create(
                 username=USER,
                 group=gid,
-                **desired,
+                **{**desired, "home": HOME_PARENT, "home_create": True},
             ),
         )
     else:

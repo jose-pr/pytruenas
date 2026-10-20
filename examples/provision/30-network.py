@@ -1,4 +1,4 @@
-"""Step 2 -- DNS and the global network configuration.
+"""Step 3 -- DNS and the global network configuration.
 
 ``network.configuration`` is a **singleton**: there is one record, read with
 ``config()`` and written with ``update(payload)``, so there is nothing to query

@@ -72,9 +72,11 @@ def main(client, args, logger):
                 browsable=True,
             ),
         )
+    elif smb["path"] == PATH and smb["enabled"]:
+        plan.ok(f"SMB share {SMB_NAME} points at {PATH} and is enabled")
     else:
         # `_upsert` would do this lookup-then-branch for us; spelled out here so
-        # the two halves are visible. It diffs, so a matching share is untouched.
+        # the two halves are visible. It diffs, so it sends only what differs.
         plan.change(
             f"ensure SMB share {SMB_NAME} points at {PATH} and is enabled",
             lambda: client.api.sharing.smb._upsert(

@@ -36,9 +36,9 @@ and send only what differs.
 
 | step | what it shows |
 |---|---|
-| [`10-users.py`](provision/10-users.py) | A group and a key-only service account with `_upsert`/`_update` diffing. |
-| [`20-network.py`](provision/20-network.py) | The `network.configuration` **singleton**: `config()`/`update()`, three scalar `nameserverN` slots rather than a list, `domain` vs the `domains` search list, and read-only `state` showing what DHCP actually supplied. Reads interfaces rather than writing them — an address change is staged behind `interface.commit` with a checkin window precisely because a bad one cuts off the connection you are using. |
-| [`30-storage.py`](provision/30-storage.py) | A dataset keyed by its **path**, a ZFS **property** (`quota` comes back `{value, parsed, rawvalue, source}` while you set the scalar), `encryption_summary` and unlocking at the **`encryption_root`** — and `unlock` being a **job** you have to wait on. |
+| [`10-storage.py`](provision/10-storage.py) | A dataset keyed by its **path**, a ZFS **property** (`quota` comes back `{value, parsed, rawvalue, source}` while you set the scalar), `encryption_summary` and unlocking at the **`encryption_root`** — and `unlock` being a **job** you have to wait on. |
+| [`20-users.py`](provision/20-users.py) | A group and a key-only service account, its home on the dataset step 1 made (TrueNAS refuses an SSH key for a user whose home is not in a pool), with `_upsert`/`_update` diffing. |
+| [`30-network.py`](provision/30-network.py) | The `network.configuration` **singleton**: `config()`/`update()`, three scalar `nameserverN` slots rather than a list, `domain` vs the `domains` search list, and read-only `state` showing what DHCP actually supplied. Reads interfaces rather than writing them — an address change is staged behind `interface.commit` with a checkin window precisely because a bad one cuts off the connection you are using. |
 | [`40-shares.py`](provision/40-shares.py) | SMB (keyed by `name`, with a `purpose` preset and an `options` sub-object) and NFS (keyed by `path`, access via `networks`/`hosts`/`ro`/`maproot_*`), plus enabling and starting the service — the step people forget, where the share exists and still serves nothing. |
 
 ## Finding the field names yourself
