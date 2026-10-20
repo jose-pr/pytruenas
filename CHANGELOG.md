@@ -46,8 +46,7 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   `config`. A file that does not read is now an error naming it (exit status
   2) instead of being ignored. `cmdspath` (below) is
   read from any config file. `PyTrueNASArgs._config_is_implicit_()` is gone;
-  `._config_path_()` and `pytruenas.cli.load_config()`/`default_config_path()`
-  are new.
+  `._config_path_()` and `pytruenas.cli.default_config_path()` are new.
 - **`pytruenas.utils.tls` is gone** (`context`, `ca_bundle`, `CA_BUNDLE_ENV`,
   `SslVerify`); the decision is private now. Pass `verify=` instead.
 - **`TrueNASHost` is gone: the class is `TrueNASClient`.** It was the same class
@@ -179,9 +178,10 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   - `pytruenas.utils.query` → `pytruenas.query`; `pytruenas.utils.target` →
     `pytruenas.target`; `pytruenas.utils.apicache` → `pytruenas.apicache`.
   - `pytruenas.utils.cmd` (`PyTrueNASArgs`, `with_targets`, `TargetsField`,
-    `register_targets`, `emit`, `emit_json`, `json_default`, `json_value`,
-    `ENV`, `load_config`, `default_config_path`) and `pytruenas.main`
-    (`main`, `PyTrueNAS`) → `pytruenas.cli`.
+    `emit`, `emit_json`, `json_default`, `ENV`, `default_config_path`) and
+    `pytruenas.main` (`main`, `PyTrueNAS`) → `pytruenas.cli`.
+    `register_targets` is gone (`with_targets` declares the positional) and
+    `json_value` is private.
   - `pytruenas.utils.runpath` → `pytruenas.cli.runpath`.
   - `pytruenas.cmd.*` → `pytruenas.cli.commands.*`.
   - `pytruenas.utils.apihelp`, `pytruenas.utils.fields` and

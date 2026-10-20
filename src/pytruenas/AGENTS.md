@@ -1113,8 +1113,8 @@ from the CLI.
 
 `pytruenas.cli` is the command line, and everything below is importable from
 it (`__all__`): `main`, `PyTrueNAS`, `PyTrueNASArgs`, `TargetsField`,
-`with_targets`, `register_targets`, `load_config`, `default_config_path`,
-`emit`, `emit_json`, `json_default`, `json_value`, `ENV`. The modules it is
+`with_targets`, `default_config_path`, `emit`, `emit_json`, `json_default`,
+`ENV`. The modules it is
 built from are private; `pytruenas.cli.runpath` is public.
 
 - **`main(argv=None, *, name=None, args=None, root=None) -> int`** — build the
@@ -1152,8 +1152,8 @@ The config file is `--config`, else `$PYTRUENAS_CONFIG` (either must exist:
 `pytruenas.cli.default_config_path()` — `pytruenas.cfg` in
 the platform's configuration directory (`%APPDATA%` on Windows,
 `$XDG_CONFIG_HOME` or `~/.config` elsewhere), read only when present. The
-working directory is never searched. `load_config(path) -> dict`
-(`pytruenas.cli`) reads one with `anycfg.load(path)` (an empty file is `{}`):
+working directory is never searched. It is read with `anycfg.load(path)`
+(an empty file is `{}`):
 the suffix picks the format, and a `.cfg` file is the format its `#!<format>`
 first line names (`#!yaml`, `#!json`, also `#!/usr/bin/env yaml`; the line is
 not part of the document), else TOML. YAML needs the `yaml` extra. A file
@@ -1181,8 +1181,9 @@ to build a client from parsed args:
   `$PYTRUENAS_INSECURE`/`$PYTRUENAS_CA_BUNDLE`, then the config file's
   `insecure`/`ca_bundle` — can turn verification off (`False`) or name a CA
   bundle (its path, which must exist, else `ValueError` naming the source);
-  the first that does wins, else `True`. An empty variable is unset; a
-  non-boolean `$PYTRUENAS_INSECURE` or config `insecure` is a `ValueError`.
+  the first that does wins, else `True`. Only a true value turns
+  verification off (`$PYTRUENAS_INSECURE` as `ENV.bool` reads it, a config
+  `insecure = true`); any other value leaves it on.
 - **`._credentials_() -> Credentials|None`** — `$PYTRUENAS_CREDENTIALS`, else the config
   file's `credentials` (a connection string, or a mapping of keyword
   arguments), else `None`.
@@ -1193,16 +1194,12 @@ to build a client from parsed args:
 
 Also in `pytruenas.cli`: **`with_targets(args_cls=None) -> type`**
 (`args_cls`, default `PyTrueNASArgs`, with `targets` declared last),
-**`TargetsField`** (that field's annotated type), **`register_targets(parser)`**
-(adds the trailing `targets` positional to a parser you build yourself; a
-command does not need it), **`emit(text)`** /
-**`emit_json(value, args=None)`** and **`json_default`** (below),
-**`json_value(raw)`** (the decoding `call -p` and `query -f` share: a JSON
-value, falling back to the raw string), and **`ENV`**, the single
+**`TargetsField`** (that field's annotated type), **`emit(text)`** /
+**`emit_json(value, args=None)`** and **`json_default`** (below), and
+**`ENV`**, the single
 `duho.env.Env("pytruenas", autoload=False)` accessor every `PYTRUENAS_*`
 setting is read through (see [Environment variables](#environment-variables)),
-and **`load_config(path) -> dict`** / **`default_config_path() -> Path`**
-(above).
+and **`default_config_path() -> Path`** (above).
 
 ### Built-in commands (`pytruenas.cli.commands`)
 
@@ -1424,9 +1421,9 @@ is routinely run from a directory the user does not control.
   is sanitized to a single path component, so a connection string cannot
   choose where the file lands.
 - **`PYTRUENAS_INSECURE`**, **`PYTRUENAS_CA_BUNDLE`** — the CLI's TLS
-  defaults when no flag is given (`._verify_()` above): a boolean
-  (`true`/`false`/`1`/`0`/`yes`/`no`/`on`/`off`, ...) that turns verification
-  off, and an existing CA bundle path. Empty is unset (the config file's
+  defaults when no flag is given (`._verify_()` above): `1`/`true`/`yes`/
+  `y`/`t`/`on` turns verification off (anything else leaves it on), and an
+  existing CA bundle path. Empty is unset (the config file's
   `insecure`/`ca_bundle`, then `True`).
 - **`PYTRUENAS_MCP`** — not read by pytruenas itself, nor through `ENV`:
   `duho`'s own `<PREFIX>_MCP` launch trigger, keyed off this app's `Env`
