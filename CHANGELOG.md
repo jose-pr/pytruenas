@@ -36,15 +36,15 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   `.fetch()`), not the job id: the link was discarded, so the bytes could
   never be fetched.
 - **The CLI's config file is read by anycfg, and is TOML by default.** It is
-  `--config`, else `$PYTRUENAS_CONFIG`, else `pytruenas/pytruenas.cfg` in the
+  `--config`, else `$PYTRUENAS_CONFIG`, else `pytruenas.cfg` in the
   user's configuration directory (`%APPDATA%`, `$XDG_CONFIG_HOME` or
   `~/.config`); `./pytruenas.yaml` in the working directory is no longer read,
-  and `$PYTRUENAS_CFG` is gone. The format is the one a `#!<format>` first line
-  names (`#!toml`, `#!yaml`, `#!json`), else the file name's suffix (`.cfg`
-  selects none), else TOML. A YAML file keeps working as `pytruenas.yaml`, or
+  and `$PYTRUENAS_CFG` is gone. The suffix picks the format, and a `.cfg`
+  file is the format its `#!<format>` first line names, else TOML. A YAML
+  file keeps working as `pytruenas.yaml`, or
   as a `.cfg` starting with `#!yaml`, with the new `yaml` extra, which replaces
-  `config`. A file that does not parse, or is not a table, is now an error
-  naming it (exit status 2) instead of being ignored. `cmdspath` (below) is
+  `config`. A file that does not read is now an error naming it (exit status
+  2) instead of being ignored. `cmdspath` (below) is
   read from any config file. `PyTrueNASArgs._config_is_implicit_()` is gone;
   `._config_path_()` and `pytruenas.cli.load_config()`/`default_config_path()`
   are new.
@@ -230,6 +230,9 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   failed target by its host name through duho's own `run_targets(label=)`, and
   `client.logger.trace()` is duho's `LoggerAdapter.trace`; neither changes
   what is printed.
+- **Dependency `anycfg>=0.15.0,<0.16`** (its `cfg` format reads the CLI's
+  config file); pytruenas no longer declares `tomli` itself, which anycfg
+  brings below Python 3.11.
 - **Dependency floor raised to `websocket-client>=1.3.3,<2`.** Below 1.2.2
   the API websocket ignores the TLS context `verify=` builds, so the OS trust,
   a CA bundle and a caller's `ssl.SSLContext` never applied there; below

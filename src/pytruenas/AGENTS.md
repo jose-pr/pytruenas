@@ -1128,9 +1128,9 @@ built from are private; `pytruenas.cli.runpath` is public.
   subclassing `PyTrueNAS` with `_ARGS_` set. Raises `SystemExit` for `--help`,
   `--version` and a usage error found while parsing; a `--config`/
   `$PYTRUENAS_CONFIG` file that does not exist returns 2 with
-  `NAME: error: config file not found: PATH`. A `hostctl.MissingExtraError`
-  raised before any target runs (a YAML config file without the `yaml` extra)
-  prints `NAME: MESSAGE` to stderr and returns 125.
+  `NAME: error: config file not found: PATH`, and one that does not read
+  (an `anycfg.ConfigError`: it does not parse, or YAML without the `yaml`
+  extra) returns 2 with `NAME: error: MESSAGE`.
 - **`PyTrueNAS(PyTrueNASArgs, duho.Cli)`** — the app root; `--version` resolves
   from installed package metadata.
 
@@ -1149,15 +1149,15 @@ methods `._config_path_()`/`._config_dict_()`/`._expanded_targets_()`.
 
 The config file is `--config`, else `$PYTRUENAS_CONFIG` (either must exist:
 `duho.UsageError`, exit status 2), else
-`pytruenas.cli.default_config_path()` — `pytruenas/pytruenas.cfg` in
+`pytruenas.cli.default_config_path()` — `pytruenas.cfg` in
 the platform's configuration directory (`%APPDATA%` on Windows,
 `$XDG_CONFIG_HOME` or `~/.config` elsewhere), read only when present. The
-working directory is never searched. Its format is the one a `#!<format>` first line names (`#!toml`, `#!yaml`,
-`#!json`, also `#!/usr/bin/env yaml`; the line is not part of the
-document), else the one the file name's suffix selects (`.toml`,
-`.yaml`/`.yml`, `.json`; `.cfg` and no suffix select none), else TOML. YAML needs the `yaml` extra. `load_config(path) -> dict` reads one
-(`pytruenas.cli`); a file that does not parse, is not a table, or is in
-another format (INI) is a `duho.UsageError` naming it. The CLI reads four keys
+working directory is never searched. `load_config(path) -> dict`
+(`pytruenas.cli`) reads one with `anycfg.load(path)` (an empty file is `{}`):
+the suffix picks the format, and a `.cfg` file is the format its `#!<format>`
+first line names (`#!yaml`, `#!json`, also `#!/usr/bin/env yaml`; the line is
+not part of the document), else TOML. YAML needs the `yaml` extra. A file
+that does not read raises `anycfg.ConfigError` naming it. The CLI reads four keys
 — `credentials`, `insecure`, `ca_bundle` and `cmdspath` (a string or a list;
 relative entries resolve against the file's directory) — and ignores any
 other, which a derived tool may read through `._config_dict_()`.
@@ -1410,7 +1410,7 @@ is routinely run from a directory the user does not control.
 - **`PYTRUENAS_CONFIG`** — the CLI's config file when `--config` is not given;
   the file must exist. Read when the file is needed.
 - **`APPDATA`** (Windows), **`XDG_CONFIG_HOME`** — where the default config file
-  `pytruenas/pytruenas.cfg` is looked for (`~/.config` without the latter).
+  `pytruenas.cfg` is looked for (`~/.config` without the latter).
 - **`PYTRUENAS_PATH`** — `os.pathsep`-separated extra command source(s) for CLI
   discovery (read with `ENV.paths`, which splits on the platform separator, so
   a Windows `C:\...` entry is not mis-split on its drive colon).

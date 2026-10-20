@@ -176,11 +176,11 @@ ca_bundle = "/etc/pki/lab-ca.pem"     # or: insecure = true
 cmdspath = ["mycommands"]             # extra command sources, relative to this file
 ```
 
-Its format is the one a `#!<format>` first line names (`#!toml`, `#!yaml`,
-`#!json`, also `#!/usr/bin/env yaml`; the line is not part of the
-document), else the one the file name's suffix selects (`.toml`,
-`.yaml`/`.yml`, `.json`; `.cfg` and no suffix select none), else TOML. So a `pytruenas.cfg` can be YAML (with the `yaml`
-extra) by starting it with a `#!yaml` line:
+The suffix picks the format (`.toml`, `.yaml`/`.yml`, `.json`), and a `.cfg`
+file is the format its `#!<format>` first line names (`#!yaml`, `#!json`, also
+`#!/usr/bin/env yaml`; the line is not part of the document), else TOML. So a
+`pytruenas.cfg` can be YAML (with the `yaml` extra) by
+starting it with a `#!yaml` line:
 
 ```yaml
 #!yaml
@@ -195,7 +195,7 @@ ca_bundle: /etc/pki/lab-ca.pem
 - `cmdspath` — directories or packages to load commands from.
 
 The file is `--config FILE` (`-c`), else `$PYTRUENAS_CONFIG`, else
-`pytruenas/pytruenas.cfg` in your configuration directory (`%APPDATA%` on
+`pytruenas.cfg` in your configuration directory (`%APPDATA%` on
 Windows, `$XDG_CONFIG_HOME` or `~/.config` elsewhere); the current directory
 is never searched. The default file may be absent; a file you named must exist,
 and a file that does not parse stops the run with exit status 2 before any
