@@ -84,7 +84,6 @@ class _Args(PyTrueNASArgs):
     def __init__(self, targets, parallel):
         self._targets = targets
         self.parallel = parallel
-        self.sslverify = None
         self.insecure = False
         self.logto = "-"
 

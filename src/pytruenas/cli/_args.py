@@ -346,17 +346,8 @@ class PyTrueNASArgs(LoggingArgs):
         first that does wins. With none, ``True``: the OS trust. An empty
         variable is unset.
         """
-        if ENV.get("SSLVERIFY"):
-            raise ValueError(
-                f"${ENV.prefix}SSLVERIFY was replaced by ${ENV.prefix}INSECURE "
-                f"and ${ENV.prefix}CA_BUNDLE"
-            )
         config = self._config_dict_()
         where = self._config_path_()[0]
-        if "sslverify" in config:
-            raise ValueError(
-                f"sslverify in {where} was replaced by insecure and ca_bundle"
-            )
         layers = (
             (self.insecure, self.ca_bundle, "--ca-bundle"),
             (

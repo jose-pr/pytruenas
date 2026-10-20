@@ -752,11 +752,6 @@ class TrueNASConfig(
         #: names the file(s). ``verify=False`` skips the ``()`` lookup;
         #: named keys are checked either way. An explicit ``ssh=SSHConfig(...)``
         #: keeps its ``known_hosts`` and gets ``verify=False`` on a copy.
-        if known_hosts is None:
-            raise ValueError(
-                "known_hosts=None is not accepted: pass verify=False to skip "
-                "the SSH host-key check"
-            )
         self.known_hosts = known_hosts
         if ssh is not None and verify is False and getattr(ssh, "verify", False):
             ssh = _dataclasses.replace(_ty.cast(_ty.Any, ssh), verify=False)
@@ -1166,11 +1161,6 @@ class TrueNASClient(_PosixHost, _ty.Generic[ApiVersion]):
         config: "_ty.Optional[_ty.Union[TrueNASConfig, str]]" = None,
         **options: object,
     ) -> None:
-        if "sslverify" in options:
-            raise TypeError(
-                "sslverify= is now verify= (True, False, a CA bundle path or an "
-                "ssl.SSLContext), which also governs the SSH host-key check"
-            )
         # A connection string is the common case, so accept it directly rather
         # than making every caller reach for TrueNASConfig.from_target first.
         # hostctl's own `Host("uri")` shortcut cannot help here: its metaclass

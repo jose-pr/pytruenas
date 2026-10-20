@@ -163,15 +163,6 @@ def test_the_implicit_config_file_may_be_absent(tmp_path, monkeypatch):
     assert _args()._config_dict_() == {}
 
 
-def test_the_old_config_key_names_its_replacement(tmp_path, isolated_config):
-    from duho import UsageError
-
-    cfg = tmp_path / "pytruenas.cfg"
-    cfg.write_text('commandspath = ["mycmds"]\n')
-    with pytest.raises(UsageError, match="renamed cmdspath"):
-        main._discover(["--config", str(cfg), "query", "user"])
-
-
 def test_cmdspath_is_repeated_not_split(tmp_path, isolated_config):
     """A Windows path in `--cmdspath` was split on its drive letter's colon."""
     _plant_commands(tmp_path)

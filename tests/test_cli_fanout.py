@@ -24,7 +24,6 @@ class _Args(PyTrueNASArgs):
         self._targets = list(targets)
         self.parallel = 2
         self.logto = logto
-        self.sslverify = None
         self.insecure = True
 
     @property

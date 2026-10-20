@@ -236,10 +236,7 @@ def _discover(
     sources += list(globals_.cmdspath or [])
     # The config file is the user's own (named, or in their config
     # directory), never one found in the working directory.
-    where = globals_._config_path_()[0]
-    if "commandspath" in config:
-        raise UsageError(f"commandspath in {where} was renamed cmdspath")
-    sources += _config_sources(config.get("cmdspath"), where)
+    sources += _config_sources(config.get("cmdspath"), globals_._config_path_()[0])
 
     by_name: "dict[str, object]" = {}
     for source in sources:

@@ -112,11 +112,6 @@ def test_the_config_keeps_a_path_as_a_string_and_a_context_as_it_is(tmp_path):
     )
 
 
-def test_sslverify_is_gone_and_says_what_replaced_it():
-    with pytest.raises(TypeError, match="verify="):
-        TrueNASClient("wss://nas", autologin=False, sslverify=False)
-
-
 @pytest.mark.parametrize("verify", ["ca.pem", "context"])
 def test_a_path_or_a_context_still_verifies_ssh_host_keys(verify):
     """hostctl's SSHConfig takes a bool: anything but False means verify."""

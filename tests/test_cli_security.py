@@ -17,7 +17,7 @@ from pytruenas.cli._args import PyTrueNASArgs
 
 @pytest.fixture
 def args(monkeypatch, tmp_path):
-    for name in ("SSLVERIFY", "INSECURE", "CA_BUNDLE"):
+    for name in ("INSECURE", "CA_BUNDLE"):
         monkeypatch.delenv("PYTRUENAS_" + name, raising=False)
     monkeypatch.delenv("PYTRUENAS_CREDENTIALS", raising=False)
     # `_config` names a file through the variable; until then, no config.
@@ -82,7 +82,7 @@ def test_a_flag_beats_the_environment_and_the_environment_the_config(
 
 @pytest.mark.parametrize("value", ["", "   ", "0", "false"])
 def test_an_empty_or_false_insecure_leaves_verification_on(args, monkeypatch, value):
-    """`PYTRUENAS_SSLVERIFY=` (empty) turned verification off."""
+    """Only a true value turns verification off; empty is unset."""
     monkeypatch.setenv("PYTRUENAS_INSECURE", value)
     monkeypatch.setenv("PYTRUENAS_CA_BUNDLE", "")
     assert args()._verify_() is True
@@ -100,16 +100,6 @@ def test_a_bundle_that_does_not_exist_is_refused(args, monkeypatch):
 def test_a_config_insecure_that_is_not_a_boolean_is_refused(args, tmp_path, value):
     _config(tmp_path, "insecure: " + value)
     with pytest.raises(ValueError, match="insecure in"):
-        args()._verify_()
-
-
-def test_the_removed_settings_say_what_replaced_them(args, monkeypatch, tmp_path):
-    monkeypatch.setenv("PYTRUENAS_SSLVERIFY", "false")
-    with pytest.raises(ValueError, match="PYTRUENAS_INSECURE"):
-        args()._verify_()
-    monkeypatch.delenv("PYTRUENAS_SSLVERIFY")
-    _config(tmp_path, "sslverify: false")
-    with pytest.raises(ValueError, match="insecure and ca_bundle"):
         args()._verify_()
 
 
@@ -139,7 +129,7 @@ def test_a_target_that_carries_credentials_keeps_them(args, monkeypatch):
 
 
 def test_the_flags_are_registered():
-    """-k is curl's spelling; --ca-bundle names the trust; --sslverify is gone."""
+    """-k is curl's spelling; --ca-bundle names the trust."""
     out = subprocess.run(
         [sys.executable, "-m", "pytruenas", "call", "--help"],
         capture_output=True,
@@ -147,4 +137,3 @@ def test_the_flags_are_registered():
     ).stdout
     assert "--insecure, -k" in out
     assert "--ca-bundle FILE" in out
-    assert "sslverify" not in out

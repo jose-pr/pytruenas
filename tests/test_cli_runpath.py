@@ -38,7 +38,7 @@ class _FakeClient:
     def __init__(self, target, credentials=None, *args, **kwargs):
         self.target = target
         self.credentials = credentials
-        self.sslverify = kwargs.get("sslverify", True)
+        self.verify = kwargs.get("verify", True)
 
 
 def _write_runpath(directory):

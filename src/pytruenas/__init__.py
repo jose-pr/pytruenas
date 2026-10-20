@@ -14,7 +14,6 @@ from .auth import (
     LocalAuth,
     TokenAuth,
 )
-from .auth import redact_call_args  # noqa: F401  (importable here; not in __all__)
 from .connection import Event, Subscription, TrueNASWSConnection
 from .exceptions import (
     APIDumpError,
