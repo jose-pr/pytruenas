@@ -220,6 +220,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   package root, where it was importable outside `__all__`.
 - **`known_hosts=None`** is refused by hostctl when the SSH leg is built, not
   by `TrueNASClient` itself: a client with no SSH leg accepts it.
+- **`pytruenas.patch.zfs.host_path` is gone**: it was `os.fspath()`, which
+  is what to call.
 - **The `repo` extra is gone**: `deploy --source repo` needs nothing beyond
   the core install, which already carries `hostctl[deploy]`. Drop `[repo]`
   from a requirement.
@@ -268,6 +270,13 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   `call(..., timeout=)` -- and a `close()` behind it -- forever once the socket
   buffers filled. The send is aborted and the connection closed (part of the
   request may be on the wire), and the call raises `CallTimeout`.
+- A host, a `--logto` target or an API name that is a Windows device name
+  (`nul`, `con`, `com1`, ...) no longer names a device: the cache directory and
+  the log file get a `_` prefix, and `generate-typings` refuses the name.
+- `pytruenas.patch.zfs` decodes a non-ASCII mount path from `findmnt` as
+  UTF-8 (`é` came back as `Ã©`).
+- The plaintext-credentials warning knows every loopback address
+  (`127.0.0.0/8`, `::1`, this machine's own), not only `127.0.0.1`.
 - An idle API connection stays open: it pings every 30 s
   (`TrueNASWSConnection(keepalive=)`, `connection.KEEPALIVE_INTERVAL`). The
   middleware closes a websocket that sends nothing for 60 s, which dropped a
