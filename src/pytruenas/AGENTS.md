@@ -532,16 +532,20 @@ The synchronous JSON-RPC 2.0 websocket transport backing `TrueNASClient`
 (`client.conn`).
 
 - **`TrueNASWSConnection(uri=None, *, verify=True, call_timeout=UNSET,
-  connect_timeout=CONNECT_TIMEOUT, logger=None)`** — `call_timeout` left
+  connect_timeout=CONNECT_TIMEOUT, logger=None,
+  keepalive=KEEPALIVE_INTERVAL)`** — `call_timeout` left
   out is `default_call_timeout()`, read now; `None` waits indefinitely. It
   builds the connection and does no I/O. `uri` is `wss://`/`ws://` or
   `ws+unix://...`; `None`/bare `ws+unix://` connects to `DEFAULT_UNIX_SOCKET`
   (`/var/run/middleware/middlewared.sock`). `verify` takes the same values as
   the client's `verify` (see above). `logger` receives the connection's
-  records (a host passes its own name-bound logger).
+  records (a host passes its own name-bound logger). `keepalive` is the
+  seconds between websocket pings while the connection is open (`None`: no
+  pings); the middleware closes a connection that sends nothing for 60 s.
   - **`.connect() -> TrueNASWSConnection`** — opens the websocket (blocking,
     bounded by `connect_timeout`: connect, TLS and the HTTP upgrade), starts
-    the background reader thread and returns the connection. Idempotent;
+    the background reader thread (and the keepalive pings) and returns the
+    connection. Idempotent;
     `with` and the first `.call()` do it too. A closed connection is not
     reopened: `.connect()` and `.call()` raise `ConnectionClosed`.
   - **`.call(method, *params, timeout=UNSET) -> Any`** — send a
@@ -593,6 +597,8 @@ The synchronous JSON-RPC 2.0 websocket transport backing `TrueNASClient`
   connection is built.
 - **`CONNECT_TIMEOUT`** — default timeout in seconds (30) for opening a
   connection. It is not the reader's timeout: an idle connection stays open.
+- **`KEEPALIVE_INTERVAL`** — `30.0`, the default seconds between keepalive
+  pings; it keeps an idle connection under the middleware's 60 s limit.
 - **`DEFAULT_UNIX_SOCKET`** — `"/var/run/middleware/middlewared.sock"`.
 - `.connect()` and the first `.call()` raise **`ConnectError`** when the HTTP
   upgrade is refused (`.status` 404 for a wrong API path) or the handshake

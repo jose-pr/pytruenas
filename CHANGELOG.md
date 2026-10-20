@@ -261,6 +261,10 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   `call(..., timeout=)` -- and a `close()` behind it -- forever once the socket
   buffers filled. The send is aborted and the connection closed (part of the
   request may be on the wire), and the call raises `CallTimeout`.
+- An idle API connection stays open: it pings every 30 s
+  (`TrueNASWSConnection(keepalive=)`, `connection.KEEPALIVE_INTERVAL`). The
+  middleware closes a websocket that sends nothing for 60 s, which dropped a
+  client left idle during a long command and logged `connection lost`.
 - Behind an HTTPS proxy (`HTTPS_PROXY`), uploads and downloads verify with the
   same trust as the websockets; they ignored a CA bundle and failed (or trusted
   certifi) while the API connected.
