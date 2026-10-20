@@ -17,6 +17,7 @@ import pytest
 issuing = pytest.importorskip("sslcontext.issuing")
 
 from pytruenas import TrueNASClient  # noqa: E402
+from pytruenas.exceptions import ConnectError  # noqa: E402
 from pytruenas.connection import TrueNASWSConnection  # noqa: E402
 
 _GUID = b"258EAFA5-E914-47DA-95CA-C5AB0DC85B11"
@@ -152,11 +153,19 @@ def test_every_leg_honours_verify(pki, leg, cert, client_ca, kind, accepted):
         if accepted:
             leg(server.port, _verify(pki, kind))
         else:
-            with pytest.raises(OSError) as raised:
+            with pytest.raises((OSError, ConnectError)) as raised:
                 leg(server.port, _verify(pki, kind))
-            # Both legs raise the TLS layer's own error, never requests' type.
-            assert type(raised.value).__module__ in ("ssl", "builtins")
+            # Neither leg raises a transport library's own type.
+            assert type(raised.value).__module__ in (
+                "ssl",
+                "builtins",
+                "pytruenas.exceptions",
+            )
             if client_ca is None:
+                # Our verification failed: the TLS layer's error, on both legs.
                 assert isinstance(raised.value, ssl.SSLCertVerificationError)
+            # A server that refuses the client's certificate may do so after
+            # the client's TLS 1.3 handshake is done, so the websocket sees it
+            # at the upgrade (ConnectError) and the side channel as an EOF.
     finally:
         server.close()
