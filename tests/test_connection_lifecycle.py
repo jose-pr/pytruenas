@@ -185,3 +185,32 @@ def test_opening_a_connection_has_a_timeout(monkeypatch):
     monkeypatch.setattr(jsonrpc._websocket, "WebSocket", _WS)
     Client("wss://nas/api/current", connect_timeout=7).connect()
     assert seen == {"timeout": 7, "settimeout": None}
+
+
+def test_an_idle_connection_is_pinged_until_it_closes(monkeypatch):
+    """The middleware closes a websocket that sends nothing for 60 s."""
+    pings = []
+    fake = _FakeWS()
+    fake.ping = lambda: pings.append(1)
+    monkeypatch.setattr(Client, "_connect", lambda self: fake)
+    c = Client("ws://x/api/current", keepalive=0.02).connect()
+    try:
+        deadline = threading.Event()
+        while len(pings) < 3 and not deadline.wait(0.01):
+            pass
+        assert len(pings) >= 3
+    finally:
+        c.close()
+    seen = len(pings)
+    threading.Event().wait(0.1)
+    assert len(pings) <= seen + 1  # at most one in flight when it closed
+
+
+def test_keepalive_none_sends_no_ping(monkeypatch):
+    fake = _FakeWS()
+    fake.ping = lambda: pytest.fail("pinged with keepalive=None")
+    monkeypatch.setattr(Client, "_connect", lambda self: fake)
+    c = Client("ws://x/api/current", keepalive=None).connect()
+    threading.Event().wait(0.05)
+    c.close()
+    assert jsonrpc.KEEPALIVE_INTERVAL < 60

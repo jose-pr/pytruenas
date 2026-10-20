@@ -66,6 +66,7 @@ __all__ = [
     "TrueNASWSConnection",
     "CALL_TIMEOUT",
     "CONNECT_TIMEOUT",
+    "KEEPALIVE_INTERVAL",
     "default_call_timeout",
     "Event",
     "Subscription",
@@ -85,6 +86,11 @@ CALL_TIMEOUT = 60.0
 #: Default timeout in seconds for opening the websocket (TCP/unix connect, TLS
 #: and the HTTP upgrade). Without one, an unresponsive host blocked forever.
 CONNECT_TIMEOUT = 30
+
+#: Seconds between websocket pings on an otherwise idle connection. The
+#: middleware closes a websocket that sends nothing for 60 s (measured on
+#: 26.0), which dropped a client left idle while it ran a long command.
+KEEPALIVE_INTERVAL = 30.0
 
 #: Default local middleware unix socket (used when the target is local).
 DEFAULT_UNIX_SOCKET = "/var/run/middleware/middlewared.sock"
@@ -392,6 +398,7 @@ class TrueNASWSConnection:
         call_timeout: "_ty.Optional[_ty.Union[float, _Unset]]" = _UNSET,
         connect_timeout: "_ty.Optional[float]" = CONNECT_TIMEOUT,
         logger: "_ty.Optional[_ty.Union[_logging.Logger, _logging.LoggerAdapter]]" = None,
+        keepalive: "_ty.Optional[float]" = KEEPALIVE_INTERVAL,
     ) -> None:
         if not uri or uri == _UNIX_PREFIX:
             uri = _UNIX_PREFIX + DEFAULT_UNIX_SOCKET
@@ -403,6 +410,8 @@ class TrueNASWSConnection:
             default_call_timeout() if isinstance(call_timeout, _Unset) else call_timeout
         )
         self.connect_timeout = connect_timeout
+        #: Seconds between pings while open; ``None`` sends none.
+        self.keepalive = keepalive
         #: Where this connection's records go. A host passes its own
         #: name-bound logger, so "connection was closed" says *which* host
         #: closed even with several open at once; standalone use falls back to
@@ -457,7 +466,23 @@ class TrueNASWSConnection:
                 self._ws = self._connect()
                 self._reader = _threading.Thread(target=self._read_loop, daemon=True)
                 self._reader.start()
+                if self.keepalive:
+                    _threading.Thread(target=self._keep_alive, daemon=True).start()
         return self
+
+    def _keep_alive(self) -> None:
+        """Ping every ``keepalive`` seconds until the connection closes.
+
+        A ping that cannot be sent ends the loop; the reader notices the dead
+        socket and ends the connection itself.
+        """
+        assert self.keepalive
+        while not self._closed.wait(self.keepalive):
+            try:
+                self._send_frame(lambda ws: ws.ping(), self.keepalive)
+            except Exception as exc:  # noqa: BLE001
+                self.logger.debug("keepalive ping failed: %s", exc)
+                return
 
     # -- connection ---------------------------------------------------------
 
@@ -695,7 +720,15 @@ class TrueNASWSConnection:
         return message.get("result")
 
     def _send(self, request: str, timeout: "_ty.Optional[float]") -> None:
-        """Send one frame; a send still blocked after ``timeout`` is aborted."""
+        """Send one request frame; see :meth:`_send_frame`."""
+        self._send_frame(lambda ws: ws.send(request), timeout)
+
+    def _send_frame(
+        self,
+        write: "_ty.Callable[[_websocket.WebSocket], object]",
+        timeout: "_ty.Optional[float]",
+    ) -> None:
+        """Write one frame; a write still blocked after ``timeout`` is aborted."""
         assert self._ws is not None
         with self._send_lock:
             if timeout is not None:
@@ -708,7 +741,7 @@ class TrueNASWSConnection:
                         self._watchdog.start()
                     self._watch.notify()
             try:
-                self._ws.send(request)
+                write(self._ws)
             finally:
                 with self._watch:
                     self._sending_until = None
