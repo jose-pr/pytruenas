@@ -6,6 +6,13 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Changed
+
+- Requires `duho>=0.7.8,<0.8`. A library caller who runs `duho.fanout.run_targets` over
+  connection strings without a `label=` now sees the host's own `[name]` prefix as well as
+  duho's tag of the target; the CLI, which labels each target with the host's name, is
+  unchanged.
+
 ## [0.7.0] - 2026-10-20
 
 ### Upgrade notes

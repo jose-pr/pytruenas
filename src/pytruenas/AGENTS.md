@@ -1355,7 +1355,7 @@ order, with no `__init__.py` — placed among the command sources
 (`PYTRUENAS_PATH` / `--cmdspath` / config `cmdspath`, or nested one level
 inside a source directory) it becomes a subcommand named after the directory.
 The discovery, ordering, filename modifiers and `--rcopts` selection are
-`duho.runpath`'s (requires `duho>=0.7.7,<0.8`); pytruenas fans the whole step
+`duho.runpath`'s (requires `duho>=0.7.8,<0.8`); pytruenas fans the whole step
 directory out **once per target**, each target getting its own connected
 `TrueNASClient` — the same per-target fan-out the built-in commands get.
 Author one with:
