@@ -30,7 +30,6 @@ from __future__ import annotations
 
 import copy as _copy
 import dataclasses as _dataclasses
-import functools as _functools
 import inspect as _inspect
 import json as _js
 import logging as _logging
@@ -121,6 +120,15 @@ _SOCKET_PATH_SAFE = "/:@-._~!$&'()*+,;="
 _LOCAL_HOSTS = {"", "localhost", "127.0.0.1"}
 
 
+def _fan_label() -> "str | None":
+    """The ``[...]`` text a duho fan-out puts on the current record, if any."""
+    label = _fanout.current_label.get()
+    if label is not None:
+        return label
+    target = _fanout.current_target.get()
+    return None if target is None else str(target)
+
+
 class _HostLogger(_logging.LoggerAdapter):
     """A logger that prefixes every record with the host it belongs to.
 
@@ -141,34 +149,13 @@ class _HostLogger(_logging.LoggerAdapter):
         name = self.extra["name"] if self.extra else ""
         # Inside a duho fan-out over this host, the fan-out's handler filter
         # tags the record with the same name.
-        if name and _fanout_label(_fanout.current_target.get()) == name:
+        if name and _fan_label() == name:
             return msg, kwargs
         prefix = f"[{name}] " if name else ""
         text = str(msg)
         if prefix and text.startswith(prefix):
             return text, kwargs
         return f"{prefix}{text}", kwargs
-
-
-@_functools.lru_cache(maxsize=32)
-def _target_name(target: str) -> "str | None":
-    try:
-        return TrueNASConfig.from_target(target).name
-    except Exception:
-        return None
-
-
-def _fanout_label(target: object) -> "str | None":
-    """The ``[...]`` prefix a duho fan-out puts on ``target``'s records.
-
-    The CLI fans out over connection strings labelled with the host's name;
-    a fan-out with no label prefixes ``str(target)``.
-    """
-    if target is None:
-        return None
-    if isinstance(target, str):
-        return _target_name(target) or target
-    return str(target)
 
 
 def _without_otp(creds: "_auth.Credentials") -> "_auth.Credentials":

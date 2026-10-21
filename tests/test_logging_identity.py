@@ -175,19 +175,19 @@ def test_host_logger_trace_is_prefixed(caplog):
 
 def test_the_cli_fanout_label_is_not_repeated_by_the_host_logger():
     """The CLI fans out over connection strings and labels them by host name."""
-    from duho.fanout import current_target
+    from duho.fanout import current_label, current_target
 
     adapter = _HostLogger(logging.getLogger("pytruenas.test"), {"name": "nas1:8443"})
-    token = current_target.set("wss://root:hunter2@nas1:8443")
-    try:
-        assert adapter.process("plain", {})[0] == "plain"
-    finally:
-        current_target.reset(token)
-    token = current_target.set("wss://nas2")
-    try:
-        assert adapter.process("plain", {})[0] == "[nas1:8443] plain"
-    finally:
-        current_target.reset(token)
+    for target, label, expected in (
+        ("wss://root:hunter2@nas1:8443", "nas1:8443", "plain"),
+        ("wss://nas2", "nas2", "[nas1:8443] plain"),
+    ):
+        tokens = current_target.set(target), current_label.set(label)
+        try:
+            assert adapter.process("plain", {})[0] == expected
+        finally:
+            current_label.reset(tokens[1])
+            current_target.reset(tokens[0])
 
 
 def test_call_trace_never_carries_a_password(caplog):
