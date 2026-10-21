@@ -8,6 +8,18 @@ user-facing; this file is the durable record.
 
 ## [Unreleased]
 
+## [0.7.1] - 2026-10-21
+
+### What changed
+
+A maintenance release on duho 0.7.8. The host logger reads the label duho tags
+a fan-out target with (`duho.fanout.current_label`) instead of re-deriving it
+from the connection string, and the per-call TRACE record goes through the
+logger's own `trace` method. The CLI's output, flags and exit statuses are
+unchanged. The one visible difference is for a library caller who runs
+`duho.fanout.run_targets` over connection strings without a `label=`: records
+now carry the host's `[name]` prefix in addition to duho's tag of the target.
+
 ## [0.7.0] - 2026-10-20
 
 ### What changed

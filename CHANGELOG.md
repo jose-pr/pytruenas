@@ -6,6 +6,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.7.1] - 2026-10-21
+
 ### Changed
 
 - Requires `duho>=0.7.8,<0.8`. A library caller who runs `duho.fanout.run_targets` over
