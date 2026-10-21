@@ -190,17 +190,19 @@ def test_the_cli_fanout_label_is_not_repeated_by_the_host_logger():
         current_target.reset(token)
 
 
-def test_call_trace_never_carries_a_password():
+def test_call_trace_never_carries_a_password(caplog):
     """The per-call TRACE record rendered raw args: auth.login(user, password)
     and the private key install_sshcreds uploads reached any log at TRACE."""
     from unittest.mock import MagicMock
 
     host = TrueNASClient("wss://nas1", autologin=False)
-    rendered = []
-    host.logger.log = lambda level, msg, *a, **kw: rendered.append(msg % a)
     host._conn = MagicMock(_closed=MagicMock(is_set=lambda: False))
-    host.api.auth.login("root", "hunter2")
-    host.api.keychaincredential.create({"attributes": {"private_key": "PEM-SECRET"}})
+    with caplog.at_level(5, logger=host.logger.logger.name):
+        host.api.auth.login("root", "hunter2")
+        host.api.keychaincredential.create(
+            {"attributes": {"private_key": "PEM-SECRET"}}
+        )
+    rendered = [r.getMessage() for r in caplog.records if r.levelno == 5]
     assert rendered and not any(
         "hunter2" in r or "PEM-SECRET" in r for r in rendered
     ), rendered
